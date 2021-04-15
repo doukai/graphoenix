@@ -600,16 +600,6 @@ public interface GraphqlListener extends ParseTreeListener {
 	 */
 	void exitDefaultValue(GraphqlParser.DefaultValueContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link GraphqlParser#stringValue}.
-	 * @param ctx the parse tree
-	 */
-	void enterStringValue(GraphqlParser.StringValueContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link GraphqlParser#stringValue}.
-	 * @param ctx the parse tree
-	 */
-	void exitStringValue(GraphqlParser.StringValueContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link GraphqlParser#type}.
 	 * @param ctx the parse tree
 	 */

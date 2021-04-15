@@ -726,18 +726,6 @@ public class GraphqlBaseListener implements GraphqlListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterStringValue(GraphqlParser.StringValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitStringValue(GraphqlParser.StringValueContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterType(GraphqlParser.TypeContext ctx) { }
 	/**
 	 * {@inheritDoc}
