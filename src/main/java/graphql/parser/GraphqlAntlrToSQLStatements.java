@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
-
 public class GraphqlAntlrToSQLStatements {
 
     public Statements createStatements(GraphqlParser.DocumentContext ctx) {
@@ -28,21 +26,21 @@ public class GraphqlAntlrToSQLStatements {
         if (definitionContext.operationDefinition() != null) {
 
         } else if (definitionContext.typeSystemDefinition() != null) {
-            return createCreateTable(definitionContext.typeSystemDefinition());
+            return createTable(definitionContext.typeSystemDefinition());
         }
 
         return Optional.empty();
     }
 
 
-    protected Optional<CreateTable> createCreateTable(GraphqlParser.TypeSystemDefinitionContext ctx) {
+    protected Optional<CreateTable> createTable(GraphqlParser.TypeSystemDefinitionContext ctx) {
         if (ctx.typeDefinition() != null) {
-            return createCreateTable(ctx.typeDefinition());
+            return createTable(ctx.typeDefinition());
         }
         return Optional.empty();
     }
 
-    protected Optional<CreateTable> createCreateTable(GraphqlParser.TypeDefinitionContext ctx) {
+    protected Optional<CreateTable> createTable(GraphqlParser.TypeDefinitionContext ctx) {
 
         if (ctx.objectTypeDefinition() != null) {
             return Optional.of(createTable(ctx.objectTypeDefinition()));
