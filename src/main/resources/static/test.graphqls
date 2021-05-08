@@ -1,0 +1,55 @@
+schema {
+    query: QueryType
+}
+
+type QueryType {
+    user(id: ID!): User
+    role(id : ID!) : Role
+    resource(id: ID!): Resource
+}
+
+enum RoleType {
+    ADMIN
+    USER
+    ANONYMOUS
+}
+
+enum Sex {
+    MAN
+    FEMALE
+}
+
+type User {
+    id: ID!
+    login: String!
+    password: String!
+    name: String!
+    age: Int
+    age2: Int
+    sex: Sex
+    roles: [Role]
+    test: [String]
+    test2: [Int]!
+    test3: [Float!]
+}
+
+type Role {
+    id: ID!
+    name: String!
+    users: [User]
+    resources: [Resource]
+    type: [RoleType]
+}
+
+type Resource {
+    id: ID!
+    name: String!
+    roles: [Role]
+}
+
+type Organization {
+    id: ID!
+    above: Organization
+    name: String!
+    users: [User]
+}
