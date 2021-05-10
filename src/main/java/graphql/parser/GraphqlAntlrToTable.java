@@ -8,13 +8,16 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GraphqlAntlrToTable {
 
-    GraphqlAntlrRegister graphqlAntlrRegister;
+    private final GraphqlAntlrRegister graphqlAntlrRegister;
+
+    private final String[] scalarType = {"ID", "Boolean", "String", "Float", "Int"};
 
     public GraphqlAntlrToTable(GraphqlAntlrRegister graphqlAntlrRegister) {
         this.graphqlAntlrRegister = graphqlAntlrRegister;
@@ -22,6 +25,11 @@ public class GraphqlAntlrToTable {
 
     public List<CreateTable> createTables(GraphqlParser.DocumentContext documentContext) {
         return documentContext.definition().stream().map(this::createTable).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+    }
+
+    protected boolean isScalar(String objectName) {
+
+        return Arrays.asList(scalarType).contains(objectName);
     }
 
     protected Optional<CreateTable> createTable(GraphqlParser.DefinitionContext definitionContext) {
@@ -57,45 +65,52 @@ public class GraphqlAntlrToTable {
         return createTable;
     }
 
-    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext ctx) {
+    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return createColumn(fieldDefinitionContext, false, false);
+    }
 
-        if (ctx.type().listType() != null) {
-            return Optional.empty();
-        }
-//TODO
+    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean list, boolean nonNull) {
+
         ColumnDefinition columnDefinition = new ColumnDefinition();
-        columnDefinition.setColumnName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ctx.name().getText()));
+        columnDefinition.setColumnName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldDefinitionContext.name().getText()));
 
-        if (ctx.type().typeName() != null) {
-            columnDefinition.setColDataType(createColDataType(ctx.type().typeName()));
+        if (fieldDefinitionContext.type().nonNullType() != null) {
 
-        } else if (ctx.type().nonNullType() != null) {
-            columnDefinition.setColDataType(createColDataType(ctx.type().nonNullType().typeName()));
+            return createColumn(fieldDefinitionContext, list, true);
+
+        } else if (fieldDefinitionContext.type().listType() != null) {
+
+            return createColumn(fieldDefinitionContext, true, nonNull);
+        } else if (fieldDefinitionContext.type().typeName() != null) {
+            ColDataType colDataType = null;
+
+            if (graphqlAntlrRegister.exist(fieldDefinitionContext.type().typeName().name().getText())) {
+                String definitionType = graphqlAntlrRegister.getDefinitionType(fieldDefinitionContext.type().typeName().name().getText()).toLowerCase();
+                if (definitionType.equals("type") && list) {
+                    return Optional.empty();
+                } else if (definitionType.equals("type")) {
+                    colDataType = createTypeColDataType(fieldDefinitionContext.type().typeName());
+                } else if (definitionType.equals("enum")) {
+                    colDataType = createEnumColDataType(fieldDefinitionContext.type().typeName(), list);
+                }
+            } else if (isScalar(fieldDefinitionContext.type().typeName().name().getText()) && list) {
+                return Optional.empty();
+            } else if (isScalar(fieldDefinitionContext.type().typeName().name().getText())) {
+                colDataType = createDefaultScalarColDataType(fieldDefinitionContext.type().typeName());
+            }
+            columnDefinition.setColDataType(colDataType);
             List<String> columnSpecs = new ArrayList<>();
-            columnSpecs.add("NOT NULL");
+            if (nonNull) {
+                columnSpecs.add("NOT NULL");
+            }
             columnDefinition.setColumnSpecs(columnSpecs);
-        }
+            return Optional.of(columnDefinition);
 
+        }
 //        ctx.description();
 //        ctx.directives();
 //        ctx.argumentsDefinition();
-        return Optional.of(columnDefinition);
-    }
-
-    protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext) {
-        if (graphqlAntlrRegister.exist(typeNameContext.name().getText())) {
-            switch (graphqlAntlrRegister.getDefinitionType(typeNameContext.name().getText()).toLowerCase()) {
-                case "type":
-                    return createTypeColDataType(typeNameContext);
-                case "enum":
-                    return createEnumColDataType(typeNameContext);
-                default:
-                    return null;
-            }
-
-        } else {
-            return createDefaultScalarColDataType(typeNameContext);
-        }
+        return Optional.empty();
     }
 
     protected ColDataType createTypeColDataType(GraphqlParser.TypeNameContext typeNameContext) {
@@ -109,9 +124,13 @@ public class GraphqlAntlrToTable {
         return colDataType;
     }
 
-    protected ColDataType createEnumColDataType(GraphqlParser.TypeNameContext typeNameContext) {
+    protected ColDataType createEnumColDataType(GraphqlParser.TypeNameContext typeNameContext, boolean list) {
         ColDataType colDataType = new ColDataType();
-        colDataType.setDataType("ENUM");
+        if (list) {
+            colDataType.setDataType("SET");
+        } else {
+            colDataType.setDataType("ENUM");
+        }
         colDataType.setArgumentsStringList(graphqlAntlrRegister.getDefinition(typeNameContext.name().getText())
                 .enumTypeDefinition()
                 .enumValueDefinitions()
