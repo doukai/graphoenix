@@ -17,18 +17,18 @@ public class GraphqlAntlrRegister {
     protected void registerDefinition(GraphqlParser.DefinitionContext definitionContext) {
 
         if (definitionContext.typeSystemDefinition() != null) {
-            registerDefinition(definitionContext.typeSystemDefinition());
+            registerSystemDefinition(definitionContext.typeSystemDefinition());
         }
     }
 
-    protected void registerDefinition(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
+    protected void registerSystemDefinition(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
 
         if (typeSystemDefinitionContext.typeDefinition() != null) {
-            registerDefinition(typeSystemDefinitionContext.typeDefinition());
+            registerTypeDefinition(typeSystemDefinitionContext.typeDefinition());
         }
     }
 
-    protected void registerDefinition(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
+    protected void registerTypeDefinition(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
 
         if (typeDefinitionContext.enumTypeDefinition() != null) {
             typeDefinitionContextMap.put(typeDefinitionContext.enumTypeDefinition().name().getText(), typeDefinitionContext);
