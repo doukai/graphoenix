@@ -5,7 +5,7 @@ schema {
 type QueryType {
     user(id: ID!): User
     role(id : ID!) : Role
-#    resource(id: ID!): Resource
+    resource(id: ID!): Resource
 }
 
 enum RoleType {
@@ -26,7 +26,7 @@ type User {
     name: String!
     age: Int
     age2: Int
-    sex: Sex
+    sex: [Sex]
     roles: [Role]
     test: [String]
     test2: [Int]!
@@ -37,19 +37,19 @@ type Role {
     id: ID!
     name: String!
     users: [User]
-#    resources: [Resource]
+    resources: [Resource]
     type: [RoleType]
 }
-#
-#type Resource {
-#    id: ID!
-#    name: String!
-#    roles: [Role]
-#}
-#
-#type Organization {
-#    id: ID!
-#    above: Organization
-#    name: String!
-#    users: [User]
-#}
+
+type Resource {
+    id: ID!
+    name: String!
+    roles: [Role]
+}
+
+type Organization {
+    id: ID!
+    above: Organization
+    name: String!
+    users: [User]
+}

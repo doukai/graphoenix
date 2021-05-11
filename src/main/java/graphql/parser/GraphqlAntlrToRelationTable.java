@@ -105,7 +105,7 @@ public class GraphqlAntlrToRelationTable extends GraphqlAntlrToTable {
 
         CreateTable createTable = new CreateTable();
         Table table = new Table();
-        table.setName(objectTypeDefinitionContext.name().getText() + "_" + fieldDefinitionContext.name().getText());
+        table.setName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectTypeDefinitionContext.name().getText()) + "_" + fieldDefinitionContext.name().getText());
         createTable.setTable(table);
 
         ColumnDefinition sourceColumnDefinition = createSourceColumn();

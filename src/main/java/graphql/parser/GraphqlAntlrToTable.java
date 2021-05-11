@@ -31,6 +31,11 @@ public abstract class GraphqlAntlrToTable {
         return graphqlAntlrRegister.isEnum(name);
     }
 
+    protected boolean inSchema(String name) {
+
+        return graphqlAntlrRegister.inSchema(name);
+    }
+
     protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext, boolean list) {
 
         if (graphqlAntlrRegister.exist(typeNameContext.name().getText())) {
@@ -70,7 +75,7 @@ public abstract class GraphqlAntlrToTable {
                 .enumTypeDefinition()
                 .enumValueDefinitions()
                 .enumValueDefinition().stream()
-                .map(value -> "'" + value + "'")
+                .map(value -> "'" + value.getText() + "'")
                 .collect(Collectors.toList()));
 
         return colDataType;
