@@ -13,59 +13,95 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class GraphqlAntlrToRelationTable {
-
-    GraphqlAntlrRegister graphqlAntlrRegister;
+public class GraphqlAntlrToRelationTable extends GraphqlAntlrToTable {
 
     public GraphqlAntlrToRelationTable(GraphqlAntlrRegister graphqlAntlrRegister) {
-        this.graphqlAntlrRegister = graphqlAntlrRegister;
+
+        super(graphqlAntlrRegister);
     }
 
-    public List<CreateTable> createRelationTables(GraphqlParser.DocumentContext documentContext) {
+    @Override
+    public List<CreateTable> createTables(GraphqlParser.DocumentContext documentContext) {
         return documentContext.definition().stream()
-                .map(this::createRelationTables).collect(Collectors.toList()).stream()
+                .map(this::createTables).collect(Collectors.toList()).stream()
                 .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()).stream()
                 .flatMap(List::stream).collect(Collectors.toList());
     }
 
-    protected Optional<List<CreateTable>> createRelationTables(GraphqlParser.DefinitionContext definitionContext) {
+    protected Optional<List<CreateTable>> createTables(GraphqlParser.DefinitionContext definitionContext) {
 
         if (definitionContext.typeSystemDefinition() == null) {
             return Optional.empty();
         }
-        return createRelationTables(definitionContext.typeSystemDefinition());
+        return createTables(definitionContext.typeSystemDefinition());
     }
 
-    protected Optional<List<CreateTable>> createRelationTables(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
+    protected Optional<List<CreateTable>> createTables(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
         if (typeSystemDefinitionContext.typeDefinition() == null) {
             return Optional.empty();
         }
-        return createRelationTables(typeSystemDefinitionContext.typeDefinition());
+        return createTables(typeSystemDefinitionContext.typeDefinition());
     }
 
-    protected Optional<List<CreateTable>> createRelationTables(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
+    protected Optional<List<CreateTable>> createTables(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
 
         if (typeDefinitionContext.objectTypeDefinition() == null) {
             return Optional.empty();
         }
-        return createRelationTables(typeDefinitionContext.objectTypeDefinition());
+        return createTables(typeDefinitionContext.objectTypeDefinition());
     }
 
-    protected Optional<List<CreateTable>> createRelationTables(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    protected Optional<List<CreateTable>> createTables(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
 
-        if (objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().anyMatch(fieldDefinitionContext -> fieldDefinitionContext.type().listType() != null)) {
+        if (objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .anyMatch(fieldDefinitionContext -> fieldDefinitionContext.type().listType() != null)) {
 
-            return Optional.of(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                    .filter(fieldDefinitionContext -> fieldDefinitionContext.type().listType() != null)
-                    .map(fieldDefinitionContext -> createRelationTable(objectTypeDefinitionContext, fieldDefinitionContext))
-                    .collect(Collectors.toList()));
-
+            return Optional.of(
+                    objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            .map(fieldDefinitionContext -> createTables(objectTypeDefinitionContext, fieldDefinitionContext))
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toList())
+            );
         }
 
         return Optional.empty();
     }
 
-    protected CreateTable createRelationTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    protected Optional<CreateTable> createTables(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext,
+                                                 GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+
+        if (fieldDefinitionContext.type().typeName() != null) {
+            return Optional.empty();
+        } else if (fieldDefinitionContext.type().listType() != null) {
+            return createTables(
+                    objectTypeDefinitionContext,
+                    fieldDefinitionContext,
+                    fieldDefinitionContext.type().listType()
+            );
+        } else if (fieldDefinitionContext.type().nonNullType() != null) {
+            if (fieldDefinitionContext.type().nonNullType().typeName() != null) {
+                return Optional.empty();
+            } else if (fieldDefinitionContext.type().nonNullType().listType() != null) {
+                return createTables(
+                        objectTypeDefinitionContext,
+                        fieldDefinitionContext,
+                        fieldDefinitionContext.type().nonNullType().listType()
+                );
+            }
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<CreateTable> createTables(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext,
+                                                 GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                 GraphqlParser.ListTypeContext listTypeContext) {
+
+        if (listTypeContext.type().nonNullType() != null && isEnum(listTypeContext.type().nonNullType().typeName().name().getText())) {
+            return Optional.empty();
+        } else if (listTypeContext.type().typeName() != null && isEnum(listTypeContext.type().typeName().name().getText())) {
+            return Optional.empty();
+        }
 
         CreateTable createTable = new CreateTable();
         Table table = new Table();
@@ -73,23 +109,28 @@ public class GraphqlAntlrToRelationTable {
         createTable.setTable(table);
 
         ColumnDefinition sourceColumnDefinition = createSourceColumn();
-        ColumnDefinition targetColumnDefinition = createTargetColumn(fieldDefinitionContext.name().getText());
+
+        ColumnDefinition targetColumnDefinition = null;
+
+        if (listTypeContext.type().nonNullType() != null) {
+            targetColumnDefinition = createTargetColumn(listTypeContext.type().nonNullType().typeName(), true);
+        } else if (listTypeContext.type().typeName() != null) {
+            targetColumnDefinition = createTargetColumn(listTypeContext.type().typeName(), false);
+        }
 
         createTable.setColumnDefinitions(Arrays.asList(targetColumnDefinition, sourceColumnDefinition));
         List<String> tableOptionsStrings = new ArrayList<>(Arrays.asList("ENGINE=InnoDB", "CHARSET=utf8"));
         createTable.setIfNotExists(true);
         createTable.setTableOptionsStrings(tableOptionsStrings);
-        return createTable;
+        return Optional.of(createTable);
     }
 
     protected ColumnDefinition createSourceColumn() {
 
         ColumnDefinition columnDefinition = new ColumnDefinition();
         columnDefinition.setColumnName("id");
-
         List<String> columnSpecs = new ArrayList<>();
-        columnSpecs.add("AUTO_INCREMENT");
-        columnSpecs.add("PRIMARY KEY");
+        columnSpecs.add("NOT NULL");
         columnDefinition.setColumnSpecs(columnSpecs);
         columnDefinition.setColDataType(createSourceColDataType());
         return columnDefinition;
@@ -105,27 +146,16 @@ public class GraphqlAntlrToRelationTable {
         return colDataType;
     }
 
-
-    protected ColumnDefinition createTargetColumn(String fieldName) {
+    protected ColumnDefinition createTargetColumn(GraphqlParser.TypeNameContext typeNameContext, boolean nonNull) {
 
         ColumnDefinition columnDefinition = new ColumnDefinition();
-        columnDefinition.setColumnName(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName) + "_" + "id");
-
+        columnDefinition.setColumnName(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, typeNameContext.name().getText()) + "_" + "id");
+        columnDefinition.setColDataType(createColDataType(typeNameContext, false));
         List<String> columnSpecs = new ArrayList<>();
-        columnSpecs.add("AUTO_INCREMENT");
-        columnSpecs.add("PRIMARY KEY");
+        if (nonNull) {
+            columnSpecs.add("NOT NULL");
+        }
         columnDefinition.setColumnSpecs(columnSpecs);
-        columnDefinition.setColDataType(createTargetColDataType());
         return columnDefinition;
-    }
-
-    protected ColDataType createTargetColDataType() {
-
-        ColDataType colDataType = new ColDataType();
-        List<String> argumentsStringList = new ArrayList<>();
-        colDataType.setDataType("INT");
-        argumentsStringList.add("20");
-        colDataType.setArgumentsStringList(argumentsStringList);
-        return colDataType;
     }
 }

@@ -45,6 +45,18 @@ public class GraphqlAntlrRegister {
         return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name));
     }
 
+    public boolean isEnum(String name) {
+        return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name) && typeDefinitionContextMap.get(key).enumTypeDefinition() != null);
+    }
+
+    public boolean isObject(String name) {
+        return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name) && typeDefinitionContextMap.get(key).objectTypeDefinition() != null);
+    }
+
+    public boolean isScaLar(String name) {
+        return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name) && typeDefinitionContextMap.get(key).scalarTypeDefinition() != null);
+    }
+
     public String getDefinitionType(String name) {
         final GraphqlParser.TypeDefinitionContext typeDefinitionContext = typeDefinitionContextMap.get(name);
 
