@@ -7,8 +7,9 @@ import java.util.Map;
 
 public class GraphqlAntlrRegister {
 
-    private final Map<String, GraphqlParser.TypeDefinitionContext> typeDefinitionContextMap = new HashMap<>();
+    private final Map<String, String> schemaDefinitionContextMap = new HashMap<>();
 
+    private final Map<String, GraphqlParser.TypeDefinitionContext> typeDefinitionContextMap = new HashMap<>();
 
     public void registerDocument(GraphqlParser.DocumentContext documentContext) {
         documentContext.definition().forEach(this::registerDefinition);
@@ -22,10 +23,15 @@ public class GraphqlAntlrRegister {
     }
 
     protected void registerSystemDefinition(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
-
-        if (typeSystemDefinitionContext.typeDefinition() != null) {
+        if (typeSystemDefinitionContext.schemaDefinition() != null) {
+            typeSystemDefinitionContext.schemaDefinition().operationTypeDefinition().forEach(this::registerOperationType);
+        } else if (typeSystemDefinitionContext.typeDefinition() != null) {
             registerTypeDefinition(typeSystemDefinitionContext.typeDefinition());
         }
+    }
+
+    protected void registerOperationType(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
+        schemaDefinitionContextMap.put(operationTypeDefinitionContext.typeName().name().getText(), operationTypeDefinitionContext.operationType().getText());
     }
 
     protected void registerTypeDefinition(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
@@ -55,6 +61,10 @@ public class GraphqlAntlrRegister {
 
     public boolean isScaLar(String name) {
         return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name) && typeDefinitionContextMap.get(key).scalarTypeDefinition() != null);
+    }
+
+    public boolean inSchema(String name) {
+        return schemaDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name));
     }
 
     public String getDefinitionType(String name) {

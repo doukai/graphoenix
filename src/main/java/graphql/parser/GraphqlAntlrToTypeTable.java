@@ -7,6 +7,7 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,39 +43,46 @@ public class GraphqlAntlrToTypeTable extends GraphqlAntlrToTable {
         if (typeDefinitionContext.objectTypeDefinition() == null) {
             return Optional.empty();
         }
+        if (inSchema(typeDefinitionContext.objectTypeDefinition().name().getText())) {
+            return Optional.empty();
+        }
         return Optional.of(createTable(typeDefinitionContext.objectTypeDefinition()));
     }
 
-    protected CreateTable createTable(GraphqlParser.ObjectTypeDefinitionContext ctx) {
+    protected CreateTable createTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
 
         CreateTable createTable = new CreateTable();
         Table table = new Table();
-        table.setName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, ctx.name().getText()));
-        createTable.setColumnDefinitions(ctx.fieldsDefinition().fieldDefinition().stream().map(this::createColumn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+        table.setName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectTypeDefinitionContext.name().getText()));
+        createTable.setTable(table);
+        createTable.setColumnDefinitions(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::createColumn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
 
+        List<String> tableOptionsStrings = new ArrayList<>(Arrays.asList("ENGINE=InnoDB", "CHARSET=utf8"));
+        createTable.setIfNotExists(true);
+        createTable.setTableOptionsStrings(tableOptionsStrings);
         return createTable;
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
 
-        Optional<ColumnDefinition> columnDefinition = createColumn(fieldDefinitionContext.type(), false, false);
+        Optional<ColumnDefinition> columnDefinition = createColumn(fieldDefinitionContext.type(), false);
 
         columnDefinition.ifPresent(presentColumnDefinition -> presentColumnDefinition.setColumnName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldDefinitionContext.name().getText())));
 
         return columnDefinition;
     }
 
-    protected Optional<ColumnDefinition> createColumn(GraphqlParser.TypeContext typeContext, boolean list, boolean nonNull) {
+    protected Optional<ColumnDefinition> createColumn(GraphqlParser.TypeContext typeContext, boolean list) {
 
         if (typeContext.typeName() != null) {
             return createColumn(typeContext.typeName(), list, false);
         } else if (typeContext.listType() != null) {
-            createColumn(typeContext.listType().type(), true, nonNull);
+            return createColumn(typeContext.listType().type(), true);
         } else if (typeContext.nonNullType() != null) {
             if (typeContext.nonNullType().typeName() != null) {
                 return createColumn(typeContext.nonNullType().typeName(), list, true);
             } else if (typeContext.nonNullType().listType() != null) {
-                createColumn(typeContext.nonNullType().listType().type(), true, true);
+                return createColumn(typeContext.nonNullType().listType().type(), true);
             }
         }
         return Optional.empty();
