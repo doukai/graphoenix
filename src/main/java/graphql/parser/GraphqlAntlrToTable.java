@@ -1,47 +1,107 @@
 package graphql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public abstract class GraphqlAntlrToTable {
+public class GraphqlAntlrToTable {
 
     final private GraphqlAntlrRegister graphqlAntlrRegister;
-
-    private final String[] scalarType = {"ID", "Boolean", "String", "Float", "Int"};
 
     public GraphqlAntlrToTable(GraphqlAntlrRegister graphqlAntlrRegister) {
         this.graphqlAntlrRegister = graphqlAntlrRegister;
     }
 
-    abstract List<CreateTable> createTables(GraphqlParser.DocumentContext documentContext);
-
-    protected boolean isScalar(String name) {
-
-        return Arrays.asList(scalarType).contains(name);
+    public List<CreateTable> createTables(GraphqlParser.DocumentContext documentContext) {
+        return documentContext.definition().stream().map(this::createTable).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
-    protected boolean isEnum(String name) {
+    protected Optional<CreateTable> createTable(GraphqlParser.DefinitionContext definitionContext) {
 
-        return graphqlAntlrRegister.isEnum(name);
+        if (definitionContext.typeSystemDefinition() == null) {
+            return Optional.empty();
+        }
+        return createTable(definitionContext.typeSystemDefinition());
     }
 
-    protected boolean isObject(String name) {
-
-        return graphqlAntlrRegister.isObject(name);
+    protected Optional<CreateTable> createTable(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
+        if (typeSystemDefinitionContext.typeDefinition() == null) {
+            return Optional.empty();
+        }
+        return createTable(typeSystemDefinitionContext.typeDefinition());
     }
 
-    protected boolean inSchema(String name) {
+    protected Optional<CreateTable> createTable(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
 
-        return graphqlAntlrRegister.inSchema(name);
+        if (typeDefinitionContext.objectTypeDefinition() == null) {
+            return Optional.empty();
+        }
+        if (graphqlAntlrRegister.inSchema(typeDefinitionContext.objectTypeDefinition().name().getText())) {
+            return Optional.empty();
+        }
+        return Optional.of(createTable(typeDefinitionContext.objectTypeDefinition()));
+    }
+
+    protected CreateTable createTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+
+        CreateTable createTable = new CreateTable();
+        Table table = new Table();
+        table.setName(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
+        createTable.setTable(table);
+        createTable.setColumnDefinitions(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::createColumn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+        createTable.setIfNotExists(true);
+        createTable.setTableOptionsStrings(createTableOption(objectTypeDefinitionContext));
+        return createTable;
+    }
+
+    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+
+        Optional<ColumnDefinition> columnDefinition = createColumn(fieldDefinitionContext, fieldDefinitionContext.type(), false);
+
+        columnDefinition.ifPresent(presentColumnDefinition -> {
+                    presentColumnDefinition.setColumnName(DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
+                    presentColumnDefinition.setColumnSpecs(createColumnSpecs(fieldDefinitionContext));
+                }
+        );
+        return columnDefinition;
+    }
+
+    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeContext typeContext, boolean list) {
+
+        if (typeContext.typeName() != null) {
+            return createColumn(fieldDefinitionContext, typeContext.typeName(), list, false);
+        } else if (typeContext.listType() != null) {
+            return createColumn(fieldDefinitionContext, typeContext.listType().type(), true);
+        } else if (typeContext.nonNullType() != null) {
+            if (typeContext.nonNullType().typeName() != null) {
+                return createColumn(fieldDefinitionContext, typeContext.nonNullType().typeName(), list, true);
+            } else if (typeContext.nonNullType().listType() != null) {
+                return createColumn(fieldDefinitionContext, typeContext.nonNullType().listType().type(), true);
+            }
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean list, boolean nonNull) {
+
+        ColumnDefinition columnDefinition = new ColumnDefinition();
+        if (list && !graphqlAntlrRegister.isEnum(typeNameContext.name().getText())) {
+            return Optional.empty();
+        }
+        columnDefinition.setColDataType(createColDataType(typeNameContext, fieldDefinitionContext.directives(), list));
+        List<String> columnSpecs = new ArrayList<>();
+        if (nonNull) {
+            columnSpecs.add("NOT NULL");
+        }
+        columnDefinition.setColumnSpecs(columnSpecs);
+        return Optional.of(columnDefinition);
     }
 
     protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext, boolean list) {
@@ -49,30 +109,31 @@ public abstract class GraphqlAntlrToTable {
         if (graphqlAntlrRegister.exist(typeNameContext.name().getText())) {
             String definitionType = graphqlAntlrRegister.getDefinitionType(typeNameContext.name().getText()).toLowerCase();
             if (definitionType.equals("type")) {
-                return createTypeColDataType(typeNameContext, directivesContext);
+                GraphqlParser.FieldDefinitionContext idFieldDefinitionContext = graphqlAntlrRegister.getDefinition(typeNameContext.name().getText())
+                        .objectTypeDefinition().fieldsDefinition().fieldDefinition().stream()
+                        .filter(fieldDefinitionContext -> fieldDefinitionContext.type().typeName() != null && fieldDefinitionContext.type().typeName().name().getText().equals("ID") ||
+                                fieldDefinitionContext.type().nonNullType().typeName() != null && fieldDefinitionContext.type().nonNullType().typeName().name().getText().equals("ID"))
+                        .findFirst().orElse(null);
+
+                if (idFieldDefinitionContext != null) {
+                    if (idFieldDefinitionContext.type().typeName() != null) {
+                        return createInnerScalarColDataType(idFieldDefinitionContext.type().typeName(), idFieldDefinitionContext.directives());
+                    } else if (idFieldDefinitionContext.type().nonNullType() != null) {
+                        if (idFieldDefinitionContext.type().nonNullType().typeName() != null) {
+                            return createInnerScalarColDataType(idFieldDefinitionContext.type().nonNullType().typeName(), idFieldDefinitionContext.directives());
+                        }
+                    }
+                }
+
             } else if (definitionType.equals("enum")) {
                 return createEnumColDataType(typeNameContext, list);
             }
-        } else if (isScalar(typeNameContext.name().getText())) {
+        } else if (graphqlAntlrRegister.isInnerScalar(typeNameContext.name().getText())) {
 
-            return createDefaultScalarColDataType(typeNameContext, directivesContext);
+            return createInnerScalarColDataType(typeNameContext, directivesContext);
         }
         //TODO
         return null;
-    }
-
-    protected ColDataType createTypeColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext) {
-        Optional<GraphqlParser.DirectiveContext> columnDirective = getColumnDirective(directivesContext);
-        Optional<GraphqlParser.ArgumentContext> dataType = columnDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("type")).findFirst());
-        Optional<GraphqlParser.ArgumentContext> length = columnDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("length")).findFirst());
-
-        ColDataType colDataType = new ColDataType();
-        List<String> argumentsStringList = new ArrayList<>();
-        colDataType.setDataType(dataType.map(argumentContext -> DBNameConverter.INSTANCE.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
-        length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
-        colDataType.setArgumentsStringList(argumentsStringList);
-
-        return colDataType;
     }
 
     protected ColDataType createEnumColDataType(GraphqlParser.TypeNameContext typeNameContext, boolean list) {
@@ -92,11 +153,11 @@ public abstract class GraphqlAntlrToTable {
         return colDataType;
     }
 
-    protected ColDataType createDefaultScalarColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext) {
-        Optional<GraphqlParser.DirectiveContext> columnDirective = getColumnDirective(directivesContext);
-        Optional<GraphqlParser.ArgumentContext> dataType = columnDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("type")).findFirst());
-        Optional<GraphqlParser.ArgumentContext> length = columnDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("length")).findFirst());
-        Optional<GraphqlParser.ArgumentContext> decimals = columnDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("decimals")).findFirst());
+    protected ColDataType createInnerScalarColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext) {
+        Optional<GraphqlParser.DirectiveContext> dataTypeDirective = getDataTypeDirective(directivesContext);
+        Optional<GraphqlParser.ArgumentContext> dataType = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("type")).findFirst());
+        Optional<GraphqlParser.ArgumentContext> length = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("length")).findFirst());
+        Optional<GraphqlParser.ArgumentContext> decimals = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("decimals")).findFirst());
         List<String> argumentsStringList = new ArrayList<>();
         ColDataType colDataType = new ColDataType();
         switch (typeNameContext.name().getText()) {
@@ -127,39 +188,33 @@ public abstract class GraphqlAntlrToTable {
     }
 
     protected Optional<GraphqlParser.DirectiveContext> getTableDirective(GraphqlParser.DirectivesContext directivesContext) {
-        if(directivesContext == null){
+        if (directivesContext == null) {
             return Optional.empty();
         }
-        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("@table")).findFirst();
+        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("table")).findFirst();
     }
 
     protected Optional<GraphqlParser.DirectiveContext> getColumnDirective(GraphqlParser.DirectivesContext directivesContext) {
-        if(directivesContext == null){
+        if (directivesContext == null) {
             return Optional.empty();
         }
-        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("@column")).findFirst();
+        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("column")).findFirst();
+    }
+
+    protected Optional<GraphqlParser.DirectiveContext> getDataTypeDirective(GraphqlParser.DirectivesContext directivesContext) {
+        if (directivesContext == null) {
+            return Optional.empty();
+        }
+        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("dataType")).findFirst();
     }
 
     protected List<String> createTableOption(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         List<String> tableOptionsList = new ArrayList<>();
         if (objectTypeDefinitionContext.directives() != null) {
-
             directiveToTableOption(objectTypeDefinitionContext.directives()).ifPresent(tableOptionsList::addAll);
         }
         if (objectTypeDefinitionContext.description() != null) {
             tableOptionsList.add("COMMENT " + DBNameConverter.INSTANCE.graphqlDescriptionToDBComment(objectTypeDefinitionContext.description().getText()));
-        }
-        return tableOptionsList;
-    }
-
-    protected List<String> createRelationTableOption(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        List<String> tableOptionsList = new ArrayList<>();
-        if (objectTypeDefinitionContext.directives() != null) {
-
-            directiveToTableOption(objectTypeDefinitionContext.directives()).ifPresent(tableOptionsList::addAll);
-        }
-        if (fieldDefinitionContext.description() != null) {
-            tableOptionsList.add("COMMENT " + DBNameConverter.INSTANCE.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
         }
         return tableOptionsList;
     }
