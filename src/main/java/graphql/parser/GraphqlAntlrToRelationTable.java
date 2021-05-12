@@ -1,6 +1,5 @@
 package graphql.parser;
 
-import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
@@ -105,30 +104,29 @@ public class GraphqlAntlrToRelationTable extends GraphqlAntlrToTable {
 
         CreateTable createTable = new CreateTable();
         Table table = new Table();
-        table.setName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, objectTypeDefinitionContext.name().getText()) + "_" + fieldDefinitionContext.name().getText());
-        createTable.setTable(table);
+        table.setName(DBNameConverter.INSTANCE.graphqlTypeFieldNameToRelationTableName(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()));
 
         ColumnDefinition sourceColumnDefinition = createSourceColumn();
 
         ColumnDefinition targetColumnDefinition = null;
 
         if (listTypeContext.type().nonNullType() != null) {
-            targetColumnDefinition = createTargetColumn(listTypeContext.type().nonNullType().typeName(), true);
+            targetColumnDefinition = createTargetColumn(fieldDefinitionContext, listTypeContext.type().nonNullType().typeName(), true);
         } else if (listTypeContext.type().typeName() != null) {
-            targetColumnDefinition = createTargetColumn(listTypeContext.type().typeName(), false);
+            targetColumnDefinition = createTargetColumn(fieldDefinitionContext, listTypeContext.type().typeName(), false);
         }
 
-        createTable.setColumnDefinitions(Arrays.asList(targetColumnDefinition, sourceColumnDefinition));
-        List<String> tableOptionsStrings = new ArrayList<>(Arrays.asList("ENGINE=InnoDB", "CHARSET=utf8"));
+        createTable.setTable(table);
+        createTable.setColumnDefinitions(Arrays.asList(sourceColumnDefinition, targetColumnDefinition));
         createTable.setIfNotExists(true);
-        createTable.setTableOptionsStrings(tableOptionsStrings);
+        createTable.setTableOptionsStrings(createRelationTableOption(objectTypeDefinitionContext, fieldDefinitionContext));
         return Optional.of(createTable);
     }
 
     protected ColumnDefinition createSourceColumn() {
 
         ColumnDefinition columnDefinition = new ColumnDefinition();
-        columnDefinition.setColumnName("id");
+        columnDefinition.setColumnName(DBNameConverter.INSTANCE.graphqlTypeFieldNameToColumnName("id"));
         List<String> columnSpecs = new ArrayList<>();
         columnSpecs.add("NOT NULL");
         columnDefinition.setColumnSpecs(columnSpecs);
@@ -146,11 +144,17 @@ public class GraphqlAntlrToRelationTable extends GraphqlAntlrToTable {
         return colDataType;
     }
 
-    protected ColumnDefinition createTargetColumn(GraphqlParser.TypeNameContext typeNameContext, boolean nonNull) {
+    protected ColumnDefinition createTargetColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean nonNull) {
 
         ColumnDefinition columnDefinition = new ColumnDefinition();
-        columnDefinition.setColumnName(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, typeNameContext.name().getText()) + "_" + "id");
-        columnDefinition.setColDataType(createColDataType(typeNameContext, false));
+
+        if (isObject(typeNameContext.name().getText())) {
+            columnDefinition.setColumnName(DBNameConverter.INSTANCE.graphqlTypeFieldNameToRelationColumnName(fieldDefinitionContext.name().getText(), "id"));
+        } else {
+            columnDefinition.setColumnName(DBNameConverter.INSTANCE.graphqlTypeFieldNameToColumnName(fieldDefinitionContext.name().getText()));
+        }
+
+        columnDefinition.setColDataType(createColDataType(typeNameContext, fieldDefinitionContext.directives(), false));
         List<String> columnSpecs = new ArrayList<>();
         if (nonNull) {
             columnSpecs.add("NOT NULL");
