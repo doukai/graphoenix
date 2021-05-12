@@ -19,7 +19,12 @@ enum Sex {
     FEMALE
 }
 
+"""
+A main title for the post
+asdfas
+"""
 type User {
+    "test"
     id: ID!
     login: String!
     password: String!
