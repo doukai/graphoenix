@@ -2,7 +2,6 @@ package graphql.parser;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Joiner;
 
 public enum DBNameConverter {
 
@@ -13,36 +12,25 @@ public enum DBNameConverter {
         return nameToDBEscape(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName));
     }
 
-    public String graphqlTypeFieldNameToColumnName(String graphqlTypeName) {
+    public String graphqlFieldNameToColumnName(String graphqlFieldName) {
 
-        return nameToDBEscape(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName));
+        return nameToDBEscape(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlFieldName));
     }
 
-    public String graphqlTypeToDBType(String graphqlTypeName) {
+    public String graphqlTypeToDBType(String graphqlType) {
 
-        return nameToDBEscape(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, graphqlTypeName));
+        return nameToDBEscape(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, graphqlType));
     }
 
     public String directiveToTableOption(String argumentName, String argumentValue) {
 
-        return String.format("`%s=%s`", CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, argumentName), argumentValue);
+        return String.format("%s=%s", CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, argumentName), stringValueToDBVarchar(CharMatcher.anyOf("\"").trimFrom(argumentValue)));
     }
 
     public String directiveTocColumnDefinition(String argumentName, String argumentValue) {
 
-        return String.format("`%s %s`", CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, argumentName), argumentValue);
+        return String.format("%s %s", CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, argumentName), stringValueToDBVarchar(CharMatcher.anyOf("\"").trimFrom(argumentValue)));
     }
-
-    public String graphqlTypeFieldNameToRelationTableName(String graphqlTypeName, String graphqlFieldName) {
-
-        return nameToDBEscape(Joiner.on("_").join(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlFieldName)));
-    }
-
-    public String graphqlTypeFieldNameToRelationColumnName(String graphqlFieldName, String graphqlIdFieldName) {
-
-        return nameToDBEscape(Joiner.on("_").join(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlFieldName), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlIdFieldName)));
-    }
-
 
     public String graphqlDescriptionToDBComment(String description) {
 

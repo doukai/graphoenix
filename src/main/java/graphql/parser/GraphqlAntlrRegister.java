@@ -2,6 +2,7 @@ package graphql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,8 @@ public class GraphqlAntlrRegister {
     private final Map<String, String> schemaDefinitionContextMap = new HashMap<>();
 
     private final Map<String, GraphqlParser.TypeDefinitionContext> typeDefinitionContextMap = new HashMap<>();
+
+    private final String[] innerScalarType = {"ID", "Boolean", "String", "Float", "Int"};
 
     public void registerDocument(GraphqlParser.DocumentContext documentContext) {
         documentContext.definition().forEach(this::registerDefinition);
@@ -61,6 +64,10 @@ public class GraphqlAntlrRegister {
 
     public boolean isScaLar(String name) {
         return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name) && typeDefinitionContextMap.get(key).scalarTypeDefinition() != null);
+    }
+
+    protected boolean isInnerScalar(String name) {
+        return Arrays.asList(innerScalarType).contains(name);
     }
 
     public boolean inSchema(String name) {

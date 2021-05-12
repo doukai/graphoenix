@@ -18,21 +18,33 @@ enum Sex {
     MAN
     FEMALE
 }
+directive @table(
+    engine : String="InnoDB"
+) on OBJECT
 
+directive @column(
+    default: String
+) on FIELD_DEFINITION
+
+directive @dataType(
+    type: String
+    length: Int
+    decimals: Int
+) on FIELD_DEFINITION
 """
 A main title for the post
 asdfas
 """
-type User {
+type User @table(engine:"InnoDB"){
     "test"
     id: ID!
-    login: String!
+    login  : String! @column(default:"111") @dataType(length:10,decimals:2)
     password: String!
     name: String!
     age: Int
     age2: Int
     sex: [Sex]
-    roles: [Role]
+    roles: Role
     test: [String]
     test2: [Int]!
     test3: [Float!]

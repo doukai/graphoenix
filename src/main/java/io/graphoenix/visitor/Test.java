@@ -3,8 +3,7 @@ package io.graphoenix.visitor;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import graphql.parser.GraphqlAntlrRegister;
-import graphql.parser.GraphqlAntlrToRelationTable;
-import graphql.parser.GraphqlAntlrToTypeTable;
+import graphql.parser.GraphqlAntlrToTable;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -20,8 +19,7 @@ public class Test {
 
     public static void main(String[] args) throws IOException {
         GraphqlAntlrRegister graphqlAntlrRegister = new GraphqlAntlrRegister();
-        GraphqlAntlrToTypeTable graphqlAntlrToTypeTable = new GraphqlAntlrToTypeTable(graphqlAntlrRegister);
-        GraphqlAntlrToRelationTable graphqlAntlrToRelationTable = new GraphqlAntlrToRelationTable(graphqlAntlrRegister);
+        GraphqlAntlrToTable graphqlAntlrToTable = new GraphqlAntlrToTable(graphqlAntlrRegister);
         CodePointCharStream charStream;
 
 
@@ -46,12 +44,10 @@ public class Test {
 
         GraphqlParser.DocumentContext documentContext = parser.document();
         graphqlAntlrRegister.registerDocument(documentContext);
-        List<CreateTable> tables = graphqlAntlrToTypeTable.createTables(documentContext);
-        List<CreateTable> relationTables = graphqlAntlrToRelationTable.createTables(documentContext);
+        List<CreateTable> tables = graphqlAntlrToTable.createTables(documentContext);
 
 
         tables.forEach(createTable -> System.out.println(createTable.toString()));
-        relationTables.forEach(createTable -> System.out.println(createTable.toString()));
 
 
     }
