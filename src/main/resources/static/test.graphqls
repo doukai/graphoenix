@@ -74,13 +74,13 @@ input RightWithNumber {
 }
 
 input RightBetweenStrings {
-    between:String!
-    and:String!
+    from:String!
+    to:String!
 }
 
 input RightBetweenNumbers {
-    between:Float!
-    and:Float!
+    from:Float!
+    to:Float!
 }
 
 input RightInStrings {
