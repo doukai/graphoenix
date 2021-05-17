@@ -4,8 +4,19 @@ schema {
 
 type QueryType {
     user(id: ID!): User
+    users(expression: Expression!): [User]
     role(id : ID!) : Role
     resource(id: ID!): Resource
+}
+
+query HeroNameAndFriends {
+    users(expression: {
+        expressions: [{
+            left:"name",right:""
+        }]
+    }) {
+        name
+    }
 }
 
 enum RoleType {
@@ -18,6 +29,68 @@ enum Sex {
     MAN
     FEMALE
 }
+
+enum Operator {
+    EQ
+    LK
+    SW
+    EW
+    GT
+    GTE
+    LT
+    LTE
+    NIL
+}
+
+enum Conditional {
+    AND
+    OR
+}
+
+input Expression {
+    conditional:Conditional
+    left:String
+    not:Boolean
+    right:String
+    rightEquals:Int
+    rightIs:Boolean
+    rightWithString:RightWithString
+    rightWithNumber:RightWithNumber
+    rightBetweenStrings:RightBetweenStrings
+    rightBetweenNumbers:RightBetweenNumbers
+    rightInStrings:RightInStrings
+    rightInNumbers:RightInNumbers
+    expressions:[Expression]
+}
+
+input RightWithString {
+    operator:Operator!
+    right:String
+}
+
+input RightWithNumber {
+    operator:Operator!
+    right:Float
+}
+
+input RightBetweenStrings {
+    between:String!
+    and:String!
+}
+
+input RightBetweenNumbers {
+    between:Float!
+    and:Float!
+}
+
+input RightInStrings {
+    in:[String!]
+}
+
+input RightInNumbers {
+    in:[Float!]
+}
+
 directive @table(
     engine : String="InnoDB"
 ) on OBJECT
