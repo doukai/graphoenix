@@ -12,6 +12,8 @@ public class GraphqlAntlrRegister {
 
     private final Map<String, GraphqlParser.TypeDefinitionContext> typeDefinitionContextMap = new HashMap<>();
 
+    private final Map<String, Map<String, String>> typeFieldTypeNameMap = new HashMap<>();
+
     private final String[] innerScalarType = {"ID", "Boolean", "String", "Float", "Int"};
 
     public void registerDocument(GraphqlParser.DocumentContext documentContext) {
@@ -19,7 +21,6 @@ public class GraphqlAntlrRegister {
     }
 
     protected void registerDefinition(GraphqlParser.DefinitionContext definitionContext) {
-
         if (definitionContext.typeSystemDefinition() != null) {
             registerSystemDefinition(definitionContext.typeSystemDefinition());
         }
@@ -41,10 +42,13 @@ public class GraphqlAntlrRegister {
 
         if (typeDefinitionContext.enumTypeDefinition() != null) {
             typeDefinitionContextMap.put(typeDefinitionContext.enumTypeDefinition().name().getText(), typeDefinitionContext);
-
         } else if (typeDefinitionContext.objectTypeDefinition() != null) {
             typeDefinitionContextMap.put(typeDefinitionContext.objectTypeDefinition().name().getText(), typeDefinitionContext);
-
+            Map<String, String> fieldTypeNameMap = new HashMap<>();
+            typeDefinitionContext.objectTypeDefinition().fieldsDefinition().fieldDefinition()
+                    .forEach(fieldDefinitionContext -> fieldTypeNameMap.put(fieldDefinitionContext.name().getText(),
+                            getFieldTypeName(fieldDefinitionContext.type())));
+            typeFieldTypeNameMap.put(typeDefinitionContext.objectTypeDefinition().name().getText(), fieldTypeNameMap);
         } else if (typeDefinitionContext.scalarTypeDefinition() != null) {
             typeDefinitionContextMap.put(typeDefinitionContext.scalarTypeDefinition().name().getText(), typeDefinitionContext);
         }
@@ -92,5 +96,27 @@ public class GraphqlAntlrRegister {
 
     public GraphqlParser.TypeDefinitionContext getDefinition(String name) {
         return typeDefinitionContextMap.get(name);
+    }
+
+
+    public String getFieldTypeName(GraphqlParser.TypeContext typeContext) {
+        if (typeContext.typeName() != null) {
+            return typeContext.typeName().name().getText();
+        } else if (typeContext.nonNullType() != null) {
+            if (typeContext.nonNullType().typeName() != null) {
+                return typeContext.nonNullType().typeName().name().getText();
+            } else {
+                return getFieldTypeName(typeContext.nonNullType().listType().type());
+            }
+        } else if (typeContext.listType() != null) {
+            return getFieldTypeName(typeContext.listType().type());
+        }
+
+        return null;
+    }
+
+    public String getQuerySchemaTypeName() {
+        return schemaDefinitionContextMap.entrySet().stream()
+                .filter(stringStringEntry -> stringStringEntry.getValue().equals("query")).findFirst().map(Map.Entry::getKey).orElse(null);
     }
 }
