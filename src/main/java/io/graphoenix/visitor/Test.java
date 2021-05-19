@@ -3,10 +3,12 @@ package io.graphoenix.visitor;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import graphql.parser.GraphqlAntlrRegister;
+import graphql.parser.GraphqlAntlrToSelect;
 import graphql.parser.GraphqlAntlrToTable;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.select.Select;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 
@@ -20,6 +22,7 @@ public class Test {
     public static void main(String[] args) throws IOException {
         GraphqlAntlrRegister graphqlAntlrRegister = new GraphqlAntlrRegister();
         GraphqlAntlrToTable graphqlAntlrToTable = new GraphqlAntlrToTable(graphqlAntlrRegister);
+        GraphqlAntlrToSelect graphqlAntlrToSelect = new GraphqlAntlrToSelect(graphqlAntlrRegister);
         CodePointCharStream charStream;
 
 
@@ -45,9 +48,11 @@ public class Test {
         GraphqlParser.DocumentContext documentContext = parser.document();
         graphqlAntlrRegister.registerDocument(documentContext);
         List<CreateTable> tables = graphqlAntlrToTable.createTables(documentContext);
+        List<Select> selects = graphqlAntlrToSelect.createSelects(documentContext);
 
 
         tables.forEach(createTable -> System.out.println(createTable.toString()));
+        selects.forEach(select -> System.out.println(select.toString()));
 
 
     }

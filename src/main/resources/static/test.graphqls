@@ -17,6 +17,9 @@ query HeroNameAndFriends {
     }) {
         name
     }
+    role(id: 1){
+        name
+    }
 }
 
 enum RoleType {

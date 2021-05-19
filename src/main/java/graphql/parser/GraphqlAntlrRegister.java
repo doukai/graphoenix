@@ -5,6 +5,7 @@ import graphql.parser.antlr.GraphqlParser;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class GraphqlAntlrRegister {
 
@@ -99,13 +100,38 @@ public class GraphqlAntlrRegister {
     }
 
 
+    public String getQuerySchemaFieldTypeName(String querySchemaFieldName) {
+
+        return typeFieldTypeNameMap.get(getQueryTypeName()).get(querySchemaFieldName);
+    }
+
+
+    public Optional<GraphqlParser.TypeContext> getObjectFieldType(String objectName, String filedName) {
+
+        String filedTypeName = typeFieldTypeNameMap.get(objectName).get(filedName);
+
+        return typeDefinitionContextMap.get(filedTypeName)
+                .objectTypeDefinition().fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(filedName)).findFirst().map(GraphqlParser.FieldDefinitionContext::type);
+    }
+
+
+    public Optional<GraphqlParser.TypeContext> getQueryObjectFieldType(String filedName) {
+
+        String filedTypeName = typeFieldTypeNameMap.get(getQueryTypeName()).get(filedName);
+
+        return typeDefinitionContextMap.get(filedTypeName)
+                .objectTypeDefinition().fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(filedName)).findFirst().map(GraphqlParser.FieldDefinitionContext::type);
+    }
+
     public String getFieldTypeName(GraphqlParser.TypeContext typeContext) {
         if (typeContext.typeName() != null) {
             return typeContext.typeName().name().getText();
         } else if (typeContext.nonNullType() != null) {
             if (typeContext.nonNullType().typeName() != null) {
                 return typeContext.nonNullType().typeName().name().getText();
-            } else {
+            } else if (typeContext.nonNullType().listType() != null) {
                 return getFieldTypeName(typeContext.nonNullType().listType().type());
             }
         } else if (typeContext.listType() != null) {
@@ -115,7 +141,23 @@ public class GraphqlAntlrRegister {
         return null;
     }
 
-    public String getQuerySchemaTypeName() {
+    public boolean fieldTypeIsList(GraphqlParser.TypeContext typeContext) {
+        if (typeContext.typeName() != null) {
+            return false;
+        } else if (typeContext.nonNullType() != null) {
+            if (typeContext.nonNullType().typeName() != null) {
+                return false;
+            } else if (typeContext.nonNullType().listType() != null) {
+                return true;
+            }
+        } else if (typeContext.listType() != null) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public String getQueryTypeName() {
         return schemaDefinitionContextMap.entrySet().stream()
                 .filter(stringStringEntry -> stringStringEntry.getValue().equals("query")).findFirst().map(Map.Entry::getKey).orElse(null);
     }
