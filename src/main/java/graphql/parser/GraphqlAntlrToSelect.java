@@ -2,13 +2,14 @@ package graphql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
+import net.sf.jsqlparser.statement.select.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,15 +36,15 @@ public class GraphqlAntlrToSelect {
 
     protected Optional<Select> createSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
 
-        Select select = new Select();
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().getText().equals("query")) {
+            Select select = new Select();
+            PlainSelect body = new PlainSelect();
+            Table table = new Table("dual");
+            body.setFromItem(table);
+            body.setSelectItems(operationDefinitionContext.selectionSet().selection().stream().map(this::createQueryFieldSubSelect).collect(Collectors.toList()));
 
             if (operationDefinitionContext.name() != null) {
                 operationDefinitionContext.name().getText();
-            }
-
-            if (operationDefinitionContext.selectionSet() != null) {
-                select.setSelectBody(createPlainSelect(operationDefinitionContext.selectionSet()));
             }
 
             if (operationDefinitionContext.variableDefinitions() != null) {
@@ -58,36 +59,42 @@ public class GraphqlAntlrToSelect {
         return Optional.empty();
     }
 
-    protected PlainSelect createPlainSelect(GraphqlParser.SelectionSetContext selectionSetContext) {
-        PlainSelect body = new PlainSelect();
+    protected SelectExpressionItem createQueryFieldSubSelect(GraphqlParser.SelectionContext selectionContext) {
 
-        if (selectionSetContext != null) {
-            body.setSelectItems(selectionSetContext.selection().stream().map(this::createSelectItem).collect(Collectors.toList()));
+        Optional<GraphqlParser.TypeContext> typeContext = graphqlAntlrRegister.getQueryObjectFieldType(selectionContext.field().name().getText());
+
+        if (typeContext.isPresent()) {
+            SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
+
+            Function function = new Function();
+            function.setName(createJsonFunctionName(typeContext.get()));
+            function.setParameters(new ExpressionList(createJsonFunctionParameters(selectionContext.field().selectionSet().selection())));
+
+            selectExpressionItem.setExpression(function);
+
+            SubSelect subSelect = new SubSelect();
+            PlainSelect body = new PlainSelect();
+            body.setSelectItems(Collections.singletonList(selectExpressionItem));
+            subSelect.setSelectBody(body);
+            return selectExpressionItem;
         }
-        return body;
+
+        return null;
     }
 
-    protected SelectItem createSelectItem(GraphqlParser.SelectionContext selectionContext) {
-        if (selectionContext.field() == null) {
 
-            return null;
+    protected String createJsonFunctionName(GraphqlParser.TypeContext typeContext) {
+        if (graphqlAntlrRegister.fieldTypeIsList(typeContext)) {
+            return "JSON_ARRAYAGG";
+        } else {
+            return "JSON_OBJECT";
         }
-
-        return createSelectItem(selectionContext.field());
     }
 
 
-    protected SelectItem createSelectItem(GraphqlParser.FieldContext fieldContext) {
+    protected List<Expression> createJsonFunctionParameters(List<GraphqlParser.SelectionContext> selectionContexts) {
 
-        SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
-        GraphqlParser.TypeDefinitionContext typeDefinitionContext = graphqlAntlrRegister.getDefinition(graphqlAntlrRegister.getQuerySchemaTypeName());
-        Table table = new Table(typeDefinitionContext.objectTypeDefinition().name().getText());
-        Column column = new Column(table, fieldContext.name().getText());
-        selectExpressionItem.setExpression(column);
-        if (fieldContext.alias() != null) {
-            Alias alias = new Alias(fieldContext.alias().getText(), true);
-            selectExpressionItem.setAlias(alias);
-        }
-        return selectExpressionItem;
+        return selectionContexts.stream().map(selectionContext -> new Column(new Table(""), selectionContext.field().name().getText())).collect(Collectors.toList());
     }
+
 }
