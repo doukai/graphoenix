@@ -1,3 +1,5 @@
+
+
 schema {
     query: QueryType
 }
@@ -12,7 +14,7 @@ type QueryType {
 query HeroNameAndFriends {
     users(expression: {
         expressions: [{
-            left:"name",right:""
+            left:"name",sex:MAN
         }]
     }) {
         name
@@ -52,46 +54,25 @@ enum Conditional {
 
 input Expression {
     conditional:Conditional
-    left:String
-    not:Boolean
-    right:String
-    rightEquals:Int
-    rightIs:Boolean
-    rightWithString:RightWithString
-    rightWithNumber:RightWithNumber
-    rightBetweenStrings:RightBetweenStrings
-    rightBetweenNumbers:RightBetweenNumbers
-    rightInStrings:RightInStrings
-    rightInNumbers:RightInNumbers
     expressions:[Expression]
-}
-
-input RightWithString {
-    operator:Operator!
-    right:String
-}
-
-input RightWithNumber {
-    operator:Operator!
-    right:Float
-}
-
-input RightBetweenStrings {
-    from:String!
-    to:String!
-}
-
-input RightBetweenNumbers {
-    from:Float!
-    to:Float!
-}
-
-input RightInStrings {
-    in:[String!]
-}
-
-input RightInNumbers {
-    in:[Float!]
+    left:String
+    is:Boolean
+    not:Boolean
+    operator:Operator
+    string:String
+    int:Int
+    float:Float
+    inStrings:[String!]
+    inInts:[Int!]
+    inFloats:[Float!]
+    fromString:String
+    toString:String
+    fromInt:Int
+    toInt:Int
+    fromFloat:Float
+    toFloat:Float
+    sex:Sex
+    roleType:RoleType
 }
 
 directive @table(
