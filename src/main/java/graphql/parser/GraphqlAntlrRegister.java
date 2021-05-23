@@ -118,9 +118,7 @@ public class GraphqlAntlrRegister {
 
     public Optional<GraphqlParser.TypeContext> getQueryObjectFieldType(String filedName) {
 
-        String filedTypeName = typeFieldTypeNameMap.get(getQueryTypeName()).get(filedName);
-
-        return typeDefinitionContextMap.get(filedTypeName)
+        return typeDefinitionContextMap.get(getQueryTypeName())
                 .objectTypeDefinition().fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(filedName)).findFirst().map(GraphqlParser.FieldDefinitionContext::type);
     }
