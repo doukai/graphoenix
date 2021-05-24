@@ -17,10 +17,10 @@ query HeroNameAndFriends {
             left:"name",sex:MAN
         }]
     }) {
-        name,sex,login
+        name,sex,login,role{name,type}
     }
     role(id: 1){
-        name,type
+        name,type,users{name,id}
     }
 }
 
@@ -101,7 +101,7 @@ type User @table(engine:"InnoDB"){
     age: Int
     age2: Int
     sex: [Sex]
-    roles: Role
+    role: Role
     test: [String]
     test2: [Int]!
     test3: [Float!]
