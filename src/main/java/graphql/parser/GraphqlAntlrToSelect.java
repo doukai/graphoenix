@@ -4,15 +4,14 @@ import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GraphqlAntlrToSelect {
@@ -51,6 +50,7 @@ public class GraphqlAntlrToSelect {
 
             selectExpressionItem.setExpression(function);
             body.setSelectItems(Collections.singletonList(selectExpressionItem));
+
             select.setSelectBody(body);
 
             if (operationDefinitionContext.name() != null) {
@@ -90,7 +90,16 @@ public class GraphqlAntlrToSelect {
                 body.setSelectItems(Collections.singletonList(selectExpressionItem));
                 subSelect.setSelectBody(body);
 
-                body.setFromItem(new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(graphqlAntlrRegister.getFieldTypeName(fieldTypeContext.get()))));
+                Table subTable = new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(graphqlAntlrRegister.getFieldTypeName(fieldTypeContext.get())));
+                body.setFromItem(subTable);
+
+                if(typeContext != null){
+
+                    EqualsTo equalsTo = new EqualsTo();
+                    equalsTo.setLeftExpression(new Column(subTable,selectionContext.field().name().getText()));
+                    equalsTo.setRightExpression(new Column(table,DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(selectionContext.field().name().getText())));
+                    body.setWhere(equalsTo);
+                }
 
                 return subSelect;
             }
