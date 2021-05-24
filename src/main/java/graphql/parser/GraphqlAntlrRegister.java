@@ -105,12 +105,14 @@ public class GraphqlAntlrRegister {
         return typeFieldTypeNameMap.get(getQueryTypeName()).get(querySchemaFieldName);
     }
 
+    public String getObjectFieldTypeName(String objectName, String filedName) {
 
-    public Optional<GraphqlParser.TypeContext> getObjectFieldType(String objectName, String filedName) {
+        return typeFieldTypeNameMap.get(objectName).get(filedName);
+    }
 
-        String filedTypeName = typeFieldTypeNameMap.get(objectName).get(filedName);
+    public Optional<GraphqlParser.TypeContext> getObjectFieldTypeContext(String objectName, String filedName) {
 
-        return typeDefinitionContextMap.get(filedTypeName)
+        return typeDefinitionContextMap.get(objectName)
                 .objectTypeDefinition().fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(filedName)).findFirst().map(GraphqlParser.FieldDefinitionContext::type);
     }

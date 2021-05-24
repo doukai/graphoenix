@@ -17,10 +17,10 @@ query HeroNameAndFriends {
             left:"name",sex:MAN
         }]
     }) {
-        name
+        name,sex,login
     }
     role(id: 1){
-        name
+        name,type
     }
 }
 
