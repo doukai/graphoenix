@@ -125,6 +125,28 @@ public class GraphqlAntlrRegister {
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(filedName)).findFirst().map(GraphqlParser.FieldDefinitionContext::type);
     }
 
+    public String getTypeIdFieldName(String typeName) {
+
+        long IdFieldCount = typeFieldTypeNameMap.get(typeName).entrySet().stream().filter(entry -> entry.getValue().equals("ID")).count();
+        if (IdFieldCount == 1) {
+
+            return typeFieldTypeNameMap.get(typeName).entrySet().stream().filter(entry -> entry.getValue().equals("ID")).map(Map.Entry::getKey).findFirst().orElse(null);
+        }
+
+        return null;
+    }
+
+    public String getTypeRelationFieldName(String sourceName,String targetName) {
+
+        long IdFieldCount = typeFieldTypeNameMap.get(sourceName).entrySet().stream().filter(entry -> entry.getValue().equals(targetName)).count();
+        if (IdFieldCount == 1) {
+
+            return typeFieldTypeNameMap.get(sourceName).entrySet().stream().filter(entry -> entry.getValue().equals(targetName)).map(Map.Entry::getKey).findFirst().orElse(null);
+        }
+
+        return null;
+    }
+
     public String getFieldTypeName(GraphqlParser.TypeContext typeContext) {
         if (typeContext.typeName() != null) {
             return typeContext.typeName().name().getText();
@@ -142,6 +164,10 @@ public class GraphqlAntlrRegister {
     }
 
     public boolean fieldTypeIsList(GraphqlParser.TypeContext typeContext) {
+        if (typeContext == null) {
+            return false;
+        }
+
         if (typeContext.typeName() != null) {
             return false;
         } else if (typeContext.nonNullType() != null) {
