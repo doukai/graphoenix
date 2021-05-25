@@ -117,6 +117,13 @@ public class GraphqlAntlrRegister {
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(filedName)).findFirst().map(GraphqlParser.FieldDefinitionContext::type);
     }
 
+    public Optional<GraphqlParser.FieldDefinitionContext> getObjectFieldDefinitionContext(String objectName, String filedName) {
+
+        return typeDefinitionContextMap.get(objectName)
+                .objectTypeDefinition().fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(filedName)).findFirst();
+    }
+
 
     public Optional<GraphqlParser.TypeContext> getQueryObjectFieldType(String filedName) {
 

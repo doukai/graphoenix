@@ -10,7 +10,7 @@ type QueryType {
 }
 
 query HeroNameAndFriends {
-    users(ex:{cond: OR, exs: [{name: {opr: EQ,string: "test"}},{name: {in: ["test3","test4"]}}]}) {
+    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
         id, name,sex,login,role{name,type}
     }
     role(id: 1){
@@ -49,63 +49,51 @@ enum Conditional {
 input UserExpression {
     cond:Conditional = AND
     exs:[UserExpression]
-    id: IDExpression
     name: StringExpression
     sex: SexExpression
     age:IntExpression
+    disable:Boolean
     role:RoleExpression
 }
 
 input RoleExpression {
     cond:Conditional = AND
     exs:[RoleExpression]
-    id: IDExpression
     name: StringExpression
     type: RoleTypeExpression
 }
 
-input IDExpression {
-    not:Boolean
-    opr:Operator
-    id:ID
-    in:[ID]
-}
-
 input StringExpression {
-    not:Boolean
-    opr:Operator
-    string:String
+    not:Boolean = false
+    opr:Operator = EQ
+    val:String
     in:[String]
 }
 
 input IntExpression {
-    not:Boolean
-    opr:Operator
-    int:Int
+    not:Boolean = false
+    opr:Operator = EQ
+    val:Int
     in:[Int]
 }
 
+input FloatExpression {
+    not:Boolean = false
+    opr:Operator = EQ
+    val:Float
+    in:[Float]
+}
+
 input SexExpression {
-    not:Boolean
-    opr:Operator
-    sex:Sex
+    not:Boolean = false
+    val:Sex
     in:[Sex]
 }
 
 input RoleTypeExpression {
-    not:Boolean
-    opr:Operator
-    roleType:RoleType
+    not:Boolean = false
+    val:RoleType
     in:[RoleType]
-}
-
-input FloatExpression {
-    conditional:Conditional
-    expressions:[FloatExpression]
-    not:Boolean
-    operator:Operator
-    float:Float
-    in:[Float]
 }
 
 directive @table(
@@ -132,6 +120,7 @@ type User @table(engine:"InnoDB"){
     password: String!
     name: String!
     age: Int
+    disable: Boolean
     sex: [Sex]
     role: Role
 }

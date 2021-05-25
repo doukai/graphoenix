@@ -73,6 +73,7 @@ public class GraphqlAntlrToSelect {
         if (register.isObject(filedTypeName)) {
 
             Optional<GraphqlParser.TypeContext> fieldTypeContext = register.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
+            Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = register.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText());
             if (fieldTypeContext.isPresent()) {
                 SubSelect subSelect = new SubSelect();
                 PlainSelect body = new PlainSelect();
@@ -100,9 +101,8 @@ public class GraphqlAntlrToSelect {
                     }
                     body.setWhere(equalsTo);
                 }
-                if (selectionContext.field().arguments() != null) {
-
-                    createWhere(selectionContext.field().arguments());
+                if (fieldDefinitionContext.isPresent() && selectionContext.field().arguments() != null) {
+                    createWhere(fieldDefinitionContext.get(), selectionContext);
                 }
 
                 return subSelect;
@@ -147,21 +147,25 @@ public class GraphqlAntlrToSelect {
         return function;
     }
 
-    protected Expression createWhere(GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Expression createWhere(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
 
-        return new MultiAndExpression(argumentsContext.argument().stream().map(this::createAnd).collect(Collectors.toList()));
+        return new MultiAndExpression(selectionContext.field().arguments().argument().stream().map(argumentContext -> createAnd(fieldDefinitionContext, argumentContext)).collect(Collectors.toList()));
     }
 
-    protected Expression createAnd(GraphqlParser.ArgumentContext argumentContext) {
+    protected Expression createAnd(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
 
-        if (argumentContext.name().getText().equals("cond")) {
-            argumentContext.valueWithVariable().enumValue();
-        }
+        return new MultiAndExpression(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .map(inputValueDefinitionContext -> createAnd(inputValueDefinitionContext, argumentContext)).filter(Optional::isPresent).map(Optional::get)
+                .collect(Collectors.toList()));
 
-        Function function = new Function();
+    }
+
+    protected Optional<Expression> createAnd(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
 
 
-        return function;
+
+
+        return Optional.empty();
     }
 
 }
