@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 public class GraphqlAntlrToSelect {
 
-    final private GraphqlAntlrRegister graphqlAntlrRegister;
+    final private GraphqlAntlrRegister register;
 
-    public GraphqlAntlrToSelect(GraphqlAntlrRegister graphqlAntlrRegister) {
-        this.graphqlAntlrRegister = graphqlAntlrRegister;
+    public GraphqlAntlrToSelect(GraphqlAntlrRegister register) {
+        this.register = register;
     }
 
     public List<Select> createSelects(GraphqlParser.DocumentContext documentContext) {
@@ -38,18 +38,15 @@ public class GraphqlAntlrToSelect {
 
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().getText().equals("query")) {
             Select select = new Select();
-            PlainSelect body = new PlainSelect();
-            Table table = new Table("dual");
-            body.setFromItem(table);
 
-            Function function = new Function();
-            function.setName("JSON_OBJECT");
-            function.setParameters(new ExpressionList(createJsonObjectFunction(null, operationDefinitionContext.selectionSet().selection())));
+            PlainSelect body = new PlainSelect();
 
             SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
-
-            selectExpressionItem.setExpression(function);
+            selectExpressionItem.setExpression(createJsonObjectFunction(null, operationDefinitionContext.selectionSet().selection()));
             body.setSelectItems(Collections.singletonList(selectExpressionItem));
+
+            Table table = new Table("dual");
+            body.setFromItem(table);
 
             select.setSelectBody(body);
 
@@ -68,18 +65,14 @@ public class GraphqlAntlrToSelect {
         return Optional.empty();
     }
 
-    protected Expression createQueryFieldSubSelect(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
+    protected Expression createFieldSubSelect(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
 
-        String typeName = typeContext == null ? graphqlAntlrRegister.getQueryTypeName() : graphqlAntlrRegister.getFieldTypeName(typeContext);
+        String typeName = typeContext == null ? register.getQueryTypeName() : register.getFieldTypeName(typeContext);
+        String filedTypeName = register.getObjectFieldTypeName(typeName, selectionContext.field().name().getText());
 
-        String filedTypeName = graphqlAntlrRegister.getObjectFieldTypeName(typeName, selectionContext.field().name().getText());
+        if (register.isObject(filedTypeName)) {
 
-        String tableName = typeContext == null ? "dual" : DBNameConverter.INSTANCE.graphqlTypeNameToTableName(graphqlAntlrRegister.getFieldTypeName(typeContext));
-        Table table = new Table(tableName);
-
-        if (graphqlAntlrRegister.isObject(filedTypeName)) {
-
-            Optional<GraphqlParser.TypeContext> fieldTypeContext = graphqlAntlrRegister.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
+            Optional<GraphqlParser.TypeContext> fieldTypeContext = register.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
             if (fieldTypeContext.isPresent()) {
                 SubSelect subSelect = new SubSelect();
                 PlainSelect body = new PlainSelect();
@@ -90,22 +83,36 @@ public class GraphqlAntlrToSelect {
                 body.setSelectItems(Collections.singletonList(selectExpressionItem));
                 subSelect.setSelectBody(body);
 
-                Table subTable = new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(graphqlAntlrRegister.getFieldTypeName(fieldTypeContext.get())));
+                Table subTable = new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext.get())));
                 body.setFromItem(subTable);
 
-                if(typeContext != null){
-
+                if (typeContext != null) {
+                    String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
+                    Table table = new Table(tableName);
                     EqualsTo equalsTo = new EqualsTo();
-                    equalsTo.setLeftExpression(new Column(subTable,selectionContext.field().name().getText()));
-                    equalsTo.setRightExpression(new Column(table,DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(selectionContext.field().name().getText())));
+
+                    if (register.fieldTypeIsList(fieldTypeContext.get())) {
+                        equalsTo.setLeftExpression(new Column(subTable, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(filedTypeName, typeName))));
+                        equalsTo.setRightExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(typeName))));
+                    } else {
+                        equalsTo.setLeftExpression(new Column(subTable, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(filedTypeName))));
+                        equalsTo.setRightExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(selectionContext.field().name().getText())));
+                    }
                     body.setWhere(equalsTo);
+                }
+                if (selectionContext.field().arguments() != null) {
+
+                    createWhere(selectionContext.field().arguments());
                 }
 
                 return subSelect;
             }
-        } else if (graphqlAntlrRegister.isScaLar(filedTypeName) || graphqlAntlrRegister.isInnerScalar(filedTypeName)) {
-
-            return new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(selectionContext.field().name().getText()));
+        } else if (register.isScaLar(filedTypeName) || register.isInnerScalar(filedTypeName)) {
+            if (typeContext != null) {
+                String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
+                Table table = new Table(tableName);
+                return new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(selectionContext.field().name().getText()));
+            }
         }
 
         return null;
@@ -113,7 +120,7 @@ public class GraphqlAntlrToSelect {
 
 
     protected Function createJsonFunction(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
-        if (graphqlAntlrRegister.fieldTypeIsList(typeContext)) {
+        if (register.fieldTypeIsList(typeContext)) {
             return createJsonArrayFunction(typeContext, selectionContext.field().selectionSet().selection());
         } else {
             return createJsonObjectFunction(typeContext, selectionContext.field().selectionSet().selection());
@@ -134,8 +141,25 @@ public class GraphqlAntlrToSelect {
         Function function = new Function();
         function.setName("JSON_OBJECT");
         function.setParameters(new ExpressionList(selectionContexts.stream()
-                .map(selectionContext -> new ExpressionList(new StringValue(selectionContext.field().name().getText()), createQueryFieldSubSelect(typeContext, selectionContext)))
+                .map(selectionContext -> new ExpressionList(new StringValue(selectionContext.field().name().getText()), createFieldSubSelect(typeContext, selectionContext)))
                 .map(ExpressionList::getExpressions).flatMap(Collection::stream).collect(Collectors.toList())));
+
+        return function;
+    }
+
+    protected Expression createWhere(GraphqlParser.ArgumentsContext argumentsContext) {
+
+        return new MultiAndExpression(argumentsContext.argument().stream().map(this::createAnd).collect(Collectors.toList()));
+    }
+
+    protected Expression createAnd(GraphqlParser.ArgumentContext argumentContext) {
+
+        if (argumentContext.name().getText().equals("cond")) {
+            argumentContext.valueWithVariable().enumValue();
+        }
+
+        Function function = new Function();
+
 
         return function;
     }
