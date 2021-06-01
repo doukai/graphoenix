@@ -4,18 +4,23 @@ schema {
 
 type QueryType {
     user(id: ID!): User
-    users(ex:UserExpression): [User]
+#    users(ex:UserExpression): [User]
+
+    users(name:String,cond:Conditional): [User]
     role(id : ID!) : Role
     resource(id: ID!): Resource
 }
 
 query HeroNameAndFriends {
-    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
-        id, name,sex,login,role{name,type}
-    }
-    role(id: 1){
-        name,type,users{name,id}
-    }
+#    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
+#        id, name,sex,login,role{name,type}
+#    }
+        users(cond:OR,name: "test") {
+            id, name,sex,login,role{name,type}
+        }
+#    role(id: 1){
+#        name,type,users{name,id}
+#    }
 }
 
 enum RoleType {
