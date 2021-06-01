@@ -6,7 +6,7 @@ type QueryType {
     user(id: ID!): User
 #    users(ex:UserExpression): [User]
 
-    users(name:String,cond:Conditional): [User]
+    users(name:String,cond:Conditional,login:String): [User]
     role(id : ID!) : Role
     resource(id: ID!): Resource
 }
@@ -15,7 +15,7 @@ query HeroNameAndFriends {
 #    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
 #        id, name,sex,login,role{name,type}
 #    }
-        users(cond:OR,name: "test") {
+        users(cond:OR,name: "test",login: "dk") {
             id, name,sex,login,role{name,type}
         }
 #    role(id: 1){
