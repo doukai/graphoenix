@@ -10,6 +10,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
+import net.sf.jsqlparser.util.cnfexpression.MultiOrExpression;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -102,7 +103,7 @@ public class GraphqlAntlrToSelect {
                     body.setWhere(equalsTo);
                 }
                 if (fieldDefinitionContext.isPresent() && selectionContext.field().arguments() != null) {
-                    createWhere(fieldDefinitionContext.get(), selectionContext);
+                    createWhere(fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments());
                 }
 
                 return subSelect;
@@ -147,23 +148,47 @@ public class GraphqlAntlrToSelect {
         return function;
     }
 
-    protected Expression createWhere(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
+    protected Expression createWhere(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
-        return new MultiAndExpression(selectionContext.field().arguments().argument().stream().map(argumentContext -> createAnd(fieldDefinitionContext, argumentContext)).collect(Collectors.toList()));
+        if (hasOrConditional(argumentsDefinitionContext, argumentsContext)) {
+
+            return new MultiOrExpression(createExpressions(argumentsDefinitionContext, argumentsContext));
+        }
+
+        return new MultiAndExpression(createExpressions(argumentsDefinitionContext, argumentsContext));
     }
 
-    protected Expression createAnd(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+    protected List<Expression> createExpressions(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
-        return new MultiAndExpression(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                .map(inputValueDefinitionContext -> createAnd(inputValueDefinitionContext, argumentContext)).filter(Optional::isPresent).map(Optional::get)
-                .collect(Collectors.toList()));
+        return argumentsContext.argument().stream().map(argumentContext -> createExpression(argumentsDefinitionContext, argumentContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
 
     }
 
-    protected Optional<Expression> createAnd(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+    private boolean hasOrConditional(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
+        return argumentsContext.argument().stream().anyMatch(argumentContext -> getArgumentDefinition(argumentsDefinitionContext, argumentContext).map(inputValueDefinitionContext -> isOrConditional(inputValueDefinitionContext, argumentContext)).orElse(false));
+    }
 
+    private boolean isOrConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
 
+        if (inputValueDefinitionContext.type().typeName() != null && register.isEnum(inputValueDefinitionContext.type().typeName().name().getText()) && inputValueDefinitionContext.type().typeName().name().getText().equals("Conditional")) {
+            return argumentContext.valueWithVariable().enumValue() != null && argumentContext.valueWithVariable().enumValue().enumValueName().getText().equals("OR");
+        }
+        return false;
+    }
+
+    private Optional<GraphqlParser.InputValueDefinitionContext> getArgumentDefinition(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+
+        return argumentsDefinitionContext.inputValueDefinition().stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(argumentContext.name().getText())).findFirst();
+
+    }
+
+    protected Optional<Expression> createExpression(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+
+        Optional<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContext = getArgumentDefinition(argumentsDefinitionContext, argumentContext);
+        if(inputValueDefinitionContext.isPresent()){
+            
+        }
 
         return Optional.empty();
     }
