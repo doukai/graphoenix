@@ -187,7 +187,7 @@ public class GraphqlAntlrToSelect {
 
         Optional<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContext = getArgumentDefinition(argumentsDefinitionContext, argumentContext);
         if(inputValueDefinitionContext.isPresent()){
-            
+
         }
 
         return Optional.empty();
