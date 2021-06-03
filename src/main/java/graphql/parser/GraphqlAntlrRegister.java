@@ -52,6 +52,13 @@ public class GraphqlAntlrRegister {
             typeFieldTypeNameMap.put(typeDefinitionContext.objectTypeDefinition().name().getText(), fieldTypeNameMap);
         } else if (typeDefinitionContext.scalarTypeDefinition() != null) {
             typeDefinitionContextMap.put(typeDefinitionContext.scalarTypeDefinition().name().getText(), typeDefinitionContext);
+        } else if (typeDefinitionContext.inputObjectTypeDefinition() != null) {
+            typeDefinitionContextMap.put(typeDefinitionContext.inputObjectTypeDefinition().name().getText(), typeDefinitionContext);
+            Map<String, String> fieldTypeNameMap = new HashMap<>();
+            typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition()
+                    .forEach(inputValueDefinitionContext -> fieldTypeNameMap.put(inputValueDefinitionContext.name().getText(),
+                            getFieldTypeName(inputValueDefinitionContext.type())));
+            typeFieldTypeNameMap.put(typeDefinitionContext.inputObjectTypeDefinition().name().getText(), fieldTypeNameMap);
         }
     }
 
@@ -90,6 +97,9 @@ public class GraphqlAntlrRegister {
 
         } else if (typeDefinitionContext.scalarTypeDefinition() != null) {
             return typeDefinitionContext.scalarTypeDefinition().SCALAR().getText();
+
+        } else if (typeDefinitionContext.inputObjectTypeDefinition() != null) {
+            return typeDefinitionContext.inputObjectTypeDefinition().INPUT().getText();
         }
 
         return null;

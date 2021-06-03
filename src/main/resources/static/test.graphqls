@@ -6,7 +6,7 @@ type QueryType {
     user(id: ID!): User
 #    users(ex:UserExpression): [User]
 
-    users(name:String,cond:Conditional,login:String): [User]
+    users(name:String,cond:Conditional,login:String,age:Int,test:UserExpression): [User]
     role(id : ID!) : Role
     resource(id: ID!): Resource
 }
@@ -15,7 +15,7 @@ query HeroNameAndFriends {
 #    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
 #        id, name,sex,login,role{name,type}
 #    }
-        users(cond:OR,name: "test",login: "dk") {
+        users(cond:OR,name: "test",login: "dk",age:18,test:{name: "test2"}) {
             id, name,sex,login,role{name,type}
         }
 #    role(id: 1){
@@ -54,7 +54,7 @@ enum Conditional {
 input UserExpression {
     cond:Conditional = AND
     exs:[UserExpression]
-    name: StringExpression
+    name: String
     sex: SexExpression
     age:IntExpression
     disable:Boolean
