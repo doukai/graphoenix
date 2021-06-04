@@ -153,7 +153,7 @@ public class GraphqlAntlrRegister {
         return null;
     }
 
-    public String getTypeRelationFieldName(String sourceName,String targetName) {
+    public String getTypeRelationFieldName(String sourceName, String targetName) {
 
         long IdFieldCount = typeFieldTypeNameMap.get(sourceName).entrySet().stream().filter(entry -> entry.getValue().equals(targetName)).count();
         if (IdFieldCount == 1) {
@@ -181,23 +181,13 @@ public class GraphqlAntlrRegister {
     }
 
     public boolean fieldTypeIsList(GraphqlParser.TypeContext typeContext) {
-        if (typeContext == null) {
-            return false;
-        }
-
         if (typeContext.typeName() != null) {
             return false;
         } else if (typeContext.nonNullType() != null) {
             if (typeContext.nonNullType().typeName() != null) {
                 return false;
-            } else if (typeContext.nonNullType().listType() != null) {
-                return true;
-            }
-        } else if (typeContext.listType() != null) {
-            return true;
-        }
-
-        return false;
+            } else return typeContext.nonNullType().listType() != null;
+        } else return typeContext.listType() != null;
     }
 
     public String getQueryTypeName() {

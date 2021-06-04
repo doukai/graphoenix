@@ -9,13 +9,14 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import net.sf.jsqlparser.util.cnfexpression.MultiOrExpression;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class GraphqlAntlrToSelect {
 
-    final private GraphqlAntlrRegister register;
+    private final GraphqlAntlrRegister register;
 
     public GraphqlAntlrToSelect(GraphqlAntlrRegister register) {
         this.register = register;
@@ -26,7 +27,6 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Optional<Select> createSelect(GraphqlParser.DefinitionContext definitionContext) {
-
         if (definitionContext.operationDefinition() == null) {
             return Optional.empty();
         }
@@ -34,7 +34,6 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Optional<Select> createSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().getText().equals("query")) {
             Select select = new Select();
 
@@ -65,12 +64,9 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Expression createFieldSubSelect(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
-
         String typeName = typeContext == null ? register.getQueryTypeName() : register.getFieldTypeName(typeContext);
         String filedTypeName = register.getObjectFieldTypeName(typeName, selectionContext.field().name().getText());
-
         if (register.isObject(filedTypeName)) {
-
             Optional<GraphqlParser.TypeContext> fieldTypeContext = register.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
             Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = register.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText());
             if (fieldTypeContext.isPresent()) {
@@ -104,7 +100,6 @@ public class GraphqlAntlrToSelect {
                         body.setWhere(createWhere(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments()));
                     }
                 }
-
                 return subSelect;
             }
         } else if (register.isScaLar(filedTypeName) || register.isInnerScalar(filedTypeName)) {
@@ -118,7 +113,6 @@ public class GraphqlAntlrToSelect {
         return null;
     }
 
-
     protected Function createJsonFunction(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
         if (register.fieldTypeIsList(typeContext)) {
             return createJsonArrayFunction(typeContext, selectionContext.field().selectionSet().selection());
@@ -128,7 +122,6 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Function createJsonArrayFunction(GraphqlParser.TypeContext typeContext, List<GraphqlParser.SelectionContext> selectionContexts) {
-
         Function function = new Function();
         function.setName("JSON_ARRAYAGG");
         function.setParameters(new ExpressionList(createJsonObjectFunction(typeContext, selectionContexts)));
@@ -137,7 +130,6 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Function createJsonObjectFunction(GraphqlParser.TypeContext typeContext, List<GraphqlParser.SelectionContext> selectionContexts) {
-
         Function function = new Function();
         function.setName("JSON_OBJECT");
         function.setParameters(new ExpressionList(selectionContexts.stream()
@@ -148,330 +140,321 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Expression createWhere(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-
         if (hasOrConditional(argumentsDefinitionContext, argumentsContext)) {
 
-            return new MultiOrExpression(createExpressions(fieldTypeContext, argumentsDefinitionContext, argumentsContext));
+            return new MultiOrExpression(createWhereExpressions(fieldTypeContext, argumentsDefinitionContext, argumentsContext));
         }
-
-        return new MultiAndExpression(createExpressions(fieldTypeContext, argumentsDefinitionContext, argumentsContext));
+        return new MultiAndExpression(createWhereExpressions(fieldTypeContext, argumentsDefinitionContext, argumentsContext));
     }
 
+    protected List<Expression> createWhereExpressions(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        return argumentsDefinitionContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> createWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+    }
+
+    protected List<Expression> createWhereExpressions(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        return inputObjectValueDefinitionsContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> createWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+    }
+
+    protected List<Expression> createWhereExpressions(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        return inputObjectValueDefinitionsContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> createWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectValueContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+    }
+
+    protected Optional<Expression> createWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        Optional<GraphqlParser.ArgumentContext> argumentContext = getArgumentFromInputValueDefinition(inputValueDefinitionContext, argumentsContext);
+        if (argumentContext.isPresent()) {
+            return argumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.get());
+        } else {
+            return createDefaultWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+        }
+    }
+
+    protected Optional<Expression> createWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = getObjectFieldWithVariableFromInputValueDefinition(inputValueDefinitionContext, objectValueWithVariableContext);
+        if (objectFieldWithVariableContext.isPresent()) {
+            return objectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.get());
+        } else {
+            return createDefaultWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+        }
+    }
+
+    protected Optional<Expression> createWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        Optional<GraphqlParser.ObjectFieldContext> objectFieldContext = getObjectFieldFromInputValueDefinition(inputValueDefinitionContext, objectValueContext);
+        if (objectFieldContext.isPresent()) {
+            return objectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext.get());
+        } else {
+            return createDefaultWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+        }
+    }
+
+    protected Optional<Expression> createDefaultWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() != null) {
+
+            return inputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+
+        } else if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() == null) {
+            //todo
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<Expression> argumentToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+        if (register.fieldTypeIsList(inputValueDefinitionContext.type())) {
+            return argumentContext == null ? multiInputValueToExpression(fieldTypeContext, inputValueDefinitionContext) : multiArgumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext);
+        } else {
+            return argumentContext == null ? singleInputValueToExpression(fieldTypeContext, inputValueDefinitionContext) : singleArgumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext);
+        }
+    }
+
+    protected Optional<Expression> inputValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return argumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, null);
+    }
+
+    protected Optional<Expression> objectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        if (isObjectValue(objectFieldWithVariableContext)) {
+            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
+        }
+        return scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), objectFieldWithVariableContext.valueWithVariable());
+    }
+
+    protected Optional<Expression> objectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
+        if (isObjectValue(objectFieldContext)) {
+            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue()));
+        }
+        return scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), objectFieldContext.value());
+    }
+
+    protected Optional<Expression> singleArgumentToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+        if (isObjectValue(argumentContext)) {
+            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable()));
+
+        }
+        return scalarValueToExpression(argumentToColumn(fieldTypeContext, argumentContext), argumentContext.valueWithVariable());
+    }
+
+    protected Optional<Expression> singleInputValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (isObjectValue(inputValueDefinitionContext)) {
+            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue()));
+
+        }
+        return scalarValueToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext.defaultValue().value());
+    }
+
+    private boolean isObjectValue(GraphqlParser.ArgumentContext argumentContext) {
+        return argumentContext.valueWithVariable().objectValueWithVariable() != null;
+    }
+
+    private boolean isObjectValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return inputValueDefinitionContext.defaultValue().value().objectValue() != null;
+    }
+
+    private boolean isObjectValue(GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        return objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null;
+    }
+
+    private boolean isObjectValue(GraphqlParser.ObjectFieldContext objectFieldContext) {
+        return objectFieldContext.value().objectValue() != null;
+    }
+
+    protected Expression objectValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
+
+        if (hasOrConditional(inputValueDefinitionContext, objectValueWithVariableContext)) {
+
+            return new MultiOrExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueWithVariableContext));
+        }
+        return new MultiAndExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueWithVariableContext));
+    }
+
+    protected Expression objectValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
+
+        if (hasOrConditional(inputValueDefinitionContext, objectValueContext)) {
+
+            return new MultiOrExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueContext));
+        }
+        return new MultiAndExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueContext));
+    }
+
+
+    protected Optional<Expression> multiArgumentToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+        InExpression inExpression = new InExpression();
+        inExpression.setLeftExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext));
+        if (argumentContext == null) {
+            if (inputValueDefinitionContext.defaultValue().value().arrayValue() != null) {
+                inExpression.setRightItemsList(new ExpressionList(inputValueDefinitionContext.defaultValue().value().arrayValue().value().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
+            }
+        } else {
+            if (argumentContext.valueWithVariable().arrayValueWithVariable() != null) {
+                inExpression.setRightItemsList(new ExpressionList(argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
+            }
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<Expression> multiInputValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return multiArgumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, null);
+    }
 
     private boolean hasOrConditional(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-
-        return argumentsDefinitionContext.inputValueDefinition().stream().anyMatch(inputValueDefinitionContext -> getArgumentContext(inputValueDefinitionContext, argumentsContext).map(argumentContext -> isOrConditional(inputValueDefinitionContext.type().getText(), argumentContext.valueWithVariable())).orElse(false));
+        return argumentsContext.argument().stream().anyMatch(argumentContext ->
+                getInputValueDefinitionFromArgumentsDefinitionContext(argumentContext, argumentsDefinitionContext)
+                        .map(inputValueDefinitionContext ->
+                                isOrConditional(inputValueDefinitionContext, argumentContext.valueWithVariable()))
+                        .orElse(false));
     }
 
-    protected List<Expression> createExpressions(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-
-        return argumentsDefinitionContext.inputValueDefinition().stream().map(inputValueDefinitionContext -> createExpression(fieldTypeContext, inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+    private boolean hasOrConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        return objectValueWithVariableContext.objectFieldWithVariable().stream().anyMatch(objectFieldWithVariableContext -> isOrConditional(inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable()));
     }
 
-
-    private boolean isConditionalInputValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-
-        return inputValueDefinitionContext.type().typeName() != null && register.isEnum(inputValueDefinitionContext.type().typeName().name().getText()) && inputValueDefinitionContext.type().typeName().name().getText().equals("Conditional");
+    private boolean hasOrConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        return objectValueContext.objectField().stream().anyMatch(objectFieldContext -> isOrConditional(inputValueDefinitionContext, objectFieldContext.value()));
     }
 
-    private Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+    private boolean isOrConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        if (isConditional(inputValueDefinitionContext)) {
+            return conditionalIsOr(valueWithVariableContext.enumValue());
+        }
+        return false;
+    }
 
+    private boolean isOrConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueContext valueContext) {
+        if (isConditional(inputValueDefinitionContext)) {
+            return conditionalIsOr(valueContext.enumValue());
+        }
+        return false;
+    }
+
+    private boolean conditionalIsOr(GraphqlParser.EnumValueContext enumValueContext) {
+        return enumValueContext != null && enumValueContext.enumValueName().getText().equals("OR");
+    }
+
+    private boolean isConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return inputValueDefinitionContext.type().typeName() != null && isConditional(inputValueDefinitionContext.type().typeName().name().getText());
+    }
+
+    private boolean isNotConditional(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return !isConditional(inputValueDefinitionContext);
+    }
+
+    private boolean isConditional(String typeName) {
+        return typeName != null && register.isEnum(typeName) && typeName.equals("Conditional");
+    }
+
+    private Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentContext argumentContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext) {
         return argumentsDefinitionContext.inputValueDefinition().stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(argumentContext.name().getText())).findFirst();
-
     }
 
-    private Optional<GraphqlParser.ArgumentContext> getArgumentContext(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-
+    private Optional<GraphqlParser.ArgumentContext> getArgumentFromInputValueDefinition(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
         return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
-
     }
 
-    private Optional<GraphqlParser.ObjectFieldWithVariableContext> getObjectFieldWithVariableContext(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-
+    private Optional<GraphqlParser.ObjectFieldWithVariableContext> getObjectFieldWithVariableFromInputValueDefinition(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         return objectValueWithVariableContext.objectFieldWithVariable().stream().filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
-
     }
 
-    private Optional<GraphqlParser.ObjectFieldContext> getObjectFieldContext(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
-
+    private Optional<GraphqlParser.ObjectFieldContext> getObjectFieldFromInputValueDefinition(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
         return objectValueContext.objectField().stream().filter(objectFieldContext -> objectFieldContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
-
     }
 
-    protected Optional<Expression> createExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-        if (isConditionalInputValue(inputValueDefinitionContext)) {
-            return Optional.empty();
-        }
-        Optional<GraphqlParser.ArgumentContext> argumentContext = getArgumentContext(inputValueDefinitionContext, argumentsContext);
-        if (argumentContext.isPresent()) {
-            return typeToExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.get().name().getText(), argumentContext.get().valueWithVariable());
-        } else {
-            if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() != null) {
-                if (inputValueDefinitionContext.type().nonNullType().typeName() != null) {
-                    return defaultValueToExpression(fieldTypeContext, inputValueDefinitionContext);
-                } else if (inputValueDefinitionContext.type().nonNullType().listType() != null) {
-                    return defaultValueToInExpression(fieldTypeContext, inputValueDefinitionContext);
-                }
-            } else if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() == null) {
-                //todo
-            }
-        }
-        return Optional.empty();
-    }
-
-    protected Optional<Expression> typeNameToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, String argumentName, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+    protected Column argumentToColumn(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentContext argumentContext) {
         String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
         Table table = new Table(tableName);
-        if (valueWithVariableContext.StringValue() != null) {
-            EqualsTo equalsTo = new EqualsTo();
-            equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentName)));
-            equalsTo.setRightExpression(valueToDBValue(valueWithVariableContext));
-            return Optional.of(equalsTo);
-        } else if (valueWithVariableContext.IntValue() != null) {
-            EqualsTo equalsTo = new EqualsTo();
-            equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentName)));
-            equalsTo.setRightExpression(valueToDBValue(valueWithVariableContext));
-            return Optional.of(equalsTo);
-        } else if (valueWithVariableContext.FloatValue() != null) {
-            EqualsTo equalsTo = new EqualsTo();
-            equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentName)));
-            equalsTo.setRightExpression(valueToDBValue(valueWithVariableContext));
-            return Optional.of(equalsTo);
-        } else if (valueWithVariableContext.BooleanValue() != null) {
-            IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
-            isBooleanExpression.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentName)));
-            isBooleanExpression.setIsTrue(Boolean.parseBoolean(valueWithVariableContext.BooleanValue().getText()));
-            return Optional.of(isBooleanExpression);
-        } else if (valueWithVariableContext.NullValue() != null) {
-            IsNullExpression isNullExpression = new IsNullExpression();
-            isNullExpression.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentName)));
-            return Optional.of(isNullExpression);
-        } else if (valueWithVariableContext.objectValueWithVariable() != null) {
-
-            return Optional.of(objectValueToDBValue(fieldTypeContext, inputValueDefinitionContext, argumentName, valueWithVariableContext));
-        }
-        return Optional.empty();
+        return new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentContext.name().getText()));
     }
 
-    protected Optional<Expression> typeNameToInExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentContext argumentContext) {
-        if (argumentContext.valueWithVariable().arrayValueWithVariable() != null) {
-            String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
-            Table table = new Table(tableName);
-            InExpression inExpression = new InExpression();
-            inExpression.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentContext.name().getText())));
-            inExpression.setRightItemsList(new ExpressionList(argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream().map(this::valueToDBValue).collect(Collectors.toList())));
-        }
-        return Optional.empty();
-    }
-
-    protected Expression valueToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-        if (valueWithVariableContext.StringValue() != null) {
-            return new StringValue(CharMatcher.is('"').trimFrom(valueWithVariableContext.StringValue().getText()));
-        } else if (valueWithVariableContext.IntValue() != null) {
-            return new LongValue(valueWithVariableContext.IntValue().getText());
-        } else if (valueWithVariableContext.FloatValue() != null) {
-            return new DoubleValue(valueWithVariableContext.IntValue().getText());
-        } else if (valueWithVariableContext.BooleanValue() != null) {
-            //todo
-        } else if (valueWithVariableContext.NullValue() != null) {
-            //todo
-        }
-        return null;
-    }
-
-    protected Expression objectValueToDBValue(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, String argumentName, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
-
-        if (hasOrConditional(argumentName, valueWithVariableContext)) {
-
-            return new MultiOrExpression(createExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), valueWithVariableContext.objectValueWithVariable()));
-        }
-        return new MultiAndExpression(createExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), valueWithVariableContext.objectValueWithVariable()));
-
-    }
-
-    protected Expression objectValueToDBValue(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
-
-        if (hasOrConditional(inputValueDefinitionContext.name().getText(), inputValueDefinitionContext.defaultValue().value())) {
-
-            return new MultiOrExpression(createExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), inputValueDefinitionContext.defaultValue().value().objectValue()));
-        }
-        return new MultiAndExpression(createExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), inputValueDefinitionContext.defaultValue().value().objectValue()));
-
-    }
-
-    protected List<Expression> createExpressions(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-
-        return inputObjectValueDefinitionsContext.inputValueDefinition().stream().map(inputValueDefinitionContext -> createExpression(fieldTypeContext, inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-    }
-
-
-    protected List<Expression> createExpressions(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueContext objectValueContext) {
-
-        return inputObjectValueDefinitionsContext.inputValueDefinition().stream().map(inputValueDefinitionContext -> createExpression(fieldTypeContext, inputValueDefinitionContext, objectValueContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-    }
-
-    protected Optional<Expression> createExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        if (isConditionalInputValue(inputValueDefinitionContext)) {
-            return Optional.empty();
-        }
-        Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = getObjectFieldWithVariableContext(inputValueDefinitionContext, objectValueWithVariableContext);
-        if (objectFieldWithVariableContext.isPresent()) {
-            return typeToExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.get().name().getText(), objectFieldWithVariableContext.get().valueWithVariable());
-        } else {
-            if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() != null) {
-                if (inputValueDefinitionContext.type().nonNullType().typeName() != null) {
-                    return defaultValueToExpression(fieldTypeContext, inputValueDefinitionContext);
-                } else if (inputValueDefinitionContext.type().nonNullType().listType() != null) {
-                    return defaultValueToInExpression(fieldTypeContext, inputValueDefinitionContext);
-                }
-            } else if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() == null) {
-                //todo
-            }
-        }
-        return Optional.empty();
-    }
-
-    protected Optional<Expression> createExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
-        if (isConditionalInputValue(inputValueDefinitionContext)) {
-            return Optional.empty();
-        }
-        Optional<GraphqlParser.ObjectFieldContext> objectFieldContext = getObjectFieldContext(inputValueDefinitionContext, objectValueContext);
-        if (objectFieldContext.isPresent()) {
-            return typeToExpression(fieldTypeContext, inputValueDefinitionContext);
-        } else {
-            if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() != null) {
-                if (inputValueDefinitionContext.type().nonNullType().typeName() != null) {
-                    return defaultValueToExpression(fieldTypeContext, inputValueDefinitionContext);
-                } else if (inputValueDefinitionContext.type().nonNullType().listType() != null) {
-                    return defaultValueToInExpression(fieldTypeContext, inputValueDefinitionContext);
-                }
-            } else if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() == null) {
-                //todo
-            }
-        }
-        return Optional.empty();
-    }
-
-    protected Optional<Expression> typeToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, String argumentName, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-        if (inputValueDefinitionContext.type().typeName() != null) {
-            return typeNameToExpression(fieldTypeContext, inputValueDefinitionContext, argumentName, valueWithVariableContext);
-        } else if (inputValueDefinitionContext.type().listType() != null) {
-//            return typeNameToInExpression(fieldTypeContext, argumentContext);
-        } else if (inputValueDefinitionContext.type().nonNullType() != null) {
-            if (inputValueDefinitionContext.type().nonNullType().typeName() != null) {
-                return typeNameToExpression(fieldTypeContext, inputValueDefinitionContext, argumentName, valueWithVariableContext);
-            } else if (inputValueDefinitionContext.type().nonNullType().listType() != null) {
-//                return typeNameToInExpression(fieldTypeContext, argumentContext);
-            }
-        }
-        return Optional.empty();
-    }
-
-    protected Optional<Expression> typeToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (inputValueDefinitionContext.type().typeName() != null) {
-            return defaultValueToExpression(fieldTypeContext, inputValueDefinitionContext);
-        } else if (inputValueDefinitionContext.type().listType() != null) {
-//            return typeNameToInExpression(fieldTypeContext, argumentContext);
-        } else if (inputValueDefinitionContext.type().nonNullType() != null) {
-            if (inputValueDefinitionContext.type().nonNullType().typeName() != null) {
-                return defaultValueToExpression(fieldTypeContext, inputValueDefinitionContext);
-            } else if (inputValueDefinitionContext.type().nonNullType().listType() != null) {
-//                return typeNameToInExpression(fieldTypeContext, argumentContext);
-            }
-        }
-        return Optional.empty();
-    }
-
-
-    private boolean hasOrConditional(String argumentDefinitionName, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-
-        return valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable().stream().anyMatch(objectFieldWithVariableContext -> isOrConditional(argumentDefinitionName, objectFieldWithVariableContext.valueWithVariable()));
-    }
-
-    private boolean hasOrConditional(String argumentDefinitionName, GraphqlParser.ValueContext valueContext) {
-
-        return valueContext.objectValue().objectField().stream().anyMatch(objectFieldContext -> isOrConditional(argumentDefinitionName, objectFieldContext.value()));
-    }
-
-    private boolean isOrConditional(String argumentDefinitionName, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-
-        if (isConditionalInputValue(argumentDefinitionName)) {
-            return valueWithVariableContext.enumValue() != null && valueWithVariableContext.enumValue().enumValueName().getText().equals("OR");
-        }
-        return false;
-    }
-
-    private boolean isOrConditional(String argumentDefinitionName, GraphqlParser.ValueContext valueContext) {
-
-        if (isConditionalInputValue(argumentDefinitionName)) {
-            return valueContext.enumValue() != null && valueContext.enumValue().enumValueName().getText().equals("OR");
-        }
-        return false;
-    }
-
-    private boolean isConditionalInputValue(String argumentDefinitionName) {
-
-        return argumentDefinitionName != null && register.isEnum(argumentDefinitionName) && argumentDefinitionName.equals("Conditional");
-    }
-
-    protected Optional<Expression> defaultValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+    protected Column inputValueToColumn(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
         Table table = new Table(tableName);
-        if (inputValueDefinitionContext.defaultValue().value().StringValue() != null) {
+        return new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText()));
+    }
+
+    protected Column objectFieldToColumn(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
+        Table table = new Table(tableName);
+        return new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(objectFieldWithVariableContext.name().getText()));
+    }
+
+    protected Column objectFieldToColumn(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
+        Table table = new Table(tableName);
+        return new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(objectFieldContext.name().getText()));
+    }
+
+    protected Optional<Expression> scalarValueToExpression(Expression leftExpression, GraphqlParser.ValueContext valueContext) {
+        return scalarValueToExpression(leftExpression,
+                valueContext.StringValue(),
+                valueContext.IntValue(),
+                valueContext.FloatValue(),
+                valueContext.BooleanValue(),
+                valueContext.NullValue());
+    }
+
+    protected Optional<Expression> scalarValueToExpression(Expression leftExpression, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        return scalarValueToExpression(leftExpression,
+                valueWithVariableContext.StringValue(),
+                valueWithVariableContext.IntValue(),
+                valueWithVariableContext.FloatValue(),
+                valueWithVariableContext.BooleanValue(),
+                valueWithVariableContext.NullValue());
+    }
+
+    protected Optional<Expression> scalarValueToExpression(Expression leftExpression, TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
+        if (stringValue != null) {
             EqualsTo equalsTo = new EqualsTo();
-            equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
-            equalsTo.setRightExpression(valueToDBValue(inputValueDefinitionContext.defaultValue().value()));
+            equalsTo.setLeftExpression(leftExpression);
+            equalsTo.setRightExpression(new StringValue(CharMatcher.is('"').trimFrom(stringValue.getText())));
             return Optional.of(equalsTo);
-        } else if (inputValueDefinitionContext.defaultValue().value().IntValue() != null) {
+        } else if (intValue != null) {
             EqualsTo equalsTo = new EqualsTo();
-            equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
-            equalsTo.setRightExpression(valueToDBValue(inputValueDefinitionContext.defaultValue().value()));
+            equalsTo.setLeftExpression(leftExpression);
+            equalsTo.setRightExpression(new LongValue(intValue.getText()));
             return Optional.of(equalsTo);
-        } else if (inputValueDefinitionContext.defaultValue().value().FloatValue() != null) {
+        } else if (floatValue != null) {
             EqualsTo equalsTo = new EqualsTo();
-            equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
-            equalsTo.setRightExpression(valueToDBValue(inputValueDefinitionContext.defaultValue().value()));
+            equalsTo.setLeftExpression(leftExpression);
+            equalsTo.setRightExpression(new DoubleValue(floatValue.getText()));
             return Optional.of(equalsTo);
-        } else if (inputValueDefinitionContext.defaultValue().value().BooleanValue() != null) {
+        } else if (booleanValue != null) {
             IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
-            isBooleanExpression.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
-            isBooleanExpression.setIsTrue(Boolean.parseBoolean(inputValueDefinitionContext.defaultValue().value().BooleanValue().getText()));
+            isBooleanExpression.setLeftExpression(leftExpression);
+            isBooleanExpression.setIsTrue(Boolean.parseBoolean(booleanValue.getText()));
             return Optional.of(isBooleanExpression);
-        } else if (inputValueDefinitionContext.defaultValue().value().NullValue() != null) {
+        } else if (nullValue != null) {
             IsNullExpression isNullExpression = new IsNullExpression();
-            isNullExpression.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
+            isNullExpression.setLeftExpression(leftExpression);
             return Optional.of(isNullExpression);
-        } else if (inputValueDefinitionContext.defaultValue().value().objectValue() != null) {
-
-            return Optional.of(objectValueToDBValue(fieldTypeContext, inputValueDefinitionContext));
         }
         return Optional.empty();
     }
 
-    protected Optional<Expression> defaultValueToInExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (inputValueDefinitionContext.defaultValue().value().arrayValue() != null) {
-            String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
-            Table table = new Table(tableName);
-            InExpression inExpression = new InExpression();
-            inExpression.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
-            inExpression.setRightItemsList(new ExpressionList(inputValueDefinitionContext.defaultValue().value().arrayValue().value().stream().map(this::valueToDBValue).collect(Collectors.toList())));
-        }
-        return Optional.empty();
+    protected Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
+        return scalarValueToDBValue(valueContext.StringValue(),
+                valueContext.IntValue(),
+                valueContext.FloatValue(),
+                valueContext.BooleanValue(),
+                valueContext.NullValue());
     }
 
-    protected Expression valueToDBValue(GraphqlParser.ValueContext valueContext) {
-        if (valueContext.StringValue() != null) {
-            return new StringValue(CharMatcher.is('"').trimFrom(valueContext.StringValue().getText()));
-        } else if (valueContext.IntValue() != null) {
-            return new LongValue(valueContext.IntValue().getText());
-        } else if (valueContext.FloatValue() != null) {
-            return new DoubleValue(valueContext.IntValue().getText());
-        } else if (valueContext.BooleanValue() != null) {
+    protected Expression scalarValueToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        return scalarValueToDBValue(valueWithVariableContext.StringValue(),
+                valueWithVariableContext.IntValue(),
+                valueWithVariableContext.FloatValue(),
+                valueWithVariableContext.BooleanValue(),
+                valueWithVariableContext.NullValue());
+    }
+
+    protected Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
+        if (stringValue != null) {
+            return new StringValue(CharMatcher.is('"').trimFrom(stringValue.getText()));
+        } else if (intValue != null) {
+            return new LongValue(intValue.getText());
+        } else if (floatValue != null) {
+            return new DoubleValue(floatValue.getText());
+        } else if (booleanValue != null) {
             //todo
-        } else if (valueContext.NullValue() != null) {
-            //todo
+        } else if (nullValue != null) {
+            return new NullValue();
         }
         return null;
     }
