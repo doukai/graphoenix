@@ -15,7 +15,7 @@ query HeroNameAndFriends {
 #    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
 #        id, name,sex,login,role{name,type}
 #    }
-        users(cond:OR,name: "test",login: "dk",age:18,test:{name: "test2"}) {
+        users(cond:OR,name: "test",login: "dk",age:18,test:{cond:OR, name: "test2",age: 13}) {
             id, name,sex,login,role{name,type}
         }
 #    role(id: 1){
@@ -56,7 +56,7 @@ input UserExpression {
     exs:[UserExpression]
     name: String
     sex: SexExpression
-    age:IntExpression
+    age:Int
     disable:Boolean
     role:RoleExpression
 }
