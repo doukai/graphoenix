@@ -194,4 +194,9 @@ public class GraphqlAntlrRegister {
         return schemaDefinitionContextMap.entrySet().stream()
                 .filter(stringStringEntry -> stringStringEntry.getValue().equals("query")).findFirst().map(Map.Entry::getKey).orElse(null);
     }
+
+    public boolean isFieldOfType(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return typeDefinitionContextMap.get(getFieldTypeName(fieldTypeContext)).objectTypeDefinition().fieldsDefinition().fieldDefinition().stream().anyMatch(fieldDefinitionContext ->
+                fieldDefinitionContext.name().getText().equals(inputValueDefinitionContext.name().getText()));
+    }
 }
