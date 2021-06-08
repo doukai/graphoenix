@@ -147,6 +147,23 @@ public class GraphqlAntlrToSelect {
         return new MultiAndExpression(createWhereExpressions(fieldTypeContext, argumentsDefinitionContext, argumentsContext));
     }
 
+    protected Expression objectValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
+        if (hasOrConditional(objectValueWithVariableContext, typeDefinitionContext.inputObjectTypeDefinition())) {
+            return new MultiOrExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueWithVariableContext));
+        }
+        return new MultiAndExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueWithVariableContext));
+    }
+
+    protected Expression objectValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
+        if (hasOrConditional(objectValueContext, typeDefinitionContext.inputObjectTypeDefinition())) {
+            return new MultiOrExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueContext));
+        }
+        return new MultiAndExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueContext));
+    }
+
+
     protected List<Expression> createWhereExpressions(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
         return argumentsDefinitionContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> createWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
@@ -187,66 +204,86 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Optional<Expression> createDefaultWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() != null) {
-
-            return inputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext);
-
-        } else if (inputValueDefinitionContext.type().nonNullType() != null && inputValueDefinitionContext.defaultValue() == null) {
-            //todo
+        if (inputValueDefinitionContext.type().nonNullType() != null) {
+            if (inputValueDefinitionContext.defaultValue() != null) {
+                return inputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+            } else {
+                //todo
+            }
         }
         return Optional.empty();
     }
 
     protected Optional<Expression> argumentToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
         if (register.fieldTypeIsList(inputValueDefinitionContext.type())) {
-            return argumentContext == null ? multiInputValueToExpression(fieldTypeContext, inputValueDefinitionContext) : multiArgumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext);
+            return argumentContext == null ? multiInputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext) : multiArgumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext);
         } else {
             return argumentContext == null ? singleInputValueToExpression(fieldTypeContext, inputValueDefinitionContext) : singleArgumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext);
         }
     }
 
     protected Optional<Expression> inputValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return argumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, null);
+        if (register.fieldTypeIsList(inputValueDefinitionContext.type())) {
+            return multiInputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+        } else {
+            return singleInputValueToExpression(fieldTypeContext, inputValueDefinitionContext);
+        }
     }
 
     protected Optional<Expression> objectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
-        if (isObjectValue(objectFieldWithVariableContext)) {
-            if (isOperatorObject(objectFieldWithVariableContext)) {
-                return Optional.of(operatorObjectToExpression(objectFieldWithVariableContext));
-            }
-            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
+        if (register.fieldTypeIsList(inputValueDefinitionContext.type())) {
+            return objectFieldWithVariableContext == null ? multiInputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext) : multiObjectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext);
+        } else {
+            return objectFieldWithVariableContext == null ? singleInputValueToExpression(fieldTypeContext, inputValueDefinitionContext) : singleObjectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext);
         }
-        return scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), objectFieldWithVariableContext.valueWithVariable());
     }
 
     protected Optional<Expression> objectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
-        if (isObjectValue(objectFieldContext)) {
-            if (isOperatorObject(objectFieldContext)) {
-                return Optional.of(operatorObjectToExpression(objectFieldContext));
-            }
-            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue()));
+        if (register.fieldTypeIsList(inputValueDefinitionContext.type())) {
+            return objectFieldContext == null ? multiInputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext) : multiObjectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext);
+        } else {
+            return objectFieldContext == null ? singleInputValueToExpression(fieldTypeContext, inputValueDefinitionContext) : singleObjectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext);
         }
-        return scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), objectFieldContext.value());
     }
 
     protected Optional<Expression> singleArgumentToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
         if (isObjectValue(argumentContext)) {
-            if (isOperatorObject(argumentContext)) {
-                return Optional.of(operatorObjectToExpression(argumentContext));
+            if (isOperatorObject(inputValueDefinitionContext)) {
+                return operatorObjectToExpression(argumentToColumn(fieldTypeContext, argumentContext), inputValueDefinitionContext, argumentContext);
             }
             return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable()));
         }
-        return scalarValueToExpression(argumentToColumn(fieldTypeContext, argumentContext), argumentContext.valueWithVariable());
+        return Optional.of(scalarValueToExpression(argumentToColumn(fieldTypeContext, argumentContext), argumentContext.valueWithVariable()));
+    }
+
+    protected Optional<Expression> singleObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        if (isObjectValue(objectFieldWithVariableContext)) {
+            if (isOperatorObject(inputValueDefinitionContext)) {
+                return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), inputValueDefinitionContext, objectFieldWithVariableContext);
+            }
+            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
+        }
+        return Optional.of(scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), objectFieldWithVariableContext.valueWithVariable()));
+    }
+
+    protected Optional<Expression> singleObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
+        if (isObjectValue(objectFieldContext)) {
+            if (isOperatorObject(inputValueDefinitionContext)) {
+                return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), inputValueDefinitionContext, objectFieldContext);
+            }
+            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue()));
+        }
+        return Optional.of(scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), objectFieldContext.value()));
     }
 
     protected Optional<Expression> singleInputValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         if (isObjectValue(inputValueDefinitionContext)) {
             if (isOperatorObject(inputValueDefinitionContext)) {
-                return Optional.of(operatorObjectToExpression(inputValueDefinitionContext));
+                return operatorObjectToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext);
             }
             return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue()));
         }
-        return scalarValueToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext.defaultValue().value());
+        return Optional.of(scalarValueToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext.defaultValue().value()));
     }
 
     private boolean isObjectValue(GraphqlParser.ArgumentContext argumentContext) {
@@ -265,63 +302,69 @@ public class GraphqlAntlrToSelect {
         return objectFieldContext.value().objectValue() != null;
     }
 
-    protected Expression objectValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
-        if (hasOrConditional(objectValueWithVariableContext, typeDefinitionContext.inputObjectTypeDefinition())) {
-            return new MultiOrExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueWithVariableContext));
-        }
-        return new MultiAndExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueWithVariableContext));
-    }
-
-    protected Expression objectValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
-        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
-        if (hasOrConditional(objectValueContext, typeDefinitionContext.inputObjectTypeDefinition())) {
-            return new MultiOrExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueContext));
-        }
-        return new MultiAndExpression(createWhereExpressions(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueContext));
-    }
-
-
     protected Optional<Expression> multiArgumentToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+        if (argumentContext == null) {
+            return multiInputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+        } else {
+            return multiObjectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.valueWithVariable());
+        }
+    }
 
+    protected Optional<Expression> multiObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        if (objectFieldWithVariableContext == null) {
+            return multiInputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+        } else {
+            return multiObjectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable());
+        }
+    }
 
-        if (register.isObject(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
-            if (argumentContext == null) {
-                if (inputValueDefinitionContext.defaultValue().value().arrayValue() != null) {
+    protected Optional<Expression> multiObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
+        if (objectFieldContext == null) {
+            return multiInputValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext);
+        } else {
+            return multiObjectFieldToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext.value());
+        }
+    }
+
+    protected Optional<Expression> multiInputValueToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type())) || register.isScaLar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
+            if (inputValueDefinitionContext.type().nonNullType() != null) {
+                if (inputValueDefinitionContext.defaultValue() != null) {
                     InExpression inExpression = new InExpression();
                     inExpression.setLeftExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext));
                     inExpression.setRightItemsList(new ExpressionList(inputValueDefinitionContext.defaultValue().value().arrayValue().value().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
                     return Optional.of(inExpression);
-                }
-            } else {
-                if (argumentContext.valueWithVariable().arrayValueWithVariable() != null) {
-                    InExpression inExpression = new InExpression();
-                    inExpression.setLeftExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext));
-                    inExpression.setRightItemsList(new ExpressionList(argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
-                    return Optional.of(inExpression);
-                }
-            }
-        } else {
-            if (argumentContext == null) {
-                if (inputValueDefinitionContext.defaultValue().value().arrayValue() != null) {
-
+                } else {
                     //todo
-                    inputValueDefinitionContext.defaultValue().value().arrayValue().value().stream().map(valueContext -> objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, valueContext.objectValue())).collect(Collectors.toList());
-                }
-            } else {
-                if (argumentContext.valueWithVariable().arrayValueWithVariable() != null) {
-
-                    //todo
-                    argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream().map(valueWithVariableContext -> objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, valueWithVariableContext.objectValueWithVariable())).collect(Collectors.toList());
                 }
             }
         }
-
         return Optional.empty();
     }
 
-    protected Optional<Expression> multiInputValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return multiArgumentToWhereExpression(fieldTypeContext, inputValueDefinitionContext, null);
+    protected Optional<Expression> multiObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type())) || register.isScaLar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
+
+            if (valueWithVariableContext.arrayValueWithVariable() != null) {
+                InExpression inExpression = new InExpression();
+                inExpression.setLeftExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext));
+                inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
+                return Optional.of(inExpression);
+            }
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<Expression> multiObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueContext valueContext) {
+        if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type())) || register.isScaLar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
+            if (valueContext.arrayValue() != null) {
+                InExpression inExpression = new InExpression();
+                inExpression.setLeftExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext));
+                inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
+                return Optional.of(inExpression);
+            }
+        }
+        return Optional.empty();
     }
 
     private boolean hasOrConditional(GraphqlParser.ArgumentsContext argumentsContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext) {
@@ -379,97 +422,182 @@ public class GraphqlAntlrToSelect {
         return typeName != null && register.isEnum(typeName) && typeName.equals("Conditional");
     }
 
-    private boolean isOperatorObject(GraphqlParser.ArgumentContext argumentContext) {
-        return argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                .anyMatch(objectFieldWithVariableContext ->
-                        objectFieldWithVariableContext.valueWithVariable().enumValue() != null &&
-                                objectFieldWithVariableContext.valueWithVariable().enumValue().enumValueName().getText().equals("Operator"));
-    }
-
     private boolean isOperatorObject(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return inputValueDefinitionContext.defaultValue().value().objectValue().objectField().stream()
-                .anyMatch(fieldContext ->
-                        fieldContext.value().enumValue() != null &&
-                                fieldContext.value().enumValue().enumValueName().getText().equals("Operator"));
+
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(inputValueDefinitionContext.type().getText());
+        return typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                .anyMatch(inputValueDefinitionContext1 ->
+                        register.isEnum(inputValueDefinitionContext1.type().getText()) &&
+                                inputValueDefinitionContext1.type().typeName().name().getText().equals("Operator"));
     }
 
-    private boolean isOperatorObject(GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
-        return objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                .anyMatch(fieldWithVariableContext ->
-                        fieldWithVariableContext.valueWithVariable().enumValue() != null &&
-                                fieldWithVariableContext.valueWithVariable().enumValue().enumValueName().getText().equals("Operator"));
+    private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+        return operatorObjectToExpression(leftExpression, inputValueDefinitionContext, argumentContext.valueWithVariable());
     }
 
-    private boolean isOperatorObject(GraphqlParser.ObjectFieldContext objectFieldContext) {
-        return objectFieldContext.value().objectValue().objectField().stream()
-                .anyMatch(fieldContext ->
-                        fieldContext.value().enumValue() != null &&
-                                fieldContext.value().enumValue().enumValueName().getText().equals("Operator"));
+    private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return operatorObjectToExpression(leftExpression, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value());
     }
 
-    private Expression operatorObjectToExpression(GraphqlParser.ArgumentContext argumentContext) {
-        return operatorObjectToExpression(argumentContext.valueWithVariable());
+    private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        return operatorObjectToExpression(leftExpression, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable());
     }
 
-    private Expression operatorObjectToExpression(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return operatorObjectToExpression(inputValueDefinitionContext.defaultValue().value());
+    private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
+        return operatorObjectToExpression(leftExpression, inputValueDefinitionContext, objectFieldContext.value());
     }
 
-    private Expression operatorObjectToExpression(GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
-        return operatorObjectToExpression(objectFieldWithVariableContext.valueWithVariable());
+    private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(inputValueDefinitionContext.type().getText());
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> enumField = typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext1 ->
+                        register.isEnum(inputValueDefinitionContext1.type().getText()) &&
+                                inputValueDefinitionContext1.type().typeName().name().getText().equals("Operator")).findFirst().flatMap(inputValueDefinitionContext1 -> getObjectFieldWithVariableFromInputValueDefinition(valueWithVariableContext.objectValueWithVariable(), inputValueDefinitionContext1));
+
+        Optional<GraphqlParser.InputValueDefinitionContext> valueFieldType = typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext1 ->
+                        !register.isEnum(inputValueDefinitionContext1.type().getText()) ||
+                                !inputValueDefinitionContext1.type().typeName().name().getText().equals("Operator")).findFirst();
+
+        if (enumField.isPresent() && valueFieldType.isPresent()) {
+            Optional<GraphqlParser.ObjectFieldWithVariableContext> valueField = getObjectFieldWithVariableFromInputValueDefinition(valueWithVariableContext.objectValueWithVariable(), valueFieldType.get());
+            if (valueField.isPresent()) {
+                return operatorObjectToExpression(leftExpression, enumField.get().valueWithVariable().enumValue(), valueField.get().valueWithVariable());
+            } else if (valueFieldType.get().type().nonNullType() != null) {
+                if (valueFieldType.get().defaultValue() != null) {
+                    return operatorObjectToExpression(leftExpression, enumField.get().valueWithVariable().enumValue(), valueFieldType.get().defaultValue().value());
+                } else {
+                    //todo
+                }
+            }
+        }
+        //todo
+        return Optional.empty();
     }
 
-    private Expression operatorObjectToExpression(GraphqlParser.ObjectFieldContext objectFieldContext) {
-        return operatorObjectToExpression(objectFieldContext.value());
+    private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueContext valueContext) {
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(inputValueDefinitionContext.type().getText());
+        Optional<GraphqlParser.ObjectFieldContext> enumField = typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext1 ->
+                        register.isEnum(inputValueDefinitionContext1.type().getText()) &&
+                                inputValueDefinitionContext1.type().typeName().name().getText().equals("Operator")).findFirst().flatMap(inputValueDefinitionContext1 -> getObjectFieldFromInputValueDefinition(valueContext.objectValue(), inputValueDefinitionContext1));
+
+        Optional<GraphqlParser.InputValueDefinitionContext> valueFieldType = typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext1 ->
+                        !register.isEnum(inputValueDefinitionContext1.type().getText()) ||
+                                !inputValueDefinitionContext1.type().typeName().name().getText().equals("Operator")).findFirst();
+
+        if (enumField.isPresent() && valueFieldType.isPresent()) {
+            Optional<GraphqlParser.ObjectFieldContext> valueField = getObjectFieldFromInputValueDefinition(valueContext.objectValue(), valueFieldType.get());
+            if (valueField.isPresent()) {
+                return operatorObjectToExpression(leftExpression, enumField.get().value().enumValue(), valueField.get().value());
+            } else if (valueFieldType.get().type().nonNullType() != null) {
+                if (valueFieldType.get().defaultValue() != null) {
+                    return operatorObjectToExpression(leftExpression, enumField.get().value().enumValue(), valueFieldType.get().defaultValue().value());
+                } else {
+                    //todo
+                }
+            }
+        }
+        //todo
+        return Optional.empty();
     }
 
-    private Expression operatorObjectToExpression(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-        Optional<GraphqlParser.ObjectFieldWithVariableContext> enumField = valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable().stream()
-                .filter(objectFieldWithVariableContext ->
-                        objectFieldWithVariableContext.valueWithVariable().enumValue() != null &&
-                                objectFieldWithVariableContext.valueWithVariable().enumValue().enumValueName().getText().equals("Operator")).findFirst();
+    private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.EnumValueContext enumValueContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
 
-        Optional<GraphqlParser.ObjectFieldWithVariableContext> valueField = valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable().stream()
-                .filter(objectFieldWithVariableContext ->
-                        objectFieldWithVariableContext.valueWithVariable().enumValue() == null).findFirst();
+        if (valueWithVariableContext.arrayValueWithVariable() != null) {
+            return Optional.ofNullable(operatorObjectToInExpression(leftExpression, enumValueContext, valueWithVariableContext));
+        }
+        return Optional.ofNullable(operatorObjectToExpression(leftExpression, enumValueContext, valueWithVariableContext.StringValue(), valueWithVariableContext.IntValue(), valueWithVariableContext.FloatValue(), valueWithVariableContext.BooleanValue(), valueWithVariableContext.NullValue()));
+    }
 
-        if (enumField.isEmpty() || valueField.isEmpty()) {
+    private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.EnumValueContext enumValueContext, GraphqlParser.ValueContext valueContext) {
+        if (valueContext.arrayValue() != null) {
+            return Optional.ofNullable(operatorObjectToInExpression(leftExpression, enumValueContext, valueContext));
+        }
+        return Optional.ofNullable(operatorObjectToExpression(leftExpression, enumValueContext, valueContext.StringValue(), valueContext.IntValue(), valueContext.FloatValue(), valueContext.BooleanValue(), valueContext.NullValue()));
+    }
+
+    private Expression operatorObjectToInExpression(Expression leftExpression, GraphqlParser.EnumValueContext enumValueContext, GraphqlParser.ValueContext valueContext) {
+        InExpression inExpression = new InExpression();
+        inExpression.setLeftExpression(leftExpression);
+        inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
+        if ("IN".equals(enumValueContext.enumValueName().getText())) {
+            inExpression.setNot(false);
+        } else if ("NIN".equals(enumValueContext.enumValueName().getText())) {
+            inExpression.setNot(true);
+        } else {
             //todo
             return null;
         }
-        return operatorObjectToExpression(enumField.get().valueWithVariable().enumValue(), valueField.get().valueWithVariable());
+        return inExpression;
     }
 
-    private Expression operatorObjectToExpression(GraphqlParser.ValueContext valueContext) {
-        Optional<GraphqlParser.ObjectFieldContext> enumField = valueContext.objectValue().objectField().stream()
-                .filter(objectFieldContext ->
-                        objectFieldContext.value().enumValue() != null &&
-                                objectFieldContext.value().enumValue().enumValueName().getText().equals("Operator")).findFirst();
-
-        Optional<GraphqlParser.ObjectFieldContext> valueField = valueContext.objectValue().objectField().stream()
-                .filter(objectFieldContext ->
-                        objectFieldContext.value().enumValue() == null).findFirst();
-
-        if (enumField.isEmpty() || valueField.isEmpty()) {
+    private Expression operatorObjectToInExpression(Expression leftExpression, GraphqlParser.EnumValueContext enumValueContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        InExpression inExpression = new InExpression();
+        inExpression.setLeftExpression(leftExpression);
+        inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
+        if ("IN".equals(enumValueContext.enumValueName().getText())) {
+            inExpression.setNot(false);
+        } else if ("NIN".equals(enumValueContext.enumValueName().getText())) {
+            inExpression.setNot(true);
+        } else {
             //todo
             return null;
         }
-        return operatorObjectToExpression(enumField.get().value().enumValue(), valueField.get().value());
+        return inExpression;
     }
 
-    private Expression operatorObjectToExpression(GraphqlParser.EnumValueContext enumValueContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+    private Expression operatorObjectToExpression(Expression leftExpression, GraphqlParser.EnumValueContext enumValueContext, TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
         switch (enumValueContext.enumValueName().getText()) {
             case "EQ":
+                return scalarValueToExpression(leftExpression, stringValue, intValue, floatValue, booleanValue, nullValue);
             case "NEQ":
-            default:
-                return null;
-        }
-    }
-
-    private Expression operatorObjectToExpression(GraphqlParser.EnumValueContext enumValueContext, GraphqlParser.ValueContext valueContext) {
-        switch (enumValueContext.enumValueName().getText()) {
-            case "EQ":
-            case "NEQ":
+                return new NotExpression(scalarValueToExpression(leftExpression, stringValue, intValue, floatValue, booleanValue, nullValue));
+            case "LK":
+                LikeExpression likeExpression = new LikeExpression();
+                likeExpression.setLeftExpression(leftExpression);
+                likeExpression.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                return likeExpression;
+            case "NLK":
+                LikeExpression notLikeExpression = new LikeExpression();
+                notLikeExpression.setNot(true);
+                notLikeExpression.setLeftExpression(leftExpression);
+                notLikeExpression.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                return notLikeExpression;
+            case "GT":
+            case "NLTE":
+                GreaterThan greaterThan = new GreaterThan();
+                greaterThan.setLeftExpression(leftExpression);
+                greaterThan.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                return greaterThan;
+            case "GTE":
+            case "NLT":
+                GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                greaterThanEquals.setLeftExpression(leftExpression);
+                greaterThanEquals.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                return greaterThanEquals;
+            case "LT":
+            case "NGTE":
+                MinorThan minorThan = new MinorThan();
+                minorThan.setLeftExpression(leftExpression);
+                minorThan.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                return minorThan;
+            case "LTE":
+            case "NGT":
+                MinorThanEquals minorThanEquals = new MinorThanEquals();
+                minorThanEquals.setLeftExpression(leftExpression);
+                minorThanEquals.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                return minorThanEquals;
+            case "NIL":
+                IsNullExpression isNullExpression = new IsNullExpression();
+                isNullExpression.setLeftExpression(leftExpression);
+                return isNullExpression;
+            case "NNIL":
+                IsNullExpression isNotNullExpression = new IsNullExpression();
+                isNotNullExpression.setNot(true);
+                isNotNullExpression.setLeftExpression(leftExpression);
+                return isNotNullExpression;
             default:
                 return null;
         }
@@ -523,7 +651,7 @@ public class GraphqlAntlrToSelect {
         return new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(objectFieldContext.name().getText()));
     }
 
-    protected Optional<Expression> scalarValueToExpression(Expression leftExpression, GraphqlParser.ValueContext valueContext) {
+    protected Expression scalarValueToExpression(Expression leftExpression, GraphqlParser.ValueContext valueContext) {
         return scalarValueToExpression(leftExpression,
                 valueContext.StringValue(),
                 valueContext.IntValue(),
@@ -532,7 +660,7 @@ public class GraphqlAntlrToSelect {
                 valueContext.NullValue());
     }
 
-    protected Optional<Expression> scalarValueToExpression(Expression leftExpression, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+    protected Expression scalarValueToExpression(Expression leftExpression, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         return scalarValueToExpression(leftExpression,
                 valueWithVariableContext.StringValue(),
                 valueWithVariableContext.IntValue(),
@@ -541,33 +669,33 @@ public class GraphqlAntlrToSelect {
                 valueWithVariableContext.NullValue());
     }
 
-    protected Optional<Expression> scalarValueToExpression(Expression leftExpression, TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
+    protected Expression scalarValueToExpression(Expression leftExpression, TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
         if (stringValue != null) {
             EqualsTo equalsTo = new EqualsTo();
             equalsTo.setLeftExpression(leftExpression);
             equalsTo.setRightExpression(new StringValue(CharMatcher.is('"').trimFrom(stringValue.getText())));
-            return Optional.of(equalsTo);
+            return equalsTo;
         } else if (intValue != null) {
             EqualsTo equalsTo = new EqualsTo();
             equalsTo.setLeftExpression(leftExpression);
             equalsTo.setRightExpression(new LongValue(intValue.getText()));
-            return Optional.of(equalsTo);
+            return equalsTo;
         } else if (floatValue != null) {
             EqualsTo equalsTo = new EqualsTo();
             equalsTo.setLeftExpression(leftExpression);
             equalsTo.setRightExpression(new DoubleValue(floatValue.getText()));
-            return Optional.of(equalsTo);
+            return equalsTo;
         } else if (booleanValue != null) {
             IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
             isBooleanExpression.setLeftExpression(leftExpression);
             isBooleanExpression.setIsTrue(Boolean.parseBoolean(booleanValue.getText()));
-            return Optional.of(isBooleanExpression);
+            return isBooleanExpression;
         } else if (nullValue != null) {
             IsNullExpression isNullExpression = new IsNullExpression();
             isNullExpression.setLeftExpression(leftExpression);
-            return Optional.of(isNullExpression);
+            return isNullExpression;
         }
-        return Optional.empty();
+        return null;
     }
 
     protected Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {

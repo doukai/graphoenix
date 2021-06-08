@@ -74,6 +74,10 @@ public class GraphqlAntlrRegister {
         return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name) && typeDefinitionContextMap.get(key).objectTypeDefinition() != null);
     }
 
+    public boolean isInputObject(String name) {
+        return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name) && typeDefinitionContextMap.get(key).inputObjectTypeDefinition() != null);
+    }
+
     public boolean isScaLar(String name) {
         return typeDefinitionContextMap.keySet().stream().anyMatch(key -> key.equals(name) && typeDefinitionContextMap.get(key).scalarTypeDefinition() != null);
     }
