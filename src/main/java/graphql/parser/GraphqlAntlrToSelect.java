@@ -247,40 +247,40 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Optional<Expression> singleArgumentToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
-        if (isObjectValue(argumentContext)) {
-            if (isOperatorObject(inputValueDefinitionContext)) {
-                return operatorObjectToExpression(argumentToColumn(fieldTypeContext, argumentContext), inputValueDefinitionContext, argumentContext);
-            }
+        if (isOperatorObject(inputValueDefinitionContext)) {
+            return operatorObjectToExpression(argumentToColumn(fieldTypeContext, argumentContext), inputValueDefinitionContext, argumentContext);
+        }
+        if (isConditionalObject(inputValueDefinitionContext)) {
             return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable()));
         }
         return Optional.of(scalarValueToExpression(argumentToColumn(fieldTypeContext, argumentContext), argumentContext.valueWithVariable()));
     }
 
     protected Optional<Expression> singleObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
-        if (isObjectValue(objectFieldWithVariableContext)) {
-            if (isOperatorObject(inputValueDefinitionContext)) {
-                return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), inputValueDefinitionContext, objectFieldWithVariableContext);
-            }
+        if (isOperatorObject(inputValueDefinitionContext)) {
+            return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), inputValueDefinitionContext, objectFieldWithVariableContext);
+        }
+        if (isConditionalObject(inputValueDefinitionContext)) {
             return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
         }
         return Optional.of(scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), objectFieldWithVariableContext.valueWithVariable()));
     }
 
     protected Optional<Expression> singleObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
-        if (isObjectValue(objectFieldContext)) {
-            if (isOperatorObject(inputValueDefinitionContext)) {
-                return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), inputValueDefinitionContext, objectFieldContext);
-            }
+        if (isOperatorObject(inputValueDefinitionContext)) {
+            return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), inputValueDefinitionContext, objectFieldContext);
+        }
+        if (isConditionalObject(inputValueDefinitionContext)) {
             return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue()));
         }
         return Optional.of(scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), objectFieldContext.value()));
     }
 
     protected Optional<Expression> singleInputValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (isObjectValue(inputValueDefinitionContext)) {
-            if (isOperatorObject(inputValueDefinitionContext)) {
-                return operatorObjectToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext);
-            }
+        if (isOperatorObject(inputValueDefinitionContext)) {
+            return operatorObjectToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext);
+        }
+        if (isConditionalObject(inputValueDefinitionContext)) {
             return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue()));
         }
         return Optional.of(scalarValueToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext.defaultValue().value()));
@@ -423,12 +423,25 @@ public class GraphqlAntlrToSelect {
     }
 
     private boolean isOperatorObject(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-
+        if (!register.isInputObject(inputValueDefinitionContext.type().getText())) {
+            return false;
+        }
         GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(inputValueDefinitionContext.type().getText());
         return typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
                 .anyMatch(inputValueDefinitionContext1 ->
                         register.isEnum(inputValueDefinitionContext1.type().getText()) &&
                                 inputValueDefinitionContext1.type().typeName().name().getText().equals("Operator"));
+    }
+
+    private boolean isConditionalObject(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (!register.isInputObject(inputValueDefinitionContext.type().getText())) {
+            return false;
+        }
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(inputValueDefinitionContext.type().getText());
+        return typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                .anyMatch(inputValueDefinitionContext1 ->
+                        register.isEnum(inputValueDefinitionContext1.type().getText()) &&
+                                inputValueDefinitionContext1.type().typeName().name().getText().equals("Conditional"));
     }
 
     private Optional<Expression> operatorObjectToExpression(Expression leftExpression, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
