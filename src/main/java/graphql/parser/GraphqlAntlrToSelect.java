@@ -257,53 +257,118 @@ public class GraphqlAntlrToSelect {
     }
 
     protected Optional<Expression> singleArgumentToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
-        if (isOperatorObject(inputValueDefinitionContext)) {
-            return operatorObjectToExpression(argumentToColumn(fieldTypeContext, argumentContext), inputValueDefinitionContext, argumentContext);
-        }
-        if (isConditionalObject(inputValueDefinitionContext)) {
-            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable()));
-        }
-        if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
-            return Optional.of(scalarValueToExpression(argumentToColumn(fieldTypeContext, argumentContext), argumentContext.valueWithVariable()));
+
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
+
+        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext1 ->
+                fieldDefinitionContext1.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
+
+        if (fieldDefinitionContext.isPresent()) {
+            String fieldTypeName = register.getFieldTypeName(fieldDefinitionContext.get().type());
+            if (register.isObject(fieldTypeName)) {
+                if (isConditionalObject(inputValueDefinitionContext)) {
+                    return Optional.of(typeInputToWhereExpression(objectTypeDefinition, fieldDefinitionContext.get(), inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable()));
+                } else {
+                    //todo
+                }
+            } else if (register.isScaLar(fieldTypeName) || register.isInnerScalar(fieldTypeName)) {
+                if (isOperatorObject(inputValueDefinitionContext)) {
+                    return operatorObjectToExpression(argumentToColumn(fieldTypeContext, argumentContext), inputValueDefinitionContext, argumentContext);
+                } else if (isConditionalObject(inputValueDefinitionContext)) {
+                    return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable()));
+                } else if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    return Optional.of(scalarValueToExpression(argumentToColumn(fieldTypeContext, argumentContext), argumentContext.valueWithVariable()));
+                } else {
+                    //todo
+                }
+            }
         }
         return Optional.empty();
     }
 
     protected Optional<Expression> singleObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
-        if (isOperatorObject(inputValueDefinitionContext)) {
-            return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), inputValueDefinitionContext, objectFieldWithVariableContext);
-        }
-        if (isConditionalObject(inputValueDefinitionContext)) {
-            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
-        }
-        if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
-            return Optional.of(scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), objectFieldWithVariableContext.valueWithVariable()));
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
+
+        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext1 ->
+                fieldDefinitionContext1.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
+
+        if (fieldDefinitionContext.isPresent()) {
+            String fieldTypeName = register.getFieldTypeName(fieldDefinitionContext.get().type());
+            if (register.isObject(fieldTypeName)) {
+                if (isConditionalObject(inputValueDefinitionContext)) {
+                    return Optional.of(typeInputToWhereExpression(objectTypeDefinition, fieldDefinitionContext.get(), inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
+                } else {
+                    //todo
+                }
+            } else if (register.isScaLar(fieldTypeName) || register.isInnerScalar(fieldTypeName)) {
+                if (isOperatorObject(inputValueDefinitionContext)) {
+                    return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), inputValueDefinitionContext, objectFieldWithVariableContext);
+                } else if (isConditionalObject(inputValueDefinitionContext)) {
+                    return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable()));
+                } else if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    return Optional.of(scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldWithVariableContext), objectFieldWithVariableContext.valueWithVariable()));
+                } else {
+                    //todo
+                }
+            }
         }
         return Optional.empty();
     }
 
     protected Optional<Expression> singleObjectFieldToWhereExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
-        if (isOperatorObject(inputValueDefinitionContext)) {
-            return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), inputValueDefinitionContext, objectFieldContext);
-        }
-        if (isConditionalObject(inputValueDefinitionContext)) {
-            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue()));
-        }
-        if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
-            return Optional.of(scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), objectFieldContext.value()));
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
+
+        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext1 ->
+                fieldDefinitionContext1.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
+
+        if (fieldDefinitionContext.isPresent()) {
+            String fieldTypeName = register.getFieldTypeName(fieldDefinitionContext.get().type());
+            if (register.isObject(fieldTypeName)) {
+                if (isConditionalObject(inputValueDefinitionContext)) {
+                    return Optional.of(typeInputToWhereExpression(objectTypeDefinition, fieldDefinitionContext.get(), inputValueDefinitionContext, objectFieldContext.value().objectValue()));
+                } else {
+                    //todo
+                }
+            } else if (register.isScaLar(fieldTypeName) || register.isInnerScalar(fieldTypeName)) {
+                if (isOperatorObject(inputValueDefinitionContext)) {
+                    return operatorObjectToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), inputValueDefinitionContext, objectFieldContext);
+                } else if (isConditionalObject(inputValueDefinitionContext)) {
+                    return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue()));
+                } else if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    return Optional.of(scalarValueToExpression(objectFieldToColumn(fieldTypeContext, objectFieldContext), objectFieldContext.value()));
+                } else {
+                    //todo
+                }
+            }
         }
         return Optional.empty();
     }
 
     protected Optional<Expression> singleInputValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (isOperatorObject(inputValueDefinitionContext)) {
-            return operatorObjectToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext);
-        }
-        if (isConditionalObject(inputValueDefinitionContext)) {
-            return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue()));
-        }
-        if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
-            return Optional.of(scalarValueToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext.defaultValue().value()));
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
+
+        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext1 ->
+                fieldDefinitionContext1.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
+
+        if (fieldDefinitionContext.isPresent()) {
+            String fieldTypeName = register.getFieldTypeName(fieldDefinitionContext.get().type());
+            if (register.isObject(fieldTypeName)) {
+                if (isConditionalObject(inputValueDefinitionContext)) {
+                    return Optional.of(typeInputToWhereExpression(objectTypeDefinition, fieldDefinitionContext.get(), inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue()));
+                } else {
+                    //todo
+                }
+            } else if (register.isScaLar(fieldTypeName) || register.isInnerScalar(fieldTypeName)) {
+                if (isOperatorObject(inputValueDefinitionContext)) {
+                    return operatorObjectToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext);
+                } else if (isConditionalObject(inputValueDefinitionContext)) {
+                    return Optional.of(objectValueToWhereExpression(fieldTypeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue()));
+                } else if (register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    return Optional.of(scalarValueToExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext), inputValueDefinitionContext.defaultValue().value()));
+                } else {
+                    //todo
+                }
+            }
         }
         return Optional.empty();
     }
@@ -675,6 +740,56 @@ public class GraphqlAntlrToSelect {
             default:
                 return null;
         }
+    }
+
+    protected Expression typeInputToWhereExpression(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        String fieldTypeName = register.getFieldTypeName(fieldDefinitionContext.type());
+        ExistsExpression expression = new ExistsExpression();
+        SubSelect subSelect = new SubSelect();
+        PlainSelect body = new PlainSelect();
+        body.setSelectItems(Collections.singletonList(new AllColumns()));
+        Table table = new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
+        Table subTable = new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(fieldTypeName));
+        body.setFromItem(subTable);
+        EqualsTo idEqualsTo = new EqualsTo();
+        if (register.fieldTypeIsList(fieldDefinitionContext.type())) {
+            idEqualsTo.setLeftExpression(new Column(subTable, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(fieldTypeName, objectTypeDefinitionContext.name().getText()))));
+            idEqualsTo.setRightExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(objectTypeDefinitionContext.name().getText()))));
+        } else {
+            idEqualsTo.setLeftExpression(new Column(subTable, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(fieldTypeName))));
+            idEqualsTo.setRightExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
+        }
+        Expression subWhereExpression = objectValueToWhereExpression(fieldDefinitionContext.type(), inputValueDefinitionContext, objectValueWithVariableContext);
+        MultiAndExpression multiAndExpression = new MultiAndExpression(Arrays.asList(idEqualsTo, subWhereExpression));
+        body.setWhere(multiAndExpression);
+        subSelect.setSelectBody(body);
+        expression.setRightExpression(subSelect);
+        return expression;
+    }
+
+    protected Expression typeInputToWhereExpression(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        String fieldTypeName = register.getFieldTypeName(fieldDefinitionContext.type());
+        ExistsExpression expression = new ExistsExpression();
+        SubSelect subSelect = new SubSelect();
+        PlainSelect body = new PlainSelect();
+        body.setSelectItems(Collections.singletonList(new AllColumns()));
+        Table table = new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
+        Table subTable = new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(fieldTypeName));
+        body.setFromItem(subTable);
+        EqualsTo idEqualsTo = new EqualsTo();
+        if (register.fieldTypeIsList(fieldDefinitionContext.type())) {
+            idEqualsTo.setLeftExpression(new Column(subTable, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(fieldTypeName, objectTypeDefinitionContext.name().getText()))));
+            idEqualsTo.setRightExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(objectTypeDefinitionContext.name().getText()))));
+        } else {
+            idEqualsTo.setLeftExpression(new Column(subTable, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(fieldTypeName))));
+            idEqualsTo.setRightExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
+        }
+        Expression subWhereExpression = objectValueToWhereExpression(fieldDefinitionContext.type(), inputValueDefinitionContext, objectValueContext);
+        MultiAndExpression multiAndExpression = new MultiAndExpression(Arrays.asList(idEqualsTo, subWhereExpression));
+        body.setWhere(multiAndExpression);
+        subSelect.setSelectBody(body);
+        expression.setRightExpression(subSelect);
+        return expression;
     }
 
     private Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
