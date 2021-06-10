@@ -5,7 +5,7 @@ schema {
 type QueryType {
     user(id: ID!): User
     #    users(ex:UserExpression): [User]
-    users(name:StringExpression,cond:Conditional,login:String,age:Int,test:[UserExpression]): [User]
+    users(name:StringExpression,cond:Conditional,myrole:RoleExpression,age:Int,test:[UserExpression]): [User]
     role(id : ID!) : Role
     resource(id: ID!): Resource
 }
@@ -14,8 +14,10 @@ query HeroNameAndFriends {
     #    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
     #        id, name,sex,login,role{name,type}
     #    }
-    users(cond:OR,name: {opr: GTE,val: "test"},login: "dk",age:18,test:[{cond:OR, name: "test2",age: 13},{cond:OR, name: "test3",age: 16}]) {
-        id, name,sex,login,role{name,type}
+    users(cond:OR,name: {opr: GTE,val: "test"},myrole: {
+        name: {opr: EQ,val: "rolename"}
+    },age:18,test:[{cond:OR, name: "test2",age: 13},{cond:OR, name: "test3",age: 16}]) {
+        id, name,sex,login,myrole{name,type}
     }
     #    role(id: 1){
     #        name,type,users{name,id}
@@ -123,7 +125,7 @@ type User @table(engine:"InnoDB"){
     age: Int
     disable: Boolean
     sex: [Sex]
-    role: Role
+    myrole: Role
 }
 
 type Role {
