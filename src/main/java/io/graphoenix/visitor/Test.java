@@ -5,6 +5,7 @@ import com.google.common.io.Resources;
 import graphql.parser.GraphqlAntlrRegister;
 import graphql.parser.GraphqlAntlrToSelect;
 import graphql.parser.GraphqlAntlrToTable;
+import graphql.parser.GraphqlArgumentsToWhere;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -21,8 +22,9 @@ public class Test {
 
     public static void main(String[] args) throws IOException {
         GraphqlAntlrRegister graphqlAntlrRegister = new GraphqlAntlrRegister();
+        GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrRegister);
         GraphqlAntlrToTable graphqlAntlrToTable = new GraphqlAntlrToTable(graphqlAntlrRegister);
-        GraphqlAntlrToSelect graphqlAntlrToSelect = new GraphqlAntlrToSelect(graphqlAntlrRegister);
+        GraphqlAntlrToSelect graphqlAntlrToSelect = new GraphqlAntlrToSelect(graphqlAntlrRegister, graphqlArgumentsToWhere);
         CodePointCharStream charStream;
 
 
