@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class GraphqlAntlrToMerge {
+public class GraphqlMutationToStatements {
 
     private final GraphqlAntlrRegister register;
     private final GraphqlArgumentsToWhere argumentsToWhere;
 
-    public GraphqlAntlrToMerge(GraphqlAntlrRegister register, GraphqlArgumentsToWhere argumentsToWhere) {
+    public GraphqlMutationToStatements(GraphqlAntlrRegister register, GraphqlArgumentsToWhere argumentsToWhere) {
         this.register = register;
         this.argumentsToWhere = argumentsToWhere;
     }

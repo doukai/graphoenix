@@ -11,12 +11,12 @@ import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class GraphqlAntlrToSelect {
+public class GraphqlQueryToSelect {
 
     private final GraphqlAntlrRegister register;
     private final GraphqlArgumentsToWhere argumentsToWhere;
 
-    public GraphqlAntlrToSelect(GraphqlAntlrRegister register, GraphqlArgumentsToWhere argumentsToWhere) {
+    public GraphqlQueryToSelect(GraphqlAntlrRegister register, GraphqlArgumentsToWhere argumentsToWhere) {
         this.register = register;
         this.argumentsToWhere = argumentsToWhere;
     }

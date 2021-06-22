@@ -3,8 +3,8 @@ package io.graphoenix.visitor;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import graphql.parser.GraphqlAntlrRegister;
-import graphql.parser.GraphqlAntlrToSelect;
-import graphql.parser.GraphqlAntlrToTable;
+import graphql.parser.GraphqlQueryToSelect;
+import graphql.parser.GraphqlTypeToTable;
 import graphql.parser.GraphqlArgumentsToWhere;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
@@ -23,8 +23,8 @@ public class Test {
     public static void main(String[] args) throws IOException {
         GraphqlAntlrRegister graphqlAntlrRegister = new GraphqlAntlrRegister();
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrRegister);
-        GraphqlAntlrToTable graphqlAntlrToTable = new GraphqlAntlrToTable(graphqlAntlrRegister);
-        GraphqlAntlrToSelect graphqlAntlrToSelect = new GraphqlAntlrToSelect(graphqlAntlrRegister, graphqlArgumentsToWhere);
+        GraphqlTypeToTable graphqlTypeToTable = new GraphqlTypeToTable(graphqlAntlrRegister);
+        GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrRegister, graphqlArgumentsToWhere);
         CodePointCharStream charStream;
 
 
@@ -49,8 +49,8 @@ public class Test {
 
         GraphqlParser.DocumentContext documentContext = parser.document();
         graphqlAntlrRegister.registerDocument(documentContext);
-        List<CreateTable> tables = graphqlAntlrToTable.createTables(documentContext);
-        List<Select> selects = graphqlAntlrToSelect.createSelects(documentContext);
+        List<CreateTable> tables = graphqlTypeToTable.createTables(documentContext);
+        List<Select> selects = graphqlQueryToSelect.createSelects(documentContext);
 
 
         tables.forEach(createTable -> System.out.println(createTable.toString()));

@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class GraphqlAntlrToTable {
+public class GraphqlTypeToTable {
 
     final private GraphqlAntlrRegister graphqlAntlrRegister;
 
-    public GraphqlAntlrToTable(GraphqlAntlrRegister graphqlAntlrRegister) {
+    public GraphqlTypeToTable(GraphqlAntlrRegister graphqlAntlrRegister) {
         this.graphqlAntlrRegister = graphqlAntlrRegister;
     }
 
