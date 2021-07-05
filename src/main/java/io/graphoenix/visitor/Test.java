@@ -2,12 +2,10 @@ package io.graphoenix.visitor;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import graphql.parser.GraphqlAntlrRegister;
-import graphql.parser.GraphqlQueryToSelect;
-import graphql.parser.GraphqlTypeToTable;
-import graphql.parser.GraphqlArgumentsToWhere;
+import graphql.parser.*;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
+import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;
 import org.antlr.v4.runtime.*;
@@ -25,6 +23,7 @@ public class Test {
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrRegister);
         GraphqlTypeToTable graphqlTypeToTable = new GraphqlTypeToTable(graphqlAntlrRegister);
         GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrRegister, graphqlArgumentsToWhere);
+        GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrRegister, graphqlArgumentsToWhere);
         CodePointCharStream charStream;
 
 
@@ -51,10 +50,12 @@ public class Test {
         graphqlAntlrRegister.registerDocument(documentContext);
         List<CreateTable> tables = graphqlTypeToTable.createTables(documentContext);
         List<Select> selects = graphqlQueryToSelect.createSelects(documentContext);
+        Statements statements = graphqlMutationToStatements.createStatements(documentContext);
 
 
         tables.forEach(createTable -> System.out.println(createTable.toString()));
         selects.forEach(select -> System.out.println(select.toString()));
+        statements.getStatements().forEach(statement -> System.out.println(statement.toString()));
 
 
     }
