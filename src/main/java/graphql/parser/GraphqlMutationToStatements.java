@@ -1,16 +1,13 @@
 package graphql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
-import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GraphqlMutationToStatements {
 
@@ -37,8 +34,7 @@ public class GraphqlMutationToStatements {
 
     protected Optional<Statement> operationDefinitionToStatement(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().getText().equals("mutation")) {
-
-
+            operationDefinitionContext.selectionSet().selection().stream().map(selectionContext -> selectionToStatements(null, selectionContext));
 
             if (operationDefinitionContext.name() != null) {
                 //TODO
@@ -52,4 +48,39 @@ public class GraphqlMutationToStatements {
         }
         return Optional.empty();
     }
+
+    protected Stream<Statement> selectionToStatements(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
+        String typeName = typeContext == null ? register.getMutationTypeName() : register.getFieldTypeName(typeContext);
+        Optional<GraphqlParser.TypeContext> fieldTypeContext = register.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
+        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = register.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText());
+
+        if (fieldTypeContext.isPresent()) {
+
+            if (fieldDefinitionContext.isPresent()) {
+
+                return argumentsToStatements(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments());
+            }
+        }
+        return Stream.empty();
+    }
+
+    protected Stream<Statement> argumentsToStatements(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+       return argumentsDefinitionContext.inputValueDefinition().stream().flatMap(inputValueDefinitionContext -> argumentsToStatement(fieldTypeContext,inputValueDefinitionContext,argumentsContext));
+    }
+
+    protected Stream<Statement> argumentsToStatement(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        Optional<GraphqlParser.ArgumentContext> argumentContext = register.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
+        if (argumentContext.isPresent()) {
+            return argumentToExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.get());
+        } else {
+//            return defaultValueToExpression(fieldTypeContext, inputValueDefinitionContext);
+        }
+        return Stream.empty();
+    }
+
+    protected Stream<Statement> argumentToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+        return Stream.empty();
+    }
+
+
 }
