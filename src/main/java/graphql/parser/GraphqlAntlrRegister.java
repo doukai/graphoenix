@@ -1,6 +1,9 @@
 package graphql.parser;
 
+import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
+import net.sf.jsqlparser.expression.*;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -231,5 +234,34 @@ public class GraphqlAntlrRegister {
 
     public Optional<GraphqlParser.ObjectFieldContext> getObjectFieldFromInputValueDefinition(GraphqlParser.ObjectValueContext objectValueContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         return objectValueContext.objectField().stream().filter(objectFieldContext -> objectFieldContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
+    }    protected Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
+        return scalarValueToDBValue(valueContext.StringValue(),
+                valueContext.IntValue(),
+                valueContext.FloatValue(),
+                valueContext.BooleanValue(),
+                valueContext.NullValue());
+    }
+
+    public Expression scalarValueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        return scalarValueToDBValue(valueWithVariableContext.StringValue(),
+                valueWithVariableContext.IntValue(),
+                valueWithVariableContext.FloatValue(),
+                valueWithVariableContext.BooleanValue(),
+                valueWithVariableContext.NullValue());
+    }
+
+    public Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
+        if (stringValue != null) {
+            return new StringValue(CharMatcher.is('"').trimFrom(stringValue.getText()));
+        } else if (intValue != null) {
+            return new LongValue(intValue.getText());
+        } else if (floatValue != null) {
+            return new DoubleValue(floatValue.getText());
+        } else if (booleanValue != null) {
+            //todo
+        } else if (nullValue != null) {
+            return new NullValue();
+        }
+        return null;
     }
 }

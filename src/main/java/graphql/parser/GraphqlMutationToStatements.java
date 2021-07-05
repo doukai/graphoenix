@@ -2,21 +2,23 @@ package graphql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
+import net.sf.jsqlparser.statement.insert.Insert;
+import net.sf.jsqlparser.statement.update.Update;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class GraphqlMutationToStatements {
 
     private final GraphqlAntlrRegister register;
-    private final GraphqlArgumentsToWhere argumentsToWhere;
 
-    public GraphqlMutationToStatements(GraphqlAntlrRegister register, GraphqlArgumentsToWhere argumentsToWhere) {
+    public GraphqlMutationToStatements(GraphqlAntlrRegister register) {
         this.register = register;
-        this.argumentsToWhere = argumentsToWhere;
     }
 
     public Statements createStatements(GraphqlParser.DocumentContext documentContext) {
@@ -49,38 +51,82 @@ public class GraphqlMutationToStatements {
         return Optional.empty();
     }
 
-    protected Stream<Statement> selectionToStatements(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
+    protected Statement selectionToStatements(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
         String typeName = typeContext == null ? register.getMutationTypeName() : register.getFieldTypeName(typeContext);
         Optional<GraphqlParser.TypeContext> fieldTypeContext = register.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
         Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = register.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText());
 
         if (fieldTypeContext.isPresent()) {
-
             if (fieldDefinitionContext.isPresent()) {
-
-                return argumentsToStatements(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments());
+                return argumentsToStatement(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments());
             }
         }
-        return Stream.empty();
+        return null;
     }
 
-    protected Stream<Statement> argumentsToStatements(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-       return argumentsDefinitionContext.inputValueDefinition().stream().flatMap(inputValueDefinitionContext -> argumentsToStatement(fieldTypeContext,inputValueDefinitionContext,argumentsContext));
+    protected Statement argumentsToStatement(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        Optional<GraphqlParser.ArgumentContext> idField = getIdFieldArgument(fieldTypeContext, argumentsContext);
+        if (idField.isPresent()) {
+            return argumentsToUpdate(fieldTypeContext, idField.get(), argumentsDefinitionContext, argumentsContext);
+        } else {
+            return argumentsToInsert(fieldTypeContext, argumentsDefinitionContext, argumentsContext);
+        }
     }
 
-    protected Stream<Statement> argumentsToStatement(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Update argumentsToUpdate(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentContext idField, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        Update update = new Update();
+        update.setColumns(argumentsDefinitionContext.inputValueDefinition().stream().map(inputValueDefinitionContext -> argumentsToColumn(inputValueDefinitionContext, argumentsContext)).collect(Collectors.toList()));
+        update.setExpressions(argumentsDefinitionContext.inputValueDefinition().stream().map(inputValueDefinitionContext -> argumentsToDBValue(inputValueDefinitionContext, argumentsContext)).collect(Collectors.toList()));
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
+        Table table = new Table(tableName);
+        update.setTable(table);
+        EqualsTo equalsTo = new EqualsTo();
+        equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(idField.name().getText())));
+        equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(idField.valueWithVariable()));
+        update.setWhere(equalsTo);
+        return update;
+    }
+
+    protected Insert argumentsToInsert(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        Insert insert = new Insert();
+        insert.setColumns(argumentsDefinitionContext.inputValueDefinition().stream().map(inputValueDefinitionContext -> argumentsToColumn(inputValueDefinitionContext, argumentsContext)).collect(Collectors.toList()));
+        insert.setSetExpressionList(argumentsDefinitionContext.inputValueDefinition().stream().map(inputValueDefinitionContext -> argumentsToDBValue(inputValueDefinitionContext, argumentsContext)).collect(Collectors.toList()));
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
+        Table table = new Table(tableName);
+        insert.setTable(table);
+        return insert;
+    }
+
+    protected Optional<GraphqlParser.ArgumentContext> getIdFieldArgument(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        String typeIdFieldName = register.getTypeIdFieldName(fieldTypeContext.typeName().name().getText());
+        return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(typeIdFieldName)).findFirst();
+    }
+
+    protected Column argumentsToColumn(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
         Optional<GraphqlParser.ArgumentContext> argumentContext = register.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
         if (argumentContext.isPresent()) {
-            return argumentToExpression(fieldTypeContext, inputValueDefinitionContext, argumentContext.get());
+            return new Column(DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentContext.get().name().getText()));
         } else {
-//            return defaultValueToExpression(fieldTypeContext, inputValueDefinitionContext);
+            if (inputValueDefinitionContext.type().nonNullType() != null) {
+                return new Column(DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText()));
+            }
         }
-        return Stream.empty();
+        //todo
+        return null;
     }
 
-    protected Stream<Statement> argumentToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
-        return Stream.empty();
+    protected Expression argumentsToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        Optional<GraphqlParser.ArgumentContext> argumentContext = register.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
+        if (argumentContext.isPresent()) {
+            return register.scalarValueWithVariableToDBValue(argumentContext.get().valueWithVariable());
+        } else {
+            if (inputValueDefinitionContext.type().nonNullType() != null) {
+                if (inputValueDefinitionContext.defaultValue() != null) {
+                    return register.scalarValueToDBValue(inputValueDefinitionContext.defaultValue().value());
+                }
+            }
+        }
+        //todo
+        return null;
     }
-
-
 }
