@@ -358,7 +358,7 @@ public class GraphqlArgumentsToWhere {
             if (valueWithVariableContext.arrayValueWithVariable() != null) {
                 InExpression inExpression = new InExpression();
                 inExpression.setLeftExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext));
-                inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream().map(this::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
+                inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream().map(register::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
                 return Optional.of(inExpression);
             }
         }
@@ -370,7 +370,7 @@ public class GraphqlArgumentsToWhere {
             if (valueContext.arrayValue() != null) {
                 InExpression inExpression = new InExpression();
                 inExpression.setLeftExpression(inputValueToColumn(fieldTypeContext, inputValueDefinitionContext));
-                inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
+                inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(register::scalarValueToDBValue).collect(Collectors.toList())));
                 return Optional.of(inExpression);
             }
         }
@@ -541,7 +541,7 @@ public class GraphqlArgumentsToWhere {
     private Expression operatorValueToInExpression(Expression leftExpression, GraphqlParser.EnumValueContext enumValueContext, GraphqlParser.ValueContext valueContext) {
         InExpression inExpression = new InExpression();
         inExpression.setLeftExpression(leftExpression);
-        inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(this::scalarValueToDBValue).collect(Collectors.toList())));
+        inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(register::scalarValueToDBValue).collect(Collectors.toList())));
         if ("IN".equals(enumValueContext.enumValueName().getText())) {
             inExpression.setNot(false);
         } else if ("NIN".equals(enumValueContext.enumValueName().getText())) {
@@ -556,7 +556,7 @@ public class GraphqlArgumentsToWhere {
     private Expression operatorValueWithVariableToInExpression(Expression leftExpression, GraphqlParser.EnumValueContext enumValueContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         InExpression inExpression = new InExpression();
         inExpression.setLeftExpression(leftExpression);
-        inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream().map(this::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
+        inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream().map(register::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
         if ("IN".equals(enumValueContext.enumValueName().getText())) {
             inExpression.setNot(false);
         } else if ("NIN".equals(enumValueContext.enumValueName().getText())) {
@@ -577,37 +577,37 @@ public class GraphqlArgumentsToWhere {
             case "LK":
                 LikeExpression likeExpression = new LikeExpression();
                 likeExpression.setLeftExpression(leftExpression);
-                likeExpression.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                likeExpression.setRightExpression(register.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return likeExpression;
             case "NLK":
                 LikeExpression notLikeExpression = new LikeExpression();
                 notLikeExpression.setNot(true);
                 notLikeExpression.setLeftExpression(leftExpression);
-                notLikeExpression.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                notLikeExpression.setRightExpression(register.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return notLikeExpression;
             case "GT":
             case "NLTE":
                 GreaterThan greaterThan = new GreaterThan();
                 greaterThan.setLeftExpression(leftExpression);
-                greaterThan.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                greaterThan.setRightExpression(register.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return greaterThan;
             case "GTE":
             case "NLT":
                 GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
                 greaterThanEquals.setLeftExpression(leftExpression);
-                greaterThanEquals.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                greaterThanEquals.setRightExpression(register.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return greaterThanEquals;
             case "LT":
             case "NGTE":
                 MinorThan minorThan = new MinorThan();
                 minorThan.setLeftExpression(leftExpression);
-                minorThan.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                minorThan.setRightExpression(register.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return minorThan;
             case "LTE":
             case "NGT":
                 MinorThanEquals minorThanEquals = new MinorThanEquals();
                 minorThanEquals.setLeftExpression(leftExpression);
-                minorThanEquals.setRightExpression(scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                minorThanEquals.setRightExpression(register.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return minorThanEquals;
             case "NIL":
                 IsNullExpression isNullExpression = new IsNullExpression();
@@ -740,37 +740,6 @@ public class GraphqlArgumentsToWhere {
             IsNullExpression isNullExpression = new IsNullExpression();
             isNullExpression.setLeftExpression(leftExpression);
             return isNullExpression;
-        }
-        return null;
-    }
-
-    protected Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
-        return scalarValueToDBValue(valueContext.StringValue(),
-                valueContext.IntValue(),
-                valueContext.FloatValue(),
-                valueContext.BooleanValue(),
-                valueContext.NullValue());
-    }
-
-    protected Expression scalarValueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-        return scalarValueToDBValue(valueWithVariableContext.StringValue(),
-                valueWithVariableContext.IntValue(),
-                valueWithVariableContext.FloatValue(),
-                valueWithVariableContext.BooleanValue(),
-                valueWithVariableContext.NullValue());
-    }
-
-    protected Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
-        if (stringValue != null) {
-            return new StringValue(CharMatcher.is('"').trimFrom(stringValue.getText()));
-        } else if (intValue != null) {
-            return new LongValue(intValue.getText());
-        } else if (floatValue != null) {
-            return new DoubleValue(floatValue.getText());
-        } else if (booleanValue != null) {
-            //todo
-        } else if (nullValue != null) {
-            return new NullValue();
         }
         return null;
     }
