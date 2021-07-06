@@ -43,6 +43,32 @@ mutation updateTest {
     }
 }
 
+input UserInput {
+    "test"
+    id: ID!
+    login  : String!
+    password: String!
+    name: String!
+    age: Int
+    disable: Boolean
+    sex: [Sex]
+    myrole: RoleInput
+}
+
+input RoleInput {
+    id: ID!
+    name: String!
+    users: [UserInput]
+    resources: [ResourceInput]
+    type: [RoleType]
+}
+
+input ResourceInput {
+    id: ID!
+    name: String!
+    roles: [RoleInput]
+}
+
 enum RoleType {
     ADMIN
     USER
