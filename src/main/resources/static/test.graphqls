@@ -12,7 +12,16 @@ type QueryType {
 }
 
 type MutationType {
-    user(id: ID!): User
+    user(
+        "test"
+        id: ID
+        login  : String
+        password: String
+        name: String
+        age: Int
+        disable: Boolean
+        sex: [Sex]
+        role: RoleInput): User
     #    users(ex:UserExpression): [User]
     users(name:String): [User]
     role(id : ID!,name:String) : Role
@@ -26,7 +35,7 @@ query HeroNameAndFriends {
     users(cond:OR,name: {opr: GTE,val: "test"},myrole: {
         name: {opr: EQ,val: "rolename"}
     },age:18,test:[{cond:OR, name: "test2",age: 13},{cond:OR, name: "test3",age: 16}]) {
-        id, name,sex,login,myrole{name,type}
+        id, name,sex,login,role{name,type}
     }
     #    role(id: 1){
     #        name,type,users{name,id}
@@ -34,7 +43,7 @@ query HeroNameAndFriends {
 }
 
 mutation updateTest {
-    users(name:"name1"){
+    user(name:"name1",role:{name:"role1"}){
         name,sex,login
     }
 
@@ -45,19 +54,19 @@ mutation updateTest {
 
 input UserInput {
     "test"
-    id: ID!
-    login  : String!
-    password: String!
-    name: String!
+    id: ID
+    login  : String
+    password: String
+    name: String
     age: Int
     disable: Boolean
     sex: [Sex]
-    myrole: RoleInput
+    role: RoleInput
 }
 
 input RoleInput {
-    id: ID!
-    name: String!
+    id: ID
+    name: String
     users: [UserInput]
     resources: [ResourceInput]
     type: [RoleType]
@@ -170,7 +179,7 @@ type User @table(engine:"InnoDB"){
     age: Int
     disable: Boolean
     sex: [Sex]
-    myrole: Role
+    role: Role
 }
 
 type Role {
