@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GraphqlArgumentsToWhere {
 
@@ -28,60 +29,49 @@ public class GraphqlArgumentsToWhere {
     }
 
     protected Expression argumentsToMultipleExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-        List<Expression> expressionList = argumentsToExpressionList(fieldTypeContext, argumentsDefinitionContext, argumentsContext);
-        if (expressionList.size() == 1) {
-            return expressionList.get(0);
-        }
-        if (hasOrConditional(argumentsContext, argumentsDefinitionContext)) {
-            return new MultiOrExpression(expressionList);
-        }
-        return new MultiAndExpression(expressionList);
+        Stream<Expression> expressionStream = argumentsToExpressionList(fieldTypeContext, argumentsDefinitionContext, argumentsContext);
+        return expressionStreamToMultipleExpression(expressionStream, hasOrConditional(argumentsContext, argumentsDefinitionContext));
     }
 
     protected Expression objectValueWithVariableToMultipleExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
-        List<Expression> expressionList = objectValueWithVariableToExpressionList(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueWithVariableContext);
-        if (expressionList.size() == 1) {
-            return expressionList.get(0);
-        }
-
-        if (hasOrConditional(objectValueWithVariableContext, typeDefinitionContext.inputObjectTypeDefinition())) {
-            return new MultiOrExpression(expressionList);
-        }
-        return new MultiAndExpression(expressionList);
+        Stream<Expression> expressionStream = objectValueWithVariableToExpressionList(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueWithVariableContext);
+        return expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueWithVariableContext, typeDefinitionContext.inputObjectTypeDefinition()));
     }
 
     protected Expression objectValueToMultipleExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
         GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
-        List<Expression> expressionList = objectValueToExpressionList(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueContext);
+        Stream<Expression> expressionStream = objectValueToExpressionList(fieldTypeContext, typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions(), objectValueContext);
+        return expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueContext, typeDefinitionContext.inputObjectTypeDefinition()));
+    }
+
+    protected Expression expressionStreamToMultipleExpression(Stream<Expression> expressionStream, boolean hasOrConditional) {
+        List<Expression> expressionList = expressionStream.collect(Collectors.toList());
         if (expressionList.size() == 1) {
             return expressionList.get(0);
         }
-        if (hasOrConditional(objectValueContext, typeDefinitionContext.inputObjectTypeDefinition())) {
+        if (hasOrConditional) {
             return new MultiOrExpression(expressionList);
         }
         return new MultiAndExpression(expressionList);
     }
 
-    protected List<Expression> argumentsToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-        List<Expression> expressionList = argumentsDefinitionContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> argumentsToExpression(fieldTypeContext, inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-        Optional<List<Expression>> conditionalExpressionList = listTypeConditionalFieldOfArgumentsToExpressionList(fieldTypeContext, argumentsDefinitionContext, argumentsContext);
-        conditionalExpressionList.ifPresent(expressionList::addAll);
-        return expressionList;
+    protected Stream<Expression> argumentsToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        Stream<Expression> expressionStream = argumentsDefinitionContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> argumentsToExpression(fieldTypeContext, inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get);
+        Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfArgumentsToExpressionList(fieldTypeContext, argumentsDefinitionContext, argumentsContext);
+        return Stream.concat(expressionStream, conditionalExpressionStream);
     }
 
-    protected List<Expression> objectValueWithVariableToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        List<Expression> expressionList = inputObjectValueDefinitionsContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> objectValueWithVariableToExpression(fieldTypeContext, inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-        Optional<List<Expression>> conditionalExpressionList = listTypeConditionalFieldOfObjectValueWithVariableToExpressionList(fieldTypeContext, inputObjectValueDefinitionsContext, objectValueWithVariableContext);
-        conditionalExpressionList.ifPresent(expressionList::addAll);
-        return expressionList;
+    protected Stream<Expression> objectValueWithVariableToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        Stream<Expression> expressionStream = inputObjectValueDefinitionsContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> objectValueWithVariableToExpression(fieldTypeContext, inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get);
+        Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfObjectValueWithVariableToExpressionList(fieldTypeContext, inputObjectValueDefinitionsContext, objectValueWithVariableContext);
+        return Stream.concat(expressionStream, conditionalExpressionStream);
     }
 
-    protected List<Expression> objectValueToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueContext objectValueContext) {
-        List<Expression> expressionList = inputObjectValueDefinitionsContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> objectValueToExpression(fieldTypeContext, inputValueDefinitionContext, objectValueContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
-        Optional<List<Expression>> conditionalExpressionList = listTypeConditionalFieldOfObjectValueToExpression(fieldTypeContext, inputObjectValueDefinitionsContext, objectValueContext);
-        conditionalExpressionList.ifPresent(expressionList::addAll);
-        return expressionList;
+    protected Stream<Expression> objectValueToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        Stream<Expression> expressionStream = inputObjectValueDefinitionsContext.inputValueDefinition().stream().filter(this::isNotConditional).map(inputValueDefinitionContext -> objectValueToExpression(fieldTypeContext, inputValueDefinitionContext, objectValueContext)).filter(Optional::isPresent).map(Optional::get);
+        Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfObjectValueToExpression(fieldTypeContext, inputObjectValueDefinitionsContext, objectValueContext);
+        return Stream.concat(expressionStream, conditionalExpressionStream);
     }
 
     protected Optional<Expression> argumentsToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
@@ -295,46 +285,46 @@ public class GraphqlArgumentsToWhere {
         }
     }
 
-    protected Optional<List<Expression>> listTypeConditionalFieldOfArgumentsToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Stream<Expression> listTypeConditionalFieldOfArgumentsToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
         Optional<GraphqlParser.InputValueDefinitionContext> conditionalInputValueDefinition = argumentsDefinitionContext.inputValueDefinition().stream().filter(inputValueDefinitionContext -> register.fieldTypeIsList(inputValueDefinitionContext.type()) && isConditionalObject(inputValueDefinitionContext)).findFirst();
         if (conditionalInputValueDefinition.isPresent()) {
             Optional<GraphqlParser.ArgumentContext> argumentContext = register.getArgumentFromInputValueDefinition(argumentsContext, conditionalInputValueDefinition.get());
-            return argumentContext.map(argumentContext1 -> Optional.of(argumentContext1.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream().map(valueWithVariableContext ->
-                    objectValueWithVariableToMultipleExpression(fieldTypeContext, conditionalInputValueDefinition.get(), valueWithVariableContext.objectValueWithVariable())).collect(Collectors.toList()))).orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(fieldTypeContext, conditionalInputValueDefinition.get()));
+            return argumentContext.flatMap(argumentContext1 -> Optional.of(argumentContext1.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream().map(valueWithVariableContext ->
+                    objectValueWithVariableToMultipleExpression(fieldTypeContext, conditionalInputValueDefinition.get(), valueWithVariableContext.objectValueWithVariable())))).orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(fieldTypeContext, conditionalInputValueDefinition.get()));
         }
-        return Optional.empty();
+        return Stream.empty();
     }
 
-    protected Optional<List<Expression>> listTypeConditionalFieldOfObjectValueWithVariableToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected Stream<Expression> listTypeConditionalFieldOfObjectValueWithVariableToExpressionList(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         Optional<GraphqlParser.InputValueDefinitionContext> conditionalInputValueDefinition = inputObjectValueDefinitionsContext.inputValueDefinition().stream().filter(inputValueDefinitionContext1 -> register.fieldTypeIsList(inputValueDefinitionContext1.type()) && isConditionalObject(inputValueDefinitionContext1)).findFirst();
         if (conditionalInputValueDefinition.isPresent()) {
             Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = register.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, conditionalInputValueDefinition.get());
-            return objectFieldWithVariableContext.map(fieldWithVariableContext -> Optional.of(fieldWithVariableContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream().map(valueWithVariableContext ->
-                    objectValueWithVariableToMultipleExpression(fieldTypeContext, conditionalInputValueDefinition.get(), valueWithVariableContext.objectValueWithVariable())).collect(Collectors.toList()))).orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(fieldTypeContext, conditionalInputValueDefinition.get()));
+            return objectFieldWithVariableContext.flatMap(fieldWithVariableContext -> Optional.of(fieldWithVariableContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream().map(valueWithVariableContext ->
+                    objectValueWithVariableToMultipleExpression(fieldTypeContext, conditionalInputValueDefinition.get(), valueWithVariableContext.objectValueWithVariable())))).orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(fieldTypeContext, conditionalInputValueDefinition.get()));
         }
-        return Optional.empty();
+        return Stream.empty();
     }
 
-    protected Optional<List<Expression>> listTypeConditionalFieldOfObjectValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueContext objectValueContext) {
+    protected Stream<Expression> listTypeConditionalFieldOfObjectValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext, GraphqlParser.ObjectValueContext objectValueContext) {
         Optional<GraphqlParser.InputValueDefinitionContext> conditionalInputValueDefinition = inputObjectValueDefinitionsContext.inputValueDefinition().stream().filter(inputValueDefinitionContext1 -> register.fieldTypeIsList(inputValueDefinitionContext1.type()) && isConditionalObject(inputValueDefinitionContext1)).findFirst();
         if (conditionalInputValueDefinition.isPresent()) {
             Optional<GraphqlParser.ObjectFieldContext> objectFieldContext = register.getObjectFieldFromInputValueDefinition(objectValueContext, conditionalInputValueDefinition.get());
-            return objectFieldContext.map(fieldContext -> Optional.of(fieldContext.value().arrayValue().value().stream().map(valueContext ->
-                    objectValueToMultipleExpression(fieldTypeContext, conditionalInputValueDefinition.get(), valueContext.objectValue())).collect(Collectors.toList()))).orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(fieldTypeContext, conditionalInputValueDefinition.get()));
+            return objectFieldContext.flatMap(fieldContext -> Optional.of(fieldContext.value().arrayValue().value().stream().map(valueContext ->
+                    objectValueToMultipleExpression(fieldTypeContext, conditionalInputValueDefinition.get(), valueContext.objectValue())))).orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(fieldTypeContext, conditionalInputValueDefinition.get()));
         }
-        return Optional.empty();
+        return Stream.empty();
     }
 
-    protected Optional<List<Expression>> listTypeConditionalFieldOfInputValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+    protected Stream<Expression> listTypeConditionalFieldOfInputValueToExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         if (inputValueDefinitionContext.type().nonNullType() != null) {
             if (inputValueDefinitionContext.defaultValue() != null) {
-                return Optional.of(inputValueDefinitionContext.defaultValue().value().arrayValue().value().stream().map(valueWithVariableContext ->
-                        objectValueToMultipleExpression(fieldTypeContext, inputValueDefinitionContext, valueWithVariableContext.objectValue())).collect(Collectors.toList()));
+                return inputValueDefinitionContext.defaultValue().value().arrayValue().value().stream().map(valueContext ->
+                        objectValueToMultipleExpression(fieldTypeContext, inputValueDefinitionContext, valueContext.objectValue()));
             } else {
                 //todo
             }
         }
-        return Optional.empty();
+        return Stream.empty();
     }
 
     private Optional<Expression> listTypeArgumentToInExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
