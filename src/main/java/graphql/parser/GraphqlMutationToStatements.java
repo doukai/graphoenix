@@ -172,7 +172,7 @@ public class GraphqlMutationToStatements {
     }
 
     protected Optional<GraphqlParser.ArgumentContext> getIdArgument(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsContext argumentsContext) {
-        String typeIdFieldName = register.getTypeIdFieldName(fieldTypeContext.typeName().name().getText());
+        String typeIdFieldName = register.getTypeIdFieldName(register.getFieldTypeName(fieldTypeContext));
         return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(typeIdFieldName)).findFirst();
     }
 
@@ -240,7 +240,7 @@ public class GraphqlMutationToStatements {
 
 
     protected Optional<GraphqlParser.ObjectFieldWithVariableContext> getIdObjectFieldWithVariable(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        String typeIdFieldName = register.getTypeIdFieldName(fieldTypeContext.typeName().name().getText());
+        String typeIdFieldName = register.getTypeIdFieldName(register.getFieldTypeName(fieldTypeContext));
         return objectValueWithVariableContext.objectFieldWithVariable().stream().filter(fieldWithVariableContext -> fieldWithVariableContext.name().getText().equals(typeIdFieldName)).findFirst();
     }
 
