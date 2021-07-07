@@ -15,7 +15,7 @@ type MutationType {
     user(id: ID!): User
     #    users(ex:UserExpression): [User]
     users(name:String): [User]
-    role(id : ID!) : Role
+    role(id : ID!,name:String) : Role
     resource(id: ID!): Resource
 }
 
@@ -38,7 +38,7 @@ mutation updateTest {
         name,sex,login
     }
 
-    role(id:"name1"){
+    role(id:"id1",name:"name1"){
         name
     }
 }
