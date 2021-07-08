@@ -17,6 +17,12 @@ public enum DBNameConverter {
         return nameToDBEscape(CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlFieldName));
     }
 
+    public String graphqlFieldNameToVariableName(String graphqlTypeName, String graphqlFieldName) {
+
+        return String.format("@%s", String.join("_", CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlFieldName)));
+    }
+
+
     public String graphqlTypeToDBType(String graphqlType) {
 
         return nameToDBEscape(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, graphqlType));

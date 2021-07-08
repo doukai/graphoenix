@@ -3,10 +3,12 @@ package graphql.parser;
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.SetStatement;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.insert.Insert;
@@ -74,7 +76,7 @@ public class GraphqlMutationToStatements {
 
         return Stream.concat(
                 Stream.concat(
-                        Stream.of(argumentsToStatement(fieldTypeContext, scalarInputValueDefinitionContextList, argumentsContext)),
+                        argumentsToStatement(fieldTypeContext, scalarInputValueDefinitionContextList, argumentsContext),
                         argumentsDefinitionContext.inputValueDefinition().stream()
                                 .filter(inputValueDefinitionContext -> !register.fieldTypeIsList(inputValueDefinitionContext.type()))
                                 .filter(inputValueDefinitionContext -> register.isInputObject(inputValueDefinitionContext.type().getText()))
@@ -95,7 +97,7 @@ public class GraphqlMutationToStatements {
         //todo
         return Stream.concat(
                 Stream.concat(
-                        Stream.of(inputObjectToStatement(fieldTypeContext, scalarInputValueDefinitionContextList, objectValueWithVariableContext)),
+                        inputObjectToStatement(fieldTypeContext, scalarInputValueDefinitionContextList, objectValueWithVariableContext),
                         typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
                                 .filter(inputValueDefinitionContext1 -> !register.fieldTypeIsList(inputValueDefinitionContext1.type()))
                                 .filter(inputValueDefinitionContext1 -> register.isInputObject(inputValueDefinitionContext1.type().getText()))
@@ -194,13 +196,13 @@ public class GraphqlMutationToStatements {
         return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(typeIdFieldName)).findFirst();
     }
 
-    protected Statement argumentsToStatement(GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Stream<Statement> argumentsToStatement(GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
 
         Optional<GraphqlParser.ArgumentContext> idField = getIdArgument(fieldTypeContext, argumentsContext);
         if (idField.isPresent()) {
-            return argumentsToUpdate(fieldTypeContext, idField.get(), inputValueDefinitionContextList, argumentsContext);
+            return Stream.of(argumentsToUpdate(fieldTypeContext, idField.get(), inputValueDefinitionContextList, argumentsContext));
         } else {
-            return argumentsToInsert(fieldTypeContext, inputValueDefinitionContextList, argumentsContext);
+            return Stream.of(argumentsToInsert(fieldTypeContext, inputValueDefinitionContextList, argumentsContext), createInsertIdSetStatement(fieldTypeContext));
         }
     }
 
@@ -264,13 +266,13 @@ public class GraphqlMutationToStatements {
         return objectValueWithVariableContext.objectFieldWithVariable().stream().filter(fieldWithVariableContext -> fieldWithVariableContext.name().getText().equals(typeIdFieldName)).findFirst();
     }
 
-    protected Statement inputObjectToStatement(GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected Stream<Statement> inputObjectToStatement(GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
 
         Optional<GraphqlParser.ObjectFieldWithVariableContext> idField = getIdObjectFieldWithVariable(fieldTypeContext, objectValueWithVariableContext);
         if (idField.isPresent()) {
-            return inputObjectToUpdate(fieldTypeContext, idField.get(), inputValueDefinitionContextList, objectValueWithVariableContext);
+            return Stream.of(inputObjectToUpdate(fieldTypeContext, idField.get(), inputValueDefinitionContextList, objectValueWithVariableContext));
         } else {
-            return inputObjectToInsert(fieldTypeContext, inputValueDefinitionContextList, objectValueWithVariableContext);
+            return Stream.of(inputObjectToInsert(fieldTypeContext, inputValueDefinitionContextList, objectValueWithVariableContext), createInsertIdSetStatement(fieldTypeContext));
         }
     }
 
@@ -291,14 +293,31 @@ public class GraphqlMutationToStatements {
         EqualsTo equalsTo = new EqualsTo();
         equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(typeContext)))));
         if (idField == null) {
-            Function function = new Function();
-            function.setName("LAST_INSERT_ID");
-            equalsTo.setRightExpression(function);
+            equalsTo.setRightExpression(createInsertIdUserVariable(typeContext));
         } else {
             equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(idField.valueWithVariable()));
         }
         update.setWhere(equalsTo);
         return update;
+    }
+
+    protected String getIdVariableName(GraphqlParser.TypeContext typeContext) {
+        String typeName = register.getFieldTypeName(typeContext);
+        return DBNameConverter.INSTANCE.graphqlFieldNameToVariableName(typeName, register.getTypeIdFieldName(typeName));
+    }
+
+    protected SetStatement createInsertIdSetStatement(GraphqlParser.TypeContext typeContext) {
+        String idVariableName = getIdVariableName(typeContext);
+        Function function = new Function();
+        function.setName("LAST_INSERT_ID");
+        return new SetStatement(idVariableName, function);
+    }
+
+    protected UserVariable createInsertIdUserVariable(GraphqlParser.TypeContext typeContext) {
+        String idVariableName = getIdVariableName(typeContext);
+        UserVariable userVariable = new UserVariable();
+        userVariable.setName(idVariableName);
+        return userVariable;
     }
 
     protected Update inputObjectToUpdate(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectFieldWithVariableContext idField, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
