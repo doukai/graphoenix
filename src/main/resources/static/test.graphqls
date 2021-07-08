@@ -24,7 +24,12 @@ type MutationType {
         role: RoleInput): User
     #    users(ex:UserExpression): [User]
     users(name:String): [User]
-    role(id : ID!,name:String) : Role
+    role(
+        id: ID
+        name: String
+        users: [UserInput]
+        resources: [ResourceInput]
+        type: [RoleType]) : Role
     resource(id: ID!): Resource
 }
 
@@ -43,11 +48,11 @@ query HeroNameAndFriends {
 }
 
 mutation updateTest {
-    user(name:"name1",role:{name:"role1"}){
-        name,sex,login
-    }
+#    user(name:"name1",role:{id:"123",name:"role1"}){
+#        name,sex,login
+#    }
 
-    role(id:"id1",name:"name1"){
+    role(id:"id1",name:"name1",resources: [{id:"test1",name: "res1"},{name: "res2"}]){
         name
     }
 }
@@ -73,9 +78,9 @@ input RoleInput {
 }
 
 input ResourceInput {
-    id: ID!
-    name: String!
-    roles: [RoleInput]
+    id: ID
+    name: String
+    role: RoleInput
 }
 
 enum RoleType {
@@ -193,7 +198,7 @@ type Role {
 type Resource {
     id: ID!
     name: String!
-    roles: [Role]
+    role: Role
 }
 
 type Organization {
