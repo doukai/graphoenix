@@ -31,18 +31,18 @@ public class GraphqlMutationToStatements {
 
     public Statements createStatements(GraphqlParser.DocumentContext documentContext) {
         Statements statements = new Statements();
-        statements.setStatements(documentContext.definition().stream().flatMap(this::createStatement).collect(Collectors.toList()));
+        statements.setStatements(documentContext.definition().stream().flatMap(this::createStatementStream).collect(Collectors.toList()));
         return statements;
     }
 
-    protected Stream<Statement> createStatement(GraphqlParser.DefinitionContext definitionContext) {
+    protected Stream<Statement> createStatementStream(GraphqlParser.DefinitionContext definitionContext) {
         if (definitionContext.operationDefinition() != null) {
-            return operationDefinitionToStatement(definitionContext.operationDefinition());
+            return operationDefinitionToStatementStream(definitionContext.operationDefinition());
         }
         return Stream.empty();
     }
 
-    protected Stream<Statement> operationDefinitionToStatement(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+    protected Stream<Statement> operationDefinitionToStatementStream(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.name() != null) {
             //TODO
         }
@@ -53,41 +53,41 @@ public class GraphqlMutationToStatements {
             //TODO
         }
         if (operationDefinitionContext.operationType() != null && operationDefinitionContext.operationType().getText().equals("mutation")) {
-            return operationDefinitionContext.selectionSet().selection().stream().flatMap(selectionContext -> selectionToStatements(null, selectionContext));
+            return operationDefinitionContext.selectionSet().selection().stream().flatMap(this::selectionToStatementStream);
         }
         return Stream.empty();
     }
 
-    protected Stream<Statement> selectionToStatements(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
-        String typeName = typeContext == null ? register.getMutationTypeName() : register.getFieldTypeName(typeContext);
-        Optional<GraphqlParser.TypeContext> fieldTypeContext = register.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
-        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = register.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText());
+    protected Stream<Statement> selectionToStatementStream(GraphqlParser.SelectionContext selectionContext) {
+        String mutationTypeName = register.getMutationTypeName();
+        Optional<GraphqlParser.TypeContext> mutationFieldTypeContext = register.getObjectFieldTypeContext(mutationTypeName, selectionContext.field().name().getText());
+        Optional<GraphqlParser.FieldDefinitionContext> mutationFieldTypeDefinitionContext = register.getObjectFieldDefinitionContext(mutationTypeName, selectionContext.field().name().getText());
 
-        if (fieldTypeContext.isPresent()) {
-            if (fieldDefinitionContext.isPresent()) {
-                return argumentsToStatement(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments());
+        if (mutationFieldTypeContext.isPresent()) {
+            if (mutationFieldTypeDefinitionContext.isPresent()) {
+                return argumentsToStatementStream(mutationFieldTypeContext.get(), mutationFieldTypeDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments());
             }
         }
         return Stream.empty();
     }
 
-    protected Stream<Statement> argumentsToStatement(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Stream<Statement> argumentsToStatementStream(GraphqlParser.TypeContext mutationFieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
-        List<GraphqlParser.InputValueDefinitionContext> scalarInputValueDefinitionContextList = argumentsDefinitionContext.inputValueDefinition().stream()
+        List<GraphqlParser.InputValueDefinitionContext> singleTypeScalarInputValueDefinitionContextList = argumentsDefinitionContext.inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !register.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> register.isInnerScalar(inputValueDefinitionContext.type().getText())).collect(Collectors.toList());
 
         return Stream.concat(
                 Stream.concat(
-                        argumentsToStatement(fieldTypeContext, scalarInputValueDefinitionContextList, argumentsContext),
+                        argumentsToStatement(mutationFieldTypeContext, singleTypeScalarInputValueDefinitionContextList, argumentsContext),
                         argumentsDefinitionContext.inputValueDefinition().stream()
                                 .filter(inputValueDefinitionContext -> !register.fieldTypeIsList(inputValueDefinitionContext.type()))
                                 .filter(inputValueDefinitionContext -> register.isInputObject(inputValueDefinitionContext.type().getText()))
-                                .flatMap(inputValueDefinitionContext -> inputObjectToStatement(fieldTypeContext, inputValueDefinitionContext, argumentsContext))
+                                .flatMap(inputValueDefinitionContext -> singleInputObjectToStatementStream(mutationFieldTypeContext, inputValueDefinitionContext, argumentsContext))
                 ),
                 argumentsDefinitionContext.inputValueDefinition().stream()
                         .filter(inputValueDefinitionContext1 -> register.fieldTypeIsList(inputValueDefinitionContext1.type()))
-                        .flatMap(inputValueDefinitionContext1 -> listTypeArgumentsToStatement(fieldTypeContext, inputValueDefinitionContext1, argumentsContext))
+                        .flatMap(inputValueDefinitionContext1 -> listTypeArgumentsToStatement(mutationFieldTypeContext, inputValueDefinitionContext1, argumentsContext))
         );
     }
 
@@ -138,7 +138,7 @@ public class GraphqlMutationToStatements {
     }
 
 
-    protected Stream<Statement> inputObjectToStatement(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Stream<Statement> singleInputObjectToStatementStream(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
         GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
 
