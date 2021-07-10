@@ -71,7 +71,7 @@ public class GraphqlMutationToStatements {
         return Stream.empty();
     }
 
-    protected Stream<Statement> argumentsToStatementStream(GraphqlParser.TypeContext mutationFieldTypeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Stream<Statement> argumentsToStatementStream(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
         List<GraphqlParser.InputValueDefinitionContext> singleTypeScalarInputValueDefinitionContextList = argumentsDefinitionContext.inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !register.fieldTypeIsList(inputValueDefinitionContext.type()))
@@ -79,83 +79,29 @@ public class GraphqlMutationToStatements {
 
         return Stream.concat(
                 Stream.concat(
-                        argumentsToStatement(mutationFieldTypeContext, singleTypeScalarInputValueDefinitionContextList, argumentsContext),
+                        singleTypeScalarArgumentsToStatementStream(typeContext, singleTypeScalarInputValueDefinitionContextList, argumentsContext),
                         argumentsDefinitionContext.inputValueDefinition().stream()
                                 .filter(inputValueDefinitionContext -> !register.fieldTypeIsList(inputValueDefinitionContext.type()))
                                 .filter(inputValueDefinitionContext -> register.isInputObject(inputValueDefinitionContext.type().getText()))
-                                .flatMap(inputValueDefinitionContext -> singleInputObjectToStatementStream(mutationFieldTypeContext, inputValueDefinitionContext, argumentsContext))
+                                .flatMap(inputValueDefinitionContext -> singleTypeArgumentToStatementStream(typeContext, inputValueDefinitionContext, argumentsContext))
                 ),
                 argumentsDefinitionContext.inputValueDefinition().stream()
-                        .filter(inputValueDefinitionContext1 -> register.fieldTypeIsList(inputValueDefinitionContext1.type()))
-                        .flatMap(inputValueDefinitionContext1 -> listTypeArgumentsToStatement(mutationFieldTypeContext, inputValueDefinitionContext1, argumentsContext))
+                        .filter(inputValueDefinitionContext -> register.fieldTypeIsList(inputValueDefinitionContext.type()))
+                        .flatMap(inputValueDefinitionContext -> listTypeArgumentToStatement(typeContext, inputValueDefinitionContext, argumentsContext))
         );
     }
 
-    protected Stream<Statement> objectValueWithVariableToStatement(GraphqlParser.TypeContext typeContext, GraphqlParser.ValueWithVariableContext idValueWithVariableContext, GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
+    protected Stream<Statement> singleTypeArgumentToStatementStream(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
-        List<GraphqlParser.InputValueDefinitionContext> scalarInputValueDefinitionContextList = typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
-                .filter(inputValueDefinitionContext1 -> !register.fieldTypeIsList(inputValueDefinitionContext1.type()))
-                .filter(inputValueDefinitionContext1 -> register.isInnerScalar(inputValueDefinitionContext1.type().getText())).collect(Collectors.toList());
-        //todo
-        return Stream.concat(
-                Stream.concat(
-                        Stream.concat(inputObjectToStatement(fieldTypeContext, scalarInputValueDefinitionContextList, objectValueWithVariableContext),
-                                Stream.of(inputObjectToRelationUpdate(typeContext, idValueWithVariableContext, fieldTypeContext, objectValueWithVariableContext))),
-                        typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
-                                .filter(inputValueDefinitionContext1 -> !register.fieldTypeIsList(inputValueDefinitionContext1.type()))
-                                .filter(inputValueDefinitionContext1 -> register.isInputObject(inputValueDefinitionContext1.type().getText()))
-                                .flatMap(inputValueDefinitionContext1 -> inputObjectToStatement(fieldTypeContext, inputValueDefinitionContext1, objectValueWithVariableContext))
-                ),
-                typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
-                        .filter(inputValueDefinitionContext1 -> register.fieldTypeIsList(inputValueDefinitionContext1.type()))
-                        .flatMap(inputValueDefinitionContext1 -> listTypeObjectValueWithVariableToStatement(fieldTypeContext, inputValueDefinitionContext1, objectValueWithVariableContext))
-        );
-    }
-
-    protected Stream<Statement> listObjectValueWithVariableToStatement(GraphqlParser.TypeContext typeContext, GraphqlParser.ValueWithVariableContext idValueWithVariableContext, GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
-
-        List<GraphqlParser.InputValueDefinitionContext> scalarInputValueDefinitionContextList = typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
-                .filter(inputValueDefinitionContext1 -> !register.fieldTypeIsList(inputValueDefinitionContext1.type()))
-                .filter(inputValueDefinitionContext1 -> register.isInnerScalar(inputValueDefinitionContext1.type().getText())).collect(Collectors.toList());
-
-
-        //todo
-        return Stream.concat(
-                Stream.concat(
-                        Stream.concat(inputObjectToStatement(fieldTypeContext, scalarInputValueDefinitionContextList, objectValueWithVariableContext),
-                                Stream.of(listInputObjectToRelationUpdate(typeContext, idValueWithVariableContext, fieldTypeContext, objectValueWithVariableContext))),
-                        typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
-                                .filter(inputValueDefinitionContext1 -> !register.fieldTypeIsList(inputValueDefinitionContext1.type()))
-                                .filter(inputValueDefinitionContext1 -> register.isInputObject(inputValueDefinitionContext1.type().getText()))
-                                .flatMap(inputValueDefinitionContext1 -> inputObjectToStatement(fieldTypeContext, inputValueDefinitionContext1, objectValueWithVariableContext))
-                ),
-                typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
-                        .filter(inputValueDefinitionContext1 -> register.fieldTypeIsList(inputValueDefinitionContext1.type()))
-                        .flatMap(inputValueDefinitionContext1 -> listTypeObjectValueWithVariableToStatement(fieldTypeContext, inputValueDefinitionContext1, objectValueWithVariableContext))
-        );
-    }
-
-
-    protected Stream<Statement> singleInputObjectToStatementStream(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-
-        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
-
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(typeContext)).objectTypeDefinition();
         Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext1 ->
                 fieldDefinitionContext1.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
-
         Optional<GraphqlParser.ArgumentContext> argumentContext = register.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
-
         if (argumentContext.isPresent()) {
             if (argumentContext.get().valueWithVariable().objectValueWithVariable() != null) {
                 if (fieldDefinitionContext.isPresent()) {
-                    Optional<GraphqlParser.ArgumentContext> idArgument = getIdArgument(fieldTypeContext, argumentsContext);
-                    if (idArgument.isPresent()) {
-                        return objectValueWithVariableToStatement(fieldTypeContext, idArgument.get().valueWithVariable(), fieldDefinitionContext.get().type(), inputValueDefinitionContext, argumentContext.get().valueWithVariable().objectValueWithVariable());
-                    } else {
-                        return objectValueWithVariableToStatement(fieldTypeContext, null, fieldDefinitionContext.get().type(), inputValueDefinitionContext, argumentContext.get().valueWithVariable().objectValueWithVariable());
-                    }
+                    Optional<GraphqlParser.ArgumentContext> idArgument = getIdArgument(typeContext, argumentsContext);
+                    return singleTypeObjectValueWithVariableToStatementStream(typeContext, idArgument.map(GraphqlParser.ArgumentContext::valueWithVariable).orElse(null), fieldDefinitionContext.get().type(), inputValueDefinitionContext, argumentContext.get().valueWithVariable().objectValueWithVariable());
                 }
             } else {
 
@@ -164,24 +110,17 @@ public class GraphqlMutationToStatements {
         return Stream.empty();
     }
 
-    protected Stream<Statement> inputObjectToStatement(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected Stream<Statement> singleTypeObjectValueWithVariableToStatementStream(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
 
         Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = register.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext);
-
         if (objectFieldWithVariableContext.isPresent()) {
             if (objectFieldWithVariableContext.get().valueWithVariable().objectValueWithVariable() != null) {
-                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
-
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(typeContext)).objectTypeDefinition();
                 Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext1 ->
                         fieldDefinitionContext1.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
                 if (fieldDefinitionContext.isPresent()) {
-
-                    Optional<GraphqlParser.ObjectFieldWithVariableContext> idObjectFieldWithVariable = getIdObjectFieldWithVariable(fieldTypeContext, objectValueWithVariableContext);
-                    if (idObjectFieldWithVariable.isPresent()) {
-                        return objectValueWithVariableToStatement(fieldTypeContext, idObjectFieldWithVariable.get().valueWithVariable(), fieldDefinitionContext.get().type(), inputValueDefinitionContext, objectFieldWithVariableContext.get().valueWithVariable().objectValueWithVariable());
-                    } else {
-                        return objectValueWithVariableToStatement(fieldTypeContext, null, fieldDefinitionContext.get().type(), inputValueDefinitionContext, objectFieldWithVariableContext.get().valueWithVariable().objectValueWithVariable());
-                    }
+                    Optional<GraphqlParser.ObjectFieldWithVariableContext> idObjectFieldWithVariable = getIdObjectFieldWithVariable(typeContext, objectValueWithVariableContext);
+                    return singleTypeObjectValueWithVariableToStatementStream(typeContext, idObjectFieldWithVariable.map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable).orElse(null), fieldDefinitionContext.get().type(), inputValueDefinitionContext, objectFieldWithVariableContext.get().valueWithVariable().objectValueWithVariable());
                 }
             } else {
 
@@ -190,41 +129,49 @@ public class GraphqlMutationToStatements {
         return Stream.empty();
     }
 
-    protected Stream<Statement> listTypeArgumentsToStatement(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Stream<Statement> singleTypeObjectValueWithVariableToStatementStream(GraphqlParser.TypeContext parentTypeContext, GraphqlParser.ValueWithVariableContext parentTypeIdValueWithVariableContext, GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
+        List<GraphqlParser.InputValueDefinitionContext> singleTypeScalarInputValueDefinitionContextList = typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(fieldInputValueDefinitionContext -> !register.fieldTypeIsList(fieldInputValueDefinitionContext.type()))
+                .filter(fieldInputValueDefinitionContext -> register.isInnerScalar(fieldInputValueDefinitionContext.type().getText())).collect(Collectors.toList());
+
+        return Stream.concat(
+                Stream.concat(
+                        Stream.concat(singleTypeScalarInputValuesToStatementStream(typeContext, singleTypeScalarInputValueDefinitionContextList, objectValueWithVariableContext),
+                                Stream.of(parentTypeRelationUpdate(parentTypeContext, parentTypeIdValueWithVariableContext, typeContext, objectValueWithVariableContext))),
+                        typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                                .filter(fieldInputValueDefinitionContext -> !register.fieldTypeIsList(fieldInputValueDefinitionContext.type()))
+                                .filter(fieldInputValueDefinitionContext -> register.isInputObject(fieldInputValueDefinitionContext.type().getText()))
+                                .flatMap(fieldInputValueDefinitionContext -> singleTypeObjectValueWithVariableToStatementStream(typeContext, fieldInputValueDefinitionContext, objectValueWithVariableContext))
+                ),
+                typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                        .filter(fieldInputValueDefinitionContext -> register.fieldTypeIsList(fieldInputValueDefinitionContext.type()))
+                        .flatMap(fieldInputValueDefinitionContext -> listTypeObjectValueWithVariableToStatementStream(typeContext, fieldInputValueDefinitionContext, objectValueWithVariableContext))
+        );
+    }
+
+    protected Stream<Statement> listTypeArgumentToStatement(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
         Optional<GraphqlParser.ArgumentContext> argumentContext = register.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
         if (argumentContext.isPresent()) {
             if (argumentContext.get().valueWithVariable().arrayValueWithVariable() != null) {
-                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(typeContext)).objectTypeDefinition();
                 Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext1 ->
                         fieldDefinitionContext1.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
                 if (fieldDefinitionContext.isPresent()) {
 
-                    Optional<GraphqlParser.ArgumentContext> idArgument = getIdArgument(fieldTypeContext, argumentsContext);
-                    if (idArgument.isPresent()) {
-
-                        return Stream.concat(argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                        .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                        .flatMap(valueWithVariableContext -> listObjectValueWithVariableToStatement(fieldTypeContext, idArgument.get().valueWithVariable(), fieldDefinitionContext.get().type(), inputValueDefinitionContext, valueWithVariableContext.objectValueWithVariable())),
-                                Stream.of(listInputObjectToRelationDelete(fieldTypeContext, idArgument.get().valueWithVariable(), fieldDefinitionContext.get().type(),
-                                        argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                                .map(valueWithVariableContext -> getIdObjectFieldWithVariable(fieldTypeContext, valueWithVariableContext.objectValueWithVariable()))
-                                                .filter(Optional::isPresent)
-                                                .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.get().valueWithVariable())
-                                                .collect(Collectors.toList())))
-                        );
-                    } else {
-                        return Stream.concat(argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                        .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                        .flatMap(valueWithVariableContext -> listObjectValueWithVariableToStatement(fieldTypeContext, idArgument.get().valueWithVariable(), fieldDefinitionContext.get().type(), inputValueDefinitionContext, valueWithVariableContext.objectValueWithVariable())),
-                                Stream.of(listInputObjectToRelationDelete(fieldTypeContext, null, fieldDefinitionContext.get().type(),
-                                        argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                                .map(valueWithVariableContext -> getIdObjectFieldWithVariable(fieldTypeContext, valueWithVariableContext.objectValueWithVariable()))
-                                                .filter(Optional::isPresent)
-                                                .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.get().valueWithVariable())
-                                                .collect(Collectors.toList())))
-                        );
-                    }
+                    Optional<GraphqlParser.ArgumentContext> idArgument = getIdArgument(typeContext, argumentsContext);
+                    return Stream.concat(argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
+                                    .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                    .flatMap(valueWithVariableContext -> listTypeObjectValueWithVariableToStatementStream(typeContext, idArgument.map(GraphqlParser.ArgumentContext::valueWithVariable).orElse(null), fieldDefinitionContext.get().type(), inputValueDefinitionContext, valueWithVariableContext.objectValueWithVariable())),
+                            Stream.of(listTypeFieldDelete(typeContext, idArgument.map(GraphqlParser.ArgumentContext::valueWithVariable).orElse(null), fieldDefinitionContext.get().type(),
+                                    argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
+                                            .map(valueWithVariableContext -> getIdObjectFieldWithVariable(typeContext, valueWithVariableContext.objectValueWithVariable()))
+                                            .filter(Optional::isPresent)
+                                            .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.get().valueWithVariable())
+                                            .collect(Collectors.toList())))
+                    );
                 }
             } else {
 
@@ -233,40 +180,27 @@ public class GraphqlMutationToStatements {
         return Stream.empty();
     }
 
-
-    protected Stream<Statement> listTypeObjectValueWithVariableToStatement(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected Stream<Statement> listTypeObjectValueWithVariableToStatementStream(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
 
         Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = register.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext);
         if (objectFieldWithVariableContext.isPresent()) {
             if (objectFieldWithVariableContext.get().valueWithVariable().arrayValueWithVariable() != null) {
-                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(fieldTypeContext)).objectTypeDefinition();
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = register.getDefinition(register.getFieldTypeName(typeContext)).objectTypeDefinition();
                 Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext1 ->
                         fieldDefinitionContext1.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
+
                 if (fieldDefinitionContext.isPresent()) {
-                    Optional<GraphqlParser.ObjectFieldWithVariableContext> idField = getIdObjectFieldWithVariable(fieldTypeContext, objectValueWithVariableContext);
-                    if (idField.isPresent()) {
-                        return Stream.concat(objectFieldWithVariableContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                        .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                        .flatMap(valueWithVariableContext -> listObjectValueWithVariableToStatement(fieldTypeContext, idField.get().valueWithVariable(), fieldDefinitionContext.get().type(), inputValueDefinitionContext, valueWithVariableContext.objectValueWithVariable())),
-                                Stream.of(listInputObjectToRelationDelete(fieldTypeContext, idField.get().valueWithVariable(), fieldDefinitionContext.get().type(),
-                                        objectFieldWithVariableContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                                .map(valueWithVariableContext -> getIdObjectFieldWithVariable(fieldTypeContext, valueWithVariableContext.objectValueWithVariable()))
-                                                .filter(Optional::isPresent)
-                                                .map(objectFieldWithVariableContext1 -> objectFieldWithVariableContext1.get().valueWithVariable())
-                                                .collect(Collectors.toList())))
-                        );
-                    } else {
-                        return Stream.concat(objectFieldWithVariableContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                        .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                        .flatMap(valueWithVariableContext -> listObjectValueWithVariableToStatement(fieldTypeContext, idField.get().valueWithVariable(), fieldDefinitionContext.get().type(), inputValueDefinitionContext, valueWithVariableContext.objectValueWithVariable())),
-                                Stream.of(listInputObjectToRelationDelete(fieldTypeContext, null, fieldDefinitionContext.get().type(),
-                                        objectFieldWithVariableContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                                                .map(valueWithVariableContext -> getIdObjectFieldWithVariable(fieldTypeContext, valueWithVariableContext.objectValueWithVariable()))
-                                                .filter(Optional::isPresent)
-                                                .map(objectFieldWithVariableContext1 -> objectFieldWithVariableContext1.get().valueWithVariable())
-                                                .collect(Collectors.toList())))
-                        );
-                    }
+                    Optional<GraphqlParser.ObjectFieldWithVariableContext> idField = getIdObjectFieldWithVariable(typeContext, objectValueWithVariableContext);
+                    return Stream.concat(objectFieldWithVariableContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
+                                    .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                    .flatMap(valueWithVariableContext -> listTypeObjectValueWithVariableToStatementStream(typeContext, idField.map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable).orElse(null), fieldDefinitionContext.get().type(), inputValueDefinitionContext, valueWithVariableContext.objectValueWithVariable())),
+                            Stream.of(listTypeFieldDelete(typeContext, idField.map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable).orElse(null), fieldDefinitionContext.get().type(),
+                                    objectFieldWithVariableContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
+                                            .map(valueWithVariableContext -> getIdObjectFieldWithVariable(typeContext, valueWithVariableContext.objectValueWithVariable()))
+                                            .filter(Optional::isPresent)
+                                            .map(updateObjectFieldWithVariableContext -> updateObjectFieldWithVariableContext.get().valueWithVariable())
+                                            .collect(Collectors.toList())))
+                    );
                 }
             } else {
 
@@ -275,26 +209,39 @@ public class GraphqlMutationToStatements {
         return Stream.empty();
     }
 
-    protected Optional<GraphqlParser.ArgumentContext> getIdArgument(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsContext argumentsContext) {
-        String typeIdFieldName = register.getTypeIdFieldName(register.getFieldTypeName(fieldTypeContext));
-        return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(typeIdFieldName)).findFirst();
+    protected Stream<Statement> listTypeObjectValueWithVariableToStatementStream(GraphqlParser.TypeContext parentTypeContext, GraphqlParser.ValueWithVariableContext parentTypeIdValueWithVariableContext, GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+
+        GraphqlParser.TypeDefinitionContext typeDefinitionContext = register.getDefinition(register.getFieldTypeName(inputValueDefinitionContext.type()));
+        List<GraphqlParser.InputValueDefinitionContext> scalarInputValueDefinitionContextList = typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(fieldInputValueDefinitionContext -> !register.fieldTypeIsList(fieldInputValueDefinitionContext.type()))
+                .filter(fieldInputValueDefinitionContext -> register.isInnerScalar(fieldInputValueDefinitionContext.type().getText())).collect(Collectors.toList());
+
+        return Stream.concat(
+                Stream.concat(
+                        Stream.concat(singleTypeScalarInputValuesToStatementStream(typeContext, scalarInputValueDefinitionContextList, objectValueWithVariableContext),
+                                Stream.of(fieldTypeRelationUpdate(parentTypeContext, parentTypeIdValueWithVariableContext, typeContext, objectValueWithVariableContext))),
+                        typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                                .filter(fieldInputValueDefinitionContext -> !register.fieldTypeIsList(fieldInputValueDefinitionContext.type()))
+                                .filter(fieldInputValueDefinitionContext -> register.isInputObject(fieldInputValueDefinitionContext.type().getText()))
+                                .flatMap(fieldInputValueDefinitionContext -> singleTypeObjectValueWithVariableToStatementStream(typeContext, fieldInputValueDefinitionContext, objectValueWithVariableContext))
+                ),
+                typeDefinitionContext.inputObjectTypeDefinition().inputObjectValueDefinitions().inputValueDefinition().stream()
+                        .filter(fieldInputValueDefinitionContext -> register.fieldTypeIsList(fieldInputValueDefinitionContext.type()))
+                        .flatMap(fieldInputValueDefinitionContext -> listTypeObjectValueWithVariableToStatementStream(typeContext, fieldInputValueDefinitionContext, objectValueWithVariableContext))
+        );
     }
 
-    protected Stream<Statement> argumentsToStatement(GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Stream<Statement> singleTypeScalarArgumentsToStatementStream(GraphqlParser.TypeContext typeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
 
-        Optional<GraphqlParser.ArgumentContext> idField = getIdArgument(fieldTypeContext, argumentsContext);
-        if (idField.isPresent()) {
-            return Stream.of(argumentsToUpdate(fieldTypeContext, idField.get(), inputValueDefinitionContextList, argumentsContext));
-        } else {
-            return Stream.of(argumentsToInsert(fieldTypeContext, inputValueDefinitionContextList, argumentsContext), createInsertIdSetStatement(fieldTypeContext));
-        }
+        Optional<GraphqlParser.ArgumentContext> idField = getIdArgument(typeContext, argumentsContext);
+        return idField.<Stream<Statement>>map(argumentContext -> Stream.of(singleTypeScalarArgumentsToUpdate(typeContext, argumentContext, inputValueDefinitionContextList, argumentsContext))).orElseGet(() -> Stream.of(singleTypeScalarArgumentsToInsert(typeContext, inputValueDefinitionContextList, argumentsContext), createInsertIdSetStatement(typeContext)));
     }
 
-    protected Update argumentsToUpdate(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentContext idField, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Update singleTypeScalarArgumentsToUpdate(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentContext idField, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
         Update update = new Update();
-        update.setColumns(inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext -> argumentsToColumn(inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
-        update.setExpressions(inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext -> argumentsToDBValue(inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
-        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
+        update.setColumns(inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext -> singleTypeScalarArgumentsToColumn(inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+        update.setExpressions(inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext -> singleTypeScalarArgumentsToDBValue(inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
         Table table = new Table(tableName);
         update.setTable(table);
         EqualsTo equalsTo = new EqualsTo();
@@ -304,17 +251,17 @@ public class GraphqlMutationToStatements {
         return update;
     }
 
-    protected Insert argumentsToInsert(GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Insert singleTypeScalarArgumentsToInsert(GraphqlParser.TypeContext typeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
         Insert insert = new Insert();
-        insert.setColumns(inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> argumentsToColumn(inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
-        insert.setItemsList(new ExpressionList(inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> argumentsToDBValue(inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList())));
-        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
+        insert.setColumns(inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> singleTypeScalarArgumentsToColumn(inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+        insert.setItemsList(new ExpressionList(inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> singleTypeScalarArgumentsToDBValue(inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList())));
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
         Table table = new Table(tableName);
         insert.setTable(table);
         return insert;
     }
 
-    protected Optional<Column> argumentsToColumn(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Optional<Column> singleTypeScalarArgumentsToColumn(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
         Optional<GraphqlParser.ArgumentContext> argumentContext = register.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
         if (argumentContext.isPresent()) {
             return Optional.of(new Column(DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(argumentContext.get().name().getText())));
@@ -328,7 +275,7 @@ public class GraphqlMutationToStatements {
         return Optional.empty();
     }
 
-    protected Optional<Expression> argumentsToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
+    protected Optional<Expression> singleTypeScalarArgumentsToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
         Optional<GraphqlParser.ArgumentContext> argumentContext = register.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
         if (argumentContext.isPresent()) {
             return Optional.of(register.scalarValueWithVariableToDBValue(argumentContext.get().valueWithVariable()));
@@ -344,113 +291,17 @@ public class GraphqlMutationToStatements {
         return Optional.empty();
     }
 
+    protected Stream<Statement> singleTypeScalarInputValuesToStatementStream(GraphqlParser.TypeContext typeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
 
-    protected Optional<GraphqlParser.ObjectFieldWithVariableContext> getIdObjectFieldWithVariable(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        String typeIdFieldName = register.getTypeIdFieldName(register.getFieldTypeName(fieldTypeContext));
-        return objectValueWithVariableContext.objectFieldWithVariable().stream().filter(fieldWithVariableContext -> fieldWithVariableContext.name().getText().equals(typeIdFieldName)).findFirst();
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> idField = getIdObjectFieldWithVariable(typeContext, objectValueWithVariableContext);
+        return idField.<Stream<Statement>>map(objectFieldWithVariableContext -> Stream.of(singleTypeScalarInputValuesToUpdate(typeContext, objectFieldWithVariableContext, inputValueDefinitionContextList, objectValueWithVariableContext))).orElseGet(() -> Stream.of(singleTypeScalarInputValuesToInsert(typeContext, inputValueDefinitionContextList, objectValueWithVariableContext), createInsertIdSetStatement(typeContext)));
     }
 
-    protected Stream<Statement> inputObjectToStatement(GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-
-        Optional<GraphqlParser.ObjectFieldWithVariableContext> idField = getIdObjectFieldWithVariable(fieldTypeContext, objectValueWithVariableContext);
-        if (idField.isPresent()) {
-            return Stream.of(inputObjectToUpdate(fieldTypeContext, idField.get(), inputValueDefinitionContextList, objectValueWithVariableContext));
-        } else {
-            return Stream.of(inputObjectToInsert(fieldTypeContext, inputValueDefinitionContextList, objectValueWithVariableContext), createInsertIdSetStatement(fieldTypeContext));
-        }
-    }
-
-    protected Update inputObjectToRelationUpdate(GraphqlParser.TypeContext typeContext, GraphqlParser.ValueWithVariableContext idValueWithVariableContext, GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected Update singleTypeScalarInputValuesToUpdate(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectFieldWithVariableContext idField, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        Update update = new Update();
+        update.setColumns(inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext -> singleTypeScalarInputValuesToColumn(inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+        update.setExpressions(inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext -> singleTypeScalarInputValuesToDBValue(inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
         String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
-        Table table = new Table(tableName);
-        Update update = new Update();
-        update.setColumns(Collections.singletonList(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(register.getFieldTypeName(typeContext), register.getFieldTypeName(fieldTypeContext))))));
-        Optional<GraphqlParser.ObjectFieldWithVariableContext> fieldIdField = getIdObjectFieldWithVariable(fieldTypeContext, objectValueWithVariableContext);
-        if (fieldIdField.isPresent()) {
-            update.setExpressions(Collections.singletonList(register.scalarValueWithVariableToDBValue(fieldIdField.get().valueWithVariable())));
-        } else {
-            Function function = new Function();
-            function.setName("LAST_INSERT_ID");
-            update.setExpressions(Collections.singletonList(function));
-        }
-        update.setTable(table);
-        EqualsTo equalsTo = new EqualsTo();
-        equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(typeContext)))));
-        if (idValueWithVariableContext == null) {
-            equalsTo.setRightExpression(createInsertIdUserVariable(typeContext));
-        } else {
-            equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(idValueWithVariableContext));
-        }
-        update.setWhere(equalsTo);
-        return update;
-    }
-
-    protected Update listInputObjectToRelationUpdate(GraphqlParser.TypeContext typeContext, GraphqlParser.ValueWithVariableContext idValueWithVariableContext, GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
-        Table table = new Table(tableName);
-        Update update = new Update();
-        update.setColumns(Collections.singletonList(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(register.getFieldTypeName(fieldTypeContext), register.getFieldTypeName(typeContext))))));
-        Optional<GraphqlParser.ObjectFieldWithVariableContext> fieldIdField = getIdObjectFieldWithVariable(fieldTypeContext, objectValueWithVariableContext);
-        if (idValueWithVariableContext == null) {
-            update.setExpressions(Collections.singletonList(createInsertIdUserVariable(fieldTypeContext)));
-        } else {
-            update.setExpressions(Collections.singletonList(register.scalarValueWithVariableToDBValue(idValueWithVariableContext)));
-        }
-        update.setTable(table);
-        EqualsTo equalsTo = new EqualsTo();
-        equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(typeContext)))));
-        if (fieldIdField.isPresent()) {
-            equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(fieldIdField.get().valueWithVariable()));
-        } else {
-            equalsTo.setRightExpression(createInsertIdUserVariable(fieldTypeContext));
-        }
-        update.setWhere(equalsTo);
-        return update;
-    }
-
-    protected Delete listInputObjectToRelationDelete(GraphqlParser.TypeContext typeContext, GraphqlParser.ValueWithVariableContext idValueWithVariableContext, GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.ValueWithVariableContext> idValueWithVariableContextList) {
-        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
-        Table table = new Table(tableName);
-        Delete delete = new Delete();
-        delete.setTable(table);
-        EqualsTo equalsTo = new EqualsTo();
-        equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(typeContext)))));
-        if (idValueWithVariableContext == null) {
-            equalsTo.setRightExpression(createInsertIdUserVariable(fieldTypeContext));
-        } else {
-            equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(idValueWithVariableContext));
-        }
-        InExpression inExpression = new InExpression();
-        inExpression.setNot(true);
-        inExpression.setRightItemsList(new ExpressionList(idValueWithVariableContextList.stream().map(register::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
-        delete.setWhere(new MultiAndExpression(Arrays.asList(equalsTo, inExpression)));
-        return delete;
-    }
-
-    protected String getIdVariableName(GraphqlParser.TypeContext typeContext) {
-        String typeName = register.getFieldTypeName(typeContext);
-        return DBNameConverter.INSTANCE.graphqlFieldNameToVariableName(typeName, register.getTypeIdFieldName(typeName));
-    }
-
-    protected SetStatement createInsertIdSetStatement(GraphqlParser.TypeContext typeContext) {
-        String idVariableName = getIdVariableName(typeContext);
-        Function function = new Function();
-        function.setName("LAST_INSERT_ID");
-        return new SetStatement(idVariableName, function);
-    }
-
-    protected UserVariable createInsertIdUserVariable(GraphqlParser.TypeContext typeContext) {
-        String idVariableName = getIdVariableName(typeContext);
-        UserVariable userVariable = new UserVariable();
-        userVariable.setName(idVariableName);
-        return userVariable;
-    }
-
-    protected Update inputObjectToUpdate(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectFieldWithVariableContext idField, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        Update update = new Update();
-        update.setColumns(inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext -> inputObjectToColumn(inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
-        update.setExpressions(inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> register.isInnerScalar(register.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext -> inputObjectToDBValue(inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
-        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
         Table table = new Table(tableName);
         update.setTable(table);
         EqualsTo equalsTo = new EqualsTo();
@@ -460,17 +311,17 @@ public class GraphqlMutationToStatements {
         return update;
     }
 
-    protected Insert inputObjectToInsert(GraphqlParser.TypeContext fieldTypeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected Insert singleTypeScalarInputValuesToInsert(GraphqlParser.TypeContext typeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         Insert insert = new Insert();
-        insert.setColumns(inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> inputObjectToColumn(inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
-        insert.setItemsList(new ExpressionList(inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> inputObjectToDBValue(inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList())));
-        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext));
+        insert.setColumns(inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> singleTypeScalarInputValuesToColumn(inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+        insert.setItemsList(new ExpressionList(inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> singleTypeScalarInputValuesToDBValue(inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList())));
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
         Table table = new Table(tableName);
         insert.setTable(table);
         return insert;
     }
 
-    protected Optional<Column> inputObjectToColumn(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected Optional<Column> singleTypeScalarInputValuesToColumn(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = register.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext);
         if (objectFieldWithVariableContext.isPresent()) {
             return Optional.of(new Column(DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(objectFieldWithVariableContext.get().name().getText())));
@@ -484,7 +335,7 @@ public class GraphqlMutationToStatements {
         return Optional.empty();
     }
 
-    protected Optional<Expression> inputObjectToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected Optional<Expression> singleTypeScalarInputValuesToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = register.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext);
         if (objectFieldWithVariableContext.isPresent()) {
             return Optional.of(register.scalarValueWithVariableToDBValue(objectFieldWithVariableContext.get().valueWithVariable()));
@@ -498,5 +349,101 @@ public class GraphqlMutationToStatements {
             }
         }
         return Optional.empty();
+    }
+
+    protected Update parentTypeRelationUpdate(GraphqlParser.TypeContext parentTypeContext, GraphqlParser.ValueWithVariableContext parentIdValueWithVariableContext, GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(parentTypeContext));
+        Table table = new Table(tableName);
+        Update update = new Update();
+        update.setColumns(Collections.singletonList(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(register.getFieldTypeName(parentTypeContext), register.getFieldTypeName(typeContext))))));
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> fieldIdField = getIdObjectFieldWithVariable(typeContext, objectValueWithVariableContext);
+        if (fieldIdField.isPresent()) {
+            update.setExpressions(Collections.singletonList(register.scalarValueWithVariableToDBValue(fieldIdField.get().valueWithVariable())));
+        } else {
+            Function function = new Function();
+            function.setName("LAST_INSERT_ID");
+            update.setExpressions(Collections.singletonList(function));
+        }
+        update.setTable(table);
+        EqualsTo equalsTo = new EqualsTo();
+        equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(parentTypeContext)))));
+        if (parentIdValueWithVariableContext == null) {
+            equalsTo.setRightExpression(createInsertIdUserVariable(parentTypeContext));
+        } else {
+            equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(parentIdValueWithVariableContext));
+        }
+        update.setWhere(equalsTo);
+        return update;
+    }
+
+    protected Update fieldTypeRelationUpdate(GraphqlParser.TypeContext parentTypeContext, GraphqlParser.ValueWithVariableContext parentIdValueWithVariableContext, GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
+        Table table = new Table(tableName);
+        Update update = new Update();
+        update.setColumns(Collections.singletonList(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(register.getFieldTypeName(typeContext), register.getFieldTypeName(parentTypeContext))))));
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> fieldIdField = getIdObjectFieldWithVariable(typeContext, objectValueWithVariableContext);
+        if (parentIdValueWithVariableContext == null) {
+            update.setExpressions(Collections.singletonList(createInsertIdUserVariable(typeContext)));
+        } else {
+            update.setExpressions(Collections.singletonList(register.scalarValueWithVariableToDBValue(parentIdValueWithVariableContext)));
+        }
+        update.setTable(table);
+        EqualsTo equalsTo = new EqualsTo();
+        equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(parentTypeContext)))));
+        if (fieldIdField.isPresent()) {
+            equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(fieldIdField.get().valueWithVariable()));
+        } else {
+            equalsTo.setRightExpression(createInsertIdUserVariable(typeContext));
+        }
+        update.setWhere(equalsTo);
+        return update;
+    }
+
+    protected Delete listTypeFieldDelete(GraphqlParser.TypeContext parentTypeContext, GraphqlParser.ValueWithVariableContext idValueWithVariableContext, GraphqlParser.TypeContext typeContext, List<GraphqlParser.ValueWithVariableContext> idValueWithVariableContextList) {
+        String tableName = DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
+        Table table = new Table(tableName);
+        Delete delete = new Delete();
+        delete.setTable(table);
+        EqualsTo equalsTo = new EqualsTo();
+        equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(parentTypeContext)))));
+        if (idValueWithVariableContext == null) {
+            equalsTo.setRightExpression(createInsertIdUserVariable(typeContext));
+        } else {
+            equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(idValueWithVariableContext));
+        }
+        InExpression inExpression = new InExpression();
+        inExpression.setNot(true);
+        inExpression.setRightItemsList(new ExpressionList(idValueWithVariableContextList.stream().map(register::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
+        delete.setWhere(new MultiAndExpression(Arrays.asList(equalsTo, inExpression)));
+        return delete;
+    }
+
+    protected Optional<GraphqlParser.ArgumentContext> getIdArgument(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        String typeIdFieldName = register.getTypeIdFieldName(register.getFieldTypeName(fieldTypeContext));
+        return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(typeIdFieldName)).findFirst();
+    }
+
+    protected Optional<GraphqlParser.ObjectFieldWithVariableContext> getIdObjectFieldWithVariable(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        String typeIdFieldName = register.getTypeIdFieldName(register.getFieldTypeName(fieldTypeContext));
+        return objectValueWithVariableContext.objectFieldWithVariable().stream().filter(fieldWithVariableContext -> fieldWithVariableContext.name().getText().equals(typeIdFieldName)).findFirst();
+    }
+
+    protected String getIdVariableName(GraphqlParser.TypeContext typeContext) {
+        String typeName = register.getFieldTypeName(typeContext);
+        return DBNameConverter.INSTANCE.graphqlFieldNameToVariableName(typeName, register.getTypeIdFieldName(typeName));
+    }
+
+    protected SetStatement createInsertIdSetStatement(GraphqlParser.TypeContext typeContext) {
+        String idVariableName = "@" + getIdVariableName(typeContext);
+        Function function = new Function();
+        function.setName("LAST_INSERT_ID");
+        return new SetStatement(idVariableName, function);
+    }
+
+    protected UserVariable createInsertIdUserVariable(GraphqlParser.TypeContext typeContext) {
+        String idVariableName = getIdVariableName(typeContext);
+        UserVariable userVariable = new UserVariable();
+        userVariable.setName(idVariableName);
+        return userVariable;
     }
 }
