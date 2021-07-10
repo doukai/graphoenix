@@ -52,7 +52,7 @@ mutation updateTest {
         name,sex,login
     }
 
-    role(id:"id1",name:"name1",resources: [{id:"test1",name: "res1"},{name: "res2"}]){
+    role(name:"name1",resources: [{id:"test1",name: "res1"},{name: "res2"}]){
         name
     }
 }

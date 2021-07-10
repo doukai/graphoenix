@@ -19,7 +19,7 @@ public enum DBNameConverter {
 
     public String graphqlFieldNameToVariableName(String graphqlTypeName, String graphqlFieldName) {
 
-        return String.format("@%s", String.join("_", CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlFieldName)));
+        return String.join("_", CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlFieldName));
     }
 
 
