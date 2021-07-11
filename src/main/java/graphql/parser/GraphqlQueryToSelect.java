@@ -44,15 +44,6 @@ public class GraphqlQueryToSelect {
             body.setFromItem(table);
             select.setSelectBody(body);
 
-            if (operationDefinitionContext.name() != null) {
-                //TODO
-            }
-            if (operationDefinitionContext.variableDefinitions() != null) {
-                //TODO
-            }
-            if (operationDefinitionContext.directives() != null) {
-                //TODO
-            }
             return Optional.of(select);
         }
         return Optional.empty();
@@ -79,6 +70,11 @@ public class GraphqlQueryToSelect {
     }
 
     protected SubSelect objectFieldToSubSelect(String typeName, String filedTypeName, GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
+
+        return objectFieldToSubSelect(typeName, filedTypeName, typeContext, selectionContext, false);
+    }
+
+    protected SubSelect objectFieldToSubSelect(String typeName, String filedTypeName, GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext, boolean isMutation) {
 
         Optional<GraphqlParser.TypeContext> fieldTypeContext = register.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
         Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = register.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText());
@@ -115,7 +111,20 @@ public class GraphqlQueryToSelect {
                 }
             } else {
                 if (fieldDefinitionContext.isPresent() && selectionContext.field().arguments() != null) {
-                    body.setWhere(argumentsToWhere.argumentsToMultipleExpression(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments()));
+                    if (isMutation) {
+                        EqualsTo equalsTo = new EqualsTo();
+                        Table table = new Table(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext.get())));
+                        equalsTo.setLeftExpression(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(fieldTypeContext.get())))));
+                        Optional<GraphqlParser.ArgumentContext> idArgument = register.getIdArgument(fieldTypeContext.get(), selectionContext.field().arguments());
+                        if (idArgument.isPresent()) {
+                            equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(idArgument.get().valueWithVariable()));
+                        } else {
+                            equalsTo.setRightExpression(register.createInsertIdUserVariable(fieldTypeContext.get()));
+                        }
+                        body.setWhere(equalsTo);
+                    } else {
+                        body.setWhere(argumentsToWhere.argumentsToMultipleExpression(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments()));
+                    }
                 }
             }
             return subSelect;

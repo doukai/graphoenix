@@ -23,7 +23,7 @@ public class Test {
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrRegister);
         GraphqlTypeToTable graphqlTypeToTable = new GraphqlTypeToTable(graphqlAntlrRegister);
         GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrRegister, graphqlArgumentsToWhere);
-        GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrRegister);
+        GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrRegister, graphqlQueryToSelect);
         CodePointCharStream charStream;
 
 
