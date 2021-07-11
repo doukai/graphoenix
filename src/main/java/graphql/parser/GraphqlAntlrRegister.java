@@ -234,7 +234,9 @@ public class GraphqlAntlrRegister {
 
     public Optional<GraphqlParser.ObjectFieldContext> getObjectFieldFromInputValueDefinition(GraphqlParser.ObjectValueContext objectValueContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         return objectValueContext.objectField().stream().filter(objectFieldContext -> objectFieldContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
-    }    protected Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
+    }
+
+    protected Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
         return scalarValueToDBValue(valueContext.StringValue(),
                 valueContext.IntValue(),
                 valueContext.FloatValue(),
@@ -263,5 +265,19 @@ public class GraphqlAntlrRegister {
             return new NullValue();
         }
         return null;
+    }
+
+    public Optional<GraphqlParser.FieldDefinitionContext> getTypeFieldDefinitionFromInputValueDefinition(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinition = getFieldTypeDefinition(typeContext).objectTypeDefinition();
+        return objectTypeDefinition.fieldsDefinition().fieldDefinition().stream().filter(fieldDefinitionContext ->
+                fieldDefinitionContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
+    }
+
+    public GraphqlParser.TypeDefinitionContext getFieldTypeDefinition(GraphqlParser.TypeContext typeContext) {
+        return getDefinition(getFieldTypeName(typeContext));
+    }
+
+    public GraphqlParser.TypeDefinitionContext getFieldTypeDefinition(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return getDefinition(getFieldTypeName(inputValueDefinitionContext.type()));
     }
 }
