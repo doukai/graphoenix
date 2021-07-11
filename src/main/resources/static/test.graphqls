@@ -6,7 +6,7 @@ schema {
 type QueryType {
     user(id: ID!): User
     #    users(ex:UserExpression): [User]
-    users(name:StringExpression,cond:Conditional,myrole:RoleExpression,age:Int,test:[UserExpression]): [User]
+    users(name:StringExpression,cond:Conditional,role:RoleExpression,age:Int,test:[UserExpression]): [User]
     role(id : ID!) : Role
     resource(id: ID!): Resource
 }
@@ -37,9 +37,12 @@ query HeroNameAndFriends {
     #    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
     #        id, name,sex,login,role{name,type}
     #    }
-    users(cond:OR,name: {opr: GTE,val: "test"},myrole: {
+    users(cond:OR,name: {opr: GTE,val: "test"},role: {
         name: {opr: EQ,val: "rolename"}
     },age:18,test:[{cond:OR, name: "test2",age: 13},{cond:OR, name: "test3",age: 16}]) {
+        id, name,sex,login,role{name,type}
+    }
+    user(id:"id1") {
         id, name,sex,login,role{name,type}
     }
     #    role(id: 1){
@@ -48,7 +51,7 @@ query HeroNameAndFriends {
 }
 
 mutation updateTest {
-    user(name:"name1",role:{id:"123",name:"role1"}){
+    user(id:"userid1", name:"name1",role:{id:"123",name:"role1"}){
         name,sex,login
     }
 

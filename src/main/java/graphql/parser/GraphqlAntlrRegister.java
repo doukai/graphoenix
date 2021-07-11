@@ -3,6 +3,7 @@ package graphql.parser;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.statement.SetStatement;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Arrays;
@@ -279,5 +280,38 @@ public class GraphqlAntlrRegister {
 
     public GraphqlParser.TypeDefinitionContext getFieldTypeDefinition(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         return getDefinition(getFieldTypeName(inputValueDefinitionContext.type()));
+    }
+
+    protected Optional<GraphqlParser.ArgumentContext> getIdArgument(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        String typeIdFieldName = getTypeIdFieldName(getFieldTypeName(typeContext));
+        return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(typeIdFieldName)).findFirst();
+    }
+
+    protected Optional<GraphqlParser.ObjectFieldWithVariableContext> getIdObjectFieldWithVariable(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        String typeIdFieldName = getTypeIdFieldName(getFieldTypeName(typeContext));
+        return objectValueWithVariableContext.objectFieldWithVariable().stream().filter(fieldWithVariableContext -> fieldWithVariableContext.name().getText().equals(typeIdFieldName)).findFirst();
+    }
+
+    protected Optional<GraphqlParser.ObjectFieldContext> getIdObjectField(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueContext objectValueContext) {
+        String typeIdFieldName = getTypeIdFieldName(getFieldTypeName(typeContext));
+        return objectValueContext.objectField().stream().filter(fieldContext -> fieldContext.name().getText().equals(typeIdFieldName)).findFirst();
+    }
+    protected String getIdVariableName(GraphqlParser.TypeContext typeContext) {
+        String typeName = getFieldTypeName(typeContext);
+        return DBNameConverter.INSTANCE.graphqlFieldNameToVariableName(typeName, getTypeIdFieldName(typeName));
+    }
+
+    protected SetStatement createInsertIdSetStatement(GraphqlParser.TypeContext typeContext) {
+        String idVariableName = "@" + getIdVariableName(typeContext);
+        Function function = new Function();
+        function.setName("LAST_INSERT_ID");
+        return new SetStatement(idVariableName, function);
+    }
+
+    protected UserVariable createInsertIdUserVariable(GraphqlParser.TypeContext typeContext) {
+        String idVariableName = getIdVariableName(typeContext);
+        UserVariable userVariable = new UserVariable();
+        userVariable.setName(idVariableName);
+        return userVariable;
     }
 }
