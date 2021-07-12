@@ -51,13 +51,13 @@ query HeroNameAndFriends {
 }
 
 mutation updateTest {
-    user(id:"userid1", name:"name1",role:{id:"123",name:"role1"}){
+    user( name:"name1",role:{id:"123",name:"role1"}){
         name,sex,login
     }
 
-    role(name:"name1",resources: [{id:"test1",name: "res1"},{name: "res2"}]){
-        name
-    }
+#    role(name:"name1",resources: [{id:"test1",name: "res1"},{name: "res2"}]){
+#        name
+#    }
 }
 
 input UserInput {

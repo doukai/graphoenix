@@ -1,4 +1,4 @@
-package graphql.parser;
+package parser;
 
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.expression.Expression;
@@ -598,9 +598,7 @@ public class GraphqlMutationToStatements {
         if (fieldIdField.isPresent()) {
             update.setExpressions(Collections.singletonList(register.scalarValueWithVariableToDBValue(fieldIdField.get().valueWithVariable())));
         } else {
-            Function function = new Function();
-            function.setName("LAST_INSERT_ID");
-            update.setExpressions(Collections.singletonList(function));
+            update.setExpressions(Collections.singletonList(register.createInsertIdUserVariable(typeContext)));
         }
         update.setTable(table);
         EqualsTo equalsTo = new EqualsTo();
@@ -621,7 +619,7 @@ public class GraphqlMutationToStatements {
         update.setColumns(Collections.singletonList(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(register.getFieldTypeName(typeContext), register.getFieldTypeName(parentTypeContext))))));
         Optional<GraphqlParser.ObjectFieldWithVariableContext> fieldIdField = register.getIdObjectFieldWithVariable(typeContext, objectValueWithVariableContext);
         if (parentIdValueWithVariableContext == null) {
-            update.setExpressions(Collections.singletonList(register.createInsertIdUserVariable(typeContext)));
+            update.setExpressions(Collections.singletonList(register.createInsertIdUserVariable(parentTypeContext)));
         } else {
             update.setExpressions(Collections.singletonList(register.scalarValueWithVariableToDBValue(parentIdValueWithVariableContext)));
         }
@@ -665,9 +663,7 @@ public class GraphqlMutationToStatements {
         if (fieldIdField.isPresent()) {
             update.setExpressions(Collections.singletonList(register.scalarValueToDBValue(fieldIdField.get().value())));
         } else {
-            Function function = new Function();
-            function.setName("LAST_INSERT_ID");
-            update.setExpressions(Collections.singletonList(function));
+            update.setExpressions(Collections.singletonList(register.createInsertIdUserVariable(typeContext)));
         }
         update.setTable(table);
         EqualsTo equalsTo = new EqualsTo();
@@ -688,7 +684,7 @@ public class GraphqlMutationToStatements {
         update.setColumns(Collections.singletonList(new Column(table, DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(register.getFieldTypeName(typeContext), register.getFieldTypeName(parentTypeContext))))));
         Optional<GraphqlParser.ObjectFieldContext> fieldIdField = register.getIdObjectField(typeContext, objectValueContext);
         if (parentIdValueContext == null) {
-            update.setExpressions(Collections.singletonList(register.createInsertIdUserVariable(typeContext)));
+            update.setExpressions(Collections.singletonList(register.createInsertIdUserVariable(parentTypeContext)));
         } else {
             update.setExpressions(Collections.singletonList(register.scalarValueToDBValue(parentIdValueContext)));
         }

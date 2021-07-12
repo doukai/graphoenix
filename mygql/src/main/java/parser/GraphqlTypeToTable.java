@@ -1,4 +1,4 @@
-package graphql.parser;
+package parser;
 
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.schema.Table;
