@@ -1,4 +1,4 @@
-package io.graphonix.grantlr.register;
+package io.graphonix.grantlr.manager;
 
 import graphql.parser.antlr.GraphqlParser;
 
