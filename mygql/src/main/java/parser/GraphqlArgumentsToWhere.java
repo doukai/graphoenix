@@ -1,4 +1,4 @@
-package graphql.parser;
+package parser;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
