@@ -1,7 +1,8 @@
-package parser;
+package io.graphoenix.mygql.parser;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.mygql.common.utils.DBNameUtil;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.statement.SetStatement;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -298,7 +299,7 @@ public class GraphqlAntlrRegister {
     }
     protected String getIdVariableName(GraphqlParser.TypeContext typeContext) {
         String typeName = getFieldTypeName(typeContext);
-        return DBNameConverter.INSTANCE.graphqlFieldNameToVariableName(typeName, getTypeIdFieldName(typeName));
+        return DBNameUtil.DB_NAME_UTIL.graphqlFieldNameToVariableName(typeName, getTypeIdFieldName(typeName));
     }
 
     protected SetStatement createInsertIdSetStatement(GraphqlParser.TypeContext typeContext) {

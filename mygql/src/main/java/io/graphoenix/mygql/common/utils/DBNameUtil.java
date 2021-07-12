@@ -1,11 +1,11 @@
-package parser;
+package io.graphoenix.mygql.common.utils;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.CharMatcher;
 
-public enum DBNameConverter {
+public enum DBNameUtil {
 
-    INSTANCE;
+    DB_NAME_UTIL;
 
     public String graphqlTypeNameToTableName(String graphqlTypeName) {
 
