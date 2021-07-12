@@ -1,7 +1,7 @@
-package io.graphonix.grantlr.register.impl;
+package io.graphonix.grantlr.manager.impl;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphonix.grantlr.register.*;
+import io.graphonix.grantlr.manager.*;
 
 public class GraphqlAntlrManager {
 
