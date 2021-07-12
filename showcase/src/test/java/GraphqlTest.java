@@ -2,6 +2,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.mygql.parser.*;
 import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;

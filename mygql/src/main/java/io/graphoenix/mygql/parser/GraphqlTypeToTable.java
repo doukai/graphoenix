@@ -1,4 +1,4 @@
-package parser;
+package io.graphoenix.mygql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.schema.Table;
@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static io.graphoenix.mygql.common.utils.DBNameUtil.DB_NAME_UTIL;
 
 public class GraphqlTypeToTable {
 
@@ -53,7 +55,7 @@ public class GraphqlTypeToTable {
 
         CreateTable createTable = new CreateTable();
         Table table = new Table();
-        table.setName(DBNameConverter.INSTANCE.graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
+        table.setName(DB_NAME_UTIL.graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
         createTable.setTable(table);
         createTable.setColumnDefinitions(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::createColumn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
         createTable.setIfNotExists(true);
@@ -66,7 +68,7 @@ public class GraphqlTypeToTable {
         Optional<ColumnDefinition> columnDefinition = createColumn(fieldDefinitionContext, fieldDefinitionContext.type(), false);
 
         columnDefinition.ifPresent(presentColumnDefinition -> {
-                    presentColumnDefinition.setColumnName(DBNameConverter.INSTANCE.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
+                    presentColumnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
                     presentColumnDefinition.setColumnSpecs(createColumnSpecs(fieldDefinitionContext));
                 }
         );
@@ -147,7 +149,7 @@ public class GraphqlTypeToTable {
                 .enumTypeDefinition()
                 .enumValueDefinitions()
                 .enumValueDefinition().stream()
-                .map(value -> DBNameConverter.INSTANCE.stringValueToDBVarchar(value.getText()))
+                .map(value -> DB_NAME_UTIL.stringValueToDBVarchar(value.getText()))
                 .collect(Collectors.toList()));
 
         return colDataType;
@@ -163,19 +165,19 @@ public class GraphqlTypeToTable {
         switch (typeNameContext.name().getText()) {
             case "ID":
             case "Int":
-                colDataType.setDataType(dataType.map(argumentContext -> DBNameConverter.INSTANCE.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
+                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "Boolean":
-                colDataType.setDataType(dataType.map(argumentContext -> DBNameConverter.INSTANCE.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
+                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "String":
-                colDataType.setDataType(dataType.map(argumentContext -> DBNameConverter.INSTANCE.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
+                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "Float":
-                colDataType.setDataType(dataType.map(argumentContext -> DBNameConverter.INSTANCE.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));
+                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 decimals.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
@@ -214,7 +216,7 @@ public class GraphqlTypeToTable {
             directiveToTableOption(objectTypeDefinitionContext.directives()).ifPresent(tableOptionsList::addAll);
         }
         if (objectTypeDefinitionContext.description() != null) {
-            tableOptionsList.add("COMMENT " + DBNameConverter.INSTANCE.graphqlDescriptionToDBComment(objectTypeDefinitionContext.description().getText()));
+            tableOptionsList.add("COMMENT " + DB_NAME_UTIL.graphqlDescriptionToDBComment(objectTypeDefinitionContext.description().getText()));
         }
         return tableOptionsList;
     }
@@ -227,11 +229,11 @@ public class GraphqlTypeToTable {
 
     protected String argumentToTableOption(GraphqlParser.ArgumentContext argumentContext) {
         if (argumentContext.valueWithVariable().IntValue() != null) {
-            return DBNameConverter.INSTANCE.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().IntValue().getText());
+            return DB_NAME_UTIL.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().IntValue().getText());
         } else if (argumentContext.valueWithVariable().BooleanValue() != null) {
             return argumentContext.name().getText();
         } else if (argumentContext.valueWithVariable().StringValue() != null) {
-            return DBNameConverter.INSTANCE.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().StringValue().getText());
+            return DB_NAME_UTIL.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().StringValue().getText());
         }
         //TODO
         return null;
@@ -244,7 +246,7 @@ public class GraphqlTypeToTable {
             directiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecsList::addAll);
         }
         if (fieldDefinitionContext.description() != null) {
-            columnSpecsList.add("COMMENT " + DBNameConverter.INSTANCE.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
+            columnSpecsList.add("COMMENT " + DB_NAME_UTIL.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
         }
         return columnSpecsList;
     }
@@ -258,11 +260,11 @@ public class GraphqlTypeToTable {
     protected String argumentToColumnSpecs(GraphqlParser.ArgumentContext argumentContext) {
 
         if (argumentContext.valueWithVariable().IntValue() != null) {
-            return DBNameConverter.INSTANCE.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().IntValue().getText());
+            return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().IntValue().getText());
         } else if (argumentContext.valueWithVariable().BooleanValue() != null) {
             return argumentContext.name().getText();
         } else if (argumentContext.valueWithVariable().StringValue() != null) {
-            return DBNameConverter.INSTANCE.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().StringValue().getText());
+            return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().StringValue().getText());
         }
         //TODO
         return null;
