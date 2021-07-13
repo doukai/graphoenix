@@ -7,4 +7,6 @@ import java.util.Map;
 public interface IGraphqlEnumManager {
 
     Map<String, GraphqlParser.EnumTypeDefinitionContext> register(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+
+    GraphqlParser.EnumTypeDefinitionContext getEnumTypeDefinition(String enumTypeName);
 }

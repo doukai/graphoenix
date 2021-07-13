@@ -18,4 +18,9 @@ public class GraphqlInputValueManager implements IGraphqlInputValueManager {
                         .collect(Collectors.toMap(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText(), inputValueDefinitionContext -> inputValueDefinitionContext)));
         return inputValueDefinitionMap;
     }
+
+    @Override
+    public Map<String, GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName) {
+        return inputValueDefinitionMap.get(inputObjectTypeName);
+    }
 }

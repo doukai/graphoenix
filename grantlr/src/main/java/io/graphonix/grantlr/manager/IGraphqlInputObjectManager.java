@@ -6,4 +6,6 @@ import java.util.Map;
 
 public interface IGraphqlInputObjectManager {
     Map<String, GraphqlParser.InputObjectTypeDefinitionContext> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+
+    GraphqlParser.InputObjectTypeDefinitionContext getInputObjectTypeDefinition(String inputObjectName);
 }

@@ -21,18 +21,13 @@ public class GraphqlOperationManager implements IGraphqlOperationManager {
         return operationTypeDefinitionMap;
     }
 
-    public Optional<Map.Entry<String, GraphqlParser.OperationTypeDefinitionContext>> getQueryOperationTypeDefinition() {
-        return operationTypeDefinitionMap.entrySet().stream()
-                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().QUERY() != null).findFirst();
+    @Override
+    public GraphqlParser.OperationTypeDefinitionContext getOperationTypeDefinition(String operationTypeName) {
+        return operationTypeDefinitionMap.get(operationTypeName);
     }
 
-    public Optional<Map.Entry<String, GraphqlParser.OperationTypeDefinitionContext>> getMutationOperationTypeDefinition() {
-        return operationTypeDefinitionMap.entrySet().stream()
-                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().MUTATION() != null).findFirst();
-    }
-
-    public Optional<Map.Entry<String, GraphqlParser.OperationTypeDefinitionContext>> getSubscriptionOperationTypeDefinition() {
-        return operationTypeDefinitionMap.entrySet().stream()
-                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().SUBSCRIPTION() != null).findFirst();
+    @Override
+    public Map<String, GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions() {
+        return operationTypeDefinitionMap;
     }
 }

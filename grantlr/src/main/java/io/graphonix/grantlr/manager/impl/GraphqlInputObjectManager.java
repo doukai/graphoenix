@@ -15,4 +15,9 @@ public class GraphqlInputObjectManager implements IGraphqlInputObjectManager {
         inputObjectTypeDefinitionMap.put(inputObjectTypeDefinitionContext.name().getText(), inputObjectTypeDefinitionContext);
         return inputObjectTypeDefinitionMap;
     }
+
+    @Override
+    public GraphqlParser.InputObjectTypeDefinitionContext getInputObjectTypeDefinition(String inputObjectName) {
+        return inputObjectTypeDefinitionMap.get(inputObjectName);
+    }
 }

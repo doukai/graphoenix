@@ -15,4 +15,9 @@ public class GraphqlObjectManager implements IGraphqlObjectManager {
         objectTypeDefinitionMap.put(objectTypeDefinitionContext.name().getText(), objectTypeDefinitionContext);
         return objectTypeDefinitionMap;
     }
+
+    @Override
+    public GraphqlParser.ObjectTypeDefinitionContext getObjectTypeDefinition(String objectTypeName) {
+        return objectTypeDefinitionMap.get(objectTypeName);
+    }
 }

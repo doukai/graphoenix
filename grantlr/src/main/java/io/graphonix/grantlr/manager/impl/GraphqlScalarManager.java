@@ -15,4 +15,9 @@ public class GraphqlScalarManager implements IGraphqlScalarManager {
         scalarTypeDefinitionMap.put(scalarTypeDefinitionContext.name().getText(), scalarTypeDefinitionContext);
         return scalarTypeDefinitionMap;
     }
+
+    @Override
+    public GraphqlParser.ScalarTypeDefinitionContext getScalarTypeDefinition(String scalarTypeName) {
+        return scalarTypeDefinitionMap.get(scalarTypeName);
+    }
 }
