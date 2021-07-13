@@ -7,4 +7,6 @@ import java.util.Map;
 public interface IGraphqlFieldManager {
 
     Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
+    Map<String, GraphqlParser.FieldDefinitionContext> getFieldDefinitions(String objectTypeName);
 }

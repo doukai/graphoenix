@@ -20,7 +20,8 @@ public class GraphqlEnumManager implements IGraphqlEnumManager {
         return enumTypeDefinitionMap.get(name);
     }
 
-    public boolean exist(String name) {
-        return enumTypeDefinitionMap.keySet().stream().anyMatch(key -> key.equals(name));
+    @Override
+    public GraphqlParser.EnumTypeDefinitionContext getEnumTypeDefinition(String enumTypeName) {
+        return enumTypeDefinitionMap.get(enumTypeName);
     }
 }
