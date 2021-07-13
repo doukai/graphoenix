@@ -9,7 +9,6 @@ import net.sf.jsqlparser.statement.select.Select;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.junit.jupiter.api.Test;
-import parser.*;
 
 import java.io.IOException;
 import java.net.URL;

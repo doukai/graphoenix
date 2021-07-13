@@ -5,6 +5,7 @@ import io.graphonix.grantlr.manager.IGraphqlOperationManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class GraphqlOperationManager implements IGraphqlOperationManager {
 
@@ -20,4 +21,18 @@ public class GraphqlOperationManager implements IGraphqlOperationManager {
         return operationTypeDefinitionMap;
     }
 
+    public Optional<Map.Entry<String, GraphqlParser.OperationTypeDefinitionContext>> getQueryOperationTypeDefinition() {
+        return operationTypeDefinitionMap.entrySet().stream()
+                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().QUERY() != null).findFirst();
+    }
+
+    public Optional<Map.Entry<String, GraphqlParser.OperationTypeDefinitionContext>> getMutationOperationTypeDefinition() {
+        return operationTypeDefinitionMap.entrySet().stream()
+                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().MUTATION() != null).findFirst();
+    }
+
+    public Optional<Map.Entry<String, GraphqlParser.OperationTypeDefinitionContext>> getSubscriptionOperationTypeDefinition() {
+        return operationTypeDefinitionMap.entrySet().stream()
+                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().SUBSCRIPTION() != null).findFirst();
+    }
 }
