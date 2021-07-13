@@ -72,4 +72,31 @@ public class GraphqlAntlrManager {
             graphqlInputValueManager.register(typeDefinitionContext.inputObjectTypeDefinition());
         }
     }
+
+
+    public String getFieldTypeName(GraphqlParser.TypeContext typeContext) {
+        if (typeContext.typeName() != null) {
+            return typeContext.typeName().name().getText();
+        } else if (typeContext.nonNullType() != null) {
+            if (typeContext.nonNullType().typeName() != null) {
+                return typeContext.nonNullType().typeName().name().getText();
+            } else if (typeContext.nonNullType().listType() != null) {
+                return getFieldTypeName(typeContext.nonNullType().listType().type());
+            }
+        } else if (typeContext.listType() != null) {
+            return getFieldTypeName(typeContext.listType().type());
+        }
+
+        return null;
+    }
+
+    public boolean fieldTypeIsList(GraphqlParser.TypeContext typeContext) {
+        if (typeContext.typeName() != null) {
+            return false;
+        } else if (typeContext.nonNullType() != null) {
+            if (typeContext.nonNullType().typeName() != null) {
+                return false;
+            } else return typeContext.nonNullType().listType() != null;
+        } else return typeContext.listType() != null;
+    }
 }

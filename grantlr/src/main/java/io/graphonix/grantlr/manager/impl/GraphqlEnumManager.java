@@ -15,4 +15,12 @@ public class GraphqlEnumManager implements IGraphqlEnumManager {
         enumTypeDefinitionMap.put(enumTypeDefinitionContext.name().getText(), enumTypeDefinitionContext);
         return enumTypeDefinitionMap;
     }
+
+    public GraphqlParser.EnumTypeDefinitionContext get(String name) {
+        return enumTypeDefinitionMap.get(name);
+    }
+
+    public boolean exist(String name) {
+        return enumTypeDefinitionMap.keySet().stream().anyMatch(key -> key.equals(name));
+    }
 }
