@@ -12,7 +12,7 @@ public enum DBValueUtil {
 
     DB_VALUE_UTIL;
 
-    protected Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
+    public Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
         return scalarValueToDBValue(valueContext.StringValue(),
                 valueContext.IntValue(),
                 valueContext.FloatValue(),
@@ -43,14 +43,14 @@ public enum DBValueUtil {
         return null;
     }
 
-    protected SetStatement createInsertIdSetStatement(String typeName, String idFieldName) {
+    public SetStatement createInsertIdSetStatement(String typeName, String idFieldName) {
         String idVariableName = "@" + DB_NAME_UTIL.graphqlFieldNameToVariableName(typeName, idFieldName);
         Function function = new Function();
         function.setName("LAST_INSERT_ID");
         return new SetStatement(idVariableName, function);
     }
 
-    protected UserVariable createInsertIdUserVariable(String typeName, String idFieldName) {
+    public UserVariable createInsertIdUserVariable(String typeName, String idFieldName) {
         String idVariableName = DB_NAME_UTIL.graphqlFieldNameToVariableName(typeName, idFieldName);
         UserVariable userVariable = new UserVariable();
         userVariable.setName(idVariableName);

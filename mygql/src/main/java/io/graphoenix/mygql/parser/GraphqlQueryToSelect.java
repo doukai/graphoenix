@@ -1,6 +1,7 @@
 package io.graphoenix.mygql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphonix.grantlr.manager.impl.GraphqlAntlrManager;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.StringValue;
@@ -18,14 +19,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.mygql.common.utils.DBNameUtil.DB_NAME_UTIL;
+import static io.graphoenix.mygql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 
 public class GraphqlQueryToSelect {
 
-    private final GraphqlAntlrRegister register;
+    private final GraphqlAntlrManager manager;
     private final GraphqlArgumentsToWhere argumentsToWhere;
 
-    public GraphqlQueryToSelect(GraphqlAntlrRegister register, GraphqlArgumentsToWhere argumentsToWhere) {
-        this.register = register;
+    public GraphqlQueryToSelect(GraphqlAntlrManager manager, GraphqlArgumentsToWhere argumentsToWhere) {
+        this.manager = manager;
         this.argumentsToWhere = argumentsToWhere;
     }
 
@@ -58,11 +60,11 @@ public class GraphqlQueryToSelect {
     }
 
     protected Expression selectionToExpression(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
-        String typeName = typeContext == null ? register.getQueryTypeName() : register.getFieldTypeName(typeContext);
-        String filedTypeName = register.getObjectFieldTypeName(typeName, selectionContext.field().name().getText());
-        if (register.isObject(filedTypeName)) {
+        String typeName = typeContext == null ? manager.getQueryOperationTypeName() : manager.getFieldTypeName(typeContext);
+        String filedTypeName = manager.getObjectFieldTypeName(typeName, selectionContext.field().name().getText());
+        if (manager.isObject(filedTypeName)) {
             return objectFieldToSubSelect(typeName, filedTypeName, typeContext, selectionContext);
-        } else if (register.isScaLar(filedTypeName) || register.isInnerScalar(filedTypeName)) {
+        } else if (manager.isScaLar(filedTypeName)) {
             if (typeContext != null) {
                 return scaLarFieldToColumn(typeContext, selectionContext);
             }
@@ -72,7 +74,7 @@ public class GraphqlQueryToSelect {
 
     protected Column scaLarFieldToColumn(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
 
-        String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
+        String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(manager.getFieldTypeName(typeContext));
         Table table = new Table(tableName);
         return new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(selectionContext.field().name().getText()));
     }
@@ -84,8 +86,8 @@ public class GraphqlQueryToSelect {
 
     protected SubSelect objectFieldToSubSelect(String typeName, String filedTypeName, GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext, boolean isMutation) {
 
-        Optional<GraphqlParser.TypeContext> fieldTypeContext = register.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
-        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = register.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText());
+        Optional<GraphqlParser.TypeContext> fieldTypeContext = manager.getObjectFieldTypeContext(typeName, selectionContext.field().name().getText());
+        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText());
         if (fieldTypeContext.isPresent()) {
             SubSelect subSelect = new SubSelect();
             PlainSelect body = new PlainSelect();
@@ -96,24 +98,24 @@ public class GraphqlQueryToSelect {
             body.setSelectItems(Collections.singletonList(selectExpressionItem));
             subSelect.setSelectBody(body);
 
-            Table subTable = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext.get())));
+            Table subTable = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(manager.getFieldTypeName(fieldTypeContext.get())));
             body.setFromItem(subTable);
 
             if (typeContext != null) {
-                String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(register.getFieldTypeName(typeContext));
+                String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(manager.getFieldTypeName(typeContext));
                 Table table = new Table(tableName);
                 EqualsTo equalsTo = new EqualsTo();
 
-                if (register.fieldTypeIsList(fieldTypeContext.get())) {
-                    equalsTo.setLeftExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(register.getTypeRelationFieldName(filedTypeName, typeName))));
-                    equalsTo.setRightExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(register.getTypeIdFieldName(typeName))));
+                if (manager.fieldTypeIsList(fieldTypeContext.get())) {
+                    equalsTo.setLeftExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(manager.getObjectTypeRelationFieldName(filedTypeName, typeName))));
+                    equalsTo.setRightExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(manager.getObjectTypeIDFieldName(typeName))));
                     if (fieldDefinitionContext.isPresent() && selectionContext.field().arguments() != null) {
                         body.setWhere(new MultiAndExpression(Arrays.asList(equalsTo, argumentsToWhere.argumentsToMultipleExpression(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments()))));
                     } else {
                         body.setWhere(equalsTo);
                     }
                 } else {
-                    equalsTo.setLeftExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(register.getTypeIdFieldName(filedTypeName))));
+                    equalsTo.setLeftExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(manager.getObjectTypeIDFieldName(filedTypeName))));
                     equalsTo.setRightExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(selectionContext.field().name().getText())));
                     body.setWhere(equalsTo);
                 }
@@ -121,13 +123,14 @@ public class GraphqlQueryToSelect {
                 if (fieldDefinitionContext.isPresent() && selectionContext.field().arguments() != null) {
                     if (isMutation) {
                         EqualsTo equalsTo = new EqualsTo();
-                        Table table = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(register.getFieldTypeName(fieldTypeContext.get())));
-                        equalsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(register.getTypeIdFieldName(register.getFieldTypeName(fieldTypeContext.get())))));
-                        Optional<GraphqlParser.ArgumentContext> idArgument = register.getIdArgument(fieldTypeContext.get(), selectionContext.field().arguments());
+                        Table table = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(manager.getFieldTypeName(fieldTypeContext.get())));
+                        equalsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(manager.getObjectTypeIDFieldName(manager.getFieldTypeName(fieldTypeContext.get())))));
+                        Optional<GraphqlParser.ArgumentContext> idArgument = manager.getIDArgument(fieldTypeContext.get(), selectionContext.field().arguments());
                         if (idArgument.isPresent()) {
-                            equalsTo.setRightExpression(register.scalarValueWithVariableToDBValue(idArgument.get().valueWithVariable()));
+                            equalsTo.setRightExpression(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(idArgument.get().valueWithVariable()));
                         } else {
-                            equalsTo.setRightExpression(register.createInsertIdUserVariable(fieldTypeContext.get()));
+                            String fieldTypeName = manager.getFieldTypeName(fieldTypeContext.get());
+                            equalsTo.setRightExpression(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, manager.getObjectTypeIDFieldName(fieldTypeName)));
                         }
                         body.setWhere(equalsTo);
                     } else {
@@ -141,7 +144,7 @@ public class GraphqlQueryToSelect {
     }
 
     protected Function selectionToJsonFunction(GraphqlParser.TypeContext typeContext, GraphqlParser.SelectionContext selectionContext) {
-        if (register.fieldTypeIsList(typeContext)) {
+        if (manager.fieldTypeIsList(typeContext)) {
             return listFieldSelectionToJsonArrayFunction(typeContext, selectionContext.field().selectionSet().selection());
         } else {
             return objectFieldSelectionToJsonObjectFunction(typeContext, selectionContext.field().selectionSet().selection());
