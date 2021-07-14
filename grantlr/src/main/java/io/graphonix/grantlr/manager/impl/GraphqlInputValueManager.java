@@ -5,7 +5,9 @@ import io.graphonix.grantlr.manager.IGraphqlInputValueManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GraphqlInputValueManager implements IGraphqlInputValueManager {
 
@@ -20,7 +22,14 @@ public class GraphqlInputValueManager implements IGraphqlInputValueManager {
     }
 
     @Override
-    public Map<String, GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName) {
-        return inputValueDefinitionMap.get(inputObjectTypeName);
+    public Stream<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName) {
+        return inputValueDefinitionMap.entrySet().stream().filter(entry -> entry.getKey().equals(inputObjectTypeName)).map(Map.Entry::getValue)
+                .flatMap(entry -> entry.values().stream());
+    }
+
+    @Override
+    public Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName, String inputValueName) {
+        return inputValueDefinitionMap.entrySet().stream().filter(entry -> entry.getKey().equals(inputObjectTypeName)).map(Map.Entry::getValue).findFirst()
+                .flatMap(entry -> entry.values().stream().findFirst());
     }
 }

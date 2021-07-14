@@ -5,6 +5,8 @@ import io.graphonix.grantlr.manager.IGraphqlObjectManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class GraphqlObjectManager implements IGraphqlObjectManager {
 
@@ -17,7 +19,12 @@ public class GraphqlObjectManager implements IGraphqlObjectManager {
     }
 
     @Override
-    public GraphqlParser.ObjectTypeDefinitionContext getObjectTypeDefinition(String objectTypeName) {
-        return objectTypeDefinitionMap.get(objectTypeName);
+    public Optional<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinition(String objectTypeName) {
+        return objectTypeDefinitionMap.entrySet().stream().filter(entry -> entry.getKey().equals(objectTypeName)).map(Map.Entry::getValue).findFirst();
+    }
+
+    @Override
+    public Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitions() {
+        return objectTypeDefinitionMap.values().stream();
     }
 }

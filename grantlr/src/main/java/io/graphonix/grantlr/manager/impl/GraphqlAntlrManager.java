@@ -76,132 +76,112 @@ public class GraphqlAntlrManager {
     }
 
     public boolean isScaLar(String name) {
-        return graphqlScalarManager.getScalarTypeDefinition(name) != null;
+        return graphqlScalarManager.getScalarTypeDefinition(name).isPresent();
     }
 
     public boolean isEnum(String name) {
-        return graphqlEnumManager.getEnumTypeDefinition(name) != null;
+        return graphqlEnumManager.getEnumTypeDefinition(name).isPresent();
     }
 
     public boolean isObject(String name) {
-        return graphqlObjectManager.getObjectTypeDefinition(name) != null;
+        return graphqlObjectManager.getObjectTypeDefinition(name).isPresent();
     }
 
     public boolean isInputObject(String name) {
-        return graphqlInputObjectManager.getInputObjectTypeDefinition(name) != null;
+        return graphqlInputObjectManager.getInputObjectTypeDefinition(name).isPresent();
     }
 
     public boolean isOperation(String name) {
-        return graphqlOperationManager.getOperationTypeDefinition(name) != null;
+        return graphqlOperationManager.getOperationTypeDefinition(name).isPresent();
     }
 
-    public GraphqlParser.ScalarTypeDefinitionContext getScaLar(String name) {
+    public Optional<GraphqlParser.ScalarTypeDefinitionContext> getScaLar(String name) {
         return graphqlScalarManager.getScalarTypeDefinition(name);
     }
 
-    public GraphqlParser.EnumTypeDefinitionContext getEnum(String name) {
+    public Optional<GraphqlParser.EnumTypeDefinitionContext> getEnum(String name) {
         return graphqlEnumManager.getEnumTypeDefinition(name);
     }
 
-    public GraphqlParser.ObjectTypeDefinitionContext getObject(String name) {
+    public Optional<GraphqlParser.ObjectTypeDefinitionContext> getObject(String name) {
         return graphqlObjectManager.getObjectTypeDefinition(name);
     }
 
-    public GraphqlParser.InputObjectTypeDefinitionContext getInputObject(String name) {
+    public Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObject(String name) {
         return graphqlInputObjectManager.getInputObjectTypeDefinition(name);
     }
 
-    public GraphqlParser.OperationTypeDefinitionContext getOperation(String name) {
+    public Optional<GraphqlParser.OperationTypeDefinitionContext> getOperation(String name) {
         return graphqlOperationManager.getOperationTypeDefinition(name);
     }
 
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getQueryOperationTypeDefinition() {
-        return graphqlOperationManager.getOperationTypeDefinitions().entrySet().stream()
-                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().QUERY() != null).findFirst().map(Map.Entry::getValue);
+        return graphqlOperationManager.getOperationTypeDefinitions()
+                .filter(operationTypeDefinition -> operationTypeDefinition.operationType().QUERY() != null).findFirst();
     }
 
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getMutationOperationTypeDefinition() {
-        return graphqlOperationManager.getOperationTypeDefinitions().entrySet().stream()
-                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().MUTATION() != null).findFirst().map(Map.Entry::getValue);
+        return graphqlOperationManager.getOperationTypeDefinitions()
+                .filter(operationTypeDefinition -> operationTypeDefinition.operationType().MUTATION() != null).findFirst();
     }
 
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getSubscriptionOperationTypeDefinition() {
-        return graphqlOperationManager.getOperationTypeDefinitions().entrySet().stream()
-                .filter(operationTypeDefinitionContextEntry -> operationTypeDefinitionContextEntry.getValue().operationType().SUBSCRIPTION() != null).findFirst().map(Map.Entry::getValue);
+        return graphqlOperationManager.getOperationTypeDefinitions()
+                .filter(operationTypeDefinition -> operationTypeDefinition.operationType().SUBSCRIPTION() != null).findFirst();
     }
 
-    public String getObjectFieldTypeName(String typeName, String fieldName) {
-        Map<String, GraphqlParser.FieldDefinitionContext> fieldDefinitions = graphqlFieldManager.getFieldDefinitions(typeName);
-        if (fieldDefinitions == null) {
-            return null;
-        }
-        GraphqlParser.FieldDefinitionContext fieldDefinition = fieldDefinitions.get(fieldName);
-        if (fieldDefinition == null) {
-            return null;
-        }
-        return getFieldTypeName(fieldDefinitions.get(fieldName).type());
+    public Optional<String> getObjectFieldTypeName(String typeName, String fieldName) {
+        return graphqlFieldManager.getFieldDefinition(typeName, fieldName).map(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()));
     }
 
     public Optional<GraphqlParser.TypeContext> getObjectFieldTypeContext(String typeName, String fieldName) {
-        Map<String, GraphqlParser.FieldDefinitionContext> fieldDefinitions = graphqlFieldManager.getFieldDefinitions(typeName);
-        if (fieldDefinitions == null) {
-            return Optional.empty();
-        }
-        return Optional.of(fieldDefinitions.get(fieldName).type());
+        return graphqlFieldManager.getFieldDefinition(typeName, fieldName).map(GraphqlParser.FieldDefinitionContext::type);
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getObjectFieldDefinitionContext(String typeName, String fieldName) {
-        Map<String, GraphqlParser.FieldDefinitionContext> fieldDefinitions = graphqlFieldManager.getFieldDefinitions(typeName);
-        if (fieldDefinitions == null) {
-            return Optional.empty();
-        }
-        return Optional.of(fieldDefinitions.get(fieldName));
+        return graphqlFieldManager.getFieldDefinition(typeName, fieldName);
     }
 
-    public String getQueryOperationTypeName() {
+    public Optional<String> getQueryOperationTypeName() {
         Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = getQueryOperationTypeDefinition();
-        return queryOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText()).orElse(null);
+        return queryOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
     }
 
-    public String getMutationOperationTypeName() {
+    public Optional<String> getMutationOperationTypeName() {
         Optional<GraphqlParser.OperationTypeDefinitionContext> mutationOperationTypeDefinition = getMutationOperationTypeDefinition();
-        return mutationOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText()).orElse(null);
+        return mutationOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
     }
 
-    public String getSubscriptionOperationTypeName() {
+    public Optional<String> getSubscriptionOperationTypeName() {
         Optional<GraphqlParser.OperationTypeDefinitionContext> subscriptionOperationTypeDefinition = getSubscriptionOperationTypeDefinition();
-        return subscriptionOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText()).orElse(null);
+        return subscriptionOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIDFieldDefinition(String objectTypeName) {
-        return graphqlFieldManager.getFieldDefinitions(objectTypeName).entrySet().stream()
-                .filter(entry -> !fieldTypeIsList(entry.getValue().type()))
-                .filter(entry -> getFieldTypeName(entry.getValue().type()).equals("ID")).findFirst()
-                .map(Map.Entry::getValue);
+        return graphqlFieldManager.getFieldDefinitions(objectTypeName)
+                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst();
     }
 
 
-    public String getObjectTypeIDFieldName(String objectTypeName) {
-        return graphqlFieldManager.getFieldDefinitions(objectTypeName).entrySet().stream()
-                .filter(entry -> !fieldTypeIsList(entry.getValue().type()))
-                .filter(entry -> getFieldTypeName(entry.getValue().type()).equals("ID")).findFirst()
-                .map(Map.Entry::getValue)
-                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText()).orElse(null);
+    public Optional<String> getObjectTypeIDFieldName(String objectTypeName) {
+        return graphqlFieldManager.getFieldDefinitions(objectTypeName)
+                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst()
+                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText());
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeRelationFieldDefinition(String sourceObjectTypeName, String targetObjectTypeName) {
-        return graphqlFieldManager.getFieldDefinitions(sourceObjectTypeName).entrySet().stream()
-                .filter(entry -> !fieldTypeIsList(entry.getValue().type()))
-                .filter(entry -> getFieldTypeName(entry.getValue().type()).equals(targetObjectTypeName)).findFirst()
-                .map(Map.Entry::getValue);
+        return graphqlFieldManager.getFieldDefinitions(sourceObjectTypeName)
+                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(targetObjectTypeName)).findFirst();
     }
 
-    public String getObjectTypeRelationFieldName(String sourceObjectTypeName, String targetObjectTypeName) {
-        return graphqlFieldManager.getFieldDefinitions(sourceObjectTypeName).entrySet().stream()
-                .filter(entry -> !fieldTypeIsList(entry.getValue().type()))
-                .filter(entry -> getFieldTypeName(entry.getValue().type()).equals(targetObjectTypeName)).findFirst()
-                .map(Map.Entry::getValue)
-                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText()).orElse(null);
+    public Optional<String> getObjectTypeRelationFieldName(String sourceObjectTypeName, String targetObjectTypeName) {
+        return graphqlFieldManager.getFieldDefinitions(sourceObjectTypeName)
+                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(targetObjectTypeName)).findFirst()
+                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText());
     }
 
     public Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
@@ -229,9 +209,8 @@ public class GraphqlAntlrManager {
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinitionFromInputValueDefinition(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return graphqlFieldManager.getFieldDefinitions(getFieldTypeName(typeContext)).entrySet().stream()
-                .filter(entry -> entry.getValue().name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst()
-                .map(Map.Entry::getValue);
+        return graphqlFieldManager.getFieldDefinitions(getFieldTypeName(typeContext))
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
     }
 
     public Optional<GraphqlParser.ArgumentContext> getIDArgument(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentsContext argumentsContext) {

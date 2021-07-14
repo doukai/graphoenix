@@ -8,6 +8,7 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -109,26 +110,20 @@ public class GraphqlTypeToTable {
 
     protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext, boolean list) {
 
-        if (typeNameContext.name().baseName().TYPE() != null) {
-            GraphqlParser.FieldDefinitionContext idFieldDefinitionContext = manager.getObject(typeNameContext.name().getText())
-                    .fieldsDefinition().fieldDefinition().stream()
-                    .filter(fieldDefinitionContext -> fieldDefinitionContext.type().typeName() != null && fieldDefinitionContext.type().typeName().name().getText().equals("ID") ||
-                            fieldDefinitionContext.type().nonNullType().typeName() != null && fieldDefinitionContext.type().nonNullType().typeName().name().getText().equals("ID"))
-                    .findFirst().orElse(null);
-
-            if (idFieldDefinitionContext != null) {
-                if (idFieldDefinitionContext.type().typeName() != null) {
-                    return createScalarColDataType(idFieldDefinitionContext.type().typeName(), idFieldDefinitionContext.directives());
-                } else if (idFieldDefinitionContext.type().nonNullType() != null) {
-                    if (idFieldDefinitionContext.type().nonNullType().typeName() != null) {
-                        return createScalarColDataType(idFieldDefinitionContext.type().nonNullType().typeName(), idFieldDefinitionContext.directives());
+        if (manager.isObject(typeNameContext.name().getText())) {
+            Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinitionContext = manager.getObjectTypeIDFieldDefinition(typeNameContext.name().getText());
+            if (idFieldDefinitionContext.isPresent()) {
+                if (idFieldDefinitionContext.get().type().typeName() != null) {
+                    return createScalarColDataType(idFieldDefinitionContext.get().type().typeName(), idFieldDefinitionContext.get().directives());
+                } else if (idFieldDefinitionContext.get().type().nonNullType() != null) {
+                    if (idFieldDefinitionContext.get().type().nonNullType().typeName() != null) {
+                        return createScalarColDataType(idFieldDefinitionContext.get().type().nonNullType().typeName(), idFieldDefinitionContext.get().directives());
                     }
                 }
             }
-
-        } else if (typeNameContext.name().baseName().ENUM() != null) {
+        } else if (manager.isEnum(typeNameContext.name().getText())) {
             return createEnumColDataType(typeNameContext, list);
-        } else if (typeNameContext.name().baseName().SCALAR() != null) {
+        } else if (manager.isScaLar(typeNameContext.name().getText())) {
             return createScalarColDataType(typeNameContext, directivesContext);
         }
         return null;
@@ -141,11 +136,10 @@ public class GraphqlTypeToTable {
         } else {
             colDataType.setDataType("ENUM");
         }
-        colDataType.setArgumentsStringList(manager.getEnum(typeNameContext.name().getText())
-                .enumValueDefinitions()
+
+        colDataType.setArgumentsStringList(manager.getEnum(typeNameContext.name().getText()).map(enumTypeDefinitionContext -> enumTypeDefinitionContext.enumValueDefinitions()
                 .enumValueDefinition().stream()
-                .map(value -> DB_NAME_UTIL.stringValueToDBVarchar(value.getText()))
-                .collect(Collectors.toList()));
+                .map(value -> DB_NAME_UTIL.stringValueToDBVarchar(value.getText())).collect(Collectors.toList())).orElse(Collections.emptyList()));
 
         return colDataType;
     }
