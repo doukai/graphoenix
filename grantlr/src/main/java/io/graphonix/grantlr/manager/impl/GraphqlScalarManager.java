@@ -30,6 +30,11 @@ public class GraphqlScalarManager implements IGraphqlScalarManager {
     }
 
     @Override
+    public boolean isScalar(String scalarTypeName) {
+        return scalarTypeDefinitionMap.entrySet().stream().anyMatch(entry -> entry.getKey().equals(scalarTypeName));
+    }
+
+    @Override
     public Stream<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinitions() {
         return scalarTypeDefinitionMap.values().stream();
     }
