@@ -3,7 +3,6 @@ package io.graphonix.grantlr.manager.impl;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphonix.grantlr.manager.*;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class GraphqlAntlrManager {
@@ -76,7 +75,7 @@ public class GraphqlAntlrManager {
     }
 
     public boolean isScaLar(String name) {
-        return graphqlScalarManager.getScalarTypeDefinition(name).isPresent();
+        return graphqlScalarManager.isScalar(name);
     }
 
     public boolean isEnum(String name) {
@@ -147,14 +146,29 @@ public class GraphqlAntlrManager {
         return queryOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
     }
 
+    public boolean isQueryOperationType(String typeName) {
+        Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = getQueryOperationTypeDefinition();
+        return queryOperationTypeDefinition.isPresent() && queryOperationTypeDefinition.get().typeName().name().getText().equals(typeName);
+    }
+
     public Optional<String> getMutationOperationTypeName() {
         Optional<GraphqlParser.OperationTypeDefinitionContext> mutationOperationTypeDefinition = getMutationOperationTypeDefinition();
         return mutationOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
     }
 
+    public boolean isMutationOperationType(String typeName) {
+        Optional<GraphqlParser.OperationTypeDefinitionContext> mutationOperationTypeDefinition = getMutationOperationTypeDefinition();
+        return mutationOperationTypeDefinition.isPresent() && mutationOperationTypeDefinition.get().typeName().name().getText().equals(typeName);
+    }
+
     public Optional<String> getSubscriptionOperationTypeName() {
         Optional<GraphqlParser.OperationTypeDefinitionContext> subscriptionOperationTypeDefinition = getSubscriptionOperationTypeDefinition();
         return subscriptionOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
+    }
+
+    public boolean isSubscriptionOperationType(String typeName) {
+        Optional<GraphqlParser.OperationTypeDefinitionContext> subscriptionOperationTypeDefinition = getSubscriptionOperationTypeDefinition();
+        return subscriptionOperationTypeDefinition.isPresent() && subscriptionOperationTypeDefinition.get().typeName().name().getText().equals(typeName);
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIDFieldDefinition(String objectTypeName) {

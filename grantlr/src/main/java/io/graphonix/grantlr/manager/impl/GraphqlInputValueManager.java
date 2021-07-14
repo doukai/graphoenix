@@ -11,25 +11,28 @@ import java.util.stream.Stream;
 
 public class GraphqlInputValueManager implements IGraphqlInputValueManager {
 
-    private final Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> inputValueDefinitionMap = new HashMap<>();
+    private final Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> inputValueDefinitionTree = new HashMap<>();
 
     @Override
     public Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        inputValueDefinitionMap.put(inputObjectTypeDefinitionContext.name().getText(),
+        inputValueDefinitionTree.put(inputObjectTypeDefinitionContext.name().getText(),
                 inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                         .collect(Collectors.toMap(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText(), inputValueDefinitionContext -> inputValueDefinitionContext)));
-        return inputValueDefinitionMap;
+        return inputValueDefinitionTree;
     }
 
     @Override
     public Stream<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName) {
-        return inputValueDefinitionMap.entrySet().stream().filter(entry -> entry.getKey().equals(inputObjectTypeName)).map(Map.Entry::getValue)
+        return inputValueDefinitionTree.entrySet().stream().filter(entry -> entry.getKey().equals(inputObjectTypeName)).map(Map.Entry::getValue)
                 .flatMap(entry -> entry.values().stream());
     }
 
     @Override
     public Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName, String inputValueName) {
-        return inputValueDefinitionMap.entrySet().stream().filter(entry -> entry.getKey().equals(inputObjectTypeName)).map(Map.Entry::getValue).findFirst()
-                .flatMap(entry -> entry.values().stream().findFirst());
+        return inputValueDefinitionTree.entrySet().stream().filter(entry -> entry.getKey().equals(inputObjectTypeName))
+                .map(Map.Entry::getValue).findFirst()
+                .flatMap(inputValueDefinitionMap -> inputValueDefinitionMap.entrySet().stream()
+                        .filter(entry -> entry.getKey().equals(inputValueName))
+                        .map(Map.Entry::getValue).findFirst());
     }
 }

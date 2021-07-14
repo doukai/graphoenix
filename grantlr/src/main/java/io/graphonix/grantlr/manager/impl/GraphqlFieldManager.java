@@ -32,8 +32,8 @@ public class GraphqlFieldManager implements IGraphqlFieldManager {
     public Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinition(String objectTypeName, String fieldName) {
         return fieldDefinitionTree.entrySet().stream().filter(entry -> entry.getKey().equals(objectTypeName))
                 .map(Map.Entry::getValue).findFirst()
-                .flatMap(stringFieldDefinitionContextMap -> stringFieldDefinitionContextMap.entrySet().stream()
-                        .filter(entry -> entry.getKey().equals(objectTypeName))
+                .flatMap(fieldDefinitionMap -> fieldDefinitionMap.entrySet().stream()
+                        .filter(entry -> entry.getKey().equals(fieldName))
                         .map(Map.Entry::getValue).findFirst());
     }
 }
