@@ -3,12 +3,14 @@ package io.graphonix.grantlr.manager;
 import graphql.parser.antlr.GraphqlParser;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface IGraphqlOperationManager {
 
     Map<String, GraphqlParser.OperationTypeDefinitionContext> register(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext);
 
-    GraphqlParser.OperationTypeDefinitionContext getOperationTypeDefinition(String operationTypeName);
+    Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String operationTypeName);
 
-    Map<String, GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions();
+    Stream<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions();
 }

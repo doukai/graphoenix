@@ -6,14 +6,11 @@ import io.graphonix.grantlr.manager.IGraphqlOperationManager;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class GraphqlOperationManager implements IGraphqlOperationManager {
 
     private final Map<String, GraphqlParser.OperationTypeDefinitionContext> operationTypeDefinitionMap = new HashMap<>();
-
-    public Map<String, GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitionMap() {
-        return operationTypeDefinitionMap;
-    }
 
     @Override
     public Map<String, GraphqlParser.OperationTypeDefinitionContext> register(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
@@ -22,12 +19,12 @@ public class GraphqlOperationManager implements IGraphqlOperationManager {
     }
 
     @Override
-    public GraphqlParser.OperationTypeDefinitionContext getOperationTypeDefinition(String operationTypeName) {
-        return operationTypeDefinitionMap.get(operationTypeName);
+    public Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String operationTypeName) {
+        return operationTypeDefinitionMap.entrySet().stream().filter(entry -> entry.getKey().equals(operationTypeName)).map(Map.Entry::getValue).findFirst();
     }
 
     @Override
-    public Map<String, GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions() {
-        return operationTypeDefinitionMap;
+    public Stream<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions() {
+        return operationTypeDefinitionMap.values().stream();
     }
 }
