@@ -10,6 +10,8 @@ public interface IGraphqlEnumManager {
 
     Map<String, GraphqlParser.EnumTypeDefinitionContext> register(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
 
+    boolean isEnum(String enumTypeName);
+
     Optional<GraphqlParser.EnumTypeDefinitionContext> getEnumTypeDefinition(String enumTypeName);
 
     Stream<GraphqlParser.EnumTypeDefinitionContext> getEnumTypeDefinitions();

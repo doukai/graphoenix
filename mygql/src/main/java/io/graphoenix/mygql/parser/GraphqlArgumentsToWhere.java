@@ -38,7 +38,7 @@ public class GraphqlArgumentsToWhere {
     }
 
     protected Optional<Expression> objectValueWithVariableToMultipleExpression(GraphqlParser.TypeContext fieldTypeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(inputValueDefinitionContext.type().typeName().name().getText());
+        Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
         if (inputObject.isPresent()) {
             Stream<Expression> expressionStream = objectValueWithVariableToExpressionList(fieldTypeContext, inputObject.get().inputObjectValueDefinitions(), objectValueWithVariableContext);
             return Optional.of(expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueWithVariableContext, inputObject.get())));
@@ -47,7 +47,7 @@ public class GraphqlArgumentsToWhere {
     }
 
     protected Optional<Expression> objectValueToMultipleExpression(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ObjectValueContext objectValueContext) {
-        Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(inputValueDefinitionContext.type().typeName().name().getText());
+        Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
         if (inputObject.isPresent()) {
             Stream<Expression> expressionStream = objectValueToExpressionList(typeContext, inputObject.get().inputObjectValueDefinitions(), objectValueContext);
             return Optional.of(expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueContext, inputObject.get())));

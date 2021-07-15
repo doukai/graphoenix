@@ -18,8 +18,9 @@ public class GraphqlEnumManager implements IGraphqlEnumManager {
         return enumTypeDefinitionMap;
     }
 
-    public GraphqlParser.EnumTypeDefinitionContext get(String name) {
-        return enumTypeDefinitionMap.get(name);
+    @Override
+    public boolean isEnum(String enumTypeName) {
+        return enumTypeDefinitionMap.entrySet().stream().anyMatch(entry -> entry.getKey().equals(enumTypeName));
     }
 
     @Override

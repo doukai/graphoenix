@@ -19,6 +19,11 @@ public class GraphqlInputObjectManager implements IGraphqlInputObjectManager {
     }
 
     @Override
+    public boolean isInputObject(String inputObjectName) {
+        return inputObjectTypeDefinitionMap.entrySet().stream().anyMatch(entry -> entry.getKey().equals(inputObjectName));
+    }
+
+    @Override
     public Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjectTypeDefinition(String inputObjectName) {
         return inputObjectTypeDefinitionMap.entrySet().stream().filter(entry -> entry.getKey().equals(inputObjectName)).map(Map.Entry::getValue).findFirst();
     }
