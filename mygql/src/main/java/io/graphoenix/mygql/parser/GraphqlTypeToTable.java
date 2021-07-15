@@ -28,7 +28,6 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<CreateTable> createTable(GraphqlParser.DefinitionContext definitionContext) {
-
         if (definitionContext.typeSystemDefinition() == null) {
             return Optional.empty();
         }
@@ -54,7 +53,6 @@ public class GraphqlTypeToTable {
     }
 
     protected CreateTable createTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-
         CreateTable createTable = new CreateTable();
         Table table = new Table();
         table.setName(DB_NAME_UTIL.graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
@@ -66,7 +64,6 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-
         Optional<ColumnDefinition> columnDefinition = createColumn(fieldDefinitionContext, fieldDefinitionContext.type(), false);
 
         columnDefinition.ifPresent(presentColumnDefinition -> {
@@ -78,7 +75,6 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeContext typeContext, boolean list) {
-
         if (typeContext.typeName() != null) {
             return createColumn(fieldDefinitionContext, typeContext.typeName(), list, false);
         } else if (typeContext.listType() != null) {
@@ -94,7 +90,6 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean list, boolean nonNull) {
-
         ColumnDefinition columnDefinition = new ColumnDefinition();
         if (list && !manager.isEnum(typeNameContext.name().getText())) {
             return Optional.empty();
@@ -109,7 +104,6 @@ public class GraphqlTypeToTable {
     }
 
     protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext, boolean list) {
-
         if (manager.isObject(typeNameContext.name().getText())) {
             Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinitionContext = manager.getObjectTypeIDFieldDefinition(typeNameContext.name().getText());
             if (idFieldDefinitionContext.isPresent()) {
@@ -211,7 +205,6 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<List<String>> directiveToTableOption(GraphqlParser.DirectivesContext directivesContext) {
-
         Optional<GraphqlParser.DirectiveContext> tableDirective = getTableDirective(directivesContext);
         return tableDirective.map(directiveContext -> directiveContext.arguments().argument().stream().map(this::argumentToTableOption).collect(Collectors.toList()));
     }
@@ -231,7 +224,6 @@ public class GraphqlTypeToTable {
     protected List<String> createColumnSpecs(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         List<String> columnSpecsList = new ArrayList<>();
         if (fieldDefinitionContext.directives() != null) {
-
             directiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecsList::addAll);
         }
         if (fieldDefinitionContext.description() != null) {
@@ -241,13 +233,11 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<List<String>> directiveToColumnSpecs(GraphqlParser.DirectivesContext directivesContext) {
-
         Optional<GraphqlParser.DirectiveContext> columnDirective = getColumnDirective(directivesContext);
         return columnDirective.map(directiveContext -> directiveContext.arguments().argument().stream().map(this::argumentToColumnSpecs).collect(Collectors.toList()));
     }
 
     protected String argumentToColumnSpecs(GraphqlParser.ArgumentContext argumentContext) {
-
         if (argumentContext.valueWithVariable().IntValue() != null) {
             return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().IntValue().getText());
         } else if (argumentContext.valueWithVariable().BooleanValue() != null) {

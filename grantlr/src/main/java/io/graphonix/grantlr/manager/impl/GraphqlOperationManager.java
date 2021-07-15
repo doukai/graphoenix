@@ -19,6 +19,11 @@ public class GraphqlOperationManager implements IGraphqlOperationManager {
     }
 
     @Override
+    public boolean isOperation(String operationTypeName) {
+        return operationTypeDefinitionMap.entrySet().stream().anyMatch(entry -> entry.getKey().equals(operationTypeName));
+    }
+
+    @Override
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String operationTypeName) {
         return operationTypeDefinitionMap.entrySet().stream().filter(entry -> entry.getKey().equals(operationTypeName)).map(Map.Entry::getValue).findFirst();
     }

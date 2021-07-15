@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.mygql.common.utils.DBNameUtil.DB_NAME_UTIL;
+import static io.graphoenix.mygql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 
 public class GraphqlQueryToSelect {
 
@@ -42,7 +43,7 @@ public class GraphqlQueryToSelect {
     }
 
     protected Optional<Select> operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().getText().equals("query")) {
+        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
             if (queryOperationTypeDefinition.isPresent()) {
                 Select select = new Select();
@@ -99,6 +100,18 @@ public class GraphqlQueryToSelect {
                 if (fieldDefinitionContext.isPresent() && selectionContext.field().arguments() != null) {
                     body.setWhere(argumentsToWhere.argumentsToMultipleExpression(fieldTypeContext.get(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments()));
                 }
+            } else if (manager.isMutationOperationType(typeName)) {
+                EqualsTo equalsTo = new EqualsTo();
+                Table table = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(manager.getFieldTypeName(fieldTypeContext.get())));
+                equalsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(manager.getObjectTypeIDFieldName(manager.getFieldTypeName(fieldTypeContext.get())).orElse(null))));
+                Optional<GraphqlParser.ArgumentContext> idArgument = manager.getIDArgument(fieldTypeContext.get(), selectionContext.field().arguments());
+                if (idArgument.isPresent()) {
+                    equalsTo.setRightExpression(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(idArgument.get().valueWithVariable()));
+                } else {
+                    String fieldTypeName = manager.getFieldTypeName(fieldTypeContext.get());
+                    equalsTo.setRightExpression(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, manager.getObjectTypeIDFieldName(fieldTypeName).orElse(null)));
+                }
+                body.setWhere(equalsTo);
             } else {
                 String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(typeName);
                 Table table = new Table(tableName);

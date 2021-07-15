@@ -10,6 +10,8 @@ public interface IGraphqlOperationManager {
 
     Map<String, GraphqlParser.OperationTypeDefinitionContext> register(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext);
 
+    boolean isOperation(String operationTypeName);
+
     Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String operationTypeName);
 
     Stream<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions();

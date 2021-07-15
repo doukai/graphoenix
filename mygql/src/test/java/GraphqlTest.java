@@ -2,8 +2,10 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.mygql.parser.*;
-import io.graphonix.grantlr.manager.*;
+import io.graphoenix.mygql.parser.GraphqlArgumentsToWhere;
+import io.graphoenix.mygql.parser.GraphqlMutationToStatements;
+import io.graphoenix.mygql.parser.GraphqlQueryToSelect;
+import io.graphoenix.mygql.parser.GraphqlTypeToTable;
 import io.graphonix.grantlr.manager.impl.*;
 import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -20,14 +22,7 @@ public class GraphqlTest {
 
     @Test
     void createType() throws IOException {
-        IGraphqlOperationManager graphqlOperationManager = new GraphqlOperationManager();
-        IGraphqlObjectManager graphqlObjectManager = new GraphqlObjectManager();
-        IGraphqlFieldManager graphqlFieldManager = new GraphqlFieldManager();
-        IGraphqlInputObjectManager graphqlInputObjectManager = new GraphqlInputObjectManager();
-        IGraphqlInputValueManager graphqlInputValueManager = new GraphqlInputValueManager();
-        IGraphqlEnumManager graphqlEnumManager = new GraphqlEnumManager();
-        IGraphqlScalarManager graphqlScalarManager = new GraphqlScalarManager();
-        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphqlOperationManager, graphqlObjectManager, graphqlFieldManager, graphqlInputObjectManager, graphqlInputValueManager, graphqlEnumManager, graphqlScalarManager);
+        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager();
         GraphqlTypeToTable graphqlTypeToTable = new GraphqlTypeToTable(graphqlAntlrManager);
         CodePointCharStream charStream;
         URL url = Resources.getResource("test.graphqls");
@@ -53,14 +48,7 @@ public class GraphqlTest {
 
     @Test
     void convertQuery() throws IOException {
-        IGraphqlOperationManager graphqlOperationManager = new GraphqlOperationManager();
-        IGraphqlObjectManager graphqlObjectManager = new GraphqlObjectManager();
-        IGraphqlFieldManager graphqlFieldManager = new GraphqlFieldManager();
-        IGraphqlInputObjectManager graphqlInputObjectManager = new GraphqlInputObjectManager();
-        IGraphqlInputValueManager graphqlInputValueManager = new GraphqlInputValueManager();
-        IGraphqlEnumManager graphqlEnumManager = new GraphqlEnumManager();
-        IGraphqlScalarManager graphqlScalarManager = new GraphqlScalarManager();
-        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphqlOperationManager, graphqlObjectManager, graphqlFieldManager, graphqlInputObjectManager, graphqlInputValueManager, graphqlEnumManager, graphqlScalarManager);
+        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager();
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
         GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
         CodePointCharStream charStream;
@@ -86,15 +74,8 @@ public class GraphqlTest {
     }
 
     @Test
-    void convertSelect() throws IOException {
-        IGraphqlOperationManager graphqlOperationManager = new GraphqlOperationManager();
-        IGraphqlObjectManager graphqlObjectManager = new GraphqlObjectManager();
-        IGraphqlFieldManager graphqlFieldManager = new GraphqlFieldManager();
-        IGraphqlInputObjectManager graphqlInputObjectManager = new GraphqlInputObjectManager();
-        IGraphqlInputValueManager graphqlInputValueManager = new GraphqlInputValueManager();
-        IGraphqlEnumManager graphqlEnumManager = new GraphqlEnumManager();
-        IGraphqlScalarManager graphqlScalarManager = new GraphqlScalarManager();
-        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphqlOperationManager, graphqlObjectManager, graphqlFieldManager, graphqlInputObjectManager, graphqlInputValueManager, graphqlEnumManager, graphqlScalarManager);
+    void convertMutation() throws IOException {
+        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager();
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
         GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
         GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrManager, graphqlQueryToSelect);

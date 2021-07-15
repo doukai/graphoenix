@@ -37,6 +37,16 @@ public class GraphqlAntlrManager {
         this.graphqlScalarManager = graphqlScalarManager;
     }
 
+    public GraphqlAntlrManager() {
+        this.graphqlOperationManager = new GraphqlOperationManager();
+        this.graphqlObjectManager = new GraphqlObjectManager();
+        this.graphqlFieldManager = new GraphqlFieldManager();
+        this.graphqlInputObjectManager = new GraphqlInputObjectManager();
+        this.graphqlInputValueManager = new GraphqlInputValueManager();
+        this.graphqlEnumManager = new GraphqlEnumManager();
+        this.graphqlScalarManager = new GraphqlScalarManager();
+    }
+
     public void registerDocument(GraphqlParser.DocumentContext documentContext) {
         documentContext.definition().forEach(this::registerDefinition);
     }
@@ -79,19 +89,19 @@ public class GraphqlAntlrManager {
     }
 
     public boolean isEnum(String name) {
-        return graphqlEnumManager.getEnumTypeDefinition(name).isPresent();
+        return graphqlEnumManager.isEnum(name);
     }
 
     public boolean isObject(String name) {
-        return graphqlObjectManager.getObjectTypeDefinition(name).isPresent();
+        return graphqlObjectManager.isObject(name);
     }
 
     public boolean isInputObject(String name) {
-        return graphqlInputObjectManager.getInputObjectTypeDefinition(name).isPresent();
+        return graphqlInputObjectManager.isInputObject(name);
     }
 
     public boolean isOperation(String name) {
-        return graphqlOperationManager.getOperationTypeDefinition(name).isPresent();
+        return graphqlOperationManager.isOperation(name);
     }
 
     public Optional<GraphqlParser.ScalarTypeDefinitionContext> getScaLar(String name) {

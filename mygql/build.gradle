@@ -10,9 +10,9 @@ repositories {
 }
 
 dependencies {
-    compile project(":grantlr")
-    compile 'com.github.jsqlparser:jsqlparser:3.2'
-    compile "com.google.guava:guava:30.1.1-jre"
+    implementation project(":grantlr")
+    implementation 'com.github.jsqlparser:jsqlparser:3.2'
+    implementation "com.google.guava:guava:30.1.1-jre"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }

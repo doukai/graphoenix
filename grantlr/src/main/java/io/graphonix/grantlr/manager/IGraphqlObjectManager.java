@@ -10,6 +10,8 @@ public interface IGraphqlObjectManager {
 
     Map<String, GraphqlParser.ObjectTypeDefinitionContext> register(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
+    boolean isObject(String objectTypeName);
+
     Optional<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinition(String objectTypeName);
 
     Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitions();

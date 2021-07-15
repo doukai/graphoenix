@@ -10,9 +10,9 @@ public interface IGraphqlScalarManager {
 
     Map<String, GraphqlParser.ScalarTypeDefinitionContext> register(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext);
 
-    Optional<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinition(String scalarTypeName);
-
     boolean isScalar(String scalarTypeName);
+
+    Optional<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinition(String scalarTypeName);
 
     Stream<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinitions();
 }
