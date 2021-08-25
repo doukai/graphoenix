@@ -2,4 +2,5 @@ rootProject.name = 'graphoenix'
 include 'grantlr'
 include 'mygql'
 include 'showcase'
+include 'gr2dbc'
 
