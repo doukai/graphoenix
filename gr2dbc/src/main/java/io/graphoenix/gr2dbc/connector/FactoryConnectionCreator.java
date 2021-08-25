@@ -4,7 +4,7 @@ import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import reactor.core.publisher.Mono;
 
-public class FactoryConnectionCreator extends ConnectionCreator {
+public class FactoryConnectionCreator implements ConnectionCreator {
 
     private final ConnectionFactory connectionFactory;
 

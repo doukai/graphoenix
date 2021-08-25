@@ -1,19 +1,18 @@
 package io.graphoenix.gr2dbc.connector;
 
-import org.mariadb.r2dbc.MariadbConnectionConfiguration;
+import io.r2dbc.spi.Result;
+import reactor.core.publisher.Mono;
 
 public class TableCreator {
 
     private final ConnectionCreator connectionCreator;
 
     public TableCreator(ConnectionCreator connectionCreator) {
-        MariadbConnectionConfiguration connectionConfiguration;
         this.connectionCreator = connectionCreator;
     }
 
-    public void createTable(String sql) {
-        connectionCreator.createConnection().subscribe(connection -> {
-            connection.createStatement(sql).execute();
-        }, Throwable::printStackTrace);
+    public Mono<Result> createTable(String sql) {
+        return connectionCreator.createConnection()
+                .flatMap(connection -> Mono.from(connection.createStatement(sql).execute()).doFinally(signalType -> connection.close()));
     }
 }

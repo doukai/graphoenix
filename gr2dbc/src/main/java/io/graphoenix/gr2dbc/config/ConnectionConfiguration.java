@@ -1,11 +1,13 @@
 package io.graphoenix.gr2dbc.config;
 
-public class DbConfig {
+public class ConnectionConfiguration {
     private String database;
     private String host;
     private int port;
     private String username;
     private String password;
+    private int maxSize;
+    private long maxIdleTime;
 
     public String getDatabase() {
         return database;
@@ -45,5 +47,21 @@ public class DbConfig {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
+    }
+
+    public long getMaxIdleTime() {
+        return maxIdleTime;
+    }
+
+    public void setMaxIdleTime(long maxIdleTime) {
+        this.maxIdleTime = maxIdleTime;
     }
 }
