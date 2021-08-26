@@ -1,7 +1,8 @@
-package io.graphonix.grantlr.manager.impl;
+package io.graphoenix.grantlr.manager.impl;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphonix.grantlr.manager.*;
+import io.graphoenix.grantlr.common.utils.DocumentUtil;
+import io.graphoenix.grantlr.manager.*;
 
 import java.util.Optional;
 
@@ -45,6 +46,32 @@ public class GraphqlAntlrManager {
         this.graphqlInputValueManager = new GraphqlInputValueManager();
         this.graphqlEnumManager = new GraphqlEnumManager();
         this.graphqlScalarManager = new GraphqlScalarManager();
+    }
+
+    public GraphqlAntlrManager(GraphqlParser.DocumentContext documentContext) {
+        this.graphqlOperationManager = new GraphqlOperationManager();
+        this.graphqlObjectManager = new GraphqlObjectManager();
+        this.graphqlFieldManager = new GraphqlFieldManager();
+        this.graphqlInputObjectManager = new GraphqlInputObjectManager();
+        this.graphqlInputValueManager = new GraphqlInputValueManager();
+        this.graphqlEnumManager = new GraphqlEnumManager();
+        this.graphqlScalarManager = new GraphqlScalarManager();
+        this.registerDocument(documentContext);
+    }
+
+    public GraphqlAntlrManager(String graphql) {
+        this.graphqlOperationManager = new GraphqlOperationManager();
+        this.graphqlObjectManager = new GraphqlObjectManager();
+        this.graphqlFieldManager = new GraphqlFieldManager();
+        this.graphqlInputObjectManager = new GraphqlInputObjectManager();
+        this.graphqlInputValueManager = new GraphqlInputValueManager();
+        this.graphqlEnumManager = new GraphqlEnumManager();
+        this.graphqlScalarManager = new GraphqlScalarManager();
+        this.registerDocument(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    public void registerDocument(String graphql) {
+        DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql).definition().forEach(this::registerDefinition);
     }
 
     public void registerDocument(GraphqlParser.DocumentContext documentContext) {

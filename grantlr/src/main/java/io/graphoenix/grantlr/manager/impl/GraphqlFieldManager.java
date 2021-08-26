@@ -1,7 +1,7 @@
-package io.graphonix.grantlr.manager.impl;
+package io.graphoenix.grantlr.manager.impl;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphonix.grantlr.manager.IGraphqlFieldManager;
+import io.graphoenix.grantlr.manager.IGraphqlFieldManager;
 
 import java.util.HashMap;
 import java.util.Map;
