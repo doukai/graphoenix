@@ -1,7 +1,7 @@
 package io.graphoenix.mygql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphonix.grantlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.grantlr.manager.impl.GraphqlAntlrManager;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.StringValue;

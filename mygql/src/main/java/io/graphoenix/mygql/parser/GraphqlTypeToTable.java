@@ -1,7 +1,8 @@
 package io.graphoenix.mygql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphonix.grantlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.grantlr.common.utils.DocumentUtil;
+import io.graphoenix.grantlr.manager.impl.GraphqlAntlrManager;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -21,6 +22,15 @@ public class GraphqlTypeToTable {
 
     public GraphqlTypeToTable(GraphqlAntlrManager graphqlAntlrManager) {
         this.manager = graphqlAntlrManager;
+    }
+
+    public List<String> createTablesSql(String graphql) {
+        return createTablesSql(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    public List<String> createTablesSql(GraphqlParser.DocumentContext documentContext) {
+        return createTables(documentContext).stream()
+                .map(CreateTable::toString).collect(Collectors.toList());
     }
 
     public List<CreateTable> createTables(GraphqlParser.DocumentContext documentContext) {
@@ -157,7 +167,8 @@ public class GraphqlTypeToTable {
                 break;
             case "String":
                 colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
-                length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
+                String StringLength = length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("30");
+                argumentsStringList.add(StringLength);
                 break;
             case "Float":
                 colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));

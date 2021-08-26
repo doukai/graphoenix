@@ -2,7 +2,7 @@ package io.graphoenix.mygql.parser;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphonix.grantlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.grantlr.manager.impl.GraphqlAntlrManager;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
