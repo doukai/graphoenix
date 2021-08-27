@@ -1,7 +1,9 @@
 package io.graphoenix.mygql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.grantlr.common.utils.DocumentUtil;
 import io.graphoenix.grantlr.manager.impl.GraphqlAntlrManager;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.StringValue;
@@ -17,6 +19,7 @@ import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.mygql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mygql.common.utils.DBValueUtil.DB_VALUE_UTIL;
@@ -31,7 +34,29 @@ public class GraphqlQueryToSelect {
         this.argumentsToWhere = argumentsToWhere;
     }
 
+    public List<String> createSelectsSql(String graphql) {
+        return createSelectsSql(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    public List<String> createSelectsSqlByQuery(String graphql) {
+        return createSelectsSqlByQuery(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    public List<String> createSelectsSql(GraphqlParser.DocumentContext documentContext) {
+        return createSelects(documentContext).stream()
+                .map(Select::toString).collect(Collectors.toList());
+    }
+
+    public List<String> createSelectsSqlByQuery(GraphqlParser.DocumentContext documentContext) {
+        return createSelectsByQuery(documentContext).stream()
+                .map(Select::toString).collect(Collectors.toList());
+    }
+
     public List<Select> createSelects(GraphqlParser.DocumentContext documentContext) {
+        return documentContext.definition().stream().flatMap(this::createSelects).collect(Collectors.toList());
+    }
+
+    public List<Select> createSelectsByQuery(GraphqlParser.DocumentContext documentContext) {
         return documentContext.definition().stream().map(this::createSelect).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
@@ -42,6 +67,13 @@ public class GraphqlQueryToSelect {
         return operationDefinitionToSelect(definitionContext.operationDefinition());
     }
 
+    protected Stream<Select> createSelects(GraphqlParser.DefinitionContext definitionContext) {
+        if (definitionContext.operationDefinition() == null) {
+            return Stream.empty();
+        }
+        return operationDefinitionToSelects(definitionContext.operationDefinition());
+    }
+
     protected Optional<Select> operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
@@ -50,6 +82,7 @@ public class GraphqlQueryToSelect {
                 PlainSelect body = new PlainSelect();
                 SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
                 selectExpressionItem.setExpression(objectFieldSelectionToJsonObjectFunction(queryOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection()));
+                selectExpressionItem.setAlias(new Alias(DB_NAME_UTIL.nameToDBEscape("data")));
                 body.setSelectItems(Collections.singletonList(selectExpressionItem));
                 Table table = new Table("dual");
                 body.setFromItem(table);
@@ -58,6 +91,30 @@ public class GraphqlQueryToSelect {
             }
         }
         return Optional.empty();
+    }
+
+    protected Stream<Select> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+            Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
+            if (queryOperationTypeDefinition.isPresent()) {
+                return operationDefinitionContext.selectionSet().selection().stream()
+                        .map(selectionContext -> selectionToSelect(queryOperationTypeDefinition.get().typeName().name().getText(), selectionContext));
+            }
+        }
+        return Stream.empty();
+    }
+
+    protected Select selectionToSelect(String typeName, GraphqlParser.SelectionContext selectionContext) {
+        Select select = new Select();
+        PlainSelect body = new PlainSelect();
+        SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
+        selectExpressionItem.setExpression(selectionToExpression(typeName, selectionContext));
+        selectExpressionItem.setAlias(new Alias(DB_NAME_UTIL.nameToDBEscape(selectionContext.field().name().getText())));
+        body.setSelectItems(Collections.singletonList(selectExpressionItem));
+        Table table = new Table("dual");
+        body.setFromItem(table);
+        select.setSelectBody(body);
+        return select;
     }
 
     protected Expression selectionToExpression(String typeName, GraphqlParser.SelectionContext selectionContext) {

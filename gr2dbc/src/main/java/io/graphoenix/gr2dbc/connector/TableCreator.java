@@ -1,9 +1,7 @@
 package io.graphoenix.gr2dbc.connector;
 
 import io.r2dbc.spi.Batch;
-import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
