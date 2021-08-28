@@ -16,5 +16,4 @@ public class FactoryConnectionCreator implements ConnectionCreator {
     public Mono<Connection> createConnection() {
         return Mono.from(connectionFactory.create());
     }
-
 }
