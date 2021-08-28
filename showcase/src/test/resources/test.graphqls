@@ -37,12 +37,12 @@ query HeroNameAndFriends {
     #    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
     #        id, name,sex,login,role{name,type}
     #    }
-    users(cond:OR,name: {opr: GTE,val: "test"},role: {
+    users(cond:OR,name: {opr: EQ,val: "name1"},role: {
         name: {opr: EQ,val: "rolename"}
     },age:18,test:[{cond:OR, name: "test2",age: 13},{cond:OR, name: "test3",age: 16}]) {
         id, name,sex,login,role{name,type}
     }
-    user(id:"id1") {
+    user(id:1) {
         id, name,sex,login,role{name,type}
     }
     #    role(id: 1){
@@ -167,6 +167,7 @@ directive @table(
 
 directive @column(
     default: String
+    autoIncrement: Boolean
 ) on FIELD_DEFINITION
 
 directive @dataType(
@@ -180,10 +181,10 @@ asdfas
 """
 type User @table(engine:"InnoDB"){
     "test"
-    id: ID!
-    login  : String! @column(default:"111") @dataType(length:10,decimals:2)
-    password: String!
-    name: String!
+    id: ID! @column(autoIncrement:true)
+    login  : String @column(default:"111") @dataType(length:10,decimals:2)
+    password: String
+    name: String
     age: Int
     disable: Boolean
     sex: [Sex]
@@ -191,22 +192,22 @@ type User @table(engine:"InnoDB"){
 }
 
 type Role {
-    id: ID!
-    name: String!
+    id: ID! @column(autoIncrement:true)
+    name: String
     users: [User]
     resources: [Resource]
     type: [RoleType]
 }
 
 type Resource {
-    id: ID!
-    name: String!
+    id: ID! @column(autoIncrement:true)
+    name: String
     role: Role
 }
 
 type Organization {
-    id: ID!
+    id: ID! @column(autoIncrement:true)
     above: Organization
-    name: String!
+    name: String
     users: [User]
 }

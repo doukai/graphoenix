@@ -78,7 +78,7 @@ public class GraphqlTypeToTable {
 
         columnDefinition.ifPresent(presentColumnDefinition -> {
                     presentColumnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
-                    presentColumnDefinition.setColumnSpecs(createColumnSpecs(fieldDefinitionContext));
+                    presentColumnDefinition.getColumnSpecs().addAll(createColumnSpecs(fieldDefinitionContext));
                 }
         );
         return columnDefinition;
@@ -106,6 +106,9 @@ public class GraphqlTypeToTable {
         }
         columnDefinition.setColDataType(createColDataType(typeNameContext, fieldDefinitionContext.directives(), list));
         List<String> columnSpecs = new ArrayList<>();
+        if (typeNameContext.name().getText().equals("ID")) {
+            columnSpecs.add("PRIMARY KEY");
+        }
         if (nonNull) {
             columnSpecs.add("NOT NULL");
         }
@@ -153,6 +156,7 @@ public class GraphqlTypeToTable {
         Optional<GraphqlParser.ArgumentContext> dataType = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("type")).findFirst());
         Optional<GraphqlParser.ArgumentContext> length = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("length")).findFirst());
         Optional<GraphqlParser.ArgumentContext> decimals = dataTypeDirective.flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("decimals")).findFirst());
+
         List<String> argumentsStringList = new ArrayList<>();
         ColDataType colDataType = new ColDataType();
         switch (typeNameContext.name().getText()) {
@@ -252,7 +256,7 @@ public class GraphqlTypeToTable {
         if (argumentContext.valueWithVariable().IntValue() != null) {
             return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().IntValue().getText());
         } else if (argumentContext.valueWithVariable().BooleanValue() != null) {
-            return argumentContext.name().getText();
+            return DB_NAME_UTIL.booleanDirectiveTocColumnDefinition(argumentContext.name().getText());
         } else if (argumentContext.valueWithVariable().StringValue() != null) {
             return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().StringValue().getText());
         }

@@ -1,6 +1,7 @@
 package io.graphoenix.mygql.parser;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.grantlr.common.utils.DocumentUtil;
 import io.graphoenix.grantlr.manager.impl.GraphqlAntlrManager;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -33,6 +34,15 @@ public class GraphqlMutationToStatements {
     public GraphqlMutationToStatements(GraphqlAntlrManager manager, GraphqlQueryToSelect graphqlQueryToSelect) {
         this.manager = manager;
         this.graphqlQueryToSelect = graphqlQueryToSelect;
+    }
+
+    public List<String> createStatementsSql(String graphql) {
+        return createSelectsSql(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    public List<String> createSelectsSql(GraphqlParser.DocumentContext documentContext) {
+        return createStatements(documentContext).getStatements().stream()
+                .map(Statement::toString).collect(Collectors.toList());
     }
 
     public Statements createStatements(GraphqlParser.DocumentContext documentContext) {

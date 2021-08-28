@@ -38,6 +38,11 @@ public enum DBNameUtil {
         return String.format("%s %s", CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, argumentName), stringValueToDBVarchar(CharMatcher.anyOf("\"").trimFrom(argumentValue)));
     }
 
+    public String booleanDirectiveTocColumnDefinition(String argumentName) {
+
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, argumentName);
+    }
+
     public String graphqlDescriptionToDBComment(String description) {
 
         return stringValueToDBVarchar(CharMatcher.anyOf("\"").or(CharMatcher.anyOf("\"\"\"")).trimFrom(description));
