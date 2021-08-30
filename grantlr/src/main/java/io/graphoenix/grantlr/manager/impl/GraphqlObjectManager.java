@@ -4,8 +4,10 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.grantlr.manager.IGraphqlObjectManager;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GraphqlObjectManager implements IGraphqlObjectManager {
@@ -31,5 +33,10 @@ public class GraphqlObjectManager implements IGraphqlObjectManager {
     @Override
     public Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitions() {
         return objectTypeDefinitionMap.values().stream();
+    }
+
+    @Override
+    public List<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitionList() {
+        return getObjectTypeDefinitions().collect(Collectors.toList());
     }
 }
