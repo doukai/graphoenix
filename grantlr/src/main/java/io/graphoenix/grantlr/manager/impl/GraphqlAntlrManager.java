@@ -5,6 +5,7 @@ import io.graphoenix.grantlr.common.utils.DocumentUtil;
 import io.graphoenix.grantlr.manager.*;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class GraphqlAntlrManager {
 
@@ -141,6 +142,10 @@ public class GraphqlAntlrManager {
 
     public Optional<GraphqlParser.ObjectTypeDefinitionContext> getObject(String name) {
         return graphqlObjectManager.getObjectTypeDefinition(name);
+    }
+
+    public Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjects() {
+        return graphqlObjectManager.getObjectTypeDefinitions();
     }
 
     public Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObject(String name) {
