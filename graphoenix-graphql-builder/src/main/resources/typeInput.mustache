@@ -1,0 +1,7 @@
+{{#types}}
+    input {{name}}Input {
+    {{#fields}}
+        {{name}}:{{#type}}{{name}}{{#isObject}}Input{{/isObject}}{{/type}}
+    {{/fields}}
+    }
+{{/types}}
