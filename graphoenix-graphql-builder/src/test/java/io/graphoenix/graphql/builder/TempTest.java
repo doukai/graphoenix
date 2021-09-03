@@ -1,21 +1,29 @@
 package io.graphoenix.graphql.builder;
 
-import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 public class TempTest {
 
     @Test
-    void test() throws IOException {
+    void test() throws IOException, URISyntaxException {
         URL url = Resources.getResource("test.graphqls");
-        String graphql = Resources.toString(url, Charsets.UTF_8);
+        InputStream inputStream = url.openStream();
+        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(inputStream);
+        inputStream.close();
 
-        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphql);
-        TypeExpressionBuilder typeExpressionBuilder = new TypeExpressionBuilder(graphqlAntlrManager);
+        StringWriter stringWriter = new StringWriter();
+
+        GraphqlSchemaBuilder graphqlSchemaBuilder = new GraphqlSchemaBuilder(graphqlAntlrManager);
+
+        graphqlSchemaBuilder.buildObjectExpressions(stringWriter);
+
+        stringWriter.flush();
+        graphqlAntlrManager.registerDocument(stringWriter.toString());
     }
 }

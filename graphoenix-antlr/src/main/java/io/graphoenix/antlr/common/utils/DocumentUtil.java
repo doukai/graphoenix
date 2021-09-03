@@ -5,13 +5,27 @@ import graphql.parser.antlr.GraphqlParser;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public enum DocumentUtil {
 
     DOCUMENT_UTIL;
 
+    public GraphqlParser.DocumentContext graphqlToDocument(InputStream inputStream) throws IOException {
+        CharStream charStream;
+        charStream = CharStreams.fromStream(inputStream);
+        return graphqlToDocument(charStream);
+    }
+
     public GraphqlParser.DocumentContext graphqlToDocument(String graphql) {
         CodePointCharStream charStream;
         charStream = CharStreams.fromString(graphql);
+        return graphqlToDocument(charStream);
+    }
+
+    public GraphqlParser.DocumentContext graphqlToDocument(CharStream charStream) {
+
         GraphqlLexer lexer = new GraphqlLexer(charStream);
         lexer.removeErrorListeners();
         lexer.addErrorListener(new BaseErrorListener() {
