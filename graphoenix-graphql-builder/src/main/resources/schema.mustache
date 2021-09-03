@@ -1,0 +1,14 @@
+schema {
+    query: QueryType
+    mutation: MutationType
+}
+
+type QueryType {
+{{#types}}
+    {{name}}(id: ID!): {{name}}
+    {{name}}List({{#fields}}{{name}}:{{#type}}{{name}}Expression{{/type}},{{/fields}}): [{{name}}]
+{{/types}}
+}
+
+
+
