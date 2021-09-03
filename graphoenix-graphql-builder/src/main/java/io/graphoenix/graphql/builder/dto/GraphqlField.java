@@ -8,6 +8,10 @@ public class GraphqlField {
 
     private boolean isObject;
 
+    private boolean isBoolean;
+
+    private boolean isLast;
+
     public GraphqlField(String name, String typeName, boolean isObject) {
         this.name = name;
         this.typeName = typeName;
@@ -18,23 +22,38 @@ public class GraphqlField {
         return name;
     }
 
-    public void setName(String name) {
+    public GraphqlField setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getTypeName() {
         return typeName;
     }
 
-    public void setTypeName(String typeName) {
+    public GraphqlField setTypeName(String typeName) {
         this.typeName = typeName;
+        if (this.typeName.equals("Boolean")) {
+            this.isBoolean = true;
+        }
+        return this;
     }
 
     public boolean isObject() {
         return isObject;
     }
 
-    public void setObject(boolean object) {
+    public GraphqlField setObject(boolean object) {
         isObject = object;
+        return this;
+    }
+
+    public boolean isLast() {
+        return isLast;
+    }
+
+    public GraphqlField setLast(boolean last) {
+        isLast = last;
+        return this;
     }
 }
