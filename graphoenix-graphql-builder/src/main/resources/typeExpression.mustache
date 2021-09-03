@@ -1,9 +1,9 @@
-{{#types}}
+{{#objects}}
     input {{name}}Expression {
     cond:Conditional = AND
     exs:[{{name}}Expression]
     {{#fields}}
-        {{name}}:{{#type}}{{name}}Expression{{/type}}
+        {{name}}:{{typeName}}{{^isBoolean}}Expression{{/isBoolean}}
     {{/fields}}
     }
-{{/types}}
+{{/objects}}

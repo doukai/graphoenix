@@ -5,6 +5,7 @@ import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GraphqlDtoWrapper {
 
@@ -20,14 +21,27 @@ public class GraphqlDtoWrapper {
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
                 .map(this::objectTypeDefinitionToDto).collect(Collectors.toList());
+    }
 
+    public List<GraphqlObject> enumTypeDefinitionsToDto() {
+        return manager.getEnums()
+                .map(this::enumTypeDefinitionToDto).collect(Collectors.toList());
+    }
+
+    public GraphqlObject enumTypeDefinitionToDto(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+
+        return new GraphqlObject(enumTypeDefinitionContext.name().getText(), null);
     }
 
     public GraphqlObject objectTypeDefinitionToDto(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new GraphqlObject(objectTypeDefinitionContext.name().getText(),
+        Stream<GraphqlField> fieldsStream =
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                         .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                        .map(this::fieldDefinitionToDto).collect(Collectors.toList()));
+                        .map(this::fieldDefinitionToDto);
+
+        List<GraphqlField> fields = fieldsStream.skip(fieldsStream.count() - 1).map(graphqlField -> graphqlField.setLast(true)).collect(Collectors.toList());
+
+        return new GraphqlObject(objectTypeDefinitionContext.name().getText(), fields);
     }
 
     private GraphqlField fieldDefinitionToDto(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {

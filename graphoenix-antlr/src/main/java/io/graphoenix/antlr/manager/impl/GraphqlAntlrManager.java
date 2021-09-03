@@ -144,6 +144,10 @@ public class GraphqlAntlrManager {
         return graphqlObjectManager.getObjectTypeDefinition(name);
     }
 
+    public Stream<GraphqlParser.EnumTypeDefinitionContext> getEnums() {
+        return graphqlEnumManager.getEnumTypeDefinitions();
+    }
+
     public Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjects() {
         return graphqlObjectManager.getObjectTypeDefinitions();
     }

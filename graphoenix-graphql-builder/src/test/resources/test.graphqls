@@ -1,116 +1,4 @@
-schema {
-    query: QueryType
-    mutation: MutationType
-}
 
-type QueryType {
-    user(id: ID!): User
-    #    users(ex:UserExpression): [User]
-    users(name:StringExpression,cond:Conditional,role:RoleExpression,age:Int,test:[UserExpression]): [User]
-    role(id : ID!) : Role
-    resource(id: ID!): Resource
-}
-
-type MutationType {
-    user(
-        "test"
-        id: ID
-        login  : String
-        password: String
-        name: String
-        age: Int
-        disable: Boolean
-        sex: [Sex]
-        role: RoleInput): User
-    #    users(ex:UserExpression): [User]
-    users(name:String): [User]
-    role(
-        id: ID
-        name: String
-        users: [UserInput]
-        resources: [ResourceInput]
-        type: [RoleType]) : Role
-    resource(id: ID!): Resource
-}
-
-query HeroNameAndFriends {
-    #    users(ex:{cond: OR, exs: [{name: {val: "test"}},{name: {in: ["test3","test4"]}}]}) {
-    #        id, name,sex,login,role{name,type}
-    #    }
-    users(cond:OR,name: {opr: EQ,val: "name1"},role: {
-        name: {opr: EQ,val: "rolename"}
-    },age:18,test:[{cond:OR, name: "test2",age: 13},{cond:OR, name: "test3",age: 16}]) {
-        id, name,sex,login,role{name,type}
-    }
-    user(id:1) {
-        id, name,sex,login,role{name,type}
-    }
-    #    role(id: 1){
-    #        name,type,users{name,id}
-    #    }
-}
-
-mutation updateTest {
-    user( name:"name1",role:{id:"123",name:"role1"}){
-        name,sex,login
-    }
-
-    role(name:"name1",resources: [{id:"test1",name: "res1"},{name: "res2"}]){
-        name
-    }
-}
-
-input UserInput {
-    "test"
-    id: ID
-    login  : String
-    password: String
-    name: String
-    age: Int
-    disable: Boolean
-    sex: [Sex]
-    role: RoleInput
-}
-
-input RoleInput {
-    id: ID
-    name: String
-    users: [UserInput]
-    resources: [ResourceInput]
-    type: [RoleType]
-}
-
-input ResourceInput {
-    id: ID
-    name: String
-    role: RoleInput
-}
-
-enum RoleType {
-    ADMIN
-    USER
-    ANONYMOUS
-}
-
-enum Sex {
-    MAN
-    FEMALE
-}
-
-enum Operator {
-    EQ
-    LK
-    GT
-    GTE
-    LT
-    LTE
-    NIL
-}
-
-enum Conditional {
-    AND
-    OR
-}
 
 input UserExpression {
     cond:Conditional = AND
@@ -129,25 +17,7 @@ input RoleExpression {
     type: RoleTypeExpression
 }
 
-input StringExpression {
-    opr:Operator = EQ
-    val:String
-    in:[String]
-}
 
-input IntExpression {
-    not:Boolean = false
-    opr:Operator = EQ
-    val:Int
-    in:[Int]
-}
-
-input FloatExpression {
-    not:Boolean = false
-    opr:Operator = EQ
-    val:Float
-    in:[Float]
-}
 
 input SexExpression {
     not:Boolean = false
@@ -161,20 +31,8 @@ input RoleTypeExpression {
     in:[RoleType]
 }
 
-directive @table(
-    engine : String="InnoDB"
-) on OBJECT
 
-directive @column(
-    default: String
-    autoIncrement: Boolean
-) on FIELD_DEFINITION
 
-directive @dataType(
-    type: String
-    length: Int
-    decimals: Int
-) on FIELD_DEFINITION
 """
 A main title for the post
 asdfas
