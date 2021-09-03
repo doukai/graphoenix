@@ -6,16 +6,42 @@ schema {
 type QueryType {
 {{#objects}}
     get{{name}}(id: ID!): {{name}}
-    query{{name}}({{#fields}}{{name}}:{{typeName}}Expression{{^isLast}},{{/isLast}}{{/fields}}): [{{name}}]
+    query{{name}}({{#fields}}{{name}}:{{typeName}}{{^isBoolean}}Expression{{/isBoolean}}{{^isLast}}, {{/isLast}}{{/fields}}): [{{name}}]
 {{/objects}}
 }
 
 type MutationType {
 {{#objects}}
-    save{{name}}({{#fields}}{{name}}:{{typeName}}{{#isObject}}Input{{/isObject}}{{^isLast}},{{/isLast}}{{/fields}}): {{name}}
+    save{{name}}({{#fields}}{{name}}:{{typeName}}{{#isObject}}Input{{/isObject}}{{^isLast}}, {{/isLast}}{{/fields}}): {{name}}
 {{/objects}}
 }
 
+{{#enums}}
+input {{name}}Expression {
+    opr:Operator = EQ
+    val:{{name}}
+    in:[{{name}}]
+}
+
+{{/enums}}
+{{#objects}}
+input {{name}}Expression {
+    cond:Conditional = AND
+    exs:[{{name}}Expression]
+{{#fields}}
+    {{name}}:{{typeName}}{{^isBoolean}}Expression{{/isBoolean}}
+{{/fields}}
+}
+
+{{/objects}}
+{{#objects}}
+input {{name}}Input {
+{{#fields}}
+    {{name}}:{{typeName}}{{#isObject}}Input{{/isObject}}
+{{/fields}}
+}
+
+{{/objects}}
 enum Operator {
     EQ
     NEQ
@@ -36,6 +62,12 @@ enum Operator {
 enum Conditional {
     AND
     OR
+}
+
+input IDExpression {
+    opr:Operator = EQ
+    val:ID
+    in:[ID]
 }
 
 input StringExpression {

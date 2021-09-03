@@ -34,12 +34,12 @@ public class GraphqlDtoWrapper {
     }
 
     public GraphqlObject objectTypeDefinitionToDto(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        Stream<GraphqlField> fieldsStream =
+        List<GraphqlField> fields =
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                         .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                        .map(this::fieldDefinitionToDto);
+                        .map(this::fieldDefinitionToDto).collect(Collectors.toList());
 
-        List<GraphqlField> fields = fieldsStream.skip(fieldsStream.count() - 1).map(graphqlField -> graphqlField.setLast(true)).collect(Collectors.toList());
+        fields.get(fields.size() - 1).setLast(true);
 
         return new GraphqlObject(objectTypeDefinitionContext.name().getText(), fields);
     }

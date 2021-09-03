@@ -1,38 +1,3 @@
-
-
-input UserExpression {
-    cond:Conditional = AND
-    exs:[UserExpression]
-    name: String
-    sex: SexExpression
-    age:Int
-    disable:Boolean
-    role:RoleExpression
-}
-
-input RoleExpression {
-    cond:Conditional = AND
-    exs:[RoleExpression]
-    name: StringExpression
-    type: RoleTypeExpression
-}
-
-
-
-input SexExpression {
-    not:Boolean = false
-    val:Sex
-    in:[Sex]
-}
-
-input RoleTypeExpression {
-    not:Boolean = false
-    val:RoleType
-    in:[RoleType]
-}
-
-
-
 """
 A main title for the post
 asdfas
@@ -68,4 +33,9 @@ type Organization {
     above: Organization
     name: String
     users: [User]
+}
+
+enum RoleType{
+    ADMIN
+    USR
 }

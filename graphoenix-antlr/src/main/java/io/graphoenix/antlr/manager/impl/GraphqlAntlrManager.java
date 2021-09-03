@@ -4,6 +4,8 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.antlr.common.utils.DocumentUtil;
 import io.graphoenix.antlr.manager.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -69,6 +71,17 @@ public class GraphqlAntlrManager {
         this.graphqlEnumManager = new GraphqlEnumManager();
         this.graphqlScalarManager = new GraphqlScalarManager();
         this.registerDocument(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    public GraphqlAntlrManager(InputStream inputStream) throws IOException {
+        this.graphqlOperationManager = new GraphqlOperationManager();
+        this.graphqlObjectManager = new GraphqlObjectManager();
+        this.graphqlFieldManager = new GraphqlFieldManager();
+        this.graphqlInputObjectManager = new GraphqlInputObjectManager();
+        this.graphqlInputValueManager = new GraphqlInputValueManager();
+        this.graphqlEnumManager = new GraphqlEnumManager();
+        this.graphqlScalarManager = new GraphqlScalarManager();
+        this.registerDocument(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(inputStream));
     }
 
     public void registerDocument(String graphql) {

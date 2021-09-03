@@ -10,19 +10,22 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
-public class TypeInputBuilder {
+public class GraphqlSchemaBuilder {
 
     private final GraphqlDtoWrapper wrapper;
 
-    public TypeInputBuilder(GraphqlAntlrManager manager) {
+    public GraphqlSchemaBuilder(GraphqlAntlrManager manager) {
         this.wrapper = new GraphqlDtoWrapper(manager);
     }
 
-    public void buildObjectInputs(Writer writer) throws IOException {
+    public void buildObjectExpressions(Writer writer) throws IOException {
 
         MustacheFactory mustacheFactory = new DefaultMustacheFactory();
-        Mustache mustache = mustacheFactory.compile("typeInput.mustache");
-        mustache.execute(writer, Map.of("objects", wrapper.objectTypeDefinitionsToDto())).flush();
+        Mustache mustache = mustacheFactory.compile("schema.mustache");
+        mustache.execute(writer, Map.of(
+                "objects", wrapper.objectTypeDefinitionsToDto(),
+                "enums", wrapper.enumTypeDefinitionsToDto()
+        )).flush();
     }
 }
 

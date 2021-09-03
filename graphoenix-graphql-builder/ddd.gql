@@ -1,0 +1,153 @@
+schema {
+    query: QueryType
+    mutation: MutationType
+}
+
+type QueryType {
+    getRole(id: ID!): Role
+    queryRole(id:IDExpression, name:StringExpression): [Role]
+    getUser(id: ID!): User
+    queryUser(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, role:RoleExpression): [User]
+    getOrganization(id: ID!): Organization
+    queryOrganization(id:IDExpression, above:OrganizationExpression, name:StringExpression): [Organization]
+    getResource(id: ID!): Resource
+    queryResource(id:IDExpression, name:StringExpression, role:RoleExpression): [Resource]
+}
+
+type MutationType {
+    saveRole(id:ID, name:String): Role
+    saveUser(id:ID, login:String, password:String, name:String, age:Int, disable:Boolean, role:RoleInput): User
+    saveOrganization(id:ID, above:OrganizationInput, name:String): Organization
+    saveResource(id:ID, name:String, role:RoleInput): Resource
+}
+
+&quot;&quot;&quot;&#13;&#10;A main title for the post&#13;&#10;asdfas&#13;&#10;&quot;&quot;&quot;&#13;&#10;type User @table(engine:&quot;InnoDB&quot;){&#13;&#10;    &quot;test&quot;&#13;&#10;    id: ID! @column(autoIncrement:true)&#13;&#10;    login  : String @column(default:&quot;111&quot;) @dataType(length:10,decimals:2)&#13;&#10;    password: String&#13;&#10;    name: String&#13;&#10;    age: Int&#13;&#10;    disable: Boolean&#13;&#10;    sex: [Sex]&#13;&#10;    role: Role&#13;&#10;}&#13;&#10;&#13;&#10;type Role {&#13;&#10;    id: ID! @column(autoIncrement:true)&#13;&#10;    name: String&#13;&#10;    users: [User]&#13;&#10;    resources: [Resource]&#13;&#10;    type: [RoleType]&#13;&#10;}&#13;&#10;&#13;&#10;type Resource {&#13;&#10;    id: ID! @column(autoIncrement:true)&#13;&#10;    name: String&#13;&#10;    role: Role&#13;&#10;}&#13;&#10;&#13;&#10;type Organization {&#13;&#10;    id: ID! @column(autoIncrement:true)&#13;&#10;    above: Organization&#13;&#10;    name: String&#13;&#10;    users: [User]&#13;&#10;}&#13;&#10;&#13;&#10;enum RoleType{&#13;&#10;    ADMIN&#13;&#10;    USR&#13;&#10;}&#13;&#10;
+
+input RoleTypeExpression {
+    opr:Operator = EQ
+    val:RoleType
+    in:[RoleType]
+}
+
+input RoleExpression {
+    cond:Conditional = AND
+    exs:[RoleExpression]
+    id:IDExpression
+    name:StringExpression
+}
+
+input UserExpression {
+    cond:Conditional = AND
+    exs:[UserExpression]
+    id:IDExpression
+    login:StringExpression
+    password:StringExpression
+    name:StringExpression
+    age:IntExpression
+    disable:Boolean
+    role:RoleExpression
+}
+
+input OrganizationExpression {
+    cond:Conditional = AND
+    exs:[OrganizationExpression]
+    id:IDExpression
+    above:OrganizationExpression
+    name:StringExpression
+}
+
+input ResourceExpression {
+    cond:Conditional = AND
+    exs:[ResourceExpression]
+    id:IDExpression
+    name:StringExpression
+    role:RoleExpression
+}
+
+input RoleInput {
+    id:ID
+    name:String
+}
+
+input UserInput {
+    id:ID
+    login:String
+    password:String
+    name:String
+    age:Int
+    disable:Boolean
+    role:RoleInput
+}
+
+input OrganizationInput {
+    id:ID
+    above:OrganizationInput
+    name:String
+}
+
+input ResourceInput {
+    id:ID
+    name:String
+    role:RoleInput
+}
+
+enum Operator {
+    EQ
+    NEQ
+    LK
+    NLK
+    GT
+    NLTE
+    GTE
+    NLT
+    LT
+    NGTE
+    LTE
+    NGT
+    NIL
+    NNIL
+}
+
+enum Conditional {
+    AND
+    OR
+}
+
+input IDExpression {
+    opr:Operator = EQ
+    val:ID
+    in:[ID]
+}
+
+input StringExpression {
+    opr:Operator = EQ
+    val:String
+    in:[String]
+}
+
+input IntExpression {
+    opr:Operator = EQ
+    val:Int
+    in:[Int]
+}
+
+input FloatExpression {
+    opr:Operator = EQ
+    val:Float
+    in:[Float]
+}
+
+directive @table(
+    engine : String="InnoDB"
+) on OBJECT
+
+directive @column(
+    default: String
+    autoIncrement: Boolean
+) on FIELD_DEFINITION
+
+directive @dataType(
+    type: String
+    length: Int
+    decimals: Int
+) on FIELD_DEFINITION

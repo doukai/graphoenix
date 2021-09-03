@@ -15,6 +15,9 @@ public class GraphqlField {
     public GraphqlField(String name, String typeName, boolean isObject) {
         this.name = name;
         this.typeName = typeName;
+        if (this.typeName.equals("Boolean")) {
+            this.isBoolean = true;
+        }
         this.isObject = isObject;
     }
 
@@ -55,5 +58,13 @@ public class GraphqlField {
     public GraphqlField setLast(boolean last) {
         isLast = last;
         return this;
+    }
+
+    public boolean isBoolean() {
+        return isBoolean;
+    }
+
+    public void setBoolean(boolean aBoolean) {
+        isBoolean = aBoolean;
     }
 }
