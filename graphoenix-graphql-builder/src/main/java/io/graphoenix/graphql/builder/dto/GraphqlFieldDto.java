@@ -1,6 +1,6 @@
 package io.graphoenix.graphql.builder.dto;
 
-public class GraphqlField {
+public class GraphqlFieldDto {
 
     private String name;
 
@@ -12,7 +12,7 @@ public class GraphqlField {
 
     private boolean isLast;
 
-    public GraphqlField(String name, String typeName, boolean isObject) {
+    public GraphqlFieldDto(String name, String typeName, boolean isObject) {
         this.name = name;
         this.typeName = typeName;
         if (this.typeName.equals("Boolean")) {
@@ -25,7 +25,7 @@ public class GraphqlField {
         return name;
     }
 
-    public GraphqlField setName(String name) {
+    public GraphqlFieldDto setName(String name) {
         this.name = name;
         return this;
     }
@@ -34,7 +34,7 @@ public class GraphqlField {
         return typeName;
     }
 
-    public GraphqlField setTypeName(String typeName) {
+    public GraphqlFieldDto setTypeName(String typeName) {
         this.typeName = typeName;
         if (this.typeName.equals("Boolean")) {
             this.isBoolean = true;
@@ -46,7 +46,7 @@ public class GraphqlField {
         return isObject;
     }
 
-    public GraphqlField setObject(boolean object) {
+    public GraphqlFieldDto setObject(boolean object) {
         isObject = object;
         return this;
     }
@@ -55,7 +55,7 @@ public class GraphqlField {
         return isLast;
     }
 
-    public GraphqlField setLast(boolean last) {
+    public GraphqlFieldDto setLast(boolean last) {
         isLast = last;
         return this;
     }
