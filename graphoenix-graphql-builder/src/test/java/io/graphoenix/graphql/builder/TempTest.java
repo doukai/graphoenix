@@ -24,6 +24,7 @@ public class TempTest {
         graphqlSchemaBuilder.buildObjectExpressions(stringWriter);
 
         stringWriter.flush();
+
         graphqlAntlrManager.registerDocument(stringWriter.toString());
     }
 }
