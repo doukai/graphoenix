@@ -1,0 +1,17 @@
+mutation introspection {
+    user(
+        types:[
+            {
+            kind:
+            }
+            ],
+        queryType: __TypeInput!,
+        mutationType: __TypeInput,
+        subscriptionType: __TypeInput,
+        directives: [__DirectiveInput!]
+    ){
+        types{
+            name
+        }
+    }
+}

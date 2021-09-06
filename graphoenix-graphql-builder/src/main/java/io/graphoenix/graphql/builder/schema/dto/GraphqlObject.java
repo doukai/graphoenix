@@ -1,16 +1,16 @@
-package io.graphoenix.graphql.builder.dto;
+package io.graphoenix.graphql.builder.schema.dto;
 
 import java.util.List;
 
-public class GraphqlObjectDto {
+public class GraphqlObject {
 
     private String schemaFieldName;
 
     private String name;
 
-    private List<GraphqlFieldDto> fields;
+    private List<GraphqlField> fields;
 
-    public GraphqlObjectDto(String name, List<GraphqlFieldDto> fields) {
+    public GraphqlObject(String name, List<GraphqlField> fields) {
         this.name = name;
         this.schemaFieldName = this.name.toLowerCase();
         this.fields = fields;
@@ -25,11 +25,11 @@ public class GraphqlObjectDto {
         this.schemaFieldName = this.name.toLowerCase();
     }
 
-    public List<GraphqlFieldDto> getFields() {
+    public List<GraphqlField> getFields() {
         return fields;
     }
 
-    public void setFields(List<GraphqlFieldDto> fields) {
+    public void setFields(List<GraphqlField> fields) {
         this.fields = fields;
     }
 
