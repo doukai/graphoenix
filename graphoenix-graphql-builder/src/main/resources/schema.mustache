@@ -13,6 +13,7 @@ type QueryType {
 }
 
 type MutationType {
+    __schema(types: [__TypeInput!]!, queryType: __TypeInput!, mutationType: __TypeInput, subscriptionType: __TypeInput, directives: [__DirectiveInput!]): __Schema
 {{#objects}}
     {{schemaFieldName}}({{#fields}}{{name}}:{{typeName}}{{#isObject}}Input{{/isObject}}{{^isLast}}, {{/isLast}}{{/fields}}): {{name}}
 {{/objects}}
@@ -44,106 +45,6 @@ input {{name}}Input {
 }
 
 {{/objects}}
-type __Schema {
-    id:ID
-    types: [__Type!]!
-    queryType: __Type!
-    mutationType: __Type
-    subscriptionType: __Type
-    directives: [__Directive!]!
-}
-
-type __Type {
-    id:ID
-    kind: __TypeKind!
-    name: String
-    description: String
-
-    # OBJECT and INTERFACE only
-    fields(includeDeprecated: Boolean = false): [__Field!]
-
-    # OBJECT only
-    interfaces: [__Type!]
-
-    # INTERFACE and UNION only
-    possibleTypes: [__Type!]
-
-    # ENUM only
-    enumValues(includeDeprecated: Boolean = false): [__EnumValue!]
-
-    # INPUT_OBJECT only
-    inputFields: [__InputValue!]
-
-    # NON_NULL and LIST only
-    ofType: __Type
-}
-
-type __Field {
-    id:ID
-    name: String!
-    description: String
-    args: [__InputValue!]!
-    type: __Type!
-    isDeprecated: Boolean!
-    deprecationReason: String
-}
-
-type __InputValue {
-    id:ID
-    name: String!
-    description: String
-    type: __Type!
-    defaultValue: String
-}
-
-type __EnumValue {
-    id:ID
-    name: String!
-    description: String
-    isDeprecated: Boolean!
-    deprecationReason: String
-}
-
-enum __TypeKind {
-    SCALAR
-    OBJECT
-    INTERFACE
-    UNION
-    ENUM
-    INPUT_OBJECT
-    LIST
-    NON_NULL
-}
-
-type __Directive {
-    id:ID
-    name: String!
-    description: String
-    locations: [__DirectiveLocation!]!
-    args: [__InputValue!]!
-}
-
-enum __DirectiveLocation {
-    QUERY
-    MUTATION
-    SUBSCRIPTION
-    FIELD
-    FRAGMENT_DEFINITION
-    FRAGMENT_SPREAD
-    INLINE_FRAGMENT
-    SCHEMA
-    SCALAR
-    OBJECT
-    FIELD_DEFINITION
-    ARGUMENT_DEFINITION
-    INTERFACE
-    UNION
-    ENUM
-    ENUM_VALUE
-    INPUT_OBJECT
-    INPUT_FIELD_DEFINITION
-}
-
 enum Operator {
     EQ
     NEQ
@@ -188,6 +89,177 @@ input FloatExpression {
     opr:Operator = EQ
     val:Float
     in:[Float]
+}
+
+type __Schema {
+    id:ID
+    types: [__Type!]!
+    queryType: __Type!
+    mutationType: __Type
+    subscriptionType: __Type
+    directives: [__Directive!]
+}
+
+type __Type {
+    id:ID
+    kind: __TypeKind!
+    name: String!
+    description: String
+    schema: __Schema
+
+    # OBJECT and INTERFACE only
+    fields(includeDeprecated: Boolean = false): [__Field!]
+
+    # OBJECT only
+    interfaces: [__Type!]
+
+    # INTERFACE and UNION only
+    possibleTypes: [__Type!]
+
+    # ENUM only
+    enumValues(includeDeprecated: Boolean = false): [__EnumValue!]
+
+    # INPUT_OBJECT only
+    inputFields: [__InputValue!]
+
+    # NON_NULL and LIST only
+    ofType: __Type
+
+    directives: [__Directive!]
+}
+
+type __Field {
+    id:ID
+    name: String!
+    description: String
+    args: [__InputValue!]
+    type: __Type!
+    isDeprecated: Boolean = false
+    deprecationReason: String
+    directives: [__Directive!]
+}
+
+type __InputValue {
+    id:ID
+    name: String!
+    description: String
+    type: __Type
+    field: __Field
+    directive: __Directive
+    defaultValue: String
+    directives: [__Directive!]
+}
+
+type __EnumValue {
+    id:ID
+    name: String!
+    description: String
+    isDeprecated: Boolean = false
+    type: __Type
+    deprecationReason: String
+}
+
+enum __TypeKind {
+    SCALAR
+    OBJECT
+    INTERFACE
+    UNION
+    ENUM
+    INPUT_OBJECT
+    LIST
+    NON_NULL
+}
+
+type __Directive {
+    id:ID
+    name: String!
+    description: String
+    schema: __Schema
+    type: __Type
+    field: __Field
+    inputValue: __InputValue
+    locations: [__DirectiveLocation!]!
+    args: [__InputValue!]
+}
+
+enum __DirectiveLocation {
+    QUERY
+    MUTATION
+    SUBSCRIPTION
+    FIELD
+    FRAGMENT_DEFINITION
+    FRAGMENT_SPREAD
+    INLINE_FRAGMENT
+    SCHEMA
+    SCALAR
+    OBJECT
+    FIELD_DEFINITION
+    ARGUMENT_DEFINITION
+    INTERFACE
+    UNION
+    ENUM
+    ENUM_VALUE
+    INPUT_OBJECT
+    INPUT_FIELD_DEFINITION
+}
+
+input __SchemaInput {
+    id:ID
+    types: [__TypeInput!]!
+    queryType: __TypeInput!
+    mutationType: __TypeInput
+    subscriptionType: __TypeInput
+    directives: [__DirectiveInput!]
+}
+
+input __TypeInput {
+    kind: __TypeKind!
+    name: String
+    description: String
+    schema: __SchemaInput
+    fields: [__FieldInput!]
+    interfaces: [__TypeInput!]
+    possibleTypes: [__TypeInput!]
+    enumValues: [__EnumValueInput!]
+    inputFields: [__InputValueInput!]
+    ofType: __TypeInput
+}
+
+input __FieldInput {
+    name: String!
+    description: String
+    args: [__InputValueInput!]
+    type: __TypeInput!
+    isDeprecated: Boolean = false
+    deprecationReason: String
+}
+
+input __InputValueInput {
+    name: String!
+    description: String
+    type: __TypeInput
+    field: __FieldInput
+    directive: __DirectiveInput
+    defaultValue: String
+}
+
+input __EnumValueInput {
+    name: String!
+    description: String
+    type: __TypeInput
+    isDeprecated: Boolean = false
+    deprecationReason: String
+}
+
+input __DirectiveInput {
+    name: String!
+    description: String
+    schema: __SchemaInput
+    type: __TypeInput
+    field: __FieldInput
+    inputValue: __InputValue
+    locations: [__DirectiveLocation!]!
+    args: [__InputValueInput!]
 }
 
 directive @table(

@@ -2,6 +2,7 @@ package io.graphoenix.graphql.builder;
 
 import com.google.common.io.Resources;
 import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.graphql.builder.schema.dto.GraphqlSchemaBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;

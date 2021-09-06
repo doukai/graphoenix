@@ -52,7 +52,7 @@ query HeroNameAndFriends {
 
 mutation updateTest {
     user( name:"name1",role:{id:"123",name:"role1"}){
-        name,sex,login
+        name,sex,login,role{name}
     }
 
     role(name:"name1",resources: [{id:"test1",name: "res1"},{name: "res2"}]){

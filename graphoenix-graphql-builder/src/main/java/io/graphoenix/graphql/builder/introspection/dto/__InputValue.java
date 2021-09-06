@@ -1,4 +1,4 @@
-package io.graphoenix.antlr.introspection;
+package io.graphoenix.graphql.builder.introspection.dto;
 
 public class __InputValue {
 
