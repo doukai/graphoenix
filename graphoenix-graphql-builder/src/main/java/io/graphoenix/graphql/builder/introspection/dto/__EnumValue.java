@@ -1,5 +1,7 @@
 package io.graphoenix.graphql.builder.introspection.dto;
 
+import java.util.List;
+
 public class __EnumValue {
 
     private String name;
@@ -9,6 +11,8 @@ public class __EnumValue {
     private Boolean isDeprecated;
 
     private String deprecationReason;
+
+    private List<__Directive> directives;
 
     public String getName() {
         return name;
@@ -40,5 +44,13 @@ public class __EnumValue {
 
     public void setDeprecationReason(String deprecationReason) {
         this.deprecationReason = deprecationReason;
+    }
+
+    public List<__Directive> getDirectives() {
+        return directives;
+    }
+
+    public void setDirectives(List<__Directive> directives) {
+        this.directives = directives;
     }
 }

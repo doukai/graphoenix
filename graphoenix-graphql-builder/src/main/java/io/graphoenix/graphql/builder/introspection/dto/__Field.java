@@ -16,6 +16,8 @@ public class __Field {
 
     private String deprecationReason;
 
+    private List<__Directive> directives;
+
     public String getName() {
         return name;
     }
@@ -62,5 +64,13 @@ public class __Field {
 
     public void setDeprecationReason(String deprecationReason) {
         this.deprecationReason = deprecationReason;
+    }
+
+    public List<__Directive> getDirectives() {
+        return directives;
+    }
+
+    public void setDirectives(List<__Directive> directives) {
+        this.directives = directives;
     }
 }
