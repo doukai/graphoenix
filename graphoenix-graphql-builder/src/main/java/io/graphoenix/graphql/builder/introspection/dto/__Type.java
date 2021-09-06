@@ -22,6 +22,8 @@ public class __Type {
 
     private __Type ofType;
 
+    private List<__Directive> directives;
+
     public __TypeKind getKind() {
         return kind;
     }
@@ -92,5 +94,13 @@ public class __Type {
 
     public void setOfType(__Type ofType) {
         this.ofType = ofType;
+    }
+
+    public List<__Directive> getDirectives() {
+        return directives;
+    }
+
+    public void setDirectives(List<__Directive> directives) {
+        this.directives = directives;
     }
 }

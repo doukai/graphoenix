@@ -13,6 +13,10 @@ public class GraphqlAntlrManager {
 
     private final IGraphqlOperationManager graphqlOperationManager;
 
+    private final IGraphqlSchemaManager graphqlSchemaManager;
+
+    private final IGraphqlDirectiveManager graphqlDirectiveManager;
+
     private final IGraphqlObjectManager graphqlObjectManager;
 
     private final IGraphqlFieldManager graphqlFieldManager;
@@ -26,6 +30,8 @@ public class GraphqlAntlrManager {
     private final IGraphqlScalarManager graphqlScalarManager;
 
     public GraphqlAntlrManager(IGraphqlOperationManager graphqlOperationManager,
+                               IGraphqlSchemaManager graphqlSchemaManager,
+                               IGraphqlDirectiveManager graphqlDirectiveManager,
                                IGraphqlObjectManager graphqlObjectManager,
                                IGraphqlFieldManager graphqlFieldManager,
                                IGraphqlInputObjectManager graphqlInputObjectManager,
@@ -33,6 +39,8 @@ public class GraphqlAntlrManager {
                                IGraphqlEnumManager graphqlEnumManager,
                                IGraphqlScalarManager graphqlScalarManager) {
         this.graphqlOperationManager = graphqlOperationManager;
+        this.graphqlSchemaManager = graphqlSchemaManager;
+        this.graphqlDirectiveManager = graphqlDirectiveManager;
         this.graphqlObjectManager = graphqlObjectManager;
         this.graphqlFieldManager = graphqlFieldManager;
         this.graphqlInputObjectManager = graphqlInputObjectManager;
@@ -43,6 +51,8 @@ public class GraphqlAntlrManager {
 
     public GraphqlAntlrManager() {
         this.graphqlOperationManager = new GraphqlOperationManager();
+        this.graphqlSchemaManager = new GraphqlSchemaManager();
+        this.graphqlDirectiveManager = new GraphqlDirectiveManager();
         this.graphqlObjectManager = new GraphqlObjectManager();
         this.graphqlFieldManager = new GraphqlFieldManager();
         this.graphqlInputObjectManager = new GraphqlInputObjectManager();
@@ -53,6 +63,8 @@ public class GraphqlAntlrManager {
 
     public GraphqlAntlrManager(GraphqlParser.DocumentContext documentContext) {
         this.graphqlOperationManager = new GraphqlOperationManager();
+        this.graphqlSchemaManager = new GraphqlSchemaManager();
+        this.graphqlDirectiveManager = new GraphqlDirectiveManager();
         this.graphqlObjectManager = new GraphqlObjectManager();
         this.graphqlFieldManager = new GraphqlFieldManager();
         this.graphqlInputObjectManager = new GraphqlInputObjectManager();
@@ -64,6 +76,8 @@ public class GraphqlAntlrManager {
 
     public GraphqlAntlrManager(String graphql) {
         this.graphqlOperationManager = new GraphqlOperationManager();
+        this.graphqlSchemaManager = new GraphqlSchemaManager();
+        this.graphqlDirectiveManager = new GraphqlDirectiveManager();
         this.graphqlObjectManager = new GraphqlObjectManager();
         this.graphqlFieldManager = new GraphqlFieldManager();
         this.graphqlInputObjectManager = new GraphqlInputObjectManager();
@@ -75,6 +89,8 @@ public class GraphqlAntlrManager {
 
     public GraphqlAntlrManager(InputStream inputStream) throws IOException {
         this.graphqlOperationManager = new GraphqlOperationManager();
+        this.graphqlSchemaManager = new GraphqlSchemaManager();
+        this.graphqlDirectiveManager = new GraphqlDirectiveManager();
         this.graphqlObjectManager = new GraphqlObjectManager();
         this.graphqlFieldManager = new GraphqlFieldManager();
         this.graphqlInputObjectManager = new GraphqlInputObjectManager();
@@ -101,8 +117,11 @@ public class GraphqlAntlrManager {
     protected void registerSystemDefinition(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
         if (typeSystemDefinitionContext.schemaDefinition() != null) {
             typeSystemDefinitionContext.schemaDefinition().operationTypeDefinition().forEach(this::registerOperationType);
+            graphqlSchemaManager.register(typeSystemDefinitionContext.schemaDefinition());
         } else if (typeSystemDefinitionContext.typeDefinition() != null) {
             registerTypeDefinition(typeSystemDefinitionContext.typeDefinition());
+        } else if (typeSystemDefinitionContext.directiveDefinition() != null) {
+            graphqlDirectiveManager.register(typeSystemDefinitionContext.directiveDefinition());
         }
     }
 
@@ -145,6 +164,14 @@ public class GraphqlAntlrManager {
         return graphqlOperationManager.isOperation(name);
     }
 
+    public GraphqlParser.SchemaDefinitionContext getSchema() {
+        return graphqlSchemaManager.getSchemaDefinitionContext();
+    }
+
+    public Optional<GraphqlParser.DirectiveDefinitionContext> getDirective(String name) {
+        return graphqlDirectiveManager.getDirectiveDefinition(name);
+    }
+
     public Optional<GraphqlParser.ScalarTypeDefinitionContext> getScaLar(String name) {
         return graphqlScalarManager.getScalarTypeDefinition(name);
     }
@@ -155,6 +182,10 @@ public class GraphqlAntlrManager {
 
     public Optional<GraphqlParser.ObjectTypeDefinitionContext> getObject(String name) {
         return graphqlObjectManager.getObjectTypeDefinition(name);
+    }
+
+    public Stream<GraphqlParser.DirectiveDefinitionContext> getDirectives() {
+        return graphqlDirectiveManager.getDirectiveDefinitions();
     }
 
     public Stream<GraphqlParser.EnumTypeDefinitionContext> getEnums() {
