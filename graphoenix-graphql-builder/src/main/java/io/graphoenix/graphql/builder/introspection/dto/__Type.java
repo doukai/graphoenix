@@ -4,6 +4,10 @@ import java.util.List;
 
 public class __Type {
 
+    private String id;
+
+    private __Schema schema;
+
     private __TypeKind kind;
 
     private String name;
@@ -22,85 +26,102 @@ public class __Type {
 
     private __Type ofType;
 
-    private List<__Directive> directives;
+    public String getId() {
+        return id;
+    }
+
+    public __Type setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public __Schema getSchema() {
+        return schema;
+    }
+
+    public __Type setSchema(__Schema schema) {
+        this.schema = schema;
+        return this;
+    }
 
     public __TypeKind getKind() {
         return kind;
     }
 
-    public void setKind(__TypeKind kind) {
+    public __Type setKind(__TypeKind kind) {
         this.kind = kind;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public __Type setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public __Type setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public List<__Field> getFields() {
         return fields;
     }
 
-    public void setFields(List<__Field> fields) {
+    public __Type setFields(List<__Field> fields) {
         this.fields = fields;
+        return this;
     }
 
     public List<__Type> getInterfaces() {
         return interfaces;
     }
 
-    public void setInterfaces(List<__Type> interfaces) {
+    public __Type setInterfaces(List<__Type> interfaces) {
         this.interfaces = interfaces;
+        return this;
     }
 
     public List<__Type> getPossibleTypes() {
         return possibleTypes;
     }
 
-    public void setPossibleTypes(List<__Type> possibleTypes) {
+    public __Type setPossibleTypes(List<__Type> possibleTypes) {
         this.possibleTypes = possibleTypes;
+        return this;
     }
 
     public List<__EnumValue> getEnumValues() {
         return enumValues;
     }
 
-    public void setEnumValues(List<__EnumValue> enumValues) {
+    public __Type setEnumValues(List<__EnumValue> enumValues) {
         this.enumValues = enumValues;
+        return this;
     }
 
     public List<__InputValue> getInputFields() {
         return inputFields;
     }
 
-    public void setInputFields(List<__InputValue> inputFields) {
+    public __Type setInputFields(List<__InputValue> inputFields) {
         this.inputFields = inputFields;
+        return this;
     }
 
     public __Type getOfType() {
         return ofType;
     }
 
-    public void setOfType(__Type ofType) {
+    public __Type setOfType(__Type ofType) {
         this.ofType = ofType;
-    }
-
-    public List<__Directive> getDirectives() {
-        return directives;
-    }
-
-    public void setDirectives(List<__Directive> directives) {
-        this.directives = directives;
+        return this;
     }
 }

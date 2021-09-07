@@ -148,6 +148,10 @@ public class GraphqlAntlrManager {
         return graphqlScalarManager.isScalar(name);
     }
 
+    public boolean isInnerScalar(String name) {
+        return graphqlScalarManager.isInnerScalar(name);
+    }
+
     public boolean isEnum(String name) {
         return graphqlEnumManager.isEnum(name);
     }
