@@ -14,59 +14,53 @@ public class __Directive {
 
     private List<__DirectiveLocation> locations;
 
-    private List<__DirectiveInputValue> args;
+    private List<__InputValue> args;
 
     public String getId() {
         return id;
     }
 
-    public __Directive setId(String id) {
+    public void setId(String id) {
         this.id = id;
-        return this;
     }
 
     public __Schema getSchema() {
         return schema;
     }
 
-    public __Directive setSchema(__Schema schema) {
+    public void setSchema(__Schema schema) {
         this.schema = schema;
-        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public __Directive setName(String name) {
+    public void setName(String name) {
         this.name = name;
-        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public __Directive setDescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
-        return this;
     }
 
     public List<__DirectiveLocation> getLocations() {
         return locations;
     }
 
-    public __Directive setLocations(List<__DirectiveLocation> locations) {
+    public void setLocations(List<__DirectiveLocation> locations) {
         this.locations = locations;
-        return this;
     }
 
-    public List<__DirectiveInputValue> getArgs() {
+    public List<__InputValue> getArgs() {
         return args;
     }
 
-    public __Directive setArgs(List<__DirectiveInputValue> args) {
+    public void setArgs(List<__InputValue> args) {
         this.args = args;
-        return this;
     }
 }

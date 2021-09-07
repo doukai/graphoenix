@@ -12,7 +12,7 @@ public class __Field {
 
     private String description;
 
-    private List<__FieldInputValue> args;
+    private List<__InputValue> args;
 
     private Boolean isDeprecated;
 
@@ -22,62 +22,55 @@ public class __Field {
         return id;
     }
 
-    public __Field setId(String id) {
+    public void setId(String id) {
         this.id = id;
-        return this;
     }
 
     public __Type getType() {
         return type;
     }
 
-    public __Field setType(__Type type) {
+    public void setType(__Type type) {
         this.type = type;
-        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public __Field setName(String name) {
+    public void setName(String name) {
         this.name = name;
-        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public __Field setDescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
-        return this;
     }
 
-    public List<__FieldInputValue> getArgs() {
+    public List<__InputValue> getArgs() {
         return args;
     }
 
-    public __Field setArgs(List<__FieldInputValue> args) {
+    public void setArgs(List<__InputValue> args) {
         this.args = args;
-        return this;
     }
 
     public Boolean getDeprecated() {
         return isDeprecated;
     }
 
-    public __Field setDeprecated(Boolean deprecated) {
+    public void setDeprecated(Boolean deprecated) {
         isDeprecated = deprecated;
-        return this;
     }
 
     public String getDeprecationReason() {
         return deprecationReason;
     }
 
-    public __Field setDeprecationReason(String deprecationReason) {
+    public void setDeprecationReason(String deprecationReason) {
         this.deprecationReason = deprecationReason;
-        return this;
     }
 }

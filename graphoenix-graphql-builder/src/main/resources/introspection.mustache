@@ -1,18 +1,40 @@
 mutation introspection {
     __schema(
-        types:{{{types}}}
-{{#hasQueryType}}
-        ,queryType: {{{queryType}}},
-{{/hasQueryType}}
-{{#hasMutationType}}
-        ,mutationType: {{{mutationType}}},
-{{/hasMutationType}}
-{{#hasSubscriptionType}}
-        ,subscriptionType: {{{subscriptionType}}}
-{{/hasSubscriptionType}}
-{{#hasDirectives}}
-        ,directives: {{{directives}}}
-{{/hasDirectives}}
+        {{#types}}
+        types:  [
+                {
+                    kind: {{kind}},
+                    name: {{name}},
+                    description: {{description}},
+                    fields: [
+                            {{#fields}}
+                            {
+                                name: {{name}},
+                                description: {{description}},
+                            },
+                            {{/fields}}
+                        ],
+                    enumValues: [
+                            {{#enumValues}}
+                            {
+                                name: {{name}},
+                                description: {{description}},
+                            },
+                            {{/enumValues}}
+                        ]
+                    enumValues: [
+                    {{#inputFields}}
+                            {
+                                name: {{name}},
+                                description: {{description}},
+                                defaultValue: {{defaultValue}},
+                            },
+                    {{/inputFields}}
+                        ],
+                    ofType: {{#ofType}} {kind: {{kind}}, kind: {{kind}}, kind: {{kind}}, } {{/ofType}}
+                },
+            ]
+        {{/types}}
     ){
         types{
             name
