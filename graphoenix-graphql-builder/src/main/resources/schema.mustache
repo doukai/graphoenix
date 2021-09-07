@@ -280,11 +280,7 @@ directive @dataType(
     decimals: Int
 ) on FIELD_DEFINITION
 
-directive @manyToOne(
-    field: String
-) on FIELD_DEFINITION
-
-directive @manyToMany(
+directive @relation(
     type: String
     field: String
 ) on FIELD_DEFINITION
