@@ -279,3 +279,12 @@ directive @dataType(
     length: Int
     decimals: Int
 ) on FIELD_DEFINITION
+
+directive @manyToOne(
+    field: String
+) on FIELD_DEFINITION
+
+directive @manyToMany(
+    type: String
+    field: String
+) on FIELD_DEFINITION
