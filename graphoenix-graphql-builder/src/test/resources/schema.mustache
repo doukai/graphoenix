@@ -131,15 +131,9 @@ type __Field {
     type: __Type!
     name: String!
     description: String
-    args: [__FieldInputValue!]
-    isDeprecated: Boolean = false
+    args: [__InputValue!]
+    isDeprecated: Boolean
     deprecationReason: String
-}
-
-type __FieldInputValue {
-    id: ID!
-    field: __Field!
-    inputValue: __InputValue!
 }
 
 type __InputValue {
@@ -155,7 +149,7 @@ type __EnumValue {
     type: __Type
     name: String!
     description: String
-    isDeprecated: Boolean = false
+    isDeprecated: Boolean
     deprecationReason: String
 }
 
@@ -176,13 +170,7 @@ type __Directive {
     name: String!
     description: String
     locations: [__DirectiveLocation!]!
-    args: [__DirectiveInputValue!]
-}
-
-type __DirectiveInputValue {
-    id: ID!
-    directive: __Directive!
-    inputValue: __InputValue!
+    args: [__InputValue!]
 }
 
 enum __DirectiveLocation {
@@ -223,7 +211,7 @@ input __TypeInput {
     description: String
 
     # OBJECT and INTERFACE only
-    fields(includeDeprecated: Boolean = false): [__FieldInput!]
+    fields: [__FieldInput!]
 
     # OBJECT only
     interfaces: [__TypeInput!]
@@ -232,7 +220,7 @@ input __TypeInput {
     possibleTypes: [__TypeInput!]
 
     # ENUM only
-    enumValues(includeDeprecated: Boolean = false): [__EnumValueInput!]
+    enumValues: [__EnumValueInput!]
 
     # INPUT_OBJECT only
     inputFields: [__InputValueInput!]
@@ -246,15 +234,9 @@ input __FieldInput {
     type: __TypeInput!
     name: String!
     description: String
-    args: [__FieldInputValueInput!]
-    isDeprecated: Boolean = false
+    args: [__InputValueInput!]
+    isDeprecated: Boolean
     deprecationReason: String
-}
-
-input __FieldInputValueInput {
-    id: ID!
-    field: __FieldInput!
-    inputValue: __InputValueInput!
 }
 
 input __InputValueInput {
@@ -267,26 +249,20 @@ input __InputValueInput {
 
 input __EnumValueInput {
     id: ID
-    type: __Type
+    type: __TypeInput
     name: String!
     description: String
-    isDeprecated: Boolean = false
+    isDeprecated: Boolean
     deprecationReason: String
 }
 
-input __Directive {
+input __DirectiveInput {
     id: ID
     schema: __SchemaInput
     name: String!
     description: String
     locations: [__DirectiveLocation!]!
-    args: [__DirectiveInputValueInput!]
-}
-
-input __DirectiveInputValueInput {
-    id: ID!
-    directive: __DirectiveInput!
-    inputValue: __InputValueInput!
+    args: [__InputValueInput!]
 }
 
 directive @table(

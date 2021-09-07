@@ -3,6 +3,7 @@ package io.graphoenix.graphql.builder.introspection;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
+import com.google.gson.Gson;
 import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
 import io.graphoenix.graphql.builder.introspection.dto.__Schema;
 
@@ -22,6 +23,7 @@ public class IntrospectionBuilder {
         MustacheFactory mustacheFactory = new DefaultMustacheFactory();
         Mustache mustache = mustacheFactory.compile("introspection.mustache");
         __Schema schema = wrapper.buildIntrospectionSchema();
+        System.out.println(new Gson().toJson(schema));
         mustache.execute(writer, schema).flush();
     }
 }

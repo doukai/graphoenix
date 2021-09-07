@@ -188,6 +188,10 @@ public class GraphqlAntlrManager {
         return graphqlObjectManager.getObjectTypeDefinition(name);
     }
 
+    public Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObject(String name) {
+        return graphqlInputObjectManager.getInputObjectTypeDefinition(name);
+    }
+
     public Stream<GraphqlParser.DirectiveDefinitionContext> getDirectives() {
         return graphqlDirectiveManager.getDirectiveDefinitions();
     }
@@ -200,8 +204,8 @@ public class GraphqlAntlrManager {
         return graphqlObjectManager.getObjectTypeDefinitions();
     }
 
-    public Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObject(String name) {
-        return graphqlInputObjectManager.getInputObjectTypeDefinition(name);
+    public Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjects() {
+        return graphqlInputObjectManager.getInputObjectTypeDefinitions();
     }
 
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getOperation(String name) {

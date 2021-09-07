@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class IntrospectionDtoWrapper {
 
@@ -20,11 +21,13 @@ public class IntrospectionDtoWrapper {
     public __Schema buildIntrospectionSchema() {
 
         __Schema schema = new __Schema();
-        schema.setTypes(manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
-                .map(this::objectTypeDefinitionContextToType).collect(Collectors.toList()));
+        schema.setTypes(
+                Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType),
+                        Stream.concat(
+                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
+                        )
+                ).collect(Collectors.toList()));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setQueryType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
@@ -58,7 +61,7 @@ public class IntrospectionDtoWrapper {
         }
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             field.setArgs(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                    .map(inputValueDefinitionContext -> fieldInputValueDefinitionContextToFieldInputValue(field, inputValueDefinitionContext)).collect(Collectors.toList()));
+                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toList()));
         }
 
         field.setType(typeContextToType(fieldDefinitionContext.type()));
@@ -130,20 +133,6 @@ public class IntrospectionDtoWrapper {
         return enumValue;
     }
 
-    private __FieldInputValue fieldInputValueDefinitionContextToFieldInputValue(__Field field, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        __FieldInputValue fieldInputValue = new __FieldInputValue();
-        fieldInputValue.setField(field);
-        fieldInputValue.setInputValue(inputValueDefinitionContextToInputValue(inputValueDefinitionContext));
-        return fieldInputValue;
-    }
-
-    private __DirectiveInputValue directiveInputValueDefinitionContextToDirectiveInputValue(__Directive directive, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        __DirectiveInputValue directiveInputValue = new __DirectiveInputValue();
-        directiveInputValue.setDirective(directive);
-        directiveInputValue.setInputValue(inputValueDefinitionContextToInputValue(inputValueDefinitionContext));
-        return directiveInputValue;
-    }
-
     private __InputValue inputValueDefinitionContextToInputValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         __InputValue inputValue = new __InputValue();
         inputValue.setName(inputValueDefinitionContext.name().getText());
@@ -154,6 +143,7 @@ public class IntrospectionDtoWrapper {
         if (inputValueDefinitionContext.defaultValue() != null) {
             inputValue.setDefaultValue(inputValueDefinitionContext.defaultValue().value().getText());
         }
+        inputValue.setType(typeContextToType(inputValueDefinitionContext.type()));
         return inputValue;
     }
 
@@ -195,7 +185,7 @@ public class IntrospectionDtoWrapper {
         }
         if (directiveDefinitionContext.argumentsDefinition() != null) {
             directive.setArgs(directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                    .map(inputValueDefinitionContext -> directiveInputValueDefinitionContextToDirectiveInputValue(directive, inputValueDefinitionContext)).collect(Collectors.toList()));
+                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toList()));
         }
         List<__DirectiveLocation> directiveLocationList = new ArrayList<>();
         addDirectiveDefinitionsContextToDirectiveLocationList(directiveDefinitionContext.directiveLocations(), directiveLocationList);
