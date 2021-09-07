@@ -4,15 +4,18 @@ schema {
 }
 
 type QueryType {
+    __schema: __Schema!
+    __type(name: String!): __Type
 {{#objects}}
-    get{{name}}(id: ID!): {{name}}
-    query{{name}}({{#fields}}{{name}}:{{typeName}}{{^isBoolean}}Expression{{/isBoolean}}{{^isLast}}, {{/isLast}}{{/fields}}): [{{name}}]
+    {{schemaFieldName}}(id: ID!): {{name}}
+    {{schemaFieldName}}List({{#fields}}{{name}}:{{typeName}}{{^isBoolean}}Expression{{/isBoolean}}{{^isLast}}, {{/isLast}}{{/fields}}): [{{name}}]
 {{/objects}}
 }
 
 type MutationType {
+    __schema(types: [__TypeInput!]!, queryType: __TypeInput!, mutationType: __TypeInput, subscriptionType: __TypeInput, directives: [__DirectiveInput!]): __Schema
 {{#objects}}
-    save{{name}}({{#fields}}{{name}}:{{typeName}}{{#isObject}}Input{{/isObject}}{{^isLast}}, {{/isLast}}{{/fields}}): {{name}}
+    {{schemaFieldName}}({{#fields}}{{name}}:{{typeName}}{{#isObject}}Input{{/isObject}}{{^isLast}}, {{/isLast}}{{/fields}}): {{name}}
 {{/objects}}
 }
 
@@ -65,27 +68,225 @@ enum Conditional {
 }
 
 input IDExpression {
-    opr:Operator = EQ
-    val:ID
-    in:[ID]
+    opr: Operator = EQ
+    val: ID
+    in: [ID]
 }
 
 input StringExpression {
-    opr:Operator = EQ
-    val:String
-    in:[String]
+    opr: Operator = EQ
+    val: String
+    in: [String]
 }
 
 input IntExpression {
-    opr:Operator = EQ
-    val:Int
-    in:[Int]
+    opr: Operator = EQ
+    val: Int
+    in: [Int]
 }
 
 input FloatExpression {
-    opr:Operator = EQ
-    val:Float
-    in:[Float]
+    opr: Operator = EQ
+    val: Float
+    in: [Float]
+}
+
+type __Schema {
+    id: ID
+    types: [__Type!]!
+    queryType: __Type!
+    mutationType: __Type
+    subscriptionType: __Type
+    directives: [__Directive!]
+}
+
+type __Type {
+    id: ID
+    schema: __Schema
+    kind: __TypeKind!
+    name: String!
+    description: String
+
+    # OBJECT and INTERFACE only
+    fields(includeDeprecated: Boolean = false): [__Field!]
+
+    # OBJECT only
+    interfaces: [__Type!]
+
+    # INTERFACE and UNION only
+    possibleTypes: [__Type!]
+
+    # ENUM only
+    enumValues(includeDeprecated: Boolean = false): [__EnumValue!]
+
+    # INPUT_OBJECT only
+    inputFields: [__InputValue!]
+
+    # NON_NULL and LIST only
+    ofType: __Type
+}
+
+type __Field {
+    id: ID
+    type: __Type!
+    name: String!
+    description: String
+    args: [__FieldInputValue!]
+    isDeprecated: Boolean = false
+    deprecationReason: String
+}
+
+type __FieldInputValue {
+    id: ID!
+    field: __Field!
+    inputValue: __InputValue!
+}
+
+type __InputValue {
+    id: ID
+    type: __Type
+    name: String!
+    description: String
+    defaultValue: String
+}
+
+type __EnumValue {
+    id: ID
+    type: __Type
+    name: String!
+    description: String
+    isDeprecated: Boolean = false
+    deprecationReason: String
+}
+
+enum __TypeKind {
+    SCALAR
+    OBJECT
+    INTERFACE
+    UNION
+    ENUM
+    INPUT_OBJECT
+    LIST
+    NON_NULL
+}
+
+type __Directive {
+    id: ID
+    schema: __Schema
+    name: String!
+    description: String
+    locations: [__DirectiveLocation!]!
+    args: [__DirectiveInputValue!]
+}
+
+type __DirectiveInputValue {
+    id: ID!
+    directive: __Directive!
+    inputValue: __InputValue!
+}
+
+enum __DirectiveLocation {
+    QUERY
+    MUTATION
+    SUBSCRIPTION
+    FIELD
+    FRAGMENT_DEFINITION
+    FRAGMENT_SPREAD
+    INLINE_FRAGMENT
+    SCHEMA
+    SCALAR
+    OBJECT
+    FIELD_DEFINITION
+    ARGUMENT_DEFINITION
+    INTERFACE
+    UNION
+    ENUM
+    ENUM_VALUE
+    INPUT_OBJECT
+    INPUT_FIELD_DEFINITION
+}
+
+input __SchemaInput {
+    id: ID
+    types: [__TypeInput!]!
+    queryType: __TypeInput!
+    mutationType: __TypeInput
+    subscriptionType: __TypeInput
+    directives: [__DirectiveInput!]
+}
+
+input __TypeInput {
+    id: ID
+    schema: __SchemaInput
+    kind: __TypeKind!
+    name: String!
+    description: String
+
+    # OBJECT and INTERFACE only
+    fields(includeDeprecated: Boolean = false): [__FieldInput!]
+
+    # OBJECT only
+    interfaces: [__TypeInput!]
+
+    # INTERFACE and UNION only
+    possibleTypes: [__TypeInput!]
+
+    # ENUM only
+    enumValues(includeDeprecated: Boolean = false): [__EnumValueInput!]
+
+    # INPUT_OBJECT only
+    inputFields: [__InputValueInput!]
+
+    # NON_NULL and LIST only
+    ofType: __TypeInput
+}
+
+input __FieldInput {
+    id: ID
+    type: __TypeInput!
+    name: String!
+    description: String
+    args: [__FieldInputValueInput!]
+    isDeprecated: Boolean = false
+    deprecationReason: String
+}
+
+input __FieldInputValueInput {
+    id: ID!
+    field: __FieldInput!
+    inputValue: __InputValueInput!
+}
+
+input __InputValueInput {
+    id: ID
+    type: __TypeInput
+    name: String!
+    description: String
+    defaultValue: String
+}
+
+input __EnumValueInput {
+    id: ID
+    type: __Type
+    name: String!
+    description: String
+    isDeprecated: Boolean = false
+    deprecationReason: String
+}
+
+input __Directive {
+    id: ID
+    schema: __SchemaInput
+    name: String!
+    description: String
+    locations: [__DirectiveLocation!]!
+    args: [__DirectiveInputValueInput!]
+}
+
+input __DirectiveInputValueInput {
+    id: ID!
+    directive: __DirectiveInput!
+    inputValue: __InputValueInput!
 }
 
 directive @table(

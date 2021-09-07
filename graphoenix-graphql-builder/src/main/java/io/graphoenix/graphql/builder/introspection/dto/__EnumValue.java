@@ -1,8 +1,10 @@
 package io.graphoenix.graphql.builder.introspection.dto;
 
-import java.util.List;
-
 public class __EnumValue {
+
+    private String id;
+
+    private __Type type;
 
     private String name;
 
@@ -12,45 +14,57 @@ public class __EnumValue {
 
     private String deprecationReason;
 
-    private List<__Directive> directives;
+    public String getId() {
+        return id;
+    }
+
+    public __EnumValue setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public __Type getType() {
+        return type;
+    }
+
+    public __EnumValue setType(__Type type) {
+        this.type = type;
+        return this;
+    }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public __EnumValue setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public __EnumValue setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public Boolean getDeprecated() {
         return isDeprecated;
     }
 
-    public void setDeprecated(Boolean deprecated) {
+    public __EnumValue setDeprecated(Boolean deprecated) {
         isDeprecated = deprecated;
+        return this;
     }
 
     public String getDeprecationReason() {
         return deprecationReason;
     }
 
-    public void setDeprecationReason(String deprecationReason) {
+    public __EnumValue setDeprecationReason(String deprecationReason) {
         this.deprecationReason = deprecationReason;
-    }
-
-    public List<__Directive> getDirectives() {
-        return directives;
-    }
-
-    public void setDirectives(List<__Directive> directives) {
-        this.directives = directives;
+        return this;
     }
 }

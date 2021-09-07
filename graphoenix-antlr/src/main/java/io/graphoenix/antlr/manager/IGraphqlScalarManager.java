@@ -12,6 +12,8 @@ public interface IGraphqlScalarManager {
 
     boolean isScalar(String scalarTypeName);
 
+    boolean isInnerScalar(String scalarTypeName);
+
     Optional<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinition(String scalarTypeName);
 
     Stream<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinitions();

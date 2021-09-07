@@ -35,9 +35,7 @@ public class IntrospectionDtoWrapper {
         Optional<GraphqlParser.ObjectTypeDefinitionContext> subscriptionTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject);
         subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setSubscriptionType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
 
-        schema.setDirectives(manager.getDirectives()
-                .filter(directiveDefinitionContext -> directiveDefinitionContext.name().getText().equals(__DirectiveLocation.SCHEMA.name()))
-                .map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
+        schema.setDirectives(manager.getDirectives().map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
         return schema;
     }
 
@@ -49,9 +47,6 @@ public class IntrospectionDtoWrapper {
             type.setDescription(objectTypeDefinitionContext.description().getText());
         }
         type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::fieldDefinitionContextToField).collect(Collectors.toList()));
-        type.setDirectives(manager.getDirectives()
-                .filter(directiveDefinitionContext -> directiveDefinitionContext.name().getText().equals(__DirectiveLocation.OBJECT.name()))
-                .map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
         return type;
     }
 
@@ -61,19 +56,22 @@ public class IntrospectionDtoWrapper {
         if (fieldDefinitionContext.description() != null) {
             field.setDescription(fieldDefinitionContext.description().getText());
         }
-        field.setArgs(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toList()));
+        if (fieldDefinitionContext.argumentsDefinition() != null) {
+            field.setArgs(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                    .map(inputValueDefinitionContext -> fieldInputValueDefinitionContextToFieldInputValue(field, inputValueDefinitionContext)).collect(Collectors.toList()));
+        }
 
         field.setType(typeContextToType(fieldDefinitionContext.type()));
-        field.setDirectives(manager.getDirectives()
-                .filter(directiveDefinitionContext -> directiveDefinitionContext.name().getText().equals(__DirectiveLocation.FIELD_DEFINITION.name()))
-                .map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
         return field;
     }
 
     private __Type typeContextToType(GraphqlParser.TypeContext typeContext) {
         if (typeContext.typeName() != null) {
-            if (manager.isObject(typeContext.typeName().getText())) {
+            if (manager.isInnerScalar(typeContext.typeName().getText())) {
+                return innerScalarTypeDefinitionContextToType(typeContext.typeName().getText());
+            } else if (manager.isScaLar(typeContext.typeName().getText())) {
+                return manager.getScaLar(typeContext.typeName().getText()).map(this::scalarTypeDefinitionContextToType).orElse(null);
+            } else if (manager.isObject(typeContext.typeName().getText())) {
                 return manager.getObject(typeContext.typeName().getText()).map(this::objectTypeDefinitionContextToType).orElse(null);
             } else if (manager.isEnum(typeContext.typeName().getText())) {
                 return manager.getEnum(typeContext.typeName().getText()).map(this::enumTypeDefinitionContextToType).orElse(null);
@@ -89,15 +87,22 @@ public class IntrospectionDtoWrapper {
             __Type type = new __Type();
             type.setKind(__TypeKind.NON_NULL);
             if (typeContext.nonNullType().typeName() != null) {
-                if (manager.isObject(typeContext.typeName().getText())) {
+                if (manager.isInnerScalar(typeContext.nonNullType().typeName().getText())) {
+                    type.setOfType(innerScalarTypeDefinitionContextToType(typeContext.nonNullType().typeName().getText()));
+                } else if (manager.isScaLar(typeContext.nonNullType().typeName().getText())) {
+                    type.setOfType(manager.getScaLar(typeContext.nonNullType().typeName().getText()).map(this::scalarTypeDefinitionContextToType).orElse(null));
+                } else if (manager.isObject(typeContext.nonNullType().typeName().getText())) {
                     type.setOfType(manager.getObject(typeContext.nonNullType().typeName().getText()).map(this::objectTypeDefinitionContextToType).orElse(null));
-                } else if (manager.isEnum(typeContext.typeName().getText())) {
+                } else if (manager.isEnum(typeContext.nonNullType().typeName().getText())) {
                     type.setOfType(manager.getEnum(typeContext.nonNullType().typeName().getText()).map(this::enumTypeDefinitionContextToType).orElse(null));
-                } else if (manager.isInputObject(typeContext.typeName().getText())) {
+                } else if (manager.isInputObject(typeContext.nonNullType().typeName().getText())) {
                     type.setOfType(manager.getInputObject(typeContext.nonNullType().typeName().getText()).map(this::inputObjectTypeDefinitionContextToType).orElse(null));
                 }
             } else if (typeContext.nonNullType().listType() != null) {
-                type.setOfType(typeContextToType(typeContext.listType().type()));
+                __Type listType = new __Type();
+                listType.setKind(__TypeKind.LIST);
+                listType.setOfType(typeContextToType(typeContext.nonNullType().listType().type()));
+                type.setOfType(listType);
             }
             return type;
         }
@@ -113,9 +118,6 @@ public class IntrospectionDtoWrapper {
         }
         type.setEnumValues(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream()
                 .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toList()));
-        type.setDirectives(manager.getDirectives()
-                .filter(directiveDefinitionContext -> directiveDefinitionContext.name().getText().equals(__DirectiveLocation.ENUM.name()))
-                .map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
         return type;
     }
 
@@ -125,10 +127,21 @@ public class IntrospectionDtoWrapper {
         if (enumValueDefinitionContext.description() != null) {
             enumValue.setDescription(enumValueDefinitionContext.description().getText());
         }
-        enumValue.setDirectives(manager.getDirectives()
-                .filter(directiveDefinitionContext -> directiveDefinitionContext.name().getText().equals(__DirectiveLocation.ENUM_VALUE.name()))
-                .map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
         return enumValue;
+    }
+
+    private __FieldInputValue fieldInputValueDefinitionContextToFieldInputValue(__Field field, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        __FieldInputValue fieldInputValue = new __FieldInputValue();
+        fieldInputValue.setField(field);
+        fieldInputValue.setInputValue(inputValueDefinitionContextToInputValue(inputValueDefinitionContext));
+        return fieldInputValue;
+    }
+
+    private __DirectiveInputValue directiveInputValueDefinitionContextToDirectiveInputValue(__Directive directive, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        __DirectiveInputValue directiveInputValue = new __DirectiveInputValue();
+        directiveInputValue.setDirective(directive);
+        directiveInputValue.setInputValue(inputValueDefinitionContextToInputValue(inputValueDefinitionContext));
+        return directiveInputValue;
     }
 
     private __InputValue inputValueDefinitionContextToInputValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
@@ -138,10 +151,9 @@ public class IntrospectionDtoWrapper {
             inputValue.setDescription(inputValueDefinitionContext.description().getText());
         }
         inputValue.setType(typeContextToType(inputValueDefinitionContext.type()));
-        inputValue.setDefaultValue(inputValueDefinitionContext.defaultValue().value().getText());
-        inputValue.setDirectives(manager.getDirectives()
-                .filter(directiveDefinitionContext -> directiveDefinitionContext.name().getText().equals(__DirectiveLocation.INPUT_FIELD_DEFINITION.name()))
-                .map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
+        if (inputValueDefinitionContext.defaultValue() != null) {
+            inputValue.setDefaultValue(inputValueDefinitionContext.defaultValue().value().getText());
+        }
         return inputValue;
     }
 
@@ -154,9 +166,23 @@ public class IntrospectionDtoWrapper {
         }
         type.setInputFields(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toList()));
-        type.setDirectives(manager.getDirectives()
-                .filter(directiveDefinitionContext -> directiveDefinitionContext.name().getText().equals(__DirectiveLocation.INPUT_OBJECT.name()))
-                .map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
+        return type;
+    }
+
+    private __Type scalarTypeDefinitionContextToType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
+        __Type type = new __Type();
+        type.setKind(__TypeKind.SCALAR);
+        type.setName(scalarTypeDefinitionContext.name().getText());
+        if (scalarTypeDefinitionContext.description() != null) {
+            type.setDescription(scalarTypeDefinitionContext.description().getText());
+        }
+        return type;
+    }
+
+    private __Type innerScalarTypeDefinitionContextToType(String scalarName) {
+        __Type type = new __Type();
+        type.setKind(__TypeKind.SCALAR);
+        type.setName(scalarName);
         return type;
     }
 
@@ -164,22 +190,25 @@ public class IntrospectionDtoWrapper {
         __Directive directive = new __Directive();
         directive.setName(directiveDefinitionContext.name().getText());
 
-        if (directiveDefinitionContext.directiveLocations() != null) {
+        if (directiveDefinitionContext.description() != null) {
             directive.setDescription(directiveDefinitionContext.description().getText());
         }
-        directive.setArgs(directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toList()));
+        if (directiveDefinitionContext.argumentsDefinition() != null) {
+            directive.setArgs(directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                    .map(inputValueDefinitionContext -> directiveInputValueDefinitionContextToDirectiveInputValue(directive, inputValueDefinitionContext)).collect(Collectors.toList()));
+        }
         List<__DirectiveLocation> directiveLocationList = new ArrayList<>();
-        addDirectiveDefinitionsContextToDirectiveList(directiveDefinitionContext.directiveLocations(), directiveLocationList);
+        addDirectiveDefinitionsContextToDirectiveLocationList(directiveDefinitionContext.directiveLocations(), directiveLocationList);
         directive.setLocations(directiveLocationList);
         return directive;
     }
 
-    private void addDirectiveDefinitionsContextToDirectiveList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext, List<__DirectiveLocation> directiveLocationList) {
+    private void addDirectiveDefinitionsContextToDirectiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext, List<__DirectiveLocation> directiveLocationList) {
         if (directiveLocationsContext.directiveLocation() != null) {
             directiveLocationList.add(__DirectiveLocation.valueOf(directiveLocationsContext.directiveLocation().name().getText()));
-        } else if (directiveLocationsContext.directiveLocations() != null) {
-            addDirectiveDefinitionsContextToDirectiveList(directiveLocationsContext.directiveLocations(), directiveLocationList);
+        }
+        if (directiveLocationsContext.directiveLocations() != null) {
+            addDirectiveDefinitionsContextToDirectiveLocationList(directiveLocationsContext.directiveLocations(), directiveLocationList);
         }
     }
 }
