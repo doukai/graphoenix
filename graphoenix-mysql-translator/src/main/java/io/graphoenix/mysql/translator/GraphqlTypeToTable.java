@@ -74,37 +74,28 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        Optional<ColumnDefinition> columnDefinition = createColumn(fieldDefinitionContext, fieldDefinitionContext.type(), false);
-
-        columnDefinition.ifPresent(presentColumnDefinition -> {
-                    presentColumnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
-                    presentColumnDefinition.getColumnSpecs().addAll(createColumnSpecs(fieldDefinitionContext));
-                }
-        );
-        return columnDefinition;
-    }
-
-    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeContext typeContext, boolean list) {
-        if (typeContext.typeName() != null) {
-            return createColumn(fieldDefinitionContext, typeContext.typeName(), list, false);
-        } else if (typeContext.listType() != null) {
-            return createColumn(fieldDefinitionContext, typeContext.listType().type(), true);
-        } else if (typeContext.nonNullType() != null) {
-            if (typeContext.nonNullType().typeName() != null) {
-                return createColumn(fieldDefinitionContext, typeContext.nonNullType().typeName(), list, true);
-            } else if (typeContext.nonNullType().listType() != null) {
-                return createColumn(fieldDefinitionContext, typeContext.nonNullType().listType().type(), true);
+        if (fieldDefinitionContext.type().typeName() != null) {
+            return createColumn(fieldDefinitionContext, fieldDefinitionContext.type().typeName(), false);
+        } else if (fieldDefinitionContext.type().listType() != null) {
+            return Optional.empty();
+        } else if (fieldDefinitionContext.type().nonNullType() != null) {
+            if (fieldDefinitionContext.type().nonNullType().typeName() != null) {
+                return createColumn(fieldDefinitionContext, fieldDefinitionContext.type().nonNullType().typeName(), true);
+            } else if (fieldDefinitionContext.type().nonNullType().listType() != null) {
+                return Optional.empty();
             }
         }
         return Optional.empty();
     }
 
-    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean list, boolean nonNull) {
-        ColumnDefinition columnDefinition = new ColumnDefinition();
-        if (list && !manager.isEnum(typeNameContext.name().getText())) {
-            return Optional.empty();
+    protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean nonNull) {
+        if (manager.isObject(typeNameContext.name().getText())) {
+            return manager.getMappingToFieldDefinition(fieldDefinitionContext).flatMap(this::createColumn);
         }
-        columnDefinition.setColDataType(createColDataType(typeNameContext, fieldDefinitionContext.directives(), list));
+
+        ColumnDefinition columnDefinition = new ColumnDefinition();
+        columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
+        columnDefinition.setColDataType(createColDataType(typeNameContext, fieldDefinitionContext.directives()));
         List<String> columnSpecs = new ArrayList<>();
         if (typeNameContext.name().getText().equals("ID")) {
             columnSpecs.add("PRIMARY KEY");
@@ -112,37 +103,28 @@ public class GraphqlTypeToTable {
         if (nonNull) {
             columnSpecs.add("NOT NULL");
         }
+        columnSpecs.addAll(createColumnSpecs(fieldDefinitionContext));
+
+        if (fieldDefinitionContext.description() != null) {
+            columnSpecs.add("COMMENT " + DB_NAME_UTIL.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
+        }
+
         columnDefinition.setColumnSpecs(columnSpecs);
         return Optional.of(columnDefinition);
     }
 
-    protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext, boolean list) {
-        if (manager.isObject(typeNameContext.name().getText())) {
-            Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinitionContext = manager.getObjectTypeIDFieldDefinition(typeNameContext.name().getText());
-            if (idFieldDefinitionContext.isPresent()) {
-                if (idFieldDefinitionContext.get().type().typeName() != null) {
-                    return createScalarColDataType(idFieldDefinitionContext.get().type().typeName(), idFieldDefinitionContext.get().directives());
-                } else if (idFieldDefinitionContext.get().type().nonNullType() != null) {
-                    if (idFieldDefinitionContext.get().type().nonNullType().typeName() != null) {
-                        return createScalarColDataType(idFieldDefinitionContext.get().type().nonNullType().typeName(), idFieldDefinitionContext.get().directives());
-                    }
-                }
-            }
-        } else if (manager.isEnum(typeNameContext.name().getText())) {
-            return createEnumColDataType(typeNameContext, list);
+    protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext) {
+        if (manager.isEnum(typeNameContext.name().getText())) {
+            return createEnumColDataType(typeNameContext);
         } else if (manager.isScaLar(typeNameContext.name().getText())) {
             return createScalarColDataType(typeNameContext, directivesContext);
         }
         return null;
     }
 
-    protected ColDataType createEnumColDataType(GraphqlParser.TypeNameContext typeNameContext, boolean list) {
+    protected ColDataType createEnumColDataType(GraphqlParser.TypeNameContext typeNameContext) {
         ColDataType colDataType = new ColDataType();
-        if (list) {
-            colDataType.setDataType("SET");
-        } else {
-            colDataType.setDataType("ENUM");
-        }
+        colDataType.setDataType("ENUM");
 
         colDataType.setArgumentsStringList(manager.getEnum(typeNameContext.name().getText()).map(enumTypeDefinitionContext -> enumTypeDefinitionContext.enumValueDefinitions()
                 .enumValueDefinition().stream()
@@ -187,27 +169,6 @@ public class GraphqlTypeToTable {
         return colDataType;
     }
 
-    protected Optional<GraphqlParser.DirectiveContext> getTableDirective(GraphqlParser.DirectivesContext directivesContext) {
-        if (directivesContext == null) {
-            return Optional.empty();
-        }
-        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("table")).findFirst();
-    }
-
-    protected Optional<GraphqlParser.DirectiveContext> getColumnDirective(GraphqlParser.DirectivesContext directivesContext) {
-        if (directivesContext == null) {
-            return Optional.empty();
-        }
-        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("column")).findFirst();
-    }
-
-    protected Optional<GraphqlParser.DirectiveContext> getDataTypeDirective(GraphqlParser.DirectivesContext directivesContext) {
-        if (directivesContext == null) {
-            return Optional.empty();
-        }
-        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("dataType")).findFirst();
-    }
-
     protected List<String> createTableOption(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         List<String> tableOptionsList = new ArrayList<>();
         if (objectTypeDefinitionContext.directives() != null) {
@@ -241,9 +202,6 @@ public class GraphqlTypeToTable {
         if (fieldDefinitionContext.directives() != null) {
             directiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecsList::addAll);
         }
-        if (fieldDefinitionContext.description() != null) {
-            columnSpecsList.add("COMMENT " + DB_NAME_UTIL.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
-        }
         return columnSpecsList;
     }
 
@@ -262,5 +220,26 @@ public class GraphqlTypeToTable {
         }
         //TODO
         return null;
+    }
+
+    protected Optional<GraphqlParser.DirectiveContext> getTableDirective(GraphqlParser.DirectivesContext directivesContext) {
+        if (directivesContext == null) {
+            return Optional.empty();
+        }
+        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("table")).findFirst();
+    }
+
+    protected Optional<GraphqlParser.DirectiveContext> getColumnDirective(GraphqlParser.DirectivesContext directivesContext) {
+        if (directivesContext == null) {
+            return Optional.empty();
+        }
+        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("column")).findFirst();
+    }
+
+    protected Optional<GraphqlParser.DirectiveContext> getDataTypeDirective(GraphqlParser.DirectivesContext directivesContext) {
+        if (directivesContext == null) {
+            return Optional.empty();
+        }
+        return directivesContext.directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("dataType")).findFirst();
     }
 }

@@ -266,7 +266,7 @@ input __DirectiveInput {
 }
 
 directive @table(
-    engine : String="InnoDB"
+    engine : String = "InnoDB"
 ) on OBJECT
 
 directive @column(
@@ -280,7 +280,7 @@ directive @dataType(
     decimals: Int
 ) on FIELD_DEFINITION
 
-directive @relation(
-    type: String
-    field: String
+directive @map(
+    from: String
+    to: String
 ) on FIELD_DEFINITION
