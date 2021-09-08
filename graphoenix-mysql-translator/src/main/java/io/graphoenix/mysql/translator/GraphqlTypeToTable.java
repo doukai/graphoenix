@@ -89,9 +89,6 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean nonNull) {
-        if (manager.isObject(typeNameContext.name().getText())) {
-            return manager.getMappingToFieldDefinition(fieldDefinitionContext).flatMap(this::createColumn);
-        }
 
         ColumnDefinition columnDefinition = new ColumnDefinition();
         columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
@@ -103,12 +100,10 @@ public class GraphqlTypeToTable {
         if (nonNull) {
             columnSpecs.add("NOT NULL");
         }
-        columnSpecs.addAll(createColumnSpecs(fieldDefinitionContext));
-
+        columnDirectiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecs::addAll);
         if (fieldDefinitionContext.description() != null) {
             columnSpecs.add("COMMENT " + DB_NAME_UTIL.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
         }
-
         columnDefinition.setColumnSpecs(columnSpecs);
         return Optional.of(columnDefinition);
     }
@@ -197,15 +192,7 @@ public class GraphqlTypeToTable {
         return null;
     }
 
-    protected List<String> createColumnSpecs(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        List<String> columnSpecsList = new ArrayList<>();
-        if (fieldDefinitionContext.directives() != null) {
-            directiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecsList::addAll);
-        }
-        return columnSpecsList;
-    }
-
-    protected Optional<List<String>> directiveToColumnSpecs(GraphqlParser.DirectivesContext directivesContext) {
+    protected Optional<List<String>> columnDirectiveToColumnSpecs(GraphqlParser.DirectivesContext directivesContext) {
         Optional<GraphqlParser.DirectiveContext> columnDirective = getColumnDirective(directivesContext);
         return columnDirective.map(directiveContext -> directiveContext.arguments().argument().stream().map(this::argumentToColumnSpecs).collect(Collectors.toList()));
     }

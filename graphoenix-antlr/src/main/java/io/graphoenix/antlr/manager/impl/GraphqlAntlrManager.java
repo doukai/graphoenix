@@ -269,16 +269,10 @@ public class GraphqlAntlrManager {
         return subscriptionOperationTypeDefinition.isPresent() && subscriptionOperationTypeDefinition.get().typeName().name().getText().equals(typeName);
     }
 
-//    public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIDFieldDefinition(String objectTypeName) {
-//        return graphqlFieldManager.getFieldDefinitions(objectTypeName)
-//                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
-//                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst();
-//    }
-
-    public Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinition(String objectTypeName, String fieldName) {
+    public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIDFieldDefinition(String objectTypeName) {
         return graphqlFieldManager.getFieldDefinitions(objectTypeName)
                 .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
-                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(fieldName)).findFirst();
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst();
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getMappingToFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
@@ -286,7 +280,7 @@ public class GraphqlAntlrManager {
         return fieldDefinitionContext.directives().directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("to")).findFirst())
-                .flatMap(argumentContext -> getFieldDefinition(getFieldTypeName(fieldDefinitionContext.type()), argumentContext.valueWithVariable().StringValue().getText()));
+                .flatMap(argumentContext -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), argumentContext.valueWithVariable().StringValue().getText()));
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getMappingFromFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
@@ -294,15 +288,15 @@ public class GraphqlAntlrManager {
         return fieldDefinitionContext.directives().directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("from")).findFirst())
-                .flatMap(argumentContext -> getFieldDefinition(getFieldTypeName(fieldDefinitionContext.type()), argumentContext.valueWithVariable().StringValue().getText()));
+                .flatMap(argumentContext -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), argumentContext.valueWithVariable().StringValue().getText()));
     }
 
-//    public Optional<String> getObjectTypeIDFieldName(String objectTypeName) {
-//        return graphqlFieldManager.getFieldDefinitions(objectTypeName)
-//                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
-//                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst()
-//                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText());
-//    }
+    public Optional<String> getObjectTypeIDFieldName(String objectTypeName) {
+        return graphqlFieldManager.getFieldDefinitions(objectTypeName)
+                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst()
+                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText());
+    }
 
 //    public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeRelationFieldDefinition(String sourceObjectTypeName, String targetObjectTypeName) {
 //        return graphqlFieldManager.getFieldDefinitions(sourceObjectTypeName)
@@ -346,10 +340,10 @@ public class GraphqlAntlrManager {
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
     }
 
-//    public Optional<GraphqlParser.ArgumentContext> getIDArgument(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentsContext argumentsContext) {
-//        Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
-//        return idFieldDefinition.flatMap(fieldDefinitionContext -> argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(fieldDefinitionContext.name().getText())).findFirst());
-//    }
+    public Optional<GraphqlParser.ArgumentContext> getIDArgument(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentsContext argumentsContext) {
+        Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
+        return idFieldDefinition.flatMap(fieldDefinitionContext -> argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(fieldDefinitionContext.name().getText())).findFirst());
+    }
 //
 //    public Optional<GraphqlParser.ObjectFieldWithVariableContext> getIDObjectFieldWithVariable(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
 //        Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
