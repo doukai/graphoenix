@@ -164,7 +164,7 @@ public class GraphqlQueryToSelect {
                 body.setWhere(equalsTo);
             } else {
                 Table table = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(typeName));
-                Optional<GraphqlParser.FieldDefinitionContext> mappingFromFieldDefinition = manager.getMappingFromFieldDefinition(fieldDefinitionContext.get());
+                Optional<GraphqlParser.FieldDefinitionContext> mappingFromFieldDefinition = manager.getMappingFromFieldDefinition(typeName, fieldDefinitionContext.get());
                 Optional<GraphqlParser.FieldDefinitionContext> mappingToFieldDefinition = manager.getMappingToFieldDefinition(fieldDefinitionContext.get());
                 if (mappingFromFieldDefinition.isPresent() && mappingToFieldDefinition.isPresent()) {
                     EqualsTo equalsTo = new EqualsTo();
