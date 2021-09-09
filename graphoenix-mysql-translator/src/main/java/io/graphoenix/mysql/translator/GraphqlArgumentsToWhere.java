@@ -639,7 +639,7 @@ public class GraphqlArgumentsToWhere {
         Table subTable = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(fieldTypeName));
         body.setFromItem(subTable);
         Optional<Expression> subWhereExpression = objectValueWithVariableToMultipleExpression(fieldDefinitionContext.type(), inputValueDefinitionContext, objectValueWithVariableContext);
-        Optional<GraphqlParser.FieldDefinitionContext> mappingFromFieldDefinition = manager.getMappingFromFieldDefinition(fieldDefinitionContext);
+        Optional<GraphqlParser.FieldDefinitionContext> mappingFromFieldDefinition = manager.getMappingFromFieldDefinition(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext);
         Optional<GraphqlParser.FieldDefinitionContext> mappingToFieldDefinition = manager.getMappingToFieldDefinition(fieldDefinitionContext);
         if (mappingFromFieldDefinition.isPresent() && mappingToFieldDefinition.isPresent()) {
             EqualsTo idEqualsTo = new EqualsTo();
@@ -667,7 +667,7 @@ public class GraphqlArgumentsToWhere {
         Table subTable = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(fieldTypeName));
         body.setFromItem(subTable);
         Optional<Expression> subWhereExpression = objectValueToMultipleExpression(fieldDefinitionContext.type(), inputValueDefinitionContext, objectValueContext);
-        Optional<GraphqlParser.FieldDefinitionContext> mappingFromFieldDefinition = manager.getMappingFromFieldDefinition(fieldDefinitionContext);
+        Optional<GraphqlParser.FieldDefinitionContext> mappingFromFieldDefinition = manager.getMappingFromFieldDefinition(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext);
         Optional<GraphqlParser.FieldDefinitionContext> mappingToFieldDefinition = manager.getMappingToFieldDefinition(fieldDefinitionContext);
         if (mappingFromFieldDefinition.isPresent() && mappingToFieldDefinition.isPresent()) {
             EqualsTo idEqualsTo = new EqualsTo();

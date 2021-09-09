@@ -89,7 +89,9 @@ public class GraphqlTypeToTable {
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean nonNull) {
-
+        if (manager.isObject(typeNameContext.name().getText())) {
+            return Optional.empty();
+        }
         ColumnDefinition columnDefinition = new ColumnDefinition();
         columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
         columnDefinition.setColDataType(createColDataType(typeNameContext, fieldDefinitionContext.directives()));
