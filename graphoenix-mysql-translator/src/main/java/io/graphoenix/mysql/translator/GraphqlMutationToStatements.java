@@ -85,18 +85,82 @@ public class GraphqlMutationToStatements {
 
     protected Stream<Statement> argumentsToStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
 
-        return Stream.concat(
-                Stream.concat(
-                        singleTypeScalarArgumentsToStatementStream(fieldDefinitionContext, argumentsContext),
-                        fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                                .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
-                                .filter(inputValueDefinitionContext -> manager.isInputObject(inputValueDefinitionContext.type().getText()))
-                                .flatMap(inputValueDefinitionContext -> singleTypeArgumentToStatementStream(fieldDefinitionContext, inputValueDefinitionContext, argumentsContext))
-                ),
-                fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                        .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
-                        .flatMap(inputValueDefinitionContext -> listTypeArgumentToStatement(fieldDefinitionContext.type(), inputValueDefinitionContext, argumentsContext))
-        );
+        List<Statement> statementList = new ArrayList<>();
+        Statement insert = singleTypeScalarArgumentsToInsert(fieldDefinitionContext, argumentsContext);
+        statementList.add(insert);
+
+        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        Optional<GraphqlParser.ArgumentContext> idArgumentContext = manager.getIDArgument(fieldDefinitionContext.type(), argumentsContext);
+        if (idArgumentContext.isEmpty()) {
+            manager.getObjectTypeIDFieldName(fieldTypeName).ifPresent(idFieldName -> statementList.add(DB_VALUE_UTIL.createInsertIdSetStatement(fieldTypeName, idFieldName)));
+        }
+
+        fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
+                .filter(inputValueDefinitionContext -> manager.isInputObject(inputValueDefinitionContext.type().getText()))
+                .forEach(inputValueDefinitionContext -> {
+
+                    Optional<GraphqlParser.ArgumentContext> argumentContext = manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
+                    Optional<GraphqlParser.FieldDefinitionContext> subFieldDefinitionContext = manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext);
+
+                    String subFieldTypeName = manager.getFieldTypeName(subFieldDefinitionContext.get().type());
+
+                    if (argumentContext.isPresent() && subFieldDefinitionContext.isPresent()) {
+                        return singleTypeObjectValueWithVariableToStatementStream(subFieldDefinitionContext.get(), inputValueDefinitionContext, argumentContext.get());
+                    } else {
+//                        return singleTypeDefaultValueToStatementStream(inputValueDefinitionContext.type(), inputValueDefinitionContext);
+                    }
+
+
+                    String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(fieldTypeName);
+                    String subTableName = DB_NAME_UTIL.graphqlTypeNameToTableName(subFieldTypeName);
+
+                    Table table = new Table(tableName);
+                    Optional<GraphqlParser.FieldDefinitionContext> mappingFromFieldDefinition = manager.getMappingFromFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), subFieldDefinitionContext.get());
+                    Optional<GraphqlParser.FieldDefinitionContext> mappingToFieldDefinition = manager.getMappingToFieldDefinition(subFieldDefinitionContext.get());
+
+                    SubSelect subSelect = new SubSelect();
+                    PlainSelect body = new PlainSelect();
+                    Table subTable = new Table(subTableName);
+                    SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
+                    selectExpressionItem.setExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingToFieldDefinition.get().name().getText())));
+                    selectExpressionItem.setAlias(new Alias(mappingToFieldDefinition.get().name().getText()));
+                    body.setSelectItems(Collections.singletonList(selectExpressionItem));
+                    EqualsTo equalsTo = new EqualsTo();
+                    manager.getObjectTypeIDFieldName(subFieldTypeName).ifPresent(idFieldName -> equalsTo.setLeftExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(idFieldName))));
+                    Optional<GraphqlParser.ObjectFieldWithVariableContext> objectIdFieldWithVariableContext = manager.getIDObjectFieldWithVariable(subFieldDefinitionContext.get().type(), argumentContext.get().valueWithVariable().objectValueWithVariable());
+
+                    if (objectIdFieldWithVariableContext.isPresent()) {
+                        equalsTo.setRightExpression(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(objectIdFieldWithVariableContext.get().valueWithVariable()));
+                    } else {
+                        manager.getObjectTypeIDFieldName(subFieldTypeName).ifPresent(idFieldName -> equalsTo.setRightExpression(DB_VALUE_UTIL.createInsertIdUserVariable(subFieldTypeName, idFieldName)));
+                    }
+                    body.setWhere(equalsTo);
+                    body.setFromItem(subTable);
+                    subSelect.setSelectBody(body);
+
+                    Update update = new Update();
+                    update.setTable(table);
+                    update.setColumns(Collections.singletonList(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(manager.getObjectTypeIDFieldName(mappingFromFieldDefinition.get().name().getText()).orElse(null)))));
+                    update.setExpressions(Collections.singletonList(subSelect));
+
+                    manager.getObjectTypeIDFieldName(fieldTypeName).ifPresent(idFieldName -> equalsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(idFieldName))));
+                    if (idArgumentContext.isPresent()) {
+                        equalsTo.setRightExpression(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(argumentContext.get().valueWithVariable()));
+                    } else {
+                        equalsTo.setRightExpression(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, manager.getObjectTypeIDFieldName(fieldTypeName).orElse(null)));
+                    }
+                    update.setWhere(equalsTo);
+
+
+                });
+
+
+        Stream<Statement> stream3 = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
+                .flatMap(inputValueDefinitionContext -> listTypeArgumentToStatement(fieldDefinitionContext.type(), inputValueDefinitionContext, argumentsContext));
+
+        return Stream.of(stream1, stream2, stream3).flatMap(statementStream -> statementStream);
     }
 
     protected Stream<Statement> singleTypeArgumentToStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
@@ -408,7 +472,6 @@ public class GraphqlMutationToStatements {
     }
 
     protected Stream<Statement> singleTypeScalarArgumentsToStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {
-
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         Optional<String> idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
         return Stream.of(singleTypeScalarArgumentsToInsert(fieldDefinitionContext, argumentsContext), DB_VALUE_UTIL.createInsertIdSetStatement(fieldTypeName, idFieldName.orElse(null)));
