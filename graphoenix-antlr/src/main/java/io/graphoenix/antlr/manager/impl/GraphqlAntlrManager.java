@@ -6,6 +6,7 @@ import io.graphoenix.antlr.manager.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -280,7 +281,8 @@ public class GraphqlAntlrManager {
         return fieldDefinitionContext.directives().directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("from")).findFirst())
-                .flatMap(argumentContext -> getObjectFieldDefinitionContext(typeName, argumentContext.valueWithVariable().StringValue().getText()));
+                .map(argumentContext -> argumentContext.valueWithVariable().StringValue().getText())
+                .flatMap(fromFieldName -> getObjectFieldDefinitionContext(typeName, fromFieldName.substring(1, fromFieldName.length() - 1)));
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getMappingToFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
@@ -288,7 +290,8 @@ public class GraphqlAntlrManager {
         return fieldDefinitionContext.directives().directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("to")).findFirst())
-                .flatMap(argumentContext -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), argumentContext.valueWithVariable().StringValue().getText()));
+                .map(argumentContext -> argumentContext.valueWithVariable().StringValue().getText())
+                .flatMap(toFieldName -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), toFieldName.substring(1, toFieldName.length() - 1)));
     }
 
     public Optional<String> getObjectTypeIDFieldName(String objectTypeName) {
