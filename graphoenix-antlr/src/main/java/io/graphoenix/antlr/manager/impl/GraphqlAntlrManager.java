@@ -330,6 +330,10 @@ public class GraphqlAntlrManager {
         return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
     }
 
+    public Optional<GraphqlParser.ArgumentContext> getArgumentFromFieldDefinitionContext(GraphqlParser.ArgumentsContext argumentsContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(fieldDefinitionContext.name().getText())).findFirst();
+    }
+
     public Optional<GraphqlParser.ObjectFieldWithVariableContext> getObjectFieldWithVariableFromInputValueDefinition(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         return objectValueWithVariableContext.objectFieldWithVariable().stream().filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
     }
