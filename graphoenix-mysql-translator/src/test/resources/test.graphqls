@@ -21,7 +21,9 @@ type MutationType {
         age: Int
         disable: Boolean
         sex: [Sex]
-        role: RoleInput): User
+        role: RoleInput
+        roles: [RoleInput]
+    ): User
     #    users(ex:UserExpression): [User]
     users(name:String): [User]
     role(
@@ -51,7 +53,7 @@ query HeroNameAndFriends {
 }
 
 mutation updateTest {
-    user( name:"name1",role:{id:"123",name:"role1",resource:{name:"res2"}}){
+    user( name:"name1",role:{id:"123",name:"role1",resource:{name:"res2"}},roles:[{name:"role2"},{id:"3",name:"role3"}]){
         name,sex,login,role{name}
     }
 
@@ -69,6 +71,7 @@ input UserInput {
     disable: Boolean
     sex: [Sex]
     role: RoleInput
+    roles: [RoleInput]
 }
 
 input RoleInput {
@@ -194,21 +197,25 @@ type User @table(engine:"InnoDB"){
     sex: [Sex]
     roleId: Int
     role: Role @map(from:"roleId",to:"id")
+    roles: [Role] @map(from:"id",to:"userId")
 }
 
 type Role {
     id: ID!
     name: String!
     users: [User]
+    userId: Int
     resourcesId: Int
     resource: Resource @map(from:"resourcesId",to:"id")
     type: [RoleType]
+    resources: [RoleType] @map(from:"id",to:"roleId")
 }
 
 type Resource {
     id: ID!
     name: String!
     role: Role
+    roleId: Int
 }
 
 type Organization {
