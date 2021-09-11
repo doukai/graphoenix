@@ -56,4 +56,18 @@ public enum DBValueUtil {
         userVariable.setName(idVariableName);
         return userVariable;
     }
+
+    public SetStatement createInsertIdSetStatement(String typeName, String idFieldName, int level) {
+        String idVariableName = "@" + DB_NAME_UTIL.graphqlFieldNameToVariableName(typeName, idFieldName) + "_" + level;
+        Function function = new Function();
+        function.setName("LAST_INSERT_ID");
+        return new SetStatement(idVariableName, function);
+    }
+
+    public UserVariable createInsertIdUserVariable(String typeName, String idFieldName, int level) {
+        String idVariableName = DB_NAME_UTIL.graphqlFieldNameToVariableName(typeName, idFieldName) + "_" + level;
+        UserVariable userVariable = new UserVariable();
+        userVariable.setName(idVariableName);
+        return userVariable;
+    }
 }
