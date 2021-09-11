@@ -6,7 +6,6 @@ import io.graphoenix.antlr.manager.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -232,10 +231,6 @@ public class GraphqlAntlrManager {
         return graphqlFieldManager.getFieldDefinition(typeName, fieldName).map(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()));
     }
 
-    public Optional<GraphqlParser.TypeContext> getObjectFieldTypeContext(String typeName, String fieldName) {
-        return graphqlFieldManager.getFieldDefinition(typeName, fieldName).map(GraphqlParser.FieldDefinitionContext::type);
-    }
-
     public Optional<GraphqlParser.FieldDefinitionContext> getObjectFieldDefinitionContext(String typeName, String fieldName) {
         return graphqlFieldManager.getFieldDefinition(typeName, fieldName);
     }
@@ -277,7 +272,9 @@ public class GraphqlAntlrManager {
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getMappingFromFieldDefinition(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-
+        if (fieldDefinitionContext.directives() == null) {
+            return Optional.empty();
+        }
         return fieldDefinitionContext.directives().directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("from")).findFirst())
@@ -286,7 +283,9 @@ public class GraphqlAntlrManager {
     }
 
     public Optional<GraphqlParser.FieldDefinitionContext> getMappingToFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-
+        if (fieldDefinitionContext.directives() == null) {
+            return Optional.empty();
+        }
         return fieldDefinitionContext.directives().directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("to")).findFirst())
@@ -300,19 +299,6 @@ public class GraphqlAntlrManager {
                 .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst()
                 .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText());
     }
-
-//    public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeRelationFieldDefinition(String sourceObjectTypeName, String targetObjectTypeName) {
-//        return graphqlFieldManager.getFieldDefinitions(sourceObjectTypeName)
-//                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
-//                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(targetObjectTypeName)).findFirst();
-//    }
-//
-//    public Optional<String> getObjectTypeRelationFieldName(String sourceObjectTypeName, String targetObjectTypeName) {
-//        return graphqlFieldManager.getFieldDefinitions(sourceObjectTypeName)
-//                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
-//                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(targetObjectTypeName)).findFirst()
-//                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText());
-//    }
 
     public Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
         return argumentsDefinitionContext.inputValueDefinition().stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(argumentContext.name().getText())).findFirst();
@@ -328,10 +314,6 @@ public class GraphqlAntlrManager {
 
     public Optional<GraphqlParser.ArgumentContext> getArgumentFromInputValueDefinition(GraphqlParser.ArgumentsContext argumentsContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
-    }
-
-    public Optional<GraphqlParser.ArgumentContext> getArgumentFromFieldDefinitionContext(GraphqlParser.ArgumentsContext argumentsContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(fieldDefinitionContext.name().getText())).findFirst();
     }
 
     public Optional<GraphqlParser.ObjectFieldWithVariableContext> getObjectFieldWithVariableFromInputValueDefinition(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
