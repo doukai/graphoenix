@@ -11,10 +11,7 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
 import java.util.*;
@@ -167,9 +164,33 @@ public class GraphqlQueryToSelect {
                 Optional<GraphqlParser.FieldDefinitionContext> mappingFromFieldDefinition = manager.getMappingFromFieldDefinition(typeName, fieldDefinitionContext.get());
                 Optional<GraphqlParser.FieldDefinitionContext> mappingToFieldDefinition = manager.getMappingToFieldDefinition(fieldDefinitionContext.get());
                 if (mappingFromFieldDefinition.isPresent() && mappingToFieldDefinition.isPresent()) {
+                    Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.fieldDefinitionMapWithTypeArgument(fieldDefinitionContext.get());
                     EqualsTo equalsTo = new EqualsTo();
-                    equalsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingFromFieldDefinition.get().name().getText())));
-                    equalsTo.setRightExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingToFieldDefinition.get().name().getText())));
+                    if (mapWithTypeArgument.isPresent()) {
+                        Optional<String> mapWithTypeName = manager.getMappingToFieldDefinitionWithTypeName(mapWithTypeArgument.get());
+                        Optional<String> mapWithFromFieldName = manager.getMappingToFieldDefinitionWithTypeFromFieldName(mapWithTypeArgument.get());
+                        Optional<String> mapWithToFieldName = manager.getMappingToFieldDefinitionWithTypeToFieldName(mapWithTypeArgument.get());
+                        if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
+
+                            Table mapWithTable = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(mapWithTypeName.get()));
+                            EqualsTo mapWithEqualsTo = new EqualsTo();
+                            mapWithEqualsTo.setLeftExpression(new Column(mapWithTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithFromFieldName.get())));
+                            mapWithEqualsTo.setRightExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingFromFieldDefinition.get().name().getText())));
+
+                            Join join = new Join();
+                            join.setLeft(true);
+                            join.setRightItem(mapWithTable);
+                            join.setOnExpression(mapWithEqualsTo);
+                            body.setJoins(Collections.singletonList(join));
+
+                            equalsTo.setLeftExpression(new Column(mapWithTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithToFieldName.get())));
+                            equalsTo.setRightExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingToFieldDefinition.get().name().getText())));
+                        }
+                    } else {
+
+                        equalsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingFromFieldDefinition.get().name().getText())));
+                        equalsTo.setRightExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingToFieldDefinition.get().name().getText())));
+                    }
                     if (selectionContext.field().arguments() != null) {
                         body.setWhere(new MultiAndExpression(Arrays.asList(equalsTo, argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext.get().type(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments()))));
                     } else {
