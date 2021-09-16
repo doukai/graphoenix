@@ -188,7 +188,13 @@ type User @table(engine:"InnoDB"){
     age: Int
     disable: Boolean
     sex: [Sex]
-    role: Role
+    roles: [Role] @map(from:"")
+}
+
+type UserRole @table(engine:"InnoDB"){
+    id: ID! @column(autoIncrement:true)
+    userId  : Int
+    roleId  : Int
 }
 
 type Role {
