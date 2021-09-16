@@ -42,7 +42,7 @@ query HeroNameAndFriends {
     users(cond:OR,name: {opr: GTE,val: "test"},role: {
         name: {opr: EQ,val: "rolename"}
     },age:18,test:[{cond:OR, name: "test2",age: 13},{cond:OR, name: "test3",age: 16}]) {
-        id, name,sex,login,role{name,type}
+        id, name,sex,login,roles{name,type}
     }
     user(id:"id1") {
         id, name,sex,login,role{name,type}
@@ -178,7 +178,14 @@ directive @dataType(
     decimals: Int
 ) on FIELD_DEFINITION
 
+input MapWith {
+    type: String
+    from: String
+    to: String
+}
+
 directive @map(
+    with: MapWith
     from: String
     to: String
 ) on FIELD_DEFINITION
@@ -197,7 +204,13 @@ type User @table(engine:"InnoDB"){
     sex: [Sex]
     roleId: Int
     role: Role @map(from:"roleId",to:"id")
-    roles: [Role] @map(from:"id",to:"userId")
+    roles: [Role] @map(from:"id",to:"id",with:{type:"UserRole",from:"userId",to:"roleId"})
+}
+
+type UserRole @table(engine:"InnoDB"){
+    id: ID! @column(autoIncrement:true)
+    userId  : Int
+    roleId  : Int
 }
 
 type Role {

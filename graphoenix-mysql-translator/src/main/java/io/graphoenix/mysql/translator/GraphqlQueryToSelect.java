@@ -174,8 +174,8 @@ public class GraphqlQueryToSelect {
 
                             Table mapWithTable = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(mapWithTypeName.get()));
                             EqualsTo mapWithEqualsTo = new EqualsTo();
-                            mapWithEqualsTo.setLeftExpression(new Column(mapWithTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithFromFieldName.get())));
-                            mapWithEqualsTo.setRightExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingFromFieldDefinition.get().name().getText())));
+                            mapWithEqualsTo.setLeftExpression(new Column(mapWithTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithToFieldName.get())));
+                            mapWithEqualsTo.setRightExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingToFieldDefinition.get().name().getText())));
 
                             Join join = new Join();
                             join.setLeft(true);
@@ -183,8 +183,8 @@ public class GraphqlQueryToSelect {
                             join.setOnExpression(mapWithEqualsTo);
                             body.setJoins(Collections.singletonList(join));
 
-                            equalsTo.setLeftExpression(new Column(mapWithTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithToFieldName.get())));
-                            equalsTo.setRightExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingToFieldDefinition.get().name().getText())));
+                            equalsTo.setLeftExpression(new Column(mapWithTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithFromFieldName.get())));
+                            equalsTo.setRightExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mappingFromFieldDefinition.get().name().getText())));
                         }
                     } else {
 
