@@ -134,11 +134,6 @@ public class GraphqlMutationToStatements {
                                     Optional<String> mapWithFromFieldName = manager.getMappingToFieldDefinitionWithTypeFromFieldName(mapWithTypeArgument.get());
                                     Optional<String> mapWithToFieldName = manager.getMappingToFieldDefinitionWithTypeToFieldName(mapWithTypeArgument.get());
                                     if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                                        statementList.add(mapWithTypeDelete(
-                                                mapWithTypeName.get(),
-                                                mapWithFromFieldName.get(),
-                                                idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level))
-                                        ));
                                         statementList.add(mapWithTypeInsert(
                                                 mapWithTypeName.get(),
                                                 mapWithFromFieldName.get(),
@@ -191,11 +186,6 @@ public class GraphqlMutationToStatements {
                                             Optional<String> mapWithFromFieldName = manager.getMappingToFieldDefinitionWithTypeFromFieldName(mapWithTypeArgument.get());
                                             Optional<String> mapWithToFieldName = manager.getMappingToFieldDefinitionWithTypeToFieldName(mapWithTypeArgument.get());
                                             if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                                                statementList.add(mapWithTypeDelete(
-                                                        mapWithTypeName.get(),
-                                                        mapWithFromFieldName.get(),
-                                                        idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level))
-                                                ));
                                                 statementList.add(mapWithTypeInsert(
                                                         mapWithTypeName.get(),
                                                         mapWithFromFieldName.get(),
@@ -254,16 +244,13 @@ public class GraphqlMutationToStatements {
                             if (mappingFromFieldDefinition.isPresent() && mappingToFieldDefinition.isPresent() && idFieldName.isPresent() && subIdFieldName.isPresent()) {
                                 if (argumentContext.isPresent()) {
                                     Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.fieldDefinitionMapWithTypeArgument(subFieldDefinitionContext.get());
+                                    List<GraphqlParser.ObjectFieldWithVariableContext> updateObjectFieldWithVariableContextList = new ArrayList<>();
+
                                     if (mapWithTypeArgument.isPresent()) {
                                         Optional<String> mapWithTypeName = manager.getMappingToFieldDefinitionWithTypeName(mapWithTypeArgument.get());
                                         Optional<String> mapWithFromFieldName = manager.getMappingToFieldDefinitionWithTypeFromFieldName(mapWithTypeArgument.get());
                                         Optional<String> mapWithToFieldName = manager.getMappingToFieldDefinitionWithTypeToFieldName(mapWithTypeArgument.get());
                                         if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                                            statementList.add(mapWithTypeDelete(
-                                                    mapWithTypeName.get(),
-                                                    mapWithFromFieldName.get(),
-                                                    idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level))
-                                            ));
                                             argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().forEach(valueWithVariableContext -> {
 
                                                 statementList.addAll(
@@ -275,6 +262,8 @@ public class GraphqlMutationToStatements {
                                                         ).collect(Collectors.toList()));
 
                                                 Optional<GraphqlParser.ObjectFieldWithVariableContext> objectIdFieldWithVariableContext = manager.getIDObjectFieldWithVariable(subFieldDefinitionContext.get().type(), valueWithVariableContext.objectValueWithVariable());
+                                                objectIdFieldWithVariableContext.ifPresent(updateObjectFieldWithVariableContextList::add);
+
                                                 statementList.add(mapWithTypeInsert(
                                                         mapWithTypeName.get(),
                                                         mapWithFromFieldName.get(),
@@ -283,10 +272,15 @@ public class GraphqlMutationToStatements {
                                                         objectIdFieldWithVariableContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(subFieldTypeName, subIdFieldName.get(), level + 1))
                                                 ));
                                             });
+                                            statementList.add(mapWithTypeDelete(
+                                                    mapWithTypeName.get(),
+                                                    mapWithToFieldName.get(),
+                                                    updateObjectFieldWithVariableContextList.stream().map(this::createIdValueExpression).collect(Collectors.toList()),
+                                                    mapWithFromFieldName.get(),
+                                                    idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level))
+                                            ));
                                         }
                                     } else {
-
-                                        List<GraphqlParser.ObjectFieldWithVariableContext> updateObjectFieldWithVariableContextList = new ArrayList<>();
                                         argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable().forEach(valueWithVariableContext -> {
 
                                             statementList.addAll(
@@ -340,16 +334,12 @@ public class GraphqlMutationToStatements {
                                     if (inputValueDefinitionContext.type().nonNullType() != null) {
                                         if (inputValueDefinitionContext.defaultValue() != null) {
                                             Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.fieldDefinitionMapWithTypeArgument(subFieldDefinitionContext.get());
+                                            List<GraphqlParser.ObjectFieldContext> updateObjectFieldContextList = new ArrayList<>();
                                             if (mapWithTypeArgument.isPresent()) {
                                                 Optional<String> mapWithTypeName = manager.getMappingToFieldDefinitionWithTypeName(mapWithTypeArgument.get());
                                                 Optional<String> mapWithFromFieldName = manager.getMappingToFieldDefinitionWithTypeFromFieldName(mapWithTypeArgument.get());
                                                 Optional<String> mapWithToFieldName = manager.getMappingToFieldDefinitionWithTypeToFieldName(mapWithTypeArgument.get());
                                                 if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                                                    statementList.add(mapWithTypeDelete(
-                                                            mapWithTypeName.get(),
-                                                            mapWithFromFieldName.get(),
-                                                            idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level))
-                                                    ));
                                                     inputValueDefinitionContext.defaultValue().value().arrayValue().value().forEach(valueContext -> {
                                                         statementList.addAll(
                                                                 singleTypeObjectValueToStatementStream(
@@ -360,6 +350,8 @@ public class GraphqlMutationToStatements {
                                                                 ).collect(Collectors.toList()));
 
                                                         Optional<GraphqlParser.ObjectFieldContext> objectIdFieldContext = manager.getIDObjectField(subFieldDefinitionContext.get().type(), valueContext.objectValue());
+                                                        objectIdFieldContext.ifPresent(updateObjectFieldContextList::add);
+
                                                         statementList.add(mapWithTypeInsert(
                                                                 mapWithTypeName.get(),
                                                                 mapWithFromFieldName.get(),
@@ -368,9 +360,15 @@ public class GraphqlMutationToStatements {
                                                                 objectIdFieldContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(subFieldTypeName, subIdFieldName.get(), level + 1))
                                                         ));
                                                     });
+                                                    statementList.add(mapWithTypeDelete(
+                                                            mapWithTypeName.get(),
+                                                            mapWithToFieldName.get(),
+                                                            updateObjectFieldContextList.stream().map(this::createIdValueExpression).collect(Collectors.toList()),
+                                                            mapWithFromFieldName.get(),
+                                                            idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level))
+                                                    ));
                                                 }
                                             } else {
-                                                List<GraphqlParser.ObjectFieldContext> updateObjectFieldContextList = new ArrayList<>();
                                                 inputValueDefinitionContext.defaultValue().value().arrayValue().value().forEach(valueContext -> {
                                                     statementList.addAll(
                                                             singleTypeObjectValueToStatementStream(
@@ -393,7 +391,6 @@ public class GraphqlMutationToStatements {
                                                             subIdFieldName.get(),
                                                             objectIdFieldContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(subFieldTypeName, subIdFieldName.get(), level + 1))
                                                     ));
-
                                                     statementList.add(mapColumnUpdate(
                                                             mappingToFieldDefinition.get().name().getText(),
                                                             subFieldTypeName,
@@ -405,7 +402,6 @@ public class GraphqlMutationToStatements {
                                                             idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level))
                                                     ));
                                                 });
-
                                                 statementList.add(mapColumnDelete(
                                                         mappingToFieldDefinition.get().name().getText(),
                                                         subFieldTypeName,
@@ -950,15 +946,26 @@ public class GraphqlMutationToStatements {
 
     protected Delete mapWithTypeDelete(String mapWithTypeName,
                                        String mapFromFieldName,
-                                       Expression mapFromIdValueExpression) {
+                                       List<Expression> mapFromIdValueExpressionList,
+                                       String mapToFieldName,
+                                       Expression mapToIdValueExpression) {
         Delete delete = new Delete();
         String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(mapWithTypeName);
         Table table = new Table(tableName);
-        EqualsTo fromFieldEqualsTo = new EqualsTo();
-        fromFieldEqualsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapFromFieldName)));
-        fromFieldEqualsTo.setRightExpression(mapFromIdValueExpression);
+
         delete.setTable(table);
-        delete.setWhere(fromFieldEqualsTo);
+        EqualsTo equalsTo = new EqualsTo();
+        equalsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapToFieldName)));
+        equalsTo.setRightExpression(mapToIdValueExpression);
+        if (mapFromIdValueExpressionList.size() > 0) {
+            InExpression inExpression = new InExpression();
+            inExpression.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapFromFieldName)));
+            inExpression.setNot(true);
+            inExpression.setRightItemsList(new ExpressionList(mapFromIdValueExpressionList));
+            delete.setWhere(new MultiAndExpression(Arrays.asList(equalsTo, inExpression)));
+        } else {
+            delete.setWhere(equalsTo);
+        }
         return delete;
     }
 
@@ -971,10 +978,39 @@ public class GraphqlMutationToStatements {
         String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(mapWithTypeName);
         Table table = new Table(tableName);
         insert.setTable(table);
-        Column fromFieldColumn = new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapFromFieldName));
-        Column toFieldColumn = new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapToFieldName));
-        insert.setColumns(Arrays.asList(fromFieldColumn, toFieldColumn));
-        insert.setItemsList(new ExpressionList(Arrays.asList(mapFromIdValueExpression, mapToIdValueExpression)));
+
+        Select select = new Select();
+        PlainSelect plainSelect = new PlainSelect();
+
+        SelectExpressionItem mapFromIdValueSelectExpression = new SelectExpressionItem();
+        mapFromIdValueSelectExpression.setExpression(mapFromIdValueExpression);
+        SelectExpressionItem mapToIdValueSelectExpression = new SelectExpressionItem();
+        mapToIdValueSelectExpression.setExpression(mapToIdValueExpression);
+        plainSelect.setSelectItems(Arrays.asList(mapFromIdValueSelectExpression, mapToIdValueSelectExpression));
+
+        ExistsExpression existsExpression = new ExistsExpression();
+        existsExpression.setNot(true);
+
+        SubSelect subSelect = new SubSelect();
+        PlainSelect existsSelect = new PlainSelect();
+        existsSelect.setSelectItems(Collections.singletonList(new AllColumns()));
+
+        EqualsTo fromFieldEqualsTo = new EqualsTo();
+        fromFieldEqualsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapFromFieldName)));
+        fromFieldEqualsTo.setRightExpression(mapFromIdValueExpression);
+        EqualsTo toFieldEqualsTo = new EqualsTo();
+        toFieldEqualsTo.setLeftExpression(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapToFieldName)));
+        toFieldEqualsTo.setRightExpression(mapToIdValueExpression);
+        MultiAndExpression multiAndExpression = new MultiAndExpression(Arrays.asList(fromFieldEqualsTo, toFieldEqualsTo));
+        existsSelect.setWhere(multiAndExpression);
+        existsSelect.setFromItem(table);
+        subSelect.setSelectBody(existsSelect);
+        existsExpression.setRightExpression(subSelect);
+        plainSelect.setWhere(existsExpression);
+        select.setSelectBody(plainSelect);
+
+        insert.setSelect(select);
+
         return insert;
     }
 
