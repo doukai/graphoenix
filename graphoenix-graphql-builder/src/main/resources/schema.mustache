@@ -91,12 +91,6 @@ input FloatExpression {
     in: [Float]
 }
 
-input MapWith {
-    type: String
-    from: String
-    to: String
-}
-
 type __Schema {
     id: ID
     types: [__Type!]!
@@ -286,8 +280,14 @@ directive @dataType(
     decimals: Int
 ) on FIELD_DEFINITION
 
-directive @map(
-    with: MapWith
+input MapWith {
+    type: String
     from: String
+    to: String
+}
+
+directive @map(
+    from: String
+    with: MapWith
     to: String
 ) on FIELD_DEFINITION

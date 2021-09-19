@@ -271,7 +271,7 @@ public class GraphqlAntlrManager {
                 .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst();
     }
 
-    public Optional<GraphqlParser.FieldDefinitionContext> getMappingFromFieldDefinition(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public Optional<GraphqlParser.FieldDefinitionContext> getMapFromFieldDefinition(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         if (fieldDefinitionContext.directives() == null) {
             return Optional.empty();
         }
@@ -282,7 +282,7 @@ public class GraphqlAntlrManager {
                 .flatMap(fromFieldName -> getObjectFieldDefinitionContext(typeName, fromFieldName.substring(1, fromFieldName.length() - 1)));
     }
 
-    public Optional<GraphqlParser.FieldDefinitionContext> getMappingToFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public Optional<GraphqlParser.FieldDefinitionContext> getMapToFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         if (fieldDefinitionContext.directives() == null) {
             return Optional.empty();
         }
@@ -293,7 +293,7 @@ public class GraphqlAntlrManager {
                 .flatMap(toFieldName -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), toFieldName.substring(1, toFieldName.length() - 1)));
     }
 
-    public Optional<GraphqlParser.ArgumentContext> fieldDefinitionMapWithTypeArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public Optional<GraphqlParser.ArgumentContext> getMapWithTypeArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         if (fieldDefinitionContext.directives() == null) {
             return Optional.empty();
         }
@@ -303,21 +303,21 @@ public class GraphqlAntlrManager {
                         .filter(argumentContext -> argumentContext.name().getText().equals("with")).findAny());
     }
 
-    public Optional<String> getMappingToFieldDefinitionWithTypeName(GraphqlParser.ArgumentContext argumentContext) {
+    public Optional<String> getMapWithTypeName(GraphqlParser.ArgumentContext argumentContext) {
         return argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("type"))
                 .map(fieldWithVariableContext -> fieldWithVariableContext.valueWithVariable().StringValue().getText())
                 .findAny();
     }
 
-    public Optional<String> getMappingToFieldDefinitionWithTypeFromFieldName(GraphqlParser.ArgumentContext argumentContext) {
+    public Optional<String> getMapWithTypeFromFieldName(GraphqlParser.ArgumentContext argumentContext) {
         return argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("from"))
                 .map(fieldWithVariableContext -> fieldWithVariableContext.valueWithVariable().StringValue().getText())
                 .findAny();
     }
 
-    public Optional<String> getMappingToFieldDefinitionWithTypeToFieldName(GraphqlParser.ArgumentContext argumentContext) {
+    public Optional<String> getMapWithTypeToFieldName(GraphqlParser.ArgumentContext argumentContext) {
         return argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("to"))
                 .map(fieldWithVariableContext -> fieldWithVariableContext.valueWithVariable().StringValue().getText())
