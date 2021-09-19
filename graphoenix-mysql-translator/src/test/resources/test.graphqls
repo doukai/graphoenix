@@ -185,8 +185,8 @@ input MapWith {
 }
 
 directive @map(
-    with: MapWith
     from: String
+    with: MapWith
     to: String
 ) on FIELD_DEFINITION
 """
