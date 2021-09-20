@@ -141,20 +141,19 @@ public class GraphqlTypeToTable {
         switch (typeNameContext.name().getText()) {
             case "ID":
             case "Int":
-                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
-                length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
+                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
+                argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("30"));
                 break;
             case "Boolean":
-                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
+                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "String":
-                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
-                String StringLength = length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("30");
-                argumentsStringList.add(StringLength);
+                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
+                argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("30"));
                 break;
             case "Float":
-                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlTypeToDBType(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));
+                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 decimals.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;

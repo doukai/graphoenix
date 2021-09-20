@@ -192,7 +192,12 @@ public class GraphqlQueryToSelect {
                         equalsTo.setRightExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(toFieldDefinition.get().name().getText())));
                     }
                     if (selectionContext.field().arguments() != null) {
-                        body.setWhere(new MultiAndExpression(Arrays.asList(equalsTo, argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext.get().type(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments()))));
+                        Optional<GraphqlParser.FieldDefinitionContext> queryFieldDefinition = manager.getQueryOperationFieldDefinitionContext(manager.getFieldTypeName(fieldDefinitionContext.get().type()), manager.fieldTypeIsList(fieldDefinitionContext.get().type()));
+                        if (queryFieldDefinition.isPresent()) {
+                            body.setWhere(new MultiAndExpression(Arrays.asList(equalsTo, argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext.get().type(), queryFieldDefinition.get().argumentsDefinition(), selectionContext.field().arguments()))));
+                        } else {
+                            //TODO
+                        }
                     } else {
                         body.setWhere(equalsTo);
                     }

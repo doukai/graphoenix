@@ -4,10 +4,11 @@ schema {
 }
 
 type QueryType {
-    user(id: ID!): User
+    user(id: ID!,role:RoleExpression): User
     #    users(ex:UserExpression): [User]
     users(name:StringExpression,cond:Conditional,role:RoleExpression,age:Int,test:[UserExpression]): [User]
     role(id : ID!) : Role
+    roles(name : StringExpression) : [Role]
     resource(id: ID!): Resource
 }
 
@@ -42,11 +43,11 @@ query HeroNameAndFriends {
     users(cond:OR,name: {opr: GTE,val: "test"},role: {
         name: {opr: EQ,val: "rolename"}
     },age:18,test:[{cond:OR, name: "test2",age: 13},{cond:OR, name: "test3",age: 16}]) {
-        id, name,sex,login,roles{name,type}
+        id, name,sex,login,roles(name: {opr: EQ,val: "rolename"}){name,type}
     }
-    user(id:"id1") {
-        id, name,sex,login,role{name,type}
-    }
+#    user(id:"id1") {
+#        id, name,sex,login,role{name,type}
+#    }
     #    role(id: 1){
     #        name,type,users{name,id}
     #    }
@@ -123,6 +124,7 @@ input UserExpression {
     age:Int
     disable:Boolean
     role:RoleExpression
+    roles:[RoleExpression]
 }
 
 input RoleExpression {
