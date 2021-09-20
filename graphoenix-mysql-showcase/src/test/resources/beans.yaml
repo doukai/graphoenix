@@ -1,4 +1,4 @@
-!!io.graphoenix.gr2dbc.config.ConnectionConfiguration
+!!io.graphoenix.r2dbc.config.ConnectionConfiguration
 host: "127.0.0.1"
 port: 3306
 username: "root"

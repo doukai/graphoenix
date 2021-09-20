@@ -227,6 +227,14 @@ public class GraphqlAntlrManager {
                 .filter(operationTypeDefinition -> operationTypeDefinition.operationType().SUBSCRIPTION() != null).findFirst();
     }
 
+    public Optional<GraphqlParser.FieldDefinitionContext> getQueryOperationFieldDefinitionContext(String typeName, boolean list) {
+        return getObjects().filter(objectTypeDefinitionContext -> isQueryOperationType(objectTypeDefinitionContext.name().getText())).findFirst()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                        .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(typeName))
+                        .filter(fieldDefinitionContext -> fieldTypeIsList(fieldDefinitionContext.type()) == list)
+                        .findFirst());
+    }
+
     public Optional<String> getObjectFieldTypeName(String typeName, String fieldName) {
         return graphqlFieldManager.getFieldDefinition(typeName, fieldName).map(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()));
     }

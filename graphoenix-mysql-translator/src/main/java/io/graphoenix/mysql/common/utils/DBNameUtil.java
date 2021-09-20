@@ -48,6 +48,11 @@ public enum DBNameUtil {
         return stringValueToDBVarchar(CharMatcher.anyOf("\"").or(CharMatcher.anyOf("\"\"\"")).trimFrom(description));
     }
 
+    public String graphqlStringValueToDBOption(String argumentName) {
+
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, CharMatcher.anyOf("\"").trimFrom(argumentName));
+    }
+
     public String stringValueToDBVarchar(String stringValue) {
 
         return String.format("'%s'", stringValue);

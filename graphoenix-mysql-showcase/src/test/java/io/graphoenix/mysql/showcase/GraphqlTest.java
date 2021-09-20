@@ -22,7 +22,7 @@ public class GraphqlTest {
     @Test
     void createType() throws IOException {
 
-        URL url = Resources.getResource("test.graphqls");
+        URL url = Resources.getResource("introspection.gql");
         String graphql = Resources.toString(url, Charsets.UTF_8);
 
         GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphql);
