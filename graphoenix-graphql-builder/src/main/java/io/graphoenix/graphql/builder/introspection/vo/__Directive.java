@@ -1,4 +1,4 @@
-package io.graphoenix.graphql.builder.introspection.dto;
+package io.graphoenix.graphql.builder.introspection.vo;
 
 import java.util.List;
 
@@ -11,6 +11,12 @@ public class __Directive {
     private List<__DirectiveLocation> locations;
 
     private List<__InputValue> args;
+
+    private Boolean hasDescription;
+
+    private Boolean hasArgs;
+
+    private Boolean isLast;
 
     public String getName() {
         return name;
@@ -44,13 +50,27 @@ public class __Directive {
         this.args = args;
     }
 
-    @Override
-    public String toString() {
-        return "__Directive{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", locations=" + locations +
-                ", args=" + args +
-                '}';
+    public Boolean getHasDescription() {
+        return hasDescription;
+    }
+
+    public void setHasDescription(Boolean hasDescription) {
+        this.hasDescription = hasDescription;
+    }
+
+    public Boolean getHasArgs() {
+        return hasArgs;
+    }
+
+    public void setHasArgs(Boolean hasArgs) {
+        this.hasArgs = hasArgs;
+    }
+
+    public Boolean getLast() {
+        return isLast;
+    }
+
+    public void setLast(Boolean last) {
+        isLast = last;
     }
 }

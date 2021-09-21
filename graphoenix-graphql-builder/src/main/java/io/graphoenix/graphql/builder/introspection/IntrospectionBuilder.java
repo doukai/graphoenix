@@ -9,6 +9,7 @@ import io.graphoenix.graphql.builder.introspection.dto.__Schema;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Map;
 
 public class IntrospectionBuilder {
 
@@ -23,8 +24,9 @@ public class IntrospectionBuilder {
         MustacheFactory mustacheFactory = new DefaultMustacheFactory();
         Mustache mustache = mustacheFactory.compile("introspection.mustache");
         __Schema schema = wrapper.buildIntrospectionSchema();
-        System.out.println(new Gson().toJson(schema));
-        mustache.execute(writer, schema).flush();
+        mustache.execute(writer, Map.of(
+                "types", schema.getTypes()
+        )).flush();
     }
 }
 

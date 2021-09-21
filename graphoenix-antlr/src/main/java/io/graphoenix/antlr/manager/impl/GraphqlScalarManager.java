@@ -29,9 +29,9 @@ public class GraphqlScalarManager implements IGraphqlScalarManager {
         return scalarTypeDefinitionMap.entrySet().stream().anyMatch(entry -> entry.getKey().equals(scalarTypeName));
     }
 
-
+    @Override
     public boolean isInnerScalar(String scalarTypeName) {
-        return scalarTypeDefinitionMap.entrySet().stream().anyMatch(entry -> entry.getValue() == null);
+        return scalarTypeDefinitionMap.entrySet().stream().filter(entry -> entry.getValue() == null).anyMatch(entry -> entry.getKey().equals(scalarTypeName));
     }
 
     @Override

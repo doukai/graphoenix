@@ -17,7 +17,7 @@ public class TempTest {
 
     @Test
     void test() throws IOException, URISyntaxException {
-        URL url = Resources.getResource("test.graphqls");
+        URL url = Resources.getResource("auth.gql");
         InputStream inputStream = url.openStream();
         GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(inputStream);
         inputStream.close();
@@ -44,5 +44,30 @@ public class TempTest {
         System.out.println(stringWriter);
 
 
+    }
+
+    @Test
+    void testDtoWrapper() throws IOException {
+
+        URL url = Resources.getResource("auth.gql");
+        InputStream inputStream = url.openStream();
+        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(inputStream);
+        inputStream.close();
+
+        StringWriter stringWriter = new StringWriter();
+
+        GraphqlSchemaBuilder graphqlSchemaBuilder = new GraphqlSchemaBuilder(graphqlAntlrManager);
+
+        graphqlSchemaBuilder.buildObjectExpressions(stringWriter);
+
+        stringWriter.flush();
+
+        graphqlAntlrManager.registerDocument(stringWriter.toString());
+//        System.out.println(stringWriter);
+
+        IntrospectionDtoWrapper wrapper = new IntrospectionDtoWrapper(graphqlAntlrManager);
+        __Schema schema = wrapper.buildIntrospectionSchema();
+        Gson gson = new Gson();
+        System.out.println(gson.toJson(schema));
     }
 }
