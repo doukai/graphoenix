@@ -1,4 +1,4 @@
-package io.graphoenix.graphql.builder.introspection.dto;
+package io.graphoenix.graphql.builder.introspection.vo;
 
 public class __InputValue {
 
@@ -9,6 +9,12 @@ public class __InputValue {
     private __Type type;
 
     private String defaultValue;
+
+    private Boolean hasDescription;
+
+    private Boolean hasDefaultValue;
+
+    private Boolean isLast;
 
     public String getName() {
         return name;
@@ -42,13 +48,27 @@ public class __InputValue {
         this.defaultValue = defaultValue;
     }
 
-    @Override
-    public String toString() {
-        return "__InputValue{" +
-                "name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", type=" + type +
-                ", defaultValue='" + defaultValue + '\'' +
-                '}';
+    public Boolean getHasDescription() {
+        return hasDescription;
+    }
+
+    public void setHasDescription(Boolean hasDescription) {
+        this.hasDescription = hasDescription;
+    }
+
+    public Boolean getHasDefaultValue() {
+        return hasDefaultValue;
+    }
+
+    public void setHasDefaultValue(Boolean hasDefaultValue) {
+        this.hasDefaultValue = hasDefaultValue;
+    }
+
+    public Boolean getLast() {
+        return isLast;
+    }
+
+    public void setLast(Boolean last) {
+        isLast = last;
     }
 }

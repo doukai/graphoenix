@@ -1,4 +1,4 @@
-package io.graphoenix.graphql.builder.introspection.dto;
+package io.graphoenix.graphql.builder.introspection.vo;
 
 import java.util.List;
 
@@ -25,6 +25,22 @@ public class __Type {
     public __TypeKind getKind() {
         return kind;
     }
+
+    private Boolean hasDescription;
+
+    private Boolean hasFields;
+
+    private Boolean hasInterfaces;
+
+    private Boolean hasPossibleTypes;
+
+    private Boolean hasEnumValues;
+
+    private Boolean hasInputFields;
+
+    private Boolean hasOfType;
+
+    private Boolean isLast;
 
     public void setKind(__TypeKind kind) {
         this.kind = kind;
@@ -94,18 +110,67 @@ public class __Type {
         this.ofType = ofType;
     }
 
-    @Override
-    public String toString() {
-        return "__Type{" +
-                "kind=" + kind +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", fields=" + fields +
-                ", interfaces=" + interfaces +
-                ", possibleTypes=" + possibleTypes +
-                ", enumValues=" + enumValues +
-                ", inputFields=" + inputFields +
-                ", ofType=" + ofType +
-                '}';
+    public Boolean getHasDescription() {
+        return hasDescription;
+    }
+
+    public void setHasDescription(Boolean hasDescription) {
+        this.hasDescription = hasDescription;
+    }
+
+    public Boolean getHasFields() {
+        return hasFields;
+    }
+
+    public void setHasFields(Boolean hasFields) {
+        this.hasFields = hasFields;
+    }
+
+    public Boolean getHasInterfaces() {
+        return hasInterfaces;
+    }
+
+    public void setHasInterfaces(Boolean hasInterfaces) {
+        this.hasInterfaces = hasInterfaces;
+    }
+
+    public Boolean getHasPossibleTypes() {
+        return hasPossibleTypes;
+    }
+
+    public void setHasPossibleTypes(Boolean hasPossibleTypes) {
+        this.hasPossibleTypes = hasPossibleTypes;
+    }
+
+    public Boolean getHasEnumValues() {
+        return hasEnumValues;
+    }
+
+    public void setHasEnumValues(Boolean hasEnumValues) {
+        this.hasEnumValues = hasEnumValues;
+    }
+
+    public Boolean getHasInputFields() {
+        return hasInputFields;
+    }
+
+    public void setHasInputFields(Boolean hasInputFields) {
+        this.hasInputFields = hasInputFields;
+    }
+
+    public Boolean getHasOfType() {
+        return hasOfType;
+    }
+
+    public void setHasOfType(Boolean hasOfType) {
+        this.hasOfType = hasOfType;
+    }
+
+    public Boolean getLast() {
+        return isLast;
+    }
+
+    public void setLast(Boolean last) {
+        isLast = last;
     }
 }

@@ -1,4 +1,4 @@
-package io.graphoenix.graphql.builder.introspection.dto;
+package io.graphoenix.graphql.builder.introspection.vo;
 
 import java.util.List;
 
@@ -13,6 +13,12 @@ public class __Schema {
     private __Type subscriptionType;
 
     private List<__Directive> directives;
+
+    private Boolean hasMutationType;
+
+    private Boolean hasSubscriptionType;
+
+    private Boolean hasDirectives;
 
     public List<__Type> getTypes() {
         return types;
@@ -54,14 +60,27 @@ public class __Schema {
         this.directives = directives;
     }
 
-    @Override
-    public String toString() {
-        return "__Schema{" +
-                "types=" + types +
-                ", queryType=" + queryType +
-                ", mutationType=" + mutationType +
-                ", subscriptionType=" + subscriptionType +
-                ", directives=" + directives +
-                '}';
+    public Boolean getHasMutationType() {
+        return hasMutationType;
+    }
+
+    public void setHasMutationType(Boolean hasMutationType) {
+        this.hasMutationType = hasMutationType;
+    }
+
+    public Boolean getHasSubscriptionType() {
+        return hasSubscriptionType;
+    }
+
+    public void setHasSubscriptionType(Boolean hasSubscriptionType) {
+        this.hasSubscriptionType = hasSubscriptionType;
+    }
+
+    public Boolean getHasDirectives() {
+        return hasDirectives;
+    }
+
+    public void setHasDirectives(Boolean hasDirectives) {
+        this.hasDirectives = hasDirectives;
     }
 }

@@ -4,30 +4,27 @@ schema {
 }
 
 type QueryType {
-    __schema: __Schema!
-    __type(name: String!): __Type
     role(id: ID!): Role
     roleList(id:IDExpression, name:StringExpression): [Role]
     user(id: ID!): User
-    userList(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, role:RoleExpression): [User]
+    userList(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, sex:SexExpression, organizationId:IntExpression, organization:OrganizationExpression): [User]
     organization(id: ID!): Organization
-    organizationList(id:IDExpression, above:OrganizationExpression, name:StringExpression): [Organization]
-    resource(id: ID!): Resource
-    resourceList(id:IDExpression, name:StringExpression, role:RoleExpression): [Resource]
+    organizationList(id:IDExpression, above_id:IntExpression, above:OrganizationExpression, name:StringExpression): [Organization]
+    userrole(id: ID!): UserRole
+    userroleList(id:IDExpression, userId:IntExpression, roleId:IntExpression): [UserRole]
 }
 
 type MutationType {
-    __schema(types: [__TypeInput!]!, queryType: __TypeInput!, mutationType: __TypeInput, subscriptionType: __TypeInput, directives: [__DirectiveInput!]): __Schema
     role(id:ID, name:String): Role
-    user(id:ID, login:String, password:String, name:String, age:Int, disable:Boolean, role:RoleInput): User
-    organization(id:ID, above:OrganizationInput, name:String): Organization
-    resource(id:ID, name:String, role:RoleInput): Resource
+    user(id:ID, login:String, password:String, name:String, age:Int, disable:Boolean, sex:Sex, organizationId:Int, organization:OrganizationInput): User
+    organization(id:ID, above_id:Int, above:OrganizationInput, name:String): Organization
+    userrole(id:ID, userId:Int, roleId:Int): UserRole
 }
 
-input RoleTypeExpression {
+input SexExpression {
     opr:Operator = EQ
-    val:RoleType
-    in:[RoleType]
+    val:Sex
+    in:[Sex]
 }
 
 input RoleExpression {
@@ -46,23 +43,26 @@ input UserExpression {
     name:StringExpression
     age:IntExpression
     disable:Boolean
-    role:RoleExpression
+    sex:SexExpression
+    organizationId:IntExpression
+    organization:OrganizationExpression
 }
 
 input OrganizationExpression {
     cond:Conditional = AND
     exs:[OrganizationExpression]
     id:IDExpression
+    above_id:IntExpression
     above:OrganizationExpression
     name:StringExpression
 }
 
-input ResourceExpression {
+input UserRoleExpression {
     cond:Conditional = AND
-    exs:[ResourceExpression]
+    exs:[UserRoleExpression]
     id:IDExpression
-    name:StringExpression
-    role:RoleExpression
+    userId:IntExpression
+    roleId:IntExpression
 }
 
 input RoleInput {
@@ -77,19 +77,22 @@ input UserInput {
     name:String
     age:Int
     disable:Boolean
-    role:RoleInput
+    sex:Sex
+    organizationId:Int
+    organization:OrganizationInput
 }
 
 input OrganizationInput {
     id:ID
+    above_id:Int
     above:OrganizationInput
     name:String
 }
 
-input ResourceInput {
+input UserRoleInput {
     id:ID
-    name:String
-    role:RoleInput
+    userId:Int
+    roleId:Int
 }
 
 enum Operator {
@@ -138,206 +141,8 @@ input FloatExpression {
     in: [Float]
 }
 
-type __Schema {
-    id: ID
-    types: [__Type!]!
-    queryType: __Type!
-    mutationType: __Type
-    subscriptionType: __Type
-    directives: [__Directive!]
-}
-
-type __Type {
-    id: ID
-    schema: __Schema
-    kind: __TypeKind!
-    name: String!
-    description: String
-
-    # OBJECT and INTERFACE only
-    fields(includeDeprecated: Boolean = false): [__Field!]
-
-    # OBJECT only
-    interfaces: [__Type!]
-
-    # INTERFACE and UNION only
-    possibleTypes: [__Type!]
-
-    # ENUM only
-    enumValues(includeDeprecated: Boolean = false): [__EnumValue!]
-
-    # INPUT_OBJECT only
-    inputFields: [__InputValue!]
-
-    # NON_NULL and LIST only
-    ofType: __Type
-}
-
-type __Field {
-    id: ID
-    type: __Type!
-    name: String!
-    description: String
-    args: [__FieldInputValue!]
-    isDeprecated: Boolean
-    deprecationReason: String
-}
-
-type __FieldInputValue {
-    id: ID!
-    field: __Field!
-    inputValue: __InputValue!
-}
-
-type __InputValue {
-    id: ID
-    type: __Type
-    name: String!
-    description: String
-    defaultValue: String
-}
-
-type __EnumValue {
-    id: ID
-    type: __Type
-    name: String!
-    description: String
-    isDeprecated: Boolean
-    deprecationReason: String
-}
-
-enum __TypeKind {
-    SCALAR
-    OBJECT
-    INTERFACE
-    UNION
-    ENUM
-    INPUT_OBJECT
-    LIST
-    NON_NULL
-}
-
-type __Directive {
-    id: ID
-    schema: __Schema
-    name: String!
-    description: String
-    locations: [__DirectiveLocation!]!
-    args: [__DirectiveInputValue!]
-}
-
-type __DirectiveInputValue {
-    id: ID!
-    directive: __Directive!
-    inputValue: __InputValue!
-}
-
-enum __DirectiveLocation {
-    QUERY
-    MUTATION
-    SUBSCRIPTION
-    FIELD
-    FRAGMENT_DEFINITION
-    FRAGMENT_SPREAD
-    INLINE_FRAGMENT
-    SCHEMA
-    SCALAR
-    OBJECT
-    FIELD_DEFINITION
-    ARGUMENT_DEFINITION
-    INTERFACE
-    UNION
-    ENUM
-    ENUM_VALUE
-    INPUT_OBJECT
-    INPUT_FIELD_DEFINITION
-}
-
-input __SchemaInput {
-    id: ID
-    types: [__TypeInput!]!
-    queryType: __TypeInput!
-    mutationType: __TypeInput
-    subscriptionType: __TypeInput
-    directives: [__DirectiveInput!]
-}
-
-input __TypeInput {
-    id: ID
-    schema: __SchemaInput
-    kind: __TypeKind!
-    name: String!
-    description: String
-
-    # OBJECT and INTERFACE only
-    fields: [__FieldInput!]
-
-    # OBJECT only
-    interfaces: [__TypeInput!]
-
-    # INTERFACE and UNION only
-    possibleTypes: [__TypeInput!]
-
-    # ENUM only
-    enumValues: [__EnumValueInput!]
-
-    # INPUT_OBJECT only
-    inputFields: [__InputValueInput!]
-
-    # NON_NULL and LIST only
-    ofType: __TypeInput
-}
-
-input __FieldInput {
-    id: ID
-    type: __TypeInput!
-    name: String!
-    description: String
-    args: [__FieldInputValueInput!]
-    isDeprecated: Boolean
-    deprecationReason: String
-}
-
-input __FieldInputValueInput {
-    id: ID!
-    field: __FieldInput!
-    inputValue: __InputValueInput!
-}
-
-input __InputValueInput {
-    id: ID
-    type: __TypeInput
-    name: String!
-    description: String
-    defaultValue: String
-}
-
-input __EnumValueInput {
-    id: ID
-    type: __TypeInput
-    name: String!
-    description: String
-    isDeprecated: Boolean
-    deprecationReason: String
-}
-
-input __DirectiveInput {
-    id: ID
-    schema: __SchemaInput
-    name: String!
-    description: String
-    locations: [__DirectiveLocation!]!
-    args: [__DirectiveInputValueInput!]
-}
-
-input __DirectiveInputValueInput {
-    id: ID!
-    directive: __DirectiveInput!
-    inputValue: __InputValueInput!
-}
-
 directive @table(
-    engine : String="InnoDB"
+    engine : String = "InnoDB"
 ) on OBJECT
 
 directive @column(
@@ -349,4 +154,16 @@ directive @dataType(
     type: String
     length: Int
     decimals: Int
+) on FIELD_DEFINITION
+
+input MapWith {
+    type: String
+    from: String
+    to: String
+}
+
+directive @map(
+    from: String
+    with: MapWith
+    to: String
 ) on FIELD_DEFINITION
