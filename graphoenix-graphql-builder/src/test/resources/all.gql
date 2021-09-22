@@ -1,0 +1,483 @@
+schema {
+    query: QueryType
+    mutation: MutationType
+}
+
+type QueryType {
+    role(id: ID!): Role
+    roleList(id:IDExpression, name:StringExpression): [Role]
+    __field(id: ID!): __Field
+    __fieldList(id:IDExpression, name:StringExpression, typeId:IntExpression, description:StringExpression, fieldTypeName:StringExpression, type:__TypeExpression, isDeprecated:Boolean, deprecationReason:StringExpression): [__Field]
+    user(id: ID!): User
+    userList(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, sex:SexExpression, organizationId:IntExpression, organization:OrganizationExpression): [User]
+    organization(id: ID!): Organization
+    organizationList(id:IDExpression, above_id:IntExpression, above:OrganizationExpression, name:StringExpression): [Organization]
+    __schema(id: ID!): __Schema
+    __schemaList(id:IDExpression, queryTypeId:IntExpression, mutationTypeId:IntExpression, subscriptionTypeId:IntExpression, queryType:__TypeExpression, mutationType:__TypeExpression, subscriptionType:__TypeExpression): [__Schema]
+    __type(id: ID!): __Type
+    __typeList(id:IDExpression, name:StringExpression, schemaId:IntExpression, fieldId:IntExpression, inputValueId:IntExpression, kind:__TypeKindExpression, description:StringExpression, ofTypeId:IntExpression, ofType:__TypeExpression): [__Type]
+    __enumvalue(id: ID!): __EnumValue
+    __enumvalueList(id:IDExpression, name:StringExpression, typeId:IntExpression, description:StringExpression, isDeprecated:Boolean, deprecationReason:StringExpression): [__EnumValue]
+    userrole(id: ID!): UserRole
+    userroleList(id:IDExpression, userId:IntExpression, roleId:IntExpression): [UserRole]
+    __inputvalue(id: ID!): __InputValue
+    __inputvalueList(id:IDExpression, name:StringExpression, typeId:IntExpression, fieldId:IntExpression, directiveId:IntExpression, description:StringExpression, type:__TypeExpression, defaultValue:StringExpression): [__InputValue]
+    __directive(id: ID!): __Directive
+    __directiveList(id:IDExpression, name:StringExpression, schemaId:IntExpression, description:StringExpression): [__Directive]
+}
+
+type MutationType {
+    role(id:ID, name:String): Role
+    __field(id:ID, name:String, typeId:Int, description:String, fieldTypeName:String, type:__TypeInput, isDeprecated:Boolean, deprecationReason:String): __Field
+    user(id:ID, login:String, password:String, name:String, age:Int, disable:Boolean, sex:Sex, organizationId:Int, organization:OrganizationInput): User
+    organization(id:ID, above_id:Int, above:OrganizationInput, name:String): Organization
+    __schema(id:ID, queryTypeId:Int, mutationTypeId:Int, subscriptionTypeId:Int, queryType:__TypeInput, mutationType:__TypeInput, subscriptionType:__TypeInput): __Schema
+    __type(id:ID, name:String, schemaId:Int, fieldId:Int, inputValueId:Int, kind:__TypeKind, description:String, ofTypeId:Int, ofType:__TypeInput): __Type
+    __enumvalue(id:ID, name:String, typeId:Int, description:String, isDeprecated:Boolean, deprecationReason:String): __EnumValue
+    userrole(id:ID, userId:Int, roleId:Int): UserRole
+    __inputvalue(id:ID, name:String, typeId:Int, fieldId:Int, directiveId:Int, description:String, type:__TypeInput, defaultValue:String): __InputValue
+    __directive(id:ID, name:String, schemaId:Int, description:String): __Directive
+}
+
+input __TypeKindExpression {
+    opr:Operator = EQ
+    val:__TypeKind
+    in:[__TypeKind]
+}
+
+input __DirectiveLocationExpression {
+    opr:Operator = EQ
+    val:__DirectiveLocation
+    in:[__DirectiveLocation]
+}
+
+input SexExpression {
+    opr:Operator = EQ
+    val:Sex
+    in:[Sex]
+}
+
+input RoleExpression {
+    cond:Conditional = AND
+    exs:[RoleExpression]
+    id:IDExpression
+    name:StringExpression
+}
+
+input __FieldExpression {
+    cond:Conditional = AND
+    exs:[__FieldExpression]
+    id:IDExpression
+    name:StringExpression
+    typeId:IntExpression
+    description:StringExpression
+    fieldTypeName:StringExpression
+    type:__TypeExpression
+    isDeprecated:Boolean
+    deprecationReason:StringExpression
+}
+
+input UserExpression {
+    cond:Conditional = AND
+    exs:[UserExpression]
+    id:IDExpression
+    login:StringExpression
+    password:StringExpression
+    name:StringExpression
+    age:IntExpression
+    disable:Boolean
+    sex:SexExpression
+    organizationId:IntExpression
+    organization:OrganizationExpression
+}
+
+input OrganizationExpression {
+    cond:Conditional = AND
+    exs:[OrganizationExpression]
+    id:IDExpression
+    above_id:IntExpression
+    above:OrganizationExpression
+    name:StringExpression
+}
+
+input __SchemaExpression {
+    cond:Conditional = AND
+    exs:[__SchemaExpression]
+    id:IDExpression
+    queryTypeId:IntExpression
+    mutationTypeId:IntExpression
+    subscriptionTypeId:IntExpression
+    queryType:__TypeExpression
+    mutationType:__TypeExpression
+    subscriptionType:__TypeExpression
+}
+
+input __TypeExpression {
+    cond:Conditional = AND
+    exs:[__TypeExpression]
+    id:IDExpression
+    name:StringExpression
+    schemaId:IntExpression
+    fieldId:IntExpression
+    inputValueId:IntExpression
+    kind:__TypeKindExpression
+    description:StringExpression
+    ofTypeId:IntExpression
+    ofType:__TypeExpression
+}
+
+input __EnumValueExpression {
+    cond:Conditional = AND
+    exs:[__EnumValueExpression]
+    id:IDExpression
+    name:StringExpression
+    typeId:IntExpression
+    description:StringExpression
+    isDeprecated:Boolean
+    deprecationReason:StringExpression
+}
+
+input UserRoleExpression {
+    cond:Conditional = AND
+    exs:[UserRoleExpression]
+    id:IDExpression
+    userId:IntExpression
+    roleId:IntExpression
+}
+
+input __InputValueExpression {
+    cond:Conditional = AND
+    exs:[__InputValueExpression]
+    id:IDExpression
+    name:StringExpression
+    typeId:IntExpression
+    fieldId:IntExpression
+    directiveId:IntExpression
+    description:StringExpression
+    type:__TypeExpression
+    defaultValue:StringExpression
+}
+
+input __DirectiveExpression {
+    cond:Conditional = AND
+    exs:[__DirectiveExpression]
+    id:IDExpression
+    name:StringExpression
+    schemaId:IntExpression
+    description:StringExpression
+}
+
+input RoleInput {
+    id:ID
+    name:String
+}
+
+input __FieldInput {
+    id:ID
+    name:String
+    typeId:Int
+    description:String
+    fieldTypeName:String
+    type:__TypeInput
+    isDeprecated:Boolean
+    deprecationReason:String
+}
+
+input UserInput {
+    id:ID
+    login:String
+    password:String
+    name:String
+    age:Int
+    disable:Boolean
+    sex:Sex
+    organizationId:Int
+    organization:OrganizationInput
+}
+
+input OrganizationInput {
+    id:ID
+    above_id:Int
+    above:OrganizationInput
+    name:String
+}
+
+input __SchemaInput {
+    id:ID
+    queryTypeId:Int
+    mutationTypeId:Int
+    subscriptionTypeId:Int
+    queryType:__TypeInput
+    mutationType:__TypeInput
+    subscriptionType:__TypeInput
+}
+
+input __TypeInput {
+    id:ID
+    name:String
+    schemaId:Int
+    fieldId:Int
+    inputValueId:Int
+    kind:__TypeKind
+    description:String
+    ofTypeId:Int
+    ofType:__TypeInput
+}
+
+input __EnumValueInput {
+    id:ID
+    name:String
+    typeId:Int
+    description:String
+    isDeprecated:Boolean
+    deprecationReason:String
+}
+
+input UserRoleInput {
+    id:ID
+    userId:Int
+    roleId:Int
+}
+
+input __InputValueInput {
+    id:ID
+    name:String
+    typeId:Int
+    fieldId:Int
+    directiveId:Int
+    description:String
+    type:__TypeInput
+    defaultValue:String
+}
+
+input __DirectiveInput {
+    id:ID
+    name:String
+    schemaId:Int
+    description:String
+}
+
+enum Operator {
+    EQ
+    NEQ
+    LK
+    NLK
+    GT
+    NLTE
+    GTE
+    NLT
+    LT
+    NGTE
+    LTE
+    NGT
+    NIL
+    NNIL
+}
+
+enum Conditional {
+    AND
+    OR
+}
+
+input IDExpression {
+    opr: Operator = EQ
+    val: ID
+    in: [ID]
+}
+
+input StringExpression {
+    opr: Operator = EQ
+    val: String
+    in: [String]
+}
+
+input IntExpression {
+    opr: Operator = EQ
+    val: Int
+    in: [Int]
+}
+
+input FloatExpression {
+    opr: Operator = EQ
+    val: Float
+    in: [Float]
+}
+
+directive @table(
+    engine : String = "InnoDB"
+) on OBJECT
+
+directive @column(
+    default: String
+    autoIncrement: Boolean
+) on FIELD_DEFINITION
+
+directive @dataType(
+    type: String
+    length: Int
+    decimals: Int
+) on FIELD_DEFINITION
+
+input MapWith {
+    type: String
+    from: String
+    to: String
+}
+
+directive @map(
+    from: String
+    with: MapWith
+    to: String
+) on FIELD_DEFINITION
+
+type __Schema {
+    id: ID @column(autoIncrement: true)
+    queryTypeId: Int
+    mutationTypeId: Int
+    subscriptionTypeId: Int
+    types: [__Type!]! @map(from: "id", to: "schemaId")
+    queryType: __Type! @map(from: "queryTypeId", to: "id")
+    mutationType: __Type @map(from: "mutationTypeId", to: "id")
+    subscriptionType: __Type @map(from: "subscriptionTypeId", to: "id")
+    directives: [__Directive!]! @map(from: "id", to: "schemaId")
+}
+
+type __Type {
+    id: ID @column(autoIncrement: true)
+    name: String
+    schemaId: Int
+    fieldId: Int
+    inputValueId: Int
+    kind: __TypeKind!
+    description: String
+
+    # OBJECT and INTERFACE only
+    fields(includeDeprecated: Boolean = false): [__Field!] @map(from: "id", to: "typeId")
+
+    # OBJECT only
+    #    interfaces: [__Type!]
+
+    # INTERFACE and UNION only
+    #    possibleTypes: [__Type!]
+
+    # ENUM only
+    enumValues(includeDeprecated: Boolean = false): [__EnumValue!] @map(from: "id", to: "typeId")
+
+    # INPUT_OBJECT only
+    inputFields: [__InputValue!] @map(from: "id", to: "typeId")
+
+    # NON_NULL and LIST only
+    ofTypeId: Int
+    ofType: __Type @map(from: "ofTypeId", to: "id")
+}
+
+type __Field {
+    id: ID @column(autoIncrement: true)
+    name: String
+    typeId: Int
+    description: String
+    args: [__InputValue!]! @map(from: "id", to: "fieldId")
+    fieldTypeName: String
+    type: __Type! @map(from: "id", to: "fieldId")
+    isDeprecated: Boolean!
+    deprecationReason: String
+}
+
+type __InputValue {
+    id: ID @column(autoIncrement: true)
+    name: String
+    typeId: Int
+    fieldId: Int
+    directiveId: Int
+    description: String
+    type: __Type! @map(from: "id", to: "inputValueId")
+    defaultValue: String
+}
+
+type __EnumValue {
+    id: ID @column(autoIncrement: true)
+    name: String
+    typeId: Int
+    description: String
+    isDeprecated: Boolean!
+    deprecationReason: String
+}
+
+enum __TypeKind {
+    SCALAR
+    OBJECT
+    INTERFACE
+    UNION
+    ENUM
+    INPUT_OBJECT
+    LIST
+    NON_NULL
+}
+
+type __Directive {
+    id: ID @column(autoIncrement: true)
+    name: String
+    schemaId: Int
+    description: String
+    locations: [__DirectiveLocation!]!
+    args: [__InputValue!]! @map(from: "id", to: "directiveId")
+}
+
+enum __DirectiveLocation {
+    QUERY
+    MUTATION
+    SUBSCRIPTION
+    FIELD
+    FRAGMENT_DEFINITION
+    FRAGMENT_SPREAD
+    INLINE_FRAGMENT
+    SCHEMA
+    SCALAR
+    OBJECT
+    FIELD_DEFINITION
+    ARGUMENT_DEFINITION
+    INTERFACE
+    UNION
+    ENUM
+    ENUM_VALUE
+    INPUT_OBJECT
+    INPUT_FIELD_DEFINITION
+}
+
+type User @table(engine:"InnoDB"){
+    id: ID! @column(autoIncrement:true)
+    login  : String!
+    password: String!
+    name: String!
+    age: Int
+    disable: Boolean
+    sex: Sex
+    organizationId: Int
+    organization: Organization @map(from: "organizationId", to: "id")
+    roles: [Role!] @map(from: "id", with:{type: "UserRole", from: "userId", to: "roleId"}, to: "id")
+}
+
+enum Sex {
+    MAN
+    FEMALE
+}
+
+type UserRole @table(engine:"InnoDB"){
+    id: ID! @column(autoIncrement:true)
+    userId  : Int
+    roleId  : Int
+}
+
+type Role @table(engine:"InnoDB") {
+    id: ID! @column(autoIncrement:true)
+    name: String!
+    users: [User!] @map(from: "id", with:{type: "UserRole", from: "roleId", to: "userId"}, to: "id")
+}
+
+type Organization @table(engine:"InnoDB") {
+    id: ID! @column(autoIncrement:true)
+    above_id:Int
+    above: Organization @map(from: "above_id", to: "id")
+    users: [User!] @map(from: "id", to: "organizationId")
+    name: String!
+}

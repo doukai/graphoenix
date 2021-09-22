@@ -17,9 +17,15 @@ public class TempTest {
 
     @Test
     void test() throws IOException, URISyntaxException {
-        URL url = Resources.getResource("auth.gql");
+
+        URL url = Resources.getResource("introspection.gql");
         InputStream inputStream = url.openStream();
         GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(inputStream);
+        inputStream.close();
+
+        url =Resources.getResource("auth.gql");
+        inputStream = url.openStream();
+        graphqlAntlrManager.registerDocument(inputStream);
         inputStream.close();
 
         StringWriter stringWriter = new StringWriter();
@@ -30,18 +36,19 @@ public class TempTest {
 
         stringWriter.flush();
 
-        graphqlAntlrManager.registerDocument(stringWriter.toString());
-
-
-        stringWriter = new StringWriter();
-
-        IntrospectionBuilder introspectionBuilder = new IntrospectionBuilder(graphqlAntlrManager);
-
-        introspectionBuilder.buildObjectExpressions(stringWriter);
-
-        stringWriter.flush();
+//        graphqlAntlrManager.registerDocument(stringWriter.toString());
 
         System.out.println(stringWriter);
+
+//        stringWriter = new StringWriter();
+//
+//        IntrospectionBuilder introspectionBuilder = new IntrospectionBuilder(graphqlAntlrManager);
+//
+//        introspectionBuilder.buildObjectExpressions(stringWriter);
+//
+//        stringWriter.flush();
+//
+//        System.out.println(stringWriter);
 
 
     }

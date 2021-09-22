@@ -6,19 +6,25 @@ public class GraphqlField {
 
     private String typeName;
 
+    private boolean isNonNull;
+
+    private boolean isList;
+
+    private boolean isNonNullList;
+
     private boolean isObject;
 
     private boolean isBoolean;
 
     private boolean isLast;
 
-    public GraphqlField(String name, String typeName, boolean isObject) {
-        this.name = name;
-        this.typeName = typeName;
-        if (this.typeName.equals("Boolean")) {
-            this.isBoolean = true;
-        }
-        this.isObject = isObject;
+    public GraphqlField(String name, String typeName, boolean isNonNull, boolean isList, boolean isNonNullList, boolean isObject) {
+        this.setName(name);
+        this.setTypeName(typeName);
+        this.setNonNull(isNonNull);
+        this.setList(isList);
+        this.setNonNullList(isNonNullList);
+        this.setObject(isObject);
     }
 
     public String getName() {
@@ -40,6 +46,30 @@ public class GraphqlField {
             this.isBoolean = true;
         }
         return this;
+    }
+
+    public boolean isNonNull() {
+        return isNonNull;
+    }
+
+    public void setNonNull(boolean nonNull) {
+        isNonNull = nonNull;
+    }
+
+    public boolean isList() {
+        return isList;
+    }
+
+    public void setList(boolean list) {
+        isList = list;
+    }
+
+    public boolean isNonNullList() {
+        return isNonNullList;
+    }
+
+    public void setNonNullList(boolean nonNullList) {
+        isNonNullList = nonNullList;
     }
 
     public boolean isObject() {

@@ -1,6 +1,24 @@
 mutation introspection {
     __schema(
-        {{> schemaTypes}}
+        queryType: {{#queryType}}{{> type}},{{/queryType}}
+        {{#hasMutationType}}
+        mutationType: {{#mutationType}}{{> type}},{{/mutationType}}
+        {{/hasMutationType}}
+        {{#hasSubscriptionType}}
+        subscriptionType: {{#subscriptionType}}{{> type}},{{/subscriptionType}}
+        {{/hasSubscriptionType}}
+        {{#hasDirectives}}
+        directives: [
+            {{#directives}}
+            {{> directive}},
+            {{/directives}}
+        ],
+        {{/hasDirectives}}
+        types: [
+            {{#types}}
+            {{> type}},
+            {{/types}}
+        ]
     ){
         types{
             name

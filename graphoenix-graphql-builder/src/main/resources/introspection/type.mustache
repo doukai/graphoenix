@@ -1,0 +1,33 @@
+{
+    kind: {{kind}},
+    {{#hasName}}
+    name: {{{name}}},
+    {{/hasName}}
+    {{#hasDescription}}
+    description: {{description}},
+    {{/hasDescription}}
+    {{#hasFields}}
+    fields: [
+    {{#fields}}
+    {{> field}},
+    {{/fields}}
+    ],
+    {{/hasFields}}
+    {{#hasEnumValues}}
+    enumValues: [
+    {{#enumValues}}
+    {{> enumValue}},
+    {{/enumValues}}
+    ],
+    {{/hasEnumValues}}
+    {{#hasInputFields}}
+    inputFields: [
+    {{#inputFields}}
+    {{> inputValue}},
+    {{/inputFields}}
+    ]
+    {{/hasInputFields}}
+    {{#hasOfType}}
+    ofType: {{#ofType}}{{> type}}{{/ofType}}
+    {{/hasOfType}}
+}

@@ -1,0 +1,10 @@
+{
+    name: {{{name}}},
+    {{#hasDescription}}
+    description: {{description}},
+    {{/hasDescription}}
+    {{#hasDefaultValue}}
+    defaultValue: {{defaultValue}},
+    {{/hasDefaultValue}}
+    type: {{#type}}{{> type}}{{/type}}
+}

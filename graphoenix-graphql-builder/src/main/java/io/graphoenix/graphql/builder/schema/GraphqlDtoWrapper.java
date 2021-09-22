@@ -37,7 +37,6 @@ public class GraphqlDtoWrapper {
     public GraphqlObject objectTypeDefinitionToDto(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         List<GraphqlField> fields =
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                        .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                         .map(this::fieldDefinitionToDto).collect(Collectors.toList());
 
         fields.get(fields.size() - 1).setLast(true);
@@ -46,8 +45,16 @@ public class GraphqlDtoWrapper {
     }
 
     private GraphqlField fieldDefinitionToDto(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        if (fieldDefinitionContext.name().getText().equals("types")) {
+            fieldDefinitionContext.name();
+        }
         return new GraphqlField(fieldDefinitionContext.name().getText(),
                 manager.getFieldTypeName(fieldDefinitionContext.type()),
+                manager.fieldTypeIsList(fieldDefinitionContext.type()) && fieldDefinitionContext.type().nonNullType() != null && fieldDefinitionContext.type().nonNullType().listType().type().nonNullType() != null ||
+                        manager.fieldTypeIsList(fieldDefinitionContext.type()) && fieldDefinitionContext.type().listType().type().nonNullType() != null ||
+                        !manager.fieldTypeIsList(fieldDefinitionContext.type()) && fieldDefinitionContext.type().nonNullType() != null,
+                manager.fieldTypeIsList(fieldDefinitionContext.type()),
+                manager.fieldTypeIsList(fieldDefinitionContext.type()) && fieldDefinitionContext.type().nonNullType() != null,
                 manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())));
     }
 }
