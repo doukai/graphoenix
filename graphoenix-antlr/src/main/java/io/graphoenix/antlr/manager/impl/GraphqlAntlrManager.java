@@ -104,6 +104,10 @@ public class GraphqlAntlrManager {
         DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql).definition().forEach(this::registerDefinition);
     }
 
+    public void registerDocument(InputStream inputStream) throws IOException {
+        DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(inputStream).definition().forEach(this::registerDefinition);
+    }
+
     public void registerDocument(GraphqlParser.DocumentContext documentContext) {
         documentContext.definition().forEach(this::registerDefinition);
     }

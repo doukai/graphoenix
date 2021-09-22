@@ -12,7 +12,7 @@ type QueryType {
 
 type MutationType {
 {{#objects}}
-    {{schemaFieldName}}({{#fields}}{{name}}:{{typeName}}{{#isObject}}Input{{/isObject}}{{^isLast}}, {{/isLast}}{{/fields}}): {{name}}
+    {{schemaFieldName}}({{#fields}}{{name}}:{{#isList}}[{{/isList}}{{typeName}}{{#isObject}}Input{{/isObject}}{{#isNonNull}}!{{/isNonNull}}{{#isList}}]{{/isList}}{{#isNonNullList}}!{{/isNonNullList}}{{^isLast}}, {{/isLast}}{{/fields}}): {{name}}
 {{/objects}}
 }
 
@@ -37,7 +37,7 @@ input {{name}}Expression {
 {{#objects}}
 input {{name}}Input {
 {{#fields}}
-    {{name}}:{{typeName}}{{#isObject}}Input{{/isObject}}
+    {{name}}:{{#isList}}[{{/isList}}{{typeName}}{{#isObject}}Input{{/isObject}}{{#isNonNull}}!{{/isNonNull}}{{#isList}}]{{/isList}}{{#isNonNullList}}!{{/isNonNullList}}
 {{/fields}}
 }
 

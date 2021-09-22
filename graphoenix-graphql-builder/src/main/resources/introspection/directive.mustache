@@ -1,0 +1,14 @@
+{
+    name: {{{name}}},
+    {{#hasDescription}}
+    description: {{description}},
+    {{/hasDescription}}
+    {{#hasArgs}}
+    args: [
+    {{#args}}
+    {{> inputValue}},
+    {{/args}}
+    ],
+    {{/hasArgs}}
+    locations: {{locations}}
+}

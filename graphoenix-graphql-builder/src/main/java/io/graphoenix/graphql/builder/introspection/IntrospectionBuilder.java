@@ -24,9 +24,7 @@ public class IntrospectionBuilder {
         Mustache mustache = mustacheFactory.compile("introspection/schema.mustache");
 
         __Schema schema = IntrospectionMapper.INSTANCE.schemaDTOToVO(wrapper.buildIntrospectionSchema());
-        mustache.execute(writer, Map.of(
-                "types", schema.getTypes()
-        )).flush();
+        mustache.execute(writer, schema).flush();
     }
 }
 

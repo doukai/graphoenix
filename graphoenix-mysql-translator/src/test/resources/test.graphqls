@@ -171,6 +171,7 @@ directive @table(
 ) on OBJECT
 
 directive @column(
+    autoIncrement: Boolean
     default: String
 ) on FIELD_DEFINITION
 
