@@ -12,65 +12,72 @@ public class __Directive {
 
     private List<__InputValue> args;
 
-    private Boolean hasDescription;
+    private boolean hasDescription;
 
-    private Boolean hasArgs;
+    private boolean hasArgs;
 
-    private Boolean isLast;
+    private boolean last;
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public __Directive setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public __Directive setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public List<__DirectiveLocation> getLocations() {
         return locations;
     }
 
-    public void setLocations(List<__DirectiveLocation> locations) {
+    public __Directive setLocations(List<__DirectiveLocation> locations) {
         this.locations = locations;
+        return this;
     }
 
     public List<__InputValue> getArgs() {
         return args;
     }
 
-    public void setArgs(List<__InputValue> args) {
+    public __Directive setArgs(List<__InputValue> args) {
         this.args = args;
+        return this;
     }
 
-    public Boolean getHasDescription() {
+    public boolean isHasDescription() {
         return hasDescription;
     }
 
-    public void setHasDescription(Boolean hasDescription) {
+    public __Directive setHasDescription(boolean hasDescription) {
         this.hasDescription = hasDescription;
+        return this;
     }
 
-    public Boolean getHasArgs() {
+    public boolean isHasArgs() {
         return hasArgs;
     }
 
-    public void setHasArgs(Boolean hasArgs) {
+    public __Directive setHasArgs(boolean hasArgs) {
         this.hasArgs = hasArgs;
+        return this;
     }
 
-    public Boolean getLast() {
-        return isLast;
+    public boolean isLast() {
+        return last;
     }
 
-    public void setLast(Boolean last) {
-        isLast = last;
+    public __Directive setLast(boolean last) {
+        this.last = last;
+        return this;
     }
 }

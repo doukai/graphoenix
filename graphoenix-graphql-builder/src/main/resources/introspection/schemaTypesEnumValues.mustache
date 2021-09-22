@@ -1,0 +1,10 @@
+enumValues: [
+{{#enumValues}}
+        {
+            name: {{{name}}},
+            {{#hasDescription}}
+            description: {{description}},
+            {{/hasDescription}}
+        }{{^last}},{{/last}}
+{{/enumValues}}
+],

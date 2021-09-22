@@ -1,0 +1,11 @@
+{{#ofType}}
+ofType: {
+            kind: {{kind}},
+            {{#hasName}}
+            name: {{{name}}},
+            {{/hasName}}
+            {{#hasOfType}}
+            {{> schemaTypesFieldsTypeOfType}}
+            {{/hasOfType}}
+},
+{{/ofType}}

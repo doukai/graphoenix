@@ -1,0 +1,11 @@
+fields: [
+{{#fields}}
+        {
+            name: {{{name}}},
+            {{#hasDescription}}
+            description: {{description}},
+            {{/hasDescription}}
+            {{> schemaTypesFieldsType}}
+        }{{^last}},{{/last}}
+{{/fields}}
+],
