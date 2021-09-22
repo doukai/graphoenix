@@ -1,0 +1,14 @@
+inputFields: [
+{{#inputFields}}
+        {
+            name: {{{name}}},
+            {{#hasDescription}}
+            description: {{description}},
+            {{/hasDescription}}
+            {{#hasDefaultValue}}
+                defaultValue: {{defaultValue}},
+            {{/hasDefaultValue}}
+            {{> schemaTypesFieldsType}}
+        }{{^last}},{{/last}}
+{{/inputFields}}
+],

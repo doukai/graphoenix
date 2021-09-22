@@ -1,0 +1,9 @@
+mutation introspection {
+    __schema(
+        {{> schemaTypes}}
+    ){
+        types{
+            name
+        }
+    }
+}

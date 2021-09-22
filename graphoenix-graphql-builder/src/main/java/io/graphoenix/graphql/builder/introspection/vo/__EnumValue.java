@@ -10,65 +10,72 @@ public class __EnumValue {
 
     private String deprecationReason;
 
-    private Boolean hasDescription;
+    private boolean hasDescription;
 
-    private Boolean hasDeprecationReason;
+    private boolean hasDeprecationReason;
 
-    private Boolean isLast;
+    private boolean last;
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public __EnumValue setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public __EnumValue setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public Boolean getDeprecated() {
         return isDeprecated;
     }
 
-    public void setDeprecated(Boolean deprecated) {
+    public __EnumValue setDeprecated(Boolean deprecated) {
         isDeprecated = deprecated;
+        return this;
     }
 
     public String getDeprecationReason() {
         return deprecationReason;
     }
 
-    public void setDeprecationReason(String deprecationReason) {
+    public __EnumValue setDeprecationReason(String deprecationReason) {
         this.deprecationReason = deprecationReason;
+        return this;
     }
 
-    public Boolean getHasDescription() {
+    public boolean isHasDescription() {
         return hasDescription;
     }
 
-    public void setHasDescription(Boolean hasDescription) {
+    public __EnumValue setHasDescription(boolean hasDescription) {
         this.hasDescription = hasDescription;
+        return this;
     }
 
-    public Boolean getHasDeprecationReason() {
+    public boolean isHasDeprecationReason() {
         return hasDeprecationReason;
     }
 
-    public void setHasDeprecationReason(Boolean hasDeprecationReason) {
+    public __EnumValue setHasDeprecationReason(boolean hasDeprecationReason) {
         this.hasDeprecationReason = hasDeprecationReason;
+        return this;
     }
 
-    public Boolean getLast() {
-        return isLast;
+    public boolean isLast() {
+        return last;
     }
 
-    public void setLast(Boolean last) {
-        isLast = last;
+    public __EnumValue setLast(boolean last) {
+        this.last = last;
+        return this;
     }
 }

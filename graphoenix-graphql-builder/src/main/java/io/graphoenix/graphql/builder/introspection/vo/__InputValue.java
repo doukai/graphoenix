@@ -10,65 +10,72 @@ public class __InputValue {
 
     private String defaultValue;
 
-    private Boolean hasDescription;
+    private boolean hasDescription;
 
-    private Boolean hasDefaultValue;
+    private boolean hasDefaultValue;
 
-    private Boolean isLast;
+    private boolean last;
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public __InputValue setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public __InputValue setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public __Type getType() {
         return type;
     }
 
-    public void setType(__Type type) {
+    public __InputValue setType(__Type type) {
         this.type = type;
+        return this;
     }
 
     public String getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
+    public __InputValue setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+        return this;
     }
 
-    public Boolean getHasDescription() {
+    public boolean isHasDescription() {
         return hasDescription;
     }
 
-    public void setHasDescription(Boolean hasDescription) {
+    public __InputValue setHasDescription(boolean hasDescription) {
         this.hasDescription = hasDescription;
+        return this;
     }
 
-    public Boolean getHasDefaultValue() {
+    public boolean isHasDefaultValue() {
         return hasDefaultValue;
     }
 
-    public void setHasDefaultValue(Boolean hasDefaultValue) {
+    public __InputValue setHasDefaultValue(boolean hasDefaultValue) {
         this.hasDefaultValue = hasDefaultValue;
+        return this;
     }
 
-    public Boolean getLast() {
-        return isLast;
+    public boolean isLast() {
+        return last;
     }
 
-    public void setLast(Boolean last) {
-        isLast = last;
+    public __InputValue setLast(boolean last) {
+        this.last = last;
+        return this;
     }
 }

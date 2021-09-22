@@ -22,155 +22,183 @@ public class __Type {
 
     private __Type ofType;
 
+    private boolean hasName;
+
+    private boolean hasDescription;
+
+    private boolean hasFields;
+
+    private boolean hasInterfaces;
+
+    private boolean hasPossibleTypes;
+
+    private boolean hasEnumValues;
+
+    private boolean hasInputFields;
+
+    private boolean hasOfType;
+
+    private boolean last;
+
     public __TypeKind getKind() {
         return kind;
     }
 
-    private Boolean hasDescription;
-
-    private Boolean hasFields;
-
-    private Boolean hasInterfaces;
-
-    private Boolean hasPossibleTypes;
-
-    private Boolean hasEnumValues;
-
-    private Boolean hasInputFields;
-
-    private Boolean hasOfType;
-
-    private Boolean isLast;
-
-    public void setKind(__TypeKind kind) {
+    public __Type setKind(__TypeKind kind) {
         this.kind = kind;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public __Type setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public __Type setDescription(String description) {
         this.description = description;
+        return this;
     }
 
     public List<__Field> getFields() {
         return fields;
     }
 
-    public void setFields(List<__Field> fields) {
+    public __Type setFields(List<__Field> fields) {
         this.fields = fields;
+        return this;
     }
 
     public List<__Type> getInterfaces() {
         return interfaces;
     }
 
-    public void setInterfaces(List<__Type> interfaces) {
+    public __Type setInterfaces(List<__Type> interfaces) {
         this.interfaces = interfaces;
+        return this;
     }
 
     public List<__Type> getPossibleTypes() {
         return possibleTypes;
     }
 
-    public void setPossibleTypes(List<__Type> possibleTypes) {
+    public __Type setPossibleTypes(List<__Type> possibleTypes) {
         this.possibleTypes = possibleTypes;
+        return this;
     }
 
     public List<__EnumValue> getEnumValues() {
         return enumValues;
     }
 
-    public void setEnumValues(List<__EnumValue> enumValues) {
+    public __Type setEnumValues(List<__EnumValue> enumValues) {
         this.enumValues = enumValues;
+        return this;
     }
 
     public List<__InputValue> getInputFields() {
         return inputFields;
     }
 
-    public void setInputFields(List<__InputValue> inputFields) {
+    public __Type setInputFields(List<__InputValue> inputFields) {
         this.inputFields = inputFields;
+        return this;
     }
 
     public __Type getOfType() {
         return ofType;
     }
 
-    public void setOfType(__Type ofType) {
+    public __Type setOfType(__Type ofType) {
         this.ofType = ofType;
+        return this;
     }
 
-    public Boolean getHasDescription() {
+    public boolean isHasDescription() {
         return hasDescription;
     }
 
-    public void setHasDescription(Boolean hasDescription) {
-        this.hasDescription = hasDescription;
+    public boolean isHasName() {
+        return hasName;
     }
 
-    public Boolean getHasFields() {
+    public __Type setHasName(boolean hasName) {
+        this.hasName = hasName;
+        return this;
+    }
+
+    public __Type setHasDescription(boolean hasDescription) {
+        this.hasDescription = hasDescription;
+        return this;
+    }
+
+    public boolean isHasFields() {
         return hasFields;
     }
 
-    public void setHasFields(Boolean hasFields) {
+    public __Type setHasFields(boolean hasFields) {
         this.hasFields = hasFields;
+        return this;
     }
 
-    public Boolean getHasInterfaces() {
+    public boolean isHasInterfaces() {
         return hasInterfaces;
     }
 
-    public void setHasInterfaces(Boolean hasInterfaces) {
+    public __Type setHasInterfaces(boolean hasInterfaces) {
         this.hasInterfaces = hasInterfaces;
+        return this;
     }
 
-    public Boolean getHasPossibleTypes() {
+    public boolean isHasPossibleTypes() {
         return hasPossibleTypes;
     }
 
-    public void setHasPossibleTypes(Boolean hasPossibleTypes) {
+    public __Type setHasPossibleTypes(boolean hasPossibleTypes) {
         this.hasPossibleTypes = hasPossibleTypes;
+        return this;
     }
 
-    public Boolean getHasEnumValues() {
+    public boolean isHasEnumValues() {
         return hasEnumValues;
     }
 
-    public void setHasEnumValues(Boolean hasEnumValues) {
+    public __Type setHasEnumValues(boolean hasEnumValues) {
         this.hasEnumValues = hasEnumValues;
+        return this;
     }
 
-    public Boolean getHasInputFields() {
+    public boolean isHasInputFields() {
         return hasInputFields;
     }
 
-    public void setHasInputFields(Boolean hasInputFields) {
+    public __Type setHasInputFields(boolean hasInputFields) {
         this.hasInputFields = hasInputFields;
+        return this;
     }
 
-    public Boolean getHasOfType() {
+    public boolean isHasOfType() {
         return hasOfType;
     }
 
-    public void setHasOfType(Boolean hasOfType) {
+    public __Type setHasOfType(boolean hasOfType) {
         this.hasOfType = hasOfType;
+        return this;
     }
 
-    public Boolean getLast() {
-        return isLast;
+    public boolean isLast() {
+        return last;
     }
 
-    public void setLast(Boolean last) {
-        isLast = last;
+    public __Type setLast(boolean last) {
+        this.last = last;
+        return this;
     }
 }

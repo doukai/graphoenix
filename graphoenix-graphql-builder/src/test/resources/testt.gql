@@ -1,1258 +1,1096 @@
 mutation introspection {
     __schema(
-        types:  [
+        types: [
             {
-                name: Role,
+                name: "Role",
                 kind: OBJECT,
-                description: 1,
                 fields: [
-                {
-                    name: id,
-                    description: 1,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: ID,
-                }
-                }
-            },
-                {
-                    name: name,
-                    description: ,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: String,
-                }
-                }
-            },
-                {
-                    name: users,
-                    description: ,
-                    type:   {
-                    kind: LIST,
-                    name: ,
-                    ofType: {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: OBJECT,
-                    name: User,
-                }
-                }
-            }
-            },
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-            ]
+                    {
+                        name: "id",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "ID",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "String",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "users",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: NON_NULL,
+                                ofType: {
+                                    kind: OBJECT,
+                                    name: "User",
+                                },
+
+                            },
+
+                        },
+
+                    }
+                ],
+
             },
             {
-                name: User,
+                name: "User",
                 kind: OBJECT,
-                description: ,
                 fields: [
-                {
-                    name: id,
-                    description: ,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: ID,
-                }
-                }
-            },
-                {
-                    name: login,
-                    description: ,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: String,
-                }
-                }
-            },
-                {
-                    name: password,
-                    description: ,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: String,
-                }
-                }
-            },
-                {
-                    name: name,
-                    description: ,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: String,
-                }
-                }
-            },
-                {
-                    name: age,
-                    description: ,
-                    type:   {
-                    kind: SCALAR,
-                    name: Int,
-                }
-                },
-                {
-                    name: disable,
-                    description: ,
-                    type:   {
-                    kind: SCALAR,
-                    name: Boolean,
-                }
-                },
-                {
-                    name: sex,
-                    description: ,
-                    type:   {
-                    kind: ENUM,
-                    name: Sex,
-                }
-                },
-                {
-                    name: organizationId,
-                    description: ,
-                    type:   {
-                    kind: SCALAR,
-                    name: Int,
-                }
-                },
-                {
-                    name: organization,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: Organization,
-                }
-                },
-                {
-                    name: roles,
-                    description: ,
-                    type:   {
-                    kind: LIST,
-                    name: ,
-                    ofType: {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: OBJECT,
-                    name: Role,
-                }
-                }
-            }
-            },
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-            ]
+                    {
+                        name: "id",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "ID",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "login",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "String",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "password",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "String",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "String",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "age",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "disable",
+                        type: {
+                            kind: SCALAR,
+                            name: "Boolean",
+                        },
+
+                    },
+                    {
+                        name: "sex",
+                        type: {
+                            kind: ENUM,
+                            name: "Sex",
+                        },
+
+                    },
+                    {
+                        name: "organizationId",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "organization",
+                        type: {
+                            kind: OBJECT,
+                            name: "Organization",
+                        },
+
+                    },
+                    {
+                        name: "roles",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: NON_NULL,
+                                ofType: {
+                                    kind: OBJECT,
+                                    name: "Role",
+                                },
+
+                            },
+
+                        },
+
+                    }
+                ],
+
             },
             {
-                name: Organization,
+                name: "Organization",
                 kind: OBJECT,
-                description: ,
                 fields: [
-                {
-                    name: id,
-                    description: ,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: ID,
-                }
-                }
-            },
-                {
-                    name: above_id,
-                    description: ,
-                    type:   {
-                    kind: SCALAR,
-                    name: Int,
-                }
-                },
-                {
-                    name: users,
-                    description: ,
-                    type:   {
-                    kind: LIST,
-                    name: ,
-                    ofType: {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: OBJECT,
-                    name: User,
-                }
-                }
-            }
-            },
-                {
-                    name: name,
-                    description: ,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: String,
-                }
-                }
-            },
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-            ]
+                    {
+                        name: "id",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "ID",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "above_id",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "users",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: NON_NULL,
+                                ofType: {
+                                    kind: OBJECT,
+                                    name: "User",
+                                },
+
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "String",
+                            },
+
+                        },
+
+                    }
+                ],
+
             },
             {
-                name: MutationType,
+                name: "MutationType",
                 kind: OBJECT,
-                description: ,
                 fields: [
-                {
-                    name: role,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: Role,
-                }
-                },
-                {
-                    name: user,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: User,
-                }
-                },
-                {
-                    name: organization,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: Organization,
-                }
-                },
-                {
-                    name: userrole,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: UserRole,
-                }
-                },
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-            ]
+                    {
+                        name: "role",
+                        type: {
+                            kind: OBJECT,
+                            name: "Role",
+                        },
+
+                    },
+                    {
+                        name: "user",
+                        type: {
+                            kind: OBJECT,
+                            name: "User",
+                        },
+
+                    },
+                    {
+                        name: "organization",
+                        type: {
+                            kind: OBJECT,
+                            name: "Organization",
+                        },
+
+                    },
+                    {
+                        name: "userrole",
+                        type: {
+                            kind: OBJECT,
+                            name: "UserRole",
+                        },
+
+                    }
+                ],
+
             },
             {
-                name: UserRole,
+                name: "UserRole",
                 kind: OBJECT,
-                description: ,
                 fields: [
-                {
-                    name: id,
-                    description: ,
-                    type:   {
-                    kind: NON_NULL,
-                    name: ,
-                    ofType: {
-                    kind: SCALAR,
-                    name: ID,
-                }
-                }
-            },
-                {
-                    name: userId,
-                    description: ,
-                    type:   {
-                    kind: SCALAR,
-                    name: Int,
-                }
-                },
-                {
-                    name: roleId,
-                    description: ,
-                    type:   {
-                    kind: SCALAR,
-                    name: Int,
-                }
-                },
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-            ]
+                    {
+                        name: "id",
+                        type: {
+                            kind: NON_NULL,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "ID",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "userId",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "roleId",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    }
+                ],
+
             },
             {
-                name: QueryType,
+                name: "QueryType",
                 kind: OBJECT,
-                description: ,
                 fields: [
-                {
-                    name: role,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: Role,
-                }
-                },
-                {
-                    name: roleList,
-                    description: ,
-                    type:   {
-                    kind: LIST,
-                    name: ,
-                    ofType: {
-                    kind: OBJECT,
-                    name: Role,
-                }
-                }
-            },
-                {
-                    name: user,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: User,
-                }
-                },
-                {
-                    name: userList,
-                    description: ,
-                    type:   {
-                    kind: LIST,
-                    name: ,
-                    ofType: {
-                    kind: OBJECT,
-                    name: User,
-                }
-                }
-            },
-                {
-                    name: organization,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: Organization,
-                }
-                },
-                {
-                    name: organizationList,
-                    description: ,
-                    type:   {
-                    kind: LIST,
-                    name: ,
-                    ofType: {
-                    kind: OBJECT,
-                    name: Organization,
-                }
-                }
-            },
-                {
-                    name: userrole,
-                    description: ,
-                    type:   {
-                    kind: OBJECT,
-                    name: UserRole,
-                }
-                },
-                {
-                    name: userroleList,
-                    description: ,
-                    type:   {
-                    kind: LIST,
-                    name: ,
-                    ofType: {
-                    kind: OBJECT,
-                    name: UserRole,
-                }
-                }
-            },
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-            ]
+                    {
+                        name: "role",
+                        type: {
+                            kind: OBJECT,
+                            name: "Role",
+                        },
+
+                    },
+                    {
+                        name: "roleList",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: OBJECT,
+                                name: "Role",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "user",
+                        type: {
+                            kind: OBJECT,
+                            name: "User",
+                        },
+
+                    },
+                    {
+                        name: "userList",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: OBJECT,
+                                name: "User",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "organization",
+                        type: {
+                            kind: OBJECT,
+                            name: "Organization",
+                        },
+
+                    },
+                    {
+                        name: "organizationList",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: OBJECT,
+                                name: "Organization",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "userrole",
+                        type: {
+                            kind: OBJECT,
+                            name: "UserRole",
+                        },
+
+                    },
+                    {
+                        name: "userroleList",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: OBJECT,
+                                name: "UserRole",
+                            },
+
+                        },
+
+                    }
+                ],
+
             },
             {
-                name: Operator,
+                name: "Operator",
                 kind: ENUM,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-                {
-                    name: EQ,
-                    description:
-                },
-                {
-                    name: NEQ,
-                    description:
-                },
-                {
-                    name: LK,
-                    description:
-                },
-                {
-                    name: NLK,
-                    description:
-                },
-                {
-                    name: GT,
-                    description:
-                },
-                {
-                    name: NLTE,
-                    description:
-                },
-                {
-                    name: GTE,
-                    description:
-                },
-                {
-                    name: NLT,
-                    description:
-                },
-                {
-                    name: LT,
-                    description:
-                },
-                {
-                    name: NGTE,
-                    description:
-                },
-                {
-                    name: LTE,
-                    description:
-                },
-                {
-                    name: NGT,
-                    description:
-                },
-                {
-                    name: NIL,
-                    description:
-                },
-                {
-                    name: NNIL,
-                    description:
-                },
-            ]
-            inputFields: [
-            ]
+                enumValues: [
+                    {
+                        name: "EQ",
+                    },
+                    {
+                        name: "NEQ",
+                    },
+                    {
+                        name: "LK",
+                    },
+                    {
+                        name: "NLK",
+                    },
+                    {
+                        name: "GT",
+                    },
+                    {
+                        name: "NLTE",
+                    },
+                    {
+                        name: "GTE",
+                    },
+                    {
+                        name: "NLT",
+                    },
+                    {
+                        name: "LT",
+                    },
+                    {
+                        name: "NGTE",
+                    },
+                    {
+                        name: "LTE",
+                    },
+                    {
+                        name: "NGT",
+                    },
+                    {
+                        name: "NIL",
+                    },
+                    {
+                        name: "NNIL",
+                    }
+                ],
+
             },
             {
-                name: Sex,
+                name: "Sex",
                 kind: ENUM,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-                {
-                    name: MAN,
-                    description:
-                },
-                {
-                    name: FEMALE,
-                    description:
-                },
-            ]
-            inputFields: [
-            ]
+                enumValues: [
+                    {
+                        name: "MAN",
+                    },
+                    {
+                        name: "FEMALE",
+                    }
+                ],
+
             },
             {
-                name: Conditional,
+                name: "Conditional",
                 kind: ENUM,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-                {
-                    name: AND,
-                    description:
-                },
-                {
-                    name: OR,
-                    description:
-                },
-            ]
-            inputFields: [
-            ]
+                enumValues: [
+                    {
+                        name: "AND",
+                    },
+                    {
+                        name: "OR",
+                    }
+                ],
+
             },
             {
-                name: IDExpression,
+                name: "IDExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: opr,
-                    description: ,
-                    defaultValue: EQ,
-                type:   {
-                    kind: ENUM,
-                    name: Operator,
-                }
-                },
-                {
-                    name: val,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: ID,
+                inputFields: [
+                    {
+                        name: "opr",
+                        defaultValue: EQ,
+                        type: {
+                            kind: ENUM,
+                            name: "Operator",
+                        },
+
+                    },
+                    {
+                        name: "val",
+                        type: {
+                            kind: SCALAR,
+                            name: "ID",
+                        },
+
+                    },
+                    {
+                        name: "in",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "ID",
+                            },
+
+                        },
+
                     }
-                },
-                {
-                    name: in,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: SCALAR,
-                    name: ID,
-                }
-                }
-            },
-            ]
+                ],
+
             },
             {
-                name: IntExpression,
+                name: "IntExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: opr,
-                    description: ,
-                    defaultValue: EQ,
-                type:   {
-                    kind: ENUM,
-                    name: Operator,
-                }
-                },
-                {
-                    name: val,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Int,
+                inputFields: [
+                    {
+                        name: "opr",
+                        defaultValue: EQ,
+                        type: {
+                            kind: ENUM,
+                            name: "Operator",
+                        },
+
+                    },
+                    {
+                        name: "val",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "in",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "Int",
+                            },
+
+                        },
+
                     }
-                },
-                {
-                    name: in,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: SCALAR,
-                    name: Int,
-                }
-                }
-            },
-            ]
+                ],
+
             },
             {
-                name: UserInput,
+                name: "UserInput",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: ID,
+                inputFields: [
+                    {
+                        name: "id",
+                        type: {
+                            kind: SCALAR,
+                            name: "ID",
+                        },
+
+                    },
+                    {
+                        name: "login",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
+                    },
+                    {
+                        name: "password",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
+                    },
+                    {
+                        name: "age",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "disable",
+                        type: {
+                            kind: SCALAR,
+                            name: "Boolean",
+                        },
+
+                    },
+                    {
+                        name: "sex",
+                        type: {
+                            kind: ENUM,
+                            name: "Sex",
+                        },
+
+                    },
+                    {
+                        name: "organizationId",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "organization",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "OrganizationInput",
+                        },
+
                     }
-                },
-                {
-                    name: login,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
-                    }
-                },
-                {
-                    name: password,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
-                    }
-                },
-                {
-                    name: name,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
-                    }
-                },
-                {
-                    name: age,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Int,
-                    }
-                },
-                {
-                    name: disable,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Boolean,
-                    }
-                },
-                {
-                    name: sex,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: ENUM,
-                        name: Sex,
-                    }
-                },
-                {
-                    name: organizationId,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Int,
-                    }
-                },
-                {
-                    name: organization,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: OrganizationInput,
-                    }
-                },
-            ]
+                ],
+
             },
             {
-                name: FloatExpression,
+                name: "FloatExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: opr,
-                    description: ,
-                    defaultValue: EQ,
-                type:   {
-                    kind: ENUM,
-                    name: Operator,
-                }
-                },
-                {
-                    name: val,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Float,
+                inputFields: [
+                    {
+                        name: "opr",
+                        defaultValue: EQ,
+                        type: {
+                            kind: ENUM,
+                            name: "Operator",
+                        },
+
+                    },
+                    {
+                        name: "val",
+                        type: {
+                            kind: SCALAR,
+                            name: "Float",
+                        },
+
+                    },
+                    {
+                        name: "in",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "Float",
+                            },
+
+                        },
+
                     }
-                },
-                {
-                    name: in,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: SCALAR,
-                    name: Float,
-                }
-                }
-            },
-            ]
+                ],
+
             },
             {
-                name: SexExpression,
+                name: "SexExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: opr,
-                    description: ,
-                    defaultValue: EQ,
-                type:   {
-                    kind: ENUM,
-                    name: Operator,
-                }
-                },
-                {
-                    name: val,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: ENUM,
-                        name: Sex,
+                inputFields: [
+                    {
+                        name: "opr",
+                        defaultValue: EQ,
+                        type: {
+                            kind: ENUM,
+                            name: "Operator",
+                        },
+
+                    },
+                    {
+                        name: "val",
+                        type: {
+                            kind: ENUM,
+                            name: "Sex",
+                        },
+
+                    },
+                    {
+                        name: "in",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: ENUM,
+                                name: "Sex",
+                            },
+
+                        },
+
                     }
-                },
-                {
-                    name: in,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: ENUM,
-                    name: Sex,
-                }
-                }
-            },
-            ]
+                ],
+
             },
             {
-                name: OrganizationExpression,
+                name: "OrganizationExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: cond,
-                    description: ,
-                    defaultValue: AND,
-                type:   {
-                    kind: ENUM,
-                    name: Conditional,
-                }
-                },
-                {
-                    name: exs,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: INPUT_OBJECT,
-                    name: OrganizationExpression,
-                }
-                }
-            },
-                {
-                    name: id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IDExpression,
+                inputFields: [
+                    {
+                        name: "cond",
+                        defaultValue: AND,
+                        type: {
+                            kind: ENUM,
+                            name: "Conditional",
+                        },
+
+                    },
+                    {
+                        name: "exs",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: INPUT_OBJECT,
+                                name: "OrganizationExpression",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "id",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IDExpression",
+                        },
+
+                    },
+                    {
+                        name: "above_id",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IntExpression",
+                        },
+
+                    },
+                    {
+                        name: "above",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "OrganizationExpression",
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "StringExpression",
+                        },
+
                     }
-                },
-                {
-                    name: above_id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IntExpression,
-                    }
-                },
-                {
-                    name: above,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: OrganizationExpression,
-                    }
-                },
-                {
-                    name: name,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: StringExpression,
-                    }
-                },
-            ]
+                ],
+
             },
             {
-                name: UserRoleExpression,
+                name: "UserRoleExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: cond,
-                    description: ,
-                    defaultValue: AND,
-                type:   {
-                    kind: ENUM,
-                    name: Conditional,
-                }
-                },
-                {
-                    name: exs,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: INPUT_OBJECT,
-                    name: UserRoleExpression,
-                }
-                }
-            },
-                {
-                    name: id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IDExpression,
+                inputFields: [
+                    {
+                        name: "cond",
+                        defaultValue: AND,
+                        type: {
+                            kind: ENUM,
+                            name: "Conditional",
+                        },
+
+                    },
+                    {
+                        name: "exs",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: INPUT_OBJECT,
+                                name: "UserRoleExpression",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "id",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IDExpression",
+                        },
+
+                    },
+                    {
+                        name: "userId",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IntExpression",
+                        },
+
+                    },
+                    {
+                        name: "roleId",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IntExpression",
+                        },
+
                     }
-                },
-                {
-                    name: userId,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IntExpression,
-                    }
-                },
-                {
-                    name: roleId,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IntExpression,
-                    }
-                },
-            ]
+                ],
+
             },
             {
-                name: RoleInput,
+                name: "RoleInput",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: ID,
+                inputFields: [
+                    {
+                        name: "id",
+                        type: {
+                            kind: SCALAR,
+                            name: "ID",
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
                     }
-                },
-                {
-                    name: name,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
-                    }
-                },
-            ]
+                ],
+
             },
             {
-                name: UserRoleInput,
+                name: "UserRoleInput",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: ID,
+                inputFields: [
+                    {
+                        name: "id",
+                        type: {
+                            kind: SCALAR,
+                            name: "ID",
+                        },
+
+                    },
+                    {
+                        name: "userId",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "roleId",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
                     }
-                },
-                {
-                    name: userId,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Int,
-                    }
-                },
-                {
-                    name: roleId,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Int,
-                    }
-                },
-            ]
+                ],
+
             },
             {
-                name: StringExpression,
+                name: "StringExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: opr,
-                    description: ,
-                    defaultValue: EQ,
-                type:   {
-                    kind: ENUM,
-                    name: Operator,
-                }
-                },
-                {
-                    name: val,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
+                inputFields: [
+                    {
+                        name: "opr",
+                        defaultValue: EQ,
+                        type: {
+                            kind: ENUM,
+                            name: "Operator",
+                        },
+
+                    },
+                    {
+                        name: "val",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
+                    },
+                    {
+                        name: "in",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: SCALAR,
+                                name: "String",
+                            },
+
+                        },
+
                     }
-                },
-                {
-                    name: in,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: SCALAR,
-                    name: String,
-                }
-                }
-            },
-            ]
+                ],
+
             },
             {
-                name: UserExpression,
+                name: "UserExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: cond,
-                    description: ,
-                    defaultValue: AND,
-                type:   {
-                    kind: ENUM,
-                    name: Conditional,
-                }
-                },
-                {
-                    name: exs,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: INPUT_OBJECT,
-                    name: UserExpression,
-                }
-                }
-            },
-                {
-                    name: id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IDExpression,
+                inputFields: [
+                    {
+                        name: "cond",
+                        defaultValue: AND,
+                        type: {
+                            kind: ENUM,
+                            name: "Conditional",
+                        },
+
+                    },
+                    {
+                        name: "exs",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: INPUT_OBJECT,
+                                name: "UserExpression",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "id",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IDExpression",
+                        },
+
+                    },
+                    {
+                        name: "login",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "StringExpression",
+                        },
+
+                    },
+                    {
+                        name: "password",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "StringExpression",
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "StringExpression",
+                        },
+
+                    },
+                    {
+                        name: "age",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IntExpression",
+                        },
+
+                    },
+                    {
+                        name: "disable",
+                        type: {
+                            kind: SCALAR,
+                            name: "Boolean",
+                        },
+
+                    },
+                    {
+                        name: "sex",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "SexExpression",
+                        },
+
+                    },
+                    {
+                        name: "organizationId",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IntExpression",
+                        },
+
+                    },
+                    {
+                        name: "organization",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "OrganizationExpression",
+                        },
+
                     }
-                },
-                {
-                    name: login,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: StringExpression,
-                    }
-                },
-                {
-                    name: password,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: StringExpression,
-                    }
-                },
-                {
-                    name: name,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: StringExpression,
-                    }
-                },
-                {
-                    name: age,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IntExpression,
-                    }
-                },
-                {
-                    name: disable,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Boolean,
-                    }
-                },
-                {
-                    name: sex,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: SexExpression,
-                    }
-                },
-                {
-                    name: organizationId,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IntExpression,
-                    }
-                },
-                {
-                    name: organization,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: OrganizationExpression,
-                    }
-                },
-            ]
+                ],
+
             },
             {
-                name: RoleExpression,
+                name: "RoleExpression",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: cond,
-                    description: ,
-                    defaultValue: AND,
-                type:   {
-                    kind: ENUM,
-                    name: Conditional,
-                }
-                },
-                {
-                    name: exs,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: LIST,
-                        name: ,
-                        ofType: {
-                    kind: INPUT_OBJECT,
-                    name: RoleExpression,
-                }
-                }
-            },
-                {
-                    name: id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: IDExpression,
+                inputFields: [
+                    {
+                        name: "cond",
+                        defaultValue: AND,
+                        type: {
+                            kind: ENUM,
+                            name: "Conditional",
+                        },
+
+                    },
+                    {
+                        name: "exs",
+                        type: {
+                            kind: LIST,
+                            ofType: {
+                                kind: INPUT_OBJECT,
+                                name: "RoleExpression",
+                            },
+
+                        },
+
+                    },
+                    {
+                        name: "id",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "IDExpression",
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "StringExpression",
+                        },
+
                     }
-                },
-                {
-                    name: name,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: StringExpression,
-                    }
-                },
-            ]
+                ],
+
             },
             {
-                name: MapWith,
+                name: "MapWith",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: type,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
+                inputFields: [
+                    {
+                        name: "type",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
+                    },
+                    {
+                        name: "from",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
+                    },
+                    {
+                        name: "to",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
                     }
-                },
-                {
-                    name: from,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
-                    }
-                },
-                {
-                    name: to,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
-                    }
-                },
-            ]
+                ],
+
             },
             {
-                name: OrganizationInput,
+                name: "OrganizationInput",
                 kind: INPUT_OBJECT,
-                description: ,
-                fields: [
-            ],
-            enumValues: [
-            ]
-            inputFields: [
-                {
-                    name: id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: ID,
+                inputFields: [
+                    {
+                        name: "id",
+                        type: {
+                            kind: SCALAR,
+                            name: "ID",
+                        },
+
+                    },
+                    {
+                        name: "above_id",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        },
+
+                    },
+                    {
+                        name: "above",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "OrganizationInput",
+                        },
+
+                    },
+                    {
+                        name: "name",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        },
+
                     }
-                },
-                {
-                    name: above_id,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: Int,
-                    }
-                },
-                {
-                    name: above,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: INPUT_OBJECT,
-                        name: OrganizationInput,
-                    }
-                },
-                {
-                    name: name,
-                    description: ,
-                    defaultValue: ,
-                    type:   {
-                        kind: SCALAR,
-                        name: String,
-                    }
-                },
-            ]
-            },
-        ]
+                ],
+
+            }
+        ],
+
     ){
         types{
             name

@@ -1,0 +1,20 @@
+types: [
+{{#types}}
+        {
+            name: {{{name}}},
+            kind: {{kind}},
+            {{#hasDescription}}
+                description: {{description}},
+            {{/hasDescription}}
+            {{#hasFields}}
+                {{> schemaTypesFields}}
+            {{/hasFields}}
+            {{#hasEnumValues}}
+                {{> schemaTypesEnumValues}}
+            {{/hasEnumValues}}
+            {{#hasInputFields}}
+                {{> schemaTypesInputFields}}
+            {{/hasInputFields}}
+        }{{^last}},{{/last}}
+{{/types}}
+],
