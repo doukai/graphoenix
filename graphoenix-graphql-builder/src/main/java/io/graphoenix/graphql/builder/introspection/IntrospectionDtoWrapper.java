@@ -101,32 +101,36 @@ public class IntrospectionDtoWrapper {
                 return manager.getInputObject(typeContext.typeName().getText()).map(inputObjectTypeDefinitionContext -> inputObjectTypeDefinitionContextToType(inputObjectTypeDefinitionContext, level)).orElse(null);
             }
         } else if (typeContext.listType() != null) {
-            __Type type = new __Type();
-            type.setKind(__TypeKind.LIST);
-            type.setOfType(typeContextToType(typeContext.listType().type(), level));
-            return type;
+            __Type listType = new __Type();
+            listType.setKind(__TypeKind.LIST);
+            listType.setOfType(typeContextToType(typeContext.listType().type(), level));
+            listType.setName("list_" + listType.getOfType().getName());
+            return listType;
         } else if (typeContext.nonNullType() != null) {
-            __Type type = new __Type();
-            type.setKind(__TypeKind.NON_NULL);
+            __Type nonNullType = new __Type();
+            nonNullType.setKind(__TypeKind.NON_NULL);
             if (typeContext.nonNullType().typeName() != null) {
                 if (manager.isInnerScalar(typeContext.nonNullType().typeName().getText())) {
-                    type.setOfType(innerScalarTypeDefinitionContextToType(typeContext.nonNullType().typeName().getText()));
+                    nonNullType.setOfType(innerScalarTypeDefinitionContextToType(typeContext.nonNullType().typeName().getText()));
                 } else if (manager.isScaLar(typeContext.nonNullType().typeName().getText())) {
-                    type.setOfType(manager.getScaLar(typeContext.nonNullType().typeName().getText()).map(this::scalarTypeDefinitionContextToType).orElse(null));
+                    nonNullType.setOfType(manager.getScaLar(typeContext.nonNullType().typeName().getText()).map(this::scalarTypeDefinitionContextToType).orElse(null));
                 } else if (manager.isObject(typeContext.nonNullType().typeName().getText())) {
-                    type.setOfType(manager.getObject(typeContext.nonNullType().typeName().getText()).map(objectTypeDefinitionContext -> objectTypeDefinitionContextToType(objectTypeDefinitionContext, level)).orElse(null));
+                    nonNullType.setOfType(manager.getObject(typeContext.nonNullType().typeName().getText()).map(objectTypeDefinitionContext -> objectTypeDefinitionContextToType(objectTypeDefinitionContext, level)).orElse(null));
                 } else if (manager.isEnum(typeContext.nonNullType().typeName().getText())) {
-                    type.setOfType(manager.getEnum(typeContext.nonNullType().typeName().getText()).map(enumTypeDefinitionContext -> enumTypeDefinitionContextToType(enumTypeDefinitionContext, level)).orElse(null));
+                    nonNullType.setOfType(manager.getEnum(typeContext.nonNullType().typeName().getText()).map(enumTypeDefinitionContext -> enumTypeDefinitionContextToType(enumTypeDefinitionContext, level)).orElse(null));
                 } else if (manager.isInputObject(typeContext.nonNullType().typeName().getText())) {
-                    type.setOfType(manager.getInputObject(typeContext.nonNullType().typeName().getText()).map(inputObjectTypeDefinitionContext -> inputObjectTypeDefinitionContextToType(inputObjectTypeDefinitionContext, level)).orElse(null));
+                    nonNullType.setOfType(manager.getInputObject(typeContext.nonNullType().typeName().getText()).map(inputObjectTypeDefinitionContext -> inputObjectTypeDefinitionContextToType(inputObjectTypeDefinitionContext, level)).orElse(null));
                 }
+                nonNullType.setName("nonnull_" + nonNullType.getOfType().getName());
             } else if (typeContext.nonNullType().listType() != null) {
                 __Type listType = new __Type();
                 listType.setKind(__TypeKind.LIST);
                 listType.setOfType(typeContextToType(typeContext.nonNullType().listType().type(), level));
-                type.setOfType(listType);
+                listType.setName("list_" + listType.getOfType().getName());
+                nonNullType.setOfType(listType);
+                nonNullType.setName("nonnull_" + listType.getName());
             }
-            return type;
+            return nonNullType;
         }
         return null;
     }
