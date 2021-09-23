@@ -151,7 +151,7 @@ public class GraphqlTypeToTable {
             case "ID":
             case "Int":
                 colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
-                argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("30"));
+                argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));
                 break;
             case "Boolean":
                 colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
@@ -159,7 +159,7 @@ public class GraphqlTypeToTable {
                 break;
             case "String":
                 colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
-                argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("30"));
+                argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));
                 break;
             case "Float":
                 colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));

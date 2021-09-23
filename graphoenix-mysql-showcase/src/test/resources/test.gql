@@ -1,14 +1,145 @@
 mutation introspection {
     __schema(
-        queryType: {
-            kind: OBJECT,
-            name: "QueryType",
-            fields :[
-                {name:"test1"}
-            ]
-        },
-        types:[
-            {name:"test2"}
+        directives: [
+            {
+                name: "dataType",
+                args: [
+                    {
+                        name: "type",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        }
+
+                    }
+                    ,
+                    {
+                        name: "length",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        }
+
+                    }
+                    ,
+                    {
+                        name: "decimals",
+                        type: {
+                            kind: SCALAR,
+                            name: "Int",
+                        }
+
+                    }
+                    ,
+                ],
+                locations: [FIELD_DEFINITION]
+            }
+            ,
+            {
+                name: "column",
+                args: [
+                    {
+                        name: "default",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        }
+
+                    }
+                    ,
+                    {
+                        name: "autoIncrement",
+                        type: {
+                            kind: SCALAR,
+                            name: "Boolean",
+                        }
+
+                    }
+                    ,
+                ],
+                locations: [FIELD_DEFINITION]
+            }
+            ,
+            {
+                name: "map",
+                args: [
+                    {
+                        name: "from",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        }
+
+                    }
+                    ,
+                    {
+                        name: "with",
+                        type: {
+                            kind: INPUT_OBJECT,
+                            name: "MapWith",
+                            inputFields: [
+                                {
+                                    name: "type",
+                                    type: {
+                                        kind: SCALAR,
+                                        name: "String",
+                                    }
+
+                                }
+                                ,
+                                {
+                                    name: "from",
+                                    type: {
+                                        kind: SCALAR,
+                                        name: "String",
+                                    }
+
+                                }
+                                ,
+                                {
+                                    name: "to",
+                                    type: {
+                                        kind: SCALAR,
+                                        name: "String",
+                                    }
+
+                                }
+                                ,
+                            ]
+                        }
+
+                    }
+                    ,
+                    {
+                        name: "to",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        }
+
+                    }
+                    ,
+                ],
+                locations: [FIELD_DEFINITION]
+            }
+            ,
+            {
+                name: "table",
+                args: [
+                    {
+                        name: "engine",
+                        defaultValue: "InnoDB",
+                        type: {
+                            kind: SCALAR,
+                            name: "String",
+                        }
+
+                    }
+                    ,
+                ],
+                locations: [OBJECT]
+            }
+            ,
         ]
     ){
         id
