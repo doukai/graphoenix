@@ -1,7 +1,7 @@
 {
     name: {{{name}}},
     {{#hasDescription}}
-    description: {{description}},
+    description: {{{description}}},
     {{/hasDescription}}
     {{#hasArgs}}
     args: [
@@ -10,5 +10,5 @@
     {{/args}}
     ],
     {{/hasArgs}}
-    locations: {{locations}}
+    type: {{#type}}{{> type}}{{/type}}
 }

@@ -169,7 +169,14 @@ public class IntrospectionDtoWrapper {
             inputValue.setDescription(inputValueDefinitionContext.description().getText());
         }
         if (inputValueDefinitionContext.defaultValue() != null) {
-            inputValue.setDefaultValue(inputValueDefinitionContext.defaultValue().value().getText());
+            if (inputValueDefinitionContext.defaultValue().value().StringValue() != null) {
+                String stringValue = inputValueDefinitionContext.defaultValue().value().StringValue().getText();
+
+                inputValue.setDefaultValue(stringValue.substring(1, stringValue.length() - 1));
+            } else {
+
+                inputValue.setDefaultValue(inputValueDefinitionContext.defaultValue().value().getText());
+            }
         }
         inputValue.setType(typeContextToType(inputValueDefinitionContext.type(), level));
         return inputValue;

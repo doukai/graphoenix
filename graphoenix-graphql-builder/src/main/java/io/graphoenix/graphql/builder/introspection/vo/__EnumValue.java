@@ -14,8 +14,6 @@ public class __EnumValue {
 
     private boolean hasDeprecationReason;
 
-    private boolean last;
-
     public String getName() {
         return name;
     }
@@ -67,15 +65,6 @@ public class __EnumValue {
 
     public __EnumValue setHasDeprecationReason(boolean hasDeprecationReason) {
         this.hasDeprecationReason = hasDeprecationReason;
-        return this;
-    }
-
-    public boolean isLast() {
-        return last;
-    }
-
-    public __EnumValue setLast(boolean last) {
-        this.last = last;
         return this;
     }
 }

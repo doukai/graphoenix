@@ -22,8 +22,6 @@ public class __Field {
 
     private boolean hasDeprecationReason;
 
-    private boolean last;
-
     public String getName() {
         return name;
     }
@@ -102,15 +100,6 @@ public class __Field {
 
     public __Field setHasDeprecationReason(boolean hasDeprecationReason) {
         this.hasDeprecationReason = hasDeprecationReason;
-        return this;
-    }
-
-    public boolean isLast() {
-        return last;
-    }
-
-    public __Field setLast(boolean last) {
-        this.last = last;
         return this;
     }
 }

@@ -24,8 +24,17 @@ public class GraphqlTypeToTable {
         this.manager = graphqlAntlrManager;
     }
 
+
+    public List<String> createTablesSql() {
+        return manager.getObjects().map(this::createTable).map(CreateTable::toString).collect(Collectors.toList());
+    }
+
     public List<String> createTablesSql(String graphql) {
         return createTablesSql(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    public List<String> createTablesSql(GraphqlAntlrManager manager) {
+        return manager.getObjects().map(this::createTable).map(CreateTable::toString).collect(Collectors.toList());
     }
 
     public List<String> createTablesSql(GraphqlParser.DocumentContext documentContext) {

@@ -20,7 +20,7 @@ public class GraphqlSchemaBuilder {
     public void buildObjectExpressions(Writer writer) throws IOException {
 
         MustacheFactory mustacheFactory = new DefaultMustacheFactory();
-        Mustache mustache = mustacheFactory.compile("schema.mustache");
+        Mustache mustache = mustacheFactory.compile("mustache/schema.mustache");
         mustache.execute(writer, Map.of(
                 "objects", wrapper.objectTypeDefinitionsToDto(),
                 "enums", wrapper.enumTypeDefinitionsToDto()

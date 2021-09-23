@@ -20,7 +20,7 @@ type __Type {
     description: String
 
     # OBJECT and INTERFACE only
-    fields(includeDeprecated: Boolean = false): [__Field!] @map(from: "id", to: "typeId")
+    fields: [__Field!] @map(from: "id", to: "typeId")
 
     # OBJECT only
     #    interfaces: [__Type!]
@@ -29,7 +29,7 @@ type __Type {
     #    possibleTypes: [__Type!]
 
     # ENUM only
-    enumValues(includeDeprecated: Boolean = false): [__EnumValue!] @map(from: "id", to: "typeId")
+    enumValues: [__EnumValue!] @map(from: "id", to: "typeId")
 
     # INPUT_OBJECT only
     inputFields: [__InputValue!] @map(from: "id", to: "typeId")
@@ -47,7 +47,7 @@ type __Field {
     args: [__InputValue!]! @map(from: "id", to: "fieldId")
     fieldTypeName: String
     type: __Type! @map(from: "id", to: "fieldId")
-    isDeprecated: Boolean!
+    isDeprecated: Boolean
     deprecationReason: String
 }
 
@@ -67,7 +67,7 @@ type __EnumValue {
     name: String
     typeId: Int
     description: String
-    isDeprecated: Boolean!
+    isDeprecated: Boolean
     deprecationReason: String
 }
 

@@ -16,8 +16,6 @@ public class __Directive {
 
     private boolean hasArgs;
 
-    private boolean last;
-
     public String getName() {
         return name;
     }
@@ -69,15 +67,6 @@ public class __Directive {
 
     public __Directive setHasArgs(boolean hasArgs) {
         this.hasArgs = hasArgs;
-        return this;
-    }
-
-    public boolean isLast() {
-        return last;
-    }
-
-    public __Directive setLast(boolean last) {
-        this.last = last;
         return this;
     }
 }
