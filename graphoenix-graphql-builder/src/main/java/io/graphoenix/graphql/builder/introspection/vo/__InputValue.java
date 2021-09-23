@@ -14,8 +14,6 @@ public class __InputValue {
 
     private boolean hasDefaultValue;
 
-    private boolean last;
-
     public String getName() {
         return name;
     }
@@ -67,15 +65,6 @@ public class __InputValue {
 
     public __InputValue setHasDefaultValue(boolean hasDefaultValue) {
         this.hasDefaultValue = hasDefaultValue;
-        return this;
-    }
-
-    public boolean isLast() {
-        return last;
-    }
-
-    public __InputValue setLast(boolean last) {
-        this.last = last;
         return this;
     }
 }

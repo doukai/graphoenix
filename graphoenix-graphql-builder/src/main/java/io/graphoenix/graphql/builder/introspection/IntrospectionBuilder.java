@@ -8,7 +8,6 @@ import io.graphoenix.graphql.builder.introspection.vo.__Schema;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Map;
 
 public class IntrospectionBuilder {
 
@@ -21,7 +20,7 @@ public class IntrospectionBuilder {
     public void buildObjectExpressions(Writer writer) throws IOException {
 
         MustacheFactory mustacheFactory = new DefaultMustacheFactory();
-        Mustache mustache = mustacheFactory.compile("introspection/schema.mustache");
+        Mustache mustache = mustacheFactory.compile("mustache/introspection/schema.mustache");
 
         __Schema schema = IntrospectionMapper.INSTANCE.schemaDTOToVO(wrapper.buildIntrospectionSchema());
         mustache.execute(writer, schema).flush();

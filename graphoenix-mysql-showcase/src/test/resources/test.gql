@@ -1,0 +1,16 @@
+mutation introspection {
+    __schema(
+        queryType: {
+            kind: OBJECT,
+            name: "QueryType",
+            fields :[
+                {name:"test1"}
+            ]
+        },
+        types:[
+            {name:"test2"}
+        ]
+    ){
+        id
+    }
+}

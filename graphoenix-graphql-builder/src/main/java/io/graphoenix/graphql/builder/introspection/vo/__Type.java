@@ -38,8 +38,6 @@ public class __Type {
 
     private boolean hasOfType;
 
-    private boolean last;
-
     public __TypeKind getKind() {
         return kind;
     }
@@ -190,15 +188,6 @@ public class __Type {
 
     public __Type setHasOfType(boolean hasOfType) {
         this.hasOfType = hasOfType;
-        return this;
-    }
-
-    public boolean isLast() {
-        return last;
-    }
-
-    public __Type setLast(boolean last) {
-        this.last = last;
         return this;
     }
 }

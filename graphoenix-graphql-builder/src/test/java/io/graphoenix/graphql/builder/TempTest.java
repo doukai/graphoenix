@@ -29,26 +29,20 @@ public class TempTest {
         inputStream.close();
 
         StringWriter stringWriter = new StringWriter();
-
         GraphqlSchemaBuilder graphqlSchemaBuilder = new GraphqlSchemaBuilder(graphqlAntlrManager);
-
         graphqlSchemaBuilder.buildObjectExpressions(stringWriter);
 
-        stringWriter.flush();
+        graphqlAntlrManager.registerDocument(stringWriter.toString());
+        stringWriter.close();
 
-//        graphqlAntlrManager.registerDocument(stringWriter.toString());
+        stringWriter = new StringWriter();
+
+        IntrospectionBuilder introspectionBuilder = new IntrospectionBuilder(graphqlAntlrManager);
+
+        introspectionBuilder.buildObjectExpressions(stringWriter);
 
         System.out.println(stringWriter);
-
-//        stringWriter = new StringWriter();
-//
-//        IntrospectionBuilder introspectionBuilder = new IntrospectionBuilder(graphqlAntlrManager);
-//
-//        introspectionBuilder.buildObjectExpressions(stringWriter);
-//
-//        stringWriter.flush();
-//
-//        System.out.println(stringWriter);
+        stringWriter.close();
 
 
     }

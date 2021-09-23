@@ -45,16 +45,11 @@ public class GraphqlDtoWrapper {
     }
 
     private GraphqlField fieldDefinitionToDto(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        if (fieldDefinitionContext.name().getText().equals("types")) {
-            fieldDefinitionContext.name();
-        }
         return new GraphqlField(fieldDefinitionContext.name().getText(),
                 manager.getFieldTypeName(fieldDefinitionContext.type()),
-                manager.fieldTypeIsList(fieldDefinitionContext.type()) && fieldDefinitionContext.type().nonNullType() != null && fieldDefinitionContext.type().nonNullType().listType().type().nonNullType() != null ||
-                        manager.fieldTypeIsList(fieldDefinitionContext.type()) && fieldDefinitionContext.type().listType().type().nonNullType() != null ||
-                        !manager.fieldTypeIsList(fieldDefinitionContext.type()) && fieldDefinitionContext.type().nonNullType() != null,
+                manager.fieldTypeIsNonNull(fieldDefinitionContext.type()),
                 manager.fieldTypeIsList(fieldDefinitionContext.type()),
-                manager.fieldTypeIsList(fieldDefinitionContext.type()) && fieldDefinitionContext.type().nonNullType() != null,
+                manager.fieldTypeIsNonNullList(fieldDefinitionContext.type()),
                 manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())));
     }
 }

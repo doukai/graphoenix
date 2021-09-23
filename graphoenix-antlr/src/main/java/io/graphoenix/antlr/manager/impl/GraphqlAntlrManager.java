@@ -411,4 +411,23 @@ public class GraphqlAntlrManager {
             } else return typeContext.nonNullType().listType() != null;
         } else return typeContext.listType() != null;
     }
+
+    public boolean fieldTypeIsNonNull(GraphqlParser.TypeContext typeContext) {
+        if (typeContext.typeName() != null) {
+            return false;
+        } else if (typeContext.nonNullType() != null) {
+            if (typeContext.nonNullType().typeName() != null) {
+                return true;
+            } else if (typeContext.nonNullType().listType() != null) {
+                return fieldTypeIsNonNull(typeContext.nonNullType().listType().type());
+            }
+        } else if (typeContext.listType() != null) {
+            return fieldTypeIsNonNull(typeContext.listType().type());
+        }
+        return false;
+    }
+
+    public boolean fieldTypeIsNonNullList(GraphqlParser.TypeContext typeContext) {
+        return typeContext.nonNullType() != null && typeContext.nonNullType().listType() != null;
+    }
 }
