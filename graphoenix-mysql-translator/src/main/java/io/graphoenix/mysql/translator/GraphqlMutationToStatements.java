@@ -5,7 +5,7 @@ import io.graphoenix.antlr.common.utils.DocumentUtil;
 import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.UserVariable;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -1167,19 +1167,10 @@ public class GraphqlMutationToStatements {
                                                    String toTypeName,
                                                    String toFieldIdName,
                                                    Expression toFieldIdValueExpression) {
-
-        if (fromFieldIdValueExpression.getClass().isAssignableFrom(UserVariable.class) && !toFieldIdValueExpression.getClass().isAssignableFrom(UserVariable.class)) {
-            return Collections.singletonList(updateMapField(fromFieldName, fromTypeName, fromFieldIdName, fromFieldIdValueExpression, toFieldName, toTypeName, toFieldIdName, toFieldIdValueExpression));
-        } else if (!fromFieldIdValueExpression.getClass().isAssignableFrom(UserVariable.class) && toFieldIdValueExpression.getClass().isAssignableFrom(UserVariable.class)) {
-            return Collections.singletonList(updateMapField(toFieldName, toTypeName, toFieldIdName, toFieldIdValueExpression, fromFieldName, fromTypeName, fromFieldIdName, fromFieldIdValueExpression));
-        } else if (fromFieldIdValueExpression.getClass().isAssignableFrom(UserVariable.class) && toFieldIdValueExpression.getClass().isAssignableFrom(UserVariable.class)) {
-            return Arrays.asList(
-                    updateMapField(fromFieldName, fromTypeName, fromFieldIdName, fromFieldIdValueExpression, toFieldName, toTypeName, toFieldIdName, toFieldIdValueExpression),
-                    updateMapField(toFieldName, toTypeName, toFieldIdName, toFieldIdValueExpression, fromFieldName, fromTypeName, fromFieldIdName, fromFieldIdValueExpression)
-            );
-        } else {
-            return Collections.emptyList();
-        }
+        return Arrays.asList(
+                updateMapField(fromFieldName, fromTypeName, fromFieldIdName, fromFieldIdValueExpression, toFieldName, toTypeName, toFieldIdName, toFieldIdValueExpression),
+                updateMapField(toFieldName, toTypeName, toFieldIdName, toFieldIdValueExpression, fromFieldName, fromTypeName, fromFieldIdName, fromFieldIdValueExpression)
+        );
     }
 
     protected Update updateMapField(String fromFieldName,
@@ -1403,7 +1394,7 @@ public class GraphqlMutationToStatements {
 
         List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
-                .filter(inputValueDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
+                .filter(inputValueDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
 
         Insert insert = new Insert();
         List<Column> columnList = inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> singleTypeScalarArgumentsToColumn(fieldDefinitionContext, inputValueDefinitionContext, argumentsContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
@@ -1427,7 +1418,7 @@ public class GraphqlMutationToStatements {
 
         List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
-                .filter(inputValueDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
+                .filter(inputValueDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
 
         Insert insert = new Insert();
         List<Column> columnList = inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> singleTypeScalarInputValuesToColumn(fieldDefinitionContext, inputValueDefinitionContext, objectValueWithVariableContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
@@ -1451,7 +1442,7 @@ public class GraphqlMutationToStatements {
 
         List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
-                .filter(inputValueDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
+                .filter(inputValueDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
 
         Insert insert = new Insert();
         List<Column> columnList = inputValueDefinitionContextList.stream().map(inputValueDefinitionContext -> singleTypeScalarInputValuesToColumn(fieldDefinitionContext, inputValueDefinitionContext, objectValueContext)).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
@@ -1480,8 +1471,6 @@ public class GraphqlMutationToStatements {
         } else {
             if (inputValueDefinitionContext.type().nonNullType() != null) {
                 return Optional.of(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
-            } else {
-                //todo
             }
         }
         return Optional.empty();
@@ -1498,8 +1487,6 @@ public class GraphqlMutationToStatements {
         } else {
             if (inputValueDefinitionContext.type().nonNullType() != null) {
                 return Optional.of(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
-            } else {
-                //todo
             }
         }
         return Optional.empty();
@@ -1516,8 +1503,6 @@ public class GraphqlMutationToStatements {
         } else {
             if (inputValueDefinitionContext.type().nonNullType() != null) {
                 return Optional.of(new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText())));
-            } else {
-                //todo
             }
         }
         return Optional.empty();
@@ -1527,13 +1512,17 @@ public class GraphqlMutationToStatements {
                                                                       GraphqlParser.ArgumentsContext argumentsContext) {
         Optional<GraphqlParser.ArgumentContext> argumentContext = manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
         if (argumentContext.isPresent()) {
-            return Optional.of(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(argumentContext.get().valueWithVariable()));
+            if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                return Optional.of(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(argumentContext.get().valueWithVariable()));
+            } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                return Optional.of(new StringValue(argumentContext.get().valueWithVariable().enumValue().getText()));
+            }
         } else {
             if (inputValueDefinitionContext.type().nonNullType() != null) {
                 if (inputValueDefinitionContext.defaultValue() != null) {
                     return Optional.of(DB_VALUE_UTIL.scalarValueToDBValue(inputValueDefinitionContext.defaultValue().value()));
                 } else {
-                    //todo
+                    System.out.println(inputValueDefinitionContext.getText());
                 }
             }
         }
@@ -1544,13 +1533,17 @@ public class GraphqlMutationToStatements {
                                                                         GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext);
         if (objectFieldWithVariableContext.isPresent()) {
-            return Optional.of(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(objectFieldWithVariableContext.get().valueWithVariable()));
+            if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                return Optional.of(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(objectFieldWithVariableContext.get().valueWithVariable()));
+            } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                return Optional.of(new StringValue(objectFieldWithVariableContext.get().valueWithVariable().enumValue().getText()));
+            }
         } else {
             if (inputValueDefinitionContext.type().nonNullType() != null) {
                 if (inputValueDefinitionContext.defaultValue() != null) {
                     return Optional.of(DB_VALUE_UTIL.scalarValueToDBValue(inputValueDefinitionContext.defaultValue().value()));
                 } else {
-                    //todo
+                    System.out.println(objectValueWithVariableContext.getText());
                 }
             }
         }
@@ -1561,13 +1554,17 @@ public class GraphqlMutationToStatements {
                                                                         GraphqlParser.ObjectValueContext objectValueContext) {
         Optional<GraphqlParser.ObjectFieldContext> objectFieldContext = manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext);
         if (objectFieldContext.isPresent()) {
-            return Optional.of(DB_VALUE_UTIL.scalarValueToDBValue(objectFieldContext.get().value()));
+            if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                return Optional.of(DB_VALUE_UTIL.scalarValueToDBValue(objectFieldContext.get().value()));
+            } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                return Optional.of(new StringValue(objectFieldContext.get().value().enumValue().getText()));
+            }
         } else {
             if (inputValueDefinitionContext.type().nonNullType() != null) {
                 if (inputValueDefinitionContext.defaultValue() != null) {
                     return Optional.of(DB_VALUE_UTIL.scalarValueToDBValue(inputValueDefinitionContext.defaultValue().value()));
                 } else {
-                    //todo
+                    System.out.println(objectValueContext.getText());
                 }
             }
         }

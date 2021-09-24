@@ -150,13 +150,17 @@ public class GraphqlQueryToSelect {
                 body.setWhere(argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext.get().type(), fieldDefinitionContext.get().argumentsDefinition(), selectionContext.field().arguments()));
             } else if (manager.isMutationOperationType(typeName)) {
                 EqualsTo equalsTo = new EqualsTo();
-                equalsTo.setLeftExpression(new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(manager.getObjectTypeIDFieldName(manager.getFieldTypeName(fieldDefinitionContext.get().type())).orElse(null))));
+                manager.getObjectTypeIDFieldName(manager.getFieldTypeName(fieldDefinitionContext.get().type()))
+                        .map(objectTypeIDFieldName -> new Column(subTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(objectTypeIDFieldName)))
+                        .ifPresent(equalsTo::setLeftExpression);
                 Optional<GraphqlParser.ArgumentContext> idArgument = manager.getIDArgument(fieldDefinitionContext.get().type(), selectionContext.field().arguments());
                 if (idArgument.isPresent()) {
                     equalsTo.setRightExpression(DB_VALUE_UTIL.scalarValueWithVariableToDBValue(idArgument.get().valueWithVariable()));
                 } else {
                     String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.get().type());
-                    equalsTo.setRightExpression(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, manager.getObjectTypeIDFieldName(fieldTypeName).orElse(null)));
+                    manager.getObjectTypeIDFieldName(fieldTypeName)
+                            .map(objectTypeIDFieldName -> DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, objectTypeIDFieldName, 0, 0))
+                            .ifPresent(equalsTo::setRightExpression);
                 }
                 body.setWhere(equalsTo);
             } else {
