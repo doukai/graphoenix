@@ -13,13 +13,11 @@ type __Schema {
 type __Type {
     name: ID @dataType(type: "varchar")
     schemaId: Int
-    fieldId: Int
-    inputValueId: Int
     kind: __TypeKind!
     description: String
 
     # OBJECT and INTERFACE only
-    fields: [__Field!] @map(from: "name", to: "typeName")
+    fields: [__Field!] @map(from: "name", to: "ofTypeName")
 
     # OBJECT only
     #    interfaces: [__Type!]
@@ -28,10 +26,10 @@ type __Type {
     #    possibleTypes: [__Type!]
 
     # ENUM only
-    enumValues: [__EnumValue!] @map(from: "name", to: "typeName")
+    enumValues: [__EnumValue!] @map(from: "name", to: "ofTypeName")
 
     # INPUT_OBJECT only
-    inputFields: [__InputValue!] @map(from: "name", to: "typeName")
+    inputFields: [__InputValue!] @map(from: "name", to: "ofTypeName")
 
     # NON_NULL and LIST only
     ofTypeName: String
@@ -42,10 +40,11 @@ type __Field {
     id: ID @column(autoIncrement: true)
     name: String
     typeName: String
+    ofTypeName: String
     description: String
     args: [__InputValue!]! @map(from: "id", to: "fieldId")
     fieldTypeName: String
-    type: __Type! @map(from: "id", to: "fieldId")
+    type: __Type! @map(from: "typeName", to: "name")
     isDeprecated: Boolean
     deprecationReason: String
 }
@@ -54,17 +53,18 @@ type __InputValue {
     id: ID @column(autoIncrement: true)
     name: String
     typeName: String
+    ofTypeName: String
     fieldId: Int
     directiveName: String
     description: String
-    type: __Type! @map(from: "id", to: "inputValueId")
+    type: __Type! @map(from: "typeName", to: "name")
     defaultValue: String
 }
 
 type __EnumValue {
     id: ID @column(autoIncrement: true)
     name: String
-    typeName: String
+    ofTypeName: String
     description: String
     isDeprecated: Boolean
     deprecationReason: String

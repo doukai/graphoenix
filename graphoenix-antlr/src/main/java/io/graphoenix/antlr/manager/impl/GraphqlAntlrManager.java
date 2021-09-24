@@ -305,6 +305,18 @@ public class GraphqlAntlrManager {
                 .flatMap(toFieldName -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), toFieldName.substring(1, toFieldName.length() - 1)));
     }
 
+
+    public Optional<GraphqlParser.ObjectTypeDefinitionContext> getMapInObjectTypeDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        if (fieldDefinitionContext.directives() == null) {
+            return Optional.empty();
+        }
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("in")).findFirst())
+                .map(argumentContext -> argumentContext.valueWithVariable().StringValue().getText())
+                .flatMap(inObjectName -> getObject(inObjectName.substring(1, inObjectName.length() - 1)));
+    }
+
     public Optional<GraphqlParser.ArgumentContext> getMapWithTypeArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         if (fieldDefinitionContext.directives() == null) {
             return Optional.empty();

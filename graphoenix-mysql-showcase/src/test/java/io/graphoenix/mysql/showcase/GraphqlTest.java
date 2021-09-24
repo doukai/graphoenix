@@ -104,11 +104,7 @@ public class GraphqlTest {
         URL url = Resources.getResource("auth.gql");
         String graphql = Resources.toString(url, Charsets.UTF_8);
 
-
-        URL url2 = Resources.getResource("test.gql");
-        String graphql2 = Resources.toString(url2, Charsets.UTF_8);
-
-        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager();
+        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphql);
 
         GraphqlSchemaRegister graphqlSchemaRegister = new GraphqlSchemaRegister(graphqlAntlrManager);
         graphqlSchemaRegister.register();
@@ -122,24 +118,23 @@ public class GraphqlTest {
         GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
         GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrManager, graphqlQueryToSelect);
         List<String> mutationsSql = graphqlMutationToStatements.createStatementsSql(mutationGraphql);
+
+        StringBuffer stringBuffer = new StringBuffer();
+        mutationsSql.forEach(sql -> stringBuffer.append(sql).append(";\r\n"));
+
+        File file = new File("introspection.sql");
+        Files.write(stringBuffer, file, Charsets.UTF_8);
 //
+//        Yaml yaml = new Yaml();
+//        InputStream inputStream = this.getClass()
+//                .getClassLoader()
+//                .getResourceAsStream("beans.yaml");
+//        ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
 //
-//        StringBuffer stringBuffer = new StringBuffer();
-//        mutationsSql.forEach(sql-> stringBuffer.append(sql).append(";"));
-
-//        File file = new File("test.sql");
-//        Files.write(stringBuffer, file, Charsets.UTF_8);
-
-        Yaml yaml = new Yaml();
-        InputStream inputStream = this.getClass()
-                .getClassLoader()
-                .getResourceAsStream("beans.yaml");
-        ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
-
-        MutationExecutor mutationExecutor = new MutationExecutor(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));
-
-        String result = mutationExecutor.executeMutations(mutationsSql).block();
-        System.out.println(result);
+//        MutationExecutor mutationExecutor = new MutationExecutor(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));
+//
+//        String result = mutationExecutor.executeMutations(mutationsSql).block();
+//        System.out.println(result);
     }
 
 }
