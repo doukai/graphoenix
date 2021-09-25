@@ -43,7 +43,6 @@ type __Field {
     ofTypeName: String
     description: String
     args: [__InputValue!]! @map(from: "id", to: "fieldId")
-    fieldTypeName: String
     type: __Type! @map(from: "typeName", to: "name")
     isDeprecated: Boolean
     deprecationReason: String
@@ -85,8 +84,14 @@ type __Directive {
     name: ID @dataType(type: "varchar")
     schemaId: Int
     description: String
-    locations: [__DirectiveLocation!]!
+    locations: [__DirectiveLocation!]! @map(from: "name", in: "__DirectiveLocations", to: "directiveName")
     args: [__InputValue!]! @map(from: "name", to: "directiveName")
+}
+
+type __DirectiveLocations {
+    id: ID @column(autoIncrement: true)
+    directiveName: String!
+    directiveLocation: __DirectiveLocation!
 }
 
 enum __DirectiveLocation {
