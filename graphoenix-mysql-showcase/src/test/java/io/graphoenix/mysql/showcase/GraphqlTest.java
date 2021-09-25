@@ -53,13 +53,13 @@ public class GraphqlTest {
     @Test
     void executeQuery() throws IOException {
 
-        URL url = Resources.getResource("test.graphqls");
+        URL url = Resources.getResource("test.gql");
         String graphql = Resources.toString(url, Charsets.UTF_8);
 
         GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphql);
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
         GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
-        List<String> queriesSql = graphqlQueryToSelect.createSelectsSql(graphql);
+        List<String> queriesSql = graphqlQueryToSelect.createSelectsSqlByQuery(graphql);
 
         Yaml yaml = new Yaml();
         InputStream inputStream = this.getClass()

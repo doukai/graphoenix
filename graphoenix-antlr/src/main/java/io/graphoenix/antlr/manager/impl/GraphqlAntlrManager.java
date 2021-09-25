@@ -294,6 +294,18 @@ public class GraphqlAntlrManager {
                 .flatMap(fromFieldName -> getObjectFieldDefinitionContext(typeName, fromFieldName.substring(1, fromFieldName.length() - 1)));
     }
 
+
+    public Optional<GraphqlParser.FieldDefinitionContext> getMapToFieldDefinition(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        if (fieldDefinitionContext.directives() == null) {
+            return Optional.empty();
+        }
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("to")).findFirst())
+                .map(argumentContext -> argumentContext.valueWithVariable().StringValue().getText())
+                .flatMap(fromFieldName -> getObjectFieldDefinitionContext(typeName, fromFieldName.substring(1, fromFieldName.length() - 1)));
+    }
+
     public Optional<GraphqlParser.FieldDefinitionContext> getMapToFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         if (fieldDefinitionContext.directives() == null) {
             return Optional.empty();
@@ -303,6 +315,12 @@ public class GraphqlAntlrManager {
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("to")).findFirst())
                 .map(argumentContext -> argumentContext.valueWithVariable().StringValue().getText())
                 .flatMap(toFieldName -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), toFieldName.substring(1, toFieldName.length() - 1)));
+    }
+
+    public Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinitionContextByType(String objectTypeName, String typeName) {
+        return graphqlFieldManager.getFieldDefinitions(objectTypeName)
+                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(typeName)).findFirst();
     }
 
 
