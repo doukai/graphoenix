@@ -61,15 +61,17 @@ public class GraphqlTest {
         GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
         List<String> queriesSql = graphqlQueryToSelect.createSelectsSqlByQuery(graphql);
 
-        Yaml yaml = new Yaml();
-        InputStream inputStream = this.getClass()
-                .getClassLoader()
-                .getResourceAsStream("beans.yaml");
-        ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
+        queriesSql.forEach(System.out::println);
 
-        QueryExecutor queryExecutor = new QueryExecutor(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));
-
-        queryExecutor.executeQueries(queriesSql).toIterable().forEach(System.out::println);
+//        Yaml yaml = new Yaml();
+//        InputStream inputStream = this.getClass()
+//                .getClassLoader()
+//                .getResourceAsStream("beans.yaml");
+//        ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
+//
+//        QueryExecutor queryExecutor = new QueryExecutor(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));
+//
+//        queryExecutor.executeQueries(queriesSql).toIterable().forEach(System.out::println);
     }
 
     @Test

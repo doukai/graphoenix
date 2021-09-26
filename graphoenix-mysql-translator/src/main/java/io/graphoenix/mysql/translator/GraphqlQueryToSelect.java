@@ -16,7 +16,6 @@ import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
@@ -78,7 +77,7 @@ public class GraphqlQueryToSelect {
                 Select select = new Select();
                 PlainSelect body = new PlainSelect();
                 SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
-                selectExpressionItem.setExpression(objectFieldSelectionToJsonObjectFunction(queryOperationTypeDefinition.get().typeName().name().getText(),operationDefinitionContext.selectionSet().selection()));
+                selectExpressionItem.setExpression(queryOperationSelectionsToJsonObjectFunction(queryOperationTypeDefinition.get(), operationDefinitionContext.selectionSet().selection()));
                 selectExpressionItem.setAlias(new Alias(DB_NAME_UTIL.nameToDBEscape("data")));
                 body.setSelectItems(Collections.singletonList(selectExpressionItem));
                 Table table = new Table("dual");
@@ -90,47 +89,62 @@ public class GraphqlQueryToSelect {
         return Optional.empty();
     }
 
-//    protected Stream<Select> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-//        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
-//            Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
-//            if (queryOperationTypeDefinition.isPresent()) {
-//                return operationDefinitionContext.selectionSet().selection().stream()
-//                        .map(selectionContext -> selectionToSelect(queryOperationTypeDefinition.get().typeName().name().getText(), selectionContext));
-//            }
-//        }
-//        return Stream.empty();
-//    }
+    protected Expression queryOperationSelectionsToJsonObjectFunction(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext, List<GraphqlParser.SelectionContext> selectionContexts) {
+        Function function = new Function();
+        function.setName("JSON_OBJECT");
+        function.setParameters(new ExpressionList(selectionContexts.stream()
+                .map(selectionContext -> new ExpressionList(new StringValue(selectionContext.field().name().getText()),
+                        selectionToJsonFunction(operationTypeDefinitionContext, selectionContext)))
+                .map(ExpressionList::getExpressions).flatMap(Collection::stream).collect(Collectors.toList())));
+        return function;
+    }
 
-//    protected Select selectionToSelect(String typeName, GraphqlParser.SelectionContext selectionContext) {
-//        Select select = new Select();
-//        PlainSelect body = new PlainSelect();
-//        SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
-//        selectExpressionItem.setExpression(selectionToExpression(typeName, selectionContext));
-//        selectExpressionItem.setAlias(new Alias(DB_NAME_UTIL.nameToDBEscape(selectionContext.field().name().getText())));
-//        body.setSelectItems(Collections.singletonList(selectExpressionItem));
-//        Table table = new Table("dual");
-//        body.setFromItem(table);
-//        select.setSelectBody(body);
-//        return select;
-//    }
+    protected Expression selectionToJsonFunction(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
+        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getFieldDefinitionFromOperationTypeDefinitionContext(operationTypeDefinitionContext, selectionContext);
+        if (fieldDefinitionContext.isPresent()) {
+            if (manager.fieldTypeIsList(fieldDefinitionContext.get().type())) {
+                return listTypeSelectionsToJsonArrayFunction(fieldDefinitionContext.get(), selectionContext);
+            } else {
+                return selectionsToExpression(fieldDefinitionContext.get(), selectionContext);
+            }
+        }
+        return null;
+    }
 
-//    protected Expression selectionToExpression(String typeName, GraphqlParser.SelectionContext selectionContext) {
-//        Optional<String> fieldTypeName = manager.getObjectFieldTypeName(typeName, selectionContext.field().name().getText());
-//        if (fieldTypeName.isPresent()) {
-//            if (manager.isObject(fieldTypeName.get())) {
-//                return objectFieldToSubSelect(typeName, selectionContext);
-//            } else if (manager.isScaLar(fieldTypeName.get()) || manager.isEnum(fieldTypeName.get())) {
-//                return scalarFieldToColumn(typeName, selectionContext);
-//            }
-//        }
-//        return null;
-//    }
+    protected Expression listTypeSelectionsToJsonArrayFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
+        Function function = new Function();
+        function.setName("JSON_ARRAYAGG");
+        function.setParameters(new ExpressionList(selectionsToExpression(fieldDefinitionContext, selectionContext)));
+        return function;
+    }
 
-    protected Column scalarFieldToColumn(String typeName, GraphqlParser.SelectionContext selectionContext) {
+    protected Expression selectionsToExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
 
-        String tableName = DB_NAME_UTIL.graphqlTypeNameToTableName(typeName);
-        Table table = new Table(tableName);
-        return new Column(table, DB_NAME_UTIL.graphqlFieldNameToColumnName(selectionContext.field().name().getText()));
+        String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        if (manager.isObject(typeName)) {
+            return selectionsToJsonObjectFunction(typeName, selectionContext.field().selectionSet().selection());
+        } else if (manager.isScaLar(typeName) || manager.isEnum(typeName)) {
+            return new Column(new Table(typeName), selectionContext.field().name().getText());
+        }
+        return null;
+    }
+
+    protected Expression selectionsToJsonObjectFunction(String typeName, List<GraphqlParser.SelectionContext> selectionContexts) {
+
+        Function function = new Function();
+        function.setName("JSON_OBJECT");
+        function.setParameters(new ExpressionList(selectionContexts.stream()
+                .map(selectionContext -> new ExpressionList(new StringValue(selectionContext.field().name().getText()), objectFieldToSubSelect(typeName, selectionContext)))
+                .map(ExpressionList::getExpressions).flatMap(Collection::stream).collect(Collectors.toList())));
+        return function;
+    }
+
+    protected Expression selectionToJsonFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
+        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+            return listTypeSelectionsToJsonArrayFunction(fieldDefinitionContext, selectionContext);
+        } else {
+            return selectionsToExpression(fieldDefinitionContext, selectionContext);
+        }
     }
 
     protected SubSelect objectFieldToSubSelect(String typeName, GraphqlParser.SelectionContext selectionContext) {
@@ -208,57 +222,6 @@ public class GraphqlQueryToSelect {
                 }
             }
             return subSelect;
-        }
-        return null;
-    }
-
-    protected Expression selectionToJsonFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
-        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-            return listFieldSelectionToJsonArrayFunction(fieldDefinitionContext, selectionContext.field().selectionSet().selection());
-        } else {
-            return objectFieldSelectionToJsonObjectFunction(fieldDefinitionContext, selectionContext.field().selectionSet().selection());
-        }
-    }
-
-    protected Expression listFieldSelectionToJsonArrayFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, List<GraphqlParser.SelectionContext> selectionContexts) {
-        Function function = new Function();
-        function.setName("JSON_ARRAYAGG");
-        String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (manager.isObject(typeName)) {
-            function.setParameters(new ExpressionList(objectFieldSelectionToJsonObjectFunction(fieldDefinitionContext, selectionContexts)));
-        } else if (manager.isScaLar(typeName) || manager.isEnum(typeName)) {
-            function.setParameters(new ExpressionList(new Column(new Table(typeName), fieldDefinitionContext.name().getText())));
-        }
-        return function;
-    }
-
-    protected Expression objectFieldSelectionToJsonObjectFunction(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext, List<GraphqlParser.SelectionContext> selectionContexts) {
-
-        Function function = new Function();
-        function.setName("JSON_OBJECT");
-        function.setParameters(new ExpressionList(selectionContexts.stream()
-                .map(selectionContext -> manager.getObjectFieldDefinitionContext(operationTypeDefinitionContext.typeName().name().getText(),
-                        selectionContext.field().name().getText()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(fieldDefinitionContext -> new ExpressionList(new StringValue(fieldDefinitionContext.name().getText()),
-                        selectionToJsonFunction(fieldDefinitionContext, selectionContexts)))
-                .map(ExpressionList::getExpressions).flatMap(Collection::stream).collect(Collectors.toList())));
-        return function;
-    }
-
-    protected Expression objectFieldSelectionToJsonObjectFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, List<GraphqlParser.SelectionContext> selectionContexts) {
-
-        String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (manager.isObject(typeName)) {
-            Function function = new Function();
-            function.setName("JSON_OBJECT");
-            function.setParameters(new ExpressionList(selectionContexts.stream()
-                    .map(selectionContext -> new ExpressionList(new StringValue(selectionContext.field().name().getText()), selectionToJsonFunction(fieldDefinitionContext, selectionContext)))
-                    .map(ExpressionList::getExpressions).flatMap(Collection::stream).collect(Collectors.toList())));
-            return function;
-        } else if (manager.isScaLar(typeName) || manager.isEnum(typeName)) {
-            return new Column(new Table(typeName), fieldDefinitionContext.name().getText());
         }
         return null;
     }
