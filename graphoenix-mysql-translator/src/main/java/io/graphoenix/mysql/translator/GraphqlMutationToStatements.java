@@ -97,9 +97,11 @@ public class GraphqlMutationToStatements {
         statementList.add(insert);
 
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        Optional<String> idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
+
         Optional<GraphqlParser.ArgumentContext> idArgumentContext = manager.getIDArgument(fieldDefinitionContext.type(), argumentsContext);
         if (idArgumentContext.isEmpty()) {
-            manager.getObjectTypeIDFieldName(fieldTypeName).ifPresent(idFieldName -> statementList.add(DB_VALUE_UTIL.createInsertIdSetStatement(fieldTypeName, idFieldName, level, index)));
+            idFieldName.ifPresent(name -> statementList.add(DB_VALUE_UTIL.createInsertIdSetStatement(fieldTypeName, name, level, index)));
         }
 
         fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
@@ -115,7 +117,6 @@ public class GraphqlMutationToStatements {
                         String subFieldTypeName = manager.getFieldTypeName(subFieldDefinitionContext.get().type());
                         Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(fieldTypeName, subFieldDefinitionContext.get());
                         Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(subFieldDefinitionContext.get());
-                        Optional<String> idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
                         Optional<String> subIdFieldName = manager.getObjectTypeIDFieldName(subFieldTypeName);
 
                         if (argumentContext.isPresent()) {
@@ -173,11 +174,11 @@ public class GraphqlMutationToStatements {
                                                     inputValueDefinitionContext.defaultValue().value().objectValue(),
                                                     level + 1
                                             ).collect(Collectors.toList()));
-
                                     Optional<GraphqlParser.ObjectFieldContext> objectIdFieldContext = manager.getIDObjectField(subFieldDefinitionContext.get().type(), inputValueDefinitionContext.defaultValue().value().objectValue());
-                                    if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && idFieldName.isPresent() && subIdFieldName.isPresent()) {
 
+                                    if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && idFieldName.isPresent() && subIdFieldName.isPresent()) {
                                         Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(subFieldDefinitionContext.get());
+
                                         if (mapWithTypeArgument.isPresent()) {
                                             Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
                                             Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
@@ -230,9 +231,9 @@ public class GraphqlMutationToStatements {
                         if (subFieldDefinitionContext.isPresent() && inputObjectTypeDefinition.isPresent()) {
                             Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(fieldTypeName, subFieldDefinitionContext.get());
                             Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(subFieldDefinitionContext.get());
-                            Optional<String> idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
                             String subFieldTypeName = manager.getFieldTypeName(subFieldDefinitionContext.get().type());
                             Optional<String> subIdFieldName = manager.getObjectTypeIDFieldName(subFieldTypeName);
+
                             if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && idFieldName.isPresent() && subIdFieldName.isPresent()) {
                                 if (argumentContext.isPresent()) {
                                     Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(subFieldDefinitionContext.get());
@@ -242,8 +243,8 @@ public class GraphqlMutationToStatements {
                                         Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
                                         Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
                                         Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
-                                        if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
 
+                                        if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
                                             int subIndex = 0;
                                             for (GraphqlParser.ValueWithVariableContext valueWithVariableContext : argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable()) {
                                                 statementList.addAll(
@@ -332,12 +333,13 @@ public class GraphqlMutationToStatements {
                                         if (inputValueDefinitionContext.defaultValue() != null) {
                                             Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(subFieldDefinitionContext.get());
                                             List<Expression> updateObjectFieldExpressionList = new ArrayList<>();
+
                                             if (mapWithTypeArgument.isPresent()) {
                                                 Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
                                                 Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
                                                 Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
-                                                if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
 
+                                                if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
                                                     int subIndex = 0;
                                                     for (GraphqlParser.ValueContext valueContext : inputValueDefinitionContext.defaultValue().value().arrayValue().value()) {
                                                         statementList.addAll(
@@ -429,26 +431,27 @@ public class GraphqlMutationToStatements {
                         }
                     } else if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
                         Optional<GraphqlParser.ArgumentContext> argumentContext = manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
+
                         if (argumentContext.isPresent()) {
-
                             Optional<GraphqlParser.FieldDefinitionContext> subFieldDefinitionContext = manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext);
+
                             if (subFieldDefinitionContext.isPresent()) {
-                                Optional<GraphqlParser.ObjectTypeDefinitionContext> mapInObjectDefinitionContext = manager.getMapInObjectTypeDefinition(subFieldDefinitionContext.get());
+                                Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(fieldTypeName, subFieldDefinitionContext.get());
+                                Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(subFieldDefinitionContext.get());
 
-                                if (mapInObjectDefinitionContext.isPresent()) {
-                                    Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(fieldTypeName, subFieldDefinitionContext.get());
-                                    Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(mapInObjectDefinitionContext.get().name().getText(), subFieldDefinitionContext.get());
-                                    Optional<GraphqlParser.FieldDefinitionContext> subFieldDefinition = manager.getFieldDefinitionContextByType(mapInObjectDefinitionContext.get().name().getText(), manager.getFieldTypeName(inputValueDefinitionContext.type()));
-                                    Optional<String> idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName);
+                                if (mapWithTypeArgument.isPresent()) {
+                                    Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
+                                    Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
+                                    Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
 
-                                    if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && idFieldName.isPresent() && subFieldDefinition.isPresent()) {
+                                    if (fromFieldDefinition.isPresent() && idFieldName.isPresent() && mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
                                         statementList.add(deleteScalarMapToWithType(
                                                 fromFieldDefinition.get().name().getText(),
                                                 fieldTypeName,
                                                 idFieldName.get(),
                                                 idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level, index)),
-                                                toFieldDefinition.get().name().getText(),
-                                                mapInObjectDefinitionContext.get().name().getText()
+                                                mapWithFromFieldName.get(),
+                                                mapWithTypeName.get()
                                         ));
 
                                         for (GraphqlParser.ValueWithVariableContext valueWithVariableContext : argumentContext.get().valueWithVariable().arrayValueWithVariable().valueWithVariable()) {
@@ -458,9 +461,9 @@ public class GraphqlMutationToStatements {
                                                         fieldTypeName,
                                                         idFieldName.get(),
                                                         idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level, index)),
-                                                        toFieldDefinition.get().name().getText(),
-                                                        mapInObjectDefinitionContext.get().name().getText(),
-                                                        subFieldDefinition.get().name().getText(),
+                                                        mapWithToFieldName.get(),
+                                                        mapWithTypeName.get(),
+                                                        mapWithToFieldName.get(),
                                                         valueWithVariableContext));
 
                                             } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
@@ -469,9 +472,9 @@ public class GraphqlMutationToStatements {
                                                         fieldTypeName,
                                                         idFieldName.get(),
                                                         idArgumentContext.map(this::createIdValueExpression).orElse(DB_VALUE_UTIL.createInsertIdUserVariable(fieldTypeName, idFieldName.get(), level, index)),
-                                                        toFieldDefinition.get().name().getText(),
-                                                        mapInObjectDefinitionContext.get().name().getText(),
-                                                        subFieldDefinition.get().name().getText(),
+                                                        mapWithToFieldName.get(),
+                                                        mapWithTypeName.get(),
+                                                        mapWithToFieldName.get(),
                                                         valueWithVariableContext));
                                             }
                                         }

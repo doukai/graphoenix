@@ -28,6 +28,15 @@ public enum DBValueUtil {
                 valueWithVariableContext.NullValue());
     }
 
+    public Expression enumValueToDBValue(GraphqlParser.ValueContext valueContext) {
+        return new StringValue(valueContext.enumValue().enumValueName().getText());
+    }
+
+    public Expression enumValueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        return new StringValue(valueWithVariableContext.enumValue().enumValueName().getText());
+
+    }
+
     public Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
         if (stringValue != null) {
             return new StringValue(CharMatcher.is('"').trimFrom(stringValue.getText()));
