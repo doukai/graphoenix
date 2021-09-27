@@ -180,9 +180,21 @@ type User @table(engine:"InnoDB"){
     name: String
     age: Int
     disable: Boolean
-    sex: [Sex]
-    test2: [String]
+    sex: [Sex] @map(from:"id",with:{type:"UserSex",from:"userId",to:"sex"})
+    test2: [String] @map(from:"id",with:{type:"UserTest2",from:"userId",to:"test2"})
     role: Role
+}
+
+type UserSex @table(engine:"InnoDB"){
+    id: ID! @column(autoIncrement:true)
+    userId: Int
+    sex: Sex
+}
+
+type UserTest2 @table(engine:"InnoDB"){
+    id: ID! @column(autoIncrement:true)
+    userId: Int
+    test2: String
 }
 
 type Role {
