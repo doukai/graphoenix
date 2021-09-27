@@ -84,7 +84,7 @@ type __Directive {
     name: ID @dataType(type: "varchar")
     schemaId: Int
     description: String
-    locations: [__DirectiveLocation!]! @map(from: "name", in: "__DirectiveLocations", to: "directiveName")
+    locations: [__DirectiveLocation!]! @map(from: "name", with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
     args: [__InputValue!]! @map(from: "name", to: "directiveName")
 }
 

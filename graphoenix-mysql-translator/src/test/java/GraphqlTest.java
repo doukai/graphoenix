@@ -69,7 +69,7 @@ public class GraphqlTest {
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         GraphqlParser.DocumentContext documentContext = parser.document();
         graphqlAntlrManager.registerDocument(documentContext);
-        List<Select> selects = graphqlQueryToSelect.createSelects(documentContext);
+        List<Select> selects = graphqlQueryToSelect.createSelectsByQuery(documentContext);
         selects.forEach(select -> System.out.println(select.toString()));
     }
 
