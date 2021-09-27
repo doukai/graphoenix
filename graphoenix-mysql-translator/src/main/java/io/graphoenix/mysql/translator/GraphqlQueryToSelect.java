@@ -93,22 +93,24 @@ public class GraphqlQueryToSelect {
         Function function = new Function();
         function.setName("JSON_OBJECT");
         function.setParameters(new ExpressionList(selectionContexts.stream()
-                .map(selectionContext -> new ExpressionList(new StringValue(selectionContext.field().name().getText()),
-                        selectionToJsonFunction(operationTypeDefinitionContext, selectionContext)))
+                .map(selectionContext ->
+                        manager.getFieldDefinitionFromOperationTypeDefinitionContext(operationTypeDefinitionContext, selectionContext)
+                                .map(fieldDefinitionContext -> new ExpressionList(new StringValue(selectionContext.field().name().getText()),
+                                        selectionToJsonFunction(fieldDefinitionContext, selectionContext)))
+                )
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .map(ExpressionList::getExpressions).flatMap(Collection::stream).collect(Collectors.toList())));
+
         return function;
     }
 
-    protected Expression selectionToJsonFunction(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
-        Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getFieldDefinitionFromOperationTypeDefinitionContext(operationTypeDefinitionContext, selectionContext);
-        if (fieldDefinitionContext.isPresent()) {
-            if (manager.fieldTypeIsList(fieldDefinitionContext.get().type())) {
-                return listTypeSelectionsToJsonArrayFunction(fieldDefinitionContext.get(), selectionContext);
-            } else {
-                return selectionsToExpression(fieldDefinitionContext.get(), selectionContext);
-            }
+    protected Expression selectionToJsonFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
+        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+            return listTypeSelectionsToJsonArrayFunction(fieldDefinitionContext, selectionContext);
+        } else {
+            return selectionsToExpression(fieldDefinitionContext, selectionContext);
         }
-        return null;
     }
 
     protected Expression listTypeSelectionsToJsonArrayFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
@@ -121,12 +123,40 @@ public class GraphqlQueryToSelect {
     protected Expression selectionsToExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
 
         String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (manager.isObject(typeName)) {
-            return selectionsToJsonObjectFunction(typeName, selectionContext.field().selectionSet().selection());
-        } else if (manager.isScaLar(typeName) || manager.isEnum(typeName)) {
-            return new Column(new Table(typeName), selectionContext.field().name().getText());
-        }
-        return null;
+        return selectionsToJsonObjectFunction(typeName, selectionContext.field().selectionSet().selection());
+//        if (manager.isObject(typeName)) {
+//        } else if (manager.isScaLar(typeName) || manager.isEnum(typeName)) {
+//            Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(typeName, fieldDefinitionContext);
+//
+//            if (fromFieldDefinition.isPresent()) {
+//                Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
+//
+//                if (mapWithTypeArgument.isPresent()) {
+//                    Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
+//                    Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
+//                    Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
+//                    if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
+//
+//                        Column fromColumn = new Column(DB_NAME_UTIL.graphqlFieldNameToColumnName(fromFieldDefinition.get().name().getText()));
+//                        Column withFromColumn = new Column(DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithFromFieldName.get()));
+//                        Column withToColumn = new Column(DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithToFieldName.get()));
+//
+//                        SubSelect subSelect = new SubSelect();
+//                        PlainSelect plainSelect = new PlainSelect();
+//                        plainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(withToColumn)));
+//                        plainSelect.setFromItem(new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(mapWithTypeName.get())));
+//                        EqualsTo equalsTo = new EqualsTo();
+//                        equalsTo.setLeftExpression(withFromColumn);
+//                        equalsTo.setRightExpression(fromColumn);
+//                        plainSelect.setWhere(equalsTo);
+//                        subSelect.setSelectBody(plainSelect);
+//
+//                        return subSelect;
+//                    }
+//                }
+//            }
+//        }
+//        return null;
     }
 
     protected Expression selectionsToJsonObjectFunction(String typeName, List<GraphqlParser.SelectionContext> selectionContexts) {
@@ -137,14 +167,6 @@ public class GraphqlQueryToSelect {
                 .map(selectionContext -> new ExpressionList(new StringValue(selectionContext.field().name().getText()), objectFieldToSubSelect(typeName, selectionContext)))
                 .map(ExpressionList::getExpressions).flatMap(Collection::stream).collect(Collectors.toList())));
         return function;
-    }
-
-    protected Expression selectionToJsonFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
-        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-            return listTypeSelectionsToJsonArrayFunction(fieldDefinitionContext, selectionContext);
-        } else {
-            return selectionsToExpression(fieldDefinitionContext, selectionContext);
-        }
     }
 
     protected SubSelect objectFieldToSubSelect(String typeName, GraphqlParser.SelectionContext selectionContext) {
