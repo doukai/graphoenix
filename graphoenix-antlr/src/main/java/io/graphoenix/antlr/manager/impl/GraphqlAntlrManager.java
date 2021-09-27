@@ -160,6 +160,11 @@ public class GraphqlAntlrManager {
         return graphqlEnumManager.isEnum(name);
     }
 
+
+    public boolean isScaLarOrEnum(String name) {
+        return graphqlScalarManager.isScalar(name) || graphqlEnumManager.isEnum(name);
+    }
+
     public boolean isObject(String name) {
         return graphqlObjectManager.isObject(name);
     }
@@ -319,6 +324,7 @@ public class GraphqlAntlrManager {
         return argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("type"))
                 .map(fieldWithVariableContext -> fieldWithVariableContext.valueWithVariable().StringValue().getText())
+                .map(string -> string.substring(1, string.length() - 1))
                 .findAny();
     }
 
@@ -326,6 +332,7 @@ public class GraphqlAntlrManager {
         return argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("from"))
                 .map(fieldWithVariableContext -> fieldWithVariableContext.valueWithVariable().StringValue().getText())
+                .map(string -> string.substring(1, string.length() - 1))
                 .findAny();
     }
 
@@ -333,6 +340,7 @@ public class GraphqlAntlrManager {
         return argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("to"))
                 .map(fieldWithVariableContext -> fieldWithVariableContext.valueWithVariable().StringValue().getText())
+                .map(string -> string.substring(1, string.length() - 1))
                 .findAny();
     }
 
