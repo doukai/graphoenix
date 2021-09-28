@@ -2,6 +2,9 @@ package io.graphoenix.mysql.common.utils;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.CharMatcher;
+import graphql.parser.antlr.GraphqlParser;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 
 public enum DBNameUtil {
 
@@ -61,5 +64,22 @@ public enum DBNameUtil {
     public String nameToDBEscape(String stringValue) {
 
         return String.format("`%s`", stringValue);
+    }
+
+
+    public Column fieldToColumn(Table table, GraphqlParser.ArgumentContext argumentContext) {
+        return new Column(table, graphqlFieldNameToColumnName(argumentContext.name().getText()));
+    }
+
+    public Column fieldToColumn(Table table, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        return new Column(table, graphqlFieldNameToColumnName(objectFieldWithVariableContext.name().getText()));
+    }
+
+    public Column fieldToColumn(Table table, GraphqlParser.ObjectFieldContext objectFieldContext) {
+        return new Column(table, graphqlFieldNameToColumnName(objectFieldContext.name().getText()));
+    }
+
+    public Column fieldToColumn(Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return new Column(table, graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
     }
 }
