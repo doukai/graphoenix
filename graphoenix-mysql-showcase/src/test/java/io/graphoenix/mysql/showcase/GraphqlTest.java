@@ -5,12 +5,9 @@ import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.builder.schema.GraphqlSchemaRegister;
-import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
+import io.graphoenix.mysql.translator.*;
 import io.graphoenix.r2dbc.config.ConnectionConfiguration;
 import io.graphoenix.r2dbc.connector.*;
-import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
-import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
-import io.graphoenix.mysql.translator.GraphqlTypeToTable;
 import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -57,7 +54,7 @@ public class GraphqlTest {
 
         GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphql);
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
-        GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
+        GraphqlQueryToSelect2 graphqlQueryToSelect = new GraphqlQueryToSelect2(graphqlAntlrManager, graphqlArgumentsToWhere);
         List<String> queriesSql = graphqlQueryToSelect.createSelectsSqlByQuery(graphql);
 
         queriesSql.forEach(System.out::println);

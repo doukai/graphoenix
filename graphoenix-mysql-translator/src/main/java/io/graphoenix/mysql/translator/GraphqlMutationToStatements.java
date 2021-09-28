@@ -676,11 +676,17 @@ public class GraphqlMutationToStatements {
                     EqualsTo joinTableEqualsParentColumn = new EqualsTo();
                     joinTableEqualsParentColumn.setLeftExpression(withParentColumn);
                     joinTableEqualsParentColumn.setRightExpression(parentColumn);
+                    joinParentTable.setLeft(true);
+                    joinParentTable.setRightItem(parentTable);
+                    joinParentTable.setOnExpression(joinTableEqualsParentColumn);
 
                     Join joinTable = new Join();
                     EqualsTo joinTableEqualsColumn = new EqualsTo();
                     joinTableEqualsColumn.setLeftExpression(withColumn);
                     joinTableEqualsColumn.setRightExpression(column);
+                    joinTable.setLeft(true);
+                    joinTable.setRightItem(table);
+                    joinTable.setOnExpression(joinTableEqualsColumn);
 
                     plainSelect.setJoins(Arrays.asList(joinParentTable, joinTable));
 
@@ -757,11 +763,17 @@ public class GraphqlMutationToStatements {
                     EqualsTo joinTableEqualsParentColumn = new EqualsTo();
                     joinTableEqualsParentColumn.setLeftExpression(withParentColumn);
                     joinTableEqualsParentColumn.setRightExpression(parentColumn);
+                    joinParentTable.setLeft(true);
+                    joinParentTable.setRightItem(parentTable);
+                    joinParentTable.setOnExpression(joinTableEqualsParentColumn);
 
                     Join joinTable = new Join();
                     EqualsTo joinTableEqualsColumn = new EqualsTo();
                     joinTableEqualsColumn.setLeftExpression(withColumn);
                     joinTableEqualsColumn.setRightExpression(column);
+                    joinTable.setLeft(true);
+                    joinTable.setRightItem(table);
+                    joinTable.setOnExpression(joinTableEqualsColumn);
 
                     return Stream.of(deleteWithJoinExpression(withTable, Arrays.asList(joinParentTable, joinTable), equalsParentAndIdNotIn));
                 }
