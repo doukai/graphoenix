@@ -58,13 +58,15 @@ public class GraphqlArgumentsToWhere {
 
     protected Expression expressionStreamToMultipleExpression(Stream<Expression> expressionStream, boolean hasOrConditional) {
         List<Expression> expressionList = expressionStream.collect(Collectors.toList());
-        if (expressionList.size() == 1) {
+        if (expressionList.size() == 0) {
+            return null;
+        } else if (expressionList.size() == 1) {
             return expressionList.get(0);
-        }
-        if (hasOrConditional) {
+        } else if (hasOrConditional) {
             return new MultiOrExpression(expressionList);
+        } else {
+            return new MultiAndExpression(expressionList);
         }
-        return new MultiAndExpression(expressionList);
     }
 
     protected Stream<Expression> argumentsToExpressionList(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext, GraphqlParser.ArgumentsContext argumentsContext) {

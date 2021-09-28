@@ -182,7 +182,14 @@ type User @table(engine:"InnoDB"){
     disable: Boolean
     sex: [Sex] @map(from:"id",with:{type:"UserSex",from:"userId",to:"sex"})
     test2: [String] @map(from:"id",with:{type:"UserTest2",from:"userId",to:"test2"})
-    role: Role
+    roles(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, sex:SexExpression, organizationId:IntExpression, organization:OrganizationExpression): [Role] @map(from:"id", to:"userId")
+#    roles: [Role] @map(from:"id", with:{type:"UserRole", from:"userId", to:"roleId"}, to:"id")
+}
+
+type UserRole @table(engine:"InnoDB"){
+    id: ID! @column(autoIncrement:true)
+    userId: Int
+    roleId: Int
 }
 
 type UserSex @table(engine:"InnoDB"){
@@ -199,6 +206,7 @@ type UserTest2 @table(engine:"InnoDB"){
 
 type Role {
     id: ID! @column(autoIncrement:true)
+    userId:Int
     name: String
     users: [User]
     resources: [Resource]
@@ -229,12 +237,13 @@ enum RoleType{
 }
 
 query test{
-    role(id:"user1"){
+    userList(name:{opr:EQ,val:"name2"}){
         name
-        users{
+        roles(name:{opr:EQ,val:"role2"}){
             name
-            sex
-            test2
         }
     }
+#    roleList(name:"user1"){
+#        name
+#    }
 }
