@@ -54,8 +54,8 @@ public class GraphqlTest {
 
         GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager(graphql);
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
-        GraphqlQueryToSelect2 graphqlQueryToSelect = new GraphqlQueryToSelect2(graphqlAntlrManager, graphqlArgumentsToWhere);
-        List<String> queriesSql = graphqlQueryToSelect.createSelectsSqlByQuery(graphql);
+        GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
+        List<String> queriesSql = graphqlQueryToSelect.createSelectsSql(graphql);
 
         queriesSql.forEach(System.out::println);
 
