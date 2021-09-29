@@ -236,8 +236,8 @@ public class GraphqlQueryToSelect {
     }
 
     protected Table typeToTable(String typeName) {
-        if (manager.isQueryOperationType(typeName)) {
-            return DB_NAME_UTIL.typeToTable("dual");
+        if (manager.isQueryOperationType(typeName) || manager.isMutationOperationType(typeName)) {
+            return DB_NAME_UTIL.dualTable();
         }
         return DB_NAME_UTIL.typeToTable(typeName);
     }
