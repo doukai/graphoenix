@@ -73,8 +73,7 @@ public class GraphqlTypeToTable {
 
     protected CreateTable createTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         CreateTable createTable = new CreateTable();
-        Table table = new Table();
-        table.setName(DB_NAME_UTIL.graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
+        Table table = DB_NAME_UTIL.typeToTable(objectTypeDefinitionContext);
         createTable.setTable(table);
         createTable.setColumnDefinitions(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::createColumn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
         createTable.setIfNotExists(true);
