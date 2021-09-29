@@ -125,7 +125,8 @@ public class GraphqlMutationToStatements {
                                                                 )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
         Stream<Statement> listObjectInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
@@ -159,7 +160,8 @@ public class GraphqlMutationToStatements {
                                                                 )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
 
@@ -187,7 +189,8 @@ public class GraphqlMutationToStatements {
                                                         )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
         return Stream.concat(insertStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream)));
@@ -239,7 +242,8 @@ public class GraphqlMutationToStatements {
                                                                 )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
         Stream<Statement> updateMapObjectFieldStatementStream = mapObjectFieldUpdateStatementStream(
@@ -280,7 +284,8 @@ public class GraphqlMutationToStatements {
                                                                 )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
 
@@ -308,7 +313,8 @@ public class GraphqlMutationToStatements {
                                                         )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
         return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
@@ -359,7 +365,8 @@ public class GraphqlMutationToStatements {
                                                                 )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
         Stream<Statement> updateMapObjectFieldStatementStream = mapObjectFieldUpdateStatementStream(
@@ -400,7 +407,8 @@ public class GraphqlMutationToStatements {
                                                                 )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
         Stream<Statement> listInsertStatementStream = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
@@ -427,7 +435,8 @@ public class GraphqlMutationToStatements {
                                                         )
                                                 )
                                 )
-                ).filter(Optional::isPresent)
+                )
+                .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
         return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
@@ -656,9 +665,9 @@ public class GraphqlMutationToStatements {
                 Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
 
                 if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                    Table withTable = new Table(mapWithTypeName.get());
-                    Column withParentColumn = new Column(withTable, mapWithFromFieldName.get());
-                    Column withColumn = new Column(withTable, mapWithToFieldName.get());
+                    Table withTable = DB_NAME_UTIL.typeToTable(mapWithTypeName.get());
+                    Column withParentColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldName.get());
+                    Column withColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithToFieldName.get());
                     SelectExpressionItem withParentColumnExpression = new SelectExpressionItem(withParentColumn);
                     SelectExpressionItem withColumnExpression = new SelectExpressionItem(withColumn);
 
@@ -750,9 +759,9 @@ public class GraphqlMutationToStatements {
                 Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
 
                 if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                    Table withTable = new Table(mapWithTypeName.get());
-                    Column withParentColumn = new Column(withTable, mapWithFromFieldName.get());
-                    Column withColumn = new Column(withTable, mapWithToFieldName.get());
+                    Table withTable = DB_NAME_UTIL.typeToTable(mapWithTypeName.get());
+                    Column withParentColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldName.get());
+                    Column withColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithToFieldName.get());
 
                     Join joinParentTable = new Join();
                     EqualsTo joinTableEqualsParentColumn = new EqualsTo();
@@ -801,8 +810,8 @@ public class GraphqlMutationToStatements {
                 Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
 
                 if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent()) {
-                    Table withTable = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(mapWithTypeName.get()));
-                    Column withParentColumn = new Column(withTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithFromFieldName.get()));
+                    Table withTable = DB_NAME_UTIL.typeToTable(mapWithTypeName.get());
+                    Column withParentColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldName.get());
 
                     SubSelect selectParentColumn = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
 
@@ -840,9 +849,9 @@ public class GraphqlMutationToStatements {
                 Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
 
                 if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                    Table withTable = new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(mapWithTypeName.get()));
-                    Column withParentColumn = new Column(withTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithFromFieldName.get()));
-                    Column withColumn = new Column(withTable, DB_NAME_UTIL.graphqlFieldNameToColumnName(mapWithToFieldName.get()));
+                    Table withTable = DB_NAME_UTIL.typeToTable(mapWithTypeName.get());
+                    Column withParentColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldName.get());
+                    Column withColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithToFieldName.get());
 
                     SubSelect selectParentColumn = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
 
@@ -1072,7 +1081,7 @@ public class GraphqlMutationToStatements {
     }
 
     protected Table typeToTable(GraphqlParser.TypeContext typeContext) {
-        return new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(manager.getFieldTypeName(typeContext)));
+        return DB_NAME_UTIL.typeToTable(manager.getFieldTypeName(typeContext));
     }
 
     protected Column defaultToColumn(Table table, GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {

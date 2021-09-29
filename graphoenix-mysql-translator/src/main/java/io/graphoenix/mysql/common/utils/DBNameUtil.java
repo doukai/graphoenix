@@ -25,7 +25,6 @@ public enum DBNameUtil {
         return String.join("_", CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName), CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlFieldName));
     }
 
-
     public String graphqlTypeToDBType(String graphqlType) {
 
         return nameToDBEscape(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, graphqlType));
@@ -66,9 +65,20 @@ public enum DBNameUtil {
         return String.format("`%s`", stringValue);
     }
 
+    public Table typeToTable(String typeName) {
+        return new Table(graphqlTypeNameToTableName(typeName));
+    }
+
+    public Table typeToTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return new Table(graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
+    }
 
     public Column fieldToColumn(Table table, GraphqlParser.ArgumentContext argumentContext) {
         return new Column(table, graphqlFieldNameToColumnName(argumentContext.name().getText()));
+    }
+
+    public Column fieldToColumn(Table table, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return new Column(table, graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText()));
     }
 
     public Column fieldToColumn(Table table, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
@@ -81,5 +91,33 @@ public enum DBNameUtil {
 
     public Column fieldToColumn(Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return new Column(table, graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
+    }
+
+    public Column fieldToColumn(Table table, String fieldName) {
+        return new Column(table, graphqlFieldNameToColumnName(fieldName));
+    }
+
+    public Column fieldToColumn(String typeName, GraphqlParser.ArgumentContext argumentContext) {
+        return new Column(new Table(graphqlTypeNameToTableName(typeName)), graphqlFieldNameToColumnName(argumentContext.name().getText()));
+    }
+
+    public Column fieldToColumn(String typeName, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return new Column(new Table(graphqlTypeNameToTableName(typeName)), graphqlFieldNameToColumnName(inputValueDefinitionContext.name().getText()));
+    }
+
+    public Column fieldToColumn(String typeName, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        return new Column(new Table(graphqlTypeNameToTableName(typeName)), graphqlFieldNameToColumnName(objectFieldWithVariableContext.name().getText()));
+    }
+
+    public Column fieldToColumn(String typeName, GraphqlParser.ObjectFieldContext objectFieldContext) {
+        return new Column(new Table(graphqlTypeNameToTableName(typeName)), graphqlFieldNameToColumnName(objectFieldContext.name().getText()));
+    }
+
+    public Column fieldToColumn(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return new Column(new Table(graphqlTypeNameToTableName(typeName)), graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
+    }
+
+    public Column fieldToColumn(String typeName, String fieldName) {
+        return new Column(new Table(graphqlTypeNameToTableName(typeName)), graphqlFieldNameToColumnName(fieldName));
     }
 }

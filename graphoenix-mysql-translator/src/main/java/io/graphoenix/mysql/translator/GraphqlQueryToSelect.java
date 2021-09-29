@@ -237,16 +237,16 @@ public class GraphqlQueryToSelect {
 
     protected Table typeToTable(String typeName) {
         if (manager.isQueryOperationType(typeName)) {
-            return new Table("dual");
+            return DB_NAME_UTIL.typeToTable("dual");
         }
-        return new Table(DB_NAME_UTIL.graphqlTypeNameToTableName(typeName));
+        return DB_NAME_UTIL.typeToTable(typeName);
     }
 
     protected Column fieldToColumn(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return new Column(typeToTable(typeName), DB_NAME_UTIL.graphqlTypeNameToTableName(fieldDefinitionContext.name().getText()));
+        return DB_NAME_UTIL.fieldToColumn(typeToTable(typeName), fieldDefinitionContext);
     }
 
     protected Column fieldToColumn(String typeName, String fieldName) {
-        return new Column(typeToTable(typeName), DB_NAME_UTIL.graphqlTypeNameToTableName(fieldName));
+        return DB_NAME_UTIL.fieldToColumn(typeToTable(typeName), fieldName);
     }
 }

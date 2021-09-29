@@ -398,6 +398,13 @@ public class GraphqlAntlrManager {
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(inputValueDefinitionContext.name().getText())).findFirst();
     }
 
+    public Optional<GraphqlParser.ValueContext> getDefaultValueFromInputValueDefinition(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (inputValueDefinitionContext.defaultValue() != null) {
+            return Optional.of(inputValueDefinitionContext.defaultValue().value());
+        }
+        return Optional.empty();
+    }
+
     public Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinitionFromOperationTypeDefinitionContext(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
         return graphqlFieldManager.getFieldDefinitions(operationTypeDefinitionContext.typeName().name().getText())
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(selectionContext.field().name().getText())).findFirst();

@@ -7,7 +7,7 @@ type QueryType {
     role(id: ID!): Role
     roleList(id:IDExpression, name:StringExpression): [Role]
     user(id: ID!): User
-    userList(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, sex:SexExpression, organizationId:IntExpression, organization:OrganizationExpression): [User]
+    userList(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, sex:SexExpression, organizationId:IntExpression, organization:OrganizationExpression,roles:RoleExpression): [User]
     organization(id: ID!): Organization
     organizationList(id:IDExpression, above_id:IntExpression, above:OrganizationExpression, name:StringExpression): [Organization]
     userrole(id: ID!): UserRole
@@ -182,7 +182,7 @@ type User @table(engine:"InnoDB"){
     disable: Boolean
     sex: [Sex] @map(from:"id",with:{type:"UserSex",from:"userId",to:"sex"})
     test2: [String] @map(from:"id",with:{type:"UserTest2",from:"userId",to:"test2"})
-    roles(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, sex:SexExpression, organizationId:IntExpression, organization:OrganizationExpression): [Role] @map(from:"id", to:"userId")
+    roles(id:IDExpression, login:StringExpression, password:StringExpression, name:StringExpression, age:IntExpression, disable:Boolean, sex:SexExpression, organizationId:IntExpression, organization:OrganizationExpression): Role @map(from:"id", to:"userId")
 #    roles: [Role] @map(from:"id", with:{type:"UserRole", from:"userId", to:"roleId"}, to:"id")
 }
 
@@ -237,7 +237,7 @@ enum RoleType{
 }
 
 query test{
-    userList(name:{opr:EQ,val:"name2"}){
+    userList(name:{opr:EQ,val:"name2"},roles:{name:{val:"rolllll"}}){
         name
         roles(name:{opr:EQ,val:"role2"}){
             name
