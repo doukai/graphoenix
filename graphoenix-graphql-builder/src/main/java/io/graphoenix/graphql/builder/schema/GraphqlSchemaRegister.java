@@ -24,6 +24,7 @@ public class GraphqlSchemaRegister {
         StringWriter stringWriter = new StringWriter();
         GraphqlSchemaBuilder graphqlSchemaBuilder = new GraphqlSchemaBuilder(manager);
         graphqlSchemaBuilder.buildObjectExpressions(stringWriter);
+        System.out.println(stringWriter);
         manager.registerDocument(stringWriter.toString());
         stringWriter.close();
     }

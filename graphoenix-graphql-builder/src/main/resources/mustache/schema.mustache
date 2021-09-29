@@ -5,7 +5,7 @@ schema {
 
 type QueryType {
 {{#objects}}
-    {{schemaFieldName}}(id: ID!): {{name}}
+    {{schemaFieldName}}({{#fields}}{{name}}:{{typeName}}{{^isBoolean}}Expression{{/isBoolean}}{{^isLast}}, {{/isLast}}{{/fields}}): {{name}}
     {{schemaFieldName}}List({{#fields}}{{name}}:{{typeName}}{{^isBoolean}}Expression{{/isBoolean}}{{^isLast}}, {{/isLast}}{{/fields}}): [{{name}}]
 {{/objects}}
 }
@@ -16,6 +16,22 @@ type MutationType {
 {{/objects}}
 }
 
+{{#enums}}
+enum {{name}} {{#directives}}{{{directive}}} {{/directives}}{
+{{#fields}}
+    {{name}} {{#directives}}{{{directive}}} {{/directives}}
+{{/fields}}
+}
+
+{{/enums}}
+{{#objects}}
+type {{name}} {{#directives}}{{{directive}}} {{/directives}} {
+{{#fields}}
+    {{name}}{{#isObject}}{{#type}}({{#fields}}{{name}}:{{typeName}}{{^isBoolean}}Expression{{/isBoolean}}{{^isLast}}, {{/isLast}}{{/fields}}){{/type}}{{/isObject}}:{{#isList}}[{{/isList}}{{typeName}}{{#isNonNull}}!{{/isNonNull}}{{#isList}}]{{/isList}}{{#isNonNullList}}!{{/isNonNullList}} {{#directives}}{{{directive}}} {{/directives}}
+{{/fields}}
+}
+
+{{/objects}}
 {{#enums}}
 input {{name}}Expression {
     opr:Operator = EQ

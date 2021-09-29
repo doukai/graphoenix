@@ -237,7 +237,7 @@ enum RoleType{
 }
 
 query test{
-    userList(name:{opr:EQ,val:"name2"},roles:{name:{val:"rolllll"}}){
+    userList(name:{opr:EQ,val:"name2"},disable:true, roles:{name:{val:"rolllll"}}){
         name
         roles(name:{opr:EQ,val:"role2"}){
             name
