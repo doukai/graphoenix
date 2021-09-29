@@ -1,10 +1,16 @@
 package io.graphoenix.graphql.builder.schema.dto;
 
+import java.util.List;
+
 public class GraphqlField {
 
     private String name;
 
     private String typeName;
+
+    private GraphqlObject type;
+
+    private List<GraphqlDirective> directives;
 
     private boolean isNonNull;
 
@@ -18,8 +24,19 @@ public class GraphqlField {
 
     private boolean isLast;
 
-    public GraphqlField(String name, String typeName, boolean isNonNull, boolean isList, boolean isNonNullList, boolean isObject) {
+    public GraphqlField(String name, List<GraphqlDirective> directives) {
         this.setName(name);
+        this.setDirectives(directives);
+    }
+
+    public GraphqlField(String name, String typeName) {
+        this.setName(name);
+        this.setTypeName(typeName);
+    }
+
+    public GraphqlField(String name, String typeName, List<GraphqlDirective> directives, boolean isNonNull, boolean isList, boolean isNonNullList, boolean isObject) {
+        this.setName(name);
+        this.setDirectives(directives);
         this.setTypeName(typeName);
         this.setNonNull(isNonNull);
         this.setList(isList);
@@ -45,6 +62,24 @@ public class GraphqlField {
         if (this.typeName.equals("Boolean")) {
             this.isBoolean = true;
         }
+        return this;
+    }
+
+    public GraphqlObject getType() {
+        return type;
+    }
+
+    public GraphqlField setType(GraphqlObject type) {
+        this.type = type;
+        return this;
+    }
+
+    public List<GraphqlDirective> getDirectives() {
+        return directives;
+    }
+
+    public GraphqlField setDirectives(List<GraphqlDirective> directives) {
+        this.directives = directives;
         return this;
     }
 

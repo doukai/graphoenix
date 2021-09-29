@@ -10,10 +10,17 @@ public class GraphqlObject {
 
     private List<GraphqlField> fields;
 
+    private List<GraphqlDirective> directives;
+
+    public GraphqlObject(String name, List<GraphqlField> fields, List<GraphqlDirective> directives) {
+        this.setName(name);
+        this.setFields(fields);
+        this.setDirectives(directives);
+    }
+
     public GraphqlObject(String name, List<GraphqlField> fields) {
-        this.name = name;
-        this.schemaFieldName = this.name.toLowerCase();
-        this.fields = fields;
+        this.setName(name);
+        this.setFields(fields);
     }
 
     public String getName() {
@@ -31,6 +38,15 @@ public class GraphqlObject {
 
     public void setFields(List<GraphqlField> fields) {
         this.fields = fields;
+    }
+
+    public List<GraphqlDirective> getDirectives() {
+        return directives;
+    }
+
+    public GraphqlObject setDirectives(List<GraphqlDirective> directives) {
+        this.directives = directives;
+        return this;
     }
 
     public String getSchemaFieldName() {

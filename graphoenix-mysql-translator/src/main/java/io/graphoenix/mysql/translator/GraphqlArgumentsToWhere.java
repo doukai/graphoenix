@@ -222,6 +222,8 @@ public class GraphqlArgumentsToWhere {
                 } else if (manager.isScaLar(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
                         return operatorArgumentToExpression(argumentToColumn(typeContext, argumentContext), inputValueDefinitionContext, argumentContext);
+                    } else if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean")) {
+                        return isBooleanExpression(argumentToColumn(typeContext, argumentContext), argumentContext.valueWithVariable(), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
                         return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable());
                     } else if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
@@ -258,6 +260,8 @@ public class GraphqlArgumentsToWhere {
                 } else if (manager.isScaLar(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
                         return operatorObjectFieldWithVariableToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext), inputValueDefinitionContext, objectFieldWithVariableContext);
+                    } else if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean")) {
+                        return isBooleanExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext), objectFieldWithVariableContext.valueWithVariable(), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
                         return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable());
                     } else if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
@@ -293,6 +297,8 @@ public class GraphqlArgumentsToWhere {
                 } else if (manager.isScaLar(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
                         return operatorObjectFieldToExpression(objectFieldToColumn(typeContext, objectFieldContext), inputValueDefinitionContext, objectFieldContext);
+                    } else if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean")) {
+                        return isBooleanExpression(objectFieldToColumn(typeContext, objectFieldContext), objectFieldContext.value(), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
                         return objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue());
                     } else if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
@@ -326,6 +332,8 @@ public class GraphqlArgumentsToWhere {
                 } else if (manager.isScaLar(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
                         return operatorInputValueToExpression(inputValueToColumn(typeContext, inputValueDefinitionContext), inputValueDefinitionContext);
+                    } else if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean")) {
+                        return isBooleanExpression(inputValueToColumn(typeContext, inputValueDefinitionContext), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
                         return objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue());
                     } else if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
@@ -963,6 +971,42 @@ public class GraphqlArgumentsToWhere {
             return isNullExpression;
         }
         return null;
+    }
+
+    protected Optional<Expression> isBooleanExpression(Expression leftExpression, GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (valueWithVariableContext.BooleanValue() != null) {
+            IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
+            isBooleanExpression.setLeftExpression(leftExpression);
+            isBooleanExpression.setIsTrue(Boolean.parseBoolean(valueWithVariableContext.BooleanValue().getText()));
+            return Optional.of(isBooleanExpression);
+        } else {
+            return isBooleanExpression(leftExpression, inputValueDefinitionContext);
+        }
+    }
+
+    protected Optional<Expression> isBooleanExpression(Expression leftExpression, GraphqlParser.ValueContext valueContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (valueContext.BooleanValue() != null) {
+            IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
+            isBooleanExpression.setLeftExpression(leftExpression);
+            isBooleanExpression.setIsTrue(Boolean.parseBoolean(valueContext.BooleanValue().getText()));
+            return Optional.of(isBooleanExpression);
+        } else {
+            return isBooleanExpression(leftExpression, inputValueDefinitionContext);
+        }
+    }
+
+    protected Optional<Expression> isBooleanExpression(Expression leftExpression, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (inputValueDefinitionContext.type().nonNullType() != null) {
+            if (inputValueDefinitionContext.defaultValue() != null) {
+                IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
+                isBooleanExpression.setLeftExpression(leftExpression);
+                isBooleanExpression.setIsTrue(Boolean.parseBoolean(inputValueDefinitionContext.defaultValue().value().BooleanValue().getText()));
+                return Optional.of(isBooleanExpression);
+            } else {
+                //TODO
+            }
+        }
+        return Optional.empty();
     }
 
     protected ExistsExpression existsExpression(PlainSelect body) {
