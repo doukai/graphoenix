@@ -65,6 +65,11 @@ public enum DBNameUtil {
         return String.format("`%s`", stringValue);
     }
 
+
+    public Table dualTable() {
+        return new Table("dual");
+    }
+
     public Table typeToTable(String typeName) {
         return new Table(graphqlTypeNameToTableName(typeName));
     }

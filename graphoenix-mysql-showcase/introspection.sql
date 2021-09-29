@@ -13726,4 +13726,4 @@ DELETE FROM `___input_value` WHERE (`___input_value`.`directive_name` = (SELECT 
 DELETE FROM `___directive_locations` WHERE `___directive_locations`.`directive_name` = (SELECT `___directive`.`name` FROM `___directive` WHERE `___directive`.`name` = 'table');
 INSERT INTO `___directive_locations` (`___directive_locations`.`directive_name`, `___directive_locations`.`directive_location`) VALUES ((SELECT `___directive`.`name` FROM `___directive` WHERE `___directive`.`name` = 'table'), 'OBJECT');
 DELETE FROM `___directive` WHERE (`___directive`.`schema_id` = (SELECT `___schema`.`id` FROM `___schema` WHERE `___schema`.`id` = @___schema_id_0_0) AND `___directive`.`name` NOT IN ('dataType', 'column', 'map', 'table'));
-SELECT JSON_OBJECT('__schema', (SELECT JSON_OBJECT('id', `___schema`.`id`) FROM `___schema` WHERE `___schema`.`id` = @___schema_id_0_0)) AS `data` FROM `mutation_type`;
+SELECT JSON_OBJECT('__schema', (SELECT JSON_OBJECT('id', `___schema`.`id`) FROM `___schema` WHERE `___schema`.`id` = @___schema_id_0_0)) AS `data` FROM dual;
