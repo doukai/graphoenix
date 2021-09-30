@@ -199,31 +199,32 @@ public class GraphqlMutationToStatements {
     protected Stream<Statement> objectValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                                Expression parentIdValueExpression,
                                                                                GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                               GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinition,
-                                                                               GraphqlParser.ObjectValueWithVariableContext objectValueWithVariable,
+                                                                               GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
+                                                                               GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
                                                                                int level,
                                                                                int index) {
 
-        Optional<GraphqlParser.ObjectFieldWithVariableContext> objectIdFieldWithVariableContext = manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), objectValueWithVariable);
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> objectIdFieldWithVariableContext = manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), objectValueWithVariableContext);
 
         Expression idValueExpression = objectIdFieldWithVariableContext.map(DB_VALUE_UTIL::createIdValueExpression).orElse(createInsertIdUserVariable(fieldDefinitionContext, level, index));
 
-        Stream<Statement> insertStatementStream = objectValueWithVariableToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinition, objectValueWithVariable, level, index);
+        Stream<Statement> insertStatementStream = objectValueWithVariableToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueWithVariableContext, level, index);
 
-        Stream<Statement> objectInsertStatementStream = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
+        Stream<Statement> objectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
-                .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext ->
+                .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
+                .map(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .flatMap(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
-                                                .map(inputObjectTypeDefinitionContext ->
-                                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariable, inputValueDefinitionContext)
+                                                .map(subInputObjectTypeDefinitionContext ->
+                                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
                                                                 .map(objectFieldWithVariableContext ->
                                                                         objectValueWithVariableToInsertStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
                                                                                 subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
                                                                                 objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(),
                                                                                 level + 1,
                                                                                 index
@@ -234,7 +235,7 @@ public class GraphqlMutationToStatements {
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
                                                                                 subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
                                                                                 level + 1,
                                                                                 index
@@ -253,21 +254,21 @@ public class GraphqlMutationToStatements {
                 idValueExpression
         );
 
-        Stream<Statement> listObjectInsertStatementStream = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
+        Stream<Statement> listObjectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                 .map(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .flatMap(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
-                                                .map(inputObjectTypeDefinitionContext ->
-                                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariable, inputValueDefinitionContext)
+                                                .map(subInputObjectTypeDefinitionContext ->
+                                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
                                                                 .map(objectFieldWithVariableContext ->
                                                                         listObjectValueWithVariableToInsertStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
                                                                                 subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
                                                                                 objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable(),
                                                                                 level + 1
                                                                         )
@@ -277,7 +278,7 @@ public class GraphqlMutationToStatements {
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
                                                                                 subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
                                                                                 level + 1
                                                                         )
@@ -289,13 +290,13 @@ public class GraphqlMutationToStatements {
                 .flatMap(Optional::get);
 
 
-        Stream<Statement> listInsertStatementStream = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
+        Stream<Statement> listInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                 .map(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .map(subFieldDefinitionContext ->
-                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariable, inputValueDefinitionContext)
+                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
                                                 .map(objectFieldWithVariableContext ->
                                                         listValueWithVariableToInsertStatementStream(
                                                                 fieldDefinitionContext,
@@ -323,7 +324,7 @@ public class GraphqlMutationToStatements {
     protected Stream<Statement> objectValueToStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                              Expression parentIdValueExpression,
                                                              GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                             GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinition,
+                                                             GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                              GraphqlParser.ObjectValueContext objectValue,
                                                              int level,
                                                              int index) {
@@ -331,22 +332,23 @@ public class GraphqlMutationToStatements {
         Optional<GraphqlParser.ObjectFieldContext> objectIdFieldContext = manager.getIDObjectField(fieldDefinitionContext.type(), objectValue);
 
         Expression idValueExpression = objectIdFieldContext.map(DB_VALUE_UTIL::createIdValueExpression).orElse(createInsertIdUserVariable(fieldDefinitionContext, level, index));
-        Stream<Statement> insertStatementStream = objectValueToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinition, objectValue, level, index);
+        Stream<Statement> insertStatementStream = objectValueToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValue, level, index);
 
-        Stream<Statement> objectInsertStatementStream = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
+        Stream<Statement> objectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
-                .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))).map(inputValueDefinitionContext ->
+                .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
+                .map(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .flatMap(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
-                                                .map(inputObjectTypeDefinitionContext ->
+                                                .map(subInputObjectTypeDefinitionContext ->
                                                         manager.getObjectFieldFromInputValueDefinition(objectValue, inputValueDefinitionContext)
                                                                 .map(objectFieldContext ->
                                                                         objectValueToStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
                                                                                 subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
                                                                                 objectFieldContext.value().objectValue(),
                                                                                 level + 1,
                                                                                 index
@@ -357,7 +359,7 @@ public class GraphqlMutationToStatements {
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
                                                                                 subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
                                                                                 level + 1,
                                                                                 index
@@ -376,21 +378,21 @@ public class GraphqlMutationToStatements {
                 idValueExpression
         );
 
-        Stream<Statement> listObjectInsertStatementStream = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
+        Stream<Statement> listObjectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                 .map(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .flatMap(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
-                                                .map(inputObjectTypeDefinitionContext ->
+                                                .map(subInputObjectTypeDefinitionContext ->
                                                         manager.getObjectFieldFromInputValueDefinition(objectValue, inputValueDefinitionContext)
                                                                 .map(objectFieldContext ->
                                                                         listObjectValueToInsertStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
                                                                                 subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
                                                                                 objectFieldContext.value().arrayValue(),
                                                                                 level + 1
                                                                         )
@@ -400,7 +402,7 @@ public class GraphqlMutationToStatements {
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
                                                                                 subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
                                                                                 level + 1
                                                                         )
@@ -411,7 +413,7 @@ public class GraphqlMutationToStatements {
                 .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
-        Stream<Statement> listInsertStatementStream = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
+        Stream<Statement> listInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                 .map(inputValueDefinitionContext ->
@@ -445,7 +447,7 @@ public class GraphqlMutationToStatements {
     protected Stream<Statement> defaultValueToStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                               Expression parentIdValueExpression,
                                                               GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                              GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinition,
+                                                              GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                               GraphqlParser.InputValueDefinitionContext parentInputValueDefinitionContext,
                                                               int level,
                                                               int index) {
@@ -456,7 +458,7 @@ public class GraphqlMutationToStatements {
                         parentFieldDefinitionContext,
                         parentIdValueExpression,
                         fieldDefinitionContext,
-                        inputObjectTypeDefinition,
+                        inputObjectTypeDefinitionContext,
                         parentInputValueDefinitionContext.defaultValue().value().objectValue(),
                         level,
                         index
@@ -471,7 +473,7 @@ public class GraphqlMutationToStatements {
     protected Stream<Statement> listObjectValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                                    Expression parentIdValueExpression,
                                                                                    GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                                   GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinition,
+                                                                                   GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                                                    GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext,
                                                                                    int level) {
 
@@ -480,7 +482,7 @@ public class GraphqlMutationToStatements {
                         parentFieldDefinitionContext,
                         parentIdValueExpression,
                         fieldDefinitionContext,
-                        inputObjectTypeDefinition,
+                        inputObjectTypeDefinitionContext,
                         arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable(),
                         level,
                         index
@@ -506,7 +508,7 @@ public class GraphqlMutationToStatements {
     protected Stream<Statement> listObjectValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                        Expression parentIdValueExpression,
                                                                        GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                       GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinition,
+                                                                       GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                                        GraphqlParser.ArrayValueContext arrayValueContext,
                                                                        int level) {
 
@@ -515,7 +517,7 @@ public class GraphqlMutationToStatements {
                         parentFieldDefinitionContext,
                         parentIdValueExpression,
                         fieldDefinitionContext,
-                        inputObjectTypeDefinition,
+                        inputObjectTypeDefinitionContext,
                         arrayValueContext.value(index).objectValue(),
                         level,
                         index
@@ -541,7 +543,7 @@ public class GraphqlMutationToStatements {
     protected Stream<Statement> defaultListObjectValueToStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                         Expression parentIdValueExpression,
                                                                         GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                        GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinition,
+                                                                        GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                                         GraphqlParser.InputValueDefinitionContext parentInputValueDefinitionContext,
                                                                         int level) {
 
@@ -551,7 +553,7 @@ public class GraphqlMutationToStatements {
                         parentFieldDefinitionContext,
                         parentIdValueExpression,
                         fieldDefinitionContext,
-                        inputObjectTypeDefinition,
+                        inputObjectTypeDefinitionContext,
                         parentInputValueDefinitionContext.defaultValue().value().arrayValue(),
                         level
                 );
@@ -883,14 +885,14 @@ public class GraphqlMutationToStatements {
     }
 
     protected Stream<Statement> objectValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                               GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinition,
+                                                                               GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                                                GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
                                                                                int level,
                                                                                int index) {
         String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         Table table = typeToTable(fieldDefinitionContext);
 
-        List<GraphqlParser.InputValueDefinitionContext> fieldList = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
+        List<GraphqlParser.InputValueDefinitionContext> fieldList = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
 
@@ -905,14 +907,14 @@ public class GraphqlMutationToStatements {
     }
 
     protected Stream<Statement> objectValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                   GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinition,
+                                                                   GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                                    GraphqlParser.ObjectValueContext objectValueContext,
                                                                    int level,
                                                                    int index) {
         String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         Table table = typeToTable(fieldDefinitionContext);
 
-        List<GraphqlParser.InputValueDefinitionContext> fieldList = inputObjectTypeDefinition.inputObjectValueDefinitions().inputValueDefinition().stream()
+        List<GraphqlParser.InputValueDefinitionContext> fieldList = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
 
