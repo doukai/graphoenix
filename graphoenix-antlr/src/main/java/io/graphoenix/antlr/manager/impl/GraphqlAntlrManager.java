@@ -349,11 +349,11 @@ public class GraphqlAntlrManager {
     }
 
     public GraphqlParser.ValueWithVariableContext getMapToObjectFieldWithVariableValueWithVariable(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                                                   GraphqlParser.ObjectValueWithVariableContext parentObjectValueWithVariableContext) {
+                                                                                                   GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
 
         return getMapToFieldDefinition(fieldDefinitionContext)
                 .flatMap(fromFieldDefinitionContext ->
-                        parentObjectValueWithVariableContext.objectFieldWithVariable().stream()
+                        objectValueWithVariableContext.objectFieldWithVariable().stream()
                                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fromFieldDefinitionContext.name().getText()))
                                 .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
                                 .findFirst()
@@ -361,11 +361,11 @@ public class GraphqlAntlrManager {
     }
 
     public GraphqlParser.ValueContext getMapToObjectFieldValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                               GraphqlParser.ObjectValueContext parentObjectValueContext) {
+                                                               GraphqlParser.ObjectValueContext objectValueContext) {
 
         return getMapToFieldDefinition(fieldDefinitionContext)
                 .flatMap(fromFieldDefinitionContext ->
-                        parentObjectValueContext.objectField().stream()
+                        objectValueContext.objectField().stream()
                                 .filter(objectFieldContext -> objectFieldContext.name().getText().equals(fromFieldDefinitionContext.name().getText()))
                                 .map(GraphqlParser.ObjectFieldContext::value)
                                 .findFirst()
