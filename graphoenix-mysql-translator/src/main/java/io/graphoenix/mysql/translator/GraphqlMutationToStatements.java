@@ -107,8 +107,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 inputObjectTypeDefinitionContext,
                                                                                 argumentContext.valueWithVariable().objectValueWithVariable(),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromArgumentValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToObjectFieldWithVariableValueWithVariable(subFieldDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable())),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToValueWithVariableFromObjectFieldWithVariable(subFieldDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable())),
                                                                                 0,
                                                                                 0
                                                                         )
@@ -120,7 +120,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 inputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromArgumentValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
                                                                                 0,
                                                                                 0
                                                                         )
@@ -147,7 +147,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 inputObjectTypeDefinitionContext,
                                                                                 argumentContext.valueWithVariable().arrayValueWithVariable(),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromArgumentValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
                                                                                 0
                                                                         )
                                                                 )
@@ -158,7 +158,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 inputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromArgumentValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
                                                                                 0
                                                                         )
                                                                 )
@@ -182,7 +182,7 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 argumentContext.valueWithVariable().arrayValueWithVariable(),
-                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromArgumentValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext))
+                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext))
                                                         )
                                                 )
                                                 .orElse(
@@ -191,7 +191,7 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 inputValueDefinitionContext,
-                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromArgumentValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext))
+                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext))
                                                         )
                                                 )
                                 )
@@ -234,8 +234,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromObjectFieldWithVariableValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToObjectFieldWithVariableValueWithVariable(subFieldDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable())),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToValueWithVariableFromObjectFieldWithVariable(subFieldDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable())),
                                                                                 level + 1,
                                                                                 index
                                                                         )
@@ -247,7 +247,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromObjectFieldWithVariableValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
                                                                                 level + 1,
                                                                                 index
                                                                         )
@@ -284,7 +284,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable(),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromObjectFieldWithVariableValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
                                                                                 level + 1
                                                                         )
                                                                 )
@@ -295,7 +295,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromObjectFieldWithVariableValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
+                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
                                                                                 level + 1
                                                                         )
                                                                 )
@@ -319,7 +319,7 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable(),
-                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromObjectFieldWithVariableValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext))
+                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext))
                                                         )
                                                 )
                                                 .orElse(
@@ -328,7 +328,7 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 inputValueDefinitionContext,
-                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromObjectFieldWithVariableValueWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext))
+                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext))
                                                         )
                                                 )
                                 )
@@ -370,8 +370,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 objectFieldContext.value().objectValue(),
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromObjectFieldValue(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToObjectFieldValue(subFieldDefinitionContext, objectFieldContext.value().objectValue())),
+                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
+                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToValueFromObjectField(subFieldDefinitionContext, objectFieldContext.value().objectValue())),
                                                                                 level + 1,
                                                                                 index
                                                                         )
@@ -383,7 +383,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromObjectFieldValue(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
+                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
                                                                                 level + 1,
                                                                                 index
                                                                         )
@@ -419,7 +419,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 objectFieldContext.value().arrayValue(),
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromObjectFieldValue(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
+                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
                                                                                 level + 1
                                                                         )
                                                                 )
@@ -430,7 +430,7 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromObjectFieldValue(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
+                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
                                                                                 level + 1
                                                                         )
                                                                 )
@@ -453,7 +453,7 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 objectFieldContext.value().arrayValue(),
-                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromObjectFieldValue(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext))
+                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext))
                                                         )
                                                 )
                                                 .orElse(
@@ -462,7 +462,7 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 inputValueDefinitionContext,
-                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromObjectFieldValue(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext))
+                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext))
                                                         )
                                                 )
                                 )
@@ -491,7 +491,7 @@ public class GraphqlMutationToStatements {
                         inputObjectTypeDefinitionContext,
                         parentInputValueDefinitionContext.defaultValue().value().objectValue(),
                         fromValueExpression,
-                        DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToObjectFieldValue(fieldDefinitionContext, parentInputValueDefinitionContext.defaultValue().value().objectValue())),
+                        DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToValueFromObjectField(fieldDefinitionContext, parentInputValueDefinitionContext.defaultValue().value().objectValue())),
                         level,
                         index
                 );
@@ -525,7 +525,7 @@ public class GraphqlMutationToStatements {
                         inputObjectTypeDefinitionContext,
                         arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable(),
                         fromValueExpression,
-                        DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToObjectFieldWithVariableValueWithVariable(fieldDefinitionContext, arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())),
+                        DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())),
                         level,
                         index
                         )
@@ -558,7 +558,7 @@ public class GraphqlMutationToStatements {
                         inputObjectTypeDefinitionContext,
                         arrayValueContext.value(index).objectValue(),
                         fromValueExpression,
-                        DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToObjectFieldValue(fieldDefinitionContext, arrayValueContext.value(index).objectValue())),
+                        DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToValueFromObjectField(fieldDefinitionContext, arrayValueContext.value(index).objectValue())),
                         level,
                         index
                         )

@@ -299,9 +299,9 @@ public class GraphqlAntlrManager {
                 .flatMap(fromFieldName -> getObjectFieldDefinitionContext(typeName, fromFieldName.substring(1, fromFieldName.length() - 1)));
     }
 
-    public GraphqlParser.ValueWithVariableContext getMapFromArgumentValueWithVariable(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                                      GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                                      GraphqlParser.ArgumentsContext parentArgumentsContext) {
+    public GraphqlParser.ValueWithVariableContext getMapFromValueWithVariableFromArguments(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                                           GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                                           GraphqlParser.ArgumentsContext parentArgumentsContext) {
 
         return getMapFromFieldDefinition(getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext)
                 .flatMap(fromFieldDefinitionContext ->
@@ -312,9 +312,9 @@ public class GraphqlAntlrManager {
                 ).orElse(null);
     }
 
-    public GraphqlParser.ValueWithVariableContext getMapFromObjectFieldWithVariableValueWithVariable(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                                                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                                                     GraphqlParser.ObjectValueWithVariableContext parentObjectValueWithVariableContext) {
+    public GraphqlParser.ValueWithVariableContext getMapFromValueWithVariableFromObjectFieldWithVariable(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                                                         GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                                                         GraphqlParser.ObjectValueWithVariableContext parentObjectValueWithVariableContext) {
         return getMapFromFieldDefinition(getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext)
                 .flatMap(fromFieldDefinitionContext ->
                         parentObjectValueWithVariableContext.objectFieldWithVariable().stream()
@@ -324,9 +324,9 @@ public class GraphqlAntlrManager {
                 ).orElse(null);
     }
 
-    public GraphqlParser.ValueContext getMapFromObjectFieldValue(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                 GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                 GraphqlParser.ObjectValueContext parentObjectValueContext) {
+    public GraphqlParser.ValueContext getMapFromValueFromObjectField(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                     GraphqlParser.ObjectValueContext parentObjectValueContext) {
 
         return getMapFromFieldDefinition(getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext)
                 .flatMap(fromFieldDefinitionContext ->
@@ -348,8 +348,8 @@ public class GraphqlAntlrManager {
                 .flatMap(toFieldName -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), toFieldName.substring(1, toFieldName.length() - 1)));
     }
 
-    public GraphqlParser.ValueWithVariableContext getMapToObjectFieldWithVariableValueWithVariable(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                                                   GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    public GraphqlParser.ValueWithVariableContext getMapToValueWithVariableFromObjectFieldWithVariable(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                                                       GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
 
         return getMapToFieldDefinition(fieldDefinitionContext)
                 .flatMap(fromFieldDefinitionContext ->
@@ -360,8 +360,8 @@ public class GraphqlAntlrManager {
                 ).orElse(null);
     }
 
-    public GraphqlParser.ValueContext getMapToObjectFieldValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                               GraphqlParser.ObjectValueContext objectValueContext) {
+    public GraphqlParser.ValueContext getMapToValueFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                   GraphqlParser.ObjectValueContext objectValueContext) {
 
         return getMapToFieldDefinition(fieldDefinitionContext)
                 .flatMap(fromFieldDefinitionContext ->
