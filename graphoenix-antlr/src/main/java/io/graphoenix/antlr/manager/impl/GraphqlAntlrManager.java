@@ -299,6 +299,54 @@ public class GraphqlAntlrManager {
                 .flatMap(fromFieldName -> getObjectFieldDefinitionContext(typeName, fromFieldName.substring(1, fromFieldName.length() - 1)));
     }
 
+    public Optional<String> getMapFromFieldName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        if (fieldDefinitionContext.directives() == null) {
+            return Optional.empty();
+        }
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("from")).findFirst())
+                .map(argumentContext -> argumentContext.valueWithVariable().StringValue().getText());
+    }
+
+    public GraphqlParser.ValueWithVariableContext getMapFromArgumentValueWithVariable(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                                      GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                                      GraphqlParser.ArgumentsContext parentArgumentsContext) {
+
+        return getMapFromFieldDefinition(getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext)
+                .flatMap(fieldName ->
+                        parentArgumentsContext.argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals(fieldName))
+                                .map(GraphqlParser.ArgumentContext::valueWithVariable)
+                                .findFirst()
+                ).orElse(null);
+    }
+
+    public GraphqlParser.ValueWithVariableContext getMapFromObjectFieldWithVariableValueWithVariable(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                                                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                                                     GraphqlParser.ObjectValueWithVariableContext parentObjectValueWithVariableContext) {
+        return getMapFromFieldDefinition(getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext)
+                .flatMap(fromFieldDefinitionContext ->
+                        parentObjectValueWithVariableContext.objectFieldWithVariable().stream()
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fromFieldDefinitionContext.name().getText()))
+                                .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
+                                .findFirst()
+                ).orElse(null);
+    }
+
+    public GraphqlParser.ValueContext getMapFromObjectFieldValue(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                 GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                 GraphqlParser.ObjectValueContext parentObjectValueContext) {
+
+        return getMapFromFieldDefinition(getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext)
+                .flatMap(fromFieldDefinitionContext ->
+                        parentObjectValueContext.objectField().stream()
+                                .filter(objectFieldContext -> objectFieldContext.name().getText().equals(fromFieldDefinitionContext.name().getText()))
+                                .map(GraphqlParser.ObjectFieldContext::value)
+                                .findFirst()
+                ).orElse(null);
+    }
+
     public Optional<GraphqlParser.FieldDefinitionContext> getMapToFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         if (fieldDefinitionContext.directives() == null) {
             return Optional.empty();
@@ -308,6 +356,30 @@ public class GraphqlAntlrManager {
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("to")).findFirst())
                 .map(argumentContext -> argumentContext.valueWithVariable().StringValue().getText())
                 .flatMap(toFieldName -> getObjectFieldDefinitionContext(getFieldTypeName(fieldDefinitionContext.type()), toFieldName.substring(1, toFieldName.length() - 1)));
+    }
+
+    public GraphqlParser.ValueWithVariableContext getMapToObjectFieldWithVariableValueWithVariable(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                                                   GraphqlParser.ObjectValueWithVariableContext parentObjectValueWithVariableContext) {
+
+        return getMapToFieldDefinition(fieldDefinitionContext)
+                .flatMap(fromFieldDefinitionContext ->
+                        parentObjectValueWithVariableContext.objectFieldWithVariable().stream()
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fromFieldDefinitionContext.name().getText()))
+                                .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
+                                .findFirst()
+                ).orElse(null);
+    }
+
+    public GraphqlParser.ValueContext getMapToObjectFieldValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                               GraphqlParser.ObjectValueContext parentObjectValueContext) {
+
+        return getMapToFieldDefinition(fieldDefinitionContext)
+                .flatMap(fromFieldDefinitionContext ->
+                        parentObjectValueContext.objectField().stream()
+                                .filter(objectFieldContext -> objectFieldContext.name().getText().equals(fromFieldDefinitionContext.name().getText()))
+                                .map(GraphqlParser.ObjectFieldContext::value)
+                                .findFirst()
+                ).orElse(null);
     }
 
     public Optional<GraphqlParser.ArgumentContext> getMapWithTypeArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {

@@ -13,6 +13,9 @@ public enum DBValueUtil {
     DB_VALUE_UTIL;
 
     public Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
+        if (valueContext == null) {
+            return null;
+        }
         return scalarValueToDBValue(valueContext.StringValue(),
                 valueContext.IntValue(),
                 valueContext.FloatValue(),
@@ -21,6 +24,9 @@ public enum DBValueUtil {
     }
 
     public Expression scalarValueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        if (valueWithVariableContext == null) {
+            return null;
+        }
         return scalarValueToDBValue(valueWithVariableContext.StringValue(),
                 valueWithVariableContext.IntValue(),
                 valueWithVariableContext.FloatValue(),
