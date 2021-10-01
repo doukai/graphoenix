@@ -299,16 +299,6 @@ public class GraphqlAntlrManager {
                 .flatMap(fromFieldName -> getObjectFieldDefinitionContext(typeName, fromFieldName.substring(1, fromFieldName.length() - 1)));
     }
 
-    public Optional<String> getMapFromFieldName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        if (fieldDefinitionContext.directives() == null) {
-            return Optional.empty();
-        }
-        return fieldDefinitionContext.directives().directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals("map")).findFirst()
-                .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("from")).findFirst())
-                .map(argumentContext -> argumentContext.valueWithVariable().StringValue().getText());
-    }
-
     public GraphqlParser.ValueWithVariableContext getMapFromArgumentValueWithVariable(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                                       GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                                       GraphqlParser.ArgumentsContext parentArgumentsContext) {
