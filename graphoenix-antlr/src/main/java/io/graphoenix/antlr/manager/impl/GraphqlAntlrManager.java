@@ -304,9 +304,9 @@ public class GraphqlAntlrManager {
                                                                                       GraphqlParser.ArgumentsContext parentArgumentsContext) {
 
         return getMapFromFieldDefinition(getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext)
-                .flatMap(fieldName ->
+                .flatMap(fromFieldDefinitionContext ->
                         parentArgumentsContext.argument().stream()
-                                .filter(argumentContext -> argumentContext.name().getText().equals(fieldName))
+                                .filter(argumentContext -> argumentContext.name().getText().equals(fromFieldDefinitionContext.name().getText()))
                                 .map(GraphqlParser.ArgumentContext::valueWithVariable)
                                 .findFirst()
                 ).orElse(null);
