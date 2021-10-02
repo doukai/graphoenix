@@ -733,8 +733,9 @@ public class GraphqlMutationToStatements {
                                                                           Expression toValueExpression) {
 
         String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
-        Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+
+        Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
         Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = manager.getObjectTypeIDFieldDefinition(fieldTypeName);
         Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(parentFieldTypeName, fieldDefinitionContext);
         Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(fieldDefinitionContext);
@@ -747,21 +748,15 @@ public class GraphqlMutationToStatements {
             Column column = DB_NAME_UTIL.fieldToColumn(table, toFieldDefinition.get());
             Column parentIdColumn = DB_NAME_UTIL.fieldToColumn(parentTable, parentIdFieldDefinition.get());
             Column idColumn = DB_NAME_UTIL.fieldToColumn(table, idFieldDefinition.get());
-            EqualsTo parentIdEqualsTo = new EqualsTo();
-            parentIdEqualsTo.setLeftExpression(parentIdColumn);
-            parentIdEqualsTo.setRightExpression(parentIdValueExpression);
-            EqualsTo idEqualsTo = new EqualsTo();
-            idEqualsTo.setLeftExpression(idColumn);
-            idEqualsTo.setRightExpression(idValueExpression);
 
             Expression parentColumnExpression;
-            Expression columnExpression;
-
             if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
                 parentColumnExpression = parentIdValueExpression;
             } else {
                 parentColumnExpression = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
             }
+
+            Expression columnExpression;
             if (column.getColumnName().equals(idColumn.getColumnName())) {
                 columnExpression = idValueExpression;
             } else {
@@ -789,6 +784,13 @@ public class GraphqlMutationToStatements {
                     }
                 }
             } else {
+                EqualsTo parentIdEqualsTo = new EqualsTo();
+                parentIdEqualsTo.setLeftExpression(parentIdColumn);
+                parentIdEqualsTo.setRightExpression(parentIdValueExpression);
+                EqualsTo idEqualsTo = new EqualsTo();
+                idEqualsTo.setLeftExpression(idColumn);
+                idEqualsTo.setRightExpression(idValueExpression);
+
                 if (fromValueExpression != null && toValueExpression == null) {
                     return Stream.of(updateExpression(table, Collections.singletonList(column), Collections.singletonList(fromValueExpression), idEqualsTo));
                 } else if (fromValueExpression == null && toValueExpression != null) {
@@ -884,9 +886,9 @@ public class GraphqlMutationToStatements {
                 if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent()) {
                     Table withTable = DB_NAME_UTIL.typeToTable(mapWithTypeName.get());
                     Column withParentColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldName.get());
+
                     EqualsTo withParentColumnEqualsTo = new EqualsTo();
                     withParentColumnEqualsTo.setLeftExpression(withParentColumn);
-
                     if (fromValueExpression != null) {
                         withParentColumnEqualsTo.setRightExpression(fromValueExpression);
                     } else {
@@ -907,10 +909,12 @@ public class GraphqlMutationToStatements {
                                                                              Expression fromValueExpression) {
 
         Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
+
         if (mapWithTypeArgument.isEmpty()) {
             String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
-            Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+
+            Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
             Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = manager.getObjectTypeIDFieldDefinition(fieldTypeName);
             Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(parentFieldTypeName, fieldDefinitionContext);
             Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(fieldDefinitionContext);
