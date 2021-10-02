@@ -7,6 +7,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -107,8 +108,10 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 inputObjectTypeDefinitionContext,
                                                                                 argumentContext.valueWithVariable().objectValueWithVariable(),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToValueWithVariableFromObjectFieldWithVariable(subFieldDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable())),
+                                                                                manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                manager.getMapToValueWithVariableFromObjectFieldWithVariable(subFieldDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable())
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                                                                                 0,
                                                                                 0
                                                                         )
@@ -120,7 +123,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 inputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
+                                                                                manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                                                                                 0,
                                                                                 0
                                                                         )
@@ -147,7 +151,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 inputObjectTypeDefinitionContext,
                                                                                 argumentContext.valueWithVariable().arrayValueWithVariable(),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
+                                                                                manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                                                                                 0
                                                                         )
                                                                 )
@@ -158,7 +163,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 inputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)),
+                                                                                manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                                                                                 0
                                                                         )
                                                                 )
@@ -182,7 +188,8 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 argumentContext.valueWithVariable().arrayValueWithVariable(),
-                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext))
+                                                                manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
                                                 .orElse(
@@ -191,7 +198,8 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 inputValueDefinitionContext,
-                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext))
+                                                                manager.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
                                 )
@@ -234,8 +242,10 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToValueWithVariableFromObjectFieldWithVariable(subFieldDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable())),
+                                                                                manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                manager.getMapToValueWithVariableFromObjectFieldWithVariable(subFieldDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable())
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                                                                                 level + 1,
                                                                                 index
                                                                         )
@@ -247,7 +257,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
+                                                                                manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                                                                                 level + 1,
                                                                                 index
                                                                         )
@@ -259,7 +270,7 @@ public class GraphqlMutationToStatements {
                 .flatMap(Optional::get);
 
 
-        Stream<Statement> updateMapObjectFieldStatementStream = mapFieldRelationStatementStream(
+        Stream<Statement> updateMapObjectFieldStatementStream = mapObjectTypeFieldRelationStatementStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -284,7 +295,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable(),
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
+                                                                                manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                                                                                 level + 1
                                                                         )
                                                                 )
@@ -295,7 +307,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)),
+                                                                                manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                                                                                 level + 1
                                                                         )
                                                                 )
@@ -319,7 +332,8 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable(),
-                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext))
+                                                                manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
                                                 .orElse(
@@ -328,7 +342,8 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 inputValueDefinitionContext,
-                                                                DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext))
+                                                                manager.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
                                 )
@@ -370,8 +385,10 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 objectFieldContext.value().objectValue(),
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToValueFromObjectField(subFieldDefinitionContext, objectFieldContext.value().objectValue())),
+                                                                                manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null),
+                                                                                manager.getMapToValueFromObjectField(subFieldDefinitionContext, objectFieldContext.value().objectValue())
+                                                                                        .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null),
                                                                                 level + 1,
                                                                                 index
                                                                         )
@@ -383,7 +400,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
+                                                                                manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null),
                                                                                 level + 1,
                                                                                 index
                                                                         )
@@ -394,7 +412,7 @@ public class GraphqlMutationToStatements {
                 .filter(Optional::isPresent)
                 .flatMap(Optional::get);
 
-        Stream<Statement> updateMapObjectFieldStatementStream = mapFieldRelationStatementStream(
+        Stream<Statement> updateMapObjectFieldStatementStream = mapObjectTypeFieldRelationStatementStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -419,7 +437,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 objectFieldContext.value().arrayValue(),
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
+                                                                                manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null),
                                                                                 level + 1
                                                                         )
                                                                 )
@@ -430,7 +449,8 @@ public class GraphqlMutationToStatements {
                                                                                 subFieldDefinitionContext,
                                                                                 subInputObjectTypeDefinitionContext,
                                                                                 inputValueDefinitionContext,
-                                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)),
+                                                                                manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)
+                                                                                        .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null),
                                                                                 level + 1
                                                                         )
                                                                 )
@@ -453,7 +473,8 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 objectFieldContext.value().arrayValue(),
-                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext))
+                                                                manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)
+                                                                        .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null)
                                                         )
                                                 )
                                                 .orElse(
@@ -462,7 +483,8 @@ public class GraphqlMutationToStatements {
                                                                 idValueExpression,
                                                                 subFieldDefinitionContext,
                                                                 inputValueDefinitionContext,
-                                                                DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext))
+                                                                manager.getMapFromValueFromObjectField(fieldDefinitionContext, subFieldDefinitionContext, objectValueContext)
+                                                                        .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null)
                                                         )
                                                 )
                                 )
@@ -491,7 +513,8 @@ public class GraphqlMutationToStatements {
                         inputObjectTypeDefinitionContext,
                         parentInputValueDefinitionContext.defaultValue().value().objectValue(),
                         fromValueExpression,
-                        DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToValueFromObjectField(fieldDefinitionContext, parentInputValueDefinitionContext.defaultValue().value().objectValue())),
+                        manager.getMapToValueFromObjectField(fieldDefinitionContext, parentInputValueDefinitionContext.defaultValue().value().objectValue())
+                                .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null),
                         level,
                         index
                 );
@@ -510,14 +533,14 @@ public class GraphqlMutationToStatements {
                                                                                    Expression fromValueExpression,
                                                                                    int level) {
 
-        Stream<Statement> listArgumentDeleteStatementStream = mapFieldRelationDeleteStatementStream(
+        Stream<Statement> deleteWithTypeStatementStream = deleteWithTypeStatementStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
                 fromValueExpression
         );
 
-        Stream<Statement> listArgumentInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
+        Stream<Statement> listObjectValueInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
                 .mapToObj(index -> objectValueWithVariableToInsertStatementStream(
                         parentFieldDefinitionContext,
                         parentIdValueExpression,
@@ -525,14 +548,30 @@ public class GraphqlMutationToStatements {
                         inputObjectTypeDefinitionContext,
                         arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable(),
                         fromValueExpression,
-                        DB_VALUE_UTIL.scalarValueWithVariableToDBValue(manager.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())),
+                        manager.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
+                                .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
                         level,
                         index
                         )
                 )
                 .flatMap(statementStream -> statementStream);
 
-        return Stream.concat(listArgumentDeleteStatementStream, listArgumentInsertStatementStream);
+        List<Expression> idValueExpressionList = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
+                .mapToObj(index ->
+                        manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
+                                .map(DB_VALUE_UTIL::createIdValueExpression)
+                                .orElse(createInsertIdUserVariable(fieldDefinitionContext, level, index)))
+                .collect(Collectors.toList());
+
+        Stream<Statement> deleteObjectTypeFieldRelationStatementStream = deleteObjectTypeFieldRelationStatementStream(
+                parentFieldDefinitionContext,
+                parentIdValueExpression,
+                fieldDefinitionContext,
+                idValueExpressionList,
+                fromValueExpression
+        );
+
+        return Stream.concat(deleteWithTypeStatementStream, Stream.concat(listObjectValueInsertStatementStream, deleteObjectTypeFieldRelationStatementStream));
     }
 
     protected Stream<Statement> listObjectValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -543,14 +582,14 @@ public class GraphqlMutationToStatements {
                                                                        Expression fromValueExpression,
                                                                        int level) {
 
-        Stream<Statement> listArgumentDeleteStatementStream = mapFieldRelationDeleteStatementStream(
+        Stream<Statement> deleteWithTypeStatementStream = deleteWithTypeStatementStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
                 fromValueExpression
         );
 
-        Stream<Statement> listArgumentInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
+        Stream<Statement> listObjectValueInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
                 .mapToObj(index -> objectValueToStatementStream(
                         parentFieldDefinitionContext,
                         parentIdValueExpression,
@@ -558,14 +597,30 @@ public class GraphqlMutationToStatements {
                         inputObjectTypeDefinitionContext,
                         arrayValueContext.value(index).objectValue(),
                         fromValueExpression,
-                        DB_VALUE_UTIL.scalarValueToDBValue(manager.getMapToValueFromObjectField(fieldDefinitionContext, arrayValueContext.value(index).objectValue())),
+                        manager.getMapToValueFromObjectField(fieldDefinitionContext, arrayValueContext.value(index).objectValue())
+                                .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null),
                         level,
                         index
                         )
                 )
                 .flatMap(statementStream -> statementStream);
 
-        return Stream.concat(listArgumentDeleteStatementStream, listArgumentInsertStatementStream);
+        List<Expression> idValueExpressionList = IntStream.range(0, arrayValueContext.value().size())
+                .mapToObj(index ->
+                        manager.getIDObjectField(fieldDefinitionContext.type(), arrayValueContext.value(index).objectValue())
+                                .map(DB_VALUE_UTIL::createIdValueExpression)
+                                .orElse(createInsertIdUserVariable(fieldDefinitionContext, level, index)))
+                .collect(Collectors.toList());
+
+        Stream<Statement> deleteObjectTypeFieldRelationStatementStream = deleteObjectTypeFieldRelationStatementStream(
+                parentFieldDefinitionContext,
+                parentIdValueExpression,
+                fieldDefinitionContext,
+                idValueExpressionList,
+                fromValueExpression
+        );
+
+        return Stream.concat(deleteWithTypeStatementStream, Stream.concat(listObjectValueInsertStatementStream, deleteObjectTypeFieldRelationStatementStream));
     }
 
     protected Stream<Statement> defaultListObjectValueToStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -600,7 +655,7 @@ public class GraphqlMutationToStatements {
                                                                              GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext,
                                                                              Expression fromValueExpression) {
 
-        Stream<Statement> listValueDeleteStatementStream = mapFieldRelationDeleteStatementStream(
+        Stream<Statement> listValueDeleteStatementStream = deleteWithTypeStatementStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -608,7 +663,7 @@ public class GraphqlMutationToStatements {
         );
 
         Stream<Statement> listValueInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
-                .mapToObj(index -> mapFieldRelationStatementStream(
+                .mapToObj(index -> mapSingleTypeFieldRelationStatementStream(
                         parentFieldDefinitionContext,
                         parentIdValueExpression,
                         fieldDefinitionContext,
@@ -628,7 +683,7 @@ public class GraphqlMutationToStatements {
                                                                  GraphqlParser.ArrayValueContext arrayValueContext,
                                                                  Expression fromValueExpression) {
 
-        Stream<Statement> listValueDeleteStatementStream = mapFieldRelationDeleteStatementStream(
+        Stream<Statement> listValueDeleteStatementStream = deleteWithTypeStatementStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -636,7 +691,7 @@ public class GraphqlMutationToStatements {
         );
 
         Stream<Statement> listValueInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
-                .mapToObj(index -> mapFieldRelationStatementStream(
+                .mapToObj(index -> mapSingleTypeFieldRelationStatementStream(
                         parentFieldDefinitionContext,
                         parentIdValueExpression,
                         fieldDefinitionContext,
@@ -670,12 +725,12 @@ public class GraphqlMutationToStatements {
         return Stream.empty();
     }
 
-    protected Stream<Statement> mapFieldRelationStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                Expression parentIdValueExpression,
-                                                                GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                Expression idValueExpression,
-                                                                Expression fromValueExpression,
-                                                                Expression toValueExpression) {
+    protected Stream<Statement> mapObjectTypeFieldRelationStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                          Expression parentIdValueExpression,
+                                                                          GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                          Expression idValueExpression,
+                                                                          Expression fromValueExpression,
+                                                                          Expression toValueExpression) {
 
         String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
         Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
@@ -752,15 +807,14 @@ public class GraphqlMutationToStatements {
                 }
             }
         }
-
         return Stream.empty();
     }
 
-    protected Stream<Statement> mapFieldRelationStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                Expression parentIdValueExpression,
-                                                                GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                Expression valueExpression,
-                                                                Expression fromValueExpression) {
+    protected Stream<Statement> mapSingleTypeFieldRelationStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                          Expression parentIdValueExpression,
+                                                                          GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                          Expression valueExpression,
+                                                                          Expression fromValueExpression) {
 
         Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
 
@@ -801,39 +855,35 @@ public class GraphqlMutationToStatements {
         return Stream.empty();
     }
 
-    protected Stream<Statement> mapFieldRelationDeleteStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                      Expression parentIdValueExpression,
-                                                                      GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                      Expression fromValueExpression) {
+    protected Stream<Statement> deleteWithTypeStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                              Expression parentIdValueExpression,
+                                                              GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                              Expression fromValueExpression) {
 
-        String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
-        Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
-        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = manager.getObjectTypeIDFieldDefinition(fieldTypeName);
-        Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(parentFieldTypeName, fieldDefinitionContext);
-        Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(fieldDefinitionContext);
+        Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
+        if (mapWithTypeArgument.isPresent()) {
+            String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
+            Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
+            Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(parentFieldTypeName, fieldDefinitionContext);
 
-        if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent() && idFieldDefinition.isPresent()) {
-            Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
-            Table parentTable = typeToTable(parentFieldDefinitionContext);
-            Column parentColumn = DB_NAME_UTIL.fieldToColumn(parentTable, fromFieldDefinition.get());
-            Column parentIdColumn = DB_NAME_UTIL.fieldToColumn(parentTable, parentIdFieldDefinition.get());
+            if (fromFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent()) {
+                Table parentTable = typeToTable(parentFieldDefinitionContext);
+                Column parentColumn = DB_NAME_UTIL.fieldToColumn(parentTable, fromFieldDefinition.get());
+                Column parentIdColumn = DB_NAME_UTIL.fieldToColumn(parentTable, parentIdFieldDefinition.get());
 
-            Expression parentColumnExpression;
-            if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
-                parentColumnExpression = parentIdValueExpression;
-            } else {
-                parentColumnExpression = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
-            }
+                Expression parentColumnExpression;
+                if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
+                    parentColumnExpression = parentIdValueExpression;
+                } else {
+                    parentColumnExpression = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
+                }
 
-            if (mapWithTypeArgument.isPresent()) {
                 Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
                 Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
-                Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
 
-                if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
+                if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent()) {
                     Table withTable = DB_NAME_UTIL.typeToTable(mapWithTypeName.get());
-                    Column withParentColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithToFieldName.get());
+                    Column withParentColumn = DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldName.get());
                     EqualsTo withParentColumnEqualsTo = new EqualsTo();
                     withParentColumnEqualsTo.setLeftExpression(withParentColumn);
 
@@ -844,19 +894,55 @@ public class GraphqlMutationToStatements {
                     }
                     return Stream.of(deleteExpression(withTable, withParentColumnEqualsTo));
                 }
-            } else {
+            }
+        }
+        return Stream.empty();
+    }
+
+
+    protected Stream<Statement> deleteObjectTypeFieldRelationStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                             Expression parentIdValueExpression,
+                                                                             GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                             List<Expression> idValueExpressionList,
+                                                                             Expression fromValueExpression) {
+
+        Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
+        if (mapWithTypeArgument.isEmpty()) {
+            String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
+            Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
+            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+            Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = manager.getObjectTypeIDFieldDefinition(fieldTypeName);
+            Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(parentFieldTypeName, fieldDefinitionContext);
+            Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(fieldDefinitionContext);
+
+            if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent() && idFieldDefinition.isPresent()) {
+                Table parentTable = typeToTable(parentFieldDefinitionContext);
                 Table table = typeToTable(fieldDefinitionContext);
+                Column parentColumn = DB_NAME_UTIL.fieldToColumn(parentTable, fromFieldDefinition.get());
+                Column parentIdColumn = DB_NAME_UTIL.fieldToColumn(parentTable, parentIdFieldDefinition.get());
                 Column column = DB_NAME_UTIL.fieldToColumn(table, toFieldDefinition.get());
+                Column idColumn = DB_NAME_UTIL.fieldToColumn(table, idFieldDefinition.get());
 
-                EqualsTo columnEqualsTo = new EqualsTo();
-                columnEqualsTo.setLeftExpression(column);
-
-                if (fromValueExpression != null) {
-                    columnEqualsTo.setRightExpression(fromValueExpression);
+                Expression parentColumnExpression;
+                if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
+                    parentColumnExpression = parentIdValueExpression;
                 } else {
-                    columnEqualsTo.setRightExpression(parentColumnExpression);
+                    parentColumnExpression = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
                 }
-                return Stream.of(deleteExpression(table, columnEqualsTo));
+
+                EqualsTo parentColumnEqualsTo = new EqualsTo();
+                parentColumnEqualsTo.setLeftExpression(column);
+                if (fromValueExpression != null) {
+                    parentColumnEqualsTo.setRightExpression(fromValueExpression);
+                } else {
+                    parentColumnEqualsTo.setRightExpression(parentColumnExpression);
+                }
+
+                InExpression idColumnNotIn = new InExpression();
+                idColumnNotIn.setLeftExpression(idColumn);
+                idColumnNotIn.setNot(true);
+                idColumnNotIn.setRightItemsList(new ExpressionList(idValueExpressionList));
+                return Stream.of(deleteExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn))));
             }
         }
         return Stream.empty();
