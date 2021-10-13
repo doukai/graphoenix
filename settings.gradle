@@ -4,7 +4,5 @@ include 'graphoenix-graphql-builder'
 include 'graphoenix-mysql-translator'
 include 'graphoenix-r2dbc-connector'
 include 'graphoenix-mysql-showcase'
-include 'graphoenix-socket-server'
-include 'graphoenix-socket-common'
-include 'graphoenix-socket-client'
+include 'graphoenix-http-server'
 
