@@ -10,6 +10,8 @@ repositories {
 }
 
 dependencies {
+    compile "io.projectreactor.netty:reactor-netty-core:1.0.12"
+    compile "io.projectreactor.netty:reactor-netty-http:1.0.12"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
