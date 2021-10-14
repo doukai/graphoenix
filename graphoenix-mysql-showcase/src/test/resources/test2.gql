@@ -2408,7 +2408,7 @@ mutation introspection {
                                     }
                                     ,
                                     {
-                                        name: "locations",
+                                        name: "graphQLLocations",
                                         type: {
                                             kind: INPUT_OBJECT,
                                             name: "__DirectiveLocationExpression",
@@ -4427,7 +4427,7 @@ mutation introspection {
                         }
                         ,
                         {
-                            name: "locations",
+                            name: "graphQLLocations",
                             type: {
                                 kind: INPUT_OBJECT,
                                 name: "__DirectiveLocationExpression",
@@ -6236,7 +6236,7 @@ mutation introspection {
                                                 }
                                                 ,
                                                 {
-                                                    name: "locations",
+                                                    name: "graphQLLocations",
                                                     type: {
                                                         kind: NON_NULL,
                                                         name: "nonnull_list_nonnull___DirectiveLocation",
@@ -7304,7 +7304,7 @@ mutation introspection {
                         }
                         ,
                         {
-                            name: "locations",
+                            name: "graphQLLocations",
                             type: {
                                 kind: NON_NULL,
                                 name: "nonnull_list_nonnull___DirectiveLocation",
@@ -7556,7 +7556,7 @@ mutation introspection {
                     }
                     ,
                 ],
-                locations: [FIELD_DEFINITION]
+                graphQLLocations: [FIELD_DEFINITION]
             }
             ,
             {
@@ -7581,7 +7581,7 @@ mutation introspection {
                     }
                     ,
                 ],
-                locations: [FIELD_DEFINITION]
+                graphQLLocations: [FIELD_DEFINITION]
             }
             ,
             {
@@ -7653,7 +7653,7 @@ mutation introspection {
                     }
                     ,
                 ],
-                locations: [FIELD_DEFINITION]
+                graphQLLocations: [FIELD_DEFINITION]
             }
             ,
             {
@@ -7670,7 +7670,7 @@ mutation introspection {
                     }
                     ,
                 ],
-                locations: [OBJECT]
+                graphQLLocations: [OBJECT]
             }
             ,
         ],
@@ -9607,7 +9607,7 @@ mutation introspection {
                                                     }
                                                     ,
                                                     {
-                                                        name: "locations",
+                                                        name: "graphQLLocations",
                                                         type: {
                                                             kind: NON_NULL,
                                                             name: "nonnull_list_nonnull___DirectiveLocation",
@@ -10675,7 +10675,7 @@ mutation introspection {
                             }
                             ,
                             {
-                                name: "locations",
+                                name: "graphQLLocations",
                                 type: {
                                     kind: NON_NULL,
                                     name: "nonnull_list_nonnull___DirectiveLocation",
@@ -13831,7 +13831,7 @@ mutation introspection {
                                         }
                                         ,
                                         {
-                                            name: "locations",
+                                            name: "graphQLLocations",
                                             type: {
                                                 kind: INPUT_OBJECT,
                                                 name: "__DirectiveLocationExpression",
@@ -15850,7 +15850,7 @@ mutation introspection {
                             }
                             ,
                             {
-                                name: "locations",
+                                name: "graphQLLocations",
                                 type: {
                                     kind: INPUT_OBJECT,
                                     name: "__DirectiveLocationExpression",
@@ -16057,7 +16057,7 @@ mutation introspection {
                     }
                     ,
                     {
-                        name: "locations",
+                        name: "graphQLLocations",
                         type: {
                             kind: NON_NULL,
                             name: "nonnull_list_nonnull___DirectiveLocation",
@@ -16897,7 +16897,7 @@ mutation introspection {
                     }
                     ,
                     {
-                        name: "locations",
+                        name: "graphQLLocations",
                         type: {
                             kind: INPUT_OBJECT,
                             name: "__DirectiveLocationExpression",
@@ -18201,7 +18201,7 @@ mutation introspection {
                     }
                     ,
                     {
-                        name: "locations",
+                        name: "graphQLLocations",
                         type: {
                             kind: NON_NULL,
                             name: "nonnull_list_nonnull___DirectiveLocation",

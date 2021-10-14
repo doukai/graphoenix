@@ -87,7 +87,7 @@ enum __TypeKind {
 type __Directive {
     name: ID
     description: String
-    locations: [__DirectiveLocation!]!
+    graphQLLocations: [__DirectiveLocation!]!
     args: [__InputValue!]! @map(from: "name", to: "typeName")
 }
 

@@ -1,7 +1,10 @@
 package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
+import com.google.gson.Gson;
 import io.graphoenix.http.server.config.ServerConfiguration;
+import io.graphoenix.http.server.dto.graphql.GraphQLRequestBody;
+import io.graphoenix.http.server.dto.graphql.GraphQLResult;
 import io.graphoenix.http.server.handler.RequestHandler;
 import io.graphoenix.http.server.handler.RequestHandlerFactory;
 import io.netty.buffer.Unpooled;
@@ -10,23 +13,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.AsciiString;
-import io.netty.util.CharsetUtil;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpUtil;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.http.cookie.Cookie;
-import io.netty.handler.codec.http.cookie.ServerCookieDecoder;
-import io.netty.handler.codec.http.cookie.ServerCookieEncoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -59,20 +53,22 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             return;
         }
         RequestHandler requestHandler = RequestHandlerFactory.create(request.method());
-        Object result;
+        GraphQLRequestBody requestBody;
+        GraphQLResult graphQLResult = new GraphQLResult();
         FullHttpResponse response;
         try {
-            result = requestHandler.handle(request);
-            String responseHtml = "<html><body>" + result + "</body></html>";
-            byte[] responseBytes = responseHtml.getBytes(StandardCharsets.UTF_8);
-            response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(responseBytes));
-            response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
+            requestBody = requestHandler.handle(request);
+
+
+            //TODO
+            response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResult).getBytes(StandardCharsets.UTF_8)));
             response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
+            response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
+
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            String responseHtml = "<html><body>" + e.toString() + "</body></html>";
-            byte[] responseBytes = responseHtml.getBytes(StandardCharsets.UTF_8);
-            response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(responseBytes));
+            //TODO
+            response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResult).getBytes(StandardCharsets.UTF_8)));
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
         }
 
