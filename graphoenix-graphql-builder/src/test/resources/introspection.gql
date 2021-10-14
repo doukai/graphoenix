@@ -87,7 +87,7 @@ type __Directive {
     name: String
     schemaId: Int
     description: String
-    locations: [__DirectiveLocation!]!
+    graphQLLocations: [__DirectiveLocation!]!
     args: [__InputValue!]! @map(from: "id", to: "directiveId")
 }
 
