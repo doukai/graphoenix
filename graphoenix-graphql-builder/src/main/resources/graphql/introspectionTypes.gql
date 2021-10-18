@@ -84,7 +84,7 @@ type __Directive {
     name: ID @dataType(type: "varchar")
     schemaId: Int
     description: String
-    graphQLLocations: [__DirectiveLocation!]! @map(from: "name", with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
+    locations: [__DirectiveLocation!]! @map(from: "name", with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
     args: [__InputValue!]! @map(from: "name", to: "directiveName")
 }
 
