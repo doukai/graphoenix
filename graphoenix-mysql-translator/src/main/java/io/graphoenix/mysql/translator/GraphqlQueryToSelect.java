@@ -16,6 +16,7 @@ import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
@@ -66,17 +67,41 @@ public class GraphqlQueryToSelect {
         return select;
     }
 
+    protected Stream<GraphqlParser.SelectionContext> fragmentUnzip(String typeName, GraphqlParser.SelectionContext selectionContext) {
+        if (selectionContext.fragmentSpread() != null) {
+            Optional<GraphqlParser.FragmentDefinitionContext> fragmentDefinitionContext = manager.getObjectFragmentDefinitionContext(typeName, selectionContext.fragmentSpread().fragmentName().getText());
+            if (fragmentDefinitionContext.isPresent()) {
+                return fragmentDefinitionContext.get().selectionSet().selection().stream();
+            } else {
+                //TODO
+                return Stream.empty();
+            }
+        } else {
+            return Stream.of(selectionContext);
+        }
+    }
+
     protected PlainSelect objectSelectionToPlainSelect(String parentTypeName, String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, List<GraphqlParser.SelectionContext> selectionContextList) {
         PlainSelect plainSelect = new PlainSelect();
         Table table = typeToTable(typeName);
         plainSelect.setFromItem(table);
-        Function function = new Function();
-        function.setName("JSON_OBJECT");
-        function.setParameters(new ExpressionList(selectionContextList.stream()
-                .map(selectionContext -> new ExpressionList(selectionToStringValueKey(selectionContext), selectionToExpression(typeName, selectionContext)))
-                .map(ExpressionList::getExpressions)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList())));
+
+        Function function = selectionToJsonFunction(
+                fieldDefinitionContext,
+                new ExpressionList(
+                        selectionContextList.stream()
+                                .flatMap(selectionContext -> fragmentUnzip(typeName, selectionContext))
+                                .map(selectionContext ->
+                                        new ExpressionList(
+                                                selectionToStringValueKey(selectionContext), selectionToExpression(typeName, selectionContext)
+                                        )
+                                )
+                                .map(ExpressionList::getExpressions)
+                                .flatMap(Collection::stream)
+                                .collect(Collectors.toList())
+                )
+        );
+
         SelectExpressionItem selectExpressionItem = new SelectExpressionItem(function);
         plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));
 
@@ -132,25 +157,6 @@ public class GraphqlQueryToSelect {
     protected Expression selectionToExpression(String typeName, GraphqlParser.SelectionContext selectionContext) {
         return manager.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText())
                 .map(fieldDefinitionContext -> {
-                            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                                return listSelectionToJsonArrayFunction(typeName, selectionContext);
-                            } else {
-                                return singleSelectionToExpression(typeName, selectionContext);
-                            }
-                        }
-                ).orElse(null);
-    }
-
-    protected Function listSelectionToJsonArrayFunction(String typeName, GraphqlParser.SelectionContext selectionContext) {
-        Function function = new Function();
-        function.setName("JSON_ARRAYAGG");
-        function.setParameters(new ExpressionList(singleSelectionToExpression(typeName, selectionContext)));
-        return function;
-    }
-
-    protected Expression singleSelectionToExpression(String typeName, GraphqlParser.SelectionContext selectionContext) {
-        return manager.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText())
-                .map(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
                                 return objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext);
@@ -159,6 +165,24 @@ public class GraphqlQueryToSelect {
                             }
                         }
                 ).orElse(null);
+    }
+
+    protected Function selectionToJsonFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, ExpressionList expressionList) {
+
+        Function function = new Function();
+        function.setName("JSON_OBJECT");
+        function.setParameters(expressionList);
+        if (fieldDefinitionContext != null && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+            return jsonArrayFunction(new ExpressionList(function));
+        }
+        return function;
+    }
+
+    protected Function jsonArrayFunction(ExpressionList expressionList) {
+        Function function = new Function();
+        function.setName("JSON_ARRAYAGG");
+        function.setParameters(expressionList);
+        return function;
     }
 
     protected SubSelect objectSelectionToSubSelect(String parentTypeName,
@@ -212,7 +236,13 @@ public class GraphqlQueryToSelect {
                     PlainSelect plainSelect = new PlainSelect();
                     Table table = typeToTable(mapWithTypeName.get());
                     plainSelect.setFromItem(table);
-                    plainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(fieldToColumn(mapWithTypeName.get(), mapWithToFieldName.get()))));
+                    SelectExpressionItem selectExpressionItem =
+                            new SelectExpressionItem(
+                                    jsonArrayFunction(new ExpressionList(
+                                            fieldToColumn(mapWithTypeName.get(), mapWithToFieldName.get()))
+                                    )
+                            );
+                    plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));
                     EqualsTo equalsTo = new EqualsTo();
                     equalsTo.setLeftExpression(fieldToColumn(mapWithTypeName.get(), mapWithFromFieldName.get()));
                     equalsTo.setRightExpression(fieldToColumn(typeName, fromFieldDefinition.get()));

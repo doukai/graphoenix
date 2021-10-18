@@ -29,6 +29,8 @@ public class GraphqlAntlrManager {
 
     private final IGraphqlScalarManager graphqlScalarManager;
 
+    private final IGraphqlFragmentManager graphqlFragmentManager;
+
     public GraphqlAntlrManager(IGraphqlOperationManager graphqlOperationManager,
                                IGraphqlSchemaManager graphqlSchemaManager,
                                IGraphqlDirectiveManager graphqlDirectiveManager,
@@ -37,7 +39,8 @@ public class GraphqlAntlrManager {
                                IGraphqlInputObjectManager graphqlInputObjectManager,
                                IGraphqlInputValueManager graphqlInputValueManager,
                                IGraphqlEnumManager graphqlEnumManager,
-                               IGraphqlScalarManager graphqlScalarManager) {
+                               IGraphqlScalarManager graphqlScalarManager,
+                               IGraphqlFragmentManager graphqlFragmentManager) {
         this.graphqlOperationManager = graphqlOperationManager;
         this.graphqlSchemaManager = graphqlSchemaManager;
         this.graphqlDirectiveManager = graphqlDirectiveManager;
@@ -47,6 +50,7 @@ public class GraphqlAntlrManager {
         this.graphqlInputValueManager = graphqlInputValueManager;
         this.graphqlEnumManager = graphqlEnumManager;
         this.graphqlScalarManager = graphqlScalarManager;
+        this.graphqlFragmentManager = graphqlFragmentManager;
     }
 
     public GraphqlAntlrManager() {
@@ -59,6 +63,7 @@ public class GraphqlAntlrManager {
         this.graphqlInputValueManager = new GraphqlInputValueManager();
         this.graphqlEnumManager = new GraphqlEnumManager();
         this.graphqlScalarManager = new GraphqlScalarManager();
+        this.graphqlFragmentManager = new GraphqlFragmentManager();
     }
 
     public GraphqlAntlrManager(GraphqlParser.DocumentContext documentContext) {
@@ -71,6 +76,7 @@ public class GraphqlAntlrManager {
         this.graphqlInputValueManager = new GraphqlInputValueManager();
         this.graphqlEnumManager = new GraphqlEnumManager();
         this.graphqlScalarManager = new GraphqlScalarManager();
+        this.graphqlFragmentManager = new GraphqlFragmentManager();
         this.registerDocument(documentContext);
     }
 
@@ -84,6 +90,7 @@ public class GraphqlAntlrManager {
         this.graphqlInputValueManager = new GraphqlInputValueManager();
         this.graphqlEnumManager = new GraphqlEnumManager();
         this.graphqlScalarManager = new GraphqlScalarManager();
+        this.graphqlFragmentManager = new GraphqlFragmentManager();
         this.registerDocument(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
     }
 
@@ -97,6 +104,7 @@ public class GraphqlAntlrManager {
         this.graphqlInputValueManager = new GraphqlInputValueManager();
         this.graphqlEnumManager = new GraphqlEnumManager();
         this.graphqlScalarManager = new GraphqlScalarManager();
+        this.graphqlFragmentManager = new GraphqlFragmentManager();
         this.registerDocument(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(inputStream));
     }
 
@@ -115,6 +123,8 @@ public class GraphqlAntlrManager {
     protected void registerDefinition(GraphqlParser.DefinitionContext definitionContext) {
         if (definitionContext.typeSystemDefinition() != null) {
             registerSystemDefinition(definitionContext.typeSystemDefinition());
+        } else if (definitionContext.fragmentDefinition() != null) {
+            graphqlFragmentManager.register(definitionContext.fragmentDefinition());
         }
     }
 
@@ -250,6 +260,10 @@ public class GraphqlAntlrManager {
 
     public Optional<GraphqlParser.FieldDefinitionContext> getObjectFieldDefinitionContext(String typeName, String fieldName) {
         return graphqlFieldManager.getFieldDefinition(typeName, fieldName);
+    }
+
+    public Optional<GraphqlParser.FragmentDefinitionContext> getObjectFragmentDefinitionContext(String typeName, String fragmentName) {
+        return graphqlFragmentManager.getFragmentDefinition(typeName, fragmentName);
     }
 
     public Optional<String> getQueryOperationTypeName() {
