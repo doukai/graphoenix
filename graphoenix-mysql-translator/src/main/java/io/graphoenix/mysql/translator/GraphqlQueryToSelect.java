@@ -238,8 +238,10 @@ public class GraphqlQueryToSelect {
                     plainSelect.setFromItem(table);
                     SelectExpressionItem selectExpressionItem =
                             new SelectExpressionItem(
-                                    jsonArrayFunction(new ExpressionList(
-                                            fieldToColumn(mapWithTypeName.get(), mapWithToFieldName.get()))
+                                    jsonArrayFunction(
+                                            new ExpressionList(
+                                                    fieldToColumn(mapWithTypeName.get(), mapWithToFieldName.get())
+                                            )
                                     )
                             );
                     plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));

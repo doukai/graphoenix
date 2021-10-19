@@ -6,4 +6,6 @@ include 'graphoenix-r2dbc-connector'
 include 'graphoenix-mysql-showcase'
 include 'graphoenix-http-server'
 include 'graphoenix-java-generator'
+include 'graphoenix-common'
+include 'graphoenix-meta'
 
