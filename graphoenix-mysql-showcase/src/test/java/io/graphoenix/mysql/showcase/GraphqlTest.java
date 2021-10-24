@@ -6,9 +6,10 @@ import com.google.common.io.Resources;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.builder.schema.GraphqlSchemaRegister;
 import io.graphoenix.mysql.translator.*;
-import io.graphoenix.r2dbc.config.ConnectionConfiguration;
+import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
 import io.graphoenix.r2dbc.connector.*;
 import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -41,7 +42,7 @@ public class GraphqlTest {
                 .getResourceAsStream("beans.yaml");
         ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
 
-        TableCreator tableCreator = new TableCreator(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));
+        TableCreator tableCreator = new TableCreator(new ConnectionCreator(connectionConfiguration));
 
         tableCreator.createTables(tablesSql).block();
     }

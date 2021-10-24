@@ -1,9 +1,9 @@
-package io.graphoenix.r2dbc.connector;
+package io.graphoenix.r2dbc.connector.connection;
 
 import io.r2dbc.spi.Connection;
 import reactor.core.publisher.Mono;
 
-public interface ConnectionCreator {
+public interface IConnectionCreator {
 
     Mono<Connection> createConnection();
 }

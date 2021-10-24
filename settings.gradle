@@ -8,4 +8,5 @@ include 'graphoenix-http-server'
 include 'graphoenix-java-generator'
 include 'graphoenix-common'
 include 'graphoenix-meta'
+include 'graphoenix-mysql'
 
