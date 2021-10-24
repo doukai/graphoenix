@@ -1,7 +1,8 @@
 !!io.graphoenix.r2dbc.config.ConnectionConfiguration
+driver: "r2dbc:mariadb"
 host: "127.0.0.1"
 port: 3306
-username: "root"
+user: "root"
 password: "root"
 database: "dev"
 maxSize: 20

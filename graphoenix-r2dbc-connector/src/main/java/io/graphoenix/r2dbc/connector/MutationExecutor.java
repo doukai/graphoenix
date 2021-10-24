@@ -1,5 +1,6 @@
 package io.graphoenix.r2dbc.connector;
 
+import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
 import io.r2dbc.spi.Batch;
 import reactor.core.publisher.Mono;
 
@@ -7,9 +8,9 @@ import java.util.List;
 
 public class MutationExecutor {
 
-    private final ConnectionCreator connectionCreator;
+    private final IConnectionCreator connectionCreator;
 
-    public MutationExecutor(ConnectionCreator connectionCreator) {
+    public MutationExecutor(IConnectionCreator connectionCreator) {
         this.connectionCreator = connectionCreator;
     }
 

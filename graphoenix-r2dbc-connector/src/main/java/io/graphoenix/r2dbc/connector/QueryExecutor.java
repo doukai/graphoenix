@@ -1,5 +1,7 @@
 package io.graphoenix.r2dbc.connector;
 
+import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
+import io.graphoenix.r2dbc.connector.dto.SelectionResult;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -8,9 +10,9 @@ import java.util.stream.Collectors;
 
 public class QueryExecutor {
 
-    private final ConnectionCreator connectionCreator;
+    private final IConnectionCreator connectionCreator;
 
-    public QueryExecutor(ConnectionCreator connectionCreator) {
+    public QueryExecutor(IConnectionCreator connectionCreator) {
         this.connectionCreator = connectionCreator;
     }
 

@@ -1,11 +1,9 @@
-!!io.graphoenix.gr2dbc.config.ConnectionConfiguration
+!!io.graphoenix.r2dbc.config.ConnectionConfiguration
+driver: "r2dbc:mariadb"
 host: "127.0.0.1"
 port: 3306
-username: "root"
+user: "root"
 password: "root"
 database: "dev"
 maxSize: 20
 maxIdleTime: 1000
-
-!!io.graphoenix.graphql.builder.config.BuilderConfiguration
-english-plural: true

@@ -1,4 +1,4 @@
-package io.graphoenix.r2dbc.connector;
+package io.graphoenix.r2dbc.connector.dto;
 
 public class SelectionResult {
     private final String name;
