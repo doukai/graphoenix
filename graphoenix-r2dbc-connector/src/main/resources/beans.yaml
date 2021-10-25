@@ -1,6 +1,0 @@
-!!io.graphoenix.gr2dbc.config.DbConfig
-host: "118.190.2.135"
-port: 3306
-username: "root"
-password: "gtime2017#"
-database: "dk_test"
