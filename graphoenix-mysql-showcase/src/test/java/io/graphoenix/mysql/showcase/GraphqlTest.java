@@ -63,7 +63,7 @@ public class GraphqlTest {
 //        Yaml yaml = new Yaml();
 //        InputStream inputStream = this.getClass()
 //                .getClassLoader()
-//                .getResourceAsStream("beans.yaml");
+//                .getResourceAsStream("application.yaml");
 //        ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
 //
 //        QueryExecutor queryExecutor = new QueryExecutor(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));
@@ -88,7 +88,7 @@ public class GraphqlTest {
 //        Yaml yaml = new Yaml();
 //        InputStream inputStream = this.getClass()
 //                .getClassLoader()
-//                .getResourceAsStream("beans.yaml");
+//                .getResourceAsStream("application.yaml");
 //        ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
 //
 //        MutationExecutor mutationExecutor = new MutationExecutor(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));
@@ -127,7 +127,7 @@ public class GraphqlTest {
 //        Yaml yaml = new Yaml();
 //        InputStream inputStream = this.getClass()
 //                .getClassLoader()
-//                .getResourceAsStream("beans.yaml");
+//                .getResourceAsStream("application.yaml");
 //        ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
 //
 //        MutationExecutor mutationExecutor = new MutationExecutor(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));
@@ -158,7 +158,7 @@ public class GraphqlTest {
 //        Yaml yaml = new Yaml();
 //        InputStream inputStream = this.getClass()
 //                .getClassLoader()
-//                .getResourceAsStream("beans.yaml");
+//                .getResourceAsStream("application.yaml");
 //        ConnectionConfiguration connectionConfiguration = yaml.load(inputStream);
 //
 //        MutationExecutor mutationExecutor = new MutationExecutor(new PoolConnectionCreator(ConnectionPoolCreator.CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration)));

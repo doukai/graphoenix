@@ -8,7 +8,7 @@ public enum YamlConfigLoader {
 
     YAML_CONFIG_LOADER;
 
-    <T> T loadAs(String name, Class<T> type) {
+    public <T> T loadAs(String name, Class<T> type) {
         Yaml yaml = new Yaml();
         InputStream inputStream = this.getClass()
                 .getClassLoader()

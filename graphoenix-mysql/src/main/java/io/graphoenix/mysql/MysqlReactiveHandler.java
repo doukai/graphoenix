@@ -7,10 +7,10 @@ import io.graphoenix.r2dbc.connector.QueryExecutor;
 
 import java.graphoenix.meta.dto.GraphQLRequestBody;
 import java.graphoenix.meta.dto.GraphQLResult;
-import java.graphoenix.meta.spi.GraphQLOperationHandler;
+import java.graphoenix.meta.spi.IGraphQLOperationHandler;
 import java.util.concurrent.Future;
 
-public class MysqlReactiveHandler implements GraphQLOperationHandler {
+public class MysqlReactiveHandler implements IGraphQLOperationHandler {
 
     private GraphqlQueryToSelect graphqlQueryToSelect;
     private GraphqlMutationToStatements graphqlMutationToStatements;

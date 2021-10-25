@@ -4,7 +4,7 @@ import java.graphoenix.meta.dto.GraphQLRequestBody;
 import java.graphoenix.meta.dto.GraphQLResult;
 import java.util.concurrent.Future;
 
-public interface GraphQLOperationHandler {
+public interface IGraphQLOperationHandler {
 
     GraphQLResult query(GraphQLRequestBody requestBody);
 
