@@ -1,7 +1,7 @@
 package io.graphoenix.common.config;
 
-import java.graphoenix.meta.dto.GraphQLResult;
-import java.util.Collections;
+import io.graphoenix.meta.dto.GraphQLResult;
+
 import java.util.List;
 
 public class GraphQLResultBuilder {

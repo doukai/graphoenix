@@ -13,8 +13,12 @@ dependencies {
     implementation project(":graphoenix-common")
     implementation "org.mariadb:r2dbc-mariadb:1.0.2"
     implementation "io.r2dbc:r2dbc-pool:0.8.7.RELEASE"
-    implementation "org.yaml:snakeyaml:1.29"
+    compileOnly "com.google.auto.factory:auto-factory:1.0.1"
+    annotationProcessor "com.google.auto.factory:auto-factory:1.0.1"
+    compileOnly "com.google.auto.service:auto-service:1.0"
+    annotationProcessor "com.google.auto.service:auto-service:1.0"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testImplementation project(":graphoenix-mysql-translator")
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
 
