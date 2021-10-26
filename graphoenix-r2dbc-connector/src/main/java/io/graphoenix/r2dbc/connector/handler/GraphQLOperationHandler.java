@@ -2,6 +2,7 @@ package io.graphoenix.r2dbc.connector.handler;
 
 import com.google.auto.service.AutoService;
 import com.google.gson.Gson;
+import io.graphoenix.common.config.AntlrManagerOperationHandler;
 import io.graphoenix.common.config.GraphQLResultBuilder;
 import io.graphoenix.r2dbc.connector.MutationExecutor;
 import io.graphoenix.r2dbc.connector.QueryExecutor;
@@ -19,8 +20,8 @@ import java.util.concurrent.Future;
 
 import static io.graphoenix.common.config.HandlerFactory.HANDLER_FACTORY;
 
-@AutoService(IGraphQLToSQLHandler.class)
-public class GraphQLOperationHandler implements IGraphQLOperationHandler {
+@AutoService(IGraphQLOperationHandler.class)
+public class GraphQLOperationHandler extends AntlrManagerOperationHandler implements IGraphQLOperationHandler {
 
     private final IGraphQLToSQLHandler graphQLToSQLHandler;
 
