@@ -6,7 +6,7 @@ import java.util.List;
 
 public class GraphQLResultBuilder {
 
-    private GraphQLResult graphQLResult;
+    private final GraphQLResult graphQLResult;
 
     public GraphQLResultBuilder(Object data) {
         this.graphQLResult = new GraphQLResult();

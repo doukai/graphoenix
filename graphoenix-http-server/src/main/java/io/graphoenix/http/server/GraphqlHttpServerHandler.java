@@ -2,11 +2,13 @@ package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
+import io.graphoenix.common.config.HandlerFactory;
 import io.graphoenix.http.server.config.ServerConfiguration;
 import io.graphoenix.http.server.dto.graphql.GraphQLRequestBody;
 import io.graphoenix.http.server.dto.graphql.GraphQLResult;
 import io.graphoenix.http.server.handler.RequestHandler;
 import io.graphoenix.http.server.handler.RequestHandlerFactory;
+import io.graphoenix.meta.spi.IGraphQLOperationHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -29,6 +31,8 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
     private final ServerConfiguration serverConfiguration;
 
+    private  IGraphQLOperationHandler graphQLOperationHandler;
+
     private static final Logger log = LoggerFactory.getLogger(GraphqlHttpServer.class);
 
     private static final String FAVICON_ICO = "/favicon.ico";
@@ -43,6 +47,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
     public GraphqlHttpServerHandler(ServerConfiguration serverConfiguration) {
         this.serverConfiguration = serverConfiguration;
+        this.graphQLOperationHandler = HandlerFactory.HANDLER_FACTORY.create(IGraphQLOperationHandler.class);
     }
 
     @Override
@@ -60,6 +65,8 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             requestBody = requestHandler.handle(request);
 
             log.info("Handle http query:{}", requestBody.getQuery());
+
+
 
             //TODO
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResult).getBytes(StandardCharsets.UTF_8)));

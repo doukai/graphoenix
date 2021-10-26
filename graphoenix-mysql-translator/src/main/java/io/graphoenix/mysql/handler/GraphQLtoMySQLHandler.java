@@ -8,6 +8,7 @@ import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
 import io.graphoenix.mysql.translator.GraphqlTypeToTable;
 
 import io.graphoenix.meta.spi.IGraphQLToSQLHandler;
+
 import java.util.List;
 
 @AutoService(IGraphQLToSQLHandler.class)
@@ -17,8 +18,7 @@ public class GraphQLtoMySQLHandler implements IGraphQLToSQLHandler {
     private final GraphqlMutationToStatements graphqlMutationToStatements;
     private final GraphqlTypeToTable graphqlTypeToTable;
 
-    public GraphQLtoMySQLHandler() {
-        GraphqlAntlrManager graphqlAntlrManager = new GraphqlAntlrManager();
+    public GraphQLtoMySQLHandler(GraphqlAntlrManager graphqlAntlrManager) {
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
         this.graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
         this.graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrManager, this.graphqlQueryToSelect);

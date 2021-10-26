@@ -54,57 +54,32 @@ public class GraphqlAntlrManager {
     }
 
     public GraphqlAntlrManager() {
-        this.graphqlOperationManager = new GraphqlOperationManager();
-        this.graphqlSchemaManager = new GraphqlSchemaManager();
-        this.graphqlDirectiveManager = new GraphqlDirectiveManager();
-        this.graphqlObjectManager = new GraphqlObjectManager();
-        this.graphqlFieldManager = new GraphqlFieldManager();
-        this.graphqlInputObjectManager = new GraphqlInputObjectManager();
-        this.graphqlInputValueManager = new GraphqlInputValueManager();
-        this.graphqlEnumManager = new GraphqlEnumManager();
-        this.graphqlScalarManager = new GraphqlScalarManager();
-        this.graphqlFragmentManager = new GraphqlFragmentManager();
+        this(
+                new GraphqlOperationManager(),
+                new GraphqlSchemaManager(),
+                new GraphqlDirectiveManager(),
+                new GraphqlObjectManager(),
+                new GraphqlFieldManager(),
+                new GraphqlInputObjectManager(),
+                new GraphqlInputValueManager(),
+                new GraphqlEnumManager(),
+                new GraphqlScalarManager(),
+                new GraphqlFragmentManager()
+        );
     }
 
     public GraphqlAntlrManager(GraphqlParser.DocumentContext documentContext) {
-        this.graphqlOperationManager = new GraphqlOperationManager();
-        this.graphqlSchemaManager = new GraphqlSchemaManager();
-        this.graphqlDirectiveManager = new GraphqlDirectiveManager();
-        this.graphqlObjectManager = new GraphqlObjectManager();
-        this.graphqlFieldManager = new GraphqlFieldManager();
-        this.graphqlInputObjectManager = new GraphqlInputObjectManager();
-        this.graphqlInputValueManager = new GraphqlInputValueManager();
-        this.graphqlEnumManager = new GraphqlEnumManager();
-        this.graphqlScalarManager = new GraphqlScalarManager();
-        this.graphqlFragmentManager = new GraphqlFragmentManager();
+        this();
         this.registerDocument(documentContext);
     }
 
     public GraphqlAntlrManager(String graphql) {
-        this.graphqlOperationManager = new GraphqlOperationManager();
-        this.graphqlSchemaManager = new GraphqlSchemaManager();
-        this.graphqlDirectiveManager = new GraphqlDirectiveManager();
-        this.graphqlObjectManager = new GraphqlObjectManager();
-        this.graphqlFieldManager = new GraphqlFieldManager();
-        this.graphqlInputObjectManager = new GraphqlInputObjectManager();
-        this.graphqlInputValueManager = new GraphqlInputValueManager();
-        this.graphqlEnumManager = new GraphqlEnumManager();
-        this.graphqlScalarManager = new GraphqlScalarManager();
-        this.graphqlFragmentManager = new GraphqlFragmentManager();
+        this();
         this.registerDocument(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
     }
 
     public GraphqlAntlrManager(InputStream inputStream) throws IOException {
-        this.graphqlOperationManager = new GraphqlOperationManager();
-        this.graphqlSchemaManager = new GraphqlSchemaManager();
-        this.graphqlDirectiveManager = new GraphqlDirectiveManager();
-        this.graphqlObjectManager = new GraphqlObjectManager();
-        this.graphqlFieldManager = new GraphqlFieldManager();
-        this.graphqlInputObjectManager = new GraphqlInputObjectManager();
-        this.graphqlInputValueManager = new GraphqlInputValueManager();
-        this.graphqlEnumManager = new GraphqlEnumManager();
-        this.graphqlScalarManager = new GraphqlScalarManager();
-        this.graphqlFragmentManager = new GraphqlFragmentManager();
+        this();
         this.registerDocument(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(inputStream));
     }
 
@@ -118,6 +93,19 @@ public class GraphqlAntlrManager {
 
     public void registerDocument(GraphqlParser.DocumentContext documentContext) {
         documentContext.definition().forEach(this::registerDefinition);
+    }
+
+    public GraphqlParser.OperationTypeContext getOperationType(String graphql) {
+        return getOperationType(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    public GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.DocumentContext documentContext) {
+        if (documentContext.definition().size() == 1) {
+            if (documentContext.definition(0).operationDefinition() != null) {
+                return documentContext.definition(0).operationDefinition().operationType();
+            }
+        }
+        return null;
     }
 
     protected void registerDefinition(GraphqlParser.DefinitionContext definitionContext) {
