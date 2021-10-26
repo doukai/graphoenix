@@ -5,9 +5,9 @@ import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
 import io.graphoenix.r2dbc.connector.MutationExecutor;
 import io.graphoenix.r2dbc.connector.QueryExecutor;
 
-import java.graphoenix.meta.dto.GraphQLRequestBody;
-import java.graphoenix.meta.dto.GraphQLResult;
-import java.graphoenix.meta.spi.IGraphQLOperationHandler;
+import io.graphoenix.meta.dto.GraphQLRequestBody;
+import io.graphoenix.meta.dto.GraphQLResult;
+import io.graphoenix.meta.spi.IGraphQLOperationHandler;
 import java.util.concurrent.Future;
 
 public class MysqlReactiveHandler implements IGraphQLOperationHandler {

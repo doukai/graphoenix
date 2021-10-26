@@ -1,4 +1,4 @@
-package java.graphoenix.meta.spi;
+package io.graphoenix.meta.spi;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public interface IGraphQLToSQLHandler {
 
     List<String> mutationOperationToMergeSQLList(String mutationOperationGraphQL);
 
-    String typeDefinitionToCreateTableSql(String typeDefinitionGraphQL);
+    List<String> typeDefinitionToCreateTableSql(String typeDefinitionGraphQL);
 
     List<String> typeDefinitionToAlterTableSql(String typeDefinitionGraphQL);
 }

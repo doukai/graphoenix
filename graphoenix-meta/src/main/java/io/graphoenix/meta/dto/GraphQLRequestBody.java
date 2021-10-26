@@ -1,4 +1,4 @@
-package java.graphoenix.meta.dto;
+package io.graphoenix.meta.dto;
 
 import java.util.Map;
 

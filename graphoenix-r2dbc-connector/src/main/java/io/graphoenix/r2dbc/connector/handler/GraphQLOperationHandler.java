@@ -1,5 +1,6 @@
 package io.graphoenix.r2dbc.connector.handler;
 
+import com.google.auto.service.AutoService;
 import com.google.gson.Gson;
 import io.graphoenix.common.config.GraphQLResultBuilder;
 import io.graphoenix.r2dbc.connector.MutationExecutor;
@@ -8,16 +9,17 @@ import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import reactor.core.publisher.Mono;
 
-import java.graphoenix.meta.dto.GraphQLRequestBody;
-import java.graphoenix.meta.dto.GraphQLResult;
-import java.graphoenix.meta.spi.IGraphQLOperationHandler;
-import java.graphoenix.meta.spi.IGraphQLToSQLHandler;
+import io.graphoenix.meta.dto.GraphQLRequestBody;
+import io.graphoenix.meta.dto.GraphQLResult;
+import io.graphoenix.meta.spi.IGraphQLOperationHandler;
+import io.graphoenix.meta.spi.IGraphQLToSQLHandler;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import static io.graphoenix.common.config.YamlConfigLoader.YAML_CONFIG_LOADER;
+import static io.graphoenix.common.config.HandlerFactory.HANDLER_FACTORY;
 
+@AutoService(IGraphQLToSQLHandler.class)
 public class GraphQLOperationHandler implements IGraphQLOperationHandler {
 
     private final IGraphQLToSQLHandler graphQLToSQLHandler;
@@ -26,10 +28,9 @@ public class GraphQLOperationHandler implements IGraphQLOperationHandler {
 
     private final MutationExecutor mutationExecutor;
 
-    public GraphQLOperationHandler(IGraphQLToSQLHandler graphQLToSQLHandler) {
+    public GraphQLOperationHandler(ConnectionConfiguration connectionConfiguration) {
 
-        this.graphQLToSQLHandler = graphQLToSQLHandler;
-        ConnectionConfiguration connectionConfiguration = YAML_CONFIG_LOADER.loadAs("application.yaml", ConnectionConfiguration.class);
+        this.graphQLToSQLHandler = HANDLER_FACTORY.create(IGraphQLToSQLHandler.class);
         ConnectionCreator connectionCreator = new ConnectionCreator(connectionConfiguration);
         this.queryExecutor = new QueryExecutor(connectionCreator);
         this.mutationExecutor = new MutationExecutor(connectionCreator);

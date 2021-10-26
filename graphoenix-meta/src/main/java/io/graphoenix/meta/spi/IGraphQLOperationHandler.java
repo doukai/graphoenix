@@ -1,7 +1,7 @@
-package java.graphoenix.meta.spi;
+package io.graphoenix.meta.spi;
 
-import java.graphoenix.meta.dto.GraphQLRequestBody;
-import java.graphoenix.meta.dto.GraphQLResult;
+import io.graphoenix.meta.dto.GraphQLRequestBody;
+import io.graphoenix.meta.dto.GraphQLResult;
 import java.util.concurrent.Future;
 
 public interface IGraphQLOperationHandler {
