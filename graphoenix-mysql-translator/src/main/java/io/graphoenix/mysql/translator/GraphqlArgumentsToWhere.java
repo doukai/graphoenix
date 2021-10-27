@@ -2,7 +2,7 @@ package io.graphoenix.mysql.translator;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.meta.antlr.IGraphqlDocumentManager;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
@@ -27,9 +27,9 @@ import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 
 public class GraphqlArgumentsToWhere {
 
-    private final GraphqlAntlrManager manager;
+    private final IGraphqlDocumentManager manager;
 
-    public GraphqlArgumentsToWhere(GraphqlAntlrManager manager) {
+    public GraphqlArgumentsToWhere(IGraphqlDocumentManager manager) {
         this.manager = manager;
     }
 

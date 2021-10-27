@@ -1,8 +1,8 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.antlr.common.utils.DocumentUtil;
-import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.common.utils.DocumentUtil;
+import io.graphoenix.meta.antlr.IGraphqlDocumentManager;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -29,10 +29,10 @@ import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 
 public class GraphqlMutationToStatements {
 
-    private final GraphqlAntlrManager manager;
+    private final IGraphqlDocumentManager manager;
     private final GraphqlQueryToSelect graphqlQueryToSelect;
 
-    public GraphqlMutationToStatements(GraphqlAntlrManager manager, GraphqlQueryToSelect graphqlQueryToSelect) {
+    public GraphqlMutationToStatements(IGraphqlDocumentManager manager, GraphqlQueryToSelect graphqlQueryToSelect) {
         this.manager = manager;
         this.graphqlQueryToSelect = graphqlQueryToSelect;
     }
