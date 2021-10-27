@@ -1,7 +1,7 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.meta.antlr.IGraphqlSchemaManager;
+import io.graphoenix.spi.antlr.IGraphqlSchemaManager;
 
 public class GraphqlSchemaManager implements IGraphqlSchemaManager {
 

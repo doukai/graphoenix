@@ -3,18 +3,21 @@ package io.graphoenix.r2dbc.connector.handler;
 import com.google.auto.service.AutoService;
 import com.google.gson.Gson;
 import io.graphoenix.common.config.GraphQLResultBuilder;
-import io.graphoenix.meta.antlr.IGraphqlDocumentManager;
-import io.graphoenix.meta.dto.SQLStatements;
-import io.graphoenix.meta.spi.ISQLHandler;
+import io.graphoenix.common.constant.Hammurabi;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.dto.SQLStatements;
+import io.graphoenix.spi.handler.ISQLHandler;
 import io.graphoenix.r2dbc.connector.MutationExecutor;
 import io.graphoenix.r2dbc.connector.QueryExecutor;
 import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import reactor.core.publisher.Mono;
 
-import io.graphoenix.meta.dto.GraphQLResult;
+import io.graphoenix.spi.dto.GraphQLResult;
 
 import java.util.Map;
+
+import static io.graphoenix.common.config.YamlConfigLoader.YAML_CONFIG_LOADER;
 
 @AutoService(ISQLHandler.class)
 public class ReactiveSQLHandler implements ISQLHandler {
@@ -26,7 +29,7 @@ public class ReactiveSQLHandler implements ISQLHandler {
     @Override
     public void assign(IGraphqlDocumentManager manager) {
 
-        ConnectionCreator connectionCreator = new ConnectionCreator(null);
+        ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_LOADER.loadAs(Hammurabi.configName, ConnectionConfiguration.class));
         this.queryExecutor = new QueryExecutor(connectionCreator);
         this.mutationExecutor = new MutationExecutor(connectionCreator);
     }

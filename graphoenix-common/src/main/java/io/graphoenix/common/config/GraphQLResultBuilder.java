@@ -1,6 +1,6 @@
 package io.graphoenix.common.config;
 
-import io.graphoenix.meta.dto.GraphQLResult;
+import io.graphoenix.spi.dto.GraphQLResult;
 
 import java.util.List;
 

@@ -1,9 +1,0 @@
-!!io.graphoenix.gr2dbc.config.ConnectionConfiguration
-username: "root"
-password: "root"
-database: "dev"
-maxSize: 20
-maxIdleTime: 1000
-
-!!io.graphoenix.graphql.builder.config.BuilderConfiguration
-english-plural: true
