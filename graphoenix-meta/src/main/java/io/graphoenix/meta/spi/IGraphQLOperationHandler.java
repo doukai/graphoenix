@@ -1,18 +1,15 @@
 package io.graphoenix.meta.spi;
 
 import io.graphoenix.meta.OperationType;
-import io.graphoenix.meta.dto.GraphQLRequestBody;
-import io.graphoenix.meta.dto.GraphQLResult;
+import io.graphoenix.meta.antlr.IGraphqlDocumentManager;
 
-import java.util.concurrent.Future;
+public interface IGraphQLOperationHandler<I, O> {
 
-public interface IGraphQLOperationHandler {
+    void assign(IGraphqlDocumentManager manager);
 
-    OperationType getType(GraphQLRequestBody requestBody);
+    O query(I object);
 
-    GraphQLResult query(GraphQLRequestBody requestBody);
+    O mutation(I object);
 
-    GraphQLResult mutation(GraphQLRequestBody requestBody);
-
-    Future<GraphQLResult> subscription(GraphQLRequestBody requestBody);
+    O subscription(I object);
 }

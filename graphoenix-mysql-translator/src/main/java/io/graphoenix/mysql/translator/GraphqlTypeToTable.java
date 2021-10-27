@@ -1,8 +1,8 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.antlr.common.utils.DocumentUtil;
-import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.common.utils.DocumentUtil;
+import io.graphoenix.meta.antlr.IGraphqlDocumentManager;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -18,9 +18,9 @@ import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 
 public class GraphqlTypeToTable {
 
-    final private GraphqlAntlrManager manager;
+    final private IGraphqlDocumentManager manager;
 
-    public GraphqlTypeToTable(GraphqlAntlrManager graphqlAntlrManager) {
+    public GraphqlTypeToTable(IGraphqlDocumentManager graphqlAntlrManager) {
         this.manager = graphqlAntlrManager;
     }
 
@@ -33,7 +33,7 @@ public class GraphqlTypeToTable {
         return createTablesSql(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
     }
 
-    public List<String> createTablesSql(GraphqlAntlrManager manager) {
+    public List<String> createTablesSql(IGraphqlDocumentManager manager) {
         return manager.getObjects().map(this::createTable).map(CreateTable::toString).collect(Collectors.toList());
     }
 

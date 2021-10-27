@@ -2,7 +2,7 @@ package io.graphoenix.meta.dto;
 
 import java.util.Map;
 
-public class GraphQLRequestBody {
+public class GraphQLRequestBody implements HandlerObject {
 
     private String query;
 

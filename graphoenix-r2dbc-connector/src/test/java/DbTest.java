@@ -1,6 +1,6 @@
 import io.graphoenix.common.config.YamlConfigLoader;
 import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
-import io.graphoenix.r2dbc.connector.handler.GraphQLOperationHandler;
+import io.graphoenix.r2dbc.connector.handler.ReactiveSQLHandler;
 import org.junit.jupiter.api.Test;
 
 public class DbTest {
@@ -9,7 +9,7 @@ public class DbTest {
     void createTable() {
 
         ConnectionConfiguration connectionConfiguration = YamlConfigLoader.YAML_CONFIG_LOADER.loadAs("beans.yaml", ConnectionConfiguration.class);
-        GraphQLOperationHandler graphQLOperationHandler = new GraphQLOperationHandler(connectionConfiguration);
+        ReactiveSQLHandler graphQLOperationHandler = new ReactiveSQLHandler(connectionConfiguration);
 
         String a = "";
 //        Yaml yaml = new Yaml();

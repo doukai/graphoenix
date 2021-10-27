@@ -1,16 +1,7 @@
 package io.graphoenix.meta.spi;
 
-import java.util.List;
+import io.graphoenix.meta.dto.GraphQLRequestBody;
+import io.graphoenix.meta.dto.SQLStatements;
 
-public interface IGraphQLToSQLHandler {
-
-    String queryOperationToSelectSQL(String queryOperationGraphQL);
-
-    List<String> queryOperationToSelectSQLList(String queryOperationGraphQL);
-
-    List<String> mutationOperationToMergeSQLList(String mutationOperationGraphQL);
-
-    List<String> typeDefinitionToCreateTableSql(String typeDefinitionGraphQL);
-
-    List<String> typeDefinitionToAlterTableSql(String typeDefinitionGraphQL);
+public interface IGraphQLToSQLHandler extends IGraphQLOperationHandler<GraphQLRequestBody, SQLStatements> {
 }

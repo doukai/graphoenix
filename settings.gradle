@@ -1,5 +1,4 @@
 rootProject.name = 'graphoenix'
-include 'graphoenix-antlr'
 include 'graphoenix-graphql-builder'
 include 'graphoenix-mysql-translator'
 include 'graphoenix-r2dbc-connector'

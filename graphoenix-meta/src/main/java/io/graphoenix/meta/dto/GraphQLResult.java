@@ -2,7 +2,7 @@ package io.graphoenix.meta.dto;
 
 import java.util.List;
 
-public class GraphQLResult {
+public class GraphQLResult implements HandlerObject {
 
     private Object data;
 

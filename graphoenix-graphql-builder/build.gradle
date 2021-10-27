@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(":graphoenix-antlr")
+    implementation project(":graphoenix-common")
     implementation "com.google.guava:guava:30.1.1-jre"
     implementation 'com.google.code.gson:gson:2.8.8'
     implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
