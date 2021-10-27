@@ -4,12 +4,12 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.config.HandlerFactory;
-import io.graphoenix.meta.OperationType;
-import io.graphoenix.meta.antlr.IGraphqlDocumentManager;
-import io.graphoenix.meta.dto.GraphQLRequestBody;
-import io.graphoenix.meta.dto.GraphQLResult;
-import io.graphoenix.meta.spi.IGraphQLOperationHandler;
-import io.graphoenix.meta.spi.IGraphQLOperationPipeline;
+import io.graphoenix.spi.OperationType;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.dto.GraphQLRequestBody;
+import io.graphoenix.spi.dto.GraphQLResult;
+import io.graphoenix.spi.handler.IGraphQLOperationHandler;
+import io.graphoenix.spi.handler.IGraphQLOperationPipeline;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,18 +18,17 @@ import java.util.List;
 public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> {
 
     private final IGraphqlDocumentManager graphqlDocumentManager;
-    private final List<IGraphQLOperationHandler<?, ?>> handlerList;
-    private final String configName;
+    private final List<IGraphQLOperationHandler<Object, Object>> handlerList;
 
-    public GraphQLOperationPipeline(@Provided IGraphqlDocumentManager manager, String configName) {
+    public GraphQLOperationPipeline(@Provided IGraphqlDocumentManager manager) {
         this.graphqlDocumentManager = manager;
         this.handlerList = new ArrayList<>();
-        this.configName = configName;
     }
 
     @Override
-    public <H extends IGraphQLOperationHandler<?, ?>> GraphQLOperationPipeline push(Class<H> handleClass) {
-        IGraphQLOperationHandler<?, ?> handler = HandlerFactory.HANDLER_FACTORY.create(handleClass);
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <H extends IGraphQLOperationHandler> GraphQLOperationPipeline push(Class<H> handlerClass) {
+        IGraphQLOperationHandler<Object, Object> handler = HandlerFactory.HANDLER_FACTORY.create(handlerClass);
         handler.assign(this.graphqlDocumentManager);
         handlerList.add(handler);
         return this;
@@ -63,7 +62,7 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
         assert handlerList.size() > 0;
         OperationType type = this.getOperationType(request);
         Object result = request;
-        for (IGraphQLOperationHandler<?, ?> handler : this.handlerList) {
+        for (IGraphQLOperationHandler<Object, Object> handler : this.handlerList) {
             switch (type) {
                 case QUERY:
                     result = handler.query(result);

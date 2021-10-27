@@ -1,7 +1,7 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.meta.antlr.IGraphqlEnumManager;
+import io.graphoenix.spi.antlr.IGraphqlEnumManager;
 
 import java.util.HashMap;
 import java.util.Map;

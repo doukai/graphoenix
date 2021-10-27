@@ -1,8 +1,8 @@
 package io.graphoenix.common.handler;
 
-import io.graphoenix.common.config.GraphQLOperationPipelineFactory;
+//import io.graphoenix.common.config.GraphQLOperationPipelineFactory;
 import io.graphoenix.common.manager.*;
-import io.graphoenix.meta.antlr.*;
+import io.graphoenix.spi.antlr.*;
 
 public enum GraphQLOperationPipelineBootstrap {
 
@@ -135,11 +135,6 @@ public enum GraphQLOperationPipelineBootstrap {
 
     public GraphQLOperationPipeline startup() {
 
-        return new GraphQLOperationPipelineFactory(this::getGraphqlDocumentManager).create("application.yaml");
-    }
-
-    public GraphQLOperationPipeline startup(String configName) {
-
-        return new GraphQLOperationPipelineFactory(this::getGraphqlDocumentManager).create(configName);
+        return new GraphQLOperationPipelineFactory(this::getGraphqlDocumentManager).create();
     }
 }

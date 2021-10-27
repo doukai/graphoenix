@@ -4,7 +4,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.utils.DocumentUtil;
-import io.graphoenix.meta.antlr.*;
+import io.graphoenix.spi.antlr.*;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,7 +1,7 @@
 package io.graphoenix.http.server.handler;
 
 import com.google.gson.Gson;
-import io.graphoenix.http.server.dto.graphql.GraphQLRequestBody;
+import io.graphoenix.spi.dto.GraphQLRequestBody;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 

@@ -2,6 +2,9 @@ package io.graphoenix.http.server;
 
 import io.graphoenix.http.server.config.NettyConfiguration;
 import io.graphoenix.http.server.config.ServerConfiguration;
+import io.graphoenix.spi.dto.GraphQLRequestBody;
+import io.graphoenix.spi.dto.GraphQLResult;
+import io.graphoenix.spi.handler.IGraphQLOperationPipeline;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -27,24 +30,16 @@ public class GraphqlHttpServer {
 
     private final ServerConfiguration serverConfiguration;
 
-    public GraphqlHttpServer(NettyConfiguration nettyConfiguration, ServerConfiguration serverConfiguration) {
+    private final IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline;
+
+    public GraphqlHttpServer(NettyConfiguration nettyConfiguration, ServerConfiguration serverConfiguration, IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline) {
         this.nettyConfiguration = nettyConfiguration;
         this.serverConfiguration = serverConfiguration;
+        this.graphQLOperationPipeline = graphQLOperationPipeline;
     }
 
-    public GraphqlHttpServer(NettyConfiguration nettyConfiguration) {
-        this.nettyConfiguration = nettyConfiguration;
-        this.serverConfiguration = new ServerConfiguration();
-    }
-
-    public GraphqlHttpServer(ServerConfiguration serverConfiguration) {
-        this.nettyConfiguration = new NettyConfiguration();
-        this.serverConfiguration = serverConfiguration;
-    }
-
-    public GraphqlHttpServer() {
-        this.nettyConfiguration = new NettyConfiguration();
-        this.serverConfiguration = new ServerConfiguration();
+    public GraphqlHttpServer(IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline) {
+        this(new NettyConfiguration(), new ServerConfiguration(), graphQLOperationPipeline);
     }
 
     public void run() throws Exception {
@@ -85,7 +80,7 @@ public class GraphqlHttpServer {
                     .option(ChannelOption.SO_BACKLOG, serverConfiguration.getSoBackLog())
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new GraphqlHttpServerInitializer(sslCtx));
+                    .childHandler(new GraphqlHttpServerInitializer(sslCtx, this.graphQLOperationPipeline));
 
             Channel ch = b.bind(serverConfiguration.getPort()).sync().channel();
 

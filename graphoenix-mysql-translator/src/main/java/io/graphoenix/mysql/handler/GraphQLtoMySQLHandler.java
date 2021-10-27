@@ -1,16 +1,15 @@
 package io.graphoenix.mysql.handler;
 
 import com.google.auto.service.AutoService;
-import io.graphoenix.meta.antlr.IGraphqlDocumentManager;
-import io.graphoenix.meta.dto.GraphQLRequestBody;
-import io.graphoenix.meta.dto.SQLStatements;
-import io.graphoenix.mysql.config.MysqlTranslateConfig;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.dto.GraphQLRequestBody;
+import io.graphoenix.spi.dto.SQLStatements;
 import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
 import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
 import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
 import io.graphoenix.mysql.translator.GraphqlTypeToTable;
 
-import io.graphoenix.meta.spi.IGraphQLToSQLHandler;
+import io.graphoenix.spi.handler.IGraphQLToSQLHandler;
 
 @AutoService(IGraphQLToSQLHandler.class)
 public class GraphQLtoMySQLHandler implements IGraphQLToSQLHandler {
@@ -18,14 +17,14 @@ public class GraphQLtoMySQLHandler implements IGraphQLToSQLHandler {
     private GraphqlQueryToSelect graphqlQueryToSelect;
     private GraphqlMutationToStatements graphqlMutationToStatements;
     private GraphqlTypeToTable graphqlTypeToTable;
-    private MysqlTranslateConfig config;
+//    private MysqlTranslateConfig config;
 
     @Override
     public void assign(IGraphqlDocumentManager manager) {
         this.graphqlQueryToSelect = new GraphqlQueryToSelect(manager, new GraphqlArgumentsToWhere(manager));
         this.graphqlMutationToStatements = new GraphqlMutationToStatements(manager, this.graphqlQueryToSelect);
         this.graphqlTypeToTable = new GraphqlTypeToTable(manager);
-        this.config = config;
+//        this.config = YAML_CONFIG_LOADER.loadAs(Hammurabi.configName, MysqlTranslateConfig.class);
     }
 
     @Override

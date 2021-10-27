@@ -2,7 +2,7 @@ package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.utils.DocumentUtil;
-import io.graphoenix.meta.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;

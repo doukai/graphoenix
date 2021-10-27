@@ -1,7 +1,7 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.meta.antlr.IGraphqlFragmentManager;
+import io.graphoenix.spi.antlr.IGraphqlFragmentManager;
 
 import java.util.Map;
 import java.util.Optional;

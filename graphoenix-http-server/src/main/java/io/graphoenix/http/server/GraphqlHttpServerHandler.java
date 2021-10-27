@@ -2,20 +2,11 @@ package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
-import io.graphoenix.common.config.GraphQLOperationPipelineFactory;
-import io.graphoenix.common.config.HandlerFactory;
-import io.graphoenix.common.handler.GraphQLOperationPipeline;
-import io.graphoenix.common.handler.GraphQLOperationPipelineBootstrap;
-import io.graphoenix.common.manager.GraphqlDocumentManager;
-import io.graphoenix.http.server.config.ServerConfiguration;
-import io.graphoenix.http.server.dto.graphql.GraphQLRequestBody;
-import io.graphoenix.http.server.dto.graphql.GraphQLResult;
 import io.graphoenix.http.server.handler.RequestHandler;
 import io.graphoenix.http.server.handler.RequestHandlerFactory;
-import io.graphoenix.meta.config.MysqlTranslateConfig;
-import io.graphoenix.meta.spi.IGraphQLOperationHandler2;
-import io.graphoenix.meta.spi.IGraphQLToSQLHandler;
-import io.graphoenix.meta.spi.ISQLHandler;
+import io.graphoenix.spi.dto.GraphQLRequestBody;
+import io.graphoenix.spi.dto.GraphQLResult;
+import io.graphoenix.spi.handler.IGraphQLOperationPipeline;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -31,15 +22,12 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
-import static io.graphoenix.common.handler.GraphQLOperationPipelineBootstrap.GRAPHQL_OPERATION_PIPELINE_BOOTSTRAP;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    private final ServerConfiguration serverConfiguration;
-
-    private IGraphQLOperationHandler2 graphQLOperationHandler;
+    private final IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline;
 
     private static final Logger log = LoggerFactory.getLogger(GraphqlHttpServer.class);
 
@@ -49,13 +37,8 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private static final AsciiString CONTENT_TYPE = AsciiString.cached("Content-Type");
     private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
-    public GraphqlHttpServerHandler() {
-        this.serverConfiguration = new ServerConfiguration();
-    }
-
-    public GraphqlHttpServerHandler(ServerConfiguration serverConfiguration) {
-        this.serverConfiguration = serverConfiguration;
-        this.graphQLOperationHandler = HandlerFactory.HANDLER_FACTORY.create(IGraphQLOperationHandler2.class);
+    public GraphqlHttpServerHandler(IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline) {
+        this.graphQLOperationPipeline = graphQLOperationPipeline;
     }
 
     @Override
@@ -67,18 +50,13 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         }
         RequestHandler requestHandler = RequestHandlerFactory.create(request.method());
         GraphQLRequestBody requestBody;
-        GraphQLResult graphQLResult = new GraphQLResult();
+        GraphQLResult graphQLResult = null;
         FullHttpResponse response;
         try {
             requestBody = requestHandler.handle(request);
 
             log.info("Handle http query:{}", requestBody.getQuery());
-            GraphQLOperationPipeline graphQLOperationPipeline =
-                    GRAPHQL_OPERATION_PIPELINE_BOOTSTRAP
-                            .startup()
-                            .push(IGraphQLToSQLHandler.class)
-                            .push(ISQLHandler.class);
-
+            graphQLResult = graphQLOperationPipeline.order(requestBody);
 
             //TODO
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResult).getBytes(StandardCharsets.UTF_8)));
