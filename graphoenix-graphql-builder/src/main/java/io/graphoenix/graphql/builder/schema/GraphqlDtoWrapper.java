@@ -1,10 +1,10 @@
 package io.graphoenix.graphql.builder.schema;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
 import io.graphoenix.graphql.builder.schema.dto.GraphqlDirective;
 import io.graphoenix.graphql.builder.schema.dto.GraphqlField;
 import io.graphoenix.graphql.builder.schema.dto.GraphqlObject;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 
 public class GraphqlDtoWrapper {
 
-    private final GraphqlAntlrManager manager;
+    private final IGraphqlDocumentManager manager;
 
-    public GraphqlDtoWrapper(GraphqlAntlrManager manager) {
+    public GraphqlDtoWrapper(IGraphqlDocumentManager manager) {
         this.manager = manager;
     }
 

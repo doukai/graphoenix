@@ -1,15 +1,15 @@
 package io.graphoenix.graphql.builder.introspection;
 
-import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 
 import java.io.IOException;
 import java.io.StringWriter;
 
 public class IntrospectionMutationBuilder {
 
-    private final GraphqlAntlrManager manager;
+    private final IGraphqlDocumentManager manager;
 
-    public IntrospectionMutationBuilder(GraphqlAntlrManager manager) {
+    public IntrospectionMutationBuilder(IGraphqlDocumentManager manager) {
         this.manager = manager;
     }
 

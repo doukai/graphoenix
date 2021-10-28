@@ -78,12 +78,11 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
 
     @Override
     public GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.DocumentContext documentContext) {
-        if (documentContext.definition().size() == 1) {
-            if (documentContext.definition(0).operationDefinition() != null) {
-                return documentContext.definition(0).operationDefinition().operationType();
-            }
-        }
-        return null;
+        return documentContext.definition().stream()
+                .filter(definitionContext -> definitionContext.operationDefinition() != null)
+                .findFirst()
+                .map(definitionContext -> definitionContext.operationDefinition().operationType())
+                .orElse(null);
     }
 
     protected void registerDefinition(GraphqlParser.DefinitionContext definitionContext) {

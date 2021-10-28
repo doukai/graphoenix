@@ -29,7 +29,7 @@ public class ReactiveSQLHandler implements ISQLHandler {
     @Override
     public void assign(IGraphqlDocumentManager manager) {
 
-        ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_LOADER.loadAs(Hammurabi.configName, ConnectionConfiguration.class));
+        ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_LOADER.loadAs(Hammurabi.CONFIG_FILE_NAME, ConnectionConfiguration.class));
         this.queryExecutor = new QueryExecutor(connectionCreator);
         this.mutationExecutor = new MutationExecutor(connectionCreator);
     }

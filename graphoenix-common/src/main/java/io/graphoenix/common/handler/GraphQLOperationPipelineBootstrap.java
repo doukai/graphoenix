@@ -1,6 +1,5 @@
 package io.graphoenix.common.handler;
 
-//import io.graphoenix.common.config.GraphQLOperationPipelineFactory;
 import io.graphoenix.common.manager.*;
 import io.graphoenix.spi.antlr.*;
 
@@ -134,7 +133,6 @@ public enum GraphQLOperationPipelineBootstrap {
     }
 
     public GraphQLOperationPipeline startup() {
-
         return new GraphQLOperationPipelineFactory(this::getGraphqlDocumentManager).create();
     }
 }

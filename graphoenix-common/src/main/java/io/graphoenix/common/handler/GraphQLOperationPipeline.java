@@ -4,13 +4,16 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.config.HandlerFactory;
-import io.graphoenix.spi.OperationType;
+import io.graphoenix.spi.handler.OperationType;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.GraphQLRequestBody;
 import io.graphoenix.spi.dto.GraphQLResult;
 import io.graphoenix.spi.handler.IGraphQLOperationHandler;
 import io.graphoenix.spi.handler.IGraphQLOperationPipeline;
+import io.graphoenix.spi.task.GraphQLTaskType;
+import io.graphoenix.spi.task.IGraphQLTask;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,10 +22,12 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
 
     private final IGraphqlDocumentManager graphqlDocumentManager;
     private final List<IGraphQLOperationHandler<Object, Object>> handlerList;
+    private final List<IGraphQLTask<Object>> taskList;
 
     public GraphQLOperationPipeline(@Provided IGraphqlDocumentManager manager) {
         this.graphqlDocumentManager = manager;
         this.handlerList = new ArrayList<>();
+        this.taskList = new ArrayList<>();
     }
 
     @Override
@@ -31,6 +36,48 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
         IGraphQLOperationHandler<Object, Object> handler = HandlerFactory.HANDLER_FACTORY.create(handlerClass);
         handler.assign(this.graphqlDocumentManager);
         handlerList.add(handler);
+        return this;
+    }
+
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <H extends IGraphQLTask> GraphQLOperationPipeline task(Class<H> taskClass, Object input) {
+        IGraphQLTask<Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
+        task.init(input, GraphQLTaskType.BLOCK);
+        task.assign(this.graphqlDocumentManager);
+        taskList.add(task);
+        return this;
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <H extends IGraphQLTask> GraphQLOperationPipeline task(Class<H> taskClass) {
+        IGraphQLTask<Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
+        task.init(GraphQLTaskType.BLOCK);
+        task.assign(this.graphqlDocumentManager);
+        taskList.add(task);
+        return this;
+    }
+
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <H extends IGraphQLTask> GraphQLOperationPipeline asyncTask(Class<H> taskClass, Object input) {
+        IGraphQLTask<Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
+        task.init(input, GraphQLTaskType.ASYNC);
+        task.assign(this.graphqlDocumentManager);
+        taskList.add(task);
+        return this;
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <H extends IGraphQLTask> GraphQLOperationPipeline asyncTask(Class<H> taskClass) {
+        IGraphQLTask<Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
+        task.init(GraphQLTaskType.ASYNC);
+        task.assign(this.graphqlDocumentManager);
+        taskList.add(task);
         return this;
     }
 
@@ -59,7 +106,7 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
 
     @Override
     public GraphQLResult order(GraphQLRequestBody request) {
-        assert handlerList.size() > 0;
+        assert this.handlerList.size() > 0;
         OperationType type = this.getOperationType(request);
         Object result = request;
         for (IGraphQLOperationHandler<Object, Object> handler : this.handlerList) {
@@ -77,5 +124,26 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
         }
         assert result instanceof GraphQLResult;
         return (GraphQLResult) result;
+    }
+
+    @Override
+    public GraphQLOperationPipeline runTask() {
+        this.taskList.parallelStream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.ASYNC)).forEach(graphQLTask -> {
+            new Thread(() -> {
+                try {
+                    graphQLTask.process();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        });
+        this.taskList.stream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.BLOCK)).forEachOrdered(graphQLTask -> {
+            try {
+                graphQLTask.process();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return this;
     }
 }
