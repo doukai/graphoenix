@@ -23,6 +23,11 @@ public class GraphQLTypeInputStreamRegisterTask implements IGraphQLTypeInputStre
     }
 
     @Override
+    public void init(InputStream inputStream) {
+        this.inputStream = inputStream;
+    }
+
+    @Override
     public void init(InputStream inputStream, GraphQLTaskType type) {
         this.inputStream = inputStream;
         this.type = type;
@@ -39,8 +44,9 @@ public class GraphQLTypeInputStreamRegisterTask implements IGraphQLTypeInputStre
     }
 
     @Override
-    public void process() throws IOException {
+    public Void process() throws IOException {
         this.graphqlDocumentManager.registerDocument(this.inputStream);
         inputStream.close();
+        return null;
     }
 }

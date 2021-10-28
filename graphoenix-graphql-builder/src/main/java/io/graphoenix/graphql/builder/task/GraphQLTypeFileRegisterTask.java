@@ -23,6 +23,11 @@ public class GraphQLTypeFileRegisterTask implements IGraphQLTypeFileRegisterTask
     }
 
     @Override
+    public void init(String fileName) {
+        this.fileName = fileName;
+    }
+
+    @Override
     public void init(String fileName, GraphQLTaskType type) {
         this.fileName = fileName;
         this.type = type;
@@ -39,8 +44,9 @@ public class GraphQLTypeFileRegisterTask implements IGraphQLTypeFileRegisterTask
     }
 
     @Override
-    public void process() throws IOException {
+    public Void process() throws IOException {
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(this.fileName);
         this.graphqlDocumentManager.registerDocument(inputStream);
+        return null;
     }
 }

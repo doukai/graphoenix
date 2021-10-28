@@ -22,6 +22,11 @@ public class GraphQLIntrospectionTypeRegisterTask implements IGraphQLIntrospecti
     }
 
     @Override
+    public void init(Void input) {
+
+    }
+
+    @Override
     public void init(Void input, GraphQLTaskType type) {
         this.type = type;
     }
@@ -37,8 +42,9 @@ public class GraphQLIntrospectionTypeRegisterTask implements IGraphQLIntrospecti
     }
 
     @Override
-    public void process() throws IOException {
+    public Void process() throws IOException {
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(Hammurabi.INTROSPECTION_TYPES_FILE_NAME);
         this.graphqlDocumentManager.registerDocument(inputStream);
+        return null;
     }
 }

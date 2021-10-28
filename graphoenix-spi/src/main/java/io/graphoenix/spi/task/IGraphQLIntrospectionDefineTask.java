@@ -1,4 +1,4 @@
 package io.graphoenix.spi.task;
 
-public interface IGraphQLIntrospectionDefineTask extends IGraphQLTask<String> {
+public interface IGraphQLIntrospectionDefineTask extends IGraphQLTask<String, Void> {
 }
