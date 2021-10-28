@@ -1,4 +1,4 @@
 package io.graphoenix.spi.task;
 
-public interface IGraphQLTypeFileRegisterTask extends IGraphQLTask<String> {
+public interface IGraphQLTypeFileRegisterTask extends IGraphQLTask<String, Void> {
 }

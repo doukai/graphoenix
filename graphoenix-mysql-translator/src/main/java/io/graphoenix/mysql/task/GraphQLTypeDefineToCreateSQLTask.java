@@ -1,15 +1,14 @@
-package io.graphoenix.r2dbc.connector.task;
+package io.graphoenix.mysql.task;
 
 import com.google.auto.service.AutoService;
+import io.graphoenix.mysql.translator.GraphqlTypeToTable;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.SQLStatements;
 import io.graphoenix.spi.task.GraphQLTaskType;
-import io.graphoenix.spi.task.IGraphQLTypeDefineTask;
+import io.graphoenix.spi.task.IGraphQLTypeDefineToCreateSQLTask;
 
-import java.io.IOException;
-
-@AutoService(IGraphQLTypeDefineTask.class)
-public class GraphQLTypeDefineTask implements IGraphQLTypeDefineTask {
+@AutoService(IGraphQLTypeDefineToCreateSQLTask.class)
+public class GraphQLTypeDefineToCreateSQLTask implements IGraphQLTypeDefineToCreateSQLTask {
 
     private IGraphqlDocumentManager graphqlDocumentManager;
 
@@ -18,6 +17,11 @@ public class GraphQLTypeDefineTask implements IGraphQLTypeDefineTask {
     @Override
     public GraphQLTaskType getType() {
         return this.type;
+    }
+
+    @Override
+    public void init(Void input) {
+
     }
 
     @Override
@@ -36,10 +40,8 @@ public class GraphQLTypeDefineTask implements IGraphQLTypeDefineTask {
     }
 
     @Override
-    public void process() throws IOException {
-
-        SQLStatements sqlStatements = this.graphQLTypToCreateSQLHandler.translate(this.graphqlDocumentManager);
-
-
+    public SQLStatements process() {
+        GraphqlTypeToTable graphqlTypeToTable = new GraphqlTypeToTable(this.graphqlDocumentManager);
+        return new SQLStatements(graphqlTypeToTable.createTablesSql());
     }
 }

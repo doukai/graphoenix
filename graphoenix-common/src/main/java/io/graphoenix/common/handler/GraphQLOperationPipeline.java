@@ -16,13 +16,14 @@ import io.graphoenix.spi.task.IGraphQLTask;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AutoFactory
 public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> {
 
     private final IGraphqlDocumentManager graphqlDocumentManager;
     private final List<IGraphQLOperationHandler<Object, Object>> handlerList;
-    private final List<IGraphQLTask<Object>> taskList;
+    private final List<IGraphQLTask<Object, Object>> taskList;
 
     public GraphQLOperationPipeline(@Provided IGraphqlDocumentManager manager) {
         this.graphqlDocumentManager = manager;
@@ -43,7 +44,7 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <H extends IGraphQLTask> GraphQLOperationPipeline task(Class<H> taskClass, Object input) {
-        IGraphQLTask<Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
+        IGraphQLTask<Object, Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
         task.init(input, GraphQLTaskType.BLOCK);
         task.assign(this.graphqlDocumentManager);
         taskList.add(task);
@@ -53,7 +54,7 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <H extends IGraphQLTask> GraphQLOperationPipeline task(Class<H> taskClass) {
-        IGraphQLTask<Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
+        IGraphQLTask<Object, Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
         task.init(GraphQLTaskType.BLOCK);
         task.assign(this.graphqlDocumentManager);
         taskList.add(task);
@@ -64,7 +65,7 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <H extends IGraphQLTask> GraphQLOperationPipeline asyncTask(Class<H> taskClass, Object input) {
-        IGraphQLTask<Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
+        IGraphQLTask<Object, Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
         task.init(input, GraphQLTaskType.ASYNC);
         task.assign(this.graphqlDocumentManager);
         taskList.add(task);
@@ -74,7 +75,7 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <H extends IGraphQLTask> GraphQLOperationPipeline asyncTask(Class<H> taskClass) {
-        IGraphQLTask<Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
+        IGraphQLTask<Object, Object> task = HandlerFactory.HANDLER_FACTORY.create(taskClass);
         task.init(GraphQLTaskType.ASYNC);
         task.assign(this.graphqlDocumentManager);
         taskList.add(task);
@@ -127,6 +128,7 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
     }
 
     @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public GraphQLOperationPipeline runTask() {
         this.taskList.parallelStream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.ASYNC)).forEach(graphQLTask -> {
             new Thread(() -> {
@@ -137,13 +139,18 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
                 }
             }).start();
         });
-        this.taskList.stream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.BLOCK)).forEachOrdered(graphQLTask -> {
+
+        Object result = null;
+        for (IGraphQLTask graphQLTask : this.taskList.stream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.BLOCK)).collect(Collectors.toList())) {
             try {
-                graphQLTask.process();
+                if (result != null) {
+                    graphQLTask.init(result);
+                }
+                result = graphQLTask.process();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        });
+        }
         return this;
     }
 }

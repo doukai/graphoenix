@@ -20,6 +20,11 @@ public class GraphQLTypeRegisterTask implements IGraphQLTypeRegisterTask {
     }
 
     @Override
+    public void init(String graphQL) {
+        this.graphQL = graphQL;
+    }
+
+    @Override
     public void init(String graphQL, GraphQLTaskType type) {
         this.graphQL = graphQL;
         this.type = type;
@@ -36,7 +41,8 @@ public class GraphQLTypeRegisterTask implements IGraphQLTypeRegisterTask {
     }
 
     @Override
-    public void process() {
+    public Void process() {
         this.graphqlDocumentManager.registerDocument(this.graphQL);
+        return null;
     }
 }
