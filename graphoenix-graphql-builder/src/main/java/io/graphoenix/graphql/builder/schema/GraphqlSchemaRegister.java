@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.builder.schema;
 
 import com.google.common.io.Resources;
-import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,9 +10,9 @@ import java.net.URL;
 
 public class GraphqlSchemaRegister {
 
-    private final GraphqlAntlrManager manager;
+    private final IGraphqlDocumentManager manager;
 
-    public GraphqlSchemaRegister(GraphqlAntlrManager manager) {
+    public GraphqlSchemaRegister(IGraphqlDocumentManager manager) {
         this.manager = manager;
     }
 

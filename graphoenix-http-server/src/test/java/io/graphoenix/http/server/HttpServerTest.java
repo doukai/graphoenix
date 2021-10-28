@@ -3,6 +3,8 @@ package io.graphoenix.http.server;
 import io.graphoenix.common.handler.GraphQLOperationPipeline;
 import io.graphoenix.spi.handler.IGraphQLToSQLHandler;
 import io.graphoenix.spi.handler.ISQLHandler;
+import io.graphoenix.spi.task.IGraphQLIntrospectionTypeRegisterTask;
+import io.graphoenix.spi.task.IGraphQLTypeFileRegisterTask;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaCompiler;
@@ -19,6 +21,9 @@ public class HttpServerTest {
     void serverTest() throws Exception {
         GraphQLOperationPipeline graphQLOperationPipeline = GRAPHQL_OPERATION_PIPELINE_BOOTSTRAP
                 .startup()
+                .task(IGraphQLTypeFileRegisterTask.class, "auth.gql")
+                .task(IGraphQLIntrospectionTypeRegisterTask.class)
+                .runTask()
                 .push(IGraphQLToSQLHandler.class)
                 .push(ISQLHandler.class);
         GraphqlHttpServer graphqlHttpServer = new GraphqlHttpServer(graphQLOperationPipeline);

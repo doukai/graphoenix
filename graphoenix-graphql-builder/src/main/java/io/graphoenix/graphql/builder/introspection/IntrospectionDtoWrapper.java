@@ -1,8 +1,8 @@
 package io.graphoenix.graphql.builder.introspection;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
 import io.graphoenix.graphql.builder.introspection.dto.*;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,16 +12,16 @@ import java.util.stream.Stream;
 
 public class IntrospectionDtoWrapper {
 
-    private final GraphqlAntlrManager manager;
+    private final IGraphqlDocumentManager manager;
 
     private final int levelThreshold;
 
-    public IntrospectionDtoWrapper(GraphqlAntlrManager manager, int levelThreshold) {
+    public IntrospectionDtoWrapper(IGraphqlDocumentManager manager, int levelThreshold) {
         this.manager = manager;
         this.levelThreshold = levelThreshold;
     }
 
-    public IntrospectionDtoWrapper(GraphqlAntlrManager manager) {
+    public IntrospectionDtoWrapper(IGraphqlDocumentManager manager) {
         this.manager = manager;
         this.levelThreshold = 1;
     }

@@ -2,7 +2,7 @@ package io.graphoenix.spi.dto;
 
 import java.util.List;
 
-public class GraphQLResult implements HandlerObject {
+public class GraphQLResult {
 
     private Object data;
 
