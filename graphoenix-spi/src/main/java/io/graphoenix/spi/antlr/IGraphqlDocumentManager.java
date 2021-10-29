@@ -19,6 +19,8 @@ public interface IGraphqlDocumentManager {
 
     public GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.DocumentContext documentContext);
 
+    public void registerFragment(String graphql);
+
     public boolean isScaLar(String name);
 
     public boolean isInnerScalar(String name);

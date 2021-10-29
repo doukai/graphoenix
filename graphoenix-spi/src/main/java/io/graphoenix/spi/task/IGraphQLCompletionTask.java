@@ -1,4 +1,4 @@
 package io.graphoenix.spi.task;
 
-public interface IGraphQLCompletionTask extends IGraphQLTask<String, Void> {
+public interface IGraphQLCompletionTask extends IGraphQLTask<Void, Void> {
 }
