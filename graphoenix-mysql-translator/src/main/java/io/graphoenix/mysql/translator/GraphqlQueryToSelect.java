@@ -63,7 +63,7 @@ public class GraphqlQueryToSelect {
 
     public Select objectSelectionToSelect(String typeName, List<GraphqlParser.SelectionContext> selectionContextList) {
         Select select = new Select();
-        select.setSelectBody(objectSelectionToPlainSelect(null, typeName, null, selectionContextList));
+        select.setSelectBody(objectSelectionToPlainSelect(typeName, selectionContextList));
         return select;
     }
 
@@ -81,9 +81,13 @@ public class GraphqlQueryToSelect {
         }
     }
 
-    protected PlainSelect objectSelectionToPlainSelect(String parentTypeName, String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, List<GraphqlParser.SelectionContext> selectionContextList) {
+    protected PlainSelect objectSelectionToPlainSelect(String typeName, List<GraphqlParser.SelectionContext> selectionContextList) {
+        return objectSelectionToPlainSelect(null, typeName, null, selectionContextList, 0);
+    }
+
+    protected PlainSelect objectSelectionToPlainSelect(String parentTypeName, String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, List<GraphqlParser.SelectionContext> selectionContextList, int level) {
         PlainSelect plainSelect = new PlainSelect();
-        Table table = typeToTable(typeName);
+        Table table = typeToTable(typeName, level);
         plainSelect.setFromItem(table);
 
         Function function = selectionToJsonFunction(
@@ -93,7 +97,7 @@ public class GraphqlQueryToSelect {
                                 .flatMap(selectionContext -> fragmentUnzip(typeName, selectionContext))
                                 .map(selectionContext ->
                                         new ExpressionList(
-                                                selectionToStringValueKey(selectionContext), selectionToExpression(typeName, selectionContext)
+                                                selectionToStringValueKey(selectionContext), selectionToExpression(typeName, selectionContext, level)
                                         )
                                 )
                                 .map(ExpressionList::getExpressions)
@@ -114,7 +118,7 @@ public class GraphqlQueryToSelect {
             Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(fieldDefinitionContext);
 
             if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
-                Table parentTable = typeToTable(parentTypeName);
+                Table parentTable = typeToTable(parentTypeName, level - 1);
                 Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
 
                 if (mapWithTypeArgument.isPresent()) {
@@ -123,30 +127,28 @@ public class GraphqlQueryToSelect {
                     Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
 
                     if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                        Table withTable = typeToTable(mapWithTypeName.get());
+                        Table withTable = typeToTable(mapWithTypeName.get(), level);
 
                         Join joinWithTable = new Join();
                         EqualsTo joinWithTableEqualsColumn = new EqualsTo();
-                        joinWithTableEqualsColumn.setLeftExpression(fieldToColumn(mapWithTypeName.get(), mapWithToFieldName.get()));
-                        joinWithTableEqualsColumn.setRightExpression(fieldToColumn(typeName, toFieldDefinition.get()));
-                        joinWithTable.setLeft(true);
+                        joinWithTableEqualsColumn.setLeftExpression(fieldToColumn(withTable, mapWithToFieldName.get()));
+                        joinWithTableEqualsColumn.setRightExpression(fieldToColumn(table, toFieldDefinition.get()));
+
+                        EqualsTo joinWithTableEqualsParentColumn = new EqualsTo();
+                        joinWithTableEqualsParentColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldName.get()));
+                        joinWithTableEqualsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
+
+                        MultiAndExpression multiAndExpression = new MultiAndExpression(Arrays.asList(joinWithTableEqualsColumn, joinWithTableEqualsParentColumn));
+
+                        joinWithTable.setRight(true);
                         joinWithTable.setRightItem(withTable);
-                        joinWithTable.setOnExpression(joinWithTableEqualsColumn);
-
-                        Join joinParentTable = new Join();
-                        EqualsTo joinTableEqualsParentColumn = new EqualsTo();
-                        joinTableEqualsParentColumn.setLeftExpression(fieldToColumn(mapWithTypeName.get(), mapWithFromFieldName.get()));
-                        joinTableEqualsParentColumn.setRightExpression(fieldToColumn(parentTypeName, fromFieldDefinition.get()));
-                        joinParentTable.setLeft(true);
-                        joinParentTable.setRightItem(parentTable);
-                        joinParentTable.setOnExpression(joinTableEqualsParentColumn);
-
-                        plainSelect.setJoins(Arrays.asList(joinWithTable, joinParentTable));
+                        joinWithTable.setOnExpression(multiAndExpression);
+                        plainSelect.setJoins(Collections.singletonList(joinWithTable));
                     }
                 } else {
                     EqualsTo equalsParentColumn = new EqualsTo();
-                    equalsParentColumn.setLeftExpression(fieldToColumn(typeName, toFieldDefinition.get()));
-                    equalsParentColumn.setRightExpression(fieldToColumn(parentTypeName, fromFieldDefinition.get()));
+                    equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
+                    equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
                     plainSelect.setWhere(equalsParentColumn);
                 }
             }
@@ -154,14 +156,14 @@ public class GraphqlQueryToSelect {
         return plainSelect;
     }
 
-    protected Expression selectionToExpression(String typeName, GraphqlParser.SelectionContext selectionContext) {
+    protected Expression selectionToExpression(String typeName, GraphqlParser.SelectionContext selectionContext, int level) {
         return manager.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText())
                 .map(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
-                                return jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext));
+                                return jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1));
                             } else {
-                                return fieldToExpression(typeName, fieldDefinitionContext);
+                                return fieldToExpression(typeName, fieldDefinitionContext, level);
                             }
                         }
                 ).orElse(null);
@@ -195,9 +197,9 @@ public class GraphqlQueryToSelect {
     protected SubSelect objectSelectionToSubSelect(String parentTypeName,
                                                    String typeName,
                                                    GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                   GraphqlParser.SelectionContext selectionContext) {
+                                                   GraphqlParser.SelectionContext selectionContext, int level) {
         SubSelect subSelect = new SubSelect();
-        PlainSelect plainSelect = objectSelectionToPlainSelect(parentTypeName, typeName, fieldDefinitionContext, selectionContext.field().selectionSet().selection());
+        PlainSelect plainSelect = objectSelectionToPlainSelect(parentTypeName, typeName, fieldDefinitionContext, selectionContext.field().selectionSet().selection(), level);
 
         if (manager.isMutationOperationType(parentTypeName)) {
             Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
@@ -228,7 +230,7 @@ public class GraphqlQueryToSelect {
         return subSelect;
     }
 
-    protected Expression fieldToExpression(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    protected Expression fieldToExpression(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
         if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
             Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(typeName, fieldDefinitionContext);
             Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
@@ -241,27 +243,28 @@ public class GraphqlQueryToSelect {
                 if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
                     SubSelect subSelect = new SubSelect();
                     PlainSelect plainSelect = new PlainSelect();
-                    Table table = typeToTable(mapWithTypeName.get());
-                    plainSelect.setFromItem(table);
+                    Table witTable = typeToTable(mapWithTypeName.get(), level);
+                    plainSelect.setFromItem(witTable);
                     SelectExpressionItem selectExpressionItem =
                             new SelectExpressionItem(
                                     jsonArrayFunction(
                                             new ExpressionList(
-                                                    fieldToColumn(mapWithTypeName.get(), mapWithToFieldName.get())
+                                                    fieldToColumn(witTable, mapWithToFieldName.get())
                                             )
                                     )
                             );
                     plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));
                     EqualsTo equalsTo = new EqualsTo();
-                    equalsTo.setLeftExpression(fieldToColumn(mapWithTypeName.get(), mapWithFromFieldName.get()));
-                    equalsTo.setRightExpression(fieldToColumn(typeName, fromFieldDefinition.get()));
+                    equalsTo.setLeftExpression(fieldToColumn(witTable, mapWithFromFieldName.get()));
+                    equalsTo.setRightExpression(fieldToColumn(typeToTable(typeName, level), fromFieldDefinition.get()));
                     plainSelect.setWhere(equalsTo);
                     subSelect.setSelectBody(plainSelect);
                     return jsonExtractFunction(subSelect);
                 }
             }
         } else {
-            return fieldToColumn(typeName, fieldDefinitionContext);
+            Table table = typeToTable(typeName, level);
+            return fieldToColumn(table, fieldDefinitionContext);
         }
         return null;
     }
@@ -281,8 +284,23 @@ public class GraphqlQueryToSelect {
         return DB_NAME_UTIL.typeToTable(typeName);
     }
 
+    protected Table typeToTable(String typeName, int level) {
+        if (manager.isQueryOperationType(typeName) || manager.isMutationOperationType(typeName)) {
+            return DB_NAME_UTIL.dualTable();
+        }
+        return DB_NAME_UTIL.typeToTable(typeName, level);
+    }
+
     protected Column fieldToColumn(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return DB_NAME_UTIL.fieldToColumn(typeToTable(typeName), fieldDefinitionContext);
+    }
+
+    protected Column fieldToColumn(Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return DB_NAME_UTIL.fieldToColumn(table, fieldDefinitionContext);
+    }
+
+    protected Column fieldToColumn(Table table, String fieldName) {
+        return DB_NAME_UTIL.fieldToColumn(table, fieldName);
     }
 
     protected Column fieldToColumn(String typeName, String fieldName) {

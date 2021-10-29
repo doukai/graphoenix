@@ -20,12 +20,10 @@ type __Type {
     fields: [__Field!] @map(from: "name", to: "ofTypeName")
 
     # OBJECT only
-    ofInterfaceName: String
-    interfaces: [__Type!] @map(from: "ofInterfaceName", to: "name")
+    interfaces: [__Type!] @map(from: "name", with: {type: "__TypeInterfaces", from: "typeName", to: "interfaceName"}, to: "name")
 
     # INTERFACE and UNION only
-    ofPossibleTypeName: String
-    possibleTypes: [__Type!] @map(from: "ofPossibleTypeName", to: "name")
+    possibleTypes: [__Type!] @map(from: "name", with: {type: "__TypePossibleTypes", from: "typeName", to: "possibleTypeName"}, to: "name")
 
     # ENUM only
     enumValues: [__EnumValue!] @map(from: "name", to: "ofTypeName")
@@ -36,6 +34,18 @@ type __Type {
     # NON_NULL and LIST only
     ofTypeName: String
     ofType: __Type @map(from: "ofTypeName", to: "name")
+}
+
+type __TypeInterfaces {
+    id: ID @column(autoIncrement: true)
+    typeName: String!
+    interfaceName: String!
+}
+
+type __TypePossibleTypes {
+    id: ID @column(autoIncrement: true)
+    typeName: String!
+    possibleTypeName: String!
 }
 
 type __Field {

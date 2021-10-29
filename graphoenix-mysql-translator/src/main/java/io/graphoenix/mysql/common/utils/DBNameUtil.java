@@ -3,6 +3,7 @@ package io.graphoenix.mysql.common.utils;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
+import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
@@ -13,6 +14,11 @@ public enum DBNameUtil {
     public String graphqlTypeNameToTableName(String graphqlTypeName) {
 
         return nameToDBEscape(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName));
+    }
+
+    public String graphqlTypeNameToTableAliaName(String graphqlTypeName, int level) {
+
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName) + "_" + level;
     }
 
     public String graphqlFieldNameToColumnName(String graphqlFieldName) {
@@ -72,6 +78,12 @@ public enum DBNameUtil {
 
     public Table typeToTable(String typeName) {
         return new Table(graphqlTypeNameToTableName(typeName));
+    }
+
+    public Table typeToTable(String typeName, int level) {
+        Table table = new Table(graphqlTypeNameToTableName(typeName));
+        table.setAlias(new Alias(graphqlTypeNameToTableAliaName(typeName, level)));
+        return table;
     }
 
     public Table typeToTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
