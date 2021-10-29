@@ -20,10 +20,12 @@ type __Type {
     fields: [__Field!] @map(from: "name", to: "ofTypeName")
 
     # OBJECT only
-    #    interfaces: [__Type!]
+    ofInterfaceName: String
+    interfaces: [__Type!] @map(from: "ofInterfaceName", to: "name")
 
     # INTERFACE and UNION only
-    #    possibleTypes: [__Type!]
+    ofPossibleTypeName: String
+    possibleTypes: [__Type!] @map(from: "ofPossibleTypeName", to: "name")
 
     # ENUM only
     enumValues: [__EnumValue!] @map(from: "name", to: "ofTypeName")

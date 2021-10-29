@@ -159,7 +159,7 @@ public class GraphqlQueryToSelect {
                 .map(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
-                                return objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext);
+                                return jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext));
                             } else {
                                 return fieldToExpression(typeName, fieldDefinitionContext);
                             }
@@ -182,6 +182,13 @@ public class GraphqlQueryToSelect {
         Function function = new Function();
         function.setName("JSON_ARRAYAGG");
         function.setParameters(expressionList);
+        return function;
+    }
+
+    protected Function jsonExtractFunction(SubSelect subSelect) {
+        Function function = new Function();
+        function.setName("JSON_EXTRACT");
+        function.setParameters(new ExpressionList(Arrays.asList(subSelect, new StringValue("$"))));
         return function;
     }
 
@@ -250,7 +257,7 @@ public class GraphqlQueryToSelect {
                     equalsTo.setRightExpression(fieldToColumn(typeName, fromFieldDefinition.get()));
                     plainSelect.setWhere(equalsTo);
                     subSelect.setSelectBody(plainSelect);
-                    return subSelect;
+                    return jsonExtractFunction(subSelect);
                 }
             }
         } else {

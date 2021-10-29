@@ -85,6 +85,13 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
                 .orElse(null);
     }
 
+    @Override
+    public void registerFragment(String graphql) {
+        DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql).definition().stream()
+                .filter(definitionContext -> definitionContext.fragmentDefinition() != null)
+                .forEach(this::registerDefinition);
+    }
+
     protected void registerDefinition(GraphqlParser.DefinitionContext definitionContext) {
         if (definitionContext.typeSystemDefinition() != null) {
             registerSystemDefinition(definitionContext.typeSystemDefinition());

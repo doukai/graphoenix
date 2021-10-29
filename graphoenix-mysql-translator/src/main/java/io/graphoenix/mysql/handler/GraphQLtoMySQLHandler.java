@@ -17,10 +17,12 @@ public class GraphQLtoMySQLHandler implements IGraphQLToSQLHandler {
     private GraphqlQueryToSelect graphqlQueryToSelect;
     private GraphqlMutationToStatements graphqlMutationToStatements;
     private GraphqlTypeToTable graphqlTypeToTable;
+    private IGraphqlDocumentManager manager;
 //    private MysqlTranslateConfig config;
 
     @Override
     public void assign(IGraphqlDocumentManager manager) {
+        this.manager = manager;
         this.graphqlQueryToSelect = new GraphqlQueryToSelect(manager, new GraphqlArgumentsToWhere(manager));
         this.graphqlMutationToStatements = new GraphqlMutationToStatements(manager, this.graphqlQueryToSelect);
         this.graphqlTypeToTable = new GraphqlTypeToTable(manager);
@@ -29,16 +31,19 @@ public class GraphQLtoMySQLHandler implements IGraphQLToSQLHandler {
 
     @Override
     public SQLStatements query(GraphQLRequestBody requestBody) {
+        this.manager.registerFragment(requestBody.getQuery());
         return new SQLStatements(this.graphqlQueryToSelect.createSelectsSql(requestBody.getQuery()));
     }
 
     @Override
     public SQLStatements mutation(GraphQLRequestBody requestBody) {
+        this.manager.registerFragment(requestBody.getQuery());
         return new SQLStatements(this.graphqlMutationToStatements.createStatementsSql(requestBody.getQuery()));
     }
 
     @Override
     public SQLStatements subscription(GraphQLRequestBody requestBody) {
+        this.manager.registerFragment(requestBody.getQuery());
         return null;
     }
 }

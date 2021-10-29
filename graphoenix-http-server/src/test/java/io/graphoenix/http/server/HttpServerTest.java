@@ -3,10 +3,7 @@ package io.graphoenix.http.server;
 import io.graphoenix.common.handler.GraphQLOperationPipeline;
 import io.graphoenix.spi.handler.IGraphQLToSQLHandler;
 import io.graphoenix.spi.handler.ISQLHandler;
-import io.graphoenix.spi.task.ICreateSQLTask;
-import io.graphoenix.spi.task.IGraphQLIntrospectionTypeRegisterTask;
-import io.graphoenix.spi.task.IGraphQLTypeDefineToCreateSQLTask;
-import io.graphoenix.spi.task.IGraphQLTypeFileRegisterTask;
+import io.graphoenix.spi.task.*;
 import org.junit.jupiter.api.Test;
 
 import static io.graphoenix.common.handler.GraphQLOperationPipelineBootstrap.GRAPHQL_OPERATION_PIPELINE_BOOTSTRAP;
@@ -21,6 +18,7 @@ public class HttpServerTest {
                 .task(IGraphQLIntrospectionTypeRegisterTask.class)
                 .task(IGraphQLTypeDefineToCreateSQLTask.class)
                 .task(ICreateSQLTask.class)
+                .task(IGraphQLCompletionTask.class)
                 .runTask()
                 .push(IGraphQLToSQLHandler.class)
                 .push(ISQLHandler.class);
