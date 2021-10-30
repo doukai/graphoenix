@@ -6,10 +6,12 @@ import io.graphoenix.spi.handler.IGraphQLOperationPipeline;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.cors.CorsConfig;
+import io.netty.handler.codec.http.cors.CorsConfigBuilder;
+import io.netty.handler.codec.http.cors.CorsHandler;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.stream.ChunkedWriteHandler;
 
 public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
@@ -23,6 +25,13 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 
     @Override
     public void initChannel(SocketChannel ch) {
+        CorsConfig corsConfig =
+                CorsConfigBuilder
+                        .forAnyOrigin()
+                        .allowedRequestHeaders(HttpHeaderNames.CONTENT_TYPE)
+                        .allowedRequestMethods(HttpMethod.GET)
+                        .allowedRequestMethods(HttpMethod.POST)
+                        .build();
         ChannelPipeline p = ch.pipeline();
         if (sslCtx != null) {
             p.addLast("ssl", sslCtx.newHandler(ch.alloc()));
@@ -32,7 +41,9 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
         // Uncomment the following line if you don't want to handle HttpChunks.
         p.addLast("aggregator", new HttpObjectAggregator(1024 * 1024));
         // Remove the following line if you don't want automatic content compression.
-        //p.addLast(new HttpContentCompressor());
+//        p.addLast("compressor",new HttpContentCompressor());
+        p.addLast("chunked", new ChunkedWriteHandler());
+        p.addLast("cors", new CorsHandler(corsConfig));
         p.addLast("handler", new GraphqlHttpServerHandler(this.graphQLOperationPipeline));
     }
 }

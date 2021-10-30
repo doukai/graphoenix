@@ -11,7 +11,7 @@ type __Schema {
 }
 
 type __Type {
-    name: ID @dataType(type: "varchar")
+    name: ID! @dataType(type: "varchar")
     schemaId: Int
     kind: __TypeKind!
     description: String
@@ -93,7 +93,7 @@ enum __TypeKind {
 }
 
 type __Directive {
-    name: ID @dataType(type: "varchar")
+    name: ID! @dataType(type: "varchar")
     schemaId: Int
     description: String
     locations: [__DirectiveLocation!]! @map(from: "name", with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})

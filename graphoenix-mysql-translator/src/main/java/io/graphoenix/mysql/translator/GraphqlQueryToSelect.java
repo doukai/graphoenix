@@ -121,6 +121,8 @@ public class GraphqlQueryToSelect {
                 Table parentTable = typeToTable(parentTypeName, level - 1);
                 Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
 
+                EqualsTo equalsParentColumn = new EqualsTo();
+                equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
                 if (mapWithTypeArgument.isPresent()) {
                     Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
                     Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
@@ -129,28 +131,24 @@ public class GraphqlQueryToSelect {
                     if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
                         Table withTable = typeToTable(mapWithTypeName.get(), level);
 
-                        Join joinWithTable = new Join();
-                        EqualsTo joinWithTableEqualsColumn = new EqualsTo();
-                        joinWithTableEqualsColumn.setLeftExpression(fieldToColumn(withTable, mapWithToFieldName.get()));
-                        joinWithTableEqualsColumn.setRightExpression(fieldToColumn(table, toFieldDefinition.get()));
+                        SubSelect selectWithTable = new SubSelect();
+                        PlainSelect subPlainSelect = new PlainSelect();
+                        subPlainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(fieldToColumn(withTable, mapWithToFieldName.get()))));
+                        EqualsTo equalsWithTableColumn = new EqualsTo();
+                        equalsWithTableColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldName.get()));
+                        equalsWithTableColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
+                        subPlainSelect.setWhere(equalsWithTableColumn);
+                        subPlainSelect.setFromItem(withTable);
+                        selectWithTable.setSelectBody(subPlainSelect);
 
-                        EqualsTo joinWithTableEqualsParentColumn = new EqualsTo();
-                        joinWithTableEqualsParentColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldName.get()));
-                        joinWithTableEqualsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
-
-                        MultiAndExpression multiAndExpression = new MultiAndExpression(Arrays.asList(joinWithTableEqualsColumn, joinWithTableEqualsParentColumn));
-
-                        joinWithTable.setRight(true);
-                        joinWithTable.setRightItem(withTable);
-                        joinWithTable.setOnExpression(multiAndExpression);
-                        plainSelect.setJoins(Collections.singletonList(joinWithTable));
+                        equalsParentColumn.setRightExpression(selectWithTable);
+                    } else {
+                        //TODO
                     }
                 } else {
-                    EqualsTo equalsParentColumn = new EqualsTo();
-                    equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
                     equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
-                    plainSelect.setWhere(equalsParentColumn);
                 }
+                plainSelect.setWhere(equalsParentColumn);
             }
         }
         return plainSelect;
@@ -210,7 +208,7 @@ public class GraphqlQueryToSelect {
                         .orElse(DB_VALUE_UTIL.createInsertIdUserVariable(typeName, idFieldName.get(), 0, 0));
 
                 EqualsTo idEqualsTo = new EqualsTo();
-                idEqualsTo.setLeftExpression(fieldToColumn(typeName, idFieldName.get()));
+                idEqualsTo.setLeftExpression(fieldToColumn(typeToTable(typeName, level), idFieldName.get()));
                 idEqualsTo.setRightExpression(idValueExpression);
                 plainSelect.setWhere(idEqualsTo);
             }
