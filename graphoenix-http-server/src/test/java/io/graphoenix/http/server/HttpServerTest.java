@@ -22,7 +22,6 @@ import java.net.URL;
 import java.util.List;
 
 import static io.graphoenix.common.handler.GraphQLOperationPipelineBootstrap.GRAPHQL_OPERATION_PIPELINE_BOOTSTRAP;
-import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 
 public class HttpServerTest {
 
@@ -40,12 +39,6 @@ public class HttpServerTest {
                 .push(ISQLHandler.class);
         GraphqlHttpServer graphqlHttpServer = new GraphqlHttpServer(graphQLOperationPipeline);
         graphqlHttpServer.run();
-    }
-
-    @Test
-    void name() {
-
-//        System.out.println(DB_NAME_UTIL.graphqlTypeNameToTableName("__Type"));
     }
 
     @Test

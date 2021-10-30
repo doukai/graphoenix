@@ -6,3 +6,5 @@ include 'graphoenix-mysql-translator'
 include 'graphoenix-r2dbc-connector'
 include 'graphoenix-http-server'
 include 'graphoenix-java-generator'
+include 'graphoenix-graphql-generator'
+

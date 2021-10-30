@@ -17,6 +17,7 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpUtil;
 
+import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         GraphQLRequestBody requestBody;
         GraphQLResult graphQLResult = null;
         FullHttpResponse response;
+
         try {
             requestBody = requestHandler.handle(request);
 
