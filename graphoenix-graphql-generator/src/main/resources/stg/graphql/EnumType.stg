@@ -1,0 +1,6 @@
+import "EnumValue.stg"
+enumTypeDefinition(enumType) ::= <<
+<if(enumType.description)>"<enumType.description>"\\<endif>enum <enumType.name><if(enumType.directives)> <enumType.directives:{directive|<directive>};separator=" "><endif> {
+  <enumType.enumValues:{enumValue|<enumValueDefinition(enumValue)>};separator="\n">
+}
+>>

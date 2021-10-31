@@ -43,7 +43,7 @@ public class GraphQLIntrospectionTypeRegisterTask implements IGraphQLIntrospecti
 
     @Override
     public Void process() throws IOException {
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(Hammurabi.INTROSPECTION_TYPES_FILE_NAME);
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/introspectionTypes.gql");
         this.graphqlDocumentManager.registerDocument(inputStream);
         return null;
     }

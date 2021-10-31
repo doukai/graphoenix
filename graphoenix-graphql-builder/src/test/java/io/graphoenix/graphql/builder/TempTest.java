@@ -1,10 +1,13 @@
 package io.graphoenix.graphql.builder;
 
+import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.google.gson.Gson;
+import io.graphoenix.common.manager.*;
 import io.graphoenix.graphql.builder.introspection.IntrospectionBuilder;
 import io.graphoenix.graphql.builder.introspection.IntrospectionDtoWrapper;
 import io.graphoenix.graphql.builder.introspection.dto.__Schema;
+import io.graphoenix.graphql.builder.schema.GraphQLDocumentBuilder;
 import io.graphoenix.graphql.builder.schema.GraphqlSchemaBuilder;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import org.junit.jupiter.api.Test;
@@ -18,32 +21,26 @@ public class TempTest {
     @Test
     void test() throws IOException, URISyntaxException {
 
-//        URL url = Resources.getResource("introspection.gql");
-//        InputStream inputStream = url.openStream();
-//        IGraphqlDocumentManager graphqlAntlrManager = new GraphqlAntlrManager(inputStream);
-//        inputStream.close();
-//
-//        url =Resources.getResource("auth.gql");
-//        inputStream = url.openStream();
-//        graphqlAntlrManager.registerDocument(inputStream);
-//        inputStream.close();
-//
-//        StringWriter stringWriter = new StringWriter();
-//        GraphqlSchemaBuilder graphqlSchemaBuilder = new GraphqlSchemaBuilder(graphqlAntlrManager);
-//        graphqlSchemaBuilder.buildObjectExpressions(stringWriter);
-//
-//        graphqlAntlrManager.registerDocument(stringWriter.toString());
-//        stringWriter.close();
-//
-//        stringWriter = new StringWriter();
-//
-//        IntrospectionBuilder introspectionBuilder = new IntrospectionBuilder(graphqlAntlrManager);
-//
-//        introspectionBuilder.buildObjectExpressions(stringWriter);
-//
-//        System.out.println(stringWriter);
-//        stringWriter.close();
+        IGraphqlDocumentManager graphqlAntlrManager = new GraphqlDocumentManager(
+                new GraphqlOperationManager(),
+                new GraphqlSchemaManager(),
+                new GraphqlDirectiveManager(),
+                new GraphqlObjectManager(),
+                new GraphqlFieldManager(),
+                new GraphqlInputObjectManager(),
+                new GraphqlInputValueManager(),
+                new GraphqlEnumManager(),
+                new GraphqlScalarManager(),
+                new GraphqlFragmentManager()
+        );
 
+
+        URL url = Resources.getResource("auth.gql");
+        String graphql = Resources.toString(url, Charsets.UTF_8);
+        graphqlAntlrManager.registerDocument(graphql);
+
+        GraphQLDocumentBuilder graphQLDocumentBuilder = new GraphQLDocumentBuilder(graphqlAntlrManager);
+        System.out.println(graphQLDocumentBuilder.buildDocument().toString());
 
     }
 

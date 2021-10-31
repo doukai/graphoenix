@@ -62,7 +62,7 @@ public class HttpServerTest {
         String graphql = Resources.toString(url, Charsets.UTF_8);
         graphqlAntlrManager.registerDocument(graphql);
 
-        url = Resources.getResource("graphql/introspectionTypes.gql");
+        url = Resources.getResource("graphql/mysql/introspectionTypes.gql");
         graphql = Resources.toString(url, Charsets.UTF_8);
         graphqlAntlrManager.registerDocument(graphql);
 
