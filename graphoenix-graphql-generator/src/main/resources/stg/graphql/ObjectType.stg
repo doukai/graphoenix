@@ -1,0 +1,6 @@
+import "Field.stg"
+objectTypeDefinition(objectType) ::= <<
+<if(objectType.description)>"<objectType.description>"\\<endif>type <objectType.name><if(objectType.interfaces)> implements <objectType.interfaces:{interface|<interface>};separator=" & "><endif><if(objectType.directives)> <objectType.directives:{directive|<directive>};separator=" "><endif> {
+  <objectType.fields:{field|<fieldDefinition(field)>};separator="\n">
+}
+>>

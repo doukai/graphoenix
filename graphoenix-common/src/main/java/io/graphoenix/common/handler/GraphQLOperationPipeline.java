@@ -15,6 +15,7 @@ import io.graphoenix.spi.task.IGraphQLTask;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -130,25 +131,36 @@ public class GraphQLOperationPipeline implements IGraphQLOperationPipeline<Graph
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
     public GraphQLOperationPipeline runTask() {
-        this.taskList.parallelStream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.ASYNC)).forEach(graphQLTask -> {
+
+        List<IGraphQLTask<Object, Object>> asyncTaskList = this.taskList.stream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.ASYNC)).collect(Collectors.toList());
+        Iterator<IGraphQLTask<Object, Object>> asyncTaskIterator = asyncTaskList.iterator();
+        while (asyncTaskIterator.hasNext()) {
+            IGraphQLTask<Object, Object> task = asyncTaskIterator.next();
             new Thread(() -> {
                 try {
-                    graphQLTask.process();
+                    task.process();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    asyncTaskIterator.remove();
                 }
             }).start();
-        });
+        }
 
         Object result = null;
-        for (IGraphQLTask graphQLTask : this.taskList.stream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.BLOCK)).collect(Collectors.toList())) {
+        List<IGraphQLTask<Object, Object>> taskList = this.taskList.stream().filter(graphQLTask -> graphQLTask.getType().equals(GraphQLTaskType.BLOCK)).collect(Collectors.toList());
+        Iterator<IGraphQLTask<Object, Object>> taskIterator = taskList.iterator();
+        while (taskIterator.hasNext()) {
+            IGraphQLTask<Object, Object> task = taskIterator.next();
             try {
                 if (result != null) {
-                    graphQLTask.init(result);
+                    task.init(result);
                 }
-                result = graphQLTask.process();
+                result = task.process();
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                taskIterator.remove();
             }
         }
         return this;
