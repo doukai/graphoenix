@@ -19,7 +19,7 @@ import java.net.URL;
 public class TempTest {
 
     @Test
-    void test() throws IOException, URISyntaxException {
+    void test() throws IOException {
 
         IGraphqlDocumentManager graphqlAntlrManager = new GraphqlDocumentManager(
                 new GraphqlOperationManager(),
