@@ -1,0 +1,15 @@
+import "__Type.stg"
+import "__Directive.stg"
+__schemaDefinition(__schema) ::= <<
+mutation introspection {
+    __schema(
+        <if(__schema.mutationType)>mutationType: <__typeDefinition(__schema.mutationType)>,<endif>
+        <if(__schema.subscriptionType)>subscriptionType: <__typeDefinition(__schema.subscriptionType)>,<endif>
+        <if(__schema.directives)>directives: [<__schema.directives:{directive|<__directiveDefinition(directive)>};separator=", ">],<endif>
+        queryType: <__typeDefinition(__schema.queryType)>,
+        types: [<__schema.types:{type|<__typeDefinition(type)>};separator=", ">]
+    ){
+        id
+    }
+}
+>>

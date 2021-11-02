@@ -3,13 +3,14 @@ package io.graphoenix.common.manager;
 import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.common.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 
 @AutoFactory
 public class GraphqlDocumentManager implements IGraphqlDocumentManager {
@@ -58,12 +59,12 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
 
     @Override
     public void registerDocument(String graphql) {
-        DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql).definition().forEach(this::registerDefinition);
+        DOCUMENT_UTIL.graphqlToDocument(graphql).definition().forEach(this::registerDefinition);
     }
 
     @Override
     public void registerDocument(InputStream inputStream) throws IOException {
-        DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(inputStream).definition().forEach(this::registerDefinition);
+        DOCUMENT_UTIL.graphqlToDocument(inputStream).definition().forEach(this::registerDefinition);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
 
     @Override
     public GraphqlParser.OperationTypeContext getOperationType(String graphql) {
-        return getOperationType(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+        return getOperationType(DOCUMENT_UTIL.graphqlToDocument(graphql));
     }
 
     @Override
@@ -87,7 +88,7 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
 
     @Override
     public void registerFragment(String graphql) {
-        DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql).definition().stream()
+        DOCUMENT_UTIL.graphqlToDocument(graphql).definition().stream()
                 .filter(definitionContext -> definitionContext.fragmentDefinition() != null)
                 .forEach(this::registerDefinition);
     }

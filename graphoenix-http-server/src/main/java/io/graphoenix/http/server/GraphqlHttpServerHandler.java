@@ -2,11 +2,11 @@ package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
+import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.graphoenix.http.server.handler.RequestHandler;
 import io.graphoenix.http.server.handler.RequestHandlerFactory;
 import io.graphoenix.spi.dto.GraphQLRequestBody;
 import io.graphoenix.spi.dto.GraphQLResult;
-import io.graphoenix.spi.handler.IGraphQLOperationPipeline;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,7 +17,6 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpUtil;
 
-import io.netty.util.internal.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,6 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    private final IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline;
 
     private static final Logger log = LoggerFactory.getLogger(GraphqlHttpServer.class);
 
@@ -38,12 +36,14 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private static final AsciiString CONTENT_TYPE = AsciiString.cached("Content-Type");
     private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
-    public GraphqlHttpServerHandler(IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline) {
-        this.graphQLOperationPipeline = graphQLOperationPipeline;
+    public GraphqlHttpServerHandler() {
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
+
+        OperationPipeline operationPipeline = new OperationPipeline();
+
         log.info("Handle http request:{}", request);
         String uri = request.uri();
         if (uri.equals(FAVICON_ICO)) {
@@ -52,13 +52,13 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         RequestHandler requestHandler = RequestHandlerFactory.create(request.method());
         GraphQLRequestBody requestBody;
         GraphQLResult graphQLResult = null;
-        FullHttpResponse response;
+        FullHttpResponse response = null;
 
         try {
             requestBody = requestHandler.handle(request);
 
             log.info("Handle http query:{}", requestBody.getQuery());
-            graphQLResult = graphQLOperationPipeline.order(requestBody);
+            graphQLResult = operationPipeline.process(requestBody);
 
             //TODO
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResult).getBytes(StandardCharsets.UTF_8)));
@@ -70,6 +70,8 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             //TODO
             response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResult).getBytes(StandardCharsets.UTF_8)));
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
 
         boolean keepAlive = HttpUtil.isKeepAlive(request);

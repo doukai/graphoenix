@@ -1,8 +1,6 @@
 package io.graphoenix.http.server;
 
-import io.graphoenix.spi.dto.GraphQLRequestBody;
-import io.graphoenix.spi.dto.GraphQLResult;
-import io.graphoenix.spi.handler.IGraphQLOperationPipeline;
+import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -16,11 +14,9 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private final SslContext sslCtx;
-    private final IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline;
 
-    public GraphqlHttpServerInitializer(SslContext sslCtx, IGraphQLOperationPipeline<GraphQLRequestBody, GraphQLResult> graphQLOperationPipeline) {
+    public GraphqlHttpServerInitializer(SslContext sslCtx) {
         this.sslCtx = sslCtx;
-        this.graphQLOperationPipeline = graphQLOperationPipeline;
     }
 
     @Override
@@ -44,6 +40,6 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 //        p.addLast("compressor",new HttpContentCompressor());
         p.addLast("chunked", new ChunkedWriteHandler());
         p.addLast("cors", new CorsHandler(corsConfig));
-        p.addLast("handler", new GraphqlHttpServerHandler(this.graphQLOperationPipeline));
+        p.addLast("handler", new GraphqlHttpServerHandler());
     }
 }

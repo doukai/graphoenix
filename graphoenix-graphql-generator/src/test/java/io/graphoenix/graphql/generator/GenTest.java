@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator;
 
+import io.graphoenix.graphql.generator.document.*;
 import org.junit.jupiter.api.Test;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -12,7 +13,7 @@ public class GenTest {
     @Test
     void name() {
 
-        STGroup test = new STGroupFile("stg/graphql/ObjectType.stg");
+        STGroup test = new STGroupFile("stg/document/ObjectType.stg");
         ST st = test.getInstanceOf("objectTypeDefinition");
         ObjectType objectType = new ObjectType();
         objectType.setName("User");
@@ -59,7 +60,7 @@ public class GenTest {
         Directive directive2 = new Directive();
         directive2.setName("directive2");
 
-        objectType.setDescription("user entity");
+//        objectType.setDescription("user entity");
         st.add("objectType", objectType);
         System.out.println(st.render());
     }
@@ -67,7 +68,7 @@ public class GenTest {
     @Test
     void test2() {
 
-        STGroup test = new STGroupFile("stg/graphql/EnumType.stg");
+        STGroup test = new STGroupFile("stg/document/EnumType.stg");
         ST st = test.getInstanceOf("enumTypeDefinition");
         EnumType enumType = new EnumType();
         enumType.setName("Sex");
@@ -105,7 +106,7 @@ public class GenTest {
     @Test
     void test3() {
 
-        STGroup test = new STGroupFile("stg/graphql/Directive.stg");
+        STGroup test = new STGroupFile("stg/document/Directive.stg");
         ST st = test.getInstanceOf("directiveDefinition");
 
         Directive directiveDefinition = new Directive();
