@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.generator.introspection.__Schema;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.handler.bootstrap.IIntrospectionMutationBuildHandler;
+import io.graphoenix.spi.handler.bootstrap.introspection.IIntrospectionMutationBuildHandler;
 
 @AutoService(IIntrospectionMutationBuildHandler.class)
 public class IntrospectionMutationBuildHandler implements IIntrospectionMutationBuildHandler {

@@ -4,10 +4,10 @@ import com.google.auto.service.AutoService;
 import io.graphoenix.mysql.translator.GraphqlTypeToTable;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.SQLStatements;
-import io.graphoenix.spi.handler.bootstrap.IGraphQLTypeToCreateSQLConvertHandler;
+import io.graphoenix.spi.handler.bootstrap.convert.ITypeDefiniteToCreateTableSQLConvertHandler;
 
-@AutoService(IGraphQLTypeToCreateSQLConvertHandler.class)
-public class GraphQLTypeToCreateSQLConvertHandler implements IGraphQLTypeToCreateSQLConvertHandler {
+@AutoService(ITypeDefiniteToCreateTableSQLConvertHandler.class)
+public class TypeDefiniteToCreateTableSQLConvertHandler implements ITypeDefiniteToCreateTableSQLConvertHandler {
 
     @Override
     public SQLStatements transform(IGraphqlDocumentManager manager, Void object) {

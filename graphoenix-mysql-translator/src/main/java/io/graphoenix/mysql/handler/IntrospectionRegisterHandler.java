@@ -2,7 +2,7 @@ package io.graphoenix.mysql.handler;
 
 import com.google.auto.service.AutoService;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.handler.bootstrap.IIntrospectionRegisterHandler;
+import io.graphoenix.spi.handler.bootstrap.introspection.IIntrospectionRegisterHandler;
 
 import java.io.IOException;
 

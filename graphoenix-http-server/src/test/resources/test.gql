@@ -1,0 +1,980 @@
+mutation introspection {
+    __schema(
+        mutationType: {
+            fields: [{
+                name: "role",
+                type: {
+                    name: "Role"
+                }
+            }, {
+                name: "user",
+                type: {
+                    name: "User"
+                }
+            }, {
+                name: "organization",
+                type: {
+                    name: "Organization"
+                }
+            }, {
+                name: "userRole",
+                type: {
+                    name: "UserRole"
+                }
+            }],
+            kind: OBJECT,
+            name: "MutationType"
+        },
+        directives: [{
+            args: [{
+                name: "type",
+                type: {
+                    kind: SCALAR,
+                    name: "String"
+                }
+            }, {
+                name: "length",
+                type: {
+                    kind: SCALAR,
+                    name: "Int"
+                }
+            }, {
+                name: "decimals",
+                type: {
+                    kind: SCALAR,
+                    name: "Int"
+                }
+            }],
+            name: "dataType",
+            locations: FIELD_DEFINITION
+        }, {
+            args: [{
+                name: "from",
+                type: {
+                    kind: SCALAR,
+                    name: "String"
+                }
+            }, {
+                name: "with",
+                type: {
+                    inputFields: [{
+                        name: "type",
+                        type: {
+                            kind: SCALAR,
+                            name: "String"
+                        }
+                    }, {
+                        name: "from",
+                        type: {
+                            kind: SCALAR,
+                            name: "String"
+                        }
+                    }, {
+                        name: "to",
+                        type: {
+                            kind: SCALAR,
+                            name: "String"
+                        }
+                    }],
+                    kind: INPUT_OBJECT,
+                    name: "MapWith"
+                }
+            }, {
+                name: "to",
+                type: {
+                    kind: SCALAR,
+                    name: "String"
+                }
+            }],
+            name: "map",
+            locations: FIELD_DEFINITION
+        }],
+        queryType: {
+            fields: [{
+                name: "role",
+                type: {
+                    name: "Role"
+                }
+            }, {
+                name: "roleList",
+                type: {
+                    name: "list_Role"
+                }
+            }, {
+                name: "user",
+                type: {
+                    name: "User"
+                }
+            }, {
+                name: "userList",
+                type: {
+                    name: "list_User"
+                }
+            }, {
+                name: "organization",
+                type: {
+                    name: "Organization"
+                }
+            }, {
+                name: "organizationList",
+                type: {
+                    name: "list_Organization"
+                }
+            }, {
+                name: "userRole",
+                type: {
+                    name: "UserRole"
+                }
+            }, {
+                name: "userRoleList",
+                type: {
+                    name: "list_UserRole"
+                }
+            }],
+            kind: OBJECT,
+            name: "QueryType"
+        },
+        types: [{
+            fields: [{
+                name: "id",
+                type: {
+                    name: "ID"
+                }
+            }, {
+                name: "name",
+                type: {
+                    name: "nonnull_String"
+                }
+            }, {
+                name: "users",
+                type: {
+                    name: "list_nonnull_User"
+                }
+            }],
+            kind: OBJECT,
+            name: "Role"
+        }, {
+            fields: [{
+                name: "id",
+                type: {
+                    name: "ID"
+                }
+            }, {
+                name: "login",
+                type: {
+                    name: "nonnull_String"
+                }
+            }, {
+                name: "password",
+                type: {
+                    name: "nonnull_String"
+                }
+            }, {
+                name: "name",
+                type: {
+                    name: "nonnull_String"
+                }
+            }, {
+                name: "age",
+                type: {
+                    name: "Int"
+                }
+            }, {
+                name: "disable",
+                type: {
+                    name: "Boolean"
+                }
+            }, {
+                name: "sex",
+                type: {
+                    name: "Sex"
+                }
+            }, {
+                name: "organizationId",
+                type: {
+                    name: "Int"
+                }
+            }, {
+                name: "organization",
+                type: {
+                    name: "Organization"
+                }
+            }, {
+                name: "roles",
+                type: {
+                    name: "list_nonnull_Role"
+                }
+            }],
+            kind: OBJECT,
+            name: "User"
+        }, {
+            fields: [{
+                name: "id",
+                type: {
+                    name: "ID"
+                }
+            }, {
+                name: "above_id",
+                type: {
+                    name: "Int"
+                }
+            }, {
+                name: "users",
+                type: {
+                    name: "list_nonnull_User"
+                }
+            }, {
+                name: "name",
+                type: {
+                    name: "nonnull_String"
+                }
+            }],
+            kind: OBJECT,
+            name: "Organization"
+        }, {
+            fields: [{
+                name: "role",
+                type: {
+                    name: "Role"
+                }
+            }, {
+                name: "user",
+                type: {
+                    name: "User"
+                }
+            }, {
+                name: "organization",
+                type: {
+                    name: "Organization"
+                }
+            }, {
+                name: "userRole",
+                type: {
+                    name: "UserRole"
+                }
+            }],
+            kind: OBJECT,
+            name: "MutationType"
+        }, {
+            fields: [{
+                name: "id",
+                type: {
+                    name: "ID"
+                }
+            }, {
+                name: "userId",
+                type: {
+                    name: "Int"
+                }
+            }, {
+                name: "roleId",
+                type: {
+                    name: "Int"
+                }
+            }],
+            kind: OBJECT,
+            name: "UserRole"
+        }, {
+            fields: [{
+                name: "role",
+                type: {
+                    name: "Role"
+                }
+            }, {
+                name: "roleList",
+                type: {
+                    name: "list_Role"
+                }
+            }, {
+                name: "user",
+                type: {
+                    name: "User"
+                }
+            }, {
+                name: "userList",
+                type: {
+                    name: "list_User"
+                }
+            }, {
+                name: "organization",
+                type: {
+                    name: "Organization"
+                }
+            }, {
+                name: "organizationList",
+                type: {
+                    name: "list_Organization"
+                }
+            }, {
+                name: "userRole",
+                type: {
+                    name: "UserRole"
+                }
+            }, {
+                name: "userRoleList",
+                type: {
+                    name: "list_UserRole"
+                }
+            }],
+            kind: OBJECT,
+            name: "QueryType"
+        }, {
+            enumValues: [{
+                name: "EQ"
+            }, {
+                name: "NEQ"
+            }, {
+                name: "LK"
+            }, {
+                name: "NLK"
+            }, {
+                name: "GT"
+            }, {
+                name: "NLTE"
+            }, {
+                name: "GTE"
+            }, {
+                name: "NLT"
+            }, {
+                name: "LT"
+            }, {
+                name: "NGTE"
+            }, {
+                name: "LTE"
+            }, {
+                name: "NGT"
+            }, {
+                name: "NIL"
+            }, {
+                name: "NNIL"
+            }],
+            kind: ENUM,
+            name: "Operator"
+        }, {
+            enumValues: [{
+                name: "MAN"
+            }, {
+                name: "FEMALE"
+            }],
+            kind: ENUM,
+            name: "Sex"
+        }, {
+            enumValues: [{
+                name: "AND"
+            }, {
+                name: "OR"
+            }],
+            kind: ENUM,
+            name: "Conditional"
+        }, {
+            inputFields: [{
+                defaultValue: "EQ",
+                name: "opr",
+                type: {
+                    kind: ENUM,
+                    name: "Operator"
+                }
+            }, {
+                name: "val",
+                type: {
+                    kind: SCALAR,
+                    name: "ID"
+                }
+            }, {
+                name: "in",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "ID"
+                    },
+                    kind: LIST,
+                    name: "list_ID"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "IDExpression"
+        }, {
+            inputFields: [{
+                defaultValue: "EQ",
+                name: "opr",
+                type: {
+                    kind: ENUM,
+                    name: "Operator"
+                }
+            }, {
+                name: "val",
+                type: {
+                    kind: SCALAR,
+                    name: "Int"
+                }
+            }, {
+                name: "in",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "Int"
+                    },
+                    kind: LIST,
+                    name: "list_Int"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "IntExpression"
+        }, {
+            inputFields: [{
+                defaultValue: "EQ",
+                name: "opr",
+                type: {
+                    kind: ENUM,
+                    name: "Operator"
+                }
+            }, {
+                name: "val",
+                type: {
+                    kind: ENUM,
+                    name: "Conditional"
+                }
+            }, {
+                name: "in",
+                type: {
+                    ofType: {
+                        kind: ENUM,
+                        name: "Conditional"
+                    },
+                    kind: LIST,
+                    name: "list_Conditional"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "ConditionalExpression"
+        }, {
+            inputFields: [{
+                name: "id",
+                type: {
+                    kind: SCALAR,
+                    name: "ID"
+                }
+            }, {
+                name: "login",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "String"
+                    },
+                    kind: NON_NULL,
+                    name: "nonnull_String"
+                }
+            }, {
+                name: "password",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "String"
+                    },
+                    kind: NON_NULL,
+                    name: "nonnull_String"
+                }
+            }, {
+                name: "name",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "String"
+                    },
+                    kind: NON_NULL,
+                    name: "nonnull_String"
+                }
+            }, {
+                name: "age",
+                type: {
+                    kind: SCALAR,
+                    name: "Int"
+                }
+            }, {
+                name: "disable",
+                type: {
+                    kind: SCALAR,
+                    name: "Boolean"
+                }
+            }, {
+                name: "sex",
+                type: {
+                    kind: ENUM,
+                    name: "Sex"
+                }
+            }, {
+                name: "organizationId",
+                type: {
+                    kind: SCALAR,
+                    name: "Int"
+                }
+            }, {
+                name: "organization",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "OrganizationInput"
+                }
+            }, {
+                name: "roles",
+                type: {
+                    ofType: {
+                        ofType: {
+                            kind: INPUT_OBJECT,
+                            name: "RoleInput"
+                        },
+                        kind: NON_NULL,
+                        name: "nonnull_RoleInput"
+                    },
+                    kind: LIST,
+                    name: "list_nonnull_RoleInput"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "UserInput"
+        }, {
+            inputFields: [{
+                defaultValue: "EQ",
+                name: "opr",
+                type: {
+                    kind: ENUM,
+                    name: "Operator"
+                }
+            }, {
+                name: "val",
+                type: {
+                    kind: SCALAR,
+                    name: "Float"
+                }
+            }, {
+                name: "in",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "Float"
+                    },
+                    kind: LIST,
+                    name: "list_Float"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "FloatExpression"
+        }, {
+            inputFields: [{
+                defaultValue: "EQ",
+                name: "opr",
+                type: {
+                    kind: ENUM,
+                    name: "Operator"
+                }
+            }, {
+                name: "val",
+                type: {
+                    kind: ENUM,
+                    name: "Sex"
+                }
+            }, {
+                name: "in",
+                type: {
+                    ofType: {
+                        kind: ENUM,
+                        name: "Sex"
+                    },
+                    kind: LIST,
+                    name: "list_Sex"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "SexExpression"
+        }, {
+            inputFields: [{
+                name: "id",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IDExpression"
+                }
+            }, {
+                name: "above_id",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IntExpression"
+                }
+            }, {
+                name: "above",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "OrganizationExpression"
+                }
+            }, {
+                name: "users",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "UserExpression"
+                }
+            }, {
+                name: "name",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "StringExpression"
+                }
+            }, {
+                defaultValue: "AND",
+                name: "cond",
+                type: {
+                    kind: ENUM,
+                    name: "Conditional"
+                }
+            }, {
+                name: "exs",
+                type: {
+                    ofType: {
+                        kind: INPUT_OBJECT,
+                        name: "OrganizationExpression"
+                    },
+                    kind: LIST,
+                    name: "list_OrganizationExpression"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "OrganizationExpression"
+        }, {
+            inputFields: [{
+                name: "id",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IDExpression"
+                }
+            }, {
+                name: "userId",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IntExpression"
+                }
+            }, {
+                name: "roleId",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IntExpression"
+                }
+            }, {
+                defaultValue: "AND",
+                name: "cond",
+                type: {
+                    kind: ENUM,
+                    name: "Conditional"
+                }
+            }, {
+                name: "exs",
+                type: {
+                    ofType: {
+                        kind: INPUT_OBJECT,
+                        name: "UserRoleExpression"
+                    },
+                    kind: LIST,
+                    name: "list_UserRoleExpression"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "UserRoleExpression"
+        }, {
+            inputFields: [{
+                name: "id",
+                type: {
+                    kind: SCALAR,
+                    name: "ID"
+                }
+            }, {
+                name: "name",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "String"
+                    },
+                    kind: NON_NULL,
+                    name: "nonnull_String"
+                }
+            }, {
+                name: "users",
+                type: {
+                    ofType: {
+                        ofType: {
+                            kind: INPUT_OBJECT,
+                            name: "UserInput"
+                        },
+                        kind: NON_NULL,
+                        name: "nonnull_UserInput"
+                    },
+                    kind: LIST,
+                    name: "list_nonnull_UserInput"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "RoleInput"
+        }, {
+            inputFields: [{
+                defaultValue: "EQ",
+                name: "opr",
+                type: {
+                    kind: ENUM,
+                    name: "Operator"
+                }
+            }, {
+                name: "val",
+                type: {
+                    kind: SCALAR,
+                    name: "String"
+                }
+            }, {
+                name: "in",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "String"
+                    },
+                    kind: LIST,
+                    name: "list_String"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "StringExpression"
+        }, {
+            inputFields: [{
+                name: "id",
+                type: {
+                    kind: SCALAR,
+                    name: "ID"
+                }
+            }, {
+                name: "userId",
+                type: {
+                    kind: SCALAR,
+                    name: "Int"
+                }
+            }, {
+                name: "roleId",
+                type: {
+                    kind: SCALAR,
+                    name: "Int"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "UserRoleInput"
+        }, {
+            inputFields: [{
+                defaultValue: "EQ",
+                name: "opr",
+                type: {
+                    kind: ENUM,
+                    name: "Operator"
+                }
+            }, {
+                name: "val",
+                type: {
+                    kind: ENUM,
+                    name: "Operator"
+                }
+            }, {
+                name: "in",
+                type: {
+                    ofType: {
+                        kind: ENUM,
+                        name: "Operator"
+                    },
+                    kind: LIST,
+                    name: "list_Operator"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "OperatorExpression"
+        }, {
+            inputFields: [{
+                name: "id",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IDExpression"
+                }
+            }, {
+                name: "login",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "StringExpression"
+                }
+            }, {
+                name: "password",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "StringExpression"
+                }
+            }, {
+                name: "name",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "StringExpression"
+                }
+            }, {
+                name: "age",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IntExpression"
+                }
+            }, {
+                name: "disable",
+                type: {
+                    kind: SCALAR,
+                    name: "Boolean"
+                }
+            }, {
+                name: "sex",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "SexExpression"
+                }
+            }, {
+                name: "organizationId",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IntExpression"
+                }
+            }, {
+                name: "organization",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "OrganizationExpression"
+                }
+            }, {
+                name: "roles",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "RoleExpression"
+                }
+            }, {
+                defaultValue: "AND",
+                name: "cond",
+                type: {
+                    kind: ENUM,
+                    name: "Conditional"
+                }
+            }, {
+                name: "exs",
+                type: {
+                    ofType: {
+                        kind: INPUT_OBJECT,
+                        name: "UserExpression"
+                    },
+                    kind: LIST,
+                    name: "list_UserExpression"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "UserExpression"
+        }, {
+            inputFields: [{
+                name: "id",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "IDExpression"
+                }
+            }, {
+                name: "name",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "StringExpression"
+                }
+            }, {
+                name: "users",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "UserExpression"
+                }
+            }, {
+                defaultValue: "AND",
+                name: "cond",
+                type: {
+                    kind: ENUM,
+                    name: "Conditional"
+                }
+            }, {
+                name: "exs",
+                type: {
+                    ofType: {
+                        kind: INPUT_OBJECT,
+                        name: "RoleExpression"
+                    },
+                    kind: LIST,
+                    name: "list_RoleExpression"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "RoleExpression"
+        }, {
+            inputFields: [{
+                name: "type",
+                type: {
+                    kind: SCALAR,
+                    name: "String"
+                }
+            }, {
+                name: "from",
+                type: {
+                    kind: SCALAR,
+                    name: "String"
+                }
+            }, {
+                name: "to",
+                type: {
+                    kind: SCALAR,
+                    name: "String"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "MapWith"
+        }, {
+            inputFields: [{
+                name: "id",
+                type: {
+                    kind: SCALAR,
+                    name: "ID"
+                }
+            }, {
+                name: "above_id",
+                type: {
+                    kind: SCALAR,
+                    name: "Int"
+                }
+            }, {
+                name: "above",
+                type: {
+                    kind: INPUT_OBJECT,
+                    name: "OrganizationInput"
+                }
+            }, {
+                name: "users",
+                type: {
+                    ofType: {
+                        ofType: {
+                            kind: INPUT_OBJECT,
+                            name: "UserInput"
+                        },
+                        kind: NON_NULL,
+                        name: "nonnull_UserInput"
+                    },
+                    kind: LIST,
+                    name: "list_nonnull_UserInput"
+                }
+            }, {
+                name: "name",
+                type: {
+                    ofType: {
+                        kind: SCALAR,
+                        name: "String"
+                    },
+                    kind: NON_NULL,
+                    name: "nonnull_String"
+                }
+            }],
+            kind: INPUT_OBJECT,
+            name: "OrganizationInput"
+        }]
+    ){
+        id
+    }
+}

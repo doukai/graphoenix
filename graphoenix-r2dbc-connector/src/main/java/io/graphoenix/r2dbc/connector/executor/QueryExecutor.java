@@ -1,4 +1,4 @@
-package io.graphoenix.r2dbc.connector;
+package io.graphoenix.r2dbc.connector.executor;
 
 import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
 import reactor.core.publisher.Mono;

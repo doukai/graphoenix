@@ -3,7 +3,7 @@ package io.graphoenix.graphql.builder;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import io.graphoenix.common.manager.*;
-import io.graphoenix.graphql.builder.schema.GraphQLDocumentBuilder;
+import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import org.junit.jupiter.api.Test;
 
@@ -33,8 +33,8 @@ public class TempTest {
         String graphql = Resources.toString(url, Charsets.UTF_8);
         graphqlAntlrManager.registerDocument(graphql);
 
-        GraphQLDocumentBuilder graphQLDocumentBuilder = new GraphQLDocumentBuilder(graphqlAntlrManager);
-        System.out.println(graphQLDocumentBuilder.buildDocument().toString());
+        DocumentBuilder documentBuilder = new DocumentBuilder(graphqlAntlrManager);
+        System.out.println(documentBuilder.buildDocument().toString());
 
     }
 
