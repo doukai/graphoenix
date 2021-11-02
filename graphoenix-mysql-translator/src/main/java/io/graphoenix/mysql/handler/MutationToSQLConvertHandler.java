@@ -5,7 +5,7 @@ import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
 import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.SQLStatements;
-import io.graphoenix.spi.handler.bootstrap.IMutationToSQLConvertHandler;
+import io.graphoenix.spi.handler.bootstrap.convert.IMutationToSQLConvertHandler;
 
 public class MutationToSQLConvertHandler implements IMutationToSQLConvertHandler {
 

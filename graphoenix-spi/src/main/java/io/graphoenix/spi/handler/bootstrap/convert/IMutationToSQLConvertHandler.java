@@ -1,6 +1,7 @@
-package io.graphoenix.spi.handler.bootstrap;
+package io.graphoenix.spi.handler.bootstrap.convert;
 
 import io.graphoenix.spi.dto.SQLStatements;
+import io.graphoenix.spi.handler.bootstrap.IBootstrapHandler;
 
 public interface IMutationToSQLConvertHandler extends IBootstrapHandler<String, SQLStatements> {
 }

@@ -175,10 +175,8 @@ public class IntrospectionMutationBuilder {
         if (inputValueDefinitionContext.defaultValue() != null) {
             if (inputValueDefinitionContext.defaultValue().value().StringValue() != null) {
                 String stringValue = inputValueDefinitionContext.defaultValue().value().StringValue().getText();
-
                 inputValue.setDefaultValue(stringValue.substring(1, stringValue.length() - 1));
             } else {
-
                 inputValue.setDefaultValue(inputValueDefinitionContext.defaultValue().value().getText());
             }
         }
@@ -224,7 +222,6 @@ public class IntrospectionMutationBuilder {
     private __Directive directiveDefinitionContextToDirective(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
         __Directive directive = new __Directive();
         directive.setName(directiveDefinitionContext.name().getText());
-
         if (directiveDefinitionContext.description() != null) {
             directive.setDescription(directiveDefinitionContext.description().getText());
         }

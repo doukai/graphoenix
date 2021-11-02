@@ -8,7 +8,7 @@ import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
 import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
 import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
 
-import io.graphoenix.spi.handler.operation.IOperationToSQLConvertHandler;
+import io.graphoenix.spi.handler.operation.convert.IOperationToSQLConvertHandler;
 
 @AutoService(IOperationToSQLConvertHandler.class)
 public class OperationToSQLConvertHandler implements IOperationToSQLConvertHandler {

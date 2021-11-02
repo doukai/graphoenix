@@ -1,6 +1,6 @@
 package io.graphoenix.common.pipeline.bootstrap;
 
-public class BootStrapConstant {
+public class BootstrapConstant {
 
     public static final String MANAGER_KEY = "manager";
 

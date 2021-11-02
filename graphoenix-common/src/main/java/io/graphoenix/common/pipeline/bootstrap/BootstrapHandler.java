@@ -5,8 +5,8 @@ import io.graphoenix.spi.handler.bootstrap.IBootstrapHandler;
 import org.apache.commons.chain.Command;
 import org.apache.commons.chain.Context;
 
-import static io.graphoenix.common.pipeline.bootstrap.BootStrapConstant.CURRENT_DATA_KEY;
-import static io.graphoenix.common.pipeline.bootstrap.BootStrapConstant.MANAGER_KEY;
+import static io.graphoenix.common.pipeline.bootstrap.BootstrapConstant.CURRENT_DATA_KEY;
+import static io.graphoenix.common.pipeline.bootstrap.BootstrapConstant.MANAGER_KEY;
 
 public class BootstrapHandler<I, O> implements Command {
 

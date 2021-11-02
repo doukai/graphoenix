@@ -6,16 +6,15 @@ import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import org.antlr.v4.runtime.RuleContext;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class GraphQLDocumentBuilder {
+public class DocumentBuilder {
 
     private final IGraphqlDocumentManager manager;
 
-    public GraphQLDocumentBuilder(IGraphqlDocumentManager manager) {
+    public DocumentBuilder(IGraphqlDocumentManager manager) {
         this.manager = manager;
     }
 
@@ -52,7 +51,8 @@ public class GraphQLDocumentBuilder {
                 .addDefinition(mutationType.toString())
                 .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toList()))
                 .addDefinitions(manager.getEnums().map(this::buildEnum).map(EnumType::toString).collect(Collectors.toList()))
-                .addDefinitions(buildObjectExpressions().stream().map(InputObjectType::toString).collect(Collectors.toList()));
+                .addDefinitions(buildObjectExpressions().stream().map(InputObjectType::toString).collect(Collectors.toList()))
+                .addDefinitions(manager.getDirectives().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
     }
 
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -105,6 +105,23 @@ public class GraphQLDocumentBuilder {
                 .setDescription(inputValueDefinitionContext.description() == null ? null : inputValueDefinitionContext.description().getText())
                 .setTypeName(inputValueDefinitionContext.type().getText())
                 .setDirectives(inputValueDefinitionContext.directives() == null ? null : inputValueDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
+    }
+
+    public Directive buildDirective(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
+        return new Directive().setName(directiveDefinitionContext.name().getText())
+                .setDescription(directiveDefinitionContext.description() == null ? null : directiveDefinitionContext.description().getText())
+                .setArguments(directiveDefinitionContext.argumentsDefinition() == null ? null : directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toList()))
+                .setDirectiveLocations(directiveDefinitionContext.directiveLocations() == null ? null : directiveLocationList(directiveDefinitionContext.directiveLocations()));
+    }
+
+    public List<String> directiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext) {
+        List<String> directiveLocationList = new ArrayList<>();
+        if (directiveLocationsContext.directiveLocation() != null) {
+            directiveLocationList.add(directiveLocationsContext.directiveLocation().name().getText());
+        } else if (directiveLocationsContext.directiveLocations() != null) {
+            directiveLocationList.addAll(directiveLocationList(directiveLocationsContext.directiveLocations()));
+        }
+        return directiveLocationList;
     }
 
     public List<Field> buildQueryTypeFields() {

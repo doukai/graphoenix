@@ -1,22 +1,15 @@
 package io.graphoenix.http.server;
 
 import com.google.common.base.Charsets;
-import com.google.common.io.Files;
 import com.google.common.io.Resources;
 import io.graphoenix.common.manager.*;
-import io.graphoenix.graphql.builder.handler.GraphQLDocumentBuildHandler;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
-import io.graphoenix.graphql.builder.schema.GraphQLDocumentBuilder;
-import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
-import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
-import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
+import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.antlr.*;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 
 public class HttpServerTest {
 
@@ -51,15 +44,16 @@ public class HttpServerTest {
 
         graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
 
-        GraphQLDocumentBuilder graphQLDocumentBuilder = new GraphQLDocumentBuilder(graphqlAntlrManager);
 
-//        System.out.println(graphQLDocumentBuilder.buildDocument().toString());
+        DocumentBuilder documentBuilder = new DocumentBuilder(graphqlAntlrManager);
+
+//        System.out.println(documentBuilder.buildDocument().toString());
+
+        graphqlAntlrManager.registerDocument(documentBuilder.buildDocument().toString());
 //
-        graphqlAntlrManager.registerDocument(graphQLDocumentBuilder.buildDocument().toString());
-
-
+//
         IntrospectionMutationBuilder introspectionMutationBuilder = new IntrospectionMutationBuilder(graphqlAntlrManager);
-
+//
         System.out.println(introspectionMutationBuilder.buildIntrospectionSchema());
 
 

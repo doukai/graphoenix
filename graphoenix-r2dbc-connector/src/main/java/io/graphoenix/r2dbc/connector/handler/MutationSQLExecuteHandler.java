@@ -1,12 +1,12 @@
 package io.graphoenix.r2dbc.connector.handler;
 
 import io.graphoenix.common.constant.Hammurabi;
-import io.graphoenix.r2dbc.connector.MutationExecutor;
+import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.SQLStatements;
-import io.graphoenix.spi.handler.bootstrap.IMutationSQLExecuteHandler;
+import io.graphoenix.spi.handler.bootstrap.sql.IMutationSQLExecuteHandler;
 
 import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 

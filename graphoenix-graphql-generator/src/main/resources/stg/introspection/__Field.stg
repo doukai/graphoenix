@@ -3,7 +3,7 @@ __fieldDefinition(__field) ::= <<
 {
     <if(__field.description)>description: "<__field.description>",<endif>
     <if(__field.hasArgs)>args: [<directive.args:{arg|<__inputValueDefinition(arg)>};separator=", ">],<endif>
-    name: <__field.name>,
+    name: "<__field.name>",
     type: <__field.type>
 }
 >>
