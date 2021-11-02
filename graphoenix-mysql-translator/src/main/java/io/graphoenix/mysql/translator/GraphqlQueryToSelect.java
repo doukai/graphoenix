@@ -1,7 +1,6 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.common.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -18,6 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 
@@ -32,7 +32,7 @@ public class GraphqlQueryToSelect {
     }
 
     public List<String> createSelectsSql(String graphql) {
-        return createSelectsSql(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+        return createSelectsSql(DOCUMENT_UTIL.graphqlToDocument(graphql));
     }
 
     public List<String> createSelectsSql(GraphqlParser.DocumentContext documentContext) {

@@ -2,7 +2,7 @@ package io.graphoenix.common.pipeline.operation;
 
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.GraphQLRequestBody;
-import io.graphoenix.spi.handler.OperationType;
+import io.graphoenix.spi.dto.OperationType;
 import org.apache.commons.chain.impl.ContextBase;
 
 public class OperationContext extends ContextBase {

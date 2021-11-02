@@ -1,35 +1,39 @@
 package io.graphoenix.common.pipeline.operation;
 
-import io.graphoenix.spi.handler.OperationType;
+import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.dto.OperationType;
+import io.graphoenix.spi.handler.operation.IOperationHandler;
 import org.apache.commons.chain.Command;
 import org.apache.commons.chain.Context;
 
+import static io.graphoenix.common.pipeline.operation.OperationConstant.MANAGER_KEY;
 import static io.graphoenix.common.pipeline.operation.OperationConstant.CURRENT_DATA_KEY;
-import static io.graphoenix.common.pipeline.operation.OperationConstant.OPERATION_TYPE_KEY;
 
-public abstract class OperationHandler implements Command {
+public class OperationHandler<I, O> implements Command {
+
+    private final IOperationHandler<I, O> operationHandler;
+
+    public OperationHandler(IOperationHandler<I, O> operationHandler) {
+        this.operationHandler = operationHandler;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean execute(Context context) throws Exception {
 
-        switch ((OperationType) context.get(OPERATION_TYPE_KEY)) {
+        operationHandler.setupManager((IGraphqlDocumentManager) context.get(MANAGER_KEY));
+
+        switch ((OperationType) context.get(OperationConstant.OPERATION_TYPE_KEY)) {
             case QUERY:
-                context.put(CURRENT_DATA_KEY, query(context.get(CURRENT_DATA_KEY)));
+                context.put(CURRENT_DATA_KEY, operationHandler.query((I) context.get(CURRENT_DATA_KEY)));
                 break;
             case MUTATION:
-                context.put(CURRENT_DATA_KEY, mutation(context.get(CURRENT_DATA_KEY)));
+                context.put(CURRENT_DATA_KEY, operationHandler.mutation((I) context.get(CURRENT_DATA_KEY)));
                 break;
             case SUBSCRIPTION:
-                context.put(CURRENT_DATA_KEY, subscription(context.get(CURRENT_DATA_KEY)));
+                context.put(CURRENT_DATA_KEY, operationHandler.subscription((I) context.get(CURRENT_DATA_KEY)));
                 break;
         }
         return false;
     }
-
-    abstract Object query(Object input) throws Exception;
-
-    abstract Object mutation(Object input) throws Exception;
-
-    abstract Object subscription(Object input) throws Exception;
 }

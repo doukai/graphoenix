@@ -1,7 +1,6 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.common.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 
 public class GraphqlTypeToTable {
@@ -30,7 +30,7 @@ public class GraphqlTypeToTable {
     }
 
     public List<String> createTablesSql(String graphql) {
-        return createTablesSql(DocumentUtil.DOCUMENT_UTIL.graphqlToDocument(graphql));
+        return createTablesSql(DOCUMENT_UTIL.graphqlToDocument(graphql));
     }
 
     public List<String> createTablesSql(IGraphqlDocumentManager manager) {

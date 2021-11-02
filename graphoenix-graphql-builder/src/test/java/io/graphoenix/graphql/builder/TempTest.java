@@ -2,18 +2,12 @@ package io.graphoenix.graphql.builder;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.google.gson.Gson;
 import io.graphoenix.common.manager.*;
-import io.graphoenix.graphql.builder.introspection.IntrospectionBuilder;
-import io.graphoenix.graphql.builder.introspection.IntrospectionDtoWrapper;
-import io.graphoenix.graphql.builder.introspection.dto.__Schema;
 import io.graphoenix.graphql.builder.schema.GraphQLDocumentBuilder;
-import io.graphoenix.graphql.builder.schema.GraphqlSchemaBuilder;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 public class TempTest {

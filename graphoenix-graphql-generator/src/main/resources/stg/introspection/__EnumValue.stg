@@ -1,0 +1,6 @@
+__enumValueDefinition(__enumValue) ::= <<
+{
+    <if(__enumValue.description)>description: "<__enumValue.description>",<endif>
+    name: <__enumValue.name>
+}
+>>

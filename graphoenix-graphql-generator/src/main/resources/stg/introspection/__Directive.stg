@@ -1,0 +1,9 @@
+import "__InputValue.stg"
+__directiveDefinition(__directive) ::= <<
+{
+    <if(__directive.description)>description: "<__directive.description>",<endif>
+    <if(__directive.args)>args: [<__directive.args:{arg|<__inputValueDefinition(arg)>};separator=", ">],<endif>
+    name: <__directive.name>,
+    locations: <__directive.locations>
+}
+>>

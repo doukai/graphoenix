@@ -2,7 +2,7 @@ package io.graphoenix.graphql.builder.schema;
 
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.graphql.generator.*;
+import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import org.antlr.v4.runtime.RuleContext;
 

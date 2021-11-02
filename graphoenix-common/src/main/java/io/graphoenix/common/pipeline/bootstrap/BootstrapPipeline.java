@@ -1,8 +1,10 @@
 package io.graphoenix.common.pipeline.bootstrap;
 
+import io.graphoenix.common.utils.HandlerUtil;
 import io.graphoenix.common.manager.*;
 import io.graphoenix.spi.antlr.*;
 import io.graphoenix.spi.dto.GraphQLRequestBody;
+import io.graphoenix.spi.handler.bootstrap.IBootstrapHandler;
 import org.apache.commons.chain.impl.ChainBase;
 
 import java.io.IOException;
@@ -46,8 +48,13 @@ public class BootstrapPipeline extends ChainBase {
         this.manager.registerDocument(inputStream);
     }
 
-    public BootstrapPipeline addHandler(BootstrapHandler handler) {
-        addCommand(handler);
+    public <I, O> BootstrapPipeline addHandler(IBootstrapHandler<I, O> handler) {
+        addCommand(new BootstrapHandler<>(handler));
+        return this;
+    }
+
+    public <T extends IBootstrapHandler<I, O>, I, O> BootstrapPipeline addHandler(Class<T> handlerClass) {
+        addCommand(new BootstrapHandler<>(HandlerUtil.HANDLER_UTIL.create(handlerClass)));
         return this;
     }
 
