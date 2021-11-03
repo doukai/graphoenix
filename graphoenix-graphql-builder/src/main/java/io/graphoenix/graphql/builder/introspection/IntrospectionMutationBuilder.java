@@ -1,12 +1,14 @@
 package io.graphoenix.graphql.builder.introspection;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.graphql.generator.document.InputValue;
 import io.graphoenix.graphql.generator.introspection.*;
+import io.graphoenix.graphql.generator.operation.Argument;
+import io.graphoenix.graphql.generator.operation.Field;
+import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +26,36 @@ public class IntrospectionMutationBuilder {
     public IntrospectionMutationBuilder(IGraphqlDocumentManager manager) {
         this.manager = manager;
         this.levelThreshold = 1;
+    }
+
+    public Operation buildIntrospectionSchemaMutation() {
+
+        List<Argument> arguments = new ArrayList<>();
+
+        Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
+        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+
+        Optional<GraphqlParser.ObjectTypeDefinitionContext> mutationTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject);
+        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("mutationType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+
+        Optional<GraphqlParser.ObjectTypeDefinitionContext> subscriptionTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject);
+        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+
+        arguments.add(new Argument().setName("types").setArrayValueWithVariable(
+                Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType),
+                        Stream.concat(
+                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
+                        )
+                ).map(__Type::toString).collect(Collectors.toList())
+        ));
+
+        arguments.add(new Argument().setName("directives").setArrayValueWithVariable(manager.getDirectives().map(this::directiveDefinitionContextToDirective).map(__Directive::toString).collect(Collectors.toList())));
+
+        return new Operation()
+                .setOperationType("mutation")
+                .setName("introspection")
+                .setFields(Collections.singletonList(new Field().setName("__schema").setArguments(arguments).setFields(Collections.singletonList(new Field().setName("id")))));
     }
 
     public __Schema buildIntrospectionSchema() {

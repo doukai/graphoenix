@@ -1,0 +1,7 @@
+import "Variable.stg"
+import "Field.stg"
+operationDefinition(operation) ::= <<
+<if(operation.operationType)><operation.operationType> <endif><if(operation.name)><operation.name><endif><if(operation.variableDefinitions)>(<operation.variableDefinitions:{variableDefinition|<variableDefinition(variableDefinition)>};separator=", ">)<endif><if(operation.directives)> <operation.directives:{directive|<directive>};separator=" "><endif> {
+    <operation.fields:{field|<fieldDefinition(field)>};separator="\r">
+}
+>>
