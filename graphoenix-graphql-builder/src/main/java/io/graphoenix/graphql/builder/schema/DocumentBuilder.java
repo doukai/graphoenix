@@ -4,6 +4,7 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import org.abego.treelayout.internal.util.java.lang.string.StringUtil;
 import org.antlr.v4.runtime.RuleContext;
 
 import java.util.*;
@@ -142,15 +143,23 @@ public class DocumentBuilder {
     }
 
     public Field buildSchemaTypeField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        return new Field().setName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()))
+        return new Field().setName(getSchemaFieldName(objectTypeDefinitionContext))
                 .setTypeName(objectTypeDefinitionContext.name().getText())
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType));
     }
 
     public Field buildSchemaTypeFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        return new Field().setName(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText().concat("List")))
+        return new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType));
+    }
+
+    private String getSchemaFieldName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        if (objectTypeDefinitionContext.name().getText().startsWith("__")) {
+            return "__".concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText().replace("__", "")));
+        } else {
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText());
+        }
     }
 
     public List<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {

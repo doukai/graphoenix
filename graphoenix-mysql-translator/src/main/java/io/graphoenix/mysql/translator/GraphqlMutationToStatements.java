@@ -38,12 +38,13 @@ public class GraphqlMutationToStatements {
     }
 
     public List<String> createStatementsSql(String graphql) {
-        return createSelectsSql(DOCUMENT_UTIL.graphqlToDocument(graphql));
+        return createStatements(DOCUMENT_UTIL.graphqlToDocument(graphql)).getStatements().stream().map(Object::toString).collect(Collectors.toList());
     }
 
-    public List<String> createSelectsSql(GraphqlParser.DocumentContext documentContext) {
-        return createStatements(documentContext).getStatements().stream()
-                .map(Statement::toString).collect(Collectors.toList());
+    public List<String> createStatementsSql(GraphqlParser.DocumentContext documentContext) {
+        Statements statements = new Statements();
+        statements.setStatements(documentContext.definition().stream().flatMap(this::createStatementStream).collect(Collectors.toList()));
+        return statements.getStatements().stream().map(Object::toString).collect(Collectors.toList());
     }
 
     public Statements createStatements(GraphqlParser.DocumentContext documentContext) {
