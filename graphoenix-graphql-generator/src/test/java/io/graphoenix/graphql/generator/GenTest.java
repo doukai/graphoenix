@@ -1,6 +1,7 @@
 package io.graphoenix.graphql.generator;
 
 import io.graphoenix.graphql.generator.document.*;
+import io.graphoenix.graphql.generator.operation.Operation;
 import org.junit.jupiter.api.Test;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -97,7 +98,7 @@ public class GenTest {
         enumValue2.setName("woman");
         enumValue2.setDescription("asdfsadf");
 
-        enumType.setEnumValues(Arrays.asList(enumValue,enumValue2));
+        enumType.setEnumValues(Arrays.asList(enumValue, enumValue2));
         enumType.setDescription("ccccccccccccccc");
         st.add("enumType", enumType);
         System.out.println(st.render());
@@ -125,11 +126,22 @@ public class GenTest {
         inputValue2.setTypeName("Int");
         inputValue2.setDescription("eeeee3");
 
-        directiveDefinition.setArguments(Arrays.asList(inputValue,inputValue2));
-        directiveDefinition.setDirectiveLocations(Arrays.asList("AAAA","BBB"));
+        directiveDefinition.setArguments(Arrays.asList(inputValue, inputValue2));
+        directiveDefinition.setDirectiveLocations(Arrays.asList("AAAA", "BBB"));
 
 
         st.add("directive", directiveDefinition);
         System.out.println(st.render());
+    }
+
+    @Test
+    void test4() {
+        Operation operation = new Operation()
+                .setOperationType("mutation")
+                .setName("updateTest")
+                .setDirectives(Arrays.asList("@skip", "@skip2"))
+                .setVariableDefinitions(Arrays.asList(new InputValue().setName("arg1").setTypeName("Type1"), new InputValue().setName("arg2").setTypeName("Type2")));
+
+        System.out.println(operation);
     }
 }

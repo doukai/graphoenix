@@ -1,0 +1,3 @@
+argumentDefinition(argument) ::= <<
+<argument.name>: <if(argument.valueWithVariable)><argument.valueWithVariable><endif><if(argument.arrayValueWithVariable)>[<argument.arrayValueWithVariable:{valueWithVariable|<valueWithVariable>};separator=", ">]<endif>
+>>

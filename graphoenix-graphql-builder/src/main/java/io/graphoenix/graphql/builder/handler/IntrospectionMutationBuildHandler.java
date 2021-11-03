@@ -2,7 +2,7 @@ package io.graphoenix.graphql.builder.handler;
 
 import com.google.auto.service.AutoService;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
-import io.graphoenix.graphql.generator.introspection.__Schema;
+import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.handler.bootstrap.introspection.IIntrospectionMutationBuildHandler;
 
@@ -11,8 +11,8 @@ public class IntrospectionMutationBuildHandler implements IIntrospectionMutation
 
     @Override
     public String transform(IGraphqlDocumentManager manager, Void object) {
-        __Schema __schema = new IntrospectionMutationBuilder(manager).buildIntrospectionSchema();
-        return __schema.toString();
+        Operation operation = new IntrospectionMutationBuilder(manager).buildIntrospectionSchemaMutation();
+        return operation.toString();
     }
 
     @Override
