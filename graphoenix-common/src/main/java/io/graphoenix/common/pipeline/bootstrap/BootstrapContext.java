@@ -12,9 +12,8 @@ public class BootstrapContext extends ContextBase {
         return manager;
     }
 
-    public BootstrapContext setManager(IGraphqlDocumentManager manager) {
+    public void setManager(IGraphqlDocumentManager manager) {
         this.manager = manager;
-        return this;
     }
 
     public Object getCurrentData() {

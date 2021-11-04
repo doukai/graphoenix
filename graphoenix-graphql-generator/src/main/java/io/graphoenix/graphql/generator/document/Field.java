@@ -4,6 +4,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Field {
@@ -40,6 +41,14 @@ public class Field {
         } else {
             this.arguments.addAll(arguments);
         }
+        return this;
+    }
+
+    public Field addArgument(InputValue argument) {
+        if (this.arguments == null) {
+            this.arguments = new ArrayList<>();
+        }
+        this.arguments.add(argument);
         return this;
     }
 

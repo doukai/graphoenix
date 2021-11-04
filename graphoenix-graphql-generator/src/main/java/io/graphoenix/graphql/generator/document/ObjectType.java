@@ -35,7 +35,7 @@ public class ObjectType {
         return this;
     }
 
-    public ObjectType addInterfaces(String interfaceType) {
+    public ObjectType addInterface(String interfaceType) {
         if (this.interfaces == null) {
             this.interfaces = new ArrayList<>();
         }
