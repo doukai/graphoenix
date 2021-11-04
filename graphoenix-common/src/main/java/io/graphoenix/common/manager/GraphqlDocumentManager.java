@@ -23,6 +23,10 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
 
     private final IGraphqlObjectManager graphqlObjectManager;
 
+    private final IGraphqlInterfaceManager graphqlInterfaceManager;
+
+    private final IGraphqlUnionManager graphqlUnionManager;
+
     private final IGraphqlFieldManager graphqlFieldManager;
 
     private final IGraphqlInputObjectManager graphqlInputObjectManager;
@@ -39,6 +43,8 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
                                   @Provided IGraphqlSchemaManager graphqlSchemaManager,
                                   @Provided IGraphqlDirectiveManager graphqlDirectiveManager,
                                   @Provided IGraphqlObjectManager graphqlObjectManager,
+                                  @Provided IGraphqlInterfaceManager graphqlInterfaceManager,
+                                  @Provided IGraphqlUnionManager graphqlUnionManager,
                                   @Provided IGraphqlFieldManager graphqlFieldManager,
                                   @Provided IGraphqlInputObjectManager graphqlInputObjectManager,
                                   @Provided IGraphqlInputValueManager graphqlInputValueManager,
@@ -49,6 +55,8 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
         this.graphqlSchemaManager = graphqlSchemaManager;
         this.graphqlDirectiveManager = graphqlDirectiveManager;
         this.graphqlObjectManager = graphqlObjectManager;
+        this.graphqlInterfaceManager = graphqlInterfaceManager;
+        this.graphqlUnionManager = graphqlUnionManager;
         this.graphqlFieldManager = graphqlFieldManager;
         this.graphqlInputObjectManager = graphqlInputObjectManager;
         this.graphqlInputValueManager = graphqlInputValueManager;
@@ -125,6 +133,11 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
         } else if (typeDefinitionContext.objectTypeDefinition() != null) {
             graphqlObjectManager.register(typeDefinitionContext.objectTypeDefinition());
             graphqlFieldManager.register(typeDefinitionContext.objectTypeDefinition());
+        } else if (typeDefinitionContext.interfaceTypeDefinition() != null) {
+            graphqlInterfaceManager.register(typeDefinitionContext.interfaceTypeDefinition());
+            graphqlFieldManager.register(typeDefinitionContext.interfaceTypeDefinition());
+        } else if (typeDefinitionContext.unionTypeDefinition() != null) {
+            graphqlUnionManager.register(typeDefinitionContext.unionTypeDefinition());
         } else if (typeDefinitionContext.inputObjectTypeDefinition() != null) {
             graphqlInputObjectManager.register(typeDefinitionContext.inputObjectTypeDefinition());
             graphqlInputValueManager.register(typeDefinitionContext.inputObjectTypeDefinition());
@@ -149,6 +162,16 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
     @Override
     public boolean isObject(String name) {
         return graphqlObjectManager.isObject(name);
+    }
+
+    @Override
+    public boolean isInterface(String name) {
+        return graphqlInterfaceManager.isInterface(name);
+    }
+
+    @Override
+    public boolean isUnion(String name) {
+        return graphqlUnionManager.isUnion(name);
     }
 
     @Override
@@ -187,6 +210,16 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
     }
 
     @Override
+    public Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterface(String name) {
+        return graphqlInterfaceManager.getInterfaceTypeDefinition(name);
+    }
+
+    @Override
+    public Optional<GraphqlParser.UnionTypeDefinitionContext> getUnion(String name) {
+        return graphqlUnionManager.getUnionTypeDefinition(name);
+    }
+
+    @Override
     public Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObject(String name) {
         return graphqlInputObjectManager.getInputObjectTypeDefinition(name);
     }
@@ -204,6 +237,16 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
     @Override
     public Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjects() {
         return graphqlObjectManager.getObjectTypeDefinitions();
+    }
+
+    @Override
+    public Stream<GraphqlParser.InterfaceTypeDefinitionContext> getInterfaces() {
+        return graphqlInterfaceManager.getInterfaceTypeDefinitions();
+    }
+
+    @Override
+    public Stream<GraphqlParser.UnionTypeDefinitionContext> getUnions() {
+        return graphqlUnionManager.getUnionTypeDefinitions();
     }
 
     @Override

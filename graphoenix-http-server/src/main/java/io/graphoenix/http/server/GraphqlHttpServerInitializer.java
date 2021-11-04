@@ -1,5 +1,6 @@
 package io.graphoenix.http.server;
 
+import io.graphoenix.common.pipeline.GraphQLDataFetcher;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -15,8 +16,11 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 
     private final SslContext sslCtx;
 
-    public GraphqlHttpServerInitializer(SslContext sslCtx) {
+    private final GraphQLDataFetcher dataFetcher;
+
+    public GraphqlHttpServerInitializer(SslContext sslCtx, GraphQLDataFetcher dataFetcher) {
         this.sslCtx = sslCtx;
+        this.dataFetcher = dataFetcher;
     }
 
     @Override
@@ -40,6 +44,6 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 //        p.addLast("compressor",new HttpContentCompressor());
         p.addLast("chunked", new ChunkedWriteHandler());
         p.addLast("cors", new CorsHandler(corsConfig));
-        p.addLast("handler", new GraphqlHttpServerHandler());
+        p.addLast("handler", new GraphqlHttpServerHandler(this.dataFetcher));
     }
 }

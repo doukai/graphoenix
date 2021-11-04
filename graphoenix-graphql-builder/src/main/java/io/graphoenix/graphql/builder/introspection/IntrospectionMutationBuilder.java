@@ -1,7 +1,6 @@
 package io.graphoenix.graphql.builder.introspection;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.graphql.generator.document.InputValue;
 import io.graphoenix.graphql.generator.introspection.*;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
@@ -86,16 +85,51 @@ public class IntrospectionMutationBuilder {
         return objectTypeDefinitionContextToType(objectTypeDefinitionContext, 0);
     }
 
+    private __Type interfaceTypeDefinitionContextToType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return interfaceTypeDefinitionContextToType(interfaceTypeDefinitionContext, 0);
+    }
+
     private __Type objectTypeDefinitionContextToType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, int level) {
         __Type type = new __Type();
         type.setKind(__TypeKind.OBJECT);
         type.setName(objectTypeDefinitionContext.name().getText());
+        if (objectTypeDefinitionContext.implementsInterfaces() != null) {
+            type.setInterfaces(getInterfaceTypes(objectTypeDefinitionContext.implementsInterfaces(), level));
+        }
         if (objectTypeDefinitionContext.description() != null) {
             type.setDescription(objectTypeDefinitionContext.description().getText());
         }
         if (level == 0) {
             type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
+        }
+        return type;
+    }
+
+    private List<__Type> getInterfaceTypes(GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext, int level) {
+
+        return implementsInterfacesContext.typeName().stream()
+                .map(typeNameContext -> manager.getInterface(typeNameContext.name().getText()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContextToType(interfaceTypeDefinitionContext, level))
+                .collect(Collectors.toList());
+    }
+
+    private __Type interfaceTypeDefinitionContextToType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext, int level) {
+        __Type type = new __Type();
+        type.setKind(__TypeKind.OBJECT);
+        type.setName(interfaceTypeDefinitionContext.name().getText());
+        if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
+            type.setInterfaces(getInterfaceTypes(interfaceTypeDefinitionContext.implementsInterfaces(), level));
+        }
+        if (interfaceTypeDefinitionContext.description() != null) {
+            type.setDescription(interfaceTypeDefinitionContext.description().getText());
+        }
+        if (level == 0) {
+            type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                    .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
                     .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
         }
         return type;

@@ -1,16 +1,14 @@
-package io.graphoenix.mysql.handler;
+package io.graphoenix.mysql.handler.bootstrap;
 
-import com.google.auto.service.AutoService;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.handler.bootstrap.introspection.IIntrospectionRegisterHandler;
+import io.graphoenix.spi.handler.IBootstrapHandler;
 
 import java.io.IOException;
 
-@AutoService(IIntrospectionRegisterHandler.class)
-public class IntrospectionRegisterHandler implements IIntrospectionRegisterHandler {
+public class IntrospectionRegisterHandler implements IBootstrapHandler {
 
     @Override
-    public Void transform(IGraphqlDocumentManager manager, Void object) {
+    public Object transform(IGraphqlDocumentManager manager, Object object) {
         return null;
     }
 

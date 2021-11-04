@@ -1,22 +1,22 @@
 package io.graphoenix.common.pipeline.operation;
 
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.GraphQLRequestBody;
+import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.dto.OperationType;
 import org.apache.commons.chain.impl.ContextBase;
 
 public class OperationContext extends ContextBase {
 
-    private GraphQLRequestBody request;
+    private GraphQLRequest request;
     private IGraphqlDocumentManager manager;
     private OperationType operationType;
     private Object currentData;
 
-    public GraphQLRequestBody getRequest() {
+    public GraphQLRequest getRequest() {
         return request;
     }
 
-    public OperationContext setRequest(GraphQLRequestBody request) {
+    public OperationContext setRequest(GraphQLRequest request) {
         this.request = request;
         return this;
     }

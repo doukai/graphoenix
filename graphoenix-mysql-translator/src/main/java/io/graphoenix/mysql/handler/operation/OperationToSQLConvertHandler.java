@@ -1,17 +1,15 @@
-package io.graphoenix.mysql.handler;
+package io.graphoenix.mysql.handler.operation;
 
-import com.google.auto.service.AutoService;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.GraphQLRequestBody;
+import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.dto.SQLStatements;
 import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
 import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
 import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
 
-import io.graphoenix.spi.handler.operation.convert.IOperationToSQLConvertHandler;
+import io.graphoenix.spi.handler.IOperationHandler;
 
-@AutoService(IOperationToSQLConvertHandler.class)
-public class OperationToSQLConvertHandler implements IOperationToSQLConvertHandler {
+public class OperationToSQLConvertHandler implements IOperationHandler {
 
     private GraphqlQueryToSelect graphqlQueryToSelect;
     private GraphqlMutationToStatements graphqlMutationToStatements;
@@ -27,20 +25,20 @@ public class OperationToSQLConvertHandler implements IOperationToSQLConvertHandl
     }
 
     @Override
-    public SQLStatements query(GraphQLRequestBody requestBody) {
-        this.manager.registerFragment(requestBody.getQuery());
-        return new SQLStatements(this.graphqlQueryToSelect.createSelectsSql(requestBody.getQuery()));
+    public SQLStatements query(Object requestBody) {
+        this.manager.registerFragment(((GraphQLRequest) requestBody).getQuery());
+        return new SQLStatements(this.graphqlQueryToSelect.createSelectsSql(((GraphQLRequest) requestBody).getQuery()));
     }
 
     @Override
-    public SQLStatements mutation(GraphQLRequestBody requestBody) {
-        this.manager.registerFragment(requestBody.getQuery());
-        return new SQLStatements(this.graphqlMutationToStatements.createStatementsSql(requestBody.getQuery()));
+    public SQLStatements mutation(Object requestBody) {
+        this.manager.registerFragment(((GraphQLRequest) requestBody).getQuery());
+        return new SQLStatements(this.graphqlMutationToStatements.createStatementsSql(((GraphQLRequest) requestBody).getQuery()));
     }
 
     @Override
-    public SQLStatements subscription(GraphQLRequestBody requestBody) {
-        this.manager.registerFragment(requestBody.getQuery());
+    public SQLStatements subscription(Object requestBody) {
+        this.manager.registerFragment(((GraphQLRequest) requestBody).getQuery());
         return null;
     }
 }

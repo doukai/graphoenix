@@ -20,6 +20,8 @@ public class TempTest {
                 new GraphqlSchemaManager(),
                 new GraphqlDirectiveManager(),
                 new GraphqlObjectManager(),
+                new GraphqlInterfaceManager(),
+                new GraphqlUnionManager(),
                 new GraphqlFieldManager(),
                 new GraphqlInputObjectManager(),
                 new GraphqlInputValueManager(),

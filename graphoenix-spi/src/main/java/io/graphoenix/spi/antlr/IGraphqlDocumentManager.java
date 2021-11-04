@@ -29,6 +29,10 @@ public interface IGraphqlDocumentManager {
 
     public boolean isObject(String name);
 
+    boolean isInterface(String name);
+
+    boolean isUnion(String name);
+
     public boolean isInputObject(String name);
 
     public boolean isOperation(String name);
@@ -43,6 +47,10 @@ public interface IGraphqlDocumentManager {
 
     public Optional<GraphqlParser.ObjectTypeDefinitionContext> getObject(String name);
 
+    Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterface(String name);
+
+    Optional<GraphqlParser.UnionTypeDefinitionContext> getUnion(String name);
+
     public Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObject(String name);
 
     public Stream<GraphqlParser.DirectiveDefinitionContext> getDirectives();
@@ -50,6 +58,10 @@ public interface IGraphqlDocumentManager {
     public Stream<GraphqlParser.EnumTypeDefinitionContext> getEnums();
 
     public Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjects();
+
+    public Stream<GraphqlParser.InterfaceTypeDefinitionContext> getInterfaces();
+
+    public Stream<GraphqlParser.UnionTypeDefinitionContext> getUnions();
 
     public Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjects();
 

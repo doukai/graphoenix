@@ -1,3 +1,8 @@
+interface Meta {
+    version: Int
+    removed: Boolean
+}
+
 enum Operator {
     EQ
     NEQ

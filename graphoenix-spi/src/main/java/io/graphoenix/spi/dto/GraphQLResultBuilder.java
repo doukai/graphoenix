@@ -4,24 +4,24 @@ import java.util.List;
 
 public class GraphQLResultBuilder {
 
-    private final GraphQLResult graphQLResult;
+    private final GraphQLResponse graphQLResponse;
 
     public GraphQLResultBuilder(Object data) {
-        this.graphQLResult = new GraphQLResult();
-        this.graphQLResult.setData(data);
+        this.graphQLResponse = new GraphQLResponse();
+        this.graphQLResponse.setData(data);
     }
 
     public GraphQLResultBuilder(Object data, Exception exception) {
-        this.graphQLResult = new GraphQLResult();
-        this.graphQLResult.setData(data);
+        this.graphQLResponse = new GraphQLResponse();
+        this.graphQLResponse.setData(data);
     }
 
     public GraphQLResultBuilder(Object data, List<Exception> exceptionList) {
-        this.graphQLResult = new GraphQLResult();
-        this.graphQLResult.setData(data);
+        this.graphQLResponse = new GraphQLResponse();
+        this.graphQLResponse.setData(data);
     }
 
-    public GraphQLResult build() {
-        return graphQLResult;
+    public GraphQLResponse build() {
+        return graphQLResponse;
     }
 }

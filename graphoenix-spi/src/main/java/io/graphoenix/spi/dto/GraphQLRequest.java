@@ -2,7 +2,7 @@ package io.graphoenix.spi.dto;
 
 import java.util.Map;
 
-public class GraphQLRequestBody {
+public class GraphQLRequest {
 
     private String query;
 

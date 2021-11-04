@@ -26,7 +26,13 @@ public class GraphqlTypeToTable {
 
 
     public List<String> createTablesSql() {
-        return manager.getObjects().map(this::createTable).map(CreateTable::toString).collect(Collectors.toList());
+        return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
+                .map(this::createTable).map(CreateTable::toString).collect(Collectors.toList());
     }
 
     public List<String> createTablesSql(String graphql) {
