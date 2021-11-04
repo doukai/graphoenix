@@ -14,10 +14,10 @@ public class OperationRouter implements Command {
     @Override
     @SuppressWarnings("unchecked")
     public boolean execute(Context context) {
-        GraphQLRequest request = (GraphQLRequest) context.get(REQUEST_KEY);
+        GraphQLRequest request = (GraphQLRequest) context.get(CURRENT_DATA_KEY);
         IGraphqlDocumentManager manager = (IGraphqlDocumentManager) context.get(MANAGER_KEY);
         GraphqlParser.OperationTypeContext operationTypeContext = manager.getOperationType(request.getQuery());
-        if (operationTypeContext.QUERY() != null) {
+        if (operationTypeContext == null || operationTypeContext.QUERY() != null) {
             context.put(OPERATION_TYPE_KEY, OperationType.QUERY);
         } else if (operationTypeContext.MUTATION() != null) {
             context.put(OPERATION_TYPE_KEY, OperationType.MUTATION);

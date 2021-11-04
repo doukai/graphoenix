@@ -35,8 +35,9 @@ public class OperationPipeline extends ChainBase {
         return this;
     }
 
-    public GraphQLResponse process(GraphQLRequest requestBody) throws Exception {
+    public GraphQLResponse process(GraphQLRequest request) throws Exception {
         OperationContext operationContext = new OperationContext();
+        operationContext.setCurrentData(request);
         operationContext.setManager(this.manager);
         this.execute(operationContext);
         return (GraphQLResponse) operationContext.getCurrentData();

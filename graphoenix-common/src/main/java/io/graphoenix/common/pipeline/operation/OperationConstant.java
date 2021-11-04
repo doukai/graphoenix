@@ -2,8 +2,6 @@ package io.graphoenix.common.pipeline.operation;
 
 public class OperationConstant {
 
-    public static final String REQUEST_KEY = "request";
-
     public static final String MANAGER_KEY = "manager";
 
     public static final String OPERATION_TYPE_KEY = "operationType";

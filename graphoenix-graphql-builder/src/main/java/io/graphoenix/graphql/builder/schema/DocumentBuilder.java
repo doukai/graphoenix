@@ -4,19 +4,23 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.introspection.__Field;
 import org.antlr.v4.runtime.RuleContext;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.common.constant.Hammurabi.META_INTERFACE_NAME;
+
 public class DocumentBuilder {
 
     private final IGraphqlDocumentManager manager;
 
+    private final GraphqlParser.InterfaceTypeDefinitionContext metaInterfaceTypeDefinitionContext;
+
     public DocumentBuilder(IGraphqlDocumentManager manager) {
         this.manager = manager;
+        this.metaInterfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElse(null);
     }
 
     public Document buildDocument() {
@@ -27,11 +31,10 @@ public class DocumentBuilder {
                     .setDescription(queryOperationTypeDefinition.get().description() == null ? null : queryOperationTypeDefinition.get().description().getText())
                     .setDirectives(queryOperationTypeDefinition.get().directives() == null ? null : queryOperationTypeDefinition.get().directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()))
                     .setFields(queryOperationTypeDefinition.get().fieldsDefinition() == null ? null : queryOperationTypeDefinition.get().fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList()));
-
         } else {
             queryType = new ObjectType().setName("QueryType");
         }
-        queryType.addFields(buildQueryTypeFields());
+        queryType.addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME);
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> mutationOperationTypeDefinition = manager.getMutationOperationTypeName().flatMap(manager::getObject);
         ObjectType mutationType;
@@ -40,11 +43,10 @@ public class DocumentBuilder {
                     .setDescription(mutationOperationTypeDefinition.get().description() == null ? null : mutationOperationTypeDefinition.get().description().getText())
                     .setDirectives(mutationOperationTypeDefinition.get().directives() == null ? null : mutationOperationTypeDefinition.get().directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()))
                     .setFields(mutationOperationTypeDefinition.get().fieldsDefinition() == null ? null : mutationOperationTypeDefinition.get().fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, true)).collect(Collectors.toList()));
-
         } else {
             mutationType = new ObjectType().setName("MutationType");
         }
-        mutationType.addFields(buildMutationTypeFields());
+        mutationType.addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME);
 
         return new Document()
                 .addDefinition(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString())
@@ -63,7 +65,7 @@ public class DocumentBuilder {
                 .setName(objectTypeDefinitionContext.name().getText())
                 .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
                 .setInterfaces(objectTypeDefinitionContext.implementsInterfaces() == null ? null : objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toList()))
-                .addInterfaces("Meta")
+                .addInterface(META_INTERFACE_NAME)
                 .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))).collect(Collectors.toList()))
                 .addFields(getMetaInterfaceFields())
                 .setDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
@@ -80,13 +82,11 @@ public class DocumentBuilder {
     }
 
     public List<Field> getMetaInterfaceFields() {
-
-        return manager.getInterface("Meta")
-                .map(interfaceTypeDefinitionContext ->
-                        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                .map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false))
-                ).map(fieldStream -> fieldStream.collect(Collectors.toList()))
-                .orElse(null);
+        if (this.metaInterfaceTypeDefinitionContext != null) {
+            return metaInterfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                    .map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList());
+        }
+        return null;
     }
 
     public EnumType buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
@@ -106,13 +106,15 @@ public class DocumentBuilder {
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> filedObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
         if (filedObjectTypeDefinitionContext.isPresent()) {
-            if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                if (isMutationOperationType) {
-                    field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.INPUT));
-                } else {
-                    field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.EXPRESSION));
-                }
+//            if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+            if (isMutationOperationType) {
+                field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.INPUT));
+            } else {
+                field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.EXPRESSION));
             }
+//            }
+        } else if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+            field.addArgument(filedToArgument(fieldDefinitionContext, InputType.EXPRESSION));
         }
         return field;
     }
@@ -186,9 +188,16 @@ public class DocumentBuilder {
     }
 
     public List<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+        List<InputValue> inputValueList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .map(fieldDefinitionContext -> filedToArgument(fieldDefinitionContext, inputType))
                 .collect(Collectors.toList());
+        if (this.metaInterfaceTypeDefinitionContext != null) {
+            List<InputValue> metaInputValueList = this.metaInterfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                    .map(fieldDefinitionContext -> filedToArgument(fieldDefinitionContext, inputType))
+                    .collect(Collectors.toList());
+            inputValueList.addAll(metaInputValueList);
+        }
+        return inputValueList;
     }
 
     public InputValue filedToArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {

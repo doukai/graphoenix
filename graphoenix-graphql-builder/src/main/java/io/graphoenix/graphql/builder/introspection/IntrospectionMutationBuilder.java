@@ -42,9 +42,11 @@ public class IntrospectionMutationBuilder {
 
         arguments.add(new Argument().setName("types").setArrayValueWithVariable(
                 Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType),
-                        Stream.concat(
-                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
-                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
+                        Stream.concat(manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
+                                Stream.concat(
+                                        manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                        manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
+                                )
                         )
                 ).map(__Type::toString).collect(Collectors.toList())
         ));
@@ -62,9 +64,11 @@ public class IntrospectionMutationBuilder {
         __Schema schema = new __Schema();
         schema.setTypes(
                 Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType),
-                        Stream.concat(
-                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
-                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
+                        Stream.concat(manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
+                                Stream.concat(
+                                        manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                        manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
+                                )
                         )
                 ).collect(Collectors.toList()));
 
@@ -119,7 +123,7 @@ public class IntrospectionMutationBuilder {
 
     private __Type interfaceTypeDefinitionContextToType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext, int level) {
         __Type type = new __Type();
-        type.setKind(__TypeKind.OBJECT);
+        type.setKind(__TypeKind.INTERFACE);
         type.setName(interfaceTypeDefinitionContext.name().getText());
         if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
             type.setInterfaces(getInterfaceTypes(interfaceTypeDefinitionContext.implementsInterfaces(), level));
