@@ -1,6 +1,6 @@
 package io.graphoenix.http.server;
 
-import io.graphoenix.common.pipeline.operation.OperationPipeline;
+import io.graphoenix.common.pipeline.GraphQLDataFetcher;
 import io.graphoenix.http.server.config.NettyConfiguration;
 import io.graphoenix.http.server.config.ServerConfiguration;
 import io.netty.bootstrap.ServerBootstrap;
@@ -28,13 +28,16 @@ public class GraphqlHttpServer {
 
     private final ServerConfiguration serverConfiguration;
 
-    public GraphqlHttpServer(NettyConfiguration nettyConfiguration, ServerConfiguration serverConfiguration) {
+    private final GraphQLDataFetcher dataFetcher;
+
+    public GraphqlHttpServer(NettyConfiguration nettyConfiguration, ServerConfiguration serverConfiguration, GraphQLDataFetcher dataFetcher) {
         this.nettyConfiguration = nettyConfiguration;
         this.serverConfiguration = serverConfiguration;
+        this.dataFetcher = dataFetcher;
     }
 
-    public GraphqlHttpServer() {
-        this(new NettyConfiguration(), new ServerConfiguration());
+    public GraphqlHttpServer(GraphQLDataFetcher dataFetcher) {
+        this(new NettyConfiguration(), new ServerConfiguration(), dataFetcher);
     }
 
     public void run() throws Exception {
@@ -75,7 +78,7 @@ public class GraphqlHttpServer {
                     .option(ChannelOption.SO_BACKLOG, serverConfiguration.getSoBackLog())
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new GraphqlHttpServerInitializer(sslCtx));
+                    .childHandler(new GraphqlHttpServerInitializer(sslCtx, dataFetcher));
 
             Channel ch = b.bind(serverConfiguration.getPort()).sync().channel();
 

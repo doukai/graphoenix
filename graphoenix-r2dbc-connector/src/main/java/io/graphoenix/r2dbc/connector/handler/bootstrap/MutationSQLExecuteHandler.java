@@ -1,24 +1,21 @@
-package io.graphoenix.r2dbc.connector.handler;
+package io.graphoenix.r2dbc.connector.handler.bootstrap;
 
-import com.google.auto.service.AutoService;
 import io.graphoenix.common.constant.Hammurabi;
-import io.graphoenix.r2dbc.connector.executor.TableCreator;
+import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.SQLStatements;
-import io.graphoenix.spi.handler.bootstrap.sql.ICreateTableSQLExecuteHandler;
+import io.graphoenix.spi.handler.IBootstrapHandler;
 
 import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 
-@AutoService(ICreateTableSQLExecuteHandler.class)
-public class CreateTableSQLExecuteHandler implements ICreateTableSQLExecuteHandler {
-
+public class MutationSQLExecuteHandler implements IBootstrapHandler {
     @Override
-    public Void transform(IGraphqlDocumentManager manager, SQLStatements sqlStatements) {
+    public Void transform(IGraphqlDocumentManager manager, Object sqlStatements) {
         ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, ConnectionConfiguration.class));
-        TableCreator tableCreator = new TableCreator(connectionCreator);
-        tableCreator.createTables(sqlStatements.getSqlStatements()).block();
+        MutationExecutor mutationExecutor = new MutationExecutor(connectionCreator);
+        mutationExecutor.executeMutations(((SQLStatements) sqlStatements).getSqlStatements());
         return null;
     }
 

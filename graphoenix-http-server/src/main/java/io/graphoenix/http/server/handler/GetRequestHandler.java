@@ -1,7 +1,7 @@
 package io.graphoenix.http.server.handler;
 
 import com.google.gson.Gson;
-import io.graphoenix.spi.dto.GraphQLRequestBody;
+import io.graphoenix.spi.dto.GraphQLRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
 
@@ -12,10 +12,10 @@ import java.util.Map;
 
 public class GetRequestHandler implements RequestHandler {
     @Override
-    public GraphQLRequestBody handle(FullHttpRequest fullHttpRequest) {
+    public GraphQLRequest handle(FullHttpRequest fullHttpRequest) {
         String requestUri = fullHttpRequest.uri();
         Map<String, String> queryParameterMappings = this.getQueryParams(requestUri);
-        return new Gson().fromJson(queryParameterMappings.toString(), GraphQLRequestBody.class);
+        return new Gson().fromJson(queryParameterMappings.toString(), GraphQLRequest.class);
     }
 
     private Map<String, String> getQueryParams(String uri) {

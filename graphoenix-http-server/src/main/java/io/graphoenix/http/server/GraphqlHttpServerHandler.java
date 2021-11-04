@@ -2,11 +2,12 @@ package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
+import io.graphoenix.common.pipeline.GraphQLDataFetcher;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.graphoenix.http.server.handler.RequestHandler;
 import io.graphoenix.http.server.handler.RequestHandlerFactory;
-import io.graphoenix.spi.dto.GraphQLRequestBody;
-import io.graphoenix.spi.dto.GraphQLResult;
+import io.graphoenix.spi.dto.GraphQLRequest;
+import io.graphoenix.spi.dto.GraphQLResponse;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,13 +37,14 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private static final AsciiString CONTENT_TYPE = AsciiString.cached("Content-Type");
     private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
-    public GraphqlHttpServerHandler() {
+    private final GraphQLDataFetcher dataFetcher;
+
+    public GraphqlHttpServerHandler(GraphQLDataFetcher dataFetcher) {
+        this.dataFetcher = dataFetcher;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
-
-        OperationPipeline operationPipeline = new OperationPipeline();
 
         log.info("Handle http request:{}", request);
         String uri = request.uri();
@@ -50,25 +52,25 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             return;
         }
         RequestHandler requestHandler = RequestHandlerFactory.create(request.method());
-        GraphQLRequestBody requestBody;
-        GraphQLResult graphQLResult = null;
+        GraphQLRequest requestBody;
+        GraphQLResponse graphQLResponse = null;
         FullHttpResponse response = null;
 
         try {
             requestBody = requestHandler.handle(request);
 
             log.info("Handle http query:{}", requestBody.getQuery());
-            graphQLResult = operationPipeline.process(requestBody);
+            graphQLResponse = dataFetcher.fetch(requestBody);
 
             //TODO
-            response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResult).getBytes(StandardCharsets.UTF_8)));
+            response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResponse).getBytes(StandardCharsets.UTF_8)));
             response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
 
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
             //TODO
-            response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResult).getBytes(StandardCharsets.UTF_8)));
+            response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResponse).getBytes(StandardCharsets.UTF_8)));
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
         } catch (Exception exception) {
             exception.printStackTrace();

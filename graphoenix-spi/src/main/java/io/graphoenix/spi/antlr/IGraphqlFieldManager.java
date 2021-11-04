@@ -10,6 +10,8 @@ public interface IGraphqlFieldManager {
 
     Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
+    Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+
     Stream<GraphqlParser.FieldDefinitionContext> getFieldDefinitions(String objectTypeName);
 
     Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinition(String objectTypeName, String fieldName);

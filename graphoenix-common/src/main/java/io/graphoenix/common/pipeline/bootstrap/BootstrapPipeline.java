@@ -3,7 +3,7 @@ package io.graphoenix.common.pipeline.bootstrap;
 import io.graphoenix.common.utils.HandlerUtil;
 import io.graphoenix.common.manager.*;
 import io.graphoenix.spi.antlr.*;
-import io.graphoenix.spi.handler.bootstrap.IBootstrapHandler;
+import io.graphoenix.spi.handler.IBootstrapHandler;
 import org.apache.commons.chain.impl.ChainBase;
 
 import java.io.IOException;
@@ -20,6 +20,10 @@ public class BootstrapPipeline extends ChainBase {
     private IGraphqlDirectiveManager graphqlDirectiveManager;
 
     private IGraphqlObjectManager graphqlObjectManager;
+
+    private IGraphqlInterfaceManager graphqlInterfaceManager;
+
+    private IGraphqlUnionManager graphqlUnionManager;
 
     private IGraphqlFieldManager graphqlFieldManager;
 
@@ -48,18 +52,19 @@ public class BootstrapPipeline extends ChainBase {
     }
 
     public IGraphqlDocumentManager buildManager() throws Exception {
-        BootstrapContext context = new BootstrapContext();
-        this.execute(context);
+        BootstrapContext bootstrapContext = new BootstrapContext();
+        bootstrapContext.setManager(this.manager);
+        this.execute(bootstrapContext);
         return manager;
     }
 
-    public <I, O> BootstrapPipeline addHandler(IBootstrapHandler<I, O> handler) {
-        addCommand(new BootstrapHandler<>(handler));
+    public BootstrapPipeline addHandler(IBootstrapHandler handler) {
+        addCommand(new BootstrapHandler(handler));
         return this;
     }
 
-    public <T extends IBootstrapHandler<I, O>, I, O> BootstrapPipeline addHandler(Class<T> handlerClass) {
-        addCommand(new BootstrapHandler<>(HandlerUtil.HANDLER_UTIL.create(handlerClass)));
+    public <T extends IBootstrapHandler> BootstrapPipeline addHandler(Class<T> handlerClass) {
+        addCommand(new BootstrapHandler(HandlerUtil.HANDLER_UTIL.create(handlerClass)));
         return this;
     }
 
@@ -80,6 +85,16 @@ public class BootstrapPipeline extends ChainBase {
 
     public BootstrapPipeline setup(IGraphqlObjectManager graphqlObjectManager) {
         this.graphqlObjectManager = graphqlObjectManager;
+        return this;
+    }
+
+    public BootstrapPipeline setup(IGraphqlInterfaceManager graphqlInterfaceManager) {
+        this.graphqlInterfaceManager = graphqlInterfaceManager;
+        return this;
+    }
+
+    public BootstrapPipeline setup(IGraphqlUnionManager graphqlUnionManager) {
+        this.graphqlUnionManager = graphqlUnionManager;
         return this;
     }
 
@@ -129,6 +144,14 @@ public class BootstrapPipeline extends ChainBase {
         return graphqlObjectManager == null ? new GraphqlObjectManager() : graphqlObjectManager;
     }
 
+    private IGraphqlInterfaceManager getGraphqlInterfaceManager() {
+        return graphqlInterfaceManager == null ? new GraphqlInterfaceManager() : graphqlInterfaceManager;
+    }
+
+    private IGraphqlUnionManager getGraphqlUnionManager() {
+        return graphqlUnionManager == null ? new GraphqlUnionManager() : graphqlUnionManager;
+    }
+
     private IGraphqlFieldManager getGraphqlFieldManager() {
         return graphqlFieldManager == null ? new GraphqlFieldManager() : graphqlFieldManager;
     }
@@ -159,6 +182,8 @@ public class BootstrapPipeline extends ChainBase {
                 this::getGraphqlSchemaManager,
                 this::getGraphqlDirectiveManager,
                 this::getGraphqlObjectManager,
+                this::getGraphqlInterfaceManager,
+                this::getGraphqlUnionManager,
                 this::getGraphqlFieldManager,
                 this::getGraphqlInputObjectManager,
                 this::getGraphqlInputValueManager,

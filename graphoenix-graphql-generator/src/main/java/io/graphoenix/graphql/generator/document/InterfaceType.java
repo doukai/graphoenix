@@ -52,6 +52,17 @@ public class InterfaceType {
         return this;
     }
 
+    public InterfaceType addFields(List<Field> fields) {
+        if (this.fields == null) {
+            this.fields = fields;
+        } else {
+            if (fields != null) {
+                this.fields.addAll(fields);
+            }
+        }
+        return this;
+    }
+
     public String getDescription() {
         return description;
     }

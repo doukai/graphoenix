@@ -4,6 +4,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ObjectType {
@@ -34,6 +35,14 @@ public class ObjectType {
         return this;
     }
 
+    public ObjectType addInterfaces(String interfaceType) {
+        if (this.interfaces == null) {
+            this.interfaces = new ArrayList<>();
+        }
+        this.interfaces.add(interfaceType);
+        return this;
+    }
+
     public List<String> getDirectives() {
         return directives;
     }
@@ -56,7 +65,9 @@ public class ObjectType {
         if (this.fields == null) {
             this.fields = fields;
         } else {
-            this.fields.addAll(fields);
+            if (fields != null) {
+                this.fields.addAll(fields);
+            }
         }
         return this;
     }

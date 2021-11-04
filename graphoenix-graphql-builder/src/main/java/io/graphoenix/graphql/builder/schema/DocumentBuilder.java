@@ -4,7 +4,7 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import org.abego.treelayout.internal.util.java.lang.string.StringUtil;
+import io.graphoenix.spi.dto.introspection.__Field;
 import org.antlr.v4.runtime.RuleContext;
 
 import java.util.*;
@@ -26,7 +26,7 @@ public class DocumentBuilder {
             queryType = new ObjectType().setName(queryOperationTypeDefinition.get().name().getText())
                     .setDescription(queryOperationTypeDefinition.get().description() == null ? null : queryOperationTypeDefinition.get().description().getText())
                     .setDirectives(queryOperationTypeDefinition.get().directives() == null ? null : queryOperationTypeDefinition.get().directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()))
-                    .setFields(queryOperationTypeDefinition.get().fieldsDefinition() == null ? null : queryOperationTypeDefinition.get().fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, queryOperationTypeDefinition.get())).collect(Collectors.toList()));
+                    .setFields(queryOperationTypeDefinition.get().fieldsDefinition() == null ? null : queryOperationTypeDefinition.get().fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList()));
 
         } else {
             queryType = new ObjectType().setName("QueryType");
@@ -39,7 +39,7 @@ public class DocumentBuilder {
             mutationType = new ObjectType().setName(mutationOperationTypeDefinition.get().name().getText())
                     .setDescription(mutationOperationTypeDefinition.get().description() == null ? null : mutationOperationTypeDefinition.get().description().getText())
                     .setDirectives(mutationOperationTypeDefinition.get().directives() == null ? null : mutationOperationTypeDefinition.get().directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()))
-                    .setFields(mutationOperationTypeDefinition.get().fieldsDefinition() == null ? null : mutationOperationTypeDefinition.get().fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, mutationOperationTypeDefinition.get())).collect(Collectors.toList()));
+                    .setFields(mutationOperationTypeDefinition.get().fieldsDefinition() == null ? null : mutationOperationTypeDefinition.get().fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, true)).collect(Collectors.toList()));
 
         } else {
             mutationType = new ObjectType().setName("MutationType");
@@ -51,6 +51,7 @@ public class DocumentBuilder {
                 .addDefinition(queryType.toString())
                 .addDefinition(mutationType.toString())
                 .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toList()))
+                .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toList()))
                 .addDefinitions(manager.getEnums().map(this::buildEnum).map(EnumType::toString).collect(Collectors.toList()))
                 .addDefinitions(buildObjectExpressions().stream().map(InputObjectType::toString).collect(Collectors.toList()))
                 .addDefinitions(manager.getDirectives().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
@@ -62,8 +63,30 @@ public class DocumentBuilder {
                 .setName(objectTypeDefinitionContext.name().getText())
                 .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
                 .setInterfaces(objectTypeDefinitionContext.implementsInterfaces() == null ? null : objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toList()))
-                .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, objectTypeDefinitionContext)).collect(Collectors.toList()))
+                .addInterfaces("Meta")
+                .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))).collect(Collectors.toList()))
+                .addFields(getMetaInterfaceFields())
                 .setDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
+    }
+
+    public InterfaceType buildInterface(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+
+        return new InterfaceType()
+                .setName(interfaceTypeDefinitionContext.name().getText())
+                .setDescription(interfaceTypeDefinitionContext.description() == null ? null : interfaceTypeDefinitionContext.description().getText())
+                .setInterfaces(interfaceTypeDefinitionContext.implementsInterfaces() == null ? null : interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toList()))
+                .setFields(interfaceTypeDefinitionContext.fieldsDefinition() == null ? null : interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList()))
+                .setDirectives(interfaceTypeDefinitionContext.directives() == null ? null : interfaceTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
+    }
+
+    public List<Field> getMetaInterfaceFields() {
+
+        return manager.getInterface("Meta")
+                .map(interfaceTypeDefinitionContext ->
+                        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false))
+                ).map(fieldStream -> fieldStream.collect(Collectors.toList()))
+                .orElse(null);
     }
 
     public EnumType buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
@@ -74,7 +97,7 @@ public class DocumentBuilder {
                 .setDirectives(enumTypeDefinitionContext.directives() == null ? null : enumTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
     }
 
-    public Field buildFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    public Field buildFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean isMutationOperationType) {
         Field field = new Field().setName(fieldDefinitionContext.name().getText())
                 .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
                 .setTypeName(fieldDefinitionContext.type().getText())
@@ -84,7 +107,7 @@ public class DocumentBuilder {
         Optional<GraphqlParser.ObjectTypeDefinitionContext> filedObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
         if (filedObjectTypeDefinitionContext.isPresent()) {
             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                if (manager.isMutationOperationType(objectTypeDefinitionContext.name().getText())) {
+                if (isMutationOperationType) {
                     field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.INPUT));
                 } else {
                     field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.EXPRESSION));
