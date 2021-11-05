@@ -56,7 +56,6 @@ type __Field {
     description: String
     args: [__InputValue!]! @map(from: "id", to: "fieldId")
     type: __Type! @map(from: "typeName", to: "name")
-    isDeprecated: Boolean
     deprecationReason: String
 }
 
@@ -77,7 +76,6 @@ type __EnumValue {
     name: String
     ofTypeName: String
     description: String
-    isDeprecated: Boolean
     deprecationReason: String
 }
 

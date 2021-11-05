@@ -22,6 +22,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.common.constant.Hammurabi.DEPRECATED_FIELD_NAME;
+import static io.graphoenix.common.constant.Hammurabi.DEPRECATED_INPUT_NAME;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 
@@ -81,11 +83,13 @@ public class GraphqlArgumentsToWhere {
                                                            GraphqlParser.ArgumentsContext argumentsContext) {
         Stream<Expression> expressionStream = argumentsDefinitionContext.inputValueDefinition().stream()
                 .filter(this::isNotConditional)
+                .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
                 .map(inputValueDefinitionContext -> argumentsToExpression(typeContext, inputValueDefinitionContext, argumentsContext))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
+        Stream<Expression> notDeprecatedExpression = notDeprecatedExpression(typeContext, argumentsDefinitionContext.inputValueDefinition(), argumentsContext);
         Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfArgumentsToExpressionList(typeContext, argumentsDefinitionContext, argumentsContext);
-        return Stream.concat(expressionStream, conditionalExpressionStream);
+        return Stream.concat(Stream.concat(expressionStream, notDeprecatedExpression), conditionalExpressionStream);
     }
 
     protected Stream<Expression> objectValueWithVariableToExpressionList(GraphqlParser.TypeContext typeContext,
@@ -93,11 +97,13 @@ public class GraphqlArgumentsToWhere {
                                                                          GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         Stream<Expression> expressionStream = inputObjectValueDefinitionsContext.inputValueDefinition().stream()
                 .filter(this::isNotConditional)
+                .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
                 .map(inputValueDefinitionContext -> objectValueWithVariableToExpression(typeContext, inputValueDefinitionContext, objectValueWithVariableContext))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
+        Stream<Expression> notDeprecatedExpression = notDeprecatedExpression(typeContext, inputObjectValueDefinitionsContext.inputValueDefinition(), objectValueWithVariableContext);
         Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfObjectValueWithVariableToExpressionList(typeContext, inputObjectValueDefinitionsContext, objectValueWithVariableContext);
-        return Stream.concat(expressionStream, conditionalExpressionStream);
+        return Stream.concat(Stream.concat(expressionStream, notDeprecatedExpression), conditionalExpressionStream);
     }
 
     protected Stream<Expression> objectValueToExpressionList(GraphqlParser.TypeContext typeContext,
@@ -105,12 +111,54 @@ public class GraphqlArgumentsToWhere {
                                                              GraphqlParser.ObjectValueContext objectValueContext) {
         Stream<Expression> expressionStream = inputObjectValueDefinitionsContext.inputValueDefinition().stream()
                 .filter(this::isNotConditional)
+                .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
                 .map(inputValueDefinitionContext -> objectValueToExpression(typeContext, inputValueDefinitionContext, objectValueContext))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
+        Stream<Expression> notDeprecatedExpression = notDeprecatedExpression(typeContext, inputObjectValueDefinitionsContext.inputValueDefinition(), objectValueContext);
         Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfObjectValueToExpression(typeContext, inputObjectValueDefinitionsContext, objectValueContext);
-        return Stream.concat(expressionStream, conditionalExpressionStream);
+        return Stream.concat(Stream.concat(expressionStream, notDeprecatedExpression), conditionalExpressionStream);
     }
+
+    protected Stream<Expression> notDeprecatedExpression(GraphqlParser.TypeContext typeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ArgumentsContext argumentsContext) {
+        Optional<GraphqlParser.ArgumentContext> argumentContext = inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
+                .filter(inputValueDefinitionContext -> manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean"))
+                .findFirst()
+                .flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext));
+        if (argumentContext.isPresent() && argumentContext.get().valueWithVariable().BooleanValue() != null) {
+            if (argumentContext.get().valueWithVariable().BooleanValue().getText().equals("true")) {
+                return Stream.empty();
+            }
+        }
+        return Stream.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME)));
+    }
+
+    protected Stream<Expression> notDeprecatedExpression(GraphqlParser.TypeContext typeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
+                .filter(inputValueDefinitionContext -> manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean"))
+                .findFirst()
+                .flatMap(inputValueDefinitionContext -> manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext));
+        if (objectFieldWithVariableContext.isPresent() && objectFieldWithVariableContext.get().valueWithVariable().BooleanValue() != null) {
+            if (objectFieldWithVariableContext.get().valueWithVariable().BooleanValue().getText().equals("true")) {
+                return Stream.empty();
+            }
+        }
+        return Stream.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME)));
+    }
+
+    protected Stream<Expression> notDeprecatedExpression(GraphqlParser.TypeContext typeContext, List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList, GraphqlParser.ObjectValueContext objectValueContext) {
+        Optional<GraphqlParser.ObjectFieldContext> objectFieldContext = inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
+                .filter(inputValueDefinitionContext -> manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean"))
+                .findFirst()
+                .flatMap(inputValueDefinitionContext -> manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext));
+        if (objectFieldContext.isPresent() && objectFieldContext.get().value().BooleanValue() != null) {
+            if (objectFieldContext.get().value().BooleanValue().getText().equals("true")) {
+                return Stream.empty();
+            }
+        }
+        return Stream.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME)));
+    }
+
 
     protected Optional<Expression> argumentsToExpression(GraphqlParser.TypeContext typeContext,
                                                          GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
@@ -1007,6 +1055,13 @@ public class GraphqlArgumentsToWhere {
             }
         }
         return Optional.empty();
+    }
+
+    protected Expression isFalseExpression(Expression leftExpression) {
+        IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
+        isBooleanExpression.setLeftExpression(leftExpression);
+        isBooleanExpression.setIsTrue(false);
+        return isBooleanExpression;
     }
 
     protected ExistsExpression existsExpression(PlainSelect body) {

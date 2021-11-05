@@ -12,7 +12,7 @@ public class __EnumValue {
 
     private String description;
 
-    private Boolean isDeprecated;
+    private Boolean isDeprecated = false;
 
     private String deprecationReason;
 
@@ -32,11 +32,11 @@ public class __EnumValue {
         this.description = description;
     }
 
-    public Boolean getDeprecated() {
+    public Boolean getIsDeprecated() {
         return isDeprecated;
     }
 
-    public void setDeprecated(Boolean deprecated) {
+    public void setIsDeprecated(Boolean deprecated) {
         isDeprecated = deprecated;
     }
 
