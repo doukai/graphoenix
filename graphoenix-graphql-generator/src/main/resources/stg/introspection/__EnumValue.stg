@@ -1,8 +1,8 @@
 __enumValueDefinition(__enumValue) ::= <<
 {
-    name: <if(__enumValue.name)>"<__enumValue.name>"<endif>,
-    description: <if(__enumValue.description)>"<__enumValue.description>"<else>null<endif>,
-    isDeprecated: <__enumValue.isDeprecated>,
-    deprecationReason: <if(__enumValue.deprecationReason)>"<__enumValue.deprecationReason>"<else>null<endif>
+    <if(__enumValue.description)>description: "<__enumValue.description>",<endif>
+    <if(__enumValue.isDeprecated)>isDeprecated: <__enumValue.isDeprecated>,<endif>
+    <if(__enumValue.deprecationReason)>deprecationReason: "<__enumValue.deprecationReason>",<endif>
+    name: "<__enumValue.name>"
 }
 >>

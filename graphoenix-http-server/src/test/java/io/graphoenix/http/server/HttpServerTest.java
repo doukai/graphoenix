@@ -86,8 +86,8 @@ public class HttpServerTest {
 
 
         graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
-//        graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/preset.gql"));
-//        graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/introspectionTypes.gql"));
+        graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/preset.gql"));
+        graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/introspectionTypes.gql"));
 
 
         DocumentBuilder documentBuilder = new DocumentBuilder(graphqlAntlrManager);
