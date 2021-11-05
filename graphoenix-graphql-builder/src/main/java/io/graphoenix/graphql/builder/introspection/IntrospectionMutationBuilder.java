@@ -97,15 +97,17 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.OBJECT);
         type.setName(objectTypeDefinitionContext.name().getText());
-        if (objectTypeDefinitionContext.implementsInterfaces() != null) {
-            type.setInterfaces(getInterfaceTypes(objectTypeDefinitionContext.implementsInterfaces(), level));
+        if (level == 0) {
+            if (objectTypeDefinitionContext.implementsInterfaces() != null) {
+                type.setInterfaces(getInterfaceTypes(objectTypeDefinitionContext.implementsInterfaces(), level));
+            }
+            if (objectTypeDefinitionContext.description() != null) {
+                type.setDescription(objectTypeDefinitionContext.description().getText());
+            }
+            type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                    .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
         }
-        if (objectTypeDefinitionContext.description() != null) {
-            type.setDescription(objectTypeDefinitionContext.description().getText());
-        }
-        type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
-                .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
         return type;
     }
 
@@ -123,15 +125,17 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.INTERFACE);
         type.setName(interfaceTypeDefinitionContext.name().getText());
-        if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
-            type.setInterfaces(getInterfaceTypes(interfaceTypeDefinitionContext.implementsInterfaces(), level));
+        if (level == 0) {
+            if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
+                type.setInterfaces(getInterfaceTypes(interfaceTypeDefinitionContext.implementsInterfaces(), level));
+            }
+            if (interfaceTypeDefinitionContext.description() != null) {
+                type.setDescription(interfaceTypeDefinitionContext.description().getText());
+            }
+            type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                    .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
         }
-        if (interfaceTypeDefinitionContext.description() != null) {
-            type.setDescription(interfaceTypeDefinitionContext.description().getText());
-        }
-        type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
-                .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
         return type;
     }
 
@@ -158,7 +162,7 @@ public class IntrospectionMutationBuilder {
             if (manager.isInnerScalar(typeContext.typeName().getText())) {
                 return innerScalarTypeDefinitionContextToType(typeContext.typeName().getText());
             } else if (manager.isScaLar(typeContext.typeName().getText())) {
-                return manager.getScaLar(typeContext.typeName().getText()).map(this::scalarTypeDefinitionContextToType).orElse(null);
+                return manager.getScaLar(typeContext.typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null);
             } else if (manager.isObject(typeContext.typeName().getText())) {
                 return manager.getObject(typeContext.typeName().getText()).map(objectTypeDefinitionContext -> objectTypeDefinitionContextToType(objectTypeDefinitionContext, level)).orElse(null);
             } else if (manager.isEnum(typeContext.typeName().getText())) {
@@ -179,7 +183,7 @@ public class IntrospectionMutationBuilder {
                 if (manager.isInnerScalar(typeContext.nonNullType().typeName().getText())) {
                     nonNullType.setOfType(innerScalarTypeDefinitionContextToType(typeContext.nonNullType().typeName().getText()));
                 } else if (manager.isScaLar(typeContext.nonNullType().typeName().getText())) {
-                    nonNullType.setOfType(manager.getScaLar(typeContext.nonNullType().typeName().getText()).map(this::scalarTypeDefinitionContextToType).orElse(null));
+                    nonNullType.setOfType(manager.getScaLar(typeContext.nonNullType().typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null));
                 } else if (manager.isObject(typeContext.nonNullType().typeName().getText())) {
                     nonNullType.setOfType(manager.getObject(typeContext.nonNullType().typeName().getText()).map(objectTypeDefinitionContext -> objectTypeDefinitionContextToType(objectTypeDefinitionContext, level)).orElse(null));
                 } else if (manager.isEnum(typeContext.nonNullType().typeName().getText())) {
@@ -209,11 +213,13 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.ENUM);
         type.setName(enumTypeDefinitionContext.name().getText());
-        if (enumTypeDefinitionContext.description() != null) {
-            type.setDescription(enumTypeDefinitionContext.description().getText());
+        if (level == 0) {
+            if (enumTypeDefinitionContext.description() != null) {
+                type.setDescription(enumTypeDefinitionContext.description().getText());
+            }
+            type.setEnumValues(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream()
+                    .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toList()));
         }
-        type.setEnumValues(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream()
-                .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toList()));
         return type;
     }
 
@@ -256,20 +262,24 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.INPUT_OBJECT);
         type.setName(inputObjectTypeDefinitionContext.name().getText());
-        if (inputObjectTypeDefinitionContext.description() != null) {
-            type.setDescription(inputObjectTypeDefinitionContext.description().getText());
+        if (level == 0) {
+            if (inputObjectTypeDefinitionContext.description() != null) {
+                type.setDescription(inputObjectTypeDefinitionContext.description().getText());
+            }
+            type.setInputFields(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                    .map(inputValueDefinitionContext -> inputValueDefinitionContextToInputValue(inputValueDefinitionContext, level + 1)).collect(Collectors.toList()));
         }
-        type.setInputFields(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
-                .map(inputValueDefinitionContext -> inputValueDefinitionContextToInputValue(inputValueDefinitionContext, level + 1)).collect(Collectors.toList()));
         return type;
     }
 
-    private __Type scalarTypeDefinitionContextToType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
+    private __Type scalarTypeDefinitionContextToType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext, int level) {
         __Type type = new __Type();
         type.setKind(__TypeKind.SCALAR);
         type.setName(scalarTypeDefinitionContext.name().getText());
-        if (scalarTypeDefinitionContext.description() != null) {
-            type.setDescription(scalarTypeDefinitionContext.description().getText());
+        if (level == 0) {
+            if (scalarTypeDefinitionContext.description() != null) {
+                type.setDescription(scalarTypeDefinitionContext.description().getText());
+            }
         }
         return type;
     }
