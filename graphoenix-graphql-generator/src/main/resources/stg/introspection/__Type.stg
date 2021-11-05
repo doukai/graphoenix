@@ -3,14 +3,14 @@ import "__EnumValue.stg"
 import "__InputValue.stg"
 __typeDefinition(__type) ::= <<
 {
-    <if(__type.description)>description: "<__type.description>",<endif>
-    <if(__type.fields)>fields: [<__type.fields:{field|<__fieldDefinition(field)>};separator=", ">],<endif>
-    <if(__type.interfaces)>interfaces: [<__type.interfaces:{interface|<__typeDefinition(interface)>};separator=", ">],<endif>
-    <if(__type.possibleTypes)>possibleTypes: [<__type.possibleTypes:{possibleType|<__typeDefinition(possibleType)>};separator=", ">],<endif>
-    <if(__type.enumValues)>enumValues: [<__type.enumValues:{enumValue|<__enumValueDefinition(enumValue)>};separator=", ">],<endif>
-    <if(__type.inputFields)>inputFields: [<__type.inputFields:{inputField|<__inputValueDefinition(inputField)>};separator=", ">],<endif>
-    <if(__type.ofType)>ofType: <__type.ofType>,<endif>
-    <if(__type.kind)>kind: <__type.kind>,<endif>
-    name: "<__type.name>"
+    kind: <__type.kind>,
+    name: <if(__type.name)>"<__type.name>"<else>null<endif>,
+    description: <if(__type.description)>"<__type.description>"<else>null<endif>,
+    fields: <if(__type.fields)>[<__type.fields:{field|<__fieldDefinition(field)>};separator=", ">]<else>null<endif>,
+    interfaces: <if(__type.interfaces)>[<__type.interfaces:{interface|<__typeDefinition(interface)>};separator=", ">]<else>null<endif>,
+    possibleTypes: <if(__type.possibleTypes)>[<__type.possibleTypes:{possibleType|<__typeDefinition(possibleType)>};separator=", ">]<else>null<endif>,
+    enumValues: <if(__type.enumValues)>[<__type.enumValues:{enumValue|<__enumValueDefinition(enumValue)>};separator=", ">]<else>null<endif>,
+    inputFields: <if(__type.inputFields)>[<__type.inputFields:{inputField|<__inputValueDefinition(inputField)>};separator=", ">]<else>null<endif>,
+    ofType: <if(__type.ofType)><__type.ofType><else>null<endif>
 }
 >>

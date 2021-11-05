@@ -2,10 +2,11 @@ import "__Type.stg"
 import "__Directive.stg"
 __schemaDefinition(__schema) ::= <<
 {
-    <if(__schema.mutationType)>mutationType: <__typeDefinition(__schema.mutationType)>,<endif>
-    <if(__schema.subscriptionType)>subscriptionType: <__typeDefinition(__schema.subscriptionType)>,<endif>
-    <if(__schema.directives)>directives: [<__schema.directives:{directive|<__directiveDefinition(directive)>};separator=", ">],<endif>
+    description: <if(__schema.description)>"<__schema.description>"<else>null<endif>,
+    types: [<__schema.types:{type|<__typeDefinition(type)>};separator=", ">],
     queryType: <__typeDefinition(__schema.queryType)>,
-    types: [<__schema.types:{type|<__typeDefinition(type)>};separator=", ">]
+    mutationType: <if(__schema.mutationType)>"<__typeDefinition(__schema.mutationType)>"<else>null<endif>,
+    subscriptionType: <if(__schema.subscriptionType)>"<__typeDefinition(__schema.subscriptionType)>"<else>null<endif>,
+    directives: [<__schema.directives:{directive|<__directiveDefinition(directive)>};separator=", ">]
 }
 >>
