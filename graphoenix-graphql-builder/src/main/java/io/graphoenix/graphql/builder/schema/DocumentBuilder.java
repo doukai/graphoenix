@@ -106,13 +106,11 @@ public class DocumentBuilder {
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> filedObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
         if (filedObjectTypeDefinitionContext.isPresent()) {
-//            if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             if (isMutationOperationType) {
                 field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.INPUT));
             } else {
                 field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.EXPRESSION));
             }
-//            }
         } else if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             field.addArgument(filedToArgument(fieldDefinitionContext, InputType.EXPRESSION));
         }
@@ -203,11 +201,17 @@ public class DocumentBuilder {
     public InputValue filedToArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
 
+
         if (inputType.equals(InputType.INPUT)) {
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldDefinitionContext.type().getText()
                             .replace(fieldTypeName, fieldTypeName.concat(manager.isObject(fieldTypeName) ? InputType.INPUT.toString() : "")));
         } else {
+            if (fieldDefinitionContext.name().getText().equals("isDeprecated")) {
+                return new InputValue().setName("includeDeprecated")
+                        .setTypeName("Boolean")
+                        .setDefaultValue("false");
+            }
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldTypeName.concat(fieldTypeName.equals("Boolean") ? "" : InputType.EXPRESSION.toString()));
         }

@@ -18,7 +18,7 @@ public class __Field {
 
     private __Type type;
 
-    private Boolean isDeprecated;
+    private Boolean isDeprecated = false;
 
     private String deprecationReason;
 
@@ -54,11 +54,11 @@ public class __Field {
         this.type = type;
     }
 
-    public Boolean getDeprecated() {
+    public Boolean getIsDeprecated() {
         return isDeprecated;
     }
 
-    public void setDeprecated(Boolean deprecated) {
+    public void setIsDeprecated(Boolean deprecated) {
         isDeprecated = deprecated;
     }
 

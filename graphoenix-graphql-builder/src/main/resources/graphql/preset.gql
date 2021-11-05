@@ -1,6 +1,6 @@
 interface Meta {
     version: Int
-    removed: Boolean
+    isDeprecated: Boolean
 }
 
 enum Operator {

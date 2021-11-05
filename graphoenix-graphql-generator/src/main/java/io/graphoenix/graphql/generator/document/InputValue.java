@@ -39,7 +39,11 @@ public class InputValue {
     }
 
     public InputValue setDefaultValue(String defaultValue) {
-        this.defaultValue = defaultValue;
+        if (this.getTypeName() != null && this.getTypeName().equals("String")) {
+            this.defaultValue = "\"".concat(defaultValue).concat("\"");
+        } else {
+            this.defaultValue = defaultValue;
+        }
         return this;
     }
 

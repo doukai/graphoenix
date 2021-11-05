@@ -3,6 +3,7 @@ package io.graphoenix.mysql.translator;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
@@ -38,13 +39,13 @@ public class GraphqlMutationToStatements {
     }
 
     public List<String> createStatementsSql(String graphql) {
-        return createStatements(DOCUMENT_UTIL.graphqlToDocument(graphql)).getStatements().stream().map(Object::toString).collect(Collectors.toList());
+        return createStatements(DOCUMENT_UTIL.graphqlToDocument(graphql)).getStatements().stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.toList());
     }
 
     public List<String> createStatementsSql(GraphqlParser.DocumentContext documentContext) {
         Statements statements = new Statements();
         statements.setStatements(documentContext.definition().stream().flatMap(this::createStatementStream).collect(Collectors.toList()));
-        return statements.getStatements().stream().map(Object::toString).collect(Collectors.toList());
+        return statements.getStatements().stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.toList());
     }
 
     public Statements createStatements(GraphqlParser.DocumentContext documentContext) {
@@ -145,6 +146,7 @@ public class GraphqlMutationToStatements {
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(inputObjectTypeDefinitionContext ->
                                                         manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext)
+                                                                .filter(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable() != null)
                                                                 .map(argumentContext ->
                                                                         listObjectValueWithVariableToInsertStatementStream(
                                                                                 fieldDefinitionContext,
@@ -183,6 +185,7 @@ public class GraphqlMutationToStatements {
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .map(subFieldDefinitionContext ->
                                         manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext)
+                                                .filter(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable() != null)
                                                 .map(argumentContext ->
                                                         listValueWithVariableToInsertStatementStream(
                                                                 fieldDefinitionContext,
@@ -289,6 +292,7 @@ public class GraphqlMutationToStatements {
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(subInputObjectTypeDefinitionContext ->
                                                         manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
+                                                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable() != null)
                                                                 .map(objectFieldWithVariableContext ->
                                                                         listObjectValueWithVariableToInsertStatementStream(
                                                                                 fieldDefinitionContext,
@@ -327,6 +331,7 @@ public class GraphqlMutationToStatements {
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .map(subFieldDefinitionContext ->
                                         manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
+                                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable() != null)
                                                 .map(objectFieldWithVariableContext ->
                                                         listValueWithVariableToInsertStatementStream(
                                                                 fieldDefinitionContext,
@@ -431,6 +436,7 @@ public class GraphqlMutationToStatements {
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(subInputObjectTypeDefinitionContext ->
                                                         manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext)
+                                                                .filter(objectFieldContext -> objectFieldContext.value().arrayValue() != null)
                                                                 .map(objectFieldContext ->
                                                                         listObjectValueToInsertStatementStream(
                                                                                 fieldDefinitionContext,
@@ -468,6 +474,7 @@ public class GraphqlMutationToStatements {
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .map(subFieldDefinitionContext ->
                                         manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext)
+                                                .filter(objectFieldContext -> objectFieldContext.value().arrayValue() != null)
                                                 .map(objectFieldContext ->
                                                         listValueToInsertStatementStream(
                                                                 fieldDefinitionContext,
@@ -943,11 +950,15 @@ public class GraphqlMutationToStatements {
                     parentColumnEqualsTo.setRightExpression(parentColumnExpression);
                 }
 
-                InExpression idColumnNotIn = new InExpression();
-                idColumnNotIn.setLeftExpression(idColumn);
-                idColumnNotIn.setNot(true);
-                idColumnNotIn.setRightItemsList(new ExpressionList(idValueExpressionList));
-                return Stream.of(deleteExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn))));
+                if (idValueExpressionList != null && idValueExpressionList.size() > 0) {
+                    InExpression idColumnNotIn = new InExpression();
+                    idColumnNotIn.setLeftExpression(idColumn);
+                    idColumnNotIn.setNot(true);
+                    idColumnNotIn.setRightItemsList(new ExpressionList(idValueExpressionList));
+                    return Stream.of(deleteExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn))));
+                } else {
+                    return Stream.of(deleteExpression(table, parentColumnEqualsTo));
+                }
             }
         }
         return Stream.empty();
@@ -1049,6 +1060,9 @@ public class GraphqlMutationToStatements {
                         .map(Optional::get)
                         .collect(Collectors.toList())
         );
+        if (columnList.size() != expressionList.getExpressions().size()) {
+            return null;
+        }
         return insertExpression(table, columnList, expressionList, true);
     }
 
@@ -1085,6 +1099,9 @@ public class GraphqlMutationToStatements {
                         .map(Optional::get)
                         .collect(Collectors.toList())
         );
+        if (columnList.size() != expressionList.getExpressions().size()) {
+            return null;
+        }
         return insertExpression(table, columnList, expressionList, true);
     }
 
@@ -1122,6 +1139,9 @@ public class GraphqlMutationToStatements {
                         .map(Optional::get)
                         .collect(Collectors.toList())
         );
+        if (columnList.size() != expressionList.getExpressions().size()) {
+            return null;
+        }
         return insertExpression(table, columnList, expressionList, true);
     }
 
@@ -1162,6 +1182,8 @@ public class GraphqlMutationToStatements {
                 }
             } else {
                 //TODO
+
+                return new NullValue();
             }
         }
         return null;

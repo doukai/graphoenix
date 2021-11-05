@@ -103,11 +103,9 @@ public class IntrospectionMutationBuilder {
         if (objectTypeDefinitionContext.description() != null) {
             type.setDescription(objectTypeDefinitionContext.description().getText());
         }
-        if (level == 0) {
-            type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                    .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
-        }
+        type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
+                .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
         return type;
     }
 
@@ -131,11 +129,9 @@ public class IntrospectionMutationBuilder {
         if (interfaceTypeDefinitionContext.description() != null) {
             type.setDescription(interfaceTypeDefinitionContext.description().getText());
         }
-        if (level == 0) {
-            type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                    .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
-        }
+        type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
+                .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
         return type;
     }
 
@@ -216,10 +212,8 @@ public class IntrospectionMutationBuilder {
         if (enumTypeDefinitionContext.description() != null) {
             type.setDescription(enumTypeDefinitionContext.description().getText());
         }
-        if (level == 0) {
-            type.setEnumValues(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream()
-                    .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toList()));
-        }
+        type.setEnumValues(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream()
+                .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toList()));
         return type;
     }
 
@@ -265,10 +259,8 @@ public class IntrospectionMutationBuilder {
         if (inputObjectTypeDefinitionContext.description() != null) {
             type.setDescription(inputObjectTypeDefinitionContext.description().getText());
         }
-        if (level == 0) {
-            type.setInputFields(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
-                    .map(inputValueDefinitionContext -> inputValueDefinitionContextToInputValue(inputValueDefinitionContext, level + 1)).collect(Collectors.toList()));
-        }
+        type.setInputFields(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                .map(inputValueDefinitionContext -> inputValueDefinitionContextToInputValue(inputValueDefinitionContext, level + 1)).collect(Collectors.toList()));
         return type;
     }
 
