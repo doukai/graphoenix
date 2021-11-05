@@ -20,6 +20,8 @@ public class __Schema {
 
     private List<__Directive> directives;
 
+    private String description;
+
     public List<__Type> getTypes() {
         return types;
     }
@@ -58,6 +60,14 @@ public class __Schema {
 
     public void setDirectives(List<__Directive> directives) {
         this.directives = directives;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     @Override
