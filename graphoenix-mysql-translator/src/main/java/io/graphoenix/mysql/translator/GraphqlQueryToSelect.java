@@ -1,6 +1,7 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
+import static io.graphoenix.spi.error.GraphQLErrorType.*;
 
 public class GraphqlQueryToSelect {
 
@@ -58,7 +60,7 @@ public class GraphqlQueryToSelect {
                 return Optional.of(objectSelectionToSelect(queryOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection()));
             }
         }
-        return Optional.empty();
+        throw new GraphQLProblem().pushError(QUERY_NOT_EXIST);
     }
 
     public Select objectSelectionToSelect(String typeName, List<GraphqlParser.SelectionContext> selectionContextList) {
@@ -73,8 +75,7 @@ public class GraphqlQueryToSelect {
             if (fragmentDefinitionContext.isPresent()) {
                 return fragmentDefinitionContext.get().selectionSet().selection().stream();
             } else {
-                //TODO
-                return Stream.empty();
+                throw new GraphQLProblem().pushError(FRAGMENT_NOT_EXIST);
             }
         } else {
             return Stream.of(selectionContext);
@@ -143,12 +144,31 @@ public class GraphqlQueryToSelect {
 
                         equalsParentColumn.setRightExpression(selectWithTable);
                     } else {
-                        //TODO
+                        GraphQLProblem graphQLProblem = new GraphQLProblem();
+                        if (mapWithTypeName.isEmpty()) {
+                            graphQLProblem.pushError(MAP_WITH_TYPE_NOT_EXIST.setVariables(mapWithTypeName));
+                        }
+                        if (mapWithFromFieldName.isEmpty()) {
+                            graphQLProblem.pushError(MAP_WITH_FROM_FIELD_EXIST.setVariables(mapWithFromFieldName));
+                        }
+                        if (mapWithToFieldName.isEmpty()) {
+                            graphQLProblem.pushError(MAP_WITH_TO_FIELD_EXIST.setVariables(mapWithToFieldName));
+                        }
+                        throw graphQLProblem;
                     }
                 } else {
                     equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
                 }
                 plainSelect.setWhere(equalsParentColumn);
+            } else {
+                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                if (fromFieldDefinition.isEmpty()) {
+                    graphQLProblem.pushError(MAP_FROM_NOT_EXIST);
+                }
+                if (toFieldDefinition.isEmpty()) {
+                    graphQLProblem.pushError(MAP_TO_NOT_EXIST);
+                }
+                throw graphQLProblem;
             }
         }
         return plainSelect;

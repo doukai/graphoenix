@@ -1,8 +1,8 @@
 __inputValueDefinition(__inputValue) ::= <<
 {
-    <if(__inputValue.description)>description: "<__inputValue.description>",<endif>
-    <if(__inputValue.type)>type: <__inputValue.type>,<endif>
-    <if(__inputValue.defaultValue)>defaultValue: "<__inputValue.defaultValue>",<endif>
-    name: "<__inputValue.name>"
+    name: "<__inputValue.name>"<if(__inputValue.description)>,
+    description: "<__inputValue.description>"<endif><if(__inputValue.type)>,
+    type: <__inputValue.type><endif><if(__inputValue.defaultValue)>,
+    defaultValue: "<__inputValue.defaultValue>"<endif>
 }
 >>

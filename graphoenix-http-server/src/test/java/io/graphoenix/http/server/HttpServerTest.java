@@ -98,18 +98,18 @@ public class HttpServerTest {
 
         IntrospectionMutationBuilder introspectionMutationBuilder = new IntrospectionMutationBuilder(graphqlAntlrManager);
 
-        System.out.println(introspectionMutationBuilder.buildIntrospectionSchemaMutation());
+//        System.out.println(introspectionMutationBuilder.buildIntrospectionSchemaMutation());
 
-//
-//        GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
-//        GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
-//        GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrManager, graphqlQueryToSelect);
-//        List<String> mutationsSql = graphqlMutationToStatements.createStatementsSql(introspectionMutationBuilder.buildIntrospectionSchemaMutation().toString());
-//
-//        StringBuffer stringBuffer = new StringBuffer();
-//        mutationsSql.forEach(sql -> stringBuffer.append(sql).append(";\r\n"));
-//
-//        File file = new File("introspection.sql");
-//        Files.write(stringBuffer, file, Charsets.UTF_8);
+
+        GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
+        GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
+        GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrManager, graphqlQueryToSelect);
+        List<String> mutationsSql = graphqlMutationToStatements.createStatementsSql(introspectionMutationBuilder.buildIntrospectionSchemaMutation().toString());
+
+        StringBuffer stringBuffer = new StringBuffer();
+        mutationsSql.forEach(sql -> stringBuffer.append(sql).append(";\r\n"));
+
+        File file = new File("introspection.sql");
+        Files.write(stringBuffer, file, Charsets.UTF_8);
     }
 }
