@@ -77,7 +77,6 @@ public class GraphqlHttpServer {
                     //表示系统用于临时存放已完成三次握手的请求的队列的最大长度,如果连接建立频繁，服务器处理创建新连接较慢，可以适当调大这个参数
                     .option(ChannelOption.SO_BACKLOG, serverConfiguration.getSoBackLog())
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new GraphqlHttpServerInitializer(sslCtx, dataFetcher));
 
             Channel ch = b.bind(serverConfiguration.getPort()).sync().channel();
