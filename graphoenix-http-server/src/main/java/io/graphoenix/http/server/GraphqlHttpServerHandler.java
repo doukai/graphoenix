@@ -2,6 +2,8 @@ package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.common.pipeline.GraphQLDataFetcher;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.graphoenix.http.server.handler.RequestHandler;
@@ -20,6 +22,7 @@ import io.netty.handler.codec.http.HttpUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.zalando.problem.gson.ProblemAdapterFactory;
 
 import java.nio.charset.StandardCharsets;
 
@@ -30,6 +33,11 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
 
     private static final Logger log = LoggerFactory.getLogger(GraphqlHttpServer.class);
+
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapterFactory(new ProblemAdapterFactory()
+                    .registerSubtype(GraphQLProblem.TYPE, GraphQLProblem.class))
+            .create();
 
     private static final String FAVICON_ICO = "/favicon.ico";
     private static final AsciiString CONNECTION = AsciiString.cached("Connection");
@@ -64,17 +72,16 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
             //TODO
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResponse).getBytes(StandardCharsets.UTF_8)));
-            response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
-            response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
 
-        } catch (IllegalArgumentException e) {
+        } catch (GraphQLProblem e) {
             e.printStackTrace();
             //TODO
-            response = new DefaultFullHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResponse).getBytes(StandardCharsets.UTF_8)));
-            response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
+            response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(gson.toJson(e).getBytes(StandardCharsets.UTF_8)));
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+        response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
+        response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
 
         boolean keepAlive = HttpUtil.isKeepAlive(request);
         if (!keepAlive) {

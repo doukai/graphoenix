@@ -5,6 +5,7 @@ import io.graphoenix.spi.dto.GraphQLLocation;
 import io.graphoenix.spi.dto.GraphQLPath;
 import io.graphoenix.spi.error.GraphQLErrorType;
 import org.zalando.problem.AbstractThrowableProblem;
+import org.zalando.problem.Problem;
 
 import javax.annotation.concurrent.Immutable;
 import java.net.URI;
@@ -16,35 +17,33 @@ import static org.zalando.problem.Status.BAD_REQUEST;
 @Immutable
 public class GraphQLProblem extends AbstractThrowableProblem {
 
-    static final URI TYPE = URI.create("https://spec.graphql.org");
+    public static final String TYPE_VALUE = "https://spec.graphql.org";
+    public static final URI TYPE = URI.create(TYPE_VALUE);
 
     private final List<GraphQLError> errors;
 
     public GraphQLProblem() {
         super(TYPE, "graphQL errors", BAD_REQUEST);
         this.errors = new ArrayList<>();
-        super.getParameters().put("errors", this.errors);
     }
 
-    public GraphQLProblem pushError(GraphQLError error) {
-        this.errors.add(error);
+    public GraphQLProblem(GraphQLErrorType graphQLErrorType) {
+        super(TYPE, "graphQL errors", BAD_REQUEST);
+        this.errors = new ArrayList<>();
+        this.push(graphQLErrorType);
+    }
+
+    public GraphQLProblem push(GraphQLErrorType graphQLErrorType) {
+        this.push(graphQLErrorType, null, null);
         return this;
     }
 
-    public GraphQLProblem pushError(GraphQLErrorType graphQLErrorType, List<GraphQLLocation> locations, GraphQLPath path) {
+    public GraphQLProblem push(GraphQLErrorType graphQLErrorType, List<GraphQLLocation> locations, GraphQLPath path) {
         GraphQLError error = new GraphQLError();
         error.setMessage(graphQLErrorType.toString());
         error.setLocations(locations);
         error.setPath(path);
         this.errors.add(error);
         return this;
-    }
-
-    public GraphQLProblem pushError(GraphQLErrorType graphQLErrorType, List<GraphQLLocation> locations) {
-        return pushError(graphQLErrorType, locations);
-    }
-
-    public GraphQLProblem pushError(GraphQLErrorType graphQLErrorType) {
-        return pushError(graphQLErrorType, null);
     }
 }

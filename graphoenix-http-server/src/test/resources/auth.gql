@@ -7,7 +7,7 @@ type User @table(engine:"InnoDB"){
     disable: Boolean
     sex: Sex
     organizationId: Int
-    organization: Organization @map(from: "organizationId", to: "id")
+    organization: Organization
     roles: [Role!] @map(from: "id", with:{type: "UserRole", from: "userId", to: "roleId"}, to: "id")
 }
 
