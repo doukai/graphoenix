@@ -2,10 +2,11 @@ package io.graphoenix.common.pipeline.operation;
 
 import io.graphoenix.common.utils.HandlerUtil;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.GraphQLRequest;
-import io.graphoenix.spi.dto.GraphQLResponse;
+import io.graphoenix.spi.dto.*;
 import io.graphoenix.spi.handler.IOperationHandler;
 import org.apache.commons.chain.impl.ChainBase;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class OperationPipeline extends ChainBase {
 
@@ -35,11 +36,35 @@ public class OperationPipeline extends ChainBase {
         return this;
     }
 
-    public GraphQLResponse process(GraphQLRequest request) throws Exception {
+    public GraphQLResponse fetch(GraphQLRequest request) throws Exception {
         OperationContext operationContext = new OperationContext();
+        operationContext.setExecuteType(ExecuteType.SYNC);
+        operationContext.setAsyncType(AsyncType.OPERATION);
         operationContext.setCurrentData(request);
         operationContext.setManager(this.manager);
         this.execute(operationContext);
         return (GraphQLResponse) operationContext.getCurrentData();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Mono<GraphQLResponse> fetchAsync(GraphQLRequest request) throws Exception {
+        OperationContext operationContext = new OperationContext();
+        operationContext.setExecuteType(ExecuteType.ASYNC);
+        operationContext.setAsyncType(AsyncType.OPERATION);
+        operationContext.setCurrentData(request);
+        operationContext.setManager(this.manager);
+        this.execute(operationContext);
+        return (Mono<GraphQLResponse>) operationContext.getCurrentData();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Flux<GraphQLResponse> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
+        OperationContext operationContext = new OperationContext();
+        operationContext.setExecuteType(ExecuteType.ASYNC);
+        operationContext.setAsyncType(AsyncType.SELECTION);
+        operationContext.setCurrentData(request);
+        operationContext.setManager(this.manager);
+        this.execute(operationContext);
+        return (Flux<GraphQLResponse>) operationContext.getCurrentData();
     }
 }

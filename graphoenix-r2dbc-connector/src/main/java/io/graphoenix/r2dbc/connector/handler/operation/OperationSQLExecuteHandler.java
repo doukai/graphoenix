@@ -1,20 +1,20 @@
 package io.graphoenix.r2dbc.connector.handler.operation;
 
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
-import io.graphoenix.spi.dto.GraphQLResultBuilder;
 import io.graphoenix.common.constant.Hammurabi;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.SQLStatements;
 import io.graphoenix.spi.handler.IOperationHandler;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import io.graphoenix.spi.dto.GraphQLResponse;
-
+import javax.json.JsonObject;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 
@@ -32,21 +32,34 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
     }
 
     @Override
-    public GraphQLResponse query(Object sqlStatements) {
-        Mono<String> jsonResult = queryExecutor.executeQuery(((SQLStatements) sqlStatements).getSqlStatements().get(0));
-        GraphQLResultBuilder resultBuilder = new GraphQLResultBuilder(new Gson().fromJson(jsonResult.block(), Map.class));
-        return resultBuilder.build();
+    public JsonObject query(Object sql) throws Exception {
+        return subscription(sql).block();
     }
 
     @Override
-    public GraphQLResponse mutation(Object sqlStatements) {
-        Mono<String> jsonResult = mutationExecutor.executeMutations(((SQLStatements) sqlStatements).getSqlStatements());
-        GraphQLResultBuilder resultBuilder = new GraphQLResultBuilder(new Gson().fromJson(jsonResult.block(), Map.class));
-        return resultBuilder.build();
+    public Mono<JsonObject> queryAsync(Object sql) throws Exception {
+        return queryExecutor.executeQuery((String) sql).map(result -> new Gson().fromJson(result, JsonObject.class));
     }
 
     @Override
-    public GraphQLResponse subscription(Object sqlStatements) {
-        return null;
+    @SuppressWarnings("unchecked")
+    public Flux<Map.Entry<String, JsonObject>> querySelectionsAsync(Object sqlStream) throws Exception {
+        return queryExecutor.executeQuery((Stream<Map.Entry<String, String>>) sqlStream).map(result -> Maps.immutableEntry(result.getKey(), new Gson().fromJson(result.getValue(), JsonObject.class)));
+    }
+
+    @Override
+    public JsonObject mutation(Object sqlStream) throws Exception {
+        return mutationAsync(sqlStream).block();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Mono<JsonObject> mutationAsync(Object sqlStream) throws Exception {
+        return mutationExecutor.executeMutations((Stream<String>) sqlStream).map(result -> new Gson().fromJson(result, JsonObject.class));
+    }
+
+    @Override
+    public Mono<JsonObject> subscription(Object sql) throws Exception {
+        return queryAsync(sql);
     }
 }

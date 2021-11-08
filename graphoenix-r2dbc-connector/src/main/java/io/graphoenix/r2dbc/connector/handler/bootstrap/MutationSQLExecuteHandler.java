@@ -5,17 +5,20 @@ import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.SQLStatements;
 import io.graphoenix.spi.handler.IBootstrapHandler;
+
+import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 
 public class MutationSQLExecuteHandler implements IBootstrapHandler {
+
     @Override
-    public Void transform(IGraphqlDocumentManager manager, Object sqlStatements) {
+    @SuppressWarnings("unchecked")
+    public Void transform(IGraphqlDocumentManager manager, Object sqlStream) {
         ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, ConnectionConfiguration.class));
         MutationExecutor mutationExecutor = new MutationExecutor(connectionCreator);
-        mutationExecutor.executeMutations(((SQLStatements) sqlStatements).getSqlStatements());
+        mutationExecutor.executeMutations((Stream<String>) sqlStream);
         return null;
     }
 

@@ -9,6 +9,8 @@ import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.dto.GraphQLResponse;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @AutoFactory
 public class GraphQLDataFetcher {
@@ -27,12 +29,22 @@ public class GraphQLDataFetcher {
     }
 
     public GraphQLResponse fetch(GraphQLRequest request) throws Exception {
+        return this.createOperationPipeline().fetch(request);
+    }
 
+    public Mono<GraphQLResponse> fetchAsync(GraphQLRequest request) throws Exception {
+        return this.createOperationPipeline().fetchAsync(request);
+    }
+
+    public Flux<GraphQLResponse> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
+        return this.createOperationPipeline().fetchSelectionsAsync(request);
+    }
+
+    private OperationPipeline createOperationPipeline() {
         OperationPipeline operationPipeline = new OperationPipeline(this.documentManager);
-
         for (IOperationHandler operationHandler : operationHandlers) {
             operationPipeline.addHandler(operationHandler);
         }
-        return operationPipeline.process(request);
+        return operationPipeline;
     }
 }
