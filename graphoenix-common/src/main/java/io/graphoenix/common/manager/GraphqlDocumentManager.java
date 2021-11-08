@@ -456,13 +456,12 @@ public class GraphqlDocumentManager implements IGraphqlDocumentManager {
     }
 
     @Override
-    public Optional<GraphqlParser.FieldDefinitionContext> getMapWithTypeFromFieldDefinition(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return getMapWithTypeArgument(fieldDefinitionContext).flatMap(
-                argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("from"))
-                        .map(fieldWithVariableContext -> fieldWithVariableContext.valueWithVariable().StringValue().getText())
-                        .map(string -> string.substring(1, string.length() - 1))
-        );
+    public Optional<String> getMapWithTypeFromFieldName(GraphqlParser.ArgumentContext argumentContext) {
+        return argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
+                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("from"))
+                .map(fieldWithVariableContext -> fieldWithVariableContext.valueWithVariable().StringValue().getText())
+                .map(string -> string.substring(1, string.length() - 1))
+                .findAny();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package io.graphoenix.mysql.translator;
 
+import com.google.common.collect.Maps;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
@@ -33,24 +34,20 @@ public class GraphqlQueryToSelect {
         this.argumentsToWhere = argumentsToWhere;
     }
 
-    public List<String> createSelectsSql(String graphql) {
-        return createSelectsSql(DOCUMENT_UTIL.graphqlToDocument(graphql));
+    public Optional<String> createSelectSQL(String graphQL) {
+        return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(Select::toString);
     }
 
-    public List<String> createSelectsSql(GraphqlParser.DocumentContext documentContext) {
-        return createSelects(documentContext).stream()
-                .map(Select::toString).collect(Collectors.toList());
+    public Stream<Map.Entry<String, String>> createSelectsSQL(String graphQL) {
+        return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(entry -> Maps.immutableEntry(entry.getKey(), entry.getValue().toString()));
     }
 
-    public List<Select> createSelects(GraphqlParser.DocumentContext documentContext) {
-        return documentContext.definition().stream().map(this::createSelect).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+    public Optional<Select> createSelect(String graphQL) {
+        return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
-    public Optional<Select> createSelect(GraphqlParser.DefinitionContext definitionContext) {
-        if (definitionContext.operationDefinition() == null) {
-            throw new GraphQLProblem().push(OPERATION_NOT_EXIST);
-        }
-        return operationDefinitionToSelect(definitionContext.operationDefinition());
+    public Stream<Map.Entry<String, Select>> createSelects(String graphQL) {
+        return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
     public Optional<Select> operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
@@ -58,6 +55,23 @@ public class GraphqlQueryToSelect {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
             if (queryOperationTypeDefinition.isPresent()) {
                 return Optional.of(objectSelectionToSelect(queryOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection()));
+            }
+        }
+        throw new GraphQLProblem().push(QUERY_NOT_EXIST);
+    }
+
+    public Stream<Map.Entry<String, Select>> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+            Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
+            if (queryOperationTypeDefinition.isPresent()) {
+                return operationDefinitionContext.selectionSet().selection().stream()
+                        .map(selectionContext ->
+                                Maps.immutableEntry(
+                                        selectionContext.field().name().getText(),
+                                        manager.getQueryOperationTypeDefinition().map(operationTypeDefinitionContext -> objectSelectionToSelect(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().selectionSet().selection()))
+                                )
+                        ).filter(entry -> entry.getValue().isPresent())
+                        .map(entry -> Maps.immutableEntry(entry.getKey(), entry.getValue().get()));
             }
         }
         throw new GraphQLProblem().push(QUERY_NOT_EXIST);
@@ -148,23 +162,20 @@ public class GraphqlQueryToSelect {
                         } else {
                             GraphQLProblem graphQLProblem = new GraphQLProblem();
                             if (mapWithFromFieldDefinitionContext.isEmpty()) {
-                                graphQLProblem.push(FIELD_NOT_EXIST.bind(mapWithTypeName.get(), mapWithFromFieldName.get()));
+                                graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
                             if (mapWithToFieldDefinitionContext.isEmpty()) {
-                                graphQLProblem.push(FIELD_NOT_EXIST.bind(mapWithTypeName.get(), mapWithToFieldName.get()));
+                                graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
                             throw graphQLProblem;
                         }
                     } else {
                         GraphQLProblem graphQLProblem = new GraphQLProblem();
-                        if (mapWithTypeName.isEmpty()) {
-                            graphQLProblem.push(FIELD_DIRECTIVE_ARGUMENT_NOT_EXIST.bind(typeName, fieldDefinitionContext.name().getText(), "@map", "with"));
-                        }
                         if (mapWithFromFieldName.isEmpty()) {
-                            graphQLProblem.push(FIELD_DIRECTIVE_ARGUMENT_NOT_EXIST.bind(typeName, fieldDefinitionContext.name().getText(), "@map", "from"));
+                            graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                         }
                         if (mapWithToFieldName.isEmpty()) {
-                            graphQLProblem.push(FIELD_DIRECTIVE_ARGUMENT_NOT_EXIST.bind(typeName, fieldDefinitionContext.name().getText(), "@map", "to"));
+                            graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                         }
                         throw graphQLProblem;
                     }
@@ -175,10 +186,10 @@ public class GraphqlQueryToSelect {
             } else {
                 GraphQLProblem graphQLProblem = new GraphQLProblem();
                 if (fromFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(parentTypeName, fieldDefinitionContext.name().getText()));
+                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
                 if (toFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_TO_FIELD_NOT_EXIST.bind(parentTypeName, fieldDefinitionContext.name().getText()));
+                    graphQLProblem.push(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
                 throw graphQLProblem;
             }
@@ -304,30 +315,27 @@ public class GraphqlQueryToSelect {
                     } else {
                         GraphQLProblem graphQLProblem = new GraphQLProblem();
                         if (mapWithFromFieldDefinitionContext.isEmpty()) {
-                            graphQLProblem.push(FIELD_NOT_EXIST.bind(mapWithTypeName.get(), mapWithFromFieldName.get()));
+                            graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                         }
                         if (mapWithToFieldDefinitionContext.isEmpty()) {
-                            graphQLProblem.push(FIELD_NOT_EXIST.bind(mapWithTypeName.get(), mapWithToFieldName.get()));
+                            graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                         }
                         throw graphQLProblem;
                     }
                 } else {
                     GraphQLProblem graphQLProblem = new GraphQLProblem();
-                    if (mapWithTypeName.isEmpty()) {
-                        graphQLProblem.push(FIELD_DIRECTIVE_ARGUMENT_NOT_EXIST.bind(typeName, fieldDefinitionContext.name().getText(), "@map", "with"));
-                    }
                     if (mapWithFromFieldName.isEmpty()) {
-                        graphQLProblem.push(FIELD_DIRECTIVE_ARGUMENT_NOT_EXIST.bind(typeName, fieldDefinitionContext.name().getText(), "@map", "from"));
+                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithToFieldName.isEmpty()) {
-                        graphQLProblem.push(FIELD_DIRECTIVE_ARGUMENT_NOT_EXIST.bind(typeName, fieldDefinitionContext.name().getText(), "@map", "to"));
+                        graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     throw graphQLProblem;
                 }
             } else {
                 GraphQLProblem graphQLProblem = new GraphQLProblem();
                 if (fromFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(typeName, fieldDefinitionContext.name().getText()));
+                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
                 throw graphQLProblem;
             }

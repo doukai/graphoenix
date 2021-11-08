@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
@@ -24,32 +25,30 @@ public class GraphqlTypeToTable {
         this.manager = graphqlAntlrManager;
     }
 
-
-    public List<String> createTablesSql() {
+    public Stream<String> createTablesSQL() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .map(this::createTable).map(CreateTable::toString).collect(Collectors.toList());
+                .map(this::createTable).map(CreateTable::toString);
     }
 
-    public List<String> createTablesSql(String graphql) {
-        return createTablesSql(DOCUMENT_UTIL.graphqlToDocument(graphql));
+    public Stream<String> createTablesSQL(String graphql) {
+        return createTablesSQL(DOCUMENT_UTIL.graphqlToDocument(graphql));
     }
 
-    public List<String> createTablesSql(IGraphqlDocumentManager manager) {
-        return manager.getObjects().map(this::createTable).map(CreateTable::toString).collect(Collectors.toList());
+    public Stream<String> createTablesSQL(IGraphqlDocumentManager manager) {
+        return manager.getObjects().map(this::createTable).map(CreateTable::toString);
     }
 
-    public List<String> createTablesSql(GraphqlParser.DocumentContext documentContext) {
-        return createTables(documentContext).stream()
-                .map(CreateTable::toString).collect(Collectors.toList());
+    public Stream<String> createTablesSQL(GraphqlParser.DocumentContext documentContext) {
+        return createTables(documentContext).map(CreateTable::toString);
     }
 
-    public List<CreateTable> createTables(GraphqlParser.DocumentContext documentContext) {
-        return documentContext.definition().stream().map(this::createTable).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+    public Stream<CreateTable> createTables(GraphqlParser.DocumentContext documentContext) {
+        return documentContext.definition().stream().map(this::createTable).filter(Optional::isPresent).map(Optional::get);
     }
 
     protected Optional<CreateTable> createTable(GraphqlParser.DefinitionContext definitionContext) {

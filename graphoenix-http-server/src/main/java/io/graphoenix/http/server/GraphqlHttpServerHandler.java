@@ -34,11 +34,6 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
     private static final Logger log = LoggerFactory.getLogger(GraphqlHttpServer.class);
 
-    private final Gson gson = new GsonBuilder()
-            .registerTypeAdapterFactory(new ProblemAdapterFactory()
-                    .registerSubtype(GraphQLProblem.TYPE, GraphQLProblem.class))
-            .create();
-
     private static final String FAVICON_ICO = "/favicon.ico";
     private static final AsciiString CONNECTION = AsciiString.cached("Connection");
     private static final AsciiString KEEP_ALIVE = AsciiString.cached("keep-alive");
@@ -62,26 +57,24 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         RequestHandler requestHandler = RequestHandlerFactory.create(request.method());
         GraphQLRequest requestBody;
         GraphQLResponse graphQLResponse = null;
-        FullHttpResponse response = null;
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK);
+
 
         try {
             requestBody = requestHandler.handle(request);
-
             log.info("Handle http query:{}", requestBody.getQuery());
             graphQLResponse = dataFetcher.fetch(requestBody);
-
-            //TODO
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResponse).getBytes(StandardCharsets.UTF_8)));
-
+            response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
+            response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
         } catch (GraphQLProblem e) {
             e.printStackTrace();
-            //TODO
-            response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(gson.toJson(e).getBytes(StandardCharsets.UTF_8)));
+            response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(e.toString().getBytes(StandardCharsets.UTF_8)));
+            response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
+            response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
-        response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
-        response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
 
         boolean keepAlive = HttpUtil.isKeepAlive(request);
         if (!keepAlive) {

@@ -5,7 +5,7 @@ import io.r2dbc.spi.Batch;
 import io.r2dbc.spi.Result;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 public class TableCreator {
 
@@ -20,11 +20,11 @@ public class TableCreator {
                 .flatMap(connection -> Mono.from(connection.createStatement(sql).execute()).doFinally(signalType -> connection.close()));
     }
 
-    public Mono<Result> createTables(List<String> sqlList) {
+    public Mono<Result> createTables(Stream<String> sqlStream) {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
                     Batch batch = connection.createBatch();
-                    sqlList.forEach(batch::add);
+                    sqlStream.forEach(batch::add);
                     return Mono.from(batch.execute()).doFinally(signalType -> connection.close());
                 });
     }

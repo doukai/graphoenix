@@ -12,7 +12,6 @@ import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.Statements;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.*;
@@ -38,27 +37,12 @@ public class GraphqlMutationToStatements {
         this.graphqlQueryToSelect = graphqlQueryToSelect;
     }
 
-    public List<String> createStatementsSql(String graphql) {
-        return createStatements(DOCUMENT_UTIL.graphqlToDocument(graphql)).getStatements().stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.toList());
+    public Stream<String> createStatementsSQL(String graphql) {
+        return operationDefinitionToStatementStream(DOCUMENT_UTIL.graphqlToOperation(graphql)).map(Object::toString);
     }
 
-    public List<String> createStatementsSql(GraphqlParser.DocumentContext documentContext) {
-        Statements statements = new Statements();
-        statements.setStatements(documentContext.definition().stream().flatMap(this::createStatementStream).collect(Collectors.toList()));
-        return statements.getStatements().stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.toList());
-    }
-
-    public Statements createStatements(GraphqlParser.DocumentContext documentContext) {
-        Statements statements = new Statements();
-        statements.setStatements(documentContext.definition().stream().flatMap(this::createStatementStream).collect(Collectors.toList()));
-        return statements;
-    }
-
-    protected Stream<Statement> createStatementStream(GraphqlParser.DefinitionContext definitionContext) {
-        if (definitionContext.operationDefinition() != null) {
-            return operationDefinitionToStatementStream(definitionContext.operationDefinition());
-        }
-        return Stream.empty();
+    public Stream<Statement> createStatements(String graphql) {
+        return operationDefinitionToStatementStream(DOCUMENT_UTIL.graphqlToOperation(graphql));
     }
 
     protected Stream<Statement> operationDefinitionToStatementStream(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
@@ -1099,9 +1083,6 @@ public class GraphqlMutationToStatements {
                         .map(Optional::get)
                         .collect(Collectors.toList())
         );
-        if (columnList.size() != expressionList.getExpressions().size()) {
-            return null;
-        }
         return insertExpression(table, columnList, expressionList, true);
     }
 
@@ -1139,9 +1120,6 @@ public class GraphqlMutationToStatements {
                         .map(Optional::get)
                         .collect(Collectors.toList())
         );
-        if (columnList.size() != expressionList.getExpressions().size()) {
-            return null;
-        }
         return insertExpression(table, columnList, expressionList, true);
     }
 
