@@ -1,13 +1,13 @@
 package io.graphoenix.mysql.handler.operation;
 
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.GraphQLRequest;
-import io.graphoenix.spi.dto.SQLStatements;
 import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
 import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
 import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
-
 import io.graphoenix.spi.handler.IOperationHandler;
+
+import java.util.Map;
+import java.util.stream.Stream;
 
 public class OperationToSQLConvertHandler implements IOperationHandler {
 
@@ -25,20 +25,35 @@ public class OperationToSQLConvertHandler implements IOperationHandler {
     }
 
     @Override
-    public SQLStatements query(Object requestBody) {
-        this.manager.registerFragment(((GraphQLRequest) requestBody).getQuery());
-        return new SQLStatements(this.graphqlQueryToSelect.createSelectsSql(((GraphQLRequest) requestBody).getQuery()));
+    public String query(Object graphQL) throws Exception {
+        return subscription(graphQL);
     }
 
     @Override
-    public SQLStatements mutation(Object requestBody) {
-        this.manager.registerFragment(((GraphQLRequest) requestBody).getQuery());
-        return new SQLStatements(this.graphqlMutationToStatements.createStatementsSql(((GraphQLRequest) requestBody).getQuery()));
+    public String queryAsync(Object graphQL) throws Exception {
+        manager.registerFragment((String) graphQL);
+        return this.graphqlQueryToSelect.createSelectSQL((String) graphQL);
     }
 
     @Override
-    public SQLStatements subscription(Object requestBody) {
-        this.manager.registerFragment(((GraphQLRequest) requestBody).getQuery());
-        return null;
+    public Stream<Map.Entry<String, String>> querySelectionsAsync(Object graphQL) throws Exception {
+        manager.registerFragment((String) graphQL);
+        return this.graphqlQueryToSelect.createSelectsSQL((String) graphQL);
+    }
+
+    @Override
+    public Stream<String> mutation(Object graphQL) throws Exception {
+        return mutationAsync(graphQL);
+    }
+
+    @Override
+    public Stream<String> mutationAsync(Object graphQL) throws Exception {
+        manager.registerFragment((String) graphQL);
+        return this.graphqlMutationToStatements.createStatementsSQL((String) graphQL);
+    }
+
+    @Override
+    public String subscription(Object graphQL) throws Exception {
+        return queryAsync(graphQL);
     }
 }

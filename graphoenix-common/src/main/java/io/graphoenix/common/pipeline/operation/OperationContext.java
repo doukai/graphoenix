@@ -1,6 +1,8 @@
 package io.graphoenix.common.pipeline.operation;
 
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.dto.AsyncType;
+import io.graphoenix.spi.dto.ExecuteType;
 import io.graphoenix.spi.dto.OperationType;
 import org.apache.commons.chain.impl.ContextBase;
 
@@ -8,6 +10,8 @@ public class OperationContext extends ContextBase {
 
     private IGraphqlDocumentManager manager;
     private OperationType operationType;
+    private ExecuteType executeType;
+    private AsyncType asyncType;
     private Object currentData;
 
     public IGraphqlDocumentManager getManager() {
@@ -24,6 +28,22 @@ public class OperationContext extends ContextBase {
 
     public void setOperationType(OperationType operationType) {
         this.operationType = operationType;
+    }
+
+    public ExecuteType getExecuteType() {
+        return executeType;
+    }
+
+    public void setExecuteType(ExecuteType executeType) {
+        this.executeType = executeType;
+    }
+
+    public AsyncType getAsyncType() {
+        return asyncType;
+    }
+
+    public void setAsyncType(AsyncType asyncType) {
+        this.asyncType = asyncType;
     }
 
     public Object getCurrentData() {

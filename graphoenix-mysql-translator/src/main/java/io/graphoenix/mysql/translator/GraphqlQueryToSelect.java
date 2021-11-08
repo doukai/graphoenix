@@ -34,15 +34,15 @@ public class GraphqlQueryToSelect {
         this.argumentsToWhere = argumentsToWhere;
     }
 
-    public Optional<String> createSelectSQL(String graphQL) {
-        return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(Select::toString);
+    public String createSelectSQL(String graphQL) {
+        return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL)).toString();
     }
 
     public Stream<Map.Entry<String, String>> createSelectsSQL(String graphQL) {
         return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(entry -> Maps.immutableEntry(entry.getKey(), entry.getValue().toString()));
     }
 
-    public Optional<Select> createSelect(String graphQL) {
+    public Select createSelect(String graphQL) {
         return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
@@ -50,11 +50,13 @@ public class GraphqlQueryToSelect {
         return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
-    public Optional<Select> operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+    public Select operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
             if (queryOperationTypeDefinition.isPresent()) {
-                return Optional.of(objectSelectionToSelect(queryOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection()));
+                return objectSelectionToSelect(queryOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection());
+            } else {
+                throw new GraphQLProblem().push(OPERATION_NOT_EXIST);
             }
         }
         throw new GraphQLProblem().push(QUERY_NOT_EXIST);

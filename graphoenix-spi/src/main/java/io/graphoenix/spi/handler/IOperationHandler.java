@@ -8,7 +8,13 @@ public interface IOperationHandler {
 
     Object query(Object input) throws Exception;
 
+    Object queryAsync(Object input) throws Exception;
+
+    Object querySelectionsAsync(Object input) throws Exception;
+
     Object mutation(Object input) throws Exception;
+
+    Object mutationAsync(Object input) throws Exception;
 
     Object subscription(Object input) throws Exception;
 }
