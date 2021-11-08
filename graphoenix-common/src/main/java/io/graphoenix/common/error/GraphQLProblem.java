@@ -1,11 +1,13 @@
 package io.graphoenix.common.error;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.graphoenix.spi.dto.GraphQLError;
 import io.graphoenix.spi.dto.GraphQLLocation;
 import io.graphoenix.spi.dto.GraphQLPath;
 import io.graphoenix.spi.error.GraphQLErrorType;
 import org.zalando.problem.AbstractThrowableProblem;
-import org.zalando.problem.Problem;
+import org.zalando.problem.gson.ProblemAdapterFactory;
 
 import javax.annotation.concurrent.Immutable;
 import java.net.URI;
@@ -16,6 +18,11 @@ import static org.zalando.problem.Status.BAD_REQUEST;
 
 @Immutable
 public class GraphQLProblem extends AbstractThrowableProblem {
+
+    private final Gson gson = new GsonBuilder()
+            .registerTypeAdapterFactory(new ProblemAdapterFactory()
+                    .registerSubtype(GraphQLProblem.TYPE, GraphQLProblem.class))
+            .create();
 
     public static final String TYPE_VALUE = "https://spec.graphql.org";
     public static final URI TYPE = URI.create(TYPE_VALUE);
@@ -45,5 +52,10 @@ public class GraphQLProblem extends AbstractThrowableProblem {
         error.setPath(path);
         this.errors.add(error);
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return gson.toJson(this);
     }
 }
