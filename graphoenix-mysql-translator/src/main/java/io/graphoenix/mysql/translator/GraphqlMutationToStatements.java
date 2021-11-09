@@ -1044,9 +1044,6 @@ public class GraphqlMutationToStatements {
                         .map(Optional::get)
                         .collect(Collectors.toList())
         );
-        if (columnList.size() != expressionList.getExpressions().size()) {
-            return null;
-        }
         return insertExpression(table, columnList, expressionList, true);
     }
 

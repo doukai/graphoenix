@@ -1,9 +1,10 @@
 package io.graphoenix.r2dbc.connector.handler.operation;
 
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import io.graphoenix.common.constant.Hammurabi;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.dto.SelectionResult;
 import io.graphoenix.spi.handler.IOperationHandler;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
@@ -12,7 +13,6 @@ import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.json.JsonObject;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -33,7 +33,7 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
 
     @Override
     public JsonObject query(Object sql) throws Exception {
-        return subscription(sql).block();
+        return queryAsync(sql).block();
     }
 
     @Override
@@ -43,8 +43,8 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Flux<Map.Entry<String, JsonObject>> querySelectionsAsync(Object sqlStream) throws Exception {
-        return queryExecutor.executeQuery((Stream<Map.Entry<String, String>>) sqlStream).map(result -> Maps.immutableEntry(result.getKey(), new Gson().fromJson(result.getValue(), JsonObject.class)));
+    public Flux<SelectionResult<JsonObject>> querySelectionsAsync(Object sqlStream) throws Exception {
+        return queryExecutor.executeQuery((Stream<Map.Entry<String, String>>) sqlStream).map(result -> new SelectionResult<>(result.getKey(), new Gson().fromJson(result.getValue(), JsonObject.class)));
     }
 
     @Override

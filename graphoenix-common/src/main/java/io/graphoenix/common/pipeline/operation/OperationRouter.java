@@ -14,9 +14,9 @@ public class OperationRouter implements Command {
     @Override
     @SuppressWarnings("unchecked")
     public boolean execute(Context context) {
-        GraphQLRequest request = (GraphQLRequest) context.get(CURRENT_DATA_KEY);
+        String graphQL = (String) context.get(CURRENT_DATA_KEY);
         IGraphqlDocumentManager manager = (IGraphqlDocumentManager) context.get(MANAGER_KEY);
-        GraphqlParser.OperationTypeContext operationTypeContext = manager.getOperationType(request.getQuery());
+        GraphqlParser.OperationTypeContext operationTypeContext = manager.getOperationType(graphQL);
         if (operationTypeContext == null || operationTypeContext.QUERY() != null) {
             context.put(OPERATION_TYPE_KEY, OperationType.QUERY);
         } else if (operationTypeContext.MUTATION() != null) {

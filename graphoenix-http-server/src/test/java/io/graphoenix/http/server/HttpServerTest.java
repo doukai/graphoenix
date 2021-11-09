@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class HttpServerTest {
 
@@ -104,7 +105,7 @@ public class HttpServerTest {
         GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
         GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
         GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrManager, graphqlQueryToSelect);
-        List<String> mutationsSql = graphqlMutationToStatements.createStatementsSql(introspectionMutationBuilder.buildIntrospectionSchemaMutation().toString());
+        List<String> mutationsSql = graphqlMutationToStatements.createStatementsSQL(introspectionMutationBuilder.buildIntrospectionSchemaMutation().toString()).collect(Collectors.toList());
 
         StringBuffer stringBuffer = new StringBuffer();
         mutationsSql.forEach(sql -> stringBuffer.append(sql).append(";\r\n"));

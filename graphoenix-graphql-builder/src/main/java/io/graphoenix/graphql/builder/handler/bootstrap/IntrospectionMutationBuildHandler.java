@@ -12,8 +12,4 @@ public class IntrospectionMutationBuildHandler implements IBootstrapHandler {
         Operation operation = new IntrospectionMutationBuilder(manager).buildIntrospectionSchemaMutation();
         return operation.toString();
     }
-
-    @Override
-    public void process(IGraphqlDocumentManager manager) {
-    }
 }

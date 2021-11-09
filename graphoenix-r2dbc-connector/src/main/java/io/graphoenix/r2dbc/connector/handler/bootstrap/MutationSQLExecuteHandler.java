@@ -21,8 +21,4 @@ public class MutationSQLExecuteHandler implements IBootstrapHandler {
         mutationExecutor.executeMutations((Stream<String>) sqlStream);
         return null;
     }
-
-    @Override
-    public void process(IGraphqlDocumentManager manager) {
-    }
 }

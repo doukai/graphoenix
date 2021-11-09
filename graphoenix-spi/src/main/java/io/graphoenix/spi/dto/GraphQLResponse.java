@@ -6,6 +6,15 @@ public class GraphQLResponse {
 
     private Object data;
 
+    public GraphQLResponse(Object data) {
+        this.data = data;
+    }
+
+    public GraphQLResponse(Object data, List<GraphQLError> errors) {
+        this.data = data;
+        this.errors = errors;
+    }
+
     public List<GraphQLError> errors;
 
     public Object getData() {

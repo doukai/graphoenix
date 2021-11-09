@@ -21,8 +21,4 @@ public class CreateTableSQLExecuteHandler implements IBootstrapHandler {
         tableCreator.createTables((Stream<String>) sqlStream).block();
         return null;
     }
-
-    @Override
-    public void process(IGraphqlDocumentManager manager) {
-    }
 }

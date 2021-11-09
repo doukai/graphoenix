@@ -1,5 +1,6 @@
 package io.graphoenix.common.pipeline.operation;
 
+import com.google.gson.JsonObject;
 import io.graphoenix.common.utils.HandlerUtil;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.*;
@@ -40,10 +41,10 @@ public class OperationPipeline extends ChainBase {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.SYNC);
         operationContext.setAsyncType(AsyncType.OPERATION);
-        operationContext.setCurrentData(request);
+        operationContext.setCurrentData(request.getQuery());
         operationContext.setManager(this.manager);
         this.execute(operationContext);
-        return (GraphQLResponse) operationContext.getCurrentData();
+        return new GraphQLResponse(operationContext.getCurrentData());
     }
 
     @SuppressWarnings("unchecked")
@@ -51,10 +52,10 @@ public class OperationPipeline extends ChainBase {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.ASYNC);
         operationContext.setAsyncType(AsyncType.OPERATION);
-        operationContext.setCurrentData(request);
+        operationContext.setCurrentData(request.getQuery());
         operationContext.setManager(this.manager);
         this.execute(operationContext);
-        return (Mono<GraphQLResponse>) operationContext.getCurrentData();
+        return ((Mono<JsonObject>) operationContext.getCurrentData()).map(GraphQLResponse::new);
     }
 
     @SuppressWarnings("unchecked")
@@ -62,9 +63,9 @@ public class OperationPipeline extends ChainBase {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.ASYNC);
         operationContext.setAsyncType(AsyncType.SELECTION);
-        operationContext.setCurrentData(request);
+        operationContext.setCurrentData(request.getQuery());
         operationContext.setManager(this.manager);
         this.execute(operationContext);
-        return (Flux<GraphQLResponse>) operationContext.getCurrentData();
+        return ((Flux<JsonObject>) operationContext.getCurrentData()).map(GraphQLResponse::new);
     }
 }

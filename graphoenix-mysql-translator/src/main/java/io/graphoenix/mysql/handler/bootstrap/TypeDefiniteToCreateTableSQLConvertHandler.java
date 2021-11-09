@@ -13,8 +13,4 @@ public class TypeDefiniteToCreateTableSQLConvertHandler implements IBootstrapHan
         GraphqlTypeToTable graphqlTypeToTable = new GraphqlTypeToTable(manager);
         return graphqlTypeToTable.createTablesSQL();
     }
-
-    @Override
-    public void process(IGraphqlDocumentManager manager) {
-    }
 }
