@@ -2,9 +2,11 @@ package io.graphoenix.r2dbc.connector.executor;
 
 import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
 import io.r2dbc.spi.Batch;
+import io.r2dbc.spi.Statement;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MutationExecutor {
@@ -34,9 +36,10 @@ public class MutationExecutor {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
                     connection.beginTransaction();
-                    return Flux.fromStream(sqlStream.map(sql -> Mono.from(connection.createStatement(sql).execute()).block()))
+                    return Flux.fromStream(sqlStream.map(connection::createStatement))
+                            .flatMap(Statement::execute)
+                            .flatMap(result -> result.map((row, rowMetadata) -> row.get(0, String.class)))
                             .last()
-                            .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))))
                             .doOnSuccess(result -> connection.commitTransaction())
                             .doOnError(throwable -> connection.rollbackTransaction())
                             .doFinally(signalType -> connection.close());

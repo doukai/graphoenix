@@ -16,8 +16,4 @@ public class MutationToSQLConvertHandler implements IBootstrapHandler {
         GraphqlMutationToStatements mutationToStatements = new GraphqlMutationToStatements(manager, graphqlQueryToSelect);
         return mutationToStatements.createStatementsSQL((String) graphQL);
     }
-
-    @Override
-    public void process(IGraphqlDocumentManager manager) {
-    }
 }

@@ -44,6 +44,7 @@ public class OperationHandler implements Command {
                                 break;
                         }
                 }
+                break;
             case MUTATION:
                 switch (executeType) {
                     case SYNC:
@@ -53,6 +54,7 @@ public class OperationHandler implements Command {
                         context.put(CURRENT_DATA_KEY, operationHandler.mutationAsync(context.get(CURRENT_DATA_KEY)));
                         break;
                 }
+                break;
             case SUBSCRIPTION:
                 context.put(CURRENT_DATA_KEY, operationHandler.subscription(context.get(CURRENT_DATA_KEY)));
                 break;

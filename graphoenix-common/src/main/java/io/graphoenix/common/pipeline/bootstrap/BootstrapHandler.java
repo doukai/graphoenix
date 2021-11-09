@@ -21,7 +21,6 @@ public class BootstrapHandler implements Command {
     public boolean execute(Context context) throws Exception {
         IGraphqlDocumentManager iGraphqlDocumentManager = (IGraphqlDocumentManager) context.get(MANAGER_KEY);
         context.put(CURRENT_DATA_KEY, this.handler.transform(iGraphqlDocumentManager, context.get(CURRENT_DATA_KEY)));
-        this.handler.process(iGraphqlDocumentManager);
         return false;
     }
 }
