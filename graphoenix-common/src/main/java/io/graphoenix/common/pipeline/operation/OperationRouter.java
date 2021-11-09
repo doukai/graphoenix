@@ -2,8 +2,7 @@ package io.graphoenix.common.pipeline.operation;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.GraphQLRequest;
-import io.graphoenix.spi.dto.OperationType;
+import io.graphoenix.spi.dto.type.OperationType;
 import org.apache.commons.chain.Command;
 import org.apache.commons.chain.Context;
 

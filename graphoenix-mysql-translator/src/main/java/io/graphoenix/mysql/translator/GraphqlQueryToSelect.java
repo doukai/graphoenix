@@ -4,10 +4,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.SelectionResult;
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
@@ -199,6 +196,12 @@ public class GraphqlQueryToSelect {
                     }
                     throw graphQLProblem;
                 }
+            }
+            if (!manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                Limit limit = new Limit();
+                limit.setOffset(new LongValue(0));
+                limit.setRowCount(new LongValue(1));
+                plainSelect.setLimit(limit);
             }
         }
         return plainSelect;

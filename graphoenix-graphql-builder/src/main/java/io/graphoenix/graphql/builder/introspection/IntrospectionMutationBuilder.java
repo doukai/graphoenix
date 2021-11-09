@@ -174,7 +174,7 @@ public class IntrospectionMutationBuilder {
             __Type listType = new __Type();
             listType.setKind(__TypeKind.LIST);
             listType.setOfType(typeContextToType(typeContext.listType().type(), level));
-            listType.setName("list_" + listType.getOfType().getName());
+            listType.setName("[" + listType.getOfType().getName() + "]");
             return listType;
         } else if (typeContext.nonNullType() != null) {
             __Type nonNullType = new __Type();
@@ -191,15 +191,14 @@ public class IntrospectionMutationBuilder {
                 } else if (manager.isInputObject(typeContext.nonNullType().typeName().getText())) {
                     nonNullType.setOfType(manager.getInputObject(typeContext.nonNullType().typeName().getText()).map(inputObjectTypeDefinitionContext -> inputObjectTypeDefinitionContextToType(inputObjectTypeDefinitionContext, level)).orElse(null));
                 }
-                nonNullType.setName("nonnull_" + nonNullType.getOfType().getName());
             } else if (typeContext.nonNullType().listType() != null) {
                 __Type listType = new __Type();
                 listType.setKind(__TypeKind.LIST);
                 listType.setOfType(typeContextToType(typeContext.nonNullType().listType().type(), level));
-                listType.setName("list_" + listType.getOfType().getName());
+                listType.setName("[" + listType.getOfType().getName() + "]");
                 nonNullType.setOfType(listType);
-                nonNullType.setName("nonnull_" + listType.getName());
             }
+            nonNullType.setName(nonNullType.getOfType().getName() + "!");
             return nonNullType;
         }
         return null;
