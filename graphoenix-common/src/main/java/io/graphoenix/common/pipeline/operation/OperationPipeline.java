@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import io.graphoenix.common.utils.HandlerUtil;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
 import io.graphoenix.spi.dto.*;
+import io.graphoenix.spi.dto.type.AsyncType;
+import io.graphoenix.spi.dto.type.ExecuteType;
 import io.graphoenix.spi.handler.IOperationHandler;
 import org.apache.commons.chain.impl.ChainBase;
 import reactor.core.publisher.Flux;

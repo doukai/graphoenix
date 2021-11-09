@@ -1,9 +1,9 @@
 package io.graphoenix.common.pipeline.operation;
 
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.AsyncType;
-import io.graphoenix.spi.dto.ExecuteType;
-import io.graphoenix.spi.dto.OperationType;
+import io.graphoenix.spi.dto.type.AsyncType;
+import io.graphoenix.spi.dto.type.ExecuteType;
+import io.graphoenix.spi.dto.type.OperationType;
 import io.graphoenix.spi.handler.IOperationHandler;
 import org.apache.commons.chain.Command;
 import org.apache.commons.chain.Context;

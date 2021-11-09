@@ -1,9 +1,9 @@
 package io.graphoenix.common.pipeline.operation;
 
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.dto.AsyncType;
-import io.graphoenix.spi.dto.ExecuteType;
-import io.graphoenix.spi.dto.OperationType;
+import io.graphoenix.spi.dto.type.AsyncType;
+import io.graphoenix.spi.dto.type.ExecuteType;
+import io.graphoenix.spi.dto.type.OperationType;
 import org.apache.commons.chain.impl.ContextBase;
 
 public class OperationContext extends ContextBase {
