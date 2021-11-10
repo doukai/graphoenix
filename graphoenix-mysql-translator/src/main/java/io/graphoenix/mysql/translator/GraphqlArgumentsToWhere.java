@@ -2,7 +2,9 @@ package io.graphoenix.mysql.translator;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.error.GraphQLErrorType;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
@@ -23,6 +25,7 @@ import static io.graphoenix.common.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.common.constant.Hammurabi.DEPRECATED_INPUT_NAME;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
+import static io.graphoenix.spi.error.GraphQLErrorType.INPUT_OBJECT_NOT_EXIST;
 
 public class GraphqlArgumentsToWhere {
 
@@ -48,7 +51,7 @@ public class GraphqlArgumentsToWhere {
             Stream<Expression> expressionStream = objectValueWithVariableToExpressionList(fieldTypeContext, inputObjectTypeDefinitionContext.get().inputObjectValueDefinitions(), objectValueWithVariableContext, level);
             return expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueWithVariableContext, inputObjectTypeDefinitionContext.get()));
         }
-        return Optional.empty();
+        throw new GraphQLProblem(INPUT_OBJECT_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
     }
 
     protected Optional<Expression> objectValueToMultipleExpression(GraphqlParser.TypeContext typeContext,
@@ -785,7 +788,7 @@ public class GraphqlArgumentsToWhere {
                                                                        GraphqlParser.EnumValueContext enumValueContext,
                                                                        GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         if (valueWithVariableContext.arrayValueWithVariable() != null) {
-            return Optional.ofNullable(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, valueWithVariableContext));
+            return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, valueWithVariableContext));
         }
         if (valueWithVariableContext.enumValue() != null) {
             return Optional.ofNullable(operatorEnumValueToExpression(leftExpression, enumValueContext, valueWithVariableContext.enumValue()));
@@ -805,7 +808,7 @@ public class GraphqlArgumentsToWhere {
                                                            GraphqlParser.EnumValueContext enumValueContext,
                                                            GraphqlParser.ValueContext valueContext) {
         if (valueContext.arrayValue() != null) {
-            return Optional.ofNullable(operatorValueToInExpression(leftExpression, enumValueContext, valueContext));
+            return Optional.of(operatorValueToInExpression(leftExpression, enumValueContext, valueContext));
         }
         if (valueContext.enumValue() != null) {
             return Optional.ofNullable(operatorEnumValueToExpression(leftExpression, enumValueContext, valueContext.enumValue()));
@@ -829,13 +832,8 @@ public class GraphqlArgumentsToWhere {
         inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream()
                 .map(DB_VALUE_UTIL::valueToDBValue)
                 .collect(Collectors.toList())));
-        if ("IN".equals(enumValueContext.enumValueName().getText())) {
-            inExpression.setNot(false);
-        } else if ("NIN".equals(enumValueContext.enumValueName().getText())) {
+        if ("NIN".equals(enumValueContext.enumValueName().getText())) {
             inExpression.setNot(true);
-        } else {
-            //todo
-            return null;
         }
         return inExpression;
     }
@@ -848,13 +846,8 @@ public class GraphqlArgumentsToWhere {
         inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
                 .map(DB_VALUE_UTIL::valueWithVariableToDBValue)
                 .collect(Collectors.toList())));
-        if ("IN".equals(enumValueContext.enumValueName().getText())) {
-            inExpression.setNot(false);
-        } else if ("NIN".equals(enumValueContext.enumValueName().getText())) {
+        if ("NIN".equals(enumValueContext.enumValueName().getText())) {
             inExpression.setNot(true);
-        } else {
-            //todo
-            return null;
         }
         return inExpression;
     }

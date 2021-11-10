@@ -4,6 +4,7 @@ import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +43,10 @@ public enum DocumentUtil {
 
     public GraphqlParser.OperationDefinitionContext graphqlToOperation(CharStream charStream) {
         return getGraphqlParser(charStream).operationDefinition();
+    }
+
+    public String getStringValue(TerminalNode stringValue) {
+        return stringValue.getText().substring(1, stringValue.getText().length() - 1);
     }
 
     private GraphqlParser getGraphqlParser(CharStream charStream) {
