@@ -6,18 +6,15 @@ import com.google.common.io.Resources;
 import io.graphoenix.common.manager.*;
 import io.graphoenix.common.pipeline.GraphQLDataFetcherFactory;
 import io.graphoenix.graphql.builder.handler.bootstrap.DocumentBuildHandler;
-import io.graphoenix.graphql.builder.handler.bootstrap.IntrospectionMutationBuildHandler;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.mysql.handler.bootstrap.IntrospectionRegisterHandler;
-import io.graphoenix.mysql.handler.bootstrap.MutationToSQLConvertHandler;
 import io.graphoenix.mysql.handler.bootstrap.TypeDefiniteToCreateTableSQLConvertHandler;
 import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
-import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
-import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
-import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
+import io.graphoenix.mysql.translator.GraphQLArgumentsToWhere;
+import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
+import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
 import io.graphoenix.r2dbc.connector.handler.bootstrap.CreateTableSQLExecuteHandler;
-import io.graphoenix.r2dbc.connector.handler.bootstrap.MutationSQLExecuteHandler;
 import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
 import io.graphoenix.spi.antlr.*;
 import io.graphoenix.spi.handler.IBootstrapHandler;
@@ -65,19 +62,19 @@ public class HttpServerTest {
     @Test
     void executeIntrospectionMutation() throws IOException {
 
-        IGraphqlDocumentManager graphqlAntlrManager = new GraphqlDocumentManager(
-                new GraphqlOperationManager(),
-                new GraphqlSchemaManager(),
-                new GraphqlDirectiveManager(),
-                new GraphqlObjectManager(),
-                new GraphqlInterfaceManager(),
-                new GraphqlUnionManager(),
-                new GraphqlFieldManager(),
-                new GraphqlInputObjectManager(),
-                new GraphqlInputValueManager(),
-                new GraphqlEnumManager(),
-                new GraphqlScalarManager(),
-                new GraphqlFragmentManager()
+        IGraphQLDocumentManager graphqlAntlrManager = new GraphQLDocumentManager(
+                new GraphQLOperationManager(),
+                new GraphQLSchemaManager(),
+                new GraphQLDirectiveManager(),
+                new GraphQLObjectManager(),
+                new GraphQLInterfaceManager(),
+                new GraphQLUnionManager(),
+                new GraphQLFieldManager(),
+                new GraphQLInputObjectManager(),
+                new GraphQLInputValueManager(),
+                new GraphQLEnumManager(),
+                new GraphQLScalarManager(),
+                new GraphQLFragmentManager()
         );
 
 
@@ -102,9 +99,10 @@ public class HttpServerTest {
 //        System.out.println(introspectionMutationBuilder.buildIntrospectionSchemaMutation());
 
 
-        GraphqlArgumentsToWhere graphqlArgumentsToWhere = new GraphqlArgumentsToWhere(graphqlAntlrManager);
-        GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(graphqlAntlrManager, graphqlArgumentsToWhere);
-        GraphqlMutationToStatements graphqlMutationToStatements = new GraphqlMutationToStatements(graphqlAntlrManager, graphqlQueryToSelect);
+        GraphQLFieldMapManager mapper = new GraphQLFieldMapManager(graphqlAntlrManager);
+        GraphQLArgumentsToWhere graphqlArgumentsToWhere = new GraphQLArgumentsToWhere(graphqlAntlrManager, mapper);
+        GraphQLQueryToSelect graphqlQueryToSelect = new GraphQLQueryToSelect(graphqlAntlrManager, mapper, graphqlArgumentsToWhere);
+        GraphQLMutationToStatements graphqlMutationToStatements = new GraphQLMutationToStatements(graphqlAntlrManager, mapper, graphqlQueryToSelect);
         List<String> mutationsSql = graphqlMutationToStatements.createStatementsSQL(introspectionMutationBuilder.buildIntrospectionSchemaMutation().toString()).collect(Collectors.toList());
 
         StringBuffer stringBuffer = new StringBuffer();

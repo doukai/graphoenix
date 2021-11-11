@@ -1,14 +1,14 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.spi.antlr.IGraphqlInputObjectManager;
+import io.graphoenix.spi.antlr.IGraphQLInputObjectManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class GraphqlInputObjectManager implements IGraphqlInputObjectManager {
+public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
 
     private final Map<String, GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionMap = new HashMap<>();
 

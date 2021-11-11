@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface IGraphqlInterfaceManager {
+public interface IGraphQLInterfaceManager {
 
     Map<String, GraphqlParser.InterfaceTypeDefinitionContext> register(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 

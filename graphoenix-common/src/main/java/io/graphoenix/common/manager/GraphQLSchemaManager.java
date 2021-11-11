@@ -1,9 +1,9 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.spi.antlr.IGraphqlSchemaManager;
+import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
 
-public class GraphqlSchemaManager implements IGraphqlSchemaManager {
+public class GraphQLSchemaManager implements IGraphQLSchemaManager {
 
     private GraphqlParser.SchemaDefinitionContext schemaDefinitionContext;
 

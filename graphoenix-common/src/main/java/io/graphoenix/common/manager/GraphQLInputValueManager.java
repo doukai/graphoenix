@@ -1,7 +1,7 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.spi.antlr.IGraphqlInputValueManager;
+import io.graphoenix.spi.antlr.IGraphQLInputValueManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class GraphqlInputValueManager implements IGraphqlInputValueManager {
+public class GraphQLInputValueManager implements IGraphQLInputValueManager {
 
     private final Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> inputValueDefinitionTree = new HashMap<>();
 

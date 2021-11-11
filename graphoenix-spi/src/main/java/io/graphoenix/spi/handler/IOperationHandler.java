@@ -1,10 +1,10 @@
 package io.graphoenix.spi.handler;
 
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 public interface IOperationHandler {
 
-    void setupManager(IGraphqlDocumentManager manager);
+    void setupManager(IGraphQLDocumentManager manager);
 
     Object query(Object input) throws Exception;
 

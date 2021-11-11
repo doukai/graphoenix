@@ -1,22 +1,7 @@
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
-import graphql.parser.antlr.GraphqlLexer;
-import graphql.parser.antlr.GraphqlParser;
 //import io.graphoenix.antlr.manager.impl.GraphqlAntlrManager;
-import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
-import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
-import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
-import io.graphoenix.mysql.translator.GraphqlTypeToTable;
-import net.sf.jsqlparser.statement.Statements;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
-import net.sf.jsqlparser.statement.select.Select;
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.PredictionMode;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.List;
 
 public class GraphqlTest {
 

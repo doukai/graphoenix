@@ -1,9 +1,10 @@
 package io.graphoenix.mysql.handler.operation;
 
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
-import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
-import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
+import io.graphoenix.common.manager.GraphQLFieldMapManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.mysql.translator.GraphQLArgumentsToWhere;
+import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
+import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
 import io.graphoenix.spi.dto.SelectionResult;
 import io.graphoenix.spi.handler.IOperationHandler;
 
@@ -11,16 +12,17 @@ import java.util.stream.Stream;
 
 public class OperationToSQLConvertHandler implements IOperationHandler {
 
-    private GraphqlQueryToSelect graphqlQueryToSelect;
-    private GraphqlMutationToStatements graphqlMutationToStatements;
-    private IGraphqlDocumentManager manager;
+    private GraphQLQueryToSelect graphqlQueryToSelect;
+    private GraphQLMutationToStatements graphqlMutationToStatements;
+    private IGraphQLDocumentManager manager;
 //    private MysqlTranslateConfig config;
 
     @Override
-    public void setupManager(IGraphqlDocumentManager manager) {
+    public void setupManager(IGraphQLDocumentManager manager) {
         this.manager = manager;
-        this.graphqlQueryToSelect = new GraphqlQueryToSelect(manager, new GraphqlArgumentsToWhere(manager));
-        this.graphqlMutationToStatements = new GraphqlMutationToStatements(manager, this.graphqlQueryToSelect);
+        GraphQLFieldMapManager mapper = new GraphQLFieldMapManager(manager);
+        this.graphqlQueryToSelect = new GraphQLQueryToSelect(manager, mapper, new GraphQLArgumentsToWhere(manager, mapper));
+        this.graphqlMutationToStatements = new GraphQLMutationToStatements(manager, mapper, this.graphqlQueryToSelect);
 //        this.config = YAML_CONFIG_LOADER.loadAs(Hammurabi.configName, MysqlTranslateConfig.class);
     }
 

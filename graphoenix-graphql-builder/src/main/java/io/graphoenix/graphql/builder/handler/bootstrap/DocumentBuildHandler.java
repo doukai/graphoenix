@@ -2,7 +2,7 @@ package io.graphoenix.graphql.builder.handler.bootstrap;
 
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Document;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class DocumentBuildHandler implements IBootstrapHandler {
     }
 
     @Override
-    public Void transform(IGraphqlDocumentManager manager, Object object) throws IOException {
+    public Void transform(IGraphQLDocumentManager manager, Object object) throws IOException {
         if (this.graphQLFileName != null) {
             manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream(graphQLFileName));
         }

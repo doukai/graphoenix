@@ -1,9 +1,10 @@
 package io.graphoenix.mysql.handler.bootstrap;
 
-import io.graphoenix.mysql.translator.GraphqlArgumentsToWhere;
-import io.graphoenix.mysql.translator.GraphqlMutationToStatements;
-import io.graphoenix.mysql.translator.GraphqlQueryToSelect;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.common.manager.GraphQLFieldMapManager;
+import io.graphoenix.mysql.translator.GraphQLArgumentsToWhere;
+import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
+import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 
 import java.util.stream.Stream;
@@ -11,9 +12,10 @@ import java.util.stream.Stream;
 public class MutationToSQLConvertHandler implements IBootstrapHandler {
 
     @Override
-    public Stream<String> transform(IGraphqlDocumentManager manager, Object graphQL) {
-        GraphqlQueryToSelect graphqlQueryToSelect = new GraphqlQueryToSelect(manager, new GraphqlArgumentsToWhere(manager));
-        GraphqlMutationToStatements mutationToStatements = new GraphqlMutationToStatements(manager, graphqlQueryToSelect);
+    public Stream<String> transform(IGraphQLDocumentManager manager, Object graphQL) {
+        GraphQLFieldMapManager mapper = new GraphQLFieldMapManager(manager);
+        GraphQLQueryToSelect graphqlQueryToSelect = new GraphQLQueryToSelect(manager, mapper, new GraphQLArgumentsToWhere(manager, mapper));
+        GraphQLMutationToStatements mutationToStatements = new GraphQLMutationToStatements(manager, mapper, graphqlQueryToSelect);
         return mutationToStatements.createStatementsSQL((String) graphQL);
     }
 }

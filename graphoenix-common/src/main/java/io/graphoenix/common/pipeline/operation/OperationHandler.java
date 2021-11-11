@@ -1,6 +1,6 @@
 package io.graphoenix.common.pipeline.operation;
 
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.AsyncType;
 import io.graphoenix.spi.dto.type.ExecuteType;
 import io.graphoenix.spi.dto.type.OperationType;
@@ -23,7 +23,7 @@ public class OperationHandler implements Command {
     @SuppressWarnings("unchecked")
     public boolean execute(Context context) throws Exception {
 
-        operationHandler.setupManager((IGraphqlDocumentManager) context.get(MANAGER_KEY));
+        operationHandler.setupManager((IGraphQLDocumentManager) context.get(MANAGER_KEY));
         OperationType operationType = (OperationType) context.get(OperationConstant.OPERATION_TYPE_KEY);
         ExecuteType executeType = (ExecuteType) context.get(OperationConstant.EXECUTE_TYPE_KEY);
         AsyncType asyncType = (AsyncType) context.get(OperationConstant.ASYNC_TYPE_KEY);

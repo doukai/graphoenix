@@ -2,7 +2,7 @@ package io.graphoenix.common.pipeline.operation;
 
 import com.google.gson.JsonObject;
 import io.graphoenix.common.utils.HandlerUtil;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.*;
 import io.graphoenix.spi.dto.type.AsyncType;
 import io.graphoenix.spi.dto.type.ExecuteType;
@@ -13,18 +13,18 @@ import reactor.core.publisher.Mono;
 
 public class OperationPipeline extends ChainBase {
 
-    private IGraphqlDocumentManager manager;
+    private IGraphQLDocumentManager manager;
 
     public OperationPipeline() {
         addCommand(new OperationRouter());
     }
 
-    public OperationPipeline(IGraphqlDocumentManager manager) {
+    public OperationPipeline(IGraphQLDocumentManager manager) {
         this.manager = manager;
         addCommand(new OperationRouter());
     }
 
-    public OperationPipeline setupManager(IGraphqlDocumentManager manager) {
+    public OperationPipeline setupManager(IGraphQLDocumentManager manager) {
         this.manager = manager;
         return this;
     }

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface IGraphqlInputObjectManager {
+public interface IGraphQLInputObjectManager {
     Map<String, GraphqlParser.InputObjectTypeDefinitionContext> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
     boolean isInputObject(String inputObjectName);
