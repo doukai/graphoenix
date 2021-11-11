@@ -1,6 +1,7 @@
 package io.graphoenix.r2dbc.connector.handler.operation;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import io.graphoenix.common.constant.Hammurabi;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -38,13 +39,13 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
 
     @Override
     public Mono<JsonObject> queryAsync(Object sql) throws Exception {
-        return queryExecutor.executeQuery((String) sql).map(result -> new Gson().fromJson(result, JsonObject.class));
+        return queryExecutor.executeQuery((String) sql).map(result -> new GsonBuilder().serializeNulls().create().fromJson(result, JsonObject.class));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Flux<SelectionResult<JsonObject>> querySelectionsAsync(Object sqlStream) throws Exception {
-        return queryExecutor.executeQuery((Stream<Map.Entry<String, String>>) sqlStream).map(result -> new SelectionResult<>(result.getKey(), new Gson().fromJson(result.getValue(), JsonObject.class)));
+        return queryExecutor.executeQuery((Stream<Map.Entry<String, String>>) sqlStream).map(result -> new SelectionResult<>(result.getKey(), new GsonBuilder().serializeNulls().create().fromJson(result.getValue(), JsonObject.class)));
     }
 
     @Override
@@ -55,7 +56,7 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
     @Override
     @SuppressWarnings("unchecked")
     public Mono<JsonObject> mutationAsync(Object sqlStream) throws Exception {
-        return mutationExecutor.executeMutations((Stream<String>) sqlStream).map(result -> new Gson().fromJson(result, JsonObject.class));
+        return mutationExecutor.executeMutations((Stream<String>) sqlStream).map(result -> new GsonBuilder().serializeNulls().create().fromJson(result, JsonObject.class));
     }
 
     @Override

@@ -62,7 +62,7 @@ public class HttpServerTest {
     @Test
     void executeIntrospectionMutation() throws IOException {
 
-        IGraphQLDocumentManager graphqlAntlrManager = new GraphQLDocumentManager(
+        IGraphQLDocumentManager manager = new GraphQLDocumentManager(
                 new GraphQLOperationManager(),
                 new GraphQLSchemaManager(),
                 new GraphQLDirectiveManager(),
@@ -80,29 +80,29 @@ public class HttpServerTest {
 
         URL url = Resources.getResource("auth.gql");
         String graphql = Resources.toString(url, Charsets.UTF_8);
-        graphqlAntlrManager.registerDocument(graphql);
+        manager.registerDocument(graphql);
 
 
-        graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
-        graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/preset.gql"));
-        graphqlAntlrManager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/introspectionTypes.gql"));
+        manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
+        manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/preset.gql"));
+        manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/introspectionTypes.gql"));
 
 
-        DocumentBuilder documentBuilder = new DocumentBuilder(graphqlAntlrManager);
+        DocumentBuilder documentBuilder = new DocumentBuilder(manager);
 
 //        System.out.println(documentBuilder.buildDocument().toString());
 
-        graphqlAntlrManager.registerDocument(documentBuilder.buildDocument().toString());
+        manager.registerDocument(documentBuilder.buildDocument().toString());
 
-        IntrospectionMutationBuilder introspectionMutationBuilder = new IntrospectionMutationBuilder(graphqlAntlrManager);
+        IntrospectionMutationBuilder introspectionMutationBuilder = new IntrospectionMutationBuilder(manager);
 
 //        System.out.println(introspectionMutationBuilder.buildIntrospectionSchemaMutation());
 
 
-        GraphQLFieldMapManager mapper = new GraphQLFieldMapManager(graphqlAntlrManager);
-        GraphQLArgumentsToWhere graphqlArgumentsToWhere = new GraphQLArgumentsToWhere(graphqlAntlrManager, mapper);
-        GraphQLQueryToSelect graphqlQueryToSelect = new GraphQLQueryToSelect(graphqlAntlrManager, mapper, graphqlArgumentsToWhere);
-        GraphQLMutationToStatements graphqlMutationToStatements = new GraphQLMutationToStatements(graphqlAntlrManager, mapper, graphqlQueryToSelect);
+        GraphQLFieldMapManager mapper = new GraphQLFieldMapManager(manager);
+        GraphQLArgumentsToWhere graphqlArgumentsToWhere = new GraphQLArgumentsToWhere(manager, mapper);
+        GraphQLQueryToSelect graphqlQueryToSelect = new GraphQLQueryToSelect(manager, mapper, graphqlArgumentsToWhere);
+        GraphQLMutationToStatements graphqlMutationToStatements = new GraphQLMutationToStatements(manager, mapper, graphqlQueryToSelect);
         List<String> mutationsSql = graphqlMutationToStatements.createStatementsSQL(introspectionMutationBuilder.buildIntrospectionSchemaMutation().toString()).collect(Collectors.toList());
 
         StringBuffer stringBuffer = new StringBuffer();

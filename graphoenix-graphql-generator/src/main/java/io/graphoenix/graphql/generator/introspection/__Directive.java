@@ -18,6 +18,12 @@ public class __Directive {
 
     private List<__InputValue> args;
 
+    private Boolean onOperation;
+
+    private Boolean onFragment;
+
+    private Boolean onField;
+
     public String getName() {
         return name;
     }
@@ -48,6 +54,30 @@ public class __Directive {
 
     public void setArgs(List<__InputValue> args) {
         this.args = args;
+    }
+
+    public Boolean getOnOperation() {
+        return onOperation;
+    }
+
+    public void setOnOperation(Boolean onOperation) {
+        this.onOperation = onOperation;
+    }
+
+    public Boolean getOnFragment() {
+        return onFragment;
+    }
+
+    public void setOnFragment(Boolean onFragment) {
+        this.onFragment = onFragment;
+    }
+
+    public Boolean getOnField() {
+        return onField;
+    }
+
+    public void setOnField(Boolean onField) {
+        this.onField = onField;
     }
 
     @Override

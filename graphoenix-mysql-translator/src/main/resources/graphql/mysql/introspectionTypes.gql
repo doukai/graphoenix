@@ -96,6 +96,9 @@ type __Directive {
     description: String
     locations: [__DirectiveLocation!]! @map(from: "name", with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
     args: [__InputValue!]! @map(from: "name", to: "directiveName")
+    onOperation: Boolean
+    onFragment: Boolean
+    onField: Boolean
 }
 
 type __DirectiveLocations {

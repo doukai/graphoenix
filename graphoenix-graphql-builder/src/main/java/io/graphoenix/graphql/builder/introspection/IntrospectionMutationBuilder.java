@@ -303,6 +303,17 @@ public class IntrospectionMutationBuilder {
         List<__DirectiveLocation> directiveLocationList = new ArrayList<>();
         addDirectiveDefinitionsContextToDirectiveLocationList(directiveDefinitionContext.directiveLocations(), directiveLocationList);
         directive.setLocations(directiveLocationList);
+        directive.setOnField(directive.getLocations().contains(__DirectiveLocation.FIELD));
+        directive.setOnFragment(
+                directive.getLocations().contains(__DirectiveLocation.FRAGMENT_SPREAD) ||
+                        directive.getLocations().contains(__DirectiveLocation.INLINE_FRAGMENT)
+        );
+        directive.setOnOperation(
+                directive.getLocations().contains(__DirectiveLocation.QUERY) ||
+                        directive.getLocations().contains(__DirectiveLocation.MUTATION) ||
+                        directive.getLocations().contains(__DirectiveLocation.SUBSCRIPTION)
+        );
+
         return directive;
     }
 

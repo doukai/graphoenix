@@ -1,6 +1,7 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
+import static io.graphoenix.spi.error.GraphQLErrorType.*;
 
 public class GraphQLTypeToTable {
 
@@ -53,14 +55,14 @@ public class GraphQLTypeToTable {
 
     protected Optional<CreateTable> createTable(GraphqlParser.DefinitionContext definitionContext) {
         if (definitionContext.typeSystemDefinition() == null) {
-            return Optional.empty();
+            throw new GraphQLProblem(DEFINITION_NOT_EXIST);
         }
         return createTable(definitionContext.typeSystemDefinition());
     }
 
     protected Optional<CreateTable> createTable(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
         if (typeSystemDefinitionContext.typeDefinition() == null) {
-            return Optional.empty();
+            throw new GraphQLProblem(TYPE_DEFINITION_NOT_EXIST);
         }
         return createTable(typeSystemDefinitionContext.typeDefinition());
     }
@@ -98,7 +100,7 @@ public class GraphQLTypeToTable {
                 return Optional.empty();
             }
         }
-        return Optional.empty();
+        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldDefinitionContext.type().getText()));
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean nonNull) {
@@ -129,7 +131,7 @@ public class GraphQLTypeToTable {
         } else if (manager.isScaLar(typeNameContext.name().getText())) {
             return createScalarColDataType(typeNameContext, directivesContext);
         }
-        return null;
+        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeNameContext.getText()));
     }
 
     protected ColDataType createEnumColDataType(GraphqlParser.TypeNameContext typeNameContext) {
@@ -195,15 +197,11 @@ public class GraphQLTypeToTable {
     }
 
     protected String argumentToTableOption(GraphqlParser.ArgumentContext argumentContext) {
-        if (argumentContext.valueWithVariable().IntValue() != null) {
-            return DB_NAME_UTIL.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().IntValue().getText());
-        } else if (argumentContext.valueWithVariable().BooleanValue() != null) {
+        if (argumentContext.valueWithVariable().BooleanValue() != null) {
             return argumentContext.name().getText();
-        } else if (argumentContext.valueWithVariable().StringValue() != null) {
-            return DB_NAME_UTIL.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().StringValue().getText());
+        } else {
+            return DB_NAME_UTIL.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
         }
-        //TODO
-        return null;
     }
 
     protected Optional<List<String>> columnDirectiveToColumnSpecs(GraphqlParser.DirectivesContext directivesContext) {
@@ -212,15 +210,11 @@ public class GraphQLTypeToTable {
     }
 
     protected String argumentToColumnSpecs(GraphqlParser.ArgumentContext argumentContext) {
-        if (argumentContext.valueWithVariable().IntValue() != null) {
-            return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().IntValue().getText());
-        } else if (argumentContext.valueWithVariable().BooleanValue() != null) {
+        if (argumentContext.valueWithVariable().BooleanValue() != null) {
             return DB_NAME_UTIL.booleanDirectiveTocColumnDefinition(argumentContext.name().getText());
-        } else if (argumentContext.valueWithVariable().StringValue() != null) {
-            return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().StringValue().getText());
+        } else {
+            return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
         }
-        //TODO
-        return null;
     }
 
     protected Optional<GraphqlParser.DirectiveContext> getTableDirective(GraphqlParser.DirectivesContext directivesContext) {

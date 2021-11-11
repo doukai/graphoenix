@@ -1,10 +1,10 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
@@ -27,6 +27,8 @@ import java.util.stream.Stream;
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
+import static io.graphoenix.spi.error.GraphQLErrorType.*;
+import static io.graphoenix.spi.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
 
 public class GraphQLMutationToStatements {
 
@@ -58,7 +60,7 @@ public class GraphQLMutationToStatements {
                 );
             }
         }
-        return Stream.empty();
+        throw new GraphQLProblem(MUTATION_NOT_EXIST);
     }
 
     protected Stream<Statement> selectionToStatementStream(GraphqlParser.SelectionContext selectionContext) {
@@ -70,8 +72,7 @@ public class GraphQLMutationToStatements {
             GraphqlParser.ArgumentsContext argumentsContext = selectionContext.field().arguments();
             return argumentsToStatementStream(fieldDefinitionContext, argumentsContext);
         }
-
-        return Stream.empty();
+        throw new GraphQLProblem(MUTATION_NOT_EXIST);
     }
 
     protected Stream<Statement> argumentsToStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
@@ -514,7 +515,7 @@ public class GraphQLMutationToStatements {
                         index
                 );
             } else {
-                //TODO
+                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
         }
         return Stream.empty();
@@ -638,7 +639,7 @@ public class GraphQLMutationToStatements {
                         level
                 );
             } else {
-                //TODO
+                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
         }
         return Stream.empty();
@@ -714,7 +715,7 @@ public class GraphQLMutationToStatements {
                         fromValueExpression
                 );
             } else {
-                //TODO
+                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
         }
         return Stream.empty();
@@ -779,6 +780,18 @@ public class GraphQLMutationToStatements {
                     } else {
                         return Stream.of(insertExpression(withTable, Arrays.asList(withParentColumn, withColumn), new ExpressionList(Arrays.asList(parentColumnExpression, columnExpression))));
                     }
+                } else {
+                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    if (mapWithObjectDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    if (mapWithFromFieldDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    if (mapWithToFieldDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    throw graphQLProblem;
                 }
             } else {
                 EqualsTo parentIdEqualsTo = new EqualsTo();
@@ -792,7 +805,7 @@ public class GraphQLMutationToStatements {
                     return Stream.of(updateExpression(table, Collections.singletonList(column), Collections.singletonList(fromValueExpression), idEqualsTo));
                 } else if (fromValueExpression == null && toValueExpression != null) {
                     return Stream.of(updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(toValueExpression), parentIdEqualsTo));
-                } else if (fromValueExpression == null) {
+                } else {
                     IsNullExpression parentColumnIsNull = new IsNullExpression();
                     parentColumnIsNull.setLeftExpression(parentColumn);
 
@@ -805,8 +818,22 @@ public class GraphQLMutationToStatements {
                     );
                 }
             }
+        } else {
+            GraphQLProblem graphQLProblem = new GraphQLProblem();
+            if (parentIdFieldDefinition.isEmpty()) {
+                graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentFieldTypeName));
+            }
+            if (idFieldDefinition.isEmpty()) {
+                graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName));
+            }
+            if (fromFieldDefinition.isEmpty()) {
+                graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+            }
+            if (toFieldDefinition.isEmpty()) {
+                graphQLProblem.push(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+            }
+            throw graphQLProblem;
         }
-        return Stream.empty();
     }
 
     protected Stream<Statement> mapSingleTypeFieldRelationStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -848,10 +875,32 @@ public class GraphQLMutationToStatements {
                     } else {
                         return Stream.of(insertExpression(withTable, Arrays.asList(withParentColumn, withColumn), new ExpressionList(Arrays.asList(parentColumnExpression, valueExpression))));
                     }
+                } else {
+                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    if (mapWithObjectDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    if (mapWithFromFieldDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    if (mapWithToFieldDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    throw graphQLProblem;
                 }
+            } else {
+                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                if (fromFieldDefinition.isEmpty()) {
+                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                if (parentIdFieldDefinition.isEmpty()) {
+                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                }
+                throw graphQLProblem;
             }
+        } else {
+            throw new GraphQLProblem(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
         }
-        return Stream.empty();
     }
 
     protected Stream<Statement> deleteWithTypeStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -895,10 +944,29 @@ public class GraphQLMutationToStatements {
                         withParentColumnEqualsTo.setRightExpression(parentColumnExpression);
                     }
                     return Stream.of(deleteExpression(withTable, withParentColumnEqualsTo));
+                } else {
+                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    if (mapWithObjectDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    if (mapWithFromFieldDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    throw graphQLProblem;
                 }
+            } else {
+                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                if (fromFieldDefinition.isEmpty()) {
+                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                if (parentIdFieldDefinition.isEmpty()) {
+                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                }
+                throw graphQLProblem;
             }
+        } else {
+            throw new GraphQLProblem(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
         }
-        return Stream.empty();
     }
 
 
@@ -953,9 +1021,25 @@ public class GraphQLMutationToStatements {
                 } else {
                     return Stream.of(deleteExpression(table, parentColumnEqualsTo));
                 }
+            } else {
+                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                if (parentIdFieldDefinition.isEmpty()) {
+                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentFieldTypeName));
+                }
+                if (idFieldDefinition.isEmpty()) {
+                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName));
+                }
+                if (fromFieldDefinition.isEmpty()) {
+                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                if (toFieldDefinition.isEmpty()) {
+                    graphQLProblem.push(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                throw graphQLProblem;
             }
+        } else {
+            throw new GraphQLProblem(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
         }
-        return Stream.empty();
     }
 
     protected Stream<Statement> argumentsToInsertStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
@@ -1079,12 +1163,20 @@ public class GraphQLMutationToStatements {
         ExpressionList expressionList = new ExpressionList(
                 inputValueDefinitionContextList.stream()
                         .map(inputValueDefinitionContext ->
-                                manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext)
-                                        .map(fieldDefinitionContext ->
-                                                manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
-                                                        .map(objectFieldWithVariableContext -> objectFieldWithVariableToDBValue(fieldDefinitionContext, objectFieldWithVariableContext))
-                                                        .orElse(defaultValueToDBValue(inputValueDefinitionContext))
-                                        )
+                                        manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext)
+                                                .map(fieldDefinitionContext ->
+                                                        {
+                                                            Optional<GraphqlParser.ObjectFieldWithVariableContext> a = manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext);
+                                                            if (a.isPresent()) {
+                                                                return objectFieldWithVariableToDBValue(fieldDefinitionContext, a.get());
+                                                            } else {
+                                                                return defaultValueToDBValue(inputValueDefinitionContext);
+                                                            }
+                                                        }
+//                                                manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
+//                                                        .map(objectFieldWithVariableContext -> objectFieldWithVariableToDBValue(fieldDefinitionContext, objectFieldWithVariableContext))
+//                                                        .orElse(defaultValueToDBValue(inputValueDefinitionContext))
+                                                )
                         )
                         .filter(Optional::isPresent)
                         .map(Optional::get)
@@ -1136,7 +1228,7 @@ public class GraphQLMutationToStatements {
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return DB_VALUE_UTIL.enumValueWithVariableToDBValue(argumentContext.valueWithVariable());
         }
-        return null;
+        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(argumentContext.getText()));
     }
 
     protected Expression objectFieldWithVariableToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
@@ -1145,7 +1237,7 @@ public class GraphQLMutationToStatements {
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return DB_VALUE_UTIL.enumValueWithVariableToDBValue(objectFieldWithVariableContext.valueWithVariable());
         }
-        return null;
+        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(objectFieldWithVariableContext.getText()));
     }
 
     protected Expression objectFieldToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
@@ -1154,7 +1246,7 @@ public class GraphQLMutationToStatements {
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return DB_VALUE_UTIL.enumValueToDBValue(objectFieldContext.value());
         }
-        return null;
+        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(objectFieldContext.getText()));
     }
 
     protected Expression defaultValueToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
@@ -1164,11 +1256,11 @@ public class GraphQLMutationToStatements {
                     return DB_VALUE_UTIL.scalarValueToDBValue(inputValueDefinitionContext.defaultValue().value());
                 } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
                     return DB_VALUE_UTIL.enumValueToDBValue(inputValueDefinitionContext.defaultValue().value());
+                } else {
+                    throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(inputValueDefinitionContext.getText()));
                 }
             } else {
-                //TODO
-
-                return new NullValue();
+                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
         }
         return null;
@@ -1184,10 +1276,11 @@ public class GraphQLMutationToStatements {
 
     protected Column defaultToColumn(Table table, GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         if (inputValueDefinitionContext.type().nonNullType() != null) {
-
             Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext);
             if (fieldDefinitionContext.isPresent()) {
                 return DB_NAME_UTIL.fieldToColumn(table, fieldDefinitionContext.get());
+            } else {
+                throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
             }
         }
         return null;
@@ -1196,7 +1289,7 @@ public class GraphQLMutationToStatements {
     public UserVariable createInsertIdUserVariable(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level, int index) {
         String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
-        return idFieldName.map(fieldName -> DB_VALUE_UTIL.createInsertIdUserVariable(typeName, fieldName, level, index)).orElse(null);
+        return idFieldName.map(fieldName -> DB_VALUE_UTIL.createInsertIdUserVariable(typeName, fieldName, level, index)).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
     }
 
     protected Insert insertExpression(Table table,
