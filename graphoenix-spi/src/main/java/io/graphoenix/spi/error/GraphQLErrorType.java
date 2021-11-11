@@ -27,7 +27,7 @@ public enum GraphQLErrorType {
     MAP_WITH_TYPE_ARGUMENT_NOT_EXIST(-22, "map with type to field not exist: %s"),
     MAP_WITH_FROM_ARGUMENT_NOT_EXIST(-23, "map with type from field not exist: %s"),
     MAP_WITH_TO_ARGUMENT_NOT_EXIST(-24, "map with type to field not exist: %s"),
-    MAP_WITH_TYPE_NOT_EXIST(-25, "map with type to field not exist: %s"),
+    MAP_WITH_TYPE_NOT_EXIST(-25, "map with type not exist: %s"),
     MAP_WITH_FROM_FIELD_NOT_EXIST(-26, "map with type from field not exist: %s"),
     MAP_WITH_TO_FIELD_NOT_EXIST(-27, "map with type to field not exist: %s"),
 

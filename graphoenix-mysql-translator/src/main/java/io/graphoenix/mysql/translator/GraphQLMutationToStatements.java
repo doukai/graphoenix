@@ -80,14 +80,14 @@ public class GraphQLMutationToStatements {
 
         Stream<Statement> insertStatementStream = argumentsToInsertStatementStream(fieldDefinitionContext, argumentsContext);
 
-        Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), argumentsContext).map(DB_VALUE_UTIL::createIdValueExpression).orElse(createInsertIdUserVariable(fieldDefinitionContext, 0, 0));
+        Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), argumentsContext).map(DB_VALUE_UTIL::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, 0, 0));
 
         Stream<Statement> objectInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
-                                .flatMap(subFieldDefinitionContext ->
+                                .map(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(inputObjectTypeDefinitionContext ->
                                                         manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext)
@@ -105,32 +105,29 @@ public class GraphQLMutationToStatements {
                                                                                 0,
                                                                                 0
                                                                         )
+                                                                ).orElseGet(() ->
+                                                                defaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
-                                                                .orElse(
-                                                                        defaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
-                                                                )
-                                                )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                                        )
+                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
         Stream<Statement> listObjectInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
-                                .flatMap(subFieldDefinitionContext ->
+                                .map(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(inputObjectTypeDefinitionContext ->
                                                         manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext)
@@ -147,7 +144,7 @@ public class GraphQLMutationToStatements {
                                                                                 0
                                                                         )
                                                                 )
-                                                                .orElse(
+                                                                .orElseGet(() ->
                                                                         defaultListObjectValueToStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
@@ -159,17 +156,15 @@ public class GraphQLMutationToStatements {
                                                                                 0
                                                                         )
                                                                 )
-                                                )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
 
         Stream<Statement> listInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .map(subFieldDefinitionContext ->
                                         manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext)
@@ -184,7 +179,7 @@ public class GraphQLMutationToStatements {
                                                                         .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
-                                                .orElse(
+                                                .orElseGet(() ->
                                                         defaultListValueToInsertStatementStream(
                                                                 fieldDefinitionContext,
                                                                 idValueExpression,
@@ -194,10 +189,8 @@ public class GraphQLMutationToStatements {
                                                                         .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
         return Stream.concat(insertStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream)));
     }
@@ -214,16 +207,16 @@ public class GraphQLMutationToStatements {
 
         Optional<GraphqlParser.ObjectFieldWithVariableContext> objectIdFieldWithVariableContext = manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), objectValueWithVariableContext);
 
-        Expression idValueExpression = objectIdFieldWithVariableContext.map(DB_VALUE_UTIL::createIdValueExpression).orElse(createInsertIdUserVariable(fieldDefinitionContext, level, index));
+        Expression idValueExpression = objectIdFieldWithVariableContext.map(DB_VALUE_UTIL::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index));
 
         Stream<Statement> insertStatementStream = objectValueWithVariableToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueWithVariableContext, level, index);
 
         Stream<Statement> objectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
-                                .flatMap(subFieldDefinitionContext ->
+                                .map(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(subInputObjectTypeDefinitionContext ->
                                                         manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
@@ -242,7 +235,7 @@ public class GraphQLMutationToStatements {
                                                                                 index
                                                                         )
                                                                 )
-                                                                .orElse(
+                                                                .orElseGet(() ->
                                                                         defaultValueToStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
@@ -255,11 +248,9 @@ public class GraphQLMutationToStatements {
                                                                                 index
                                                                         )
                                                                 )
-                                                )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
 
         Stream<Statement> updateMapObjectFieldStatementStream = mapObjectTypeFieldRelationStatementStream(
@@ -274,9 +265,9 @@ public class GraphQLMutationToStatements {
         Stream<Statement> listObjectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
-                                .flatMap(subFieldDefinitionContext ->
+                                .map(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(subInputObjectTypeDefinitionContext ->
                                                         manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
@@ -293,7 +284,7 @@ public class GraphQLMutationToStatements {
                                                                                 level + 1
                                                                         )
                                                                 )
-                                                                .orElse(
+                                                                .orElseGet(() ->
                                                                         defaultListObjectValueToStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
@@ -305,17 +296,15 @@ public class GraphQLMutationToStatements {
                                                                                 level + 1
                                                                         )
                                                                 )
-                                                )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
 
         Stream<Statement> listInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .map(subFieldDefinitionContext ->
                                         manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
@@ -330,7 +319,7 @@ public class GraphQLMutationToStatements {
                                                                         .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
-                                                .orElse(
+                                                .orElseGet(() ->
                                                         defaultListValueToInsertStatementStream(
                                                                 fieldDefinitionContext,
                                                                 idValueExpression,
@@ -340,10 +329,8 @@ public class GraphQLMutationToStatements {
                                                                         .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
         return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
     }
@@ -360,15 +347,15 @@ public class GraphQLMutationToStatements {
 
         Optional<GraphqlParser.ObjectFieldContext> objectIdFieldContext = manager.getIDObjectField(fieldDefinitionContext.type(), objectValueContext);
 
-        Expression idValueExpression = objectIdFieldContext.map(DB_VALUE_UTIL::createIdValueExpression).orElse(createInsertIdUserVariable(fieldDefinitionContext, level, index));
+        Expression idValueExpression = objectIdFieldContext.map(DB_VALUE_UTIL::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index));
         Stream<Statement> insertStatementStream = objectValueToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueContext, level, index);
 
         Stream<Statement> objectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
-                                .flatMap(subFieldDefinitionContext ->
+                                .map(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(subInputObjectTypeDefinitionContext ->
                                                         manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext)
@@ -387,7 +374,7 @@ public class GraphQLMutationToStatements {
                                                                                 index
                                                                         )
                                                                 )
-                                                                .orElse(
+                                                                .orElseGet(() ->
                                                                         defaultValueToStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
@@ -400,11 +387,9 @@ public class GraphQLMutationToStatements {
                                                                                 index
                                                                         )
                                                                 )
-                                                )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
         Stream<Statement> updateMapObjectFieldStatementStream = mapObjectTypeFieldRelationStatementStream(
                 parentFieldDefinitionContext,
@@ -418,9 +403,9 @@ public class GraphQLMutationToStatements {
         Stream<Statement> listObjectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
-                                .flatMap(subFieldDefinitionContext ->
+                                .map(subFieldDefinitionContext ->
                                         manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
                                                 .map(subInputObjectTypeDefinitionContext ->
                                                         manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext)
@@ -437,7 +422,7 @@ public class GraphQLMutationToStatements {
                                                                                 level + 1
                                                                         )
                                                                 )
-                                                                .orElse(
+                                                                .orElseGet(() ->
                                                                         defaultListObjectValueToStatementStream(
                                                                                 fieldDefinitionContext,
                                                                                 idValueExpression,
@@ -449,16 +434,14 @@ public class GraphQLMutationToStatements {
                                                                                 level + 1
                                                                         )
                                                                 )
-                                                )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
         Stream<Statement> listInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext ->
+                .flatMap(inputValueDefinitionContext ->
                         manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
                                 .map(subFieldDefinitionContext ->
                                         manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext)
@@ -473,7 +456,7 @@ public class GraphQLMutationToStatements {
                                                                         .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null)
                                                         )
                                                 )
-                                                .orElse(
+                                                .orElseGet(() ->
                                                         defaultListValueToInsertStatementStream(
                                                                 fieldDefinitionContext,
                                                                 idValueExpression,
@@ -483,10 +466,8 @@ public class GraphQLMutationToStatements {
                                                                         .map(DB_VALUE_UTIL::scalarValueToDBValue).orElse(null)
                                                         )
                                                 )
-                                )
-                )
-                .filter(Optional::isPresent)
-                .flatMap(Optional::get);
+                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
 
         return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
     }
@@ -556,7 +537,7 @@ public class GraphQLMutationToStatements {
                 .mapToObj(index ->
                         manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
                                 .map(DB_VALUE_UTIL::createIdValueExpression)
-                                .orElse(createInsertIdUserVariable(fieldDefinitionContext, level, index)))
+                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index)))
                 .collect(Collectors.toList());
 
         Stream<Statement> deleteObjectTypeFieldRelationStatementStream = deleteObjectTypeFieldRelationStatementStream(
@@ -605,7 +586,7 @@ public class GraphQLMutationToStatements {
                 .mapToObj(index ->
                         manager.getIDObjectField(fieldDefinitionContext.type(), arrayValueContext.value(index).objectValue())
                                 .map(DB_VALUE_UTIL::createIdValueExpression)
-                                .orElse(createInsertIdUserVariable(fieldDefinitionContext, level, index)))
+                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index)))
                 .collect(Collectors.toList());
 
         Stream<Statement> deleteObjectTypeFieldRelationStatementStream = deleteObjectTypeFieldRelationStatementStream(
@@ -1117,7 +1098,7 @@ public class GraphQLMutationToStatements {
                                 .map(fieldDefinitionContext ->
                                         manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext)
                                                 .map(argumentContext -> DB_NAME_UTIL.fieldToColumn(table, argumentContext))
-                                                .orElse(defaultToColumn(table, typeContext, inputValueDefinitionContext))
+                                                .orElseGet(() -> defaultToColumn(table, typeContext, inputValueDefinitionContext))
                                 )
                 )
                 .filter(Optional::isPresent)
@@ -1131,7 +1112,7 @@ public class GraphQLMutationToStatements {
                                         .map(fieldDefinitionContext ->
                                                 manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext)
                                                         .map(argumentContext -> argumentToDBValue(fieldDefinitionContext, argumentContext))
-                                                        .orElse(defaultValueToDBValue(inputValueDefinitionContext))
+                                                        .orElseGet(() -> defaultValueToDBValue(inputValueDefinitionContext))
                                         )
                         )
                         .filter(Optional::isPresent)
@@ -1153,7 +1134,7 @@ public class GraphQLMutationToStatements {
                                 .map(fieldDefinitionContext ->
                                         manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
                                                 .map(objectFieldWithVariableContext -> DB_NAME_UTIL.fieldToColumn(table, objectFieldWithVariableContext))
-                                                .orElse(defaultToColumn(table, typeContext, inputValueDefinitionContext))
+                                                .orElseGet(() -> defaultToColumn(table, typeContext, inputValueDefinitionContext))
                                 )
                 )
                 .filter(Optional::isPresent)
@@ -1163,20 +1144,12 @@ public class GraphQLMutationToStatements {
         ExpressionList expressionList = new ExpressionList(
                 inputValueDefinitionContextList.stream()
                         .map(inputValueDefinitionContext ->
-                                        manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext)
-                                                .map(fieldDefinitionContext ->
-                                                        {
-                                                            Optional<GraphqlParser.ObjectFieldWithVariableContext> a = manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext);
-                                                            if (a.isPresent()) {
-                                                                return objectFieldWithVariableToDBValue(fieldDefinitionContext, a.get());
-                                                            } else {
-                                                                return defaultValueToDBValue(inputValueDefinitionContext);
-                                                            }
-                                                        }
-//                                                manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
-//                                                        .map(objectFieldWithVariableContext -> objectFieldWithVariableToDBValue(fieldDefinitionContext, objectFieldWithVariableContext))
-//                                                        .orElse(defaultValueToDBValue(inputValueDefinitionContext))
-                                                )
+                                manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext)
+                                        .map(fieldDefinitionContext ->
+                                                manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
+                                                        .map(objectFieldWithVariableContext -> objectFieldWithVariableToDBValue(fieldDefinitionContext, objectFieldWithVariableContext))
+                                                        .orElseGet(() -> defaultValueToDBValue(inputValueDefinitionContext))
+                                        )
                         )
                         .filter(Optional::isPresent)
                         .map(Optional::get)
@@ -1198,7 +1171,7 @@ public class GraphQLMutationToStatements {
                                 .map(fieldDefinitionContext ->
                                         manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext)
                                                 .map(objectFieldContext -> DB_NAME_UTIL.fieldToColumn(table, objectFieldContext))
-                                                .orElse(defaultToColumn(table, typeContext, inputValueDefinitionContext))
+                                                .orElseGet(() -> defaultToColumn(table, typeContext, inputValueDefinitionContext))
                                 )
                 )
                 .filter(Optional::isPresent)
@@ -1212,7 +1185,7 @@ public class GraphQLMutationToStatements {
                                         .map(fieldDefinitionContext ->
                                                 manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext)
                                                         .map(objectFieldContext -> objectFieldToDBValue(fieldDefinitionContext, objectFieldContext))
-                                                        .orElse(defaultValueToDBValue(inputValueDefinitionContext))
+                                                        .orElseGet(() -> defaultValueToDBValue(inputValueDefinitionContext))
                                         )
                         )
                         .filter(Optional::isPresent)
