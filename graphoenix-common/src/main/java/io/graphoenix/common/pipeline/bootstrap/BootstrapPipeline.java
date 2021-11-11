@@ -177,7 +177,7 @@ public class BootstrapPipeline extends ChainBase {
     }
 
     private IGraphQLDocumentManager getGraphQLDocumentManager() {
-        return new GraphqlDocumentManagerFactory(
+        return new GraphQLDocumentManagerFactory(
                 this::getGraphQLOperationManager,
                 this::getGraphQLSchemaManager,
                 this::getGraphQLDirectiveManager,

@@ -67,7 +67,7 @@ public class GraphQLQueryToSelect {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
             if (queryOperationTypeDefinition.isPresent()) {
                 if (operationDefinitionContext.selectionSet() == null || operationDefinitionContext.selectionSet().selection().size() == 0) {
-                    throw new GraphQLProblem(SELECTION_NOT_EXIST.bind(queryOperationTypeDefinition.get().typeName().name().getText()));
+                    throw new GraphQLProblem(SELECTION_NOT_EXIST.bind(queryOperationTypeDefinition.get().getText()));
                 }
                 return operationDefinitionContext.selectionSet().selection().stream()
                         .map(selectionContext ->
@@ -97,7 +97,7 @@ public class GraphQLQueryToSelect {
             if (fragmentDefinitionContext.isPresent()) {
                 return fragmentDefinitionContext.get().selectionSet().selection().stream();
             } else {
-                throw new GraphQLProblem().push(FRAGMENT_NOT_EXIST.bind(typeName, selectionContext.fragmentSpread().fragmentName().getText()));
+                throw new GraphQLProblem().push(FRAGMENT_NOT_EXIST.bind(selectionContext.fragmentSpread().fragmentName().getText()));
             }
         } else {
             return Stream.of(selectionContext);
@@ -173,7 +173,7 @@ public class GraphQLQueryToSelect {
                             if (mapWithFromFieldDefinition.isEmpty()) {
                                 graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
-                            if (mapWithObjectDefinition.isEmpty()) {
+                            if (mapWithToFieldDefinition.isEmpty()) {
                                 graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
                             throw graphQLProblem;
@@ -246,11 +246,11 @@ public class GraphQLQueryToSelect {
     protected SubSelect objectSelectionToSubSelect(String parentTypeName,
                                                    String typeName,
                                                    GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                   GraphqlParser.SelectionContext selectionContext
-            , int level) {
+                                                   GraphqlParser.SelectionContext selectionContext,
+                                                   int level) {
         SubSelect subSelect = new SubSelect();
         if (selectionContext.field().selectionSet() == null || selectionContext.field().selectionSet().selection().size() == 0) {
-            throw new GraphQLProblem(SELECTION_NOT_EXIST.bind(selectionContext.field().name().getText()));
+            throw new GraphQLProblem(SELECTION_NOT_EXIST.bind(selectionContext.getText()));
         }
         PlainSelect plainSelect = objectSelectionToPlainSelect(parentTypeName, typeName, fieldDefinitionContext, selectionContext.field().selectionSet().selection(), level);
 
@@ -271,7 +271,7 @@ public class GraphQLQueryToSelect {
                 throw new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
             }
         } else {
-            Optional<Expression> where = argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext, selectionContext.field().arguments(), 1);
+            Optional<Expression> where = argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext, selectionContext.field().arguments());
             where.ifPresent(expression -> {
                 if (plainSelect.getWhere() != null) {
                     plainSelect.setWhere(new MultiAndExpression(Arrays.asList(plainSelect.getWhere(), expression)));
@@ -323,7 +323,7 @@ public class GraphQLQueryToSelect {
                     if (mapWithFromFieldDefinition.isEmpty()) {
                         graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
-                    if (mapWithObjectDefinition.isEmpty()) {
+                    if (mapWithToFieldDefinition.isEmpty()) {
                         graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     throw graphQLProblem;
