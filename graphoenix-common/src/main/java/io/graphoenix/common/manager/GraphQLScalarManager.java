@@ -1,14 +1,14 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.spi.antlr.IGraphqlScalarManager;
+import io.graphoenix.spi.antlr.IGraphQLScalarManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class GraphqlScalarManager implements IGraphqlScalarManager {
+public class GraphQLScalarManager implements IGraphQLScalarManager {
 
     private final Map<String, GraphqlParser.ScalarTypeDefinitionContext> scalarTypeDefinitionMap = new HashMap<String, GraphqlParser.ScalarTypeDefinitionContext>() {{
         put("Int", null);

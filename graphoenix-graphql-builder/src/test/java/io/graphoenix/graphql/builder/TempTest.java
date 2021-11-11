@@ -4,7 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import io.graphoenix.common.manager.*;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -15,19 +15,19 @@ public class TempTest {
     @Test
     void test() throws IOException {
 
-        IGraphqlDocumentManager graphqlAntlrManager = new GraphqlDocumentManager(
-                new GraphqlOperationManager(),
-                new GraphqlSchemaManager(),
-                new GraphqlDirectiveManager(),
-                new GraphqlObjectManager(),
-                new GraphqlInterfaceManager(),
-                new GraphqlUnionManager(),
-                new GraphqlFieldManager(),
-                new GraphqlInputObjectManager(),
-                new GraphqlInputValueManager(),
-                new GraphqlEnumManager(),
-                new GraphqlScalarManager(),
-                new GraphqlFragmentManager()
+        IGraphQLDocumentManager graphqlAntlrManager = new GraphQLDocumentManager(
+                new GraphQLOperationManager(),
+                new GraphQLSchemaManager(),
+                new GraphQLDirectiveManager(),
+                new GraphQLObjectManager(),
+                new GraphQLInterfaceManager(),
+                new GraphQLUnionManager(),
+                new GraphQLFieldManager(),
+                new GraphQLInputObjectManager(),
+                new GraphQLInputValueManager(),
+                new GraphQLEnumManager(),
+                new GraphQLScalarManager(),
+                new GraphQLFragmentManager()
         );
 
 

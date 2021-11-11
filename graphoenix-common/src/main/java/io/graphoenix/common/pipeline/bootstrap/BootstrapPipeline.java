@@ -11,34 +11,34 @@ import java.io.InputStream;
 
 public class BootstrapPipeline extends ChainBase {
 
-    private final IGraphqlDocumentManager manager;
+    private final IGraphQLDocumentManager manager;
 
-    private IGraphqlOperationManager graphqlOperationManager;
+    private IGraphQLOperationManager graphQLOperationManager;
 
-    private IGraphqlSchemaManager graphqlSchemaManager;
+    private IGraphQLSchemaManager graphQLSchemaManager;
 
-    private IGraphqlDirectiveManager graphqlDirectiveManager;
+    private IGraphQLDirectiveManager graphQLDirectiveManager;
 
-    private IGraphqlObjectManager graphqlObjectManager;
+    private IGraphQLObjectManager graphQLObjectManager;
 
-    private IGraphqlInterfaceManager graphqlInterfaceManager;
+    private IGraphQLInterfaceManager graphQLInterfaceManager;
 
-    private IGraphqlUnionManager graphqlUnionManager;
+    private IGraphQLUnionManager graphQLUnionManager;
 
-    private IGraphqlFieldManager graphqlFieldManager;
+    private IGraphQLFieldManager graphQLFieldManager;
 
-    private IGraphqlInputObjectManager graphqlInputObjectManager;
+    private IGraphQLInputObjectManager graphQLInputObjectManager;
 
-    private IGraphqlInputValueManager graphqlInputValueManager;
+    private IGraphQLInputValueManager graphQLInputValueManager;
 
-    private IGraphqlEnumManager graphqlEnumManager;
+    private IGraphQLEnumManager graphQLEnumManager;
 
-    private IGraphqlScalarManager graphqlScalarManager;
+    private IGraphQLScalarManager graphQLScalarManager;
 
-    private IGraphqlFragmentManager graphqlFragmentManager;
+    private IGraphQLFragmentManager graphQLFragmentManager;
 
     public BootstrapPipeline() {
-        this.manager = getGraphqlDocumentManager();
+        this.manager = getGraphQLDocumentManager();
     }
 
     public BootstrapPipeline(String graphQL) {
@@ -51,7 +51,7 @@ public class BootstrapPipeline extends ChainBase {
         this.manager.registerDocument(inputStream);
     }
 
-    public IGraphqlDocumentManager buildManager() throws Exception {
+    public IGraphQLDocumentManager buildManager() throws Exception {
         BootstrapContext bootstrapContext = new BootstrapContext();
         bootstrapContext.setManager(this.manager);
         this.execute(bootstrapContext);
@@ -68,128 +68,128 @@ public class BootstrapPipeline extends ChainBase {
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlOperationManager graphqlOperationManager) {
-        this.graphqlOperationManager = graphqlOperationManager;
+    public BootstrapPipeline setup(IGraphQLOperationManager graphQLOperationManager) {
+        this.graphQLOperationManager = graphQLOperationManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlSchemaManager graphqlSchemaManager) {
-        this.graphqlSchemaManager = graphqlSchemaManager;
+    public BootstrapPipeline setup(IGraphQLSchemaManager graphQLSchemaManager) {
+        this.graphQLSchemaManager = graphQLSchemaManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlDirectiveManager graphqlDirectiveManager) {
-        this.graphqlDirectiveManager = graphqlDirectiveManager;
+    public BootstrapPipeline setup(IGraphQLDirectiveManager graphQLDirectiveManager) {
+        this.graphQLDirectiveManager = graphQLDirectiveManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlObjectManager graphqlObjectManager) {
-        this.graphqlObjectManager = graphqlObjectManager;
+    public BootstrapPipeline setup(IGraphQLObjectManager graphQLObjectManager) {
+        this.graphQLObjectManager = graphQLObjectManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlInterfaceManager graphqlInterfaceManager) {
-        this.graphqlInterfaceManager = graphqlInterfaceManager;
+    public BootstrapPipeline setup(IGraphQLInterfaceManager graphQLInterfaceManager) {
+        this.graphQLInterfaceManager = graphQLInterfaceManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlUnionManager graphqlUnionManager) {
-        this.graphqlUnionManager = graphqlUnionManager;
+    public BootstrapPipeline setup(IGraphQLUnionManager graphQLUnionManager) {
+        this.graphQLUnionManager = graphQLUnionManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlFieldManager graphqlFieldManager) {
-        this.graphqlFieldManager = graphqlFieldManager;
+    public BootstrapPipeline setup(IGraphQLFieldManager graphQLFieldManager) {
+        this.graphQLFieldManager = graphQLFieldManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlInputObjectManager graphqlInputObjectManager) {
-        this.graphqlInputObjectManager = graphqlInputObjectManager;
+    public BootstrapPipeline setup(IGraphQLInputObjectManager graphQLInputObjectManager) {
+        this.graphQLInputObjectManager = graphQLInputObjectManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlInputValueManager graphqlInputValueManager) {
-        this.graphqlInputValueManager = graphqlInputValueManager;
+    public BootstrapPipeline setup(IGraphQLInputValueManager graphQLInputValueManager) {
+        this.graphQLInputValueManager = graphQLInputValueManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlEnumManager graphqlEnumManager) {
-        this.graphqlEnumManager = graphqlEnumManager;
+    public BootstrapPipeline setup(IGraphQLEnumManager graphQLEnumManager) {
+        this.graphQLEnumManager = graphQLEnumManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlScalarManager graphqlScalarManager) {
-        this.graphqlScalarManager = graphqlScalarManager;
+    public BootstrapPipeline setup(IGraphQLScalarManager graphQLScalarManager) {
+        this.graphQLScalarManager = graphQLScalarManager;
         return this;
     }
 
-    public BootstrapPipeline setup(IGraphqlFragmentManager graphqlFragmentManager) {
-        this.graphqlFragmentManager = graphqlFragmentManager;
+    public BootstrapPipeline setup(IGraphQLFragmentManager graphQLFragmentManager) {
+        this.graphQLFragmentManager = graphQLFragmentManager;
         return this;
     }
 
-    private IGraphqlOperationManager getGraphqlOperationManager() {
-        return graphqlOperationManager == null ? new GraphqlOperationManager() : graphqlOperationManager;
+    private IGraphQLOperationManager getGraphQLOperationManager() {
+        return graphQLOperationManager == null ? new GraphQLOperationManager() : graphQLOperationManager;
     }
 
-    private IGraphqlSchemaManager getGraphqlSchemaManager() {
-        return graphqlSchemaManager == null ? new GraphqlSchemaManager() : graphqlSchemaManager;
+    private IGraphQLSchemaManager getGraphQLSchemaManager() {
+        return graphQLSchemaManager == null ? new GraphQLSchemaManager() : graphQLSchemaManager;
     }
 
-    private IGraphqlDirectiveManager getGraphqlDirectiveManager() {
-        return graphqlDirectiveManager == null ? new GraphqlDirectiveManager() : graphqlDirectiveManager;
+    private IGraphQLDirectiveManager getGraphQLDirectiveManager() {
+        return graphQLDirectiveManager == null ? new GraphQLDirectiveManager() : graphQLDirectiveManager;
     }
 
-    private IGraphqlObjectManager getGraphqlObjectManager() {
-        return graphqlObjectManager == null ? new GraphqlObjectManager() : graphqlObjectManager;
+    private IGraphQLObjectManager getGraphQLObjectManager() {
+        return graphQLObjectManager == null ? new GraphQLObjectManager() : graphQLObjectManager;
     }
 
-    private IGraphqlInterfaceManager getGraphqlInterfaceManager() {
-        return graphqlInterfaceManager == null ? new GraphqlInterfaceManager() : graphqlInterfaceManager;
+    private IGraphQLInterfaceManager getGraphQLInterfaceManager() {
+        return graphQLInterfaceManager == null ? new GraphQLInterfaceManager() : graphQLInterfaceManager;
     }
 
-    private IGraphqlUnionManager getGraphqlUnionManager() {
-        return graphqlUnionManager == null ? new GraphqlUnionManager() : graphqlUnionManager;
+    private IGraphQLUnionManager getGraphQLUnionManager() {
+        return graphQLUnionManager == null ? new GraphQLUnionManager() : graphQLUnionManager;
     }
 
-    private IGraphqlFieldManager getGraphqlFieldManager() {
-        return graphqlFieldManager == null ? new GraphqlFieldManager() : graphqlFieldManager;
+    private IGraphQLFieldManager getGraphQLFieldManager() {
+        return graphQLFieldManager == null ? new GraphQLFieldManager() : graphQLFieldManager;
     }
 
-    private IGraphqlInputObjectManager getGraphqlInputObjectManager() {
-        return graphqlInputObjectManager == null ? new GraphqlInputObjectManager() : graphqlInputObjectManager;
+    private IGraphQLInputObjectManager getGraphQLInputObjectManager() {
+        return graphQLInputObjectManager == null ? new GraphQLInputObjectManager() : graphQLInputObjectManager;
     }
 
-    private IGraphqlInputValueManager getGraphqlInputValueManager() {
-        return graphqlInputValueManager == null ? new GraphqlInputValueManager() : graphqlInputValueManager;
+    private IGraphQLInputValueManager getGraphQLInputValueManager() {
+        return graphQLInputValueManager == null ? new GraphQLInputValueManager() : graphQLInputValueManager;
     }
 
-    private IGraphqlEnumManager getGraphqlEnumManager() {
-        return graphqlEnumManager == null ? new GraphqlEnumManager() : graphqlEnumManager;
+    private IGraphQLEnumManager getGraphQLEnumManager() {
+        return graphQLEnumManager == null ? new GraphQLEnumManager() : graphQLEnumManager;
     }
 
-    private IGraphqlScalarManager getGraphqlScalarManager() {
-        return graphqlScalarManager == null ? new GraphqlScalarManager() : graphqlScalarManager;
+    private IGraphQLScalarManager getGraphQLScalarManager() {
+        return graphQLScalarManager == null ? new GraphQLScalarManager() : graphQLScalarManager;
     }
 
-    private IGraphqlFragmentManager getGraphqlFragmentManager() {
-        return graphqlFragmentManager == null ? new GraphqlFragmentManager() : graphqlFragmentManager;
+    private IGraphQLFragmentManager getGraphQLFragmentManager() {
+        return graphQLFragmentManager == null ? new GraphQLFragmentManager() : graphQLFragmentManager;
     }
 
-    private IGraphqlDocumentManager getGraphqlDocumentManager() {
+    private IGraphQLDocumentManager getGraphQLDocumentManager() {
         return new GraphqlDocumentManagerFactory(
-                this::getGraphqlOperationManager,
-                this::getGraphqlSchemaManager,
-                this::getGraphqlDirectiveManager,
-                this::getGraphqlObjectManager,
-                this::getGraphqlInterfaceManager,
-                this::getGraphqlUnionManager,
-                this::getGraphqlFieldManager,
-                this::getGraphqlInputObjectManager,
-                this::getGraphqlInputValueManager,
-                this::getGraphqlEnumManager,
-                this::getGraphqlScalarManager,
-                this::getGraphqlFragmentManager
+                this::getGraphQLOperationManager,
+                this::getGraphQLSchemaManager,
+                this::getGraphQLDirectiveManager,
+                this::getGraphQLObjectManager,
+                this::getGraphQLInterfaceManager,
+                this::getGraphQLUnionManager,
+                this::getGraphQLFieldManager,
+                this::getGraphQLInputObjectManager,
+                this::getGraphQLInputValueManager,
+                this::getGraphQLEnumManager,
+                this::getGraphQLScalarManager,
+                this::getGraphQLFragmentManager
         ).create();
     }
 }

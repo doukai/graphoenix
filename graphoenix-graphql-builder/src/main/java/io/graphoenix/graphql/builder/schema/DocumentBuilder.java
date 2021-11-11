@@ -3,7 +3,7 @@ package io.graphoenix.graphql.builder.schema;
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.document.*;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.antlr.v4.runtime.RuleContext;
 
 import java.util.*;
@@ -14,11 +14,11 @@ import static io.graphoenix.common.constant.Hammurabi.META_INTERFACE_NAME;
 
 public class DocumentBuilder {
 
-    private final IGraphqlDocumentManager manager;
+    private final IGraphQLDocumentManager manager;
 
     private final GraphqlParser.InterfaceTypeDefinitionContext metaInterfaceTypeDefinitionContext;
 
-    public DocumentBuilder(IGraphqlDocumentManager manager) {
+    public DocumentBuilder(IGraphQLDocumentManager manager) {
         this.manager = manager;
         this.metaInterfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElse(null);
     }

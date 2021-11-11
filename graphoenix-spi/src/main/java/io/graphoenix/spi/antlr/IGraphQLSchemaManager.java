@@ -2,7 +2,7 @@ package io.graphoenix.spi.antlr;
 
 import graphql.parser.antlr.GraphqlParser;
 
-public interface IGraphqlSchemaManager {
+public interface IGraphQLSchemaManager {
 
     void register(GraphqlParser.SchemaDefinitionContext schemaDefinitionContext);
 

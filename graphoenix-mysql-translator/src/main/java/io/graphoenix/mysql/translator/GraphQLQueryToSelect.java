@@ -2,7 +2,8 @@ package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.dto.SelectionResult;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -21,13 +22,15 @@ import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.*;
 
-public class GraphqlQueryToSelect {
+public class GraphQLQueryToSelect {
 
-    private final IGraphqlDocumentManager manager;
-    private final GraphqlArgumentsToWhere argumentsToWhere;
+    private final IGraphQLDocumentManager manager;
+    private final IGraphQLFieldMapManager mapper;
+    private final GraphQLArgumentsToWhere argumentsToWhere;
 
-    public GraphqlQueryToSelect(IGraphqlDocumentManager manager, GraphqlArgumentsToWhere argumentsToWhere) {
+    public GraphQLQueryToSelect(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLArgumentsToWhere argumentsToWhere) {
         this.manager = manager;
+        this.mapper = mapper;
         this.argumentsToWhere = argumentsToWhere;
     }
 
@@ -70,7 +73,10 @@ public class GraphqlQueryToSelect {
                         .map(selectionContext ->
                                 new SelectionResult<>(
                                         selectionContext.field().name().getText(),
-                                        manager.getQueryOperationTypeDefinition().map(operationTypeDefinitionContext -> objectSelectionToSelect(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().selectionSet().selection()))
+                                        manager.getQueryOperationTypeDefinition().map(
+                                                operationTypeDefinitionContext ->
+                                                        objectSelectionToSelect(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().selectionSet().selection())
+                                        )
                                 )
                         ).filter(result -> result.getData().isPresent())
                         .map(result -> new SelectionResult<>(result.getName(), result.getData().get()));
@@ -87,7 +93,7 @@ public class GraphqlQueryToSelect {
 
     protected Stream<GraphqlParser.SelectionContext> fragmentUnzip(String typeName, GraphqlParser.SelectionContext selectionContext) {
         if (selectionContext.fragmentSpread() != null) {
-            Optional<GraphqlParser.FragmentDefinitionContext> fragmentDefinitionContext = manager.getObjectFragmentDefinitionContext(typeName, selectionContext.fragmentSpread().fragmentName().getText());
+            Optional<GraphqlParser.FragmentDefinitionContext> fragmentDefinitionContext = manager.getObjectFragmentDefinition(typeName, selectionContext.fragmentSpread().fragmentName().getText());
             if (fragmentDefinitionContext.isPresent()) {
                 return fragmentDefinitionContext.get().selectionSet().selection().stream();
             } else {
@@ -132,52 +138,42 @@ public class GraphqlQueryToSelect {
             selectExpressionItem.setAlias(new Alias("`data`"));
         } else {
             if (!manager.isQueryOperationType(parentTypeName) && !manager.isMutationOperationType(parentTypeName) && !manager.isSubscriptionOperationType(parentTypeName)) {
-                Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(parentTypeName, fieldDefinitionContext);
-                Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(fieldDefinitionContext);
+                String fieldName = fieldDefinitionContext.name().getText();
+                Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentTypeName, fieldName);
+                Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
 
                 if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
                     Table parentTable = typeToTable(parentTypeName, level - 1);
-                    Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
-
+                    boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
                     EqualsTo equalsParentColumn = new EqualsTo();
                     equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
-                    if (mapWithTypeArgument.isPresent()) {
-                        Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
-                        Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
-                        Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
 
-                        if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                            Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinitionContext = manager.getObjectFieldDefinitionContext(mapWithTypeName.get(), mapWithFromFieldName.get());
-                            Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinitionContext = manager.getObjectFieldDefinitionContext(mapWithTypeName.get(), mapWithToFieldName.get());
-                            if (mapWithFromFieldDefinitionContext.isPresent() && mapWithToFieldDefinitionContext.isPresent()) {
+                    if (mapWithType) {
+                        Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(parentTypeName, fieldName);
+                        Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(parentTypeName, fieldName);
+                        Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(parentTypeName, fieldName);
 
-                                Table withTable = typeToTable(mapWithTypeName.get(), level);
-                                SubSelect selectWithTable = new SubSelect();
-                                PlainSelect subPlainSelect = new PlainSelect();
-                                subPlainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(fieldToColumn(withTable, mapWithToFieldName.get()))));
-                                EqualsTo equalsWithTableColumn = new EqualsTo();
-                                equalsWithTableColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldName.get()));
-                                equalsWithTableColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
-                                subPlainSelect.setWhere(equalsWithTableColumn);
-                                subPlainSelect.setFromItem(withTable);
-                                selectWithTable.setSelectBody(subPlainSelect);
-                                equalsParentColumn.setRightExpression(selectWithTable);
-                            } else {
-                                GraphQLProblem graphQLProblem = new GraphQLProblem();
-                                if (mapWithFromFieldDefinitionContext.isEmpty()) {
-                                    graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                                }
-                                if (mapWithToFieldDefinitionContext.isEmpty()) {
-                                    graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                                }
-                                throw graphQLProblem;
-                            }
+                        if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
+                            Table withTable = typeToTable(mapWithObjectDefinition.get().name().getText(), level);
+                            SubSelect selectWithTable = new SubSelect();
+                            PlainSelect subPlainSelect = new PlainSelect();
+                            subPlainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(fieldToColumn(withTable, mapWithToFieldDefinition.get()))));
+                            EqualsTo equalsWithTableColumn = new EqualsTo();
+                            equalsWithTableColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
+                            equalsWithTableColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
+                            subPlainSelect.setWhere(equalsWithTableColumn);
+                            subPlainSelect.setFromItem(withTable);
+                            selectWithTable.setSelectBody(subPlainSelect);
+                            equalsParentColumn.setRightExpression(selectWithTable);
                         } else {
                             GraphQLProblem graphQLProblem = new GraphQLProblem();
-                            if (mapWithFromFieldName.isEmpty()) {
+                            if (mapWithObjectDefinition.isEmpty()) {
+                                graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                            }
+                            if (mapWithFromFieldDefinition.isEmpty()) {
                                 graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
-                            if (mapWithToFieldName.isEmpty()) {
+                            if (mapWithObjectDefinition.isEmpty()) {
                                 graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
                             throw graphQLProblem;
@@ -208,7 +204,7 @@ public class GraphqlQueryToSelect {
     }
 
     protected Expression selectionToExpression(String typeName, GraphqlParser.SelectionContext selectionContext, int level) {
-        return manager.getObjectFieldDefinitionContext(typeName, selectionContext.field().name().getText())
+        return manager.getObjectFieldDefinition(typeName, selectionContext.field().name().getText())
                 .map(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
@@ -275,16 +271,14 @@ public class GraphqlQueryToSelect {
                 throw new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
             }
         } else {
-            if (selectionContext.field().arguments() != null) {
-                Optional<Expression> where = argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext, selectionContext.field().arguments(), 1);
-                where.ifPresent(expression -> {
-                    if (plainSelect.getWhere() != null) {
-                        plainSelect.setWhere(new MultiAndExpression(Arrays.asList(plainSelect.getWhere(), expression)));
-                    } else {
-                        plainSelect.setWhere(expression);
-                    }
-                });
-            }
+            Optional<Expression> where = argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext, selectionContext.field().arguments(), 1);
+            where.ifPresent(expression -> {
+                if (plainSelect.getWhere() != null) {
+                    plainSelect.setWhere(new MultiAndExpression(Arrays.asList(plainSelect.getWhere(), expression)));
+                } else {
+                    plainSelect.setWhere(expression);
+                }
+            });
         }
         subSelect.setSelectBody(plainSelect);
         return subSelect;
@@ -292,54 +286,44 @@ public class GraphqlQueryToSelect {
 
     protected Expression fieldToExpression(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
         if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-            Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(typeName, fieldDefinitionContext);
-            Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
+            String fieldName = fieldDefinitionContext.name().getText();
+            Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(typeName, fieldName);
+            boolean mapWithType = mapper.mapWithType(typeName, fieldName);
 
-            if (fromFieldDefinition.isPresent() && mapWithTypeArgument.isPresent()) {
-                Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
-                Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
-                Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
+            if (fromFieldDefinition.isPresent() && mapWithType) {
+                Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(typeName, fieldName);
+                Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(typeName, fieldName);
+                Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(typeName, fieldName);
 
-                if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
-                    Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinitionContext = manager.getObjectFieldDefinitionContext(mapWithTypeName.get(), mapWithFromFieldName.get());
-                    Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinitionContext = manager.getObjectFieldDefinitionContext(mapWithTypeName.get(), mapWithToFieldName.get());
-
-                    if (mapWithFromFieldDefinitionContext.isPresent() && mapWithToFieldDefinitionContext.isPresent()) {
-                        SubSelect subSelect = new SubSelect();
-                        PlainSelect plainSelect = new PlainSelect();
-                        Table witTable = typeToTable(mapWithTypeName.get(), level);
-                        plainSelect.setFromItem(witTable);
-                        SelectExpressionItem selectExpressionItem =
-                                new SelectExpressionItem(
-                                        jsonArrayFunction(
-                                                new ExpressionList(
-                                                        fieldToColumn(witTable, mapWithToFieldName.get())
-                                                )
-                                        )
-                                );
-                        plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));
-                        EqualsTo equalsTo = new EqualsTo();
-                        equalsTo.setLeftExpression(fieldToColumn(witTable, mapWithFromFieldName.get()));
-                        equalsTo.setRightExpression(fieldToColumn(typeToTable(typeName, level), fromFieldDefinition.get()));
-                        plainSelect.setWhere(equalsTo);
-                        subSelect.setSelectBody(plainSelect);
-                        return jsonExtractFunction(subSelect);
-                    } else {
-                        GraphQLProblem graphQLProblem = new GraphQLProblem();
-                        if (mapWithFromFieldDefinitionContext.isEmpty()) {
-                            graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                        }
-                        if (mapWithToFieldDefinitionContext.isEmpty()) {
-                            graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                        }
-                        throw graphQLProblem;
-                    }
+                if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
+                    SubSelect subSelect = new SubSelect();
+                    PlainSelect plainSelect = new PlainSelect();
+                    Table witTable = typeToTable(mapWithObjectDefinition.get().name().getText(), level);
+                    plainSelect.setFromItem(witTable);
+                    SelectExpressionItem selectExpressionItem =
+                            new SelectExpressionItem(
+                                    jsonArrayFunction(
+                                            new ExpressionList(
+                                                    fieldToColumn(witTable, mapWithToFieldDefinition.get())
+                                            )
+                                    )
+                            );
+                    plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));
+                    EqualsTo equalsTo = new EqualsTo();
+                    equalsTo.setLeftExpression(fieldToColumn(witTable, mapWithFromFieldDefinition.get()));
+                    equalsTo.setRightExpression(fieldToColumn(typeToTable(typeName, level), fromFieldDefinition.get()));
+                    plainSelect.setWhere(equalsTo);
+                    subSelect.setSelectBody(plainSelect);
+                    return jsonExtractFunction(subSelect);
                 } else {
                     GraphQLProblem graphQLProblem = new GraphQLProblem();
-                    if (mapWithFromFieldName.isEmpty()) {
+                    if (mapWithObjectDefinition.isEmpty()) {
+                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    if (mapWithFromFieldDefinition.isEmpty()) {
                         graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
-                    if (mapWithToFieldName.isEmpty()) {
+                    if (mapWithObjectDefinition.isEmpty()) {
                         graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     throw graphQLProblem;
@@ -363,13 +347,6 @@ public class GraphqlQueryToSelect {
         } else {
             return new StringValue(selectionContext.field().name().getText());
         }
-    }
-
-    protected Table typeToTable(String typeName) {
-        if (manager.isQueryOperationType(typeName) || manager.isMutationOperationType(typeName)) {
-            return DB_NAME_UTIL.dualTable();
-        }
-        return DB_NAME_UTIL.typeToTable(typeName);
     }
 
     protected Table typeToTable(String typeName, int level) {

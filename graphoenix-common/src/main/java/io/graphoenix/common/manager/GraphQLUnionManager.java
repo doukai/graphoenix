@@ -1,14 +1,14 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.spi.antlr.IGraphqlUnionManager;
+import io.graphoenix.spi.antlr.IGraphQLUnionManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class GraphqlUnionManager implements IGraphqlUnionManager {
+public class GraphQLUnionManager implements IGraphQLUnionManager {
 
     private final Map<String, GraphqlParser.UnionTypeDefinitionContext> unionTypeDefinitionContextMap = new HashMap<>();
 

@@ -3,8 +3,8 @@ package io.graphoenix.mysql.translator;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
-import io.graphoenix.spi.error.GraphQLErrorType;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
@@ -27,12 +27,14 @@ import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.INPUT_OBJECT_NOT_EXIST;
 
-public class GraphqlArgumentsToWhere {
+public class GraphQLArgumentsToWhere {
 
-    private final IGraphqlDocumentManager manager;
+    private final IGraphQLDocumentManager manager;
+    private final IGraphQLFieldMapManager mapper;
 
-    public GraphqlArgumentsToWhere(IGraphqlDocumentManager manager) {
+    public GraphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
         this.manager = manager;
+        this.mapper = mapper;
     }
 
     protected Optional<Expression> argumentsToMultipleExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
@@ -1017,28 +1019,31 @@ public class GraphqlArgumentsToWhere {
         Table table = DB_NAME_UTIL.typeToTable(fieldTypeName, level);
         body.setFromItem(table);
 
-        Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getMapFromFieldDefinition(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext);
-        Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getMapToFieldDefinition(fieldDefinitionContext);
+        String parentTypeName = objectTypeDefinitionContext.name().getText();
+        String fieldName = fieldDefinitionContext.name().getText();
+
+        Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentTypeName, fieldName);
+        Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
 
         if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
             Table parentTable = DB_NAME_UTIL.typeToTable(objectTypeDefinitionContext, level - 1);
-            Optional<GraphqlParser.ArgumentContext> mapWithTypeArgument = manager.getMapWithTypeArgument(fieldDefinitionContext);
-
             EqualsTo idEqualsTo = new EqualsTo();
             idEqualsTo.setLeftExpression(DB_NAME_UTIL.fieldToColumn(table, toFieldDefinition.get()));
-            if (mapWithTypeArgument.isPresent()) {
-                Optional<String> mapWithTypeName = manager.getMapWithTypeName(mapWithTypeArgument.get());
-                Optional<String> mapWithFromFieldName = manager.getMapWithTypeFromFieldName(mapWithTypeArgument.get());
-                Optional<String> mapWithToFieldName = manager.getMapWithTypeToFieldName(mapWithTypeArgument.get());
+            boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
 
-                if (mapWithTypeName.isPresent() && mapWithFromFieldName.isPresent() && mapWithToFieldName.isPresent()) {
+            if (mapWithType) {
+                Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(parentTypeName, fieldName);
+                Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(parentTypeName, fieldName);
+                Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(parentTypeName, fieldName);
 
-                    Table withTable = DB_NAME_UTIL.typeToTable(mapWithTypeName.get(), level);
+                if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
+
+                    Table withTable = DB_NAME_UTIL.typeToTable(mapWithObjectDefinition.get(), level);
                     SubSelect selectWithTable = new SubSelect();
                     PlainSelect subPlainSelect = new PlainSelect();
-                    subPlainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(DB_NAME_UTIL.fieldToColumn(withTable, mapWithToFieldName.get()))));
+                    subPlainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(DB_NAME_UTIL.fieldToColumn(withTable, mapWithToFieldDefinition.get()))));
                     EqualsTo equalsWithTableColumn = new EqualsTo();
-                    equalsWithTableColumn.setLeftExpression(DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldName.get()));
+                    equalsWithTableColumn.setLeftExpression(DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
                     equalsWithTableColumn.setRightExpression(DB_NAME_UTIL.fieldToColumn(parentTable, fromFieldDefinition.get()));
                     subPlainSelect.setWhere(equalsWithTableColumn);
                     subPlainSelect.setFromItem(withTable);

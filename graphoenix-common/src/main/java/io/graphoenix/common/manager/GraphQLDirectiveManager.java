@@ -1,14 +1,14 @@
 package io.graphoenix.common.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.spi.antlr.IGraphqlDirectiveManager;
+import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class GraphqlDirectiveManager implements IGraphqlDirectiveManager {
+public class GraphQLDirectiveManager implements IGraphQLDirectiveManager {
 
     private final Map<String, GraphqlParser.DirectiveDefinitionContext> directiveDefinitionMap = new HashMap<>();
 

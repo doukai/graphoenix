@@ -5,7 +5,7 @@ import io.graphoenix.graphql.generator.introspection.*;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,16 +13,16 @@ import java.util.stream.Stream;
 
 public class IntrospectionMutationBuilder {
 
-    private final IGraphqlDocumentManager manager;
+    private final IGraphQLDocumentManager manager;
 
     private final int levelThreshold;
 
-    public IntrospectionMutationBuilder(IGraphqlDocumentManager manager, int levelThreshold) {
+    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager, int levelThreshold) {
         this.manager = manager;
         this.levelThreshold = levelThreshold;
     }
 
-    public IntrospectionMutationBuilder(IGraphqlDocumentManager manager) {
+    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager) {
         this.manager = manager;
         this.levelThreshold = 1;
     }

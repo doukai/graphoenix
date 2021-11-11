@@ -3,7 +3,7 @@ package io.graphoenix.r2dbc.connector.handler.operation;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.graphoenix.common.constant.Hammurabi;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.SelectionResult;
 import io.graphoenix.spi.handler.IOperationHandler;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
@@ -25,7 +25,7 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
     private MutationExecutor mutationExecutor;
 
     @Override
-    public void setupManager(IGraphqlDocumentManager manager) {
+    public void setupManager(IGraphQLDocumentManager manager) {
         ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, ConnectionConfiguration.class));
         this.queryExecutor = new QueryExecutor(connectionCreator);
         this.mutationExecutor = new MutationExecutor(connectionCreator);

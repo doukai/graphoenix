@@ -4,7 +4,7 @@ import com.google.auto.factory.AutoFactory;
 import com.google.auto.factory.Provided;
 import io.graphoenix.common.pipeline.bootstrap.BootstrapPipeline;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
-import io.graphoenix.spi.antlr.IGraphqlDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.dto.GraphQLResponse;
 import io.graphoenix.spi.handler.IBootstrapHandler;
@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @AutoFactory
 public class GraphQLDataFetcher {
 
-    private final IGraphqlDocumentManager documentManager;
+    private final IGraphQLDocumentManager documentManager;
     private final IOperationHandler[] operationHandlers;
 
     public GraphQLDataFetcher(@Provided IBootstrapHandler[] bootstrapHandlers,
