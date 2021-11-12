@@ -39,7 +39,10 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                         objectTypeDefinitionContext.name().getText()
                                 ).forEach(
                                         fieldDefinitionContext -> {
-                                            if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                                            if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                    (manager.fieldTypeIsList(fieldDefinitionContext.type()) && manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type()))) ||
+                                                    (manager.fieldTypeIsList(fieldDefinitionContext.type()) && manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                            ) {
                                                 if (fieldDefinitionContext.directives() == null) {
                                                     throw new GraphQLProblem(MAP_DIRECTIVE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                 }
@@ -54,11 +57,6 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                     if (fromArgument.isEmpty()) {
                                                         throw new GraphQLProblem(MAP_FROM_ARGUMENT_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                     }
-                                                    Optional<GraphqlParser.ArgumentContext> toArgument = mapDirective.get().arguments().argument()
-                                                            .stream().filter(argumentContext -> argumentContext.name().getText().equals("to")).findFirst();
-                                                    if (toArgument.isEmpty()) {
-                                                        throw new GraphQLProblem(MAP_TO_ARGUMENT_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                                                    }
                                                     Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getField(
                                                             objectTypeDefinitionContext.name().getText(),
                                                             DOCUMENT_UTIL.getStringValue(fromArgument.get().valueWithVariable().StringValue())
@@ -66,19 +64,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                     if (fromFieldDefinition.isEmpty()) {
                                                         throw new GraphQLProblem(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                     }
-                                                    Optional<GraphqlParser.ObjectTypeDefinitionContext> toObjectTypeDefinition = manager.getObject(
-                                                            manager.getFieldTypeName(fieldDefinitionContext.type())
-                                                    );
-                                                    if (toObjectTypeDefinition.isEmpty()) {
-                                                        throw new GraphQLProblem(MAP_TO_OBJECT_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                                                    }
-                                                    Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getField(
-                                                            manager.getFieldTypeName(fieldDefinitionContext.type()),
-                                                            DOCUMENT_UTIL.getStringValue(toArgument.get().valueWithVariable().StringValue())
-                                                    );
-                                                    if (toFieldDefinition.isEmpty()) {
-                                                        throw new GraphQLProblem(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                                                    }
+
                                                     Optional<GraphqlParser.ArgumentContext> withArgument = mapDirective.get().arguments().argument()
                                                             .stream().filter(argumentContext -> argumentContext.name().getText().equals("with")).findFirst();
 
@@ -130,16 +116,13 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                                 withObjectTypeDefinition.get(),
                                                                 withFromFieldDefinition.get(),
                                                                 withToFieldDefinition.get(),
-                                                                toObjectTypeDefinition.get(),
-                                                                toFieldDefinition.get());
+                                                                getToFieldDefinition(mapDirective.get(), fieldDefinitionContext));
 
                                                     } else {
                                                         registerMap(objectTypeDefinitionContext.name().getText(),
                                                                 fieldDefinitionContext.name().getText(),
                                                                 fromFieldDefinition.get(),
-                                                                toObjectTypeDefinition.get(),
-                                                                toFieldDefinition.get());
-
+                                                                getToFieldDefinition(mapDirective.get(), fieldDefinitionContext));
                                                     }
                                                 }
                                             }
@@ -148,38 +131,54 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                 );
     }
 
+    private GraphqlParser.FieldDefinitionContext getToFieldDefinition(GraphqlParser.DirectiveContext mapDirective, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+
+        if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+            Optional<GraphqlParser.ArgumentContext> toArgument = mapDirective.arguments().argument()
+                    .stream().filter(argumentContext -> argumentContext.name().getText().equals("to")).findFirst();
+            if (toArgument.isEmpty()) {
+                throw new GraphQLProblem(MAP_TO_ARGUMENT_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+            }
+            Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getField(
+                    manager.getFieldTypeName(fieldDefinitionContext.type()),
+                    DOCUMENT_UTIL.getStringValue(toArgument.get().valueWithVariable().StringValue())
+            );
+            if (toFieldDefinition.isEmpty()) {
+                throw new GraphQLProblem(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+            }
+            return toFieldDefinition.get();
+        }
+        return null;
+    }
+
 
     @Override
-    public Map<String, Map<String, FieldMap>> registerMap(String objectTypeName,
-                                                          String fieldName,
-                                                          GraphqlParser.FieldDefinitionContext from,
-                                                          GraphqlParser.ObjectTypeDefinitionContext toType,
-                                                          GraphqlParser.FieldDefinitionContext to) {
+    public void registerMap(String objectTypeName,
+                            String fieldName,
+                            GraphqlParser.FieldDefinitionContext from,
+                            GraphqlParser.FieldDefinitionContext to) {
         Map<String, FieldMap> fieldMap = fieldMapTree.get(objectTypeName);
         if (fieldMap == null) {
             fieldMap = new HashMap<>();
         }
-        fieldMap.put(fieldName, new FieldMap(from, toType, to));
+        fieldMap.put(fieldName, new FieldMap(from, to));
         fieldMapTree.put(objectTypeName, fieldMap);
-        return fieldMapTree;
     }
 
     @Override
-    public Map<String, Map<String, FieldMap>> registerMap(String objectTypeName,
-                                                          String fieldName,
-                                                          GraphqlParser.FieldDefinitionContext from,
-                                                          GraphqlParser.ObjectTypeDefinitionContext withType,
-                                                          GraphqlParser.FieldDefinitionContext withFrom,
-                                                          GraphqlParser.FieldDefinitionContext withTo,
-                                                          GraphqlParser.ObjectTypeDefinitionContext toType,
-                                                          GraphqlParser.FieldDefinitionContext to) {
+    public void registerMap(String objectTypeName,
+                            String fieldName,
+                            GraphqlParser.FieldDefinitionContext from,
+                            GraphqlParser.ObjectTypeDefinitionContext withType,
+                            GraphqlParser.FieldDefinitionContext withFrom,
+                            GraphqlParser.FieldDefinitionContext withTo,
+                            GraphqlParser.FieldDefinitionContext to) {
         Map<String, FieldMap> fieldMap = fieldMapTree.get(objectTypeName);
         if (fieldMap == null) {
             fieldMap = new HashMap<>();
         }
-        fieldMap.put(fieldName, new FieldMap(from, new FieldMapWith(withType, withFrom, withTo), toType, to));
+        fieldMap.put(fieldName, new FieldMap(from, new FieldMapWith(withType, withFrom, withTo), to));
         fieldMapTree.put(objectTypeName, fieldMap);
-        return fieldMapTree;
     }
 
     private Optional<FieldMap> getFieldMap(String objectTypeName, String fieldName) {
@@ -201,11 +200,6 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     @Override
     public Optional<GraphqlParser.FieldDefinitionContext> getFromFieldDefinition(String objectTypeName, String fieldName) {
         return getFieldMap(objectTypeName, fieldName).map(FieldMap::getFrom);
-    }
-
-    @Override
-    public Optional<GraphqlParser.ObjectTypeDefinitionContext> getToObjectTypeDefinition(String objectTypeName, String fieldName) {
-        return getFieldMap(objectTypeName, fieldName).map(FieldMap::getToType);
     }
 
     @Override

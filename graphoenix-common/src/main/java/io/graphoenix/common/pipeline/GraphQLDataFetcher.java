@@ -28,15 +28,15 @@ public class GraphQLDataFetcher {
         this.operationHandlers = operationHandlers;
     }
 
-    public GraphQLResponse fetch(GraphQLRequest request) throws Exception {
+    public Object fetch(GraphQLRequest request) throws Exception {
         return this.createOperationPipeline().fetch(request);
     }
 
-    public Mono<GraphQLResponse> fetchAsync(GraphQLRequest request) throws Exception {
+    public Mono<Object> fetchAsync(GraphQLRequest request) throws Exception {
         return this.createOperationPipeline().fetchAsync(request);
     }
 
-    public Flux<GraphQLResponse> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
+    public Flux<Object> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
         return this.createOperationPipeline().fetchSelectionsAsync(request);
     }
 

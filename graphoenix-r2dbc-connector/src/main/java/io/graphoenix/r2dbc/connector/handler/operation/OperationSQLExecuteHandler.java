@@ -1,8 +1,5 @@
 package io.graphoenix.r2dbc.connector.handler.operation;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import io.graphoenix.common.constant.Hammurabi;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.SelectionResult;
@@ -33,34 +30,34 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
     }
 
     @Override
-    public JsonObject query(Object sql) throws Exception {
+    public String query(Object sql) throws Exception {
         return queryAsync(sql).block();
     }
 
     @Override
-    public Mono<JsonObject> queryAsync(Object sql) throws Exception {
-        return queryExecutor.executeQuery((String) sql).map(result -> new GsonBuilder().serializeNulls().create().fromJson(result, JsonObject.class));
+    public Mono<String> queryAsync(Object sql) throws Exception {
+        return queryExecutor.executeQuery((String) sql);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Flux<SelectionResult<JsonObject>> querySelectionsAsync(Object sqlStream) throws Exception {
-        return queryExecutor.executeQuery((Stream<Map.Entry<String, String>>) sqlStream).map(result -> new SelectionResult<>(result.getKey(), new GsonBuilder().serializeNulls().create().fromJson(result.getValue(), JsonObject.class)));
+    public Flux<SelectionResult<String>> querySelectionsAsync(Object sqlStream) throws Exception {
+        return queryExecutor.executeQuery((Stream<Map.Entry<String, String>>) sqlStream).map(result -> new SelectionResult<>(result.getKey(), result.getValue()));
     }
 
     @Override
-    public JsonObject mutation(Object sqlStream) throws Exception {
+    public String mutation(Object sqlStream) throws Exception {
         return mutationAsync(sqlStream).block();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Mono<JsonObject> mutationAsync(Object sqlStream) throws Exception {
-        return mutationExecutor.executeMutations((Stream<String>) sqlStream).map(result -> new GsonBuilder().serializeNulls().create().fromJson(result, JsonObject.class));
+    public Mono<String> mutationAsync(Object sqlStream) throws Exception {
+        return mutationExecutor.executeMutations((Stream<String>) sqlStream);
     }
 
     @Override
-    public Mono<JsonObject> subscription(Object sql) throws Exception {
+    public Mono<String> subscription(Object sql) throws Exception {
         return queryAsync(sql);
     }
 }

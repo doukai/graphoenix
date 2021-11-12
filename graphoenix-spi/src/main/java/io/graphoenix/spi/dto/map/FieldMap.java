@@ -5,7 +5,6 @@ import graphql.parser.antlr.GraphqlParser;
 public class FieldMap {
     GraphqlParser.FieldDefinitionContext from;
     FieldMapWith with;
-    GraphqlParser.ObjectTypeDefinitionContext toType;
     GraphqlParser.FieldDefinitionContext to;
 
     public boolean withType() {
@@ -14,19 +13,15 @@ public class FieldMap {
 
     public FieldMap(GraphqlParser.FieldDefinitionContext from,
                     FieldMapWith with,
-                    GraphqlParser.ObjectTypeDefinitionContext toType,
                     GraphqlParser.FieldDefinitionContext to) {
         this.from = from;
         this.with = with;
-        this.toType = toType;
         this.to = to;
     }
 
     public FieldMap(GraphqlParser.FieldDefinitionContext from,
-                    GraphqlParser.ObjectTypeDefinitionContext toType,
                     GraphqlParser.FieldDefinitionContext to) {
         this.from = from;
-        this.toType = toType;
         this.to = to;
     }
 
@@ -44,14 +39,6 @@ public class FieldMap {
 
     public void setWith(FieldMapWith with) {
         this.with = with;
-    }
-
-    public GraphqlParser.ObjectTypeDefinitionContext getToType() {
-        return toType;
-    }
-
-    public void setToType(GraphqlParser.ObjectTypeDefinitionContext toType) {
-        this.toType = toType;
     }
 
     public GraphqlParser.FieldDefinitionContext getTo() {
