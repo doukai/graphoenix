@@ -1,0 +1,8 @@
+directive @table(
+    engine : String = "InnoDB"
+) on OBJECT
+
+directive @column(
+    default: String
+    autoIncrement: Boolean
+) on FIELD_DEFINITION

@@ -1,0 +1,129 @@
+type __Schema {
+    id: ID @column(autoIncrement: true)
+    queryTypeName: String
+    mutationTypeName: String
+    subscriptionTypeName: String
+    types: [__Type!]! @map(from: "id", to: "schemaId")
+    queryType: __Type! @map(from: "queryTypeName", to: "name")
+    mutationType: __Type @map(from: "mutationTypeName", to: "name")
+    subscriptionType: __Type @map(from: "subscriptionTypeName", to: "name")
+    directives: [__Directive!]! @map(from: "id", to: "schemaId")
+}
+
+type __Type {
+    name: ID! @dataType(type: "varchar")
+    schemaId: Int
+    kind: __TypeKind!
+    description: String
+
+    # OBJECT and INTERFACE only
+    fields: [__Field!] @map(from: "name", to: "ofTypeName")
+
+    # OBJECT only
+    interfaces: [__Type!] @map(from: "name", with: {type: "__TypeInterfaces", from: "typeName", to: "interfaceName"}, to: "name")
+
+    # INTERFACE and UNION only
+    possibleTypes: [__Type!] @map(from: "name", with: {type: "__TypePossibleTypes", from: "typeName", to: "possibleTypeName"}, to: "name")
+
+    # ENUM only
+    enumValues: [__EnumValue!] @map(from: "name", to: "ofTypeName")
+
+    # INPUT_OBJECT only
+    inputFields: [__InputValue!] @map(from: "name", to: "ofTypeName")
+
+    # NON_NULL and LIST only
+    ofTypeName: String
+    ofType: __Type @map(from: "ofTypeName", to: "name")
+}
+
+type __TypeInterfaces {
+    id: ID @column(autoIncrement: true)
+    typeName: String!
+    interfaceName: String!
+}
+
+type __TypePossibleTypes {
+    id: ID @column(autoIncrement: true)
+    typeName: String!
+    possibleTypeName: String!
+}
+
+type __Field {
+    id: ID @column(autoIncrement: true)
+    name: String
+    typeName: String
+    ofTypeName: String
+    description: String
+    args: [__InputValue!]! @map(from: "id", to: "fieldId")
+    type: __Type! @map(from: "typeName", to: "name")
+    deprecationReason: String
+}
+
+type __InputValue {
+    id: ID @column(autoIncrement: true)
+    name: String
+    typeName: String
+    ofTypeName: String
+    fieldId: Int
+    directiveName: String
+    description: String
+    type: __Type! @map(from: "typeName", to: "name")
+    defaultValue: String
+}
+
+type __EnumValue {
+    id: ID @column(autoIncrement: true)
+    name: String
+    ofTypeName: String
+    description: String
+    deprecationReason: String
+}
+
+enum __TypeKind {
+    SCALAR
+    OBJECT
+    INTERFACE
+    UNION
+    ENUM
+    INPUT_OBJECT
+    LIST
+    NON_NULL
+}
+
+type __Directive {
+    name: ID! @dataType(type: "varchar")
+    schemaId: Int
+    description: String
+    locations: [__DirectiveLocation!]! @map(from: "name", with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
+    args: [__InputValue!]! @map(from: "name", to: "directiveName")
+    onOperation: Boolean
+    onFragment: Boolean
+    onField: Boolean
+}
+
+type __DirectiveLocations {
+    id: ID @column(autoIncrement: true)
+    directiveName: String!
+    directiveLocation: __DirectiveLocation!
+}
+
+enum __DirectiveLocation {
+    QUERY
+    MUTATION
+    SUBSCRIPTION
+    FIELD
+    FRAGMENT_DEFINITION
+    FRAGMENT_SPREAD
+    INLINE_FRAGMENT
+    SCHEMA
+    SCALAR
+    OBJECT
+    FIELD_DEFINITION
+    ARGUMENT_DEFINITION
+    INTERFACE
+    UNION
+    ENUM
+    ENUM_VALUE
+    INPUT_OBJECT
+    INPUT_FIELD_DEFINITION
+}

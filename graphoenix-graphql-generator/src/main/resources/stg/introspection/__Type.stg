@@ -1,0 +1,16 @@
+import "__Field.stg"
+import "__EnumValue.stg"
+import "__InputValue.stg"
+__typeDefinition(__type) ::= <<
+{
+    kind: <__type.kind>,
+    name: "<__type.name>"<if(__type.description)>,
+    description: "<__type.description>"<endif><if(__type.fields)>,
+    fields: [<__type.fields:{field|<__fieldDefinition(field)>};separator=", ">]<endif><if(__type.interfaces)>,
+    interfaces: [<__type.interfaces:{interface|<__typeDefinition(interface)>};separator=", ">]<endif><if(__type.possibleTypes)>,
+    possibleTypes: [<__type.possibleTypes:{possibleType|<__typeDefinition(possibleType)>};separator=", ">]<endif><if(__type.enumValues)>,
+    enumValues: [<__type.enumValues:{enumValue|<__enumValueDefinition(enumValue)>};separator=", ">]<endif><if(__type.inputFields)>,
+    inputFields: [<__type.inputFields:{inputField|<__inputValueDefinition(inputField)>};separator=", ">]<endif><if(__type.ofType)>,
+    ofType: <__type.ofType><endif>
+}
+>>

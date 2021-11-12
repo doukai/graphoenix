@@ -1,0 +1,11 @@
+rootProject.name = 'graphoenix'
+include 'graphoenix-spi'
+include 'graphoenix-common'
+include 'graphoenix-graphql-builder'
+include 'graphoenix-mysql-translator'
+include 'graphoenix-r2dbc-connector'
+include 'graphoenix-http-server'
+include 'graphoenix-java-generator'
+include 'graphoenix-graphql-generator'
+include 'graphoenix-showcase-mysql'
+
