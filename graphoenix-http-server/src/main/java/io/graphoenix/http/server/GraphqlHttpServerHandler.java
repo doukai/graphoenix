@@ -1,11 +1,8 @@
 package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.common.pipeline.GraphQLDataFetcher;
-import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.graphoenix.http.server.handler.RequestHandler;
 import io.graphoenix.http.server.handler.RequestHandlerFactory;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -22,15 +19,14 @@ import io.netty.handler.codec.http.HttpUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.zalando.problem.gson.ProblemAdapterFactory;
 
 import java.nio.charset.StandardCharsets;
 
+import static io.graphoenix.common.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-
 
     private static final Logger log = LoggerFactory.getLogger(GraphqlHttpServer.class);
 
@@ -63,8 +59,8 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         try {
             requestBody = requestHandler.handle(request);
             log.info("Handle http query:{}", requestBody.getQuery());
-            graphQLResponse = dataFetcher.fetch(requestBody);
-            response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(new Gson().toJson(graphQLResponse).getBytes(StandardCharsets.UTF_8)));
+            String jsonResult = (String) dataFetcher.fetch(requestBody);
+            response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));
             response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
         } catch (GraphQLProblem e) {

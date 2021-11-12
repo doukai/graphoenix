@@ -38,13 +38,14 @@ public class GraphQLArgumentsToWhere {
     }
 
     protected Optional<Expression> argumentsToMultipleExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                 GraphqlParser.ArgumentsContext argumentsContext) {
+                                                                 GraphqlParser.ArgumentsContext argumentsContext,
+                                                                 int level) {
 
         if (argumentsContext == null) {
-            return Optional.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(fieldDefinitionContext.type()), DEPRECATED_FIELD_NAME, 1)));
+            return Optional.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(fieldDefinitionContext.type()), DEPRECATED_FIELD_NAME, level)));
         }
 
-        Stream<Expression> expressionStream = argumentsToExpressionList(fieldDefinitionContext.type(), fieldDefinitionContext.argumentsDefinition(), argumentsContext);
+        Stream<Expression> expressionStream = argumentsToExpressionList(fieldDefinitionContext.type(), fieldDefinitionContext.argumentsDefinition(), argumentsContext, level);
         return expressionStreamToMultipleExpression(expressionStream, hasOrConditional(argumentsContext, fieldDefinitionContext.argumentsDefinition()));
     }
 
@@ -91,15 +92,16 @@ public class GraphQLArgumentsToWhere {
 
     protected Stream<Expression> argumentsToExpressionList(GraphqlParser.TypeContext typeContext,
                                                            GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
-                                                           GraphqlParser.ArgumentsContext argumentsContext) {
+                                                           GraphqlParser.ArgumentsContext argumentsContext,
+                                                           int level) {
         Stream<Expression> expressionStream = argumentsDefinitionContext.inputValueDefinition().stream()
                 .filter(this::isNotConditional)
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
-                .map(inputValueDefinitionContext -> argumentsToExpression(typeContext, inputValueDefinitionContext, argumentsContext))
+                .map(inputValueDefinitionContext -> argumentsToExpression(typeContext, inputValueDefinitionContext, argumentsContext, level))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
-        Stream<Expression> notDeprecatedExpression = notDeprecatedExpression(typeContext, argumentsDefinitionContext.inputValueDefinition(), argumentsContext);
-        Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfArgumentsToExpressionList(typeContext, argumentsDefinitionContext, argumentsContext);
+        Stream<Expression> notDeprecatedExpression = notDeprecatedExpression(typeContext, argumentsDefinitionContext.inputValueDefinition(), argumentsContext, level);
+        Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfArgumentsToExpressionList(typeContext, argumentsDefinitionContext, argumentsContext, level);
         return Stream.concat(Stream.concat(expressionStream, notDeprecatedExpression), conditionalExpressionStream);
     }
 
@@ -135,7 +137,8 @@ public class GraphQLArgumentsToWhere {
 
     protected Stream<Expression> notDeprecatedExpression(GraphqlParser.TypeContext typeContext,
                                                          List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
-                                                         GraphqlParser.ArgumentsContext argumentsContext) {
+                                                         GraphqlParser.ArgumentsContext argumentsContext,
+                                                         int level) {
         Optional<GraphqlParser.ArgumentContext> argumentContext = inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
                 .filter(inputValueDefinitionContext -> manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean"))
                 .findFirst()
@@ -145,7 +148,7 @@ public class GraphQLArgumentsToWhere {
                 return Stream.empty();
             }
         }
-        return Stream.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, 1)));
+        return Stream.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
     }
 
     protected Stream<Expression> notDeprecatedExpression(GraphqlParser.TypeContext typeContext,
@@ -183,12 +186,13 @@ public class GraphQLArgumentsToWhere {
 
     protected Optional<Expression> argumentsToExpression(GraphqlParser.TypeContext typeContext,
                                                          GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
-                                                         GraphqlParser.ArgumentsContext argumentsContext) {
+                                                         GraphqlParser.ArgumentsContext argumentsContext,
+                                                         int level) {
         Optional<GraphqlParser.ArgumentContext> argumentContext = manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext);
         if (argumentContext.isPresent()) {
-            return argumentToExpression(typeContext, inputValueDefinitionContext, argumentContext.get());
+            return argumentToExpression(typeContext, inputValueDefinitionContext, argumentContext.get(), level);
         } else {
-            return defaultValueToExpression(typeContext, inputValueDefinitionContext, 1);
+            return defaultValueToExpression(typeContext, inputValueDefinitionContext, level);
         }
     }
 
@@ -231,13 +235,14 @@ public class GraphQLArgumentsToWhere {
 
     protected Optional<Expression> argumentToExpression(GraphqlParser.TypeContext typeContext,
                                                         GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
-                                                        GraphqlParser.ArgumentContext argumentContext) {
+                                                        GraphqlParser.ArgumentContext argumentContext,
+                                                        int level) {
         if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
             return argumentContext == null ?
-                    listTypeInputValueToInExpression(typeContext, inputValueDefinitionContext, 1) : listTypeArgumentToExpression(typeContext, inputValueDefinitionContext, argumentContext);
+                    listTypeInputValueToInExpression(typeContext, inputValueDefinitionContext, level) : listTypeArgumentToExpression(typeContext, inputValueDefinitionContext, argumentContext, level);
         } else {
             return argumentContext == null ?
-                    singleTypeInputValueToExpression(typeContext, inputValueDefinitionContext, 1) : singleTypeArgumentToExpression(typeContext, inputValueDefinitionContext, argumentContext);
+                    singleTypeInputValueToExpression(typeContext, inputValueDefinitionContext, level) : singleTypeArgumentToExpression(typeContext, inputValueDefinitionContext, argumentContext, level);
         }
     }
 
@@ -279,7 +284,8 @@ public class GraphQLArgumentsToWhere {
 
     protected Optional<Expression> singleTypeArgumentToExpression(GraphqlParser.TypeContext typeContext,
                                                                   GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
-                                                                  GraphqlParser.ArgumentContext argumentContext) {
+                                                                  GraphqlParser.ArgumentContext argumentContext,
+                                                                  int level) {
         if (inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME)) {
             return Optional.empty();
         }
@@ -296,22 +302,22 @@ public class GraphQLArgumentsToWhere {
                                 fieldDefinitionContext.get(),
                                 inputValueDefinitionContext,
                                 argumentContext.valueWithVariable().objectValueWithVariable(),
-                                1 + 1)
+                                level + 1)
                         );
                     } else {
                         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else if (manager.isScaLar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
-                        return operatorArgumentToExpression(argumentToColumn(typeContext, argumentContext), inputValueDefinitionContext, argumentContext);
+                        return operatorArgumentToExpression(argumentToColumn(typeContext, argumentContext, level), inputValueDefinitionContext, argumentContext);
                     } else if (fieldTypeName.equals("Boolean")) {
-                        return isBooleanExpression(argumentToColumn(typeContext, argumentContext), argumentContext.valueWithVariable(), inputValueDefinitionContext);
+                        return isBooleanExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable(), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
-                        return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable(), 1);
+                        return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable(), level);
                     } else if (manager.isScaLar(fieldTypeName)) {
-                        return Optional.of(scalarValueWithVariableToExpression(argumentToColumn(typeContext, argumentContext), argumentContext.valueWithVariable()));
+                        return Optional.of(scalarValueWithVariableToExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable()));
                     } else if (manager.isEnum(fieldTypeName)) {
-                        return Optional.of(enumValueToExpression(argumentToColumn(typeContext, argumentContext), argumentContext.valueWithVariable().enumValue()));
+                        return Optional.of(enumValueToExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable().enumValue()));
                     } else {
                         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
@@ -478,11 +484,12 @@ public class GraphQLArgumentsToWhere {
 
     protected Optional<Expression> listTypeArgumentToExpression(GraphqlParser.TypeContext typeContext,
                                                                 GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
-                                                                GraphqlParser.ArgumentContext argumentContext) {
+                                                                GraphqlParser.ArgumentContext argumentContext,
+                                                                int level) {
         if (argumentContext == null) {
-            return listTypeInputValueToInExpression(typeContext, inputValueDefinitionContext, 1);
+            return listTypeInputValueToInExpression(typeContext, inputValueDefinitionContext, level);
         } else {
-            return listTypeArgumentToInExpression(typeContext, inputValueDefinitionContext, argumentContext, 1);
+            return listTypeArgumentToInExpression(typeContext, inputValueDefinitionContext, argumentContext, level);
         }
     }
 
@@ -510,7 +517,8 @@ public class GraphQLArgumentsToWhere {
 
     protected Stream<Expression> listTypeConditionalFieldOfArgumentsToExpressionList(GraphqlParser.TypeContext typeContext,
                                                                                      GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
-                                                                                     GraphqlParser.ArgumentsContext argumentsContext) {
+                                                                                     GraphqlParser.ArgumentsContext argumentsContext,
+                                                                                     int level) {
         Optional<GraphqlParser.InputValueDefinitionContext> conditionalInputValueDefinitionContext = argumentsDefinitionContext.inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()) && isConditionalObject(inputValueDefinitionContext))
                 .findFirst();
@@ -518,10 +526,10 @@ public class GraphQLArgumentsToWhere {
             Optional<GraphqlParser.ArgumentContext> argumentContext = manager.getArgumentFromInputValueDefinition(argumentsContext, conditionalInputValueDefinitionContext.get());
             return argumentContext
                     .flatMap(context -> Optional.of(context.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
-                            .map(valueWithVariableContext -> objectValueWithVariableToMultipleExpression(typeContext, conditionalInputValueDefinitionContext.get(), valueWithVariableContext.objectValueWithVariable(), 1))
+                            .map(valueWithVariableContext -> objectValueWithVariableToMultipleExpression(typeContext, conditionalInputValueDefinitionContext.get(), valueWithVariableContext.objectValueWithVariable(), level))
                             .filter(Optional::isPresent)
                             .map(Optional::get)))
-                    .orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(typeContext, conditionalInputValueDefinitionContext.get(), 1));
+                    .orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(typeContext, conditionalInputValueDefinitionContext.get(), level));
         }
         return Stream.empty();
     }
@@ -1105,8 +1113,8 @@ public class GraphQLArgumentsToWhere {
         return body;
     }
 
-    protected Column argumentToColumn(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentContext argumentContext) {
-        return DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), argumentContext, 1);
+    protected Column argumentToColumn(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentContext argumentContext, int level) {
+        return DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), argumentContext, level);
     }
 
     protected Column inputValueToColumn(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, int level) {

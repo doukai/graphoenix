@@ -39,35 +39,35 @@ public class OperationPipeline extends ChainBase {
         return this;
     }
 
-    public GraphQLResponse fetch(GraphQLRequest request) throws Exception {
+    public Object fetch(GraphQLRequest request) throws Exception {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.SYNC);
         operationContext.setAsyncType(AsyncType.OPERATION);
         operationContext.setCurrentData(request.getQuery());
         operationContext.setManager(this.manager);
         this.execute(operationContext);
-        return new GraphQLResponse(operationContext.getCurrentData());
+        return operationContext.getCurrentData();
     }
 
     @SuppressWarnings("unchecked")
-    public Mono<GraphQLResponse> fetchAsync(GraphQLRequest request) throws Exception {
+    public Mono<Object> fetchAsync(GraphQLRequest request) throws Exception {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.ASYNC);
         operationContext.setAsyncType(AsyncType.OPERATION);
         operationContext.setCurrentData(request.getQuery());
         operationContext.setManager(this.manager);
         this.execute(operationContext);
-        return ((Mono<JsonObject>) operationContext.getCurrentData()).map(GraphQLResponse::new);
+        return ((Mono<Object>) operationContext.getCurrentData());
     }
 
     @SuppressWarnings("unchecked")
-    public Flux<GraphQLResponse> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
+    public Flux<Object> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.ASYNC);
         operationContext.setAsyncType(AsyncType.SELECTION);
         operationContext.setCurrentData(request.getQuery());
         operationContext.setManager(this.manager);
         this.execute(operationContext);
-        return ((Flux<JsonObject>) operationContext.getCurrentData()).map(GraphQLResponse::new);
+        return ((Flux<Object>) operationContext.getCurrentData());
     }
 }
