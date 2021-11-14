@@ -10,13 +10,7 @@ import java.util.stream.Stream;
 
 public class GraphQLScalarManager implements IGraphQLScalarManager {
 
-    private final Map<String, GraphqlParser.ScalarTypeDefinitionContext> scalarTypeDefinitionMap = new HashMap<String, GraphqlParser.ScalarTypeDefinitionContext>() {{
-        put("Int", null);
-        put("Float", null);
-        put("String", null);
-        put("Boolean", null);
-        put("ID", null);
-    }};
+    private final Map<String, GraphqlParser.ScalarTypeDefinitionContext> scalarTypeDefinitionMap = new HashMap<>();
 
     @Override
     public Map<String, GraphqlParser.ScalarTypeDefinitionContext> register(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
@@ -27,11 +21,6 @@ public class GraphQLScalarManager implements IGraphQLScalarManager {
     @Override
     public boolean isScalar(String scalarTypeName) {
         return scalarTypeDefinitionMap.entrySet().stream().anyMatch(entry -> entry.getKey().equals(scalarTypeName));
-    }
-
-    @Override
-    public boolean isInnerScalar(String scalarTypeName) {
-        return scalarTypeDefinitionMap.entrySet().stream().filter(entry -> entry.getValue() == null).anyMatch(entry -> entry.getKey().equals(scalarTypeName));
     }
 
     @Override

@@ -23,8 +23,6 @@ public interface IGraphQLDocumentManager {
 
     boolean isScaLar(String name);
 
-    boolean isInnerScalar(String name);
-
     boolean isEnum(String name);
 
     boolean isObject(String name);
