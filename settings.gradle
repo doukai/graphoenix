@@ -1,6 +1,6 @@
 rootProject.name = 'graphoenix'
 include 'graphoenix-spi'
-include 'graphoenix-common'
+include 'graphoenix-core'
 include 'graphoenix-graphql-builder'
 include 'graphoenix-mysql-translator'
 include 'graphoenix-r2dbc-connector'

@@ -1,4 +1,4 @@
-# GrapPhoenix Project
+# GraPhoenix Project
 
 ### requirements
 * MySQL 5.7.22+

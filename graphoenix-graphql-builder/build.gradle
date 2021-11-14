@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(":graphoenix-common")
+    implementation project(":graphoenix-core")
     compile project(":graphoenix-graphql-generator")
     implementation 'org.atteo:evo-inflector:1.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'

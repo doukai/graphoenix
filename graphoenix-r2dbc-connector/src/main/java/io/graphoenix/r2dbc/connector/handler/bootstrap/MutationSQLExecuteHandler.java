@@ -24,7 +24,10 @@ public class MutationSQLExecuteHandler implements IBootstrapHandler {
         ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, ConnectionConfiguration.class));
         MutationExecutor mutationExecutor = new MutationExecutor(connectionCreator);
         log.info("introspection data SQL insert started");
-        mutationExecutor.executeMutationsInBatchByGroup((Stream<String>) sqlStream, sqlCount);
+        mutationExecutor.executeMutationsInBatchByGroup((Stream<String>) sqlStream, sqlCount)
+                .forEach(count -> {
+                    log.info(count + " introspection data SQL insert success");
+                });
         log.info("All introspection data SQL insert success");
         return null;
     }

@@ -2,9 +2,7 @@ package io.graphoenix.r2dbc.connector.executor;
 
 import com.google.common.collect.Lists;
 import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
-import io.graphoenix.r2dbc.connector.handler.bootstrap.MutationSQLExecuteHandler;
 import io.r2dbc.spi.Batch;
-import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +11,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class MutationExecutor {
@@ -42,25 +39,31 @@ public class MutationExecutor {
     }
 
 
-    public void executeMutationsInBatchByGroup(Stream<String> sqlStream, int count) {
-        List<List<String>> sqlListGroup = Lists.partition(sqlStream.collect(Collectors.toList()), count);
-        Connection connection = connectionCreator.createConnection().block();
-        assert connection != null;
-        connection.beginTransaction();
-        sqlListGroup.forEach(sqlList -> {
-            Batch batch = connection.createBatch();
-            sqlList.forEach(batch::add);
-            Mono.from(batch.execute())
-                    .doOnSuccess(result -> log.info("execute " + count + " SQL"))
-                    .doOnError(throwable -> {
-                        throwable.printStackTrace();
-                        connection.rollbackTransaction();
-                        connection.close();
-                    })
-                    .block();
-        });
-        connection.commitTransaction();
-        log.info("execute finish");
+    public Stream<Integer> executeMutationsInBatchByGroup(Stream<String> sqlStream, int itemCount) {
+        List<List<String>> sqlListGroup = Lists.partition(sqlStream.collect(Collectors.toList()), itemCount);
+
+        return connectionCreator.createConnection()
+                .map(connection -> {
+                            connection.beginTransaction();
+                            Stream<Integer> stream = sqlListGroup.stream()
+                                    .map(sqlList -> {
+                                        Batch batch = connection.createBatch();
+                                        sqlList.forEach(batch::add);
+                                        Mono.from(batch.execute())
+                                                .doOnError(throwable -> {
+                                                    throwable.printStackTrace();
+                                                    connection.rollbackTransaction();
+                                                    connection.close();
+                                                })
+                                                .block();
+                                        return sqlList.size();
+                                    });
+                            connection.commitTransaction();
+                            connection.close();
+                            return stream;
+                        }
+                )
+                .block();
     }
 
     public Mono<String> executeMutations(Stream<String> sqlStream) {
