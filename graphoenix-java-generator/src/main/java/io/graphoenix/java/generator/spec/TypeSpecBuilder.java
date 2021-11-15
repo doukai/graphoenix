@@ -75,7 +75,8 @@ public class TypeSpecBuilder {
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(
                         fieldDefinitionContext -> {
-                            FieldSpec fieldSpec = buildField(fieldDefinitionContext);
+                            FieldSpec fieldSpec = buildInterfaceField(fieldDefinitionContext);
+                            builder.addField(fieldSpec);
                             addInterfaceGetterAndSetter(fieldSpec, builder);
                         }
                 );
@@ -157,6 +158,14 @@ public class TypeSpecBuilder {
 
     public FieldSpec buildField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.PRIVATE);
+        if (fieldDefinitionContext.type().nonNullType() != null) {
+            builder.addAnnotation(NotNull.class);
+        }
+        return builder.build();
+    }
+
+    public FieldSpec buildInterfaceField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
         if (fieldDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NotNull.class);
         }
@@ -248,7 +257,6 @@ public class TypeSpecBuilder {
         addSetter(fieldSpec, classBuilder, implementsInterfacesContext);
     }
 
-
     private void addSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder, GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
         String setterName = "set" + capitalizeFirstLetter(fieldSpec.name);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(setterName).addModifiers(Modifier.PUBLIC);
@@ -268,7 +276,6 @@ public class TypeSpecBuilder {
 
         classBuilder.addMethod(methodBuilder.build());
     }
-
 
     public void addGetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder, GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
         String getterName = "get" + capitalizeFirstLetter(fieldSpec.name);
@@ -294,7 +301,6 @@ public class TypeSpecBuilder {
         addInterfaceSetter(fieldSpec, classBuilder);
     }
 
-
     private void addInterfaceSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder) {
         String setterName = "set" + capitalizeFirstLetter(fieldSpec.name);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(setterName).addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC);
@@ -302,15 +308,48 @@ public class TypeSpecBuilder {
         classBuilder.addMethod(methodBuilder.build());
     }
 
-
     public void addInterfaceGetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder) {
         String getterName = "get" + capitalizeFirstLetter(fieldSpec.name);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(getterName).returns(fieldSpec.type).addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC);
         classBuilder.addMethod(methodBuilder.build());
     }
 
-
     private String capitalizeFirstLetter(final String fieldName) {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
+    }
+
+    public TypeSpec buildExpressionAnnotation() {
+        return TypeSpec.annotationBuilder("Expression")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(AnnotationSpec.builder(Documented.class).build())
+                .addAnnotation(
+                        AnnotationSpec.builder(Retention.class)
+                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                .build()
+                )
+                .addAnnotation(
+                        AnnotationSpec.builder(Target.class)
+                                .addMember("value", "$T.$L", ElementType.class, ElementType.PARAMETER)
+                                .build()
+                )
+                .addMethod(
+                        MethodSpec.methodBuilder("cond")
+                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                .returns(ClassName.get(configuration.getInputObjectTypePackageName(), "Conditional"))
+                                .build()
+                )
+                .addMethod(
+                        MethodSpec.methodBuilder("value")
+                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                .returns(ArrayTypeName.of(String.class))
+                                .build()
+                )
+                .addMethod(
+                        MethodSpec.methodBuilder("opr")
+                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                .returns(ClassName.get(configuration.getInputObjectTypePackageName(), "Operator"))
+                                .build()
+                )
+                .build();
     }
 }

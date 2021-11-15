@@ -8,14 +8,15 @@ import io.graphoenix.graphql.generator.document.Document;
 import io.graphoenix.java.generator.config.JavaGeneratorConfiguration;
 import io.graphoenix.java.generator.spec.TypeSpecBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 
-public class Test {
+public class JavaGenTest {
 
-    @org.junit.jupiter.api.Test
+    @Test
     void test() throws IOException {
         JavaGeneratorConfiguration javaGeneratorConfiguration = YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, JavaGeneratorConfiguration.class);
         IGraphQLDocumentManager manager = new GraphQLDocumentManager(
@@ -48,14 +49,14 @@ public class Test {
 //            }
 //        });
 
-        manager.getObjects().forEach(objectTypeDefinitionContext -> {
-            JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildClass(objectTypeDefinitionContext)).build();
-            try {
-                javaFile.writeTo(System.out);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+//        manager.getObjects().forEach(objectTypeDefinitionContext -> {
+//            JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildClass(objectTypeDefinitionContext)).build();
+//            try {
+//                javaFile.writeTo(System.out);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        });
 
 //        manager.getEnums().forEach(enumTypeDefinitionContext -> {
 //            JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildEnum(enumTypeDefinitionContext)).build();
@@ -83,5 +84,13 @@ public class Test {
                 e.printStackTrace();
             }
         });
+
+
+//        JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildExpressionAnnotation()).build();
+//        try {
+//            javaFile.writeTo(System.out);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 }

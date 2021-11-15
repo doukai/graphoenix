@@ -14,6 +14,8 @@ public class JavaGeneratorConfiguration {
 
     private String inputObjectTypePackageName;
 
+    private String directivePackageName;
+
     public String getBasePackageName() {
         return basePackageName;
     }
@@ -60,5 +62,13 @@ public class JavaGeneratorConfiguration {
 
     public void setInputObjectTypePackageName(String inputObjectTypePackageName) {
         this.inputObjectTypePackageName = inputObjectTypePackageName;
+    }
+
+    public String getDirectivePackageName() {
+        return directivePackageName != null ? directivePackageName : basePackageName + ".directive";
+    }
+
+    public void setDirectivePackageName(String directivePackageName) {
+        this.directivePackageName = directivePackageName;
     }
 }
