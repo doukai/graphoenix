@@ -1,19 +1,19 @@
 package io.graphoenix.java.generator.spec;
 
+import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.java.generator.config.JavaGeneratorConfiguration;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
-import javax.annotation.Nonnull;
 import javax.lang.model.element.Modifier;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.validation.constraints.NotNull;
+import java.lang.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 public class TypeSpecBuilder {
 
@@ -29,10 +29,20 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.classBuilder(objectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC);
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
-                .forEach(fieldDefinitionContext -> builder.addField(buildField(fieldDefinitionContext)));
+                .forEach(
+                        fieldDefinitionContext -> {
+                            FieldSpec fieldSpec = buildField(fieldDefinitionContext);
+                            builder.addField(fieldSpec);
+                            addGetterAndSetter(fieldSpec, builder, objectTypeDefinitionContext.implementsInterfaces());
+                        }
+                );
         if (objectTypeDefinitionContext.implementsInterfaces() != null) {
             objectTypeDefinitionContext.implementsInterfaces().typeName()
-                    .forEach(typeNameContext -> builder.addSuperinterface(ClassName.get(configuration.getInterfaceTypePackageName(), typeNameContext.name().getText())));
+                    .forEach(
+                            typeNameContext -> {
+                                builder.addSuperinterface(ClassName.get(configuration.getInterfaceTypePackageName(), typeNameContext.name().getText()));
+                            }
+                    );
         }
         return builder.build();
     }
@@ -41,7 +51,13 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.classBuilder(inputObjectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC);
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
-                .forEach(inputValueDefinitionContext -> builder.addField(buildField(inputValueDefinitionContext)));
+                .forEach(
+                        inputValueDefinitionContext -> {
+                            FieldSpec fieldSpec = buildField(inputValueDefinitionContext);
+                            builder.addField(fieldSpec);
+                            addGetterAndSetter(fieldSpec, builder, null);
+                        }
+                );
         return builder.build();
     }
 
@@ -49,7 +65,7 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.enumBuilder(enumTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC);
         enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
-                .forEach(enumValueDefinitionContext -> builder.addEnumConstant(enumTypeDefinitionContext.name().getText()));
+                .forEach(enumValueDefinitionContext -> builder.addEnumConstant(enumValueDefinitionContext.enumValue().enumValueName().getText()));
         return builder.build();
     }
 
@@ -57,7 +73,16 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.interfaceBuilder(interfaceTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC);
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
-                .forEach(fieldDefinitionContext -> builder.addField(buildField(fieldDefinitionContext)));
+                .forEach(
+                        fieldDefinitionContext -> {
+                            FieldSpec fieldSpec = buildField(fieldDefinitionContext);
+                            addInterfaceGetterAndSetter(fieldSpec, builder);
+                        }
+                );
+        if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
+            interfaceTypeDefinitionContext.implementsInterfaces().typeName()
+                    .forEach(typeNameContext -> builder.addSuperinterface(ClassName.get(configuration.getInterfaceTypePackageName(), typeNameContext.name().getText())));
+        }
         return builder.build();
     }
 
@@ -65,7 +90,8 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.annotationBuilder(directiveDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC);
         directiveDefinitionContext.argumentsDefinition().inputValueDefinition()
-                .forEach(inputValueDefinitionContext -> builder.addField(buildArgument(inputValueDefinitionContext)));
+                .forEach(inputValueDefinitionContext -> builder.addMethod(buildMethod(inputValueDefinitionContext)));
+        builder.addAnnotation(AnnotationSpec.builder(Documented.class).build());
         builder.addAnnotation(
                 AnnotationSpec.builder(Retention.class)
                         .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
@@ -74,7 +100,11 @@ public class TypeSpecBuilder {
         List<ElementType> elementTypeList = buildElementTypeList(directiveDefinitionContext.directiveLocations());
         CodeBlock.Builder codeBuilder = CodeBlock.builder();
         codeBuilder.add("{");
-        elementTypeList.forEach(elementType -> codeBuilder.add("$T.$L", ElementType.class, elementType));
+        IntStream.range(0, elementTypeList.size())
+                .forEach(index -> {
+                    String format = index == elementTypeList.size() - 1 ? "$T.$L" : "$T.$L,";
+                    codeBuilder.add(format, ElementType.class, elementTypeList.get(index));
+                });
         codeBuilder.add("}");
         builder.addAnnotation(
                 AnnotationSpec.builder(Target.class)
@@ -128,7 +158,7 @@ public class TypeSpecBuilder {
     public FieldSpec buildField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.PRIVATE);
         if (fieldDefinitionContext.type().nonNullType() != null) {
-            builder.addAnnotation(Nonnull.class);
+            builder.addAnnotation(NotNull.class);
         }
         return builder.build();
     }
@@ -136,16 +166,15 @@ public class TypeSpecBuilder {
     public FieldSpec buildField(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(inputValueDefinitionContext.type()), inputValueDefinitionContext.name().getText(), Modifier.PRIVATE);
         if (inputValueDefinitionContext.type().nonNullType() != null) {
-            builder.addAnnotation(Nonnull.class);
+            builder.addAnnotation(NotNull.class);
         }
         return builder.build();
     }
 
-    public FieldSpec buildArgument(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        FieldSpec.Builder builder = FieldSpec.builder(buildType(inputValueDefinitionContext.type()), inputValueDefinitionContext.name().getText(), Modifier.STATIC, Modifier.FINAL, Modifier.PRIVATE);
-        if (inputValueDefinitionContext.type().nonNullType() != null) {
-            builder.addAnnotation(Nonnull.class);
-        }
+    public MethodSpec buildMethod(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(inputValueDefinitionContext.name().getText())
+                .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
+                .returns(buildType(inputValueDefinitionContext.type()));
         return builder.build();
     }
 
@@ -195,21 +224,93 @@ public class TypeSpecBuilder {
     }
 
     public TypeName buildType(GraphqlParser.ListTypeContext listTypeContext) {
-        return ArrayTypeName.of(buildType(listTypeContext.type()));
+        return ParameterizedTypeName.get(ClassName.get(Set.class), buildType(listTypeContext.type()));
     }
 
     public TypeName buildType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
-            case "String":
-                return TypeName.get(String.class);
-            case "Boolean":
-                return TypeName.get(Boolean.class);
+            case "ID":
             case "Int":
                 return TypeName.get(Integer.class);
             case "Float":
                 return TypeName.get(Float.class);
+            case "String":
+                return TypeName.get(String.class);
+            case "Boolean":
+                return TypeName.get(Boolean.class);
         }
         return null;
+    }
+
+    public void addGetterAndSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder, GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
+        addGetter(fieldSpec, classBuilder, implementsInterfacesContext);
+        addSetter(fieldSpec, classBuilder, implementsInterfacesContext);
+    }
+
+
+    private void addSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder, GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
+        String setterName = "set" + capitalizeFirstLetter(fieldSpec.name);
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(setterName).addModifiers(Modifier.PUBLIC);
+        methodBuilder.addParameter(fieldSpec.type, fieldSpec.name);
+        methodBuilder.addStatement("this." + fieldSpec.name + " = " + fieldSpec.name);
+
+        if (implementsInterfacesContext != null) {
+            implementsInterfacesContext.typeName().forEach(typeNameContext -> {
+                Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(typeNameContext.name().getText());
+                interfaceType.ifPresent(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().forEach(fieldDefinitionContext -> {
+                    if (fieldSpec.name.equals(fieldDefinitionContext.name().getText())) {
+                        methodBuilder.addAnnotation(Override.class);
+                    }
+                }));
+            });
+        }
+
+        classBuilder.addMethod(methodBuilder.build());
+    }
+
+
+    public void addGetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder, GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
+        String getterName = "get" + capitalizeFirstLetter(fieldSpec.name);
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(getterName).returns(fieldSpec.type).addModifiers(Modifier.PUBLIC);
+        methodBuilder.addStatement("return this." + fieldSpec.name);
+
+        if (implementsInterfacesContext != null) {
+            implementsInterfacesContext.typeName().forEach(typeNameContext -> {
+                Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(typeNameContext.name().getText());
+                interfaceType.ifPresent(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().forEach(fieldDefinitionContext -> {
+                    if (fieldSpec.name.equals(fieldDefinitionContext.name().getText())) {
+                        methodBuilder.addAnnotation(Override.class);
+                    }
+                }));
+            });
+        }
+
+        classBuilder.addMethod(methodBuilder.build());
+    }
+
+    public void addInterfaceGetterAndSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder) {
+        addInterfaceGetter(fieldSpec, classBuilder);
+        addInterfaceSetter(fieldSpec, classBuilder);
+    }
+
+
+    private void addInterfaceSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder) {
+        String setterName = "set" + capitalizeFirstLetter(fieldSpec.name);
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(setterName).addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC);
+        methodBuilder.addParameter(fieldSpec.type, fieldSpec.name);
+        classBuilder.addMethod(methodBuilder.build());
+    }
+
+
+    public void addInterfaceGetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder) {
+        String getterName = "get" + capitalizeFirstLetter(fieldSpec.name);
+        MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(getterName).returns(fieldSpec.type).addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC);
+        classBuilder.addMethod(methodBuilder.build());
+    }
+
+
+    private String capitalizeFirstLetter(final String fieldName) {
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
     }
 }

@@ -34,7 +34,7 @@ public class DocumentBuilder {
         } else {
             queryType = new ObjectType().setName("QueryType");
         }
-        queryType.addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME);
+        queryType.addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> mutationOperationTypeDefinition = manager.getMutationOperationTypeName().flatMap(manager::getObject);
         ObjectType mutationType;
@@ -46,7 +46,7 @@ public class DocumentBuilder {
         } else {
             mutationType = new ObjectType().setName("MutationType");
         }
-        mutationType.addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME);
+        mutationType.addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
 
         return new Document()
                 .addDefinition(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString())
