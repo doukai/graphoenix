@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TypeSpecBuilder {
@@ -351,5 +352,67 @@ public class TypeSpecBuilder {
                                 .build()
                 )
                 .build();
+    }
+
+    public List<TypeSpec> buildScalarExpressions() {
+        return manager.getScalars()
+                .map(scalarTypeDefinitionContext ->
+                        TypeSpec.annotationBuilder(scalarTypeDefinitionContext.name().getText() + "Expression")
+                                .addAnnotation(
+                                        AnnotationSpec.builder(Retention.class)
+                                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                                .build()
+                                )
+                                .addAnnotation(
+                                        AnnotationSpec.builder(Target.class)
+                                                .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
+                                                .build()
+                                )
+                                .addMethod(
+                                        MethodSpec.methodBuilder("opr")
+                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                .returns(ClassName.get(configuration.getEnumTypePackageName(), "Operator"))
+                                                .defaultValue("$T.$L", ClassName.get(configuration.getEnumTypePackageName(), "Operator"), "EQ")
+                                                .build()
+                                )
+                                .addMethod(
+                                        MethodSpec.methodBuilder("value")
+                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                .returns(String.class)
+                                                .build()
+                                )
+                                .build()
+                ).collect(Collectors.toList());
+    }
+
+    public List<TypeSpec> buildObjectExpressions() {
+        return manager.getObjects()
+                .map(objectTypeDefinitionContext ->
+                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expression")
+                                .addAnnotation(
+                                        AnnotationSpec.builder(Retention.class)
+                                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                                .build()
+                                )
+                                .addAnnotation(
+                                        AnnotationSpec.builder(Target.class)
+                                                .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
+                                                .build()
+                                )
+                                .addMethod(
+                                        MethodSpec.methodBuilder("cond")
+                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                .returns(ClassName.get(configuration.getEnumTypePackageName(), "Conditional"))
+                                                .defaultValue("$T.$L", ClassName.get(configuration.getEnumTypePackageName(), "Conditional"), "AND")
+                                                .build()
+                                )
+                                .addMethod(
+                                        MethodSpec.methodBuilder("value")
+                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Expression")))
+                                                .build()
+                                )
+                                .build()
+                ).collect(Collectors.toList());
     }
 }

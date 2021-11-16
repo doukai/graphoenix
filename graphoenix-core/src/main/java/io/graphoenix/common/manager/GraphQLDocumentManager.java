@@ -230,6 +230,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public Stream<GraphqlParser.ScalarTypeDefinitionContext> getScalars() {
+        return graphQLScalarManager.getScalarTypeDefinitions();
+    }
+
+    @Override
     public Stream<GraphqlParser.EnumTypeDefinitionContext> getEnums() {
         return graphQLEnumManager.getEnumTypeDefinitions();
     }

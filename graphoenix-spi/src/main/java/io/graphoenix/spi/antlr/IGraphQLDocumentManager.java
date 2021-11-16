@@ -55,6 +55,8 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.DirectiveDefinitionContext> getDirectives();
 
+    Stream<GraphqlParser.ScalarTypeDefinitionContext> getScalars();
+
     Stream<GraphqlParser.EnumTypeDefinitionContext> getEnums();
 
     Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjects();

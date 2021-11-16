@@ -76,21 +76,37 @@ public class JavaGenTest {
 //            }
 //        });
 
-        manager.getInterfaces().forEach(interfaceTypeDefinitionContext -> {
-            JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildInterface(interfaceTypeDefinitionContext)).build();
-            try {
-                javaFile.writeTo(System.out);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+//        manager.getInterfaces().forEach(interfaceTypeDefinitionContext -> {
+//            JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildInterface(interfaceTypeDefinitionContext)).build();
+//            try {
+//                javaFile.writeTo(System.out);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        });
 
+        typeSpecBuilder.buildScalarExpressions().forEach(
+                typeSpec -> {
 
-//        JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildExpressionAnnotation()).build();
-//        try {
-//            javaFile.writeTo(System.out);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+                    JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpec).build();
+                    try {
+                        javaFile.writeTo(System.out);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
+
+        typeSpecBuilder.buildObjectExpressions().forEach(
+                typeSpec -> {
+
+                    JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpec).build();
+                    try {
+                        javaFile.writeTo(System.out);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+        );
     }
 }
