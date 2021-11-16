@@ -25,7 +25,7 @@ public class JavaGeneratorConfiguration {
     }
 
     public String getObjectTypePackageName() {
-        return objectTypePackageName != null ? objectTypePackageName : basePackageName + ".object";
+        return objectTypePackageName != null ? objectTypePackageName : basePackageName + ".objectType";
     }
 
     public void setObjectTypePackageName(String objectTypePackageName) {
@@ -33,7 +33,7 @@ public class JavaGeneratorConfiguration {
     }
 
     public String getInterfaceTypePackageName() {
-        return interfaceTypePackageName != null ? interfaceTypePackageName : basePackageName + ".interface";
+        return interfaceTypePackageName != null ? interfaceTypePackageName : basePackageName + ".interfaceType";
     }
 
     public void setInterfaceTypePackageName(String interfaceTypePackageName) {
@@ -41,7 +41,7 @@ public class JavaGeneratorConfiguration {
     }
 
     public String getUnionTypePackageName() {
-        return unionTypePackageName != null ? unionTypePackageName : basePackageName + ".union";
+        return unionTypePackageName != null ? unionTypePackageName : basePackageName + ".unionType";
     }
 
     public void setUnionTypePackageName(String unionTypePackageName) {
@@ -49,7 +49,7 @@ public class JavaGeneratorConfiguration {
     }
 
     public String getEnumTypePackageName() {
-        return enumTypePackageName != null ? enumTypePackageName : basePackageName + ".enum";
+        return enumTypePackageName != null ? enumTypePackageName : basePackageName + ".enumType";
     }
 
     public void setEnumTypePackageName(String enumTypePackageName) {
@@ -57,7 +57,7 @@ public class JavaGeneratorConfiguration {
     }
 
     public String getInputObjectTypePackageName() {
-        return inputObjectTypePackageName != null ? inputObjectTypePackageName : basePackageName + ".inputObject";
+        return inputObjectTypePackageName != null ? inputObjectTypePackageName : basePackageName + ".inputObjectType";
     }
 
     public void setInputObjectTypePackageName(String inputObjectTypePackageName) {

@@ -8,4 +8,5 @@ include 'graphoenix-http-server'
 include 'graphoenix-java-generator'
 include 'graphoenix-graphql-generator'
 include 'graphoenix-showcase-mysql'
+include 'graphoenix-gradle-plugin'
 

@@ -1,9 +1,24 @@
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+    dependencies {
+        classpath 'io.graphoenix:graphoenix-gradle-plugin:1.0-SNAPSHOT'
+    }
+}
+
 plugins {
     id 'java'
 }
 
+apply plugin: 'io.graphoenix'
+
 group 'io.graphoenix'
 version '1.0-SNAPSHOT'
+
+graphQLCodegen {
+    packageName = "io.graphoenix"
+}
 
 repositories {
     mavenCentral()

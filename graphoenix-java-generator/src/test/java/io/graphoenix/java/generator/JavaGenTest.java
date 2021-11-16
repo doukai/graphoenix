@@ -11,6 +11,8 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 
@@ -58,14 +60,15 @@ public class JavaGenTest {
 //            }
 //        });
 
-//        manager.getEnums().forEach(enumTypeDefinitionContext -> {
-//            JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildEnum(enumTypeDefinitionContext)).build();
-//            try {
-//                javaFile.writeTo(System.out);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        });
+        manager.getEnums().forEach(enumTypeDefinitionContext -> {
+            JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getEnumTypePackageName(), typeSpecBuilder.buildEnum(enumTypeDefinitionContext)).build();
+            try {
+                Path path = Paths.get("src/test/java");
+                javaFile.writeTo(path);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
 
 //        manager.getInputObjects().forEach(inputObjectTypeDefinitionContext -> {
 //            JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpecBuilder.buildClass(inputObjectTypeDefinitionContext)).build();
@@ -85,24 +88,25 @@ public class JavaGenTest {
 //            }
 //        });
 
-        typeSpecBuilder.buildScalarExpressions().forEach(
+        typeSpecBuilder.buildObjectTypeExpressionAnnotations().forEach(
                 typeSpec -> {
-
-                    JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpec).build();
+                    JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getDirectivePackageName(), typeSpec).build();
                     try {
-                        javaFile.writeTo(System.out);
+                        Path path = Paths.get("src/test/java");
+                        javaFile.writeTo(path);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
         );
 
-        typeSpecBuilder.buildObjectExpressions().forEach(
+        typeSpecBuilder.buildObjectTypeExpressionsAnnotations().forEach(
                 typeSpec -> {
 
-                    JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getBasePackageName(), typeSpec).build();
+                    JavaFile javaFile = JavaFile.builder(javaGeneratorConfiguration.getDirectivePackageName(), typeSpec).build();
                     try {
-                        javaFile.writeTo(System.out);
+                        Path path = Paths.get("src/test/java");
+                        javaFile.writeTo(path);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

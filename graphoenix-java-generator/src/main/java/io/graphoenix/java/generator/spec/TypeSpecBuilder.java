@@ -45,6 +45,9 @@ public class TypeSpecBuilder {
                             }
                     );
         }
+        if (objectTypeDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", objectTypeDefinitionContext.description().getText());
+        }
         return builder.build();
     }
 
@@ -59,6 +62,9 @@ public class TypeSpecBuilder {
                             addGetterAndSetter(fieldSpec, builder, null);
                         }
                 );
+        if (inputObjectTypeDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", inputObjectTypeDefinitionContext.description().getText());
+        }
         return builder.build();
     }
 
@@ -67,6 +73,9 @@ public class TypeSpecBuilder {
                 .addModifiers(Modifier.PUBLIC);
         enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
                 .forEach(enumValueDefinitionContext -> builder.addEnumConstant(enumValueDefinitionContext.enumValue().enumValueName().getText()));
+        if (enumTypeDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", enumTypeDefinitionContext.description().getText());
+        }
         return builder.build();
     }
 
@@ -84,6 +93,9 @@ public class TypeSpecBuilder {
         if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
             interfaceTypeDefinitionContext.implementsInterfaces().typeName()
                     .forEach(typeNameContext -> builder.addSuperinterface(ClassName.get(configuration.getInterfaceTypePackageName(), typeNameContext.name().getText())));
+        }
+        if (interfaceTypeDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", interfaceTypeDefinitionContext.description().getText());
         }
         return builder.build();
     }
@@ -113,6 +125,9 @@ public class TypeSpecBuilder {
                         .addMember("value", codeBuilder.build())
                         .build()
         );
+        if (directiveDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", directiveDefinitionContext.description().getText());
+        }
         return builder.build();
     }
 
@@ -162,6 +177,9 @@ public class TypeSpecBuilder {
         if (fieldDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NotNull.class);
         }
+        if (fieldDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", fieldDefinitionContext.description().getText());
+        }
         return builder.build();
     }
 
@@ -169,6 +187,9 @@ public class TypeSpecBuilder {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
         if (fieldDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NotNull.class);
+        }
+        if (fieldDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", fieldDefinitionContext.description().getText());
         }
         return builder.build();
     }
@@ -178,6 +199,9 @@ public class TypeSpecBuilder {
         if (inputValueDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NotNull.class);
         }
+        if (inputValueDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());
+        }
         return builder.build();
     }
 
@@ -185,6 +209,9 @@ public class TypeSpecBuilder {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(inputValueDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(buildType(inputValueDefinitionContext.type()));
+        if (inputValueDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());
+        }
         return builder.build();
     }
 
@@ -319,45 +346,16 @@ public class TypeSpecBuilder {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
     }
 
-    public TypeSpec buildExpressionAnnotation() {
-        return TypeSpec.annotationBuilder("Expression")
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(AnnotationSpec.builder(Documented.class).build())
-                .addAnnotation(
-                        AnnotationSpec.builder(Retention.class)
-                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
-                                .build()
+    public List<TypeSpec> buildObjectTypeExpressionAnnotations() {
+        return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .addAnnotation(
-                        AnnotationSpec.builder(Target.class)
-                                .addMember("value", "$T.$L", ElementType.class, ElementType.PARAMETER)
-                                .build()
-                )
-                .addMethod(
-                        MethodSpec.methodBuilder("cond")
-                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                .returns(ClassName.get(configuration.getInputObjectTypePackageName(), "Conditional"))
-                                .build()
-                )
-                .addMethod(
-                        MethodSpec.methodBuilder("value")
-                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                .returns(ArrayTypeName.of(String.class))
-                                .build()
-                )
-                .addMethod(
-                        MethodSpec.methodBuilder("opr")
-                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                .returns(ClassName.get(configuration.getInputObjectTypePackageName(), "Operator"))
-                                .build()
-                )
-                .build();
-    }
-
-    public List<TypeSpec> buildScalarExpressions() {
-        return manager.getScalars()
-                .map(scalarTypeDefinitionContext ->
-                        TypeSpec.annotationBuilder(scalarTypeDefinitionContext.name().getText() + "Expression")
+                .map(objectTypeDefinitionContext ->
+                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expression")
+                                .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(
                                         AnnotationSpec.builder(Retention.class)
                                                 .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
@@ -375,20 +373,32 @@ public class TypeSpecBuilder {
                                                 .defaultValue("$T.$L", ClassName.get(configuration.getEnumTypePackageName(), "Operator"), "EQ")
                                                 .build()
                                 )
-                                .addMethod(
-                                        MethodSpec.methodBuilder("value")
-                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                .returns(String.class)
-                                                .build()
+                                .addMethods(
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(String.class)
+                                                                .defaultValue("$S", "")
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
                                 )
                                 .build()
                 ).collect(Collectors.toList());
     }
 
-    public List<TypeSpec> buildObjectExpressions() {
+    public List<TypeSpec> buildObjectTypeExpressionsAnnotations() {
         return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
                 .map(objectTypeDefinitionContext ->
-                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expression")
+                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expressions")
+                                .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(
                                         AnnotationSpec.builder(Retention.class)
                                                 .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
@@ -410,7 +420,20 @@ public class TypeSpecBuilder {
                                         MethodSpec.methodBuilder("value")
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                                                 .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Expression")))
+                                                .defaultValue("$L", "{}")
                                                 .build()
+                                )
+                                .addMethods(
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(ArrayTypeName.of(ClassName.get(configuration.getDirectivePackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Expression")))
+                                                                .defaultValue("$L", "{}")
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
                                 )
                                 .build()
                 ).collect(Collectors.toList());
