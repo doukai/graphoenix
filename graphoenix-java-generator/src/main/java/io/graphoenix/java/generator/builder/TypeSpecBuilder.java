@@ -1,9 +1,9 @@
-package io.graphoenix.java.generator.spec;
+package io.graphoenix.java.generator.builder;
 
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.java.generator.config.JavaGeneratorConfiguration;
+import io.graphoenix.java.generator.config.CodegenConfiguration;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.lang.model.element.Modifier;
@@ -19,9 +19,9 @@ import java.util.stream.IntStream;
 public class TypeSpecBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final JavaGeneratorConfiguration configuration;
+    private final CodegenConfiguration configuration;
 
-    public TypeSpecBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfiguration configuration) {
+    public TypeSpecBuilder(IGraphQLDocumentManager manager, CodegenConfiguration configuration) {
         this.manager = manager;
         this.configuration = configuration;
     }

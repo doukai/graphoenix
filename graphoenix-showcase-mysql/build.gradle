@@ -16,8 +16,9 @@ apply plugin: 'io.graphoenix'
 group 'io.graphoenix'
 version '1.0-SNAPSHOT'
 
-graphQLCodegen {
-    packageName = "io.graphoenix"
+generateGraphQLSource {
+    basePackageName = "io.graphoenix.showcase.mysql"
+    graphQLFileName = "auth.gql"
 }
 
 repositories {

@@ -1,3 +1,79 @@
+scalar ID
+scalar Int
+scalar Float
+scalar String
+scalar Boolean
+
+scalar Booleaninterface Meta {
+version: Int
+isDeprecated: Boolean
+}
+
+enum Operator {
+EQ
+NEQ
+LK
+NLK
+GT
+NLTE
+GTE
+NLT
+LT
+NGTE
+LTE
+NGT
+NIL
+NNIL
+}
+
+enum Conditional {
+AND
+OR
+}
+
+input IDExpression {
+opr: Operator = EQ
+val: ID
+in: [ID]
+}
+
+input StringExpression {
+opr: Operator = EQ
+val: String
+in: [String]
+}
+
+input IntExpression {
+opr: Operator = EQ
+val: Int
+in: [Int]
+}
+
+input FloatExpression {
+opr: Operator = EQ
+val: Float
+in: [Float]
+}
+
+input MapWith {
+type: String
+from: String
+to: String
+}
+
+directive @dataType(
+type: String
+length: Int
+decimals: Int
+) on FIELD_DEFINITION
+
+directive @map(
+from: String
+with: MapWith
+to: String
+) on FIELD_DEFINITION
+
+
 type User @table(engine:"InnoDB"){
     id: ID @column(autoIncrement:true)
     login  : String!

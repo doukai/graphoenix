@@ -5,6 +5,8 @@ plugins {
 group 'io.graphoenix'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'maven'
+
 repositories {
     mavenCentral()
 }

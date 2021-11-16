@@ -1,6 +1,6 @@
 package io.graphoenix.java.generator.config;
 
-public class JavaGeneratorConfiguration {
+public class CodegenConfiguration {
 
     private String basePackageName;
 
@@ -15,6 +15,10 @@ public class JavaGeneratorConfiguration {
     private String inputObjectTypePackageName;
 
     private String directivePackageName;
+
+    private String graphQL;
+
+    private String graphQLFileName;
 
     public String getBasePackageName() {
         return basePackageName;
@@ -70,5 +74,21 @@ public class JavaGeneratorConfiguration {
 
     public void setDirectivePackageName(String directivePackageName) {
         this.directivePackageName = directivePackageName;
+    }
+
+    public String getGraphQL() {
+        return graphQL;
+    }
+
+    public void setGraphQL(String graphQL) {
+        this.graphQL = graphQL;
+    }
+
+    public String getGraphQLFileName() {
+        return graphQLFileName;
+    }
+
+    public void setGraphQLFileName(String graphQLFileName) {
+        this.graphQLFileName = graphQLFileName;
     }
 }
