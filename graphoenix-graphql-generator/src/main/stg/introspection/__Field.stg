@@ -1,0 +1,11 @@
+import "__InputValue.stg"
+__fieldDefinition(__field) ::= <<
+{
+    name: "<__field.name>"<if(__field.description)>,
+    description: "<__field.description>"<endif><if(__field.args)>,
+    args: [<__field.args:{arg|<__inputValueDefinition(arg)>};separator=", ">]<endif><if(__field.type)>,
+    type: <__field.type><endif><if(__field.isDeprecated)>,
+    isDeprecated: <__field.isDeprecated><endif><if(__field.deprecationReason)>,
+    deprecationReason: "<__field.deprecationReason>"<endif>
+}
+>>

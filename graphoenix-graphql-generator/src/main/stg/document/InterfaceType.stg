@@ -1,0 +1,7 @@
+import "Field.stg"
+interfaceTypeDefinition(interfaceType) ::= <<
+<if(interfaceType.description)>"<interfaceType.description>"<endif>
+interface <interfaceType.name><if(interfaceType.interfaces)> implements <interfaceType.interfaces:{interface|<interface>};separator=" & "><endif><if(interfaceType.directives)> <interfaceType.directives:{directive|<directive>};separator=" "><endif> {
+  <interfaceType.fields:{field|<fieldDefinition(field)>};separator="\n">
+}
+>>
