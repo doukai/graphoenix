@@ -7,6 +7,7 @@ import io.graphoenix.spi.antlr.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -73,6 +74,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public void registerDocument(InputStream inputStream) throws IOException {
         registerDocument(DOCUMENT_UTIL.graphqlToDocument(inputStream));
+    }
+
+    @Override
+    public void registerFile(String graphqlFileName) throws IOException {
+        registerDocument(DOCUMENT_UTIL.graphqlFileToDocument(graphqlFileName));
+    }
+
+    @Override
+    public void registerPath(Path graphqlPath) throws IOException {
+        registerDocument(DOCUMENT_UTIL.graphqlPathToDocument(graphqlPath));
     }
 
     @Override

@@ -4,6 +4,7 @@ import graphql.parser.antlr.GraphqlParser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -12,6 +13,10 @@ public interface IGraphQLDocumentManager {
     void registerDocument(String graphql);
 
     void registerDocument(InputStream inputStream) throws IOException;
+
+    void registerFile(String graphqlFileName) throws IOException;
+
+    void registerPath(Path graphqlPath) throws IOException;
 
     void registerDocument(GraphqlParser.DocumentContext documentContext);
 

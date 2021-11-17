@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 public enum DocumentUtil {
 
@@ -28,6 +29,18 @@ public enum DocumentUtil {
     public GraphqlParser.DocumentContext graphqlToDocument(String graphql) {
         CodePointCharStream charStream;
         charStream = CharStreams.fromString(graphql);
+        return graphqlToDocument(charStream);
+    }
+
+    public GraphqlParser.DocumentContext graphqlFileToDocument(String graphqlFileName) throws IOException {
+        CharStream charStream;
+        charStream = CharStreams.fromFileName(graphqlFileName);
+        return graphqlToDocument(charStream);
+    }
+
+    public GraphqlParser.DocumentContext graphqlPathToDocument(Path graphqlPath) throws IOException {
+        CharStream charStream;
+        charStream = CharStreams.fromPath(graphqlPath);
         return graphqlToDocument(charStream);
     }
 
