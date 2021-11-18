@@ -1,9 +1,9 @@
 package io.graphoenix.gradle.task;
 
+import com.pivovarit.function.ThrowingBiConsumer;
 import com.squareup.javapoet.JavaFile;
 import io.graphoenix.common.manager.*;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.graphql.generator.document.Document;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.java.generator.config.CodegenConfiguration;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -14,13 +14,11 @@ import org.gradle.api.tasks.TaskAction;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 
 public class GenerateGraphQLSourceTask extends DefaultTask {
-
 
     @TaskAction
     public void generateGraphQLSource() {
@@ -39,21 +37,19 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
                         .flatMap(file -> DOCUMENT_UTIL.graphqlFileTryToDocument(file.getPath()))
                         .ifPresent(manager::registerDocument);
             } else if (codegenConfiguration.getGraphQLPath() != null) {
-                DOCUMENT_UTIL.graphqlPathTryToDocument(Path.of(sourceSet.getResources().getAsPath() + File.pathSeparator + codegenConfiguration.getGraphQLPath()))
+                sourceSet.getResources().getSrcDirs().stream().findFirst()
+                        .flatMap(file -> DOCUMENT_UTIL.graphqlPathTryToDocument(Path.of(file.getPath() + File.pathSeparator + codegenConfiguration.getGraphQLPath())))
                         .ifPresent(manager::registerDocument);
             }
-            manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
-            Document document = new DocumentBuilder(manager).buildDocument();
-            manager.registerDocument(document.toString());
+            manager.registerDocument(new DocumentBuilder(manager).buildDocument().toString());
             JavaFileBuilder javaFileBuilder = new JavaFileBuilder(manager, codegenConfiguration);
-
             List<JavaFile> javaFileList = javaFileBuilder.buildJavaFileList();
-            for (JavaFile javaFile : javaFileList) {
-                javaFile.writeTo(Paths.get(getProject().getProjectDir().getPath() + "/src/main/java/"));
-            }
+            ThrowingBiConsumer<JavaFile, File, IOException> JavaFileWriteTo = JavaFile::writeTo;
+            sourceSet.getJava().getSrcDirs().stream()
+                    .findFirst()
+                    .ifPresent(file -> javaFileList.forEach(javaFile -> JavaFileWriteTo.uncheck().accept(javaFile, file)));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
 }
