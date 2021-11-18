@@ -14,6 +14,7 @@ repositories {
 dependencies {
     compile project(":graphoenix-spi")
     compile "io.projectreactor:reactor-core:3.4.11"
+
     compile "org.yaml:snakeyaml:1.29"
     compile "commons-chain:commons-chain:1.2"
 

@@ -17,7 +17,7 @@ group 'io.graphoenix'
 version '1.0-SNAPSHOT'
 
 generateGraphQLSource {
-    basePackageName = "io.graphoenix.showcase.mysql"
+    basePackageName = "io.graphoenix.showcase.mysql.generated"
     graphQLFileName = "auth.gql"
 }
 

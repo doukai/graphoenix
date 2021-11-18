@@ -4,7 +4,7 @@ scalar Float
 scalar String
 scalar Boolean
 
-scalar Booleaninterface Meta {
+interface Meta {
     version: Int
     isDeprecated: Boolean
 }

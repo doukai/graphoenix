@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class TypeSpecBuilder {
 
@@ -104,7 +105,7 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.annotationBuilder(directiveDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC);
         directiveDefinitionContext.argumentsDefinition().inputValueDefinition()
-                .forEach(inputValueDefinitionContext -> builder.addMethod(buildMethod(inputValueDefinitionContext)));
+                .forEach(inputValueDefinitionContext -> builder.addMethod(buildAnnotationMethod(inputValueDefinitionContext)));
         builder.addAnnotation(AnnotationSpec.builder(Documented.class).build());
         builder.addAnnotation(
                 AnnotationSpec.builder(Retention.class)
@@ -127,6 +128,29 @@ public class TypeSpecBuilder {
         );
         if (directiveDefinitionContext.description() != null) {
             builder.addJavadoc("$S", directiveDefinitionContext.description().getText());
+        }
+        return builder.build();
+    }
+
+    public TypeSpec buildAnnotation(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        TypeSpec.Builder builder = TypeSpec.annotationBuilder(inputObjectTypeDefinitionContext.name().getText())
+                .addModifiers(Modifier.PUBLIC);
+        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
+                .stream().filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
+                .forEach(inputValueDefinitionContext -> builder.addMethod(buildAnnotationMethod(inputValueDefinitionContext)));
+        builder.addAnnotation(AnnotationSpec.builder(Documented.class).build());
+        builder.addAnnotation(
+                AnnotationSpec.builder(Retention.class)
+                        .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                        .build()
+        );
+        builder.addAnnotation(
+                AnnotationSpec.builder(Target.class)
+                        .addMember("value", "$T.$L", ElementType.class, ElementType.ANNOTATION_TYPE)
+                        .build()
+        );
+        if (inputObjectTypeDefinitionContext.description() != null) {
+            builder.addJavadoc("$S", inputObjectTypeDefinitionContext.description().getText());
         }
         return builder.build();
     }
@@ -185,6 +209,7 @@ public class TypeSpecBuilder {
 
     public FieldSpec buildInterfaceField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
+        builder.initializer("$L", "null");
         if (fieldDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NotNull.class);
         }
@@ -205,36 +230,45 @@ public class TypeSpecBuilder {
         return builder.build();
     }
 
-    public MethodSpec buildMethod(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+    public MethodSpec buildAnnotationMethod(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(inputValueDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
-                .returns(buildType(inputValueDefinitionContext.type()));
+                .returns(buildType(inputValueDefinitionContext.type(), true));
         if (inputValueDefinitionContext.description() != null) {
             builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());
         }
         return builder.build();
     }
 
+
     public TypeName buildType(GraphqlParser.TypeContext typeContext) {
+        return buildType(typeContext, false);
+    }
+
+    public TypeName buildType(GraphqlParser.TypeContext typeContext, boolean isAnnotation) {
         if (typeContext.typeName() != null) {
-            return buildType(typeContext.typeName().name());
+            return buildType(typeContext.typeName().name(), isAnnotation);
         } else if (typeContext.listType() != null) {
-            return buildType(typeContext.listType());
+            return buildType(typeContext.listType(), isAnnotation);
         } else if (typeContext.nonNullType() != null) {
             if (typeContext.nonNullType().typeName() != null) {
-                return buildType(typeContext.nonNullType().typeName().name());
+                return buildType(typeContext.nonNullType().typeName().name(), isAnnotation);
             } else if (typeContext.nonNullType().listType() != null) {
-                return buildType(typeContext.nonNullType().listType());
+                return buildType(typeContext.nonNullType().listType(), isAnnotation);
             }
         }
         return null;
     }
 
-    public TypeName buildType(GraphqlParser.NameContext nameContext) {
+    public TypeName buildType(GraphqlParser.NameContext nameContext, boolean isAnnotation) {
         if (manager.isScaLar(nameContext.getText())) {
             Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(nameContext.getText());
             if (scaLar.isPresent()) {
-                return buildType(scaLar.get());
+                if (isAnnotation) {
+                    return buildAnnotationType(scaLar.get());
+                } else {
+                    return buildType(scaLar.get());
+                }
             }
         } else if (manager.isObject(nameContext.getText())) {
             Optional<GraphqlParser.ObjectTypeDefinitionContext> object = manager.getObject(nameContext.getText());
@@ -254,14 +288,22 @@ public class TypeSpecBuilder {
         } else if (manager.isInputObject(nameContext.getText())) {
             Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(nameContext.getText());
             if (inputObject.isPresent()) {
-                return ClassName.get(configuration.getInputObjectTypePackageName(), inputObject.get().name().getText());
+                if (isAnnotation) {
+                    return ClassName.get(configuration.getDirectivePackageName(), inputObject.get().name().getText());
+                } else {
+                    return ClassName.get(configuration.getInputObjectTypePackageName(), inputObject.get().name().getText());
+                }
             }
         }
         return null;
     }
 
-    public TypeName buildType(GraphqlParser.ListTypeContext listTypeContext) {
-        return ParameterizedTypeName.get(ClassName.get(Set.class), buildType(listTypeContext.type()));
+    public TypeName buildType(GraphqlParser.ListTypeContext listTypeContext, boolean isAnnotation) {
+        if (isAnnotation) {
+            return ArrayTypeName.of(buildType(listTypeContext.type(), true));
+        } else {
+            return ParameterizedTypeName.get(ClassName.get(Set.class), buildType(listTypeContext.type()));
+        }
     }
 
     public TypeName buildType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
@@ -276,6 +318,22 @@ public class TypeSpecBuilder {
                 return TypeName.get(String.class);
             case "Boolean":
                 return TypeName.get(Boolean.class);
+        }
+        return null;
+    }
+
+    public TypeName buildAnnotationType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
+        String name = scalarTypeDefinitionContext.name().getText();
+        switch (name) {
+            case "ID":
+            case "Int":
+                return TypeName.get(int.class);
+            case "Float":
+                return TypeName.get(float.class);
+            case "String":
+                return TypeName.get(String.class);
+            case "Boolean":
+                return TypeName.get(boolean.class);
         }
         return null;
     }
@@ -346,7 +404,7 @@ public class TypeSpecBuilder {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
     }
 
-    public List<TypeSpec> buildObjectTypeExpressionAnnotations() {
+    public Stream<TypeSpec> buildObjectTypeExpressionAnnotations() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -386,10 +444,10 @@ public class TypeSpecBuilder {
                                                 .collect(Collectors.toList())
                                 )
                                 .build()
-                ).collect(Collectors.toList());
+                );
     }
 
-    public List<TypeSpec> buildObjectTypeExpressionsAnnotations() {
+    public Stream<TypeSpec> buildObjectTypeExpressionsAnnotations() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -429,13 +487,92 @@ public class TypeSpecBuilder {
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ArrayTypeName.of(ClassName.get(configuration.getDirectivePackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Expression")))
+                                                                .returns(ArrayTypeName.of(ClassName.get(configuration.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Expression")))
                                                                 .defaultValue("$L", "{}")
                                                                 .build()
                                                 )
                                                 .collect(Collectors.toList())
                                 )
                                 .build()
-                ).collect(Collectors.toList());
+                );
+    }
+
+    public Stream<TypeSpec> buildObjectTypeInputAnnotations() {
+        return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
+                .map(objectTypeDefinitionContext ->
+                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Input")
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(
+                                        AnnotationSpec.builder(Retention.class)
+                                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                                .build()
+                                )
+                                .addAnnotation(
+                                        AnnotationSpec.builder(Target.class)
+                                                .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
+                                                .build()
+                                )
+                                .addMethods(
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(String.class)
+                                                                .defaultValue("$S", "")
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                )
+                                .build()
+                );
+    }
+
+    public Stream<TypeSpec> buildObjectTypeInputsAnnotations() {
+        return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
+                .map(objectTypeDefinitionContext ->
+                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Inputs")
+                                .addModifiers(Modifier.PUBLIC)
+                                .addAnnotation(
+                                        AnnotationSpec.builder(Retention.class)
+                                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                                .build()
+                                )
+                                .addAnnotation(
+                                        AnnotationSpec.builder(Target.class)
+                                                .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
+                                                .build()
+                                )
+                                .addMethod(
+                                        MethodSpec.methodBuilder("value")
+                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Input")))
+                                                .defaultValue("$L", "{}")
+                                                .build()
+                                )
+                                .addMethods(
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(ArrayTypeName.of(ClassName.get(configuration.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")))
+                                                                .defaultValue("$L", "{}")
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                )
+                                .build()
+                );
     }
 }

@@ -16,9 +16,13 @@ public class CodegenConfiguration {
 
     private String directivePackageName;
 
+    private String annotationPackageName;
+
     private String graphQL;
 
     private String graphQLFileName;
+
+    private String graphQLPath;
 
     public String getBasePackageName() {
         return basePackageName;
@@ -76,6 +80,14 @@ public class CodegenConfiguration {
         this.directivePackageName = directivePackageName;
     }
 
+    public String getAnnotationPackageName() {
+        return annotationPackageName != null ? annotationPackageName : basePackageName + ".annotation";
+    }
+
+    public void setAnnotationPackageName(String annotationPackageName) {
+        this.annotationPackageName = annotationPackageName;
+    }
+
     public String getGraphQL() {
         return graphQL;
     }
@@ -90,5 +102,13 @@ public class CodegenConfiguration {
 
     public void setGraphQLFileName(String graphQLFileName) {
         this.graphQLFileName = graphQLFileName;
+    }
+
+    public String getGraphQLPath() {
+        return graphQLPath;
+    }
+
+    public void setGraphQLPath(String graphQLPath) {
+        this.graphQLPath = graphQLPath;
     }
 }
