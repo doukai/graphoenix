@@ -1,21 +1,15 @@
 plugins {
-    id 'java-gradle-plugin'
+    id 'java'
 }
 
 group 'io.graphoenix'
 version '1.0-SNAPSHOT'
-
-apply plugin: 'maven'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation project(":graphoenix-core")
-    compile project(":graphoenix-graphql-builder")
-    implementation project(":graphoenix-java-generator")
-    compile "org.antlr:antlr4:4.9.2"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }

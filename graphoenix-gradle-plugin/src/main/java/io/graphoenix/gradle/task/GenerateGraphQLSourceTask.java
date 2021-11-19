@@ -14,7 +14,7 @@ import org.gradle.api.tasks.TaskAction;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 
@@ -43,7 +43,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
             }
             manager.registerDocument(new DocumentBuilder(manager).buildDocument().toString());
             JavaFileBuilder javaFileBuilder = new JavaFileBuilder(manager, codegenConfiguration);
-            List<JavaFile> javaFileList = javaFileBuilder.buildJavaFileList();
+            Stream<JavaFile> javaFileList = javaFileBuilder.buildJavaFileList();
             ThrowingBiConsumer<JavaFile, File, IOException> JavaFileWriteTo = JavaFile::writeTo;
             sourceSet.getJava().getSrcDirs().stream()
                     .findFirst()
