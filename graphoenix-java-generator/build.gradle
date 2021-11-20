@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     implementation project(":graphoenix-core")
+    implementation project(":graphoenix-java-generator")
     implementation 'com.squareup:javapoet:1.13.0'
     testImplementation project(":graphoenix-graphql-builder")
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

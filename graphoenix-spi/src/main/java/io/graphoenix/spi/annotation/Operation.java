@@ -1,11 +1,11 @@
-package graphoenix.annotation.processor;
+package io.graphoenix.spi.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface Query {
+public @interface Operation {
 }

@@ -10,6 +10,9 @@ repositories {
 }
 
 dependencies {
+    compile project(":graphoenix-spi")
+    compile "com.google.auto.service:auto-service:1.0.1"
+    annotationProcessor "com.google.auto.service:auto-service:1.0.1"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
