@@ -1,7 +1,7 @@
 package io.graphoenix.java.generator.builder;
 
 import com.squareup.javapoet.JavaFile;
-import io.graphoenix.java.generator.config.CodegenConfiguration;
+import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import one.util.streamex.StreamEx;
 
@@ -11,9 +11,9 @@ import java.util.stream.Stream;
 public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final CodegenConfiguration configuration;
+    private final JavaGeneratorConfig configuration;
 
-    public JavaFileBuilder(IGraphQLDocumentManager manager, CodegenConfiguration configuration) {
+    public JavaFileBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
         this.manager = manager;
         this.configuration = configuration;
     }

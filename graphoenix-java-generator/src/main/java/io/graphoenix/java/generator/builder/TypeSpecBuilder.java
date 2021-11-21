@@ -3,7 +3,7 @@ package io.graphoenix.java.generator.builder;
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.java.generator.config.CodegenConfiguration;
+import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.lang.model.element.Modifier;
@@ -20,9 +20,9 @@ import java.util.stream.Stream;
 public class TypeSpecBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final CodegenConfiguration configuration;
+    private final JavaGeneratorConfig configuration;
 
-    public TypeSpecBuilder(IGraphQLDocumentManager manager, CodegenConfiguration configuration) {
+    public TypeSpecBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
         this.manager = manager;
         this.configuration = configuration;
     }
@@ -433,7 +433,11 @@ public class TypeSpecBuilder {
                                 )
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext ->
+                                                        manager.isScaLar(
+                                                                manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                )
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -519,7 +523,11 @@ public class TypeSpecBuilder {
                                 )
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext -> manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext ->
+                                                        manager.isScaLar(
+                                                                manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                )
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)

@@ -1,6 +1,6 @@
-package io.graphoenix.http.server.config;
+package io.graphoenix.spi.config;
 
-public class ServerConfiguration {
+public class HttpServerConfig {
 
     private String graphqlContextPath = "graphql";
     private boolean ssl;

@@ -5,6 +5,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Operation {
@@ -59,6 +60,14 @@ public class Operation {
 
     public Operation setFields(List<Field> fields) {
         this.fields = fields;
+        return this;
+    }
+
+    public Operation addField(Field field) {
+        if (this.fields == null) {
+            this.fields = new ArrayList<>();
+        }
+        this.fields.add(field);
         return this;
     }
 

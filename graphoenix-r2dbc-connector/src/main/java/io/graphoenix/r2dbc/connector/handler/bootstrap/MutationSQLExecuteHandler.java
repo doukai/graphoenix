@@ -2,7 +2,7 @@ package io.graphoenix.r2dbc.connector.handler.bootstrap;
 
 import io.graphoenix.common.constant.Hammurabi;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
-import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
+import io.graphoenix.spi.config.R2DBCConfig;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
@@ -21,7 +21,7 @@ public class MutationSQLExecuteHandler implements IBootstrapHandler {
     @Override
     @SuppressWarnings("unchecked")
     public Void transform(IGraphQLDocumentManager manager, Object sqlStream) {
-        ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, ConnectionConfiguration.class));
+        ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, R2DBCConfig.class));
         MutationExecutor mutationExecutor = new MutationExecutor(connectionCreator);
         log.info("introspection data SQL insert started");
         mutationExecutor.executeMutationsInBatchByGroup((Stream<String>) sqlStream, sqlCount)

@@ -1,6 +1,6 @@
-package io.graphoenix.r2dbc.connector.config;
+package io.graphoenix.spi.config;
 
-public class ConnectionConfiguration {
+public class R2DBCConfig {
     private String driver;
     private String protocol = "pipes";
     private String database;

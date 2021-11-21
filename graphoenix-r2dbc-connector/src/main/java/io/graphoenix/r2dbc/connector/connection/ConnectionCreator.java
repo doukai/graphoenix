@@ -1,6 +1,6 @@
 package io.graphoenix.r2dbc.connector.connection;
 
-import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
+import io.graphoenix.spi.config.R2DBCConfig;
 import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.ConnectionFactory;
 import reactor.core.publisher.Mono;
@@ -12,11 +12,11 @@ public class ConnectionCreator implements IConnectionCreator {
 
     private final ConnectionFactory connectionFactory;
 
-    public ConnectionCreator(ConnectionConfiguration connectionConfiguration) {
-        if (connectionConfiguration.isUsePool()) {
-            connectionFactory = CONNECTION_POOL_CREATOR.createConnectionPool(connectionConfiguration);
+    public ConnectionCreator(R2DBCConfig r2DBCConfig) {
+        if (r2DBCConfig.isUsePool()) {
+            connectionFactory = CONNECTION_POOL_CREATOR.createConnectionPool(r2DBCConfig);
         } else {
-            connectionFactory = FACTORY_CREATOR.createFactory(connectionConfiguration);
+            connectionFactory = FACTORY_CREATOR.createFactory(r2DBCConfig);
         }
     }
 

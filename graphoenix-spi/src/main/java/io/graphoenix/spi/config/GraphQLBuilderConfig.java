@@ -1,6 +1,6 @@
-package io.graphoenix.graphql.builder.config;
+package io.graphoenix.spi.config;
 
-public class BuilderConfiguration {
+public class GraphQLBuilderConfig {
 
     boolean englishPlural = false;
 
@@ -8,7 +8,7 @@ public class BuilderConfiguration {
         return englishPlural;
     }
 
-    public BuilderConfiguration setEnglishPlural(boolean englishPlural) {
+    public GraphQLBuilderConfig setEnglishPlural(boolean englishPlural) {
         this.englishPlural = englishPlural;
         return this;
     }

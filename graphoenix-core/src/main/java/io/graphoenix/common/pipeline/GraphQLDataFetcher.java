@@ -6,7 +6,6 @@ import io.graphoenix.common.pipeline.bootstrap.BootstrapPipeline;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.GraphQLRequest;
-import io.graphoenix.spi.dto.GraphQLResponse;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
 import reactor.core.publisher.Flux;

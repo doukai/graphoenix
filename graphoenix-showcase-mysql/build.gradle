@@ -30,7 +30,7 @@ dependencies {
     implementation project(":graphoenix-graphql-builder")
     implementation project(":graphoenix-http-server")
     implementation project(":graphoenix-mysql-translator")
-    implementation project(":graphoenix-r2dbc-connector")
+    compile project(":graphoenix-r2dbc-connector")
     annotationProcessor project(":graphoenix-annotation-processor")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

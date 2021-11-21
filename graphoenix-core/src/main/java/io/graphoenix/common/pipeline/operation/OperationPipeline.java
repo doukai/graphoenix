@@ -1,6 +1,5 @@
 package io.graphoenix.common.pipeline.operation;
 
-import com.google.gson.JsonObject;
 import io.graphoenix.common.utils.HandlerUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.*;

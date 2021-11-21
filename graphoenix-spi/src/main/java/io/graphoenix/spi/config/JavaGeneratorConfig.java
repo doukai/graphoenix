@@ -1,6 +1,6 @@
-package io.graphoenix.java.generator.config;
+package io.graphoenix.spi.config;
 
-public class CodegenConfiguration {
+public class JavaGeneratorConfig {
 
     private String basePackageName;
 

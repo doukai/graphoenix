@@ -1,6 +1,6 @@
-package io.graphoenix.http.server.config;
+package io.graphoenix.spi.config;
 
-public class NettyConfiguration {
+public class NettyConfig {
 
     private boolean epoll;
 

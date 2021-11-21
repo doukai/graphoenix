@@ -6,7 +6,7 @@ import io.graphoenix.spi.dto.SelectionResult;
 import io.graphoenix.spi.handler.IOperationHandler;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
-import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
+import io.graphoenix.spi.config.R2DBCConfig;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,7 +24,7 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
 
     @Override
     public void setupManager(IGraphQLDocumentManager manager) {
-        ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, ConnectionConfiguration.class));
+        ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, R2DBCConfig.class));
         this.queryExecutor = new QueryExecutor(connectionCreator);
         this.mutationExecutor = new MutationExecutor(connectionCreator);
     }

@@ -1,19 +1,35 @@
 package io.graphoenix.showcase.mysql;
 
+import io.graphoenix.showcase.mysql.generated.annotation.UserExpression;
+import io.graphoenix.showcase.mysql.generated.annotation.UserExpressions;
+import io.graphoenix.showcase.mysql.generated.enumType.Sex;
+import io.graphoenix.showcase.mysql.generated.objectType.User;
 import io.graphoenix.spi.annotation.Mutation;
 import io.graphoenix.spi.annotation.Operation;
 import io.graphoenix.spi.annotation.Query;
-import io.graphoenix.spi.annotation.Subscription;
+import reactor.core.publisher.Mono;
 
 @Operation
 public interface OperationTest {
 
-    @Query
-    String query();
+    @Query("user")
+    @UserExpressions({
+            @UserExpression(name = "name"),
+            @UserExpression(sex = "sex")
+    })
+    User queryUser(String name, Sex sex);
 
-    @Mutation
-    String mutation();
+    @Query("user")
+    @UserExpressions({
+            @UserExpression(name = "name"),
+            @UserExpression(sex = "sex")
+    })
+    Mono<User> queryUserAsync();
 
-    @Subscription
-    String subscription();
+    @Mutation("user")
+    User mutationUser();
+
+    @Mutation("user")
+    Mono<User> mutationUserAsync();
+
 }

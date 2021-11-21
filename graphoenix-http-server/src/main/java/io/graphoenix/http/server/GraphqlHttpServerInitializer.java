@@ -44,6 +44,6 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 //        p.addLast("compressor",new HttpContentCompressor());
         p.addLast("chunked", new ChunkedWriteHandler());
         p.addLast("cors", new CorsHandler(corsConfig));
-        p.addLast("handler", new GraphqlHttpServerHandler(this.dataFetcher));
+        p.addLast("io.graphoenix.java.translator.handler", new GraphqlHttpServerHandler(this.dataFetcher));
     }
 }

@@ -1,6 +1,6 @@
 package io.graphoenix.r2dbc.connector.connection;
 
-import io.graphoenix.r2dbc.connector.config.ConnectionConfiguration;
+import io.graphoenix.spi.config.R2DBCConfig;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 
@@ -12,12 +12,12 @@ public enum ConnectionPoolCreator {
 
     CONNECTION_POOL_CREATOR;
 
-    public ConnectionPool createConnectionPool(ConnectionConfiguration connectionConfiguration) {
+    public ConnectionPool createConnectionPool(R2DBCConfig r2DBCConfig) {
 
         ConnectionPoolConfiguration poolConfiguration = ConnectionPoolConfiguration
-                .builder(FACTORY_CREATOR.createFactory(connectionConfiguration))
-                .maxIdleTime(Duration.ofMillis(connectionConfiguration.getPoolMaxIdleTime()))
-                .maxSize(connectionConfiguration.getPoolMaxSize())
+                .builder(FACTORY_CREATOR.createFactory(r2DBCConfig))
+                .maxIdleTime(Duration.ofMillis(r2DBCConfig.getPoolMaxIdleTime()))
+                .maxSize(r2DBCConfig.getPoolMaxSize())
                 .build();
 
         return new ConnectionPool(poolConfiguration);
