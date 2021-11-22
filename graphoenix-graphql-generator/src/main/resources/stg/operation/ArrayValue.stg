@@ -1,3 +1,0 @@
-arrayValueDefinition(arrayValue) ::= <<
-[<arrayValue.valueWithVariables:{valueWithVariable|<valueWithVariable>};separator=", ">]
->>

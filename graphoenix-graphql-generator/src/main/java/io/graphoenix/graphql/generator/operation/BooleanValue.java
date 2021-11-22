@@ -4,10 +4,14 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class BooleanValue extends ValueWithVariable {
+public class BooleanValue {
     private final STGroup stGroupFile = new STGroupFile("stg/operation/BooleanValue.stg");
 
     private Boolean value;
+
+    public BooleanValue(Boolean value) {
+        this.value = value;
+    }
 
     public Boolean getValue() {
         return value;
@@ -15,11 +19,6 @@ public class BooleanValue extends ValueWithVariable {
 
     public void setValue(Boolean value) {
         this.value = value;
-    }
-
-    @Override
-    public String getValueWithVariable() {
-        return this.toString();
     }
 
     @Override

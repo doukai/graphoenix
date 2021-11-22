@@ -4,13 +4,8 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class NullValue extends ValueWithVariable {
+public class NullValue {
     private final STGroup stGroupFile = new STGroupFile("stg/operation/NullValue.stg");
-
-    @Override
-    public String getValueWithVariable() {
-        return this.toString();
-    }
 
     @Override
     public String toString() {

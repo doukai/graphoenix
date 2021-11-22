@@ -4,14 +4,17 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
-
 public class Argument {
 
     private final STGroup stGroupFile = new STGroupFile("stg/operation/Argument.stg");
 
     private String name;
-    private ValueWithVariable valueWithVariable;
+    private String valueWithVariable;
+
+    public Argument(String name, String valueWithVariable) {
+        this.name = name;
+        this.valueWithVariable = valueWithVariable;
+    }
 
     public String getName() {
         return name;
@@ -22,12 +25,12 @@ public class Argument {
         return this;
     }
 
-    public ValueWithVariable getValueWithVariable() {
+    public String getValueWithVariable() {
         return valueWithVariable;
     }
 
-    public Argument setValueWithVariable(ValueWithVariable valueWithVariable) {
-        this.valueWithVariable = valueWithVariable;
+    public Argument setValueWithVariable(Object object) {
+        this.valueWithVariable = new ValueWithVariable(object).toString();
         return this;
     }
 

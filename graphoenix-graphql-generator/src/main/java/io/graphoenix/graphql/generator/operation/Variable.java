@@ -4,10 +4,14 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class Variable extends ValueWithVariable {
+public class Variable {
     private final STGroup stGroupFile = new STGroupFile("stg/operation/Variable.stg");
 
     private String name;
+
+    public Variable(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -15,11 +19,6 @@ public class Variable extends ValueWithVariable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public String getValueWithVariable() {
-        return this.toString();
     }
 
     @Override

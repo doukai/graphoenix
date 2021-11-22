@@ -4,23 +4,22 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class IntValue extends ValueWithVariable {
+public class IntValue {
 
     private final STGroup stGroupFile = new STGroupFile("stg/operation/IntValue.stg");
 
-    private Integer value;
+    private Number value;
 
-    public Integer getValue() {
-        return value;
-    }
-
-    public void setValue(Integer value) {
+    public IntValue(Number value) {
         this.value = value;
     }
 
-    @Override
-    public String getValueWithVariable() {
-        return this.toString();
+    public Number getValue() {
+        return value;
+    }
+
+    public void setValue(Number value) {
+        this.value = value;
     }
 
     @Override

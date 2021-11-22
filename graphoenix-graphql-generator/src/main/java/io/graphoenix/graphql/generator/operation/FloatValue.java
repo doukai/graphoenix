@@ -4,22 +4,21 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-public class FloatValue extends ValueWithVariable {
+public class FloatValue {
     private final STGroup stGroupFile = new STGroupFile("stg/operation/FloatValue.stg");
 
-    private Float value;
+    private Number value;
 
-    public Float getValue() {
-        return value;
-    }
-
-    public void setValue(Float value) {
+    public FloatValue(Number value) {
         this.value = value;
     }
 
-    @Override
-    public String getValueWithVariable() {
-        return this.toString();
+    public Number getValue() {
+        return value;
+    }
+
+    public void setValue(Number value) {
+        this.value = value;
     }
 
     @Override

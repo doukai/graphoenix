@@ -1,23 +1,39 @@
 package io.graphoenix.graphql.generator.operation;
 
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
-import org.stringtemplate.v4.STGroupFile;
+import javax.lang.model.element.VariableElement;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Collection;
 
-public abstract class ValueWithVariable {
+public class ValueWithVariable {
 
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/ValueWithVariable.stg");
+    private final Object valueWithVariable;
 
-    private String valueWithVariable;
+    public ValueWithVariable(Object value) {
+        if (value == null) {
+            valueWithVariable = new NullValue();
+        } else if (value instanceof VariableElement) {
+            valueWithVariable = new Variable(((VariableElement) value).getSimpleName().toString());
+        } else if (value instanceof Boolean) {
+            valueWithVariable = new BooleanValue((Boolean) value);
+        } else if (value instanceof Integer || value instanceof Long || value instanceof Short || value instanceof BigInteger) {
+            valueWithVariable = new IntValue((Number) value);
+        } else if (value instanceof Float || value instanceof Double || value instanceof BigDecimal) {
+            valueWithVariable = new FloatValue((Number) value);
+        } else if (value instanceof String) {
+            valueWithVariable = new StringValue((String) value);
+        } else if (value instanceof Enum<?>) {
+            valueWithVariable = new EnumValue((Enum<?>) value);
+        } else if (value instanceof Collection<?>) {
+            valueWithVariable = new ArrayValueWithVariable((Collection<?>) value);
+        } else {
+            valueWithVariable = new ObjectValueWithVariable(value);
+        }
 
-    public abstract String getValueWithVariable();
+    }
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("valueWithVariableDefinition");
-        st.add("valueWithVariable", this);
-        return st.render();
+        return valueWithVariable.toString();
     }
-
-
 }

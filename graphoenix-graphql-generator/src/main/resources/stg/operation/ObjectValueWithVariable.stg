@@ -1,0 +1,5 @@
+objectValueWithVariableDefinition(objectValueWithVariable) ::= <<
+{
+<objectValueWithVariable.keys:{key|<key>: <objectValueWithVariable.(key)>};separator=", \n">
+}
+>>
