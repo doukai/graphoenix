@@ -1,6 +1,0 @@
-schemaDefinition(schema) ::= <<
-schema {
-  query: <schema.query>
-  mutation: <if(schema.mutation)><schema.mutation><endif>
-}
->>

@@ -1,0 +1,3 @@
+valueWithVariableDefinition(valueWithVariable) ::= <<
+<valueWithVariable.valueWithVariable>
+>>

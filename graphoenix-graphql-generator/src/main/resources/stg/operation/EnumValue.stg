@@ -1,0 +1,3 @@
+enumValueDefinition(enumValue) ::= <<
+<enumValue.value>
+>>

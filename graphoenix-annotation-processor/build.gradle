@@ -13,6 +13,7 @@ dependencies {
     compile project(":graphoenix-core")
     compile project(":graphoenix-graphql-builder")
     compile project(":graphoenix-java-generator")
+    compile project(":graphoenix-graphql-generator")
     compile "com.google.auto.service:auto-service:1.0.1"
     annotationProcessor "com.google.auto.service:auto-service:1.0.1"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

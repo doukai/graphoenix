@@ -1,0 +1,3 @@
+booleanValueDefinition(booleanValue) ::= <<
+<booleanValue.value>
+>>

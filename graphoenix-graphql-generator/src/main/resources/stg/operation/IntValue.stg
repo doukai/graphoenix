@@ -1,0 +1,3 @@
+intValueDefinition(intValue) ::= <<
+<intValue.value>
+>>

@@ -1,3 +1,0 @@
-schemaDefinition(schema) ::= <<
-<if(schema.definitions)><schema.definitions:{definition|<definition>};separator="\n"><endif>
->>

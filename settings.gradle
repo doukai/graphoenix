@@ -9,6 +9,5 @@ include 'graphoenix-java-generator'
 include 'graphoenix-graphql-generator'
 include 'graphoenix-showcase-mysql'
 include 'graphoenix-gradle-plugin'
-include 'graphoenix-java-translator'
 include 'graphoenix-annotation-processor'
 

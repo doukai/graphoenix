@@ -11,8 +11,7 @@ public class Argument {
     private final STGroup stGroupFile = new STGroupFile("stg/operation/Argument.stg");
 
     private String name;
-    private String valueWithVariable;
-    private List<String> arrayValueWithVariable;
+    private ValueWithVariable valueWithVariable;
 
     public String getName() {
         return name;
@@ -23,21 +22,12 @@ public class Argument {
         return this;
     }
 
-    public String getValueWithVariable() {
+    public ValueWithVariable getValueWithVariable() {
         return valueWithVariable;
     }
 
-    public Argument setValueWithVariable(String valueWithVariable) {
+    public Argument setValueWithVariable(ValueWithVariable valueWithVariable) {
         this.valueWithVariable = valueWithVariable;
-        return this;
-    }
-
-    public List<String> getArrayValueWithVariable() {
-        return arrayValueWithVariable;
-    }
-
-    public Argument setArrayValueWithVariable(List<String> arrayValueWithVariable) {
-        this.arrayValueWithVariable = arrayValueWithVariable;
         return this;
     }
 

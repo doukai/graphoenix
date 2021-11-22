@@ -1,11 +1,11 @@
 package graphoenix.annotation.processor;
 
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.common.constant.Hammurabi;
 import io.graphoenix.common.manager.SimpleGraphQLDocumentManager;
 import io.graphoenix.common.utils.YamlConfigUtil;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
+import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -13,14 +13,14 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import javax.annotation.processing.*;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.tools.JavaFileObject;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Set;
+import java.util.stream.Stream;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.Operation")
 @AutoService(Processor.class)
@@ -56,13 +56,12 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                             manager.registerPath(Paths.get(graphQLPathUri));
                         }
                         manager.registerDocument(new DocumentBuilder(manager).buildDocument().toString());
+                        PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(typeElement);
+                        JavaElementToOperation javaElementToOperation = new JavaElementToOperation(manager, javaGeneratorConfig);
+                        Stream<String> operationResources = javaElementToOperation.buildOperationResources(packageElement, typeElement);
+                        operationResources.forEach(System.out::println);
                         OperationInterfaceImplementer implementer = new OperationInterfaceImplementer(manager, javaGeneratorConfig);
-                        TypeSpec typeSpec = implementer.buildImplementClass(typeElement);
-
-                        JavaFileObject builderFile = processingEnv.getFiler().createSourceFile(typeSpec.name);
-                        try (PrintWriter out = new PrintWriter(builderFile.openWriter())) {
-                            out.println(typeSpec);
-                        }
+                        implementer.buildImplementClass(packageElement, typeElement).writeTo(processingEnv.getFiler());
 
                     } catch (IOException e) {
                         e.printStackTrace();

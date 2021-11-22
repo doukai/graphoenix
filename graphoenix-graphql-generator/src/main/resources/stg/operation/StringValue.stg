@@ -1,0 +1,3 @@
+stringValueDefinition(stringValue) ::= <<
+"<stringValue.value>"
+>>

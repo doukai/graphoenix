@@ -1,7 +1,0 @@
-import "InputValue.stg"
-inputObjectTypeDefinition(inputObjectType) ::= <<
-<if(inputObjectType.description)>"<inputObjectType.description>"<endif>
-input <inputObjectType.name><if(inputObjectType.directives)> <inputObjectType.directives:{directive|<directive>};separator=" "><endif> {
-  <inputObjectType.inputValues:{inputValue|<inputValueDefinition(inputValue)>};separator="\n">
-}
->>
