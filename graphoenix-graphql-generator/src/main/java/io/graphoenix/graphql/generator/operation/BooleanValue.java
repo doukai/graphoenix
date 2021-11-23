@@ -4,10 +4,16 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import javax.lang.model.element.AnnotationValue;
+
 public class BooleanValue {
     private final STGroup stGroupFile = new STGroupFile("stg/operation/BooleanValue.stg");
 
     private Boolean value;
+
+    public BooleanValue(AnnotationValue value) {
+        this.value = (Boolean) value.getValue();
+    }
 
     public BooleanValue(Boolean value) {
         this.value = value;

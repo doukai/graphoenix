@@ -5,6 +5,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
+import javax.lang.model.element.AnnotationMirror;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Map;
@@ -15,6 +16,14 @@ public class ObjectValueWithVariable {
     private final STGroup stGroupFile = new STGroupFile("stg/operation/ObjectValueWithVariable.stg");
 
     private final Map<String, ValueWithVariable> objectValueWithVariable;
+
+    public ObjectValueWithVariable(Map<?, ?> objectValueWithVariable) {
+        this.objectValueWithVariable = objectValueWithVariable.entrySet().stream().collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> new ValueWithVariable(entry.getValue())));
+    }
+
+    public ObjectValueWithVariable(AnnotationMirror objectValueWithVariable) {
+        this.objectValueWithVariable = objectValueWithVariable.getElementValues().entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().getSimpleName().toString(), entry -> new ValueWithVariable(entry.getValue())));
+    }
 
     public ObjectValueWithVariable(Object objectValueWithVariable) {
         Class<?> clazz = objectValueWithVariable.getClass();

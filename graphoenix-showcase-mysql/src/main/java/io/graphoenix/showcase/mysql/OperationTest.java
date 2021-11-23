@@ -2,34 +2,36 @@ package io.graphoenix.showcase.mysql;
 
 import io.graphoenix.showcase.mysql.generated.annotation.UserExpression;
 import io.graphoenix.showcase.mysql.generated.annotation.UserExpressions;
+import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import io.graphoenix.showcase.mysql.generated.enumType.Sex;
 import io.graphoenix.showcase.mysql.generated.objectType.User;
-import io.graphoenix.spi.annotation.Mutation;
-import io.graphoenix.spi.annotation.Operation;
-import io.graphoenix.spi.annotation.Query;
+import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Mutation;
+import org.eclipse.microprofile.graphql.Query;
 import reactor.core.publisher.Mono;
 
-@Operation
+@GraphQLApi
 public interface OperationTest {
 
-    @Query("user")
-    @UserExpressions({
-            @UserExpression(name = "name"),
-            @UserExpression(sex = "sex")
-    })
+    @Query
+//    @UserExpressions({
+//            @UserExpression(name = "name"),
+//            @UserExpression(sex = "sex")
+//    })
+    @UserExpression(opr = Operator.NEQ, sex = "sex", name = "name")
     User queryUser(String name, Sex sex);
 
-    @Query("user")
+    @Query
     @UserExpressions({
             @UserExpression(name = "name"),
             @UserExpression(sex = "sex")
     })
     Mono<User> queryUserAsync();
 
-    @Mutation("user")
+    @Mutation
     User mutationUser();
 
-    @Mutation("user")
+    @Mutation
     Mono<User> mutationUserAsync();
 
 }

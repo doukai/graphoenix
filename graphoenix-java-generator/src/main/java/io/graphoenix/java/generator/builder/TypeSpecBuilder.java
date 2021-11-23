@@ -5,16 +5,16 @@ import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import org.eclipse.microprofile.graphql.*;
+import org.eclipse.microprofile.graphql.Enum;
 
 import javax.lang.model.element.Modifier;
-import javax.validation.constraints.NotNull;
 import java.lang.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class TypeSpecBuilder {
@@ -29,7 +29,8 @@ public class TypeSpecBuilder {
 
     public TypeSpec buildClass(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(objectTypeDefinitionContext.name().getText())
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Type.class);
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(
                         fieldDefinitionContext -> {
@@ -48,13 +49,19 @@ public class TypeSpecBuilder {
         }
         if (objectTypeDefinitionContext.description() != null) {
             builder.addJavadoc("$S", objectTypeDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", objectTypeDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
 
     public TypeSpec buildClass(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(inputObjectTypeDefinitionContext.name().getText())
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Input.class);
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .forEach(
                         inputValueDefinitionContext -> {
@@ -65,24 +72,36 @@ public class TypeSpecBuilder {
                 );
         if (inputObjectTypeDefinitionContext.description() != null) {
             builder.addJavadoc("$S", inputObjectTypeDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", inputObjectTypeDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
 
     public TypeSpec buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.enumBuilder(enumTypeDefinitionContext.name().getText())
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Enum.class);
         enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
                 .forEach(enumValueDefinitionContext -> builder.addEnumConstant(enumValueDefinitionContext.enumValue().enumValueName().getText()));
         if (enumTypeDefinitionContext.description() != null) {
             builder.addJavadoc("$S", enumTypeDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", enumTypeDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
 
     public TypeSpec buildInterface(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.interfaceBuilder(interfaceTypeDefinitionContext.name().getText())
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Interface.class);
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(
                         fieldDefinitionContext -> {
@@ -97,6 +116,11 @@ public class TypeSpecBuilder {
         }
         if (interfaceTypeDefinitionContext.description() != null) {
             builder.addJavadoc("$S", interfaceTypeDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", interfaceTypeDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
@@ -112,14 +136,9 @@ public class TypeSpecBuilder {
                         .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
                         .build()
         );
-        List<ElementType> elementTypeList = buildElementTypeList(directiveDefinitionContext.directiveLocations());
         CodeBlock.Builder codeBuilder = CodeBlock.builder();
         codeBuilder.add("{");
-        IntStream.range(0, elementTypeList.size())
-                .forEach(index -> {
-                    String format = index == elementTypeList.size() - 1 ? "$T.$L" : "$T.$L,";
-                    codeBuilder.add(format, ElementType.class, elementTypeList.get(index));
-                });
+        codeBuilder.add(CodeBlock.join(buildElementTypeList(directiveDefinitionContext.directiveLocations()).stream().map(elementType -> CodeBlock.of("$T.$L", elementType)).collect(Collectors.toList()), ","));
         codeBuilder.add("}");
         builder.addAnnotation(
                 AnnotationSpec.builder(Target.class)
@@ -128,6 +147,11 @@ public class TypeSpecBuilder {
         );
         if (directiveDefinitionContext.description() != null) {
             builder.addJavadoc("$S", directiveDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", directiveDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
@@ -151,6 +175,11 @@ public class TypeSpecBuilder {
         );
         if (inputObjectTypeDefinitionContext.description() != null) {
             builder.addJavadoc("$S", inputObjectTypeDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", inputObjectTypeDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
@@ -198,11 +227,19 @@ public class TypeSpecBuilder {
 
     public FieldSpec buildField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.PRIVATE);
+        if(manager.getFieldTypeName(fieldDefinitionContext.type()).equals("ID")){
+            builder.addAnnotation(Id.class);
+        }
         if (fieldDefinitionContext.type().nonNullType() != null) {
-            builder.addAnnotation(NotNull.class);
+            builder.addAnnotation(NonNull.class);
         }
         if (fieldDefinitionContext.description() != null) {
             builder.addJavadoc("$S", fieldDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", fieldDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
@@ -211,21 +248,38 @@ public class TypeSpecBuilder {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
         builder.initializer("$L", "null");
         if (fieldDefinitionContext.type().nonNullType() != null) {
-            builder.addAnnotation(NotNull.class);
+            builder.addAnnotation(NonNull.class);
         }
         if (fieldDefinitionContext.description() != null) {
             builder.addJavadoc("$S", fieldDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", fieldDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
 
     public FieldSpec buildField(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(inputValueDefinitionContext.type()), inputValueDefinitionContext.name().getText(), Modifier.PRIVATE);
+        if (inputValueDefinitionContext.defaultValue() != null) {
+            builder.addAnnotation(
+                    AnnotationSpec.builder(DefaultValue.class)
+                            .addMember("value", "$S", inputValueDefinitionContext.defaultValue().getText())
+                            .build()
+            );
+        }
         if (inputValueDefinitionContext.type().nonNullType() != null) {
-            builder.addAnnotation(NotNull.class);
+            builder.addAnnotation(NonNull.class);
         }
         if (inputValueDefinitionContext.description() != null) {
             builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", inputValueDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
@@ -234,12 +288,41 @@ public class TypeSpecBuilder {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(inputValueDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(buildType(inputValueDefinitionContext.type(), true));
+        if (inputValueDefinitionContext.defaultValue() != null) {
+            builder.defaultValue(buildDefaultValue(inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value()));
+        }
         if (inputValueDefinitionContext.description() != null) {
             builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());
+            builder.addAnnotation(
+                    AnnotationSpec.builder(Description.class)
+                            .addMember("value", "$S", inputValueDefinitionContext.description().getText())
+                            .build()
+            );
         }
         return builder.build();
     }
 
+    private CodeBlock buildDefaultValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueContext valueContext) {
+        if (valueContext.StringValue() != null) {
+            return CodeBlock.of("$L", valueContext.StringValue().getText());
+        } else if (valueContext.IntValue() != null) {
+            return CodeBlock.of("$L", valueContext.IntValue().getText());
+        } else if (valueContext.FloatValue() != null) {
+            return CodeBlock.of("$L", valueContext.FloatValue().getText());
+        } else if (valueContext.BooleanValue() != null) {
+            return CodeBlock.of("$L", valueContext.BooleanValue().getText());
+        } else if (valueContext.enumValue() != null) {
+            return CodeBlock.of("$T.$L", ClassName.get(configuration.getEnumTypePackageName(), manager.getFieldTypeName(inputValueDefinitionContext.type())), valueContext.enumValue().getText());
+        } else if (valueContext.arrayValue() != null) {
+            CodeBlock.Builder codeBuilder = CodeBlock.builder();
+            codeBuilder.add("{");
+            codeBuilder.add(CodeBlock.join(valueContext.arrayValue().value().stream().map(subValue -> buildDefaultValue(inputValueDefinitionContext, subValue)).collect(Collectors.toList()), ","));
+            codeBuilder.add("}");
+            return codeBuilder.build();
+        }
+        //TODO
+        return null;
+    }
 
     public TypeName buildType(GraphqlParser.TypeContext typeContext) {
         return buildType(typeContext, false);

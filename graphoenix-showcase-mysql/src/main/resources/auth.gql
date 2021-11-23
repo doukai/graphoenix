@@ -5,13 +5,13 @@ type User @table(engine:"InnoDB"){
     name: String!
     age: Int
     disable: Boolean
-    sex: io.graphoenix.graphql.generator.Sex
+    sex: Sex
     organizationId: Int
     organization: Organization @map(from: "organizationId", to: "id")
     roles: [Role!] @map(from: "id", with:{type: "UserRole" from: "userId", to: "roleId"}, to: "id")
 }
 
-enum io.graphoenix.graphql.generator.Sex {
+enum Sex {
     MAN
     FEMALE
 }

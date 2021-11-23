@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     antlr "org.antlr:antlr4:4.9.2"
+    compile 'org.eclipse.microprofile.graphql:microprofile-graphql-api:1.0.3'
     compile 'javax.validation:validation-api:2.0.1.Final'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

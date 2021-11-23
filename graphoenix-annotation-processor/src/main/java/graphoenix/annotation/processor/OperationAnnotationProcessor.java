@@ -22,7 +22,7 @@ import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Stream;
 
-@SupportedAnnotationTypes("io.graphoenix.spi.annotation.Operation")
+@SupportedAnnotationTypes("org.eclipse.microprofile.graphql.GraphQLApi")
 @AutoService(Processor.class)
 public class OperationAnnotationProcessor extends AbstractProcessor {
 

@@ -1,18 +1,15 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.graphql.generator.document.InputObjectType;
-import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
-import io.graphoenix.spi.annotation.Mutation;
-import io.graphoenix.spi.annotation.Query;
-import io.graphoenix.spi.annotation.Subscription;
+import io.graphoenix.graphql.generator.operation.ValueWithVariable;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
+import org.eclipse.microprofile.graphql.Query;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.ExecutableType;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JavaElementToOperation {
@@ -46,28 +43,56 @@ public class JavaElementToOperation {
                 .filter(annotationMirror ->
                         annotationMirror.getAnnotationType().asElement().getEnclosedElements().stream()
                                 .map(element -> (ExecutableElement) element)
-                                .anyMatch(filedElement -> filedElement.getReturnType().toString().contains(".Conditional"))
+                                .anyMatch(filedElement -> filedElement.getReturnType().toString().equals(configuration.getEnumTypePackageName().concat(".Conditional")))
                 )
                 .findFirst();
         if (expressions.isPresent()) {
-            AnnotationMirror annotationMirror = expressions.get();
+            AnnotationMirror expressionsAnnotationMirror = expressions.get();
 
         }
         Optional<? extends AnnotationMirror> expression = executableElement.getAnnotationMirrors().stream()
                 .filter(annotationMirror ->
                         annotationMirror.getAnnotationType().asElement().getEnclosedElements().stream()
                                 .map(element -> (ExecutableElement) element)
-                                .anyMatch(filedElement -> filedElement.getReturnType().toString().contains(".Operator"))
+                                .anyMatch(filedElement -> filedElement.getReturnType().toString().equals(configuration.getEnumTypePackageName().concat(".Operator")))
                 )
                 .findFirst();
         if (expression.isPresent()) {
-            AnnotationMirror annotationMirror = expression.get();
+            ValueWithVariable valueWithVariable = new ValueWithVariable(
+                    expression.get().getElementValues().entrySet().stream()
+                            .collect(
+                                    Collectors.toMap(
+                                            entry -> entry.getKey().getSimpleName().toString(),
+                                            entry -> annotationValueToVariableElement(executableElement, entry.getKey(), entry.getValue())
+                                    )
+                            )
+            );
+            System.out.println(valueWithVariable);
+
 
         }
         return operation.toString();
     }
 
+    private Object annotationValueToVariableElement(ExecutableElement parentExecutableElement, ExecutableElement executableElement, AnnotationValue annotationValue) {
+        if (executableElement.getReturnType().toString().equals(configuration.getEnumTypePackageName().concat(".Operator"))) {
+            return annotationValue;
+        } else {
+            return parentExecutableElement.getParameters().stream()
+                    .filter(variableElement -> variableElement.getSimpleName().toString().equals(annotationValue.getValue()))
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
+
     private InputObjectType expressionsToInput(AnnotationMirror expressions) {
+
+
+        return null;
+    }
+
+    private InputObjectType expressionToInput(AnnotationMirror expression) {
+
 
         return null;
     }

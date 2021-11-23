@@ -32,15 +32,15 @@ public class IntrospectionMutationBuilder {
         List<Argument> arguments = new ArrayList<>();
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
-        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext))));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> mutationTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject);
-        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("mutationType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("mutationType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext))));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> subscriptionTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject);
-        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext))));
 
-        arguments.add(new Argument().setName("types").setArrayValueWithVariable(
+        arguments.add(new Argument().setName("types").setValueWithVariable(
                 Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType),
                         Stream.concat(manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
                                 Stream.concat(
@@ -48,10 +48,10 @@ public class IntrospectionMutationBuilder {
                                         manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
                                 )
                         )
-                ).map(__Type::toString).collect(Collectors.toList())
+                ).collect(Collectors.toList())
         ));
 
-        arguments.add(new Argument().setName("directives").setArrayValueWithVariable(manager.getDirectives().map(this::directiveDefinitionContextToDirective).map(__Directive::toString).collect(Collectors.toList())));
+        arguments.add(new Argument().setName("directives").setValueWithVariable(manager.getDirectives().map(this::directiveDefinitionContextToDirective).map(__Directive::toString).collect(Collectors.toList())));
 
         return new Operation()
                 .setOperationType("mutation")

@@ -11,6 +11,9 @@ public class Argument {
     private String name;
     private String valueWithVariable;
 
+    public Argument() {
+    }
+
     public Argument(String name, String valueWithVariable) {
         this.name = name;
         this.valueWithVariable = valueWithVariable;
