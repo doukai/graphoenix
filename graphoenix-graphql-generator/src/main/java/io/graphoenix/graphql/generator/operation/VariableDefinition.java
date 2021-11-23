@@ -9,17 +9,22 @@ import java.util.List;
 public class VariableDefinition {
     private final STGroup stGroupFile = new STGroupFile("stg/operation/VariableDefinition.stg");
 
-    private String name;
+    private Variable variable;
     private String typeName;
     private String defaultValue;
     private List<String> directives;
 
-    public String getName() {
-        return name;
+    public Variable getVariable() {
+        return variable;
     }
 
-    public VariableDefinition setName(String name) {
-        this.name = name;
+    public VariableDefinition setVariable(Variable variable) {
+        this.variable = variable;
+        return this;
+    }
+
+    public VariableDefinition setVariable(String variableName) {
+        this.variable = new Variable(variableName);
         return this;
     }
 
@@ -29,6 +34,11 @@ public class VariableDefinition {
 
     public VariableDefinition setTypeName(String typeName) {
         this.typeName = typeName;
+        return this;
+    }
+
+    public VariableDefinition setTypeName(Type type) {
+        this.typeName = type.toString();
         return this;
     }
 

@@ -1,10 +1,11 @@
 package io.graphoenix.graphql.generator.translator;
 
+import com.pivovarit.function.ThrowingFunction;
 import io.graphoenix.graphql.generator.document.InputObjectType;
-import io.graphoenix.graphql.generator.operation.Operation;
-import io.graphoenix.graphql.generator.operation.ValueWithVariable;
+import io.graphoenix.graphql.generator.operation.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
+import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Query;
 
 import javax.lang.model.element.*;
@@ -31,25 +32,32 @@ public class JavaElementToOperation {
     private String executableElementToOperation(ExecutableElement executableElement) {
         Query query = executableElement.getAnnotation(Query.class);
         if (query != null) {
-            return executableElementToQuery(executableElement);
+            return executableElementToQuery(query.value(), executableElement);
         }
         return null;
     }
 
-    private String executableElementToQuery(ExecutableElement executableElement) {
-        Operation operation = new Operation();
+    private String executableElementToQuery(String queryName, ExecutableElement executableElement) {
+        Operation operation = new Operation()
+                .setName(executableElement.getSimpleName().toString())
+                .setOperationType("query")
+                .setVariableDefinitions(
+                        executableElement.getParameters().stream()
+                                .map(variableElement -> variableElementToVariableDefinition(queryName, variableElement))
+                                .collect(Collectors.toList())
+                );
+        Field field = new Field().setName(queryName);
 
-        Optional<? extends AnnotationMirror> expressions = executableElement.getAnnotationMirrors().stream()
-                .filter(annotationMirror ->
-                        annotationMirror.getAnnotationType().asElement().getEnclosedElements().stream()
-                                .map(element -> (ExecutableElement) element)
-                                .anyMatch(filedElement -> filedElement.getReturnType().toString().equals(configuration.getEnumTypePackageName().concat(".Conditional")))
-                )
-                .findFirst();
-        if (expressions.isPresent()) {
-            AnnotationMirror expressionsAnnotationMirror = expressions.get();
-
-        }
+//        Optional<? extends AnnotationMirror> expressions = executableElement.getAnnotationMirrors().stream()
+//                .filter(annotationMirror ->
+//                        annotationMirror.getAnnotationType().asElement().getEnclosedElements().stream()
+//                                .map(element -> (ExecutableElement) element)
+//                                .anyMatch(filedElement -> filedElement.getReturnType().toString().equals(configuration.getEnumTypePackageName().concat(".Conditional")))
+//                )
+//                .findFirst();
+//        if (expressions.isPresent()) {
+//
+//        }
         Optional<? extends AnnotationMirror> expression = executableElement.getAnnotationMirrors().stream()
                 .filter(annotationMirror ->
                         annotationMirror.getAnnotationType().asElement().getEnclosedElements().stream()
@@ -58,6 +66,7 @@ public class JavaElementToOperation {
                 )
                 .findFirst();
         if (expression.isPresent()) {
+
             ValueWithVariable valueWithVariable = new ValueWithVariable(
                     expression.get().getElementValues().entrySet().stream()
                             .collect(
@@ -67,10 +76,10 @@ public class JavaElementToOperation {
                                     )
                             )
             );
-            System.out.println(valueWithVariable);
-
-
+            Argument argument = new Argument(getArgumentName(expression.get()), valueWithVariable.toString());
+            field.addArgument(argument);
         }
+        operation.addField(field);
         return operation.toString();
     }
 
@@ -81,8 +90,38 @@ public class JavaElementToOperation {
             return parentExecutableElement.getParameters().stream()
                     .filter(variableElement -> variableElement.getSimpleName().toString().equals(annotationValue.getValue()))
                     .findFirst()
-                    .orElse(null);
+                    .orElseThrow();
         }
+    }
+
+    private String getArgumentName(AnnotationMirror expression) {
+        return expression.getElementValues().entrySet().stream()
+                .filter(entry -> !entry.getKey().getReturnType().toString().equals(configuration.getEnumTypePackageName().concat(".Operator")))
+                .findFirst()
+                .map(entry -> entry.getKey().getSimpleName().toString())
+                .orElseThrow();
+    }
+
+    private VariableDefinition variableElementToVariableDefinition(String queryName, VariableElement variableElement) {
+        ThrowingFunction<String, Class<?>, ClassNotFoundException> classForName = Class::forName;
+        VariableDefinition variableDefinition = new VariableDefinition()
+                .setVariable(variableElement.getSimpleName().toString());
+
+
+        String typeName = manager.getQueryOperationTypeName()
+                .flatMap(queryTypeName -> manager.getField(queryTypeName, queryName))
+                .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
+                .flatMap(parentTypeName -> manager.getField(parentTypeName, variableElement.getSimpleName().toString()))
+                .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
+                .orElseThrow();
+
+        variableDefinition.setTypeName(typeName);
+
+        DefaultValue defaultValue = variableElement.getAnnotation(DefaultValue.class);
+        if (defaultValue != null) {
+            variableDefinition.setDefaultValue(defaultValue.value());
+        }
+        return variableDefinition;
     }
 
     private InputObjectType expressionsToInput(AnnotationMirror expressions) {

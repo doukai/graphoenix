@@ -1,6 +1,5 @@
 package io.graphoenix.graphql.generator.operation;
 
-import io.graphoenix.graphql.generator.document.InputValue;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -14,7 +13,7 @@ public class Operation {
 
     private String operationType;
     private String name;
-    private List<InputValue> variableDefinitions;
+    private List<VariableDefinition> variableDefinitions;
     private List<String> directives;
     private List<Field> fields;
 
@@ -36,11 +35,11 @@ public class Operation {
         return this;
     }
 
-    public List<InputValue> getVariableDefinitions() {
+    public List<VariableDefinition> getVariableDefinitions() {
         return variableDefinitions;
     }
 
-    public Operation setVariableDefinitions(List<InputValue> variableDefinitions) {
+    public Operation setVariableDefinitions(List<VariableDefinition> variableDefinitions) {
         this.variableDefinitions = variableDefinitions;
         return this;
     }

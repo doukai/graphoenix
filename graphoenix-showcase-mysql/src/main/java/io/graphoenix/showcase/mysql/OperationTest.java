@@ -13,12 +13,12 @@ import reactor.core.publisher.Mono;
 @GraphQLApi
 public interface OperationTest {
 
-    @Query
+    @Query("userList")
 //    @UserExpressions({
 //            @UserExpression(name = "name"),
 //            @UserExpression(sex = "sex")
 //    })
-    @UserExpression(opr = Operator.NEQ, sex = "sex", name = "name")
+    @UserExpression(opr = Operator.NEQ, sex = "sex")
     User queryUser(String name, Sex sex);
 
     @Query
