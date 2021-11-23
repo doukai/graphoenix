@@ -1,6 +1,5 @@
 package io.graphoenix.graphql.generator.translator;
 
-import com.pivovarit.function.ThrowingFunction;
 import io.graphoenix.graphql.generator.document.InputObjectType;
 import io.graphoenix.graphql.generator.operation.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -40,12 +39,7 @@ public class JavaElementToOperation {
     private String executableElementToQuery(String queryName, ExecutableElement executableElement) {
         Operation operation = new Operation()
                 .setName(executableElement.getSimpleName().toString())
-                .setOperationType("query")
-                .setVariableDefinitions(
-                        executableElement.getParameters().stream()
-                                .map(variableElement -> variableElementToVariableDefinition(queryName, variableElement))
-                                .collect(Collectors.toList())
-                );
+                .setOperationType("query");
         Field field = new Field().setName(queryName);
 
 //        Optional<? extends AnnotationMirror> expressions = executableElement.getAnnotationMirrors().stream()
@@ -76,8 +70,9 @@ public class JavaElementToOperation {
                                     )
                             )
             );
-            Argument argument = new Argument(getArgumentName(expression.get()), valueWithVariable.toString());
-            field.addArgument(argument);
+            String argumentName = getArgumentName(expression.get());
+            field.addArgument(new Argument(argumentName, valueWithVariable.toString()));
+            operation.addVariableDefinition(variableElementToVariableDefinition(queryName, argumentName, getParameter(executableElement, argumentName)));
         }
         operation.addField(field);
         return operation.toString();
@@ -102,16 +97,20 @@ public class JavaElementToOperation {
                 .orElseThrow();
     }
 
-    private VariableDefinition variableElementToVariableDefinition(String queryName, VariableElement variableElement) {
-        ThrowingFunction<String, Class<?>, ClassNotFoundException> classForName = Class::forName;
+    private VariableElement getParameter(ExecutableElement executableElement, String parameterName) {
+        return executableElement.getParameters().stream()
+                .filter(variableElement -> variableElement.getSimpleName().toString().equals(parameterName))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private VariableDefinition variableElementToVariableDefinition(String queryName, String argumentName, VariableElement variableElement) {
         VariableDefinition variableDefinition = new VariableDefinition()
-                .setVariable(variableElement.getSimpleName().toString());
-
-
+                .setVariable(argumentName);
         String typeName = manager.getQueryOperationTypeName()
                 .flatMap(queryTypeName -> manager.getField(queryTypeName, queryName))
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
-                .flatMap(parentTypeName -> manager.getField(parentTypeName, variableElement.getSimpleName().toString()))
+                .flatMap(parentTypeName -> manager.getField(parentTypeName, argumentName))
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .orElseThrow();
 

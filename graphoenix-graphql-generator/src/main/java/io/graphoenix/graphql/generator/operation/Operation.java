@@ -44,6 +44,14 @@ public class Operation {
         return this;
     }
 
+    public Operation addVariableDefinition(VariableDefinition variableDefinition) {
+        if (this.variableDefinitions == null) {
+            this.variableDefinitions = new ArrayList<>();
+        }
+        this.variableDefinitions.add(variableDefinition);
+        return this;
+    }
+
     public List<String> getDirectives() {
         return directives;
     }
