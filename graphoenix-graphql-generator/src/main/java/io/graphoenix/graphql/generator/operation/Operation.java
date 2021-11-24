@@ -6,6 +6,8 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Operation {
 
@@ -49,6 +51,14 @@ public class Operation {
             this.variableDefinitions = new ArrayList<>();
         }
         this.variableDefinitions.add(variableDefinition);
+        return this;
+    }
+
+    public Operation addVariableDefinitions(Stream<VariableDefinition> variableDefinitionStream) {
+        if (this.variableDefinitions == null) {
+            this.variableDefinitions = new ArrayList<>();
+        }
+        this.variableDefinitions.addAll(variableDefinitionStream.collect(Collectors.toList()));
         return this;
     }
 

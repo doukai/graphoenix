@@ -37,6 +37,11 @@ public class Argument {
         return this;
     }
 
+    public Argument setValueWithVariable(ValueWithVariable valueWithVariable) {
+        this.valueWithVariable = valueWithVariable.toString();
+        return this;
+    }
+
     @Override
     public String toString() {
         ST st = stGroupFile.getInstanceOf("argumentDefinition");

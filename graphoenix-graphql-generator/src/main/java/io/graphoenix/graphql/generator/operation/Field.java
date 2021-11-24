@@ -6,6 +6,8 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Field {
 
@@ -49,6 +51,14 @@ public class Field {
             this.arguments = new ArrayList<>();
         }
         this.arguments.add(argument);
+        return this;
+    }
+
+    public Field addArguments(Stream<Argument> argumentStream) {
+        if (this.arguments == null) {
+            this.arguments = new ArrayList<>();
+        }
+        this.arguments.addAll(argumentStream.collect(Collectors.toList()));
         return this;
     }
 

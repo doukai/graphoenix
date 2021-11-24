@@ -5,15 +5,15 @@ import io.graphoenix.showcase.mysql.generated.annotation.UserExpressions;
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import io.graphoenix.showcase.mysql.generated.enumType.Sex;
 import io.graphoenix.showcase.mysql.generated.objectType.User;
-import org.eclipse.microprofile.graphql.GraphQLApi;
-import org.eclipse.microprofile.graphql.Mutation;
-import org.eclipse.microprofile.graphql.Query;
+import io.graphoenix.spi.annotation.GraphQLOperation;
+import io.graphoenix.spi.annotation.MutationOperation;
+import io.graphoenix.spi.annotation.QueryOperation;
 import reactor.core.publisher.Mono;
 
-@GraphQLApi
+@GraphQLOperation
 public interface OperationTest {
 
-    @Query("userList")
+    @QueryOperation("userList")
 //    @UserExpressions({
 //            @UserExpression(name = "name"),
 //            @UserExpression(sex = "sex")
@@ -21,17 +21,17 @@ public interface OperationTest {
     @UserExpression(opr = Operator.NEQ, sex = "sex")
     User queryUser(String name, Sex sex);
 
-    @Query
+    @QueryOperation("userList")
     @UserExpressions({
             @UserExpression(name = "name"),
             @UserExpression(sex = "sex")
     })
-    Mono<User> queryUserAsync();
+    Mono<User> queryUserAsync(String name, Sex sex);
 
-    @Mutation
+    @MutationOperation("userList")
     User mutationUser();
 
-    @Mutation
+    @MutationOperation("userList")
     Mono<User> mutationUserAsync();
 
 }
