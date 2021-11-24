@@ -12,13 +12,23 @@ import java.lang.annotation.Target;
 public @interface UserRoleExpression {
   Operator opr() default Operator.EQ;
 
-  String isDeprecated() default "";
+  boolean isDeprecated() default false;
 
-  String roleId() default "";
+  int roleId() default 0;
 
-  String id() default "";
+  int id() default 0;
 
-  String userId() default "";
+  int userId() default 0;
 
-  String version() default "";
+  int version() default 0;
+
+  String $isDeprecated() default "";
+
+  String $roleId() default "";
+
+  String $id() default "";
+
+  String $userId() default "";
+
+  String $version() default "";
 }

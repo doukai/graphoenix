@@ -2,8 +2,12 @@ package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import java.util.Set;
+import org.eclipse.microprofile.graphql.DefaultValue;
+import org.eclipse.microprofile.graphql.Input;
 
+@Input
 public class OperatorExpression {
+  @DefaultValue("=EQ")
   private Operator opr;
 
   private Operator val;

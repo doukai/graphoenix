@@ -1,7 +1,9 @@
 package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
 import java.lang.String;
+import org.eclipse.microprofile.graphql.Input;
 
+@Input
 public class MapWith {
   private String type;
 

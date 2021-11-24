@@ -7,4 +7,6 @@ import java.lang.annotation.*;
 @Documented
 public @interface QueryOperation {
     String value();
+
+    int layers() default 0;
 }

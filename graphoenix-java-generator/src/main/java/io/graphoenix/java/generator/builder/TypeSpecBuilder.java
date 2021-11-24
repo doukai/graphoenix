@@ -138,7 +138,7 @@ public class TypeSpecBuilder {
         );
         CodeBlock.Builder codeBuilder = CodeBlock.builder();
         codeBuilder.add("{");
-        codeBuilder.add(CodeBlock.join(buildElementTypeList(directiveDefinitionContext.directiveLocations()).stream().map(elementType -> CodeBlock.of("$T.$L", elementType)).collect(Collectors.toList()), ","));
+        codeBuilder.add(CodeBlock.join(buildElementTypeList(directiveDefinitionContext.directiveLocations()).stream().map(elementType -> CodeBlock.of("$T.$L", ElementType.class, elementType)).collect(Collectors.toList()), ","));
         codeBuilder.add("}");
         builder.addAnnotation(
                 AnnotationSpec.builder(Target.class)
@@ -227,7 +227,7 @@ public class TypeSpecBuilder {
 
     public FieldSpec buildField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.PRIVATE);
-        if(manager.getFieldTypeName(fieldDefinitionContext.type()).equals("ID")){
+        if (manager.getFieldTypeName(fieldDefinitionContext.type()).equals("ID")) {
             builder.addAnnotation(Id.class);
         }
         if (fieldDefinitionContext.type().nonNullType() != null) {
@@ -405,6 +405,7 @@ public class TypeSpecBuilder {
         return null;
     }
 
+
     public TypeName buildAnnotationType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
@@ -417,6 +418,41 @@ public class TypeSpecBuilder {
                 return TypeName.get(String.class);
             case "Boolean":
                 return TypeName.get(boolean.class);
+        }
+        return null;
+    }
+
+    public CodeBlock buildAnnotationDefaultValue(GraphqlParser.TypeContext typeContext) {
+        if (manager.isScaLar(manager.getFieldTypeName(typeContext))) {
+            Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(manager.getFieldTypeName(typeContext));
+            if (scaLar.isPresent()) {
+                return buildAnnotationDefaultValue(scaLar.get());
+            }
+        } else if (manager.isEnum(manager.getFieldTypeName(typeContext))) {
+            Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(manager.getFieldTypeName(typeContext));
+            if (enumType.isPresent()) {
+                return CodeBlock.of(
+                        "$T.$L",
+                        ClassName.get(configuration.getEnumTypePackageName(), enumType.get().name().getText()),
+                        enumType.get().enumValueDefinitions().enumValueDefinition(0).enumValue().enumValueName().getText()
+                );
+            }
+        }
+        return null;
+    }
+
+    public CodeBlock buildAnnotationDefaultValue(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
+        String name = scalarTypeDefinitionContext.name().getText();
+        switch (name) {
+            case "ID":
+            case "Int":
+                return CodeBlock.of("$L", 0);
+            case "Float":
+                return CodeBlock.of("$L", 0.0f);
+            case "String":
+                return CodeBlock.of("$S", "");
+            case "Boolean":
+                return CodeBlock.of("$L", false);
         }
         return null;
     }
@@ -517,12 +553,26 @@ public class TypeSpecBuilder {
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext ->
-                                                        manager.isScaLar(
-                                                                manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                                 manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                 )
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(buildType(fieldDefinitionContext.type(), true))
+                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type()))
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                )
+                                .addMethods(
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext ->
+                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                )
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                                                                 .returns(String.class)
                                                                 .defaultValue("$S", "")
@@ -607,12 +657,26 @@ public class TypeSpecBuilder {
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext ->
-                                                        manager.isScaLar(
-                                                                manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                                 manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                 )
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(buildType(fieldDefinitionContext.type(), true))
+                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type()))
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                )
+                                .addMethods(
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext ->
+                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                )
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                                                                 .returns(String.class)
                                                                 .defaultValue("$S", "")

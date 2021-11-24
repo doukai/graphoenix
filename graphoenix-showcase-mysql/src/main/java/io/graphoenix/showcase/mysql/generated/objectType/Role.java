@@ -6,12 +6,16 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
+import org.eclipse.microprofile.graphql.Id;
+import org.eclipse.microprofile.graphql.NonNull;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type
 public class Role implements Meta {
+  @Id
   private Integer id;
 
-  @NotNull
+  @NonNull
   private String name;
 
   private Set<User> users;

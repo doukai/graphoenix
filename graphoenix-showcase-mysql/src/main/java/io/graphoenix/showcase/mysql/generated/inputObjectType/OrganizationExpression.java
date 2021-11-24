@@ -3,7 +3,10 @@ package io.graphoenix.showcase.mysql.generated.inputObjectType;
 import io.graphoenix.showcase.mysql.generated.enumType.Conditional;
 import java.lang.Boolean;
 import java.util.Set;
+import org.eclipse.microprofile.graphql.DefaultValue;
+import org.eclipse.microprofile.graphql.Input;
 
+@Input
 public class OrganizationExpression {
   private IDExpression id;
 
@@ -17,8 +20,10 @@ public class OrganizationExpression {
 
   private IntExpression version;
 
+  @DefaultValue("=false")
   private Boolean includeDeprecated;
 
+  @DefaultValue("=AND")
   private Conditional cond;
 
   private Set<OrganizationExpression> exs;

@@ -4,8 +4,10 @@ import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
+import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
+@Input
 public class OrganizationInput {
   private Integer id;
 
@@ -15,7 +17,7 @@ public class OrganizationInput {
 
   private Set<UserInput> users;
 
-  @NotNull
+  @NonNull
   private String name;
 
   private Integer version;

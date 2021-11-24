@@ -3,8 +3,12 @@ package io.graphoenix.showcase.mysql.generated.inputObjectType;
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import java.lang.Float;
 import java.util.Set;
+import org.eclipse.microprofile.graphql.DefaultValue;
+import org.eclipse.microprofile.graphql.Input;
 
+@Input
 public class FloatExpression {
+  @DefaultValue("=EQ")
   private Operator opr;
 
   private Float val;

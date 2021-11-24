@@ -2,7 +2,9 @@ package io.graphoenix.showcase.mysql.generated.interfaceType;
 
 import java.lang.Boolean;
 import java.lang.Integer;
+import org.eclipse.microprofile.graphql.Interface;
 
+@Interface
 public interface Meta {
   Integer version = null;
 

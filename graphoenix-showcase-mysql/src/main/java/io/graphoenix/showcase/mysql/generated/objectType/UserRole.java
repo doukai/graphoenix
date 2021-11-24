@@ -4,8 +4,12 @@ import io.graphoenix.showcase.mysql.generated.interfaceType.Meta;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Override;
+import org.eclipse.microprofile.graphql.Id;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type
 public class UserRole implements Meta {
+  @Id
   private Integer id;
 
   private Integer userId;

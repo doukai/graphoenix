@@ -2,7 +2,9 @@ package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
 import java.lang.Boolean;
 import java.lang.Integer;
+import org.eclipse.microprofile.graphql.Input;
 
+@Input
 public class UserRoleInput {
   private Integer id;
 

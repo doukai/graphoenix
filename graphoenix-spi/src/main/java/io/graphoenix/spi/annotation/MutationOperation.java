@@ -7,4 +7,6 @@ import java.lang.annotation.*;
 @Documented
 public @interface MutationOperation {
     String value();
+
+    int layers() default 0;
 }

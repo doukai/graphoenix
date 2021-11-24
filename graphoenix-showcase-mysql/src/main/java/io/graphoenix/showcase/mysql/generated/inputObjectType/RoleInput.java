@@ -4,12 +4,14 @@ import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
+import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
+@Input
 public class RoleInput {
   private Integer id;
 
-  @NotNull
+  @NonNull
   private String name;
 
   private Set<UserInput> users;

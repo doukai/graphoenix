@@ -6,9 +6,13 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import java.util.Set;
-import javax.validation.constraints.NotNull;
+import org.eclipse.microprofile.graphql.Id;
+import org.eclipse.microprofile.graphql.NonNull;
+import org.eclipse.microprofile.graphql.Type;
 
+@Type
 public class Organization implements Meta {
+  @Id
   private Integer id;
 
   private Integer aboveId;
@@ -17,7 +21,7 @@ public class Organization implements Meta {
 
   private Set<User> users;
 
-  @NotNull
+  @NonNull
   private String name;
 
   private Integer version;

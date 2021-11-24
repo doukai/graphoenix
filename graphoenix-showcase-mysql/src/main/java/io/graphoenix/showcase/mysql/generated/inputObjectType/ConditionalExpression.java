@@ -3,8 +3,12 @@ package io.graphoenix.showcase.mysql.generated.inputObjectType;
 import io.graphoenix.showcase.mysql.generated.enumType.Conditional;
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import java.util.Set;
+import org.eclipse.microprofile.graphql.DefaultValue;
+import org.eclipse.microprofile.graphql.Input;
 
+@Input
 public class ConditionalExpression {
+  @DefaultValue("=EQ")
   private Operator opr;
 
   private Conditional val;
