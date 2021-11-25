@@ -3,6 +3,10 @@ package io.graphoenix.java.generator.builder;
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.spi.annotation.TypeExpression;
+import io.graphoenix.spi.annotation.TypeExpressions;
+import io.graphoenix.spi.annotation.TypeInput;
+import io.graphoenix.spi.annotation.TypeInputs;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.eclipse.microprofile.graphql.*;
@@ -343,6 +347,21 @@ public class TypeSpecBuilder {
         return null;
     }
 
+    public TypeName buildExpressionType(GraphqlParser.TypeContext typeContext, boolean isAnnotation) {
+        if (typeContext.typeName() != null) {
+            return buildExpressionType(typeContext.typeName().name(), isAnnotation);
+        } else if (typeContext.listType() != null) {
+            return buildExpressionType(typeContext.listType().type(), isAnnotation);
+        } else if (typeContext.nonNullType() != null) {
+            if (typeContext.nonNullType().typeName() != null) {
+                return buildExpressionType(typeContext.nonNullType().typeName().name(), isAnnotation);
+            } else if (typeContext.nonNullType().listType() != null) {
+                return buildExpressionType(typeContext.nonNullType().listType().type(), isAnnotation);
+            }
+        }
+        return null;
+    }
+
     public TypeName buildType(GraphqlParser.NameContext nameContext, boolean isAnnotation) {
         if (manager.isScaLar(nameContext.getText())) {
             Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(nameContext.getText());
@@ -381,6 +400,25 @@ public class TypeSpecBuilder {
         return null;
     }
 
+    public TypeName buildExpressionType(GraphqlParser.NameContext nameContext, boolean isAnnotation) {
+        if (manager.isScaLar(nameContext.getText())) {
+            Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(nameContext.getText());
+            if (scaLar.isPresent()) {
+                if (isAnnotation) {
+                    return buildAnnotationType(scaLar.get());
+                } else {
+                    return buildType(scaLar.get());
+                }
+            }
+        } else if (manager.isEnum(nameContext.getText())) {
+            Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
+            if (enumType.isPresent()) {
+                return ClassName.get(configuration.getEnumTypePackageName(), enumType.get().name().getText());
+            }
+        }
+        return null;
+    }
+
     public TypeName buildType(GraphqlParser.ListTypeContext listTypeContext, boolean isAnnotation) {
         if (isAnnotation) {
             return ArrayTypeName.of(buildType(listTypeContext.type(), true));
@@ -404,7 +442,6 @@ public class TypeSpecBuilder {
         }
         return null;
     }
-
 
     public TypeName buildAnnotationType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
@@ -543,6 +580,7 @@ public class TypeSpecBuilder {
                                                 .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
                                                 .build()
                                 )
+                                .addAnnotation(TypeExpression.class)
                                 .addMethod(
                                         MethodSpec.methodBuilder("opr")
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -559,7 +597,7 @@ public class TypeSpecBuilder {
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ArrayTypeName.of(buildType(fieldDefinitionContext.type(), true)))
+                                                                .returns(ArrayTypeName.of(buildExpressionType(fieldDefinitionContext.type(), true)))
                                                                 .defaultValue(CodeBlock.of("$L", "{}"))
                                                                 .build()
                                                 )
@@ -604,6 +642,7 @@ public class TypeSpecBuilder {
                                                 .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
                                                 .build()
                                 )
+                                .addAnnotation(TypeExpressions.class)
                                 .addMethod(
                                         MethodSpec.methodBuilder("cond")
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -654,6 +693,7 @@ public class TypeSpecBuilder {
                                                 .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
                                                 .build()
                                 )
+                                .addAnnotation(TypeInput.class)
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext ->
@@ -708,6 +748,7 @@ public class TypeSpecBuilder {
                                                 .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
                                                 .build()
                                 )
+                                .addAnnotation(TypeInputs.class)
                                 .addMethod(
                                         MethodSpec.methodBuilder("value")
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
