@@ -25,15 +25,15 @@ public interface OperationTest {
     @QueryOperation("userList")
     @UserExpressions(
             value = {
-                    @UserExpression(name = "dk1"),
-//                    @UserExpression(opr = Operator.NEQ, $sex = "sex")
+                    @UserExpression(name = {"dk1", "dk2"}),
+                    @UserExpression(opr = Operator.NEQ, $sex = {"sex", "sex2"})
             },
             roles = {
                     @RoleExpression(name = "role1"),
-//                    @RoleExpression($version = "version")
+                    @RoleExpression($version = "version")
             }
     )
-    Mono<User> queryUserAsync(String name, Sex sex, int version);
+    Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version);
 
     @MutationOperation("userList")
     User mutationUser();

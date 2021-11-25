@@ -52,14 +52,32 @@ public class JavaElementToOperation {
         Optional<? extends AnnotationMirror> expressions = getExpressionsAnnotation(executableElement);
         if (expressions.isPresent()) {
             field.addArguments(expressionsAnnotationArguments(executableElement, expressions.get()));
-            operation.addVariableDefinitions(getVariableArgumentNames(expressions.get()).map(argumentName -> buildVariableDefinition(queryFieldName, argumentName)));
-            operation.addVariableDefinitions(getRelationValueArgumentNames(expressions.get()).map(argumentName -> buildVariableDefinition(queryFieldName, argumentName)));
+            operation.addVariableDefinitions(
+                    getVariableArgumentNames(expressions.get())
+                            .flatMap(argumentName ->
+                                    getVariableNamesByArgumentNames(expressions.get(), argumentName)
+                                            .map(variableName -> buildVariableDefinition(queryFieldName, argumentName.substring(1), variableName))
+                            )
+            );
+            operation.addVariableDefinitions(
+                    getRelationValueArgumentNames(expressions.get())
+                            .flatMap(argumentName ->
+                                    getRelationVariableNamesByArgumentNames(expressions.get(), argumentName)
+                                            .map(variableName -> buildVariableDefinition(queryFieldName, argumentName.substring(1), variableName))
+                            )
+            );
         }
 
         Optional<? extends AnnotationMirror> expression = getExpressionAnnotation(executableElement);
         if (expression.isPresent()) {
             field.addArgument(expressionAnnotationToArgument(executableElement, expression.get()));
-            getVariableArgumentName(expression.get()).ifPresent(argumentName -> operation.addVariableDefinition(buildVariableDefinition(queryFieldName, argumentName)));
+            getVariableArgumentName(expression.get())
+                    .ifPresent(argumentName ->
+                            operation.addVariableDefinitions(
+                                    getVariableNamesByArgumentName(expression.get(), argumentName)
+                                            .map(variableName -> buildVariableDefinition(queryFieldName, argumentName.substring(1), variableName))
+                            )
+                    );
         }
         field.setFields(buildFields(getQueryTypeName(queryFieldName), 0, layers));
         operation.addField(field);
@@ -227,7 +245,7 @@ public class JavaElementToOperation {
                 .filter(annotationValue -> !annotationValue.getReturnType().toString().equals(operatorName))
                 .filter(annotationValue -> annotationValue.getSimpleName().toString().startsWith("$"))
                 .findFirst()
-                .map(annotationValue -> annotationValue.getSimpleName().toString().substring(1));
+                .map(annotationValue -> annotationValue.getSimpleName().toString());
     }
 
     private Stream<String> getVariableArgumentNames(AnnotationMirror expressions) {
@@ -263,29 +281,78 @@ public class JavaElementToOperation {
                 );
     }
 
-    private Optional<VariableElement> getVariable(AnnotationMirror expression, ExecutableElement parentExecutableElement) {
+    private Stream<String> getVariableNamesByArgumentName(AnnotationMirror expression, String variableArgumentName) {
+        return expression.getElementValues().entrySet().stream()
+                .filter(entry -> entry.getKey().getSimpleName().toString().equals(variableArgumentName))
+                .filter(entry -> entry.getValue().getValue() instanceof List<?>)
+                .findFirst()
+                .map(entry -> (List<?>) entry.getValue().getValue())
+                .map(list -> list.stream().map(value -> ((AnnotationValue) value).getValue().toString()))
+                .orElseGet(Stream::empty);
+    }
+
+
+    private Stream<String> getVariableNamesByArgumentNames(AnnotationMirror expressions, String variableArgumentName) {
+        return expressions.getElementValues().entrySet().stream()
+                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> entry.getKey().getSimpleName().toString().equals("value"))
+                .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
+                .map(entry -> (Collection<?>) entry.getValue().getValue())
+                .findFirst()
+                .map(collection ->
+                        collection.stream()
+                                .filter(expression -> expression instanceof AnnotationValue)
+                                .map(expression -> (AnnotationMirror) expression)
+                                .flatMap(expression -> getVariableNamesByArgumentName(expression, variableArgumentName))
+                ).orElseGet(Stream::empty);
+    }
+
+    private Stream<String> getRelationVariableNamesByArgumentNames(AnnotationMirror expressions, String variableArgumentName) {
+        return expressions.getElementValues().entrySet().stream()
+                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> !entry.getKey().getSimpleName().toString().equals("value"))
+                .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
+                .map(entry -> (Collection<?>) entry.getValue().getValue())
+                .flatMap(collection ->
+                        collection.stream()
+                                .filter(expression -> expression instanceof AnnotationValue)
+                                .map(expression -> (AnnotationMirror) expression)
+                                .flatMap(expression -> getVariableNamesByArgumentName(expression, variableArgumentName))
+                );
+    }
+
+    private Optional<Object> getVariable(AnnotationMirror expression, ExecutableElement parentExecutableElement) {
         return expression.getElementValues().entrySet().stream()
                 .filter(entry -> !entry.getKey().getReturnType().toString().equals(operatorName))
                 .filter(entry -> entry.getKey().getSimpleName().toString().startsWith("$"))
+                .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                 .findFirst()
-                .flatMap(entry ->
-                        parentExecutableElement.getParameters().stream()
-                                .filter(variableElement -> variableElement.getSimpleName().toString().equals(entry.getValue().getValue().toString()))
+                .map(entry -> (List<?>) entry.getValue().getValue())
+                .map(list -> list.stream()
+                        .map(value -> parentExecutableElement.getParameters().stream()
+                                .filter(variableElement -> variableElement.getSimpleName().toString().equals(((AnnotationValue) value).getValue().toString()))
                                 .findFirst()
-                );
+                        )
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList())
+                )
+                .map(variableElements -> variableElements.size() == 1 ? variableElements.get(0) : variableElements);
     }
 
     private Optional<Object> getValue(AnnotationMirror expression) {
         return expression.getElementValues().entrySet().stream()
                 .filter(entry -> !entry.getKey().getReturnType().toString().equals(operatorName))
                 .filter(entry -> !entry.getKey().getSimpleName().toString().startsWith("$"))
+                .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                 .findFirst()
-                .map(entry -> entry.getValue().getValue());
+                .map(entry -> (List<?>) entry.getValue().getValue())
+                .map(values -> values.size() == 1 ? values.get(0) : values);
     }
 
-    private VariableDefinition buildVariableDefinition(String queryFieldName, String argumentName) {
+    private VariableDefinition buildVariableDefinition(String queryFieldName, String argumentName, String variableName) {
         return new VariableDefinition()
-                .setVariable(argumentName)
+                .setVariable(variableName)
                 .setTypeName(getTypeName(queryFieldName, argumentName));
     }
 
