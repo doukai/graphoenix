@@ -559,8 +559,8 @@ public class TypeSpecBuilder {
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(buildType(fieldDefinitionContext.type(), true))
-                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type()))
+                                                                .returns(ArrayTypeName.of(buildType(fieldDefinitionContext.type(), true)))
+                                                                .defaultValue(CodeBlock.of("$L", "{}"))
                                                                 .build()
                                                 )
                                                 .collect(Collectors.toList())
@@ -574,8 +574,8 @@ public class TypeSpecBuilder {
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(String.class)
-                                                                .defaultValue("$S", "")
+                                                                .returns(ArrayTypeName.of(String.class))
+                                                                .defaultValue(CodeBlock.of("$L", "{}"))
                                                                 .build()
                                                 )
                                                 .collect(Collectors.toList())

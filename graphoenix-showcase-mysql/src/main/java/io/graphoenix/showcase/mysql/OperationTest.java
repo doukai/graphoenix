@@ -19,18 +19,18 @@ public interface OperationTest {
 //            @UserExpression(name = "name"),
 //            @UserExpression(sex = "sex")
 //    })
-    @UserExpression(opr = Operator.NEQ, $sex = "sex")
+    @UserExpression(opr = Operator.NEQ, name = "test2")
     User queryUser(String name, Sex sex);
 
     @QueryOperation("userList")
     @UserExpressions(
             value = {
                     @UserExpression(name = "dk1"),
-                    @UserExpression(opr = Operator.NEQ, $sex = "sex")
+//                    @UserExpression(opr = Operator.NEQ, $sex = "sex")
             },
             roles = {
                     @RoleExpression(name = "role1"),
-                    @RoleExpression($version = "version")
+//                    @RoleExpression($version = "version")
             }
     )
     Mono<User> queryUserAsync(String name, Sex sex, int version);

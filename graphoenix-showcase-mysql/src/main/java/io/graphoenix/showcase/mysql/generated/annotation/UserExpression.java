@@ -13,43 +13,43 @@ import java.lang.annotation.Target;
 public @interface UserExpression {
   Operator opr() default Operator.EQ;
 
-  int organizationId() default 0;
+  int[] organizationId() default {};
 
-  String password() default "";
+  String[] password() default {};
 
-  boolean isDeprecated() default false;
+  boolean[] isDeprecated() default {};
 
-  boolean disable() default false;
+  boolean[] disable() default {};
 
-  Sex sex() default Sex.MAN;
+  Sex[] sex() default {};
 
-  String name() default "";
+  String[] name() default {};
 
-  int id() default 0;
+  int[] id() default {};
 
-  String login() default "";
+  String[] login() default {};
 
-  int version() default 0;
+  int[] version() default {};
 
-  int age() default 0;
+  int[] age() default {};
 
-  String $organizationId() default "";
+  String[] $organizationId() default {};
 
-  String $password() default "";
+  String[] $password() default {};
 
-  String $isDeprecated() default "";
+  String[] $isDeprecated() default {};
 
-  String $disable() default "";
+  String[] $disable() default {};
 
-  String $sex() default "";
+  String[] $sex() default {};
 
-  String $name() default "";
+  String[] $name() default {};
 
-  String $id() default "";
+  String[] $id() default {};
 
-  String $login() default "";
+  String[] $login() default {};
 
-  String $version() default "";
+  String[] $version() default {};
 
-  String $age() default "";
+  String[] $age() default {};
 }

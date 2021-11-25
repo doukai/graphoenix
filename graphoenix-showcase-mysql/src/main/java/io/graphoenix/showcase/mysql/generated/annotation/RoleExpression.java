@@ -12,19 +12,19 @@ import java.lang.annotation.Target;
 public @interface RoleExpression {
   Operator opr() default Operator.EQ;
 
-  boolean isDeprecated() default false;
+  boolean[] isDeprecated() default {};
 
-  String name() default "";
+  String[] name() default {};
 
-  int id() default 0;
+  int[] id() default {};
 
-  int version() default 0;
+  int[] version() default {};
 
-  String $isDeprecated() default "";
+  String[] $isDeprecated() default {};
 
-  String $name() default "";
+  String[] $name() default {};
 
-  String $id() default "";
+  String[] $id() default {};
 
-  String $version() default "";
+  String[] $version() default {};
 }

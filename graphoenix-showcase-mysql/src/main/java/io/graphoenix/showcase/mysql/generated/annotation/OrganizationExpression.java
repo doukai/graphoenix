@@ -12,23 +12,23 @@ import java.lang.annotation.Target;
 public @interface OrganizationExpression {
   Operator opr() default Operator.EQ;
 
-  int aboveId() default 0;
+  int[] aboveId() default {};
 
-  boolean isDeprecated() default false;
+  boolean[] isDeprecated() default {};
 
-  String name() default "";
+  String[] name() default {};
 
-  int id() default 0;
+  int[] id() default {};
 
-  int version() default 0;
+  int[] version() default {};
 
-  String $aboveId() default "";
+  String[] $aboveId() default {};
 
-  String $isDeprecated() default "";
+  String[] $isDeprecated() default {};
 
-  String $name() default "";
+  String[] $name() default {};
 
-  String $id() default "";
+  String[] $id() default {};
 
-  String $version() default "";
+  String[] $version() default {};
 }
