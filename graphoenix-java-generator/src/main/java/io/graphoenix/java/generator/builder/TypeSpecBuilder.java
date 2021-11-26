@@ -752,8 +752,8 @@ public class TypeSpecBuilder {
                                 .addMethod(
                                         MethodSpec.methodBuilder("value")
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Input")))
-                                                .defaultValue("$L", "{}")
+                                                .returns(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Input"))
+                                                .defaultValue("$L", "@" + objectTypeDefinitionContext.name().getText() + "Input")
                                                 .build()
                                 )
                                 .addMethods(
@@ -762,8 +762,16 @@ public class TypeSpecBuilder {
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ArrayTypeName.of(ClassName.get(configuration.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")))
-                                                                .defaultValue("$L", "{}")
+                                                                .returns(
+                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
+                                                                                ArrayTypeName.of(ClassName.get(configuration.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")) :
+                                                                                ClassName.get(configuration.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")
+                                                                )
+                                                                .defaultValue("$L",
+                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
+                                                                                "{}" :
+                                                                                "@" + manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input"
+                                                                )
                                                                 .build()
                                                 )
                                                 .collect(Collectors.toList())

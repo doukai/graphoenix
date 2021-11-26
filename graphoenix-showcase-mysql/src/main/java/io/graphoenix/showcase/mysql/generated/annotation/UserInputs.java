@@ -10,9 +10,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInputs
 public @interface UserInputs {
-  UserInput[] value() default {};
+  UserInput value() default @UserInput;
 
-  OrganizationInput[] organization() default {};
+  OrganizationInput organization() default @OrganizationInput;
 
   RoleInput[] roles() default {};
 }

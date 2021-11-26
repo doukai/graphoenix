@@ -101,7 +101,7 @@ public class MethodToQueryOperation {
 
     private Argument expressionAnnotationToArgument(ExecutableElement executableElement, AnnotationMirror expression) {
         return new Argument()
-                .setName(getValueArgumentName(expression).orElseGet(() -> getVariableArgumentName(expression).orElseThrow()))
+                .setName(getValueArgumentName(expression).orElseGet(() -> getVariableArgumentName(expression).map(argumentName -> argumentName.substring(1)).orElseThrow()))
                 .setValueWithVariable(
                         Map.of(
                                 getOperatorArgumentName(expression),

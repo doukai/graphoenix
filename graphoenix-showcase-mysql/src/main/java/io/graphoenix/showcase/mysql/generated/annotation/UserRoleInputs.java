@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInputs
 public @interface UserRoleInputs {
-  UserRoleInput[] value() default {};
+  UserRoleInput value() default @UserRoleInput;
 }

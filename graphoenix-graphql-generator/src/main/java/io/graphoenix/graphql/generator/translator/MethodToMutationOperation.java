@@ -13,6 +13,7 @@ import io.graphoenix.spi.config.JavaGeneratorConfig;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.VariableElement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -27,11 +28,11 @@ public class MethodToMutationOperation {
         this.manager = manager;
     }
 
-    public String executableElementToQuery(String queryFieldName, ExecutableElement executableElement, int layers) {
+    public String executableElementToMutation(String mutationFieldName, ExecutableElement executableElement, int layers) {
         Operation operation = new Operation()
                 .setName(executableElement.getSimpleName().toString())
                 .setOperationType("mutation");
-        Field field = new Field().setName(queryFieldName);
+        Field field = new Field().setName(mutationFieldName);
 
         Optional<? extends AnnotationMirror> expressions = getInputsAnnotation(executableElement);
         if (expressions.isPresent()) {
@@ -40,14 +41,14 @@ public class MethodToMutationOperation {
                     getVariableArgumentNames(expressions.get())
                             .flatMap(argumentName ->
                                     getInputsVariableNamesByArgumentName(expressions.get(), argumentName)
-                                            .map(variableName -> buildVariableDefinition(queryFieldName, argumentName.substring(1), variableName))
+                                            .map(variableName -> buildVariableDefinition(mutationFieldName, argumentName.substring(1), variableName))
                             )
             );
             operation.addVariableDefinitions(
                     getRelationValueArgumentNames(expressions.get())
                             .flatMap(argumentName ->
                                     getRelationInputsVariableNamesByArgumentName(expressions.get(), argumentName)
-                                            .map(variableName -> buildVariableDefinition(queryFieldName, argumentName.substring(1), variableName))
+                                            .map(variableName -> buildVariableDefinition(mutationFieldName, argumentName.substring(1), variableName))
                             )
             );
         }
@@ -59,11 +60,11 @@ public class MethodToMutationOperation {
                     .ifPresent(argumentName ->
                             operation.addVariableDefinitions(
                                     getInputVariableNamesByArgumentName(expression.get(), argumentName)
-                                            .map(variableName -> buildVariableDefinition(queryFieldName, argumentName.substring(1), variableName))
+                                            .map(variableName -> buildVariableDefinition(mutationFieldName, argumentName.substring(1), variableName))
                             )
                     );
         }
-        field.setFields(buildFields(getQueryTypeName(queryFieldName), 0, layers));
+        field.setFields(buildFields(getMutationTypeName(mutationFieldName), 0, layers));
         operation.addField(field);
         return operation.toString();
     }
@@ -96,7 +97,7 @@ public class MethodToMutationOperation {
 
     private Argument inputAnnotationToArgument(ExecutableElement executableElement, AnnotationMirror input) {
         return new Argument()
-                .setName(getValueArgumentName(input).orElseGet(() -> getVariableArgumentName(input).orElseThrow()))
+                .setName(getValueArgumentName(input).orElseGet(() -> getVariableArgumentName(input).map(argumentName -> argumentName.substring(1)).orElseThrow()))
                 .setValueWithVariable(getValue(input).orElseGet(() -> getVariable(input, executableElement).orElseThrow()));
     }
 
@@ -127,18 +128,36 @@ public class MethodToMutationOperation {
     private Stream<Argument> getRelationValueArguments(ExecutableElement executableElement, AnnotationMirror inputs) {
         return inputs.getElementValues().entrySet().stream()
                 .filter(entry -> !entry.getKey().getSimpleName().toString().equals("value"))
-                .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
-                .map(entry -> new Argument()
-                        .setName(entry.getKey().getSimpleName().toString())
-                        .setValueWithVariable(
-                                ((Collection<?>) entry.getValue().getValue()).stream()
-                                        .filter(expression -> expression instanceof AnnotationValue)
-                                        .map(expression -> (AnnotationMirror) expression)
-                                        .collect(Collectors.toMap(
-                                                expression -> getValueArgumentName(expression).orElseGet(() -> getVariableArgumentName(expression).orElseThrow()),
-                                                expression -> getValue(expression).orElseGet(() -> getVariable(expression, executableElement).orElseThrow())
-                                        ))
-                        )
+                .map(entry -> {
+                            if (entry.getValue().getValue() instanceof Collection<?>) {
+
+                                return new Argument()
+                                        .setName(entry.getKey().getSimpleName().toString())
+                                        .setValueWithVariable(
+                                                ((Collection<?>) entry.getValue().getValue()).stream()
+                                                        .filter(expression -> expression instanceof AnnotationValue)
+                                                        .map(expression -> (AnnotationMirror) expression)
+                                                        .collect(Collectors.toMap(
+                                                                expression -> getValueArgumentName(expression).orElseGet(() -> getVariableArgumentName(expression).orElseThrow()),
+                                                                expression -> getValue(expression).orElseGet(() -> getVariable(expression, executableElement).orElseThrow())
+                                                        ))
+                                        );
+                            }else{
+                                return new Argument()
+                                        .setName(entry.getKey().getSimpleName().toString())
+                                        .setValueWithVariable(
+                                                ((Collection<?>) entry.getValue().getValue()).stream()
+                                                        .filter(expression -> expression instanceof AnnotationValue)
+                                                        .map(expression -> (AnnotationMirror) expression)
+                                                        .collect(Collectors.toMap(
+                                                                expression -> getValueArgumentName(expression).orElseGet(() -> getVariableArgumentName(expression).orElseThrow()),
+                                                                expression -> getValue(expression).orElseGet(() -> getVariable(expression, executableElement).orElseThrow())
+                                                        ))
+                                        );
+                            }
+
+
+                        }
                 );
     }
 
@@ -188,11 +207,15 @@ public class MethodToMutationOperation {
     private Stream<String> getInputVariableNamesByArgumentName(AnnotationMirror input, String variableArgumentName) {
         return input.getElementValues().entrySet().stream()
                 .filter(entry -> entry.getKey().getSimpleName().toString().equals(variableArgumentName))
-                .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                 .findFirst()
-                .map(entry -> (List<?>) entry.getValue().getValue())
-                .map(list -> list.stream().map(value -> ((AnnotationValue) value).getValue().toString()))
-                .orElseGet(Stream::empty);
+                .map(entry -> entry.getValue().getValue())
+                .map(value -> {
+                    if (value instanceof List<?>) {
+                        return ((List<?>) value).stream().map(item -> ((AnnotationValue) item).getValue().toString());
+                    } else {
+                        return Stream.of(value.toString());
+                    }
+                }).orElseGet(Stream::empty);
     }
 
 
@@ -225,10 +248,23 @@ public class MethodToMutationOperation {
         return input.getElementValues().entrySet().stream()
                 .filter(entry -> entry.getKey().getSimpleName().toString().startsWith("$"))
                 .findFirst()
-                .flatMap(entry -> parentExecutableElement.getParameters().stream()
-                        .filter(variableElement -> variableElement.getSimpleName().toString().equals(entry.getValue().getValue().toString()))
-                        .findFirst()
+                .map(entry -> entry.getValue().getValue())
+                .map(value -> {
+                            if (value instanceof List<?>) {
+                                return ((List<?>) value).stream()
+                                        .map(item -> getParameterFromExecutableElement(parentExecutableElement, ((AnnotationValue) item).getValue().toString()).orElseThrow())
+                                        .collect(Collectors.toList());
+                            } else {
+                                return getParameterFromExecutableElement(parentExecutableElement, value.toString()).orElseThrow();
+                            }
+                        }
                 );
+    }
+
+    private Optional<? extends VariableElement> getParameterFromExecutableElement(ExecutableElement executableElement, String name) {
+        return executableElement.getParameters().stream()
+                .filter(parameter -> parameter.getSimpleName().toString().equals(name))
+                .findFirst();
     }
 
     private Optional<Object> getValue(AnnotationMirror expression) {
@@ -238,21 +274,21 @@ public class MethodToMutationOperation {
                 .map(entry -> entry.getValue().getValue());
     }
 
-    private VariableDefinition buildVariableDefinition(String queryFieldName, String argumentName, String variableName) {
+    private VariableDefinition buildVariableDefinition(String mutationFieldName, String argumentName, String variableName) {
         return new VariableDefinition()
                 .setVariable(variableName)
-                .setTypeName(getTypeName(queryFieldName, argumentName));
+                .setTypeName(getTypeName(mutationFieldName, argumentName));
     }
 
-    private String getQueryTypeName(String queryFieldName) {
-        return manager.getQueryOperationTypeName()
-                .flatMap(queryTypeName -> manager.getField(queryTypeName, queryFieldName))
+    private String getMutationTypeName(String mutationFieldName) {
+        return manager.getMutationOperationTypeName()
+                .flatMap(mutationTypeName -> manager.getField(mutationTypeName, mutationFieldName))
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .orElseThrow();
     }
 
-    private String getTypeName(String queryFieldName, String argumentName) {
-        return manager.getField(getQueryTypeName(queryFieldName), argumentName)
+    private String getTypeName(String mutationFieldName, String argumentName) {
+        return manager.getField(getMutationTypeName(mutationFieldName), argumentName)
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .orElseThrow();
     }

@@ -35,7 +35,7 @@ public class JavaElementToOperation {
         }
         MutationOperation mutationOperation = executableElement.getAnnotation(MutationOperation.class);
         if (mutationOperation != null) {
-            return methodToMutationOperation.executableElementToQuery(mutationOperation.value(), executableElement, mutationOperation.layers());
+            return methodToMutationOperation.executableElementToMutation(mutationOperation.value(), executableElement, mutationOperation.layers());
         }
         return null;
     }
