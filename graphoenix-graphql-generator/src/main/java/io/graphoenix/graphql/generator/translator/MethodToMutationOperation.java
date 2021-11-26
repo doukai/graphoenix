@@ -84,13 +84,13 @@ public class MethodToMutationOperation {
 
     private Optional<? extends AnnotationMirror> getInputAnnotation(ExecutableElement executableElement) {
         return executableElement.getAnnotationMirrors().stream()
-                .filter(annotationMirror -> annotationMirror.getAnnotationType().getAnnotation(TypeInput.class) != null)
+                .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getAnnotation(TypeInput.class) != null)
                 .findFirst();
     }
 
     private Optional<? extends AnnotationMirror> getInputsAnnotation(ExecutableElement executableElement) {
         return executableElement.getAnnotationMirrors().stream()
-                .filter(annotationMirror -> annotationMirror.getAnnotationType().getAnnotation(TypeInputs.class) != null)
+                .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getAnnotation(TypeInputs.class) != null)
                 .findFirst();
     }
 

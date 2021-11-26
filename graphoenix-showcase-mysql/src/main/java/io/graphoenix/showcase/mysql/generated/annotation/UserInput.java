@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.generated.annotation;
 
 import io.graphoenix.showcase.mysql.generated.enumType.Sex;
+import io.graphoenix.spi.annotation.TypeInput;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
+@TypeInput
 public @interface UserInput {
   int organizationId() default 0;
 

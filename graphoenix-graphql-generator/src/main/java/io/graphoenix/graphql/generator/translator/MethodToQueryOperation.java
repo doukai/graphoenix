@@ -89,13 +89,13 @@ public class MethodToQueryOperation {
 
     private Optional<? extends AnnotationMirror> getExpressionAnnotation(ExecutableElement executableElement) {
         return executableElement.getAnnotationMirrors().stream()
-                .filter(annotationMirror -> annotationMirror.getAnnotationType().getAnnotation(TypeExpression.class) != null)
+                .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getAnnotation(TypeExpression.class) != null)
                 .findFirst();
     }
 
     private Optional<? extends AnnotationMirror> getExpressionsAnnotation(ExecutableElement executableElement) {
         return executableElement.getAnnotationMirrors().stream()
-                .filter(annotationMirror -> annotationMirror.getAnnotationType().getAnnotation(TypeExpressions.class) != null)
+                .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getAnnotation(TypeExpressions.class) != null)
                 .findFirst();
     }
 
