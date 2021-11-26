@@ -1,6 +1,5 @@
 package io.graphoenix.graphql.generator.translator;
 
-import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
@@ -25,11 +24,13 @@ public class MethodToQueryOperation {
     private final String conditionalName;
     private final String operatorName;
     private final IGraphQLDocumentManager manager;
+    private final ElementManager elementManager;
 
     public MethodToQueryOperation(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
         this.conditionalName = configuration.getEnumTypePackageName().concat(".Conditional");
         this.operatorName = configuration.getEnumTypePackageName().concat(".Operator");
         this.manager = manager;
+        this.elementManager = new ElementManager(manager);
     }
 
     public String executableElementToQuery(String queryFieldName, ExecutableElement executableElement, int layers) {
@@ -68,23 +69,9 @@ public class MethodToQueryOperation {
                             )
                     );
         }
-        field.setFields(buildFields(getQueryTypeName(queryFieldName), 0, layers));
+        field.setFields(elementManager.buildFields(getQueryTypeName(queryFieldName), 0, layers));
         operation.addField(field);
         return operation.toString();
-    }
-
-    private List<Field> buildFields(String typeName, int level, int layers) {
-        return getFields(typeName, level, layers)
-                .map(fieldDefinitionContext ->
-                        {
-                            Field field = new Field().setName(fieldDefinitionContext.name().getText());
-                            if (level <= layers) {
-                                field.setFields(buildFields(manager.getFieldTypeName(fieldDefinitionContext.type()), level + 1, layers));
-                            }
-                            return field;
-                        }
-                )
-                .collect(Collectors.toList());
     }
 
     private Optional<? extends AnnotationMirror> getExpressionAnnotation(ExecutableElement executableElement) {
@@ -305,10 +292,7 @@ public class MethodToQueryOperation {
                 .findFirst()
                 .map(entry -> (List<?>) entry.getValue().getValue())
                 .map(list -> list.stream()
-                        .map(value -> parentExecutableElement.getParameters().stream()
-                                .filter(variableElement -> variableElement.getSimpleName().toString().equals(((AnnotationValue) value).getValue().toString()))
-                                .findFirst()
-                        )
+                        .map(value -> elementManager.getParameterFromExecutableElement(parentExecutableElement, ((AnnotationValue) value).getValue().toString()))
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .collect(Collectors.toList())
@@ -332,23 +316,16 @@ public class MethodToQueryOperation {
                 .setTypeName(getTypeName(queryFieldName, argumentName));
     }
 
-    private String getQueryTypeName(String queryFieldName) {
-        return manager.getQueryOperationTypeName()
-                .flatMap(queryTypeName -> manager.getField(queryTypeName, queryFieldName))
-                .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
-                .orElseThrow();
-    }
-
     private String getTypeName(String queryFieldName, String argumentName) {
         return manager.getField(getQueryTypeName(queryFieldName), argumentName)
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .orElseThrow();
     }
 
-    private Stream<GraphqlParser.FieldDefinitionContext> getFields(String typeName, int level, int layers) {
-        return manager.getFields(typeName)
-                .filter(fieldDefinitionContext -> level < layers ||
-                        level == layers && (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                );
+    private String getQueryTypeName(String queryFieldName) {
+        return manager.getQueryOperationTypeName()
+                .flatMap(queryTypeName -> manager.getField(queryTypeName, queryFieldName))
+                .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
+                .orElseThrow();
     }
 }

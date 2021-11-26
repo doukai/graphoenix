@@ -6,7 +6,6 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.annotation.TypeExpression;
 import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.annotation.TypeInput;
-import io.graphoenix.spi.annotation.TypeInputs;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.eclipse.microprofile.graphql.*;
@@ -720,58 +719,6 @@ public class TypeSpecBuilder {
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                                                                 .returns(String.class)
                                                                 .defaultValue("$S", "")
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
-                                )
-                                .build()
-                );
-    }
-
-    public Stream<TypeSpec> buildObjectTypeInputsAnnotations() {
-        return manager.getObjects()
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                )
-                .map(objectTypeDefinitionContext ->
-                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Inputs")
-                                .addModifiers(Modifier.PUBLIC)
-                                .addAnnotation(
-                                        AnnotationSpec.builder(Retention.class)
-                                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
-                                                .build()
-                                )
-                                .addAnnotation(
-                                        AnnotationSpec.builder(Target.class)
-                                                .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
-                                                .build()
-                                )
-                                .addAnnotation(TypeInputs.class)
-                                .addMethod(
-                                        MethodSpec.methodBuilder("value")
-                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                .returns(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Input"))
-                                                .defaultValue("$L", "@" + objectTypeDefinitionContext.name().getText() + "Input")
-                                                .build()
-                                )
-                                .addMethods(
-                                        manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(
-                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
-                                                                                ArrayTypeName.of(ClassName.get(configuration.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")) :
-                                                                                ClassName.get(configuration.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input")
-                                                                )
-                                                                .defaultValue("$L",
-                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
-                                                                                "{}" :
-                                                                                "@" + manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input"
-                                                                )
                                                                 .build()
                                                 )
                                                 .collect(Collectors.toList())
