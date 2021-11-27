@@ -38,33 +38,33 @@ public class OperationPipeline extends ChainBase {
         return this;
     }
 
-    public Object fetch(GraphQLRequest request) throws Exception {
+    public Object fetch(String graphQL) throws Exception {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.SYNC);
         operationContext.setAsyncType(AsyncType.OPERATION);
-        operationContext.setCurrentData(request.getQuery());
+        operationContext.setCurrentData(graphQL);
         operationContext.setManager(this.manager);
         this.execute(operationContext);
         return operationContext.getCurrentData();
     }
 
     @SuppressWarnings("unchecked")
-    public Mono<Object> fetchAsync(GraphQLRequest request) throws Exception {
+    public Mono<Object> fetchAsync(String graphQL) throws Exception {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.ASYNC);
         operationContext.setAsyncType(AsyncType.OPERATION);
-        operationContext.setCurrentData(request.getQuery());
+        operationContext.setCurrentData(graphQL);
         operationContext.setManager(this.manager);
         this.execute(operationContext);
         return ((Mono<Object>) operationContext.getCurrentData());
     }
 
     @SuppressWarnings("unchecked")
-    public Flux<Object> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
+    public Flux<Object> fetchSelectionsAsync(String graphQL) throws Exception {
         OperationContext operationContext = new OperationContext();
         operationContext.setExecuteType(ExecuteType.ASYNC);
         operationContext.setAsyncType(AsyncType.SELECTION);
-        operationContext.setCurrentData(request.getQuery());
+        operationContext.setCurrentData(graphQL);
         operationContext.setManager(this.manager);
         this.execute(operationContext);
         return ((Flux<Object>) operationContext.getCurrentData());

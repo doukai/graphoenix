@@ -12,5 +12,7 @@ public @interface GraphQLOperation {
 
     Class<? extends IBootstrapHandler>[] bootstrapHandlers() default {};
 
-    Class<? extends IOperationHandler>[] operationHandlers() default {};
+    Class<? extends IOperationHandler>[] pretreatmentHandlers() default {};
+
+    Class<? extends IOperationHandler>[] executeHandlers() default {};
 }

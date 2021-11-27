@@ -32,6 +32,7 @@ dependencies {
     implementation project(":graphoenix-mysql-translator")
     compile project(":graphoenix-r2dbc-connector")
     annotationProcessor project(":graphoenix-annotation-processor")
+    annotationProcessor project(":graphoenix-mysql-translator")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

@@ -8,7 +8,10 @@ import java.io.IOException;
 
 public class DocumentBuildHandler implements IBootstrapHandler {
 
-    private final String graphQLFileName;
+    private String graphQLFileName;
+
+    public DocumentBuildHandler() {
+    }
 
     public DocumentBuildHandler(String graphQL) {
         this.graphQLFileName = graphQL;

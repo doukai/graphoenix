@@ -1,47 +1,55 @@
 package io.graphoenix.common.pipeline;
 
 import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import io.graphoenix.common.pipeline.bootstrap.BootstrapPipeline;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @AutoFactory
 public class GraphQLCodeGenerator {
 
     private final IGraphQLDocumentManager documentManager;
-    private final IOperationHandler[] operationHandlers;
+    private final List<IOperationHandler> pretreatmentHandlers;
+    private final List<String> executeHandlerNames;
 
-    public GraphQLCodeGenerator(@Provided IBootstrapHandler[] bootstrapHandlers,
-                                @Provided IOperationHandler[] operationHandlers) throws Exception {
-        BootstrapPipeline bootstrapPipeline = new BootstrapPipeline();
-        for (IBootstrapHandler bootstrapHandler : bootstrapHandlers) {
-            bootstrapPipeline.addHandler(bootstrapHandler);
+    public GraphQLCodeGenerator(IGraphQLDocumentManager manager,
+                                List<String> bootstrapHandlerNames,
+                                List<String> pretreatmentHandlerNames,
+                                List<String> executeHandlerNames) throws Exception {
+        BootstrapPipeline bootstrapPipeline = new BootstrapPipeline(manager);
+
+        for (String bootstrapHandlerName : bootstrapHandlerNames) {
+            bootstrapPipeline.addHandler((IBootstrapHandler) Class.forName(bootstrapHandlerName).getDeclaredConstructor().newInstance());
         }
         this.documentManager = bootstrapPipeline.buildManager();
-        this.operationHandlers = operationHandlers;
+
+        this.pretreatmentHandlers = new ArrayList<>();
+        for (String pretreatmentHandlerName : pretreatmentHandlerNames) {
+            this.pretreatmentHandlers.add((IOperationHandler) Class.forName(pretreatmentHandlerName).getDeclaredConstructor().newInstance());
+        }
+
+        this.executeHandlerNames = new ArrayList<>();
+        this.executeHandlerNames.addAll(executeHandlerNames);
     }
 
-    public Object fetch(GraphQLRequest request) throws Exception {
-        return this.createOperationPipeline().fetch(request);
+    @SuppressWarnings("unchecked")
+    public Tuple2<String, String> pretreatment(String graphQL) throws Exception {
+        return (Tuple2<String, String>) this.createOperationPipeline().fetch(graphQL);
     }
 
-    public Mono<Object> fetchAsync(GraphQLRequest request) throws Exception {
-        return this.createOperationPipeline().fetchAsync(request);
-    }
-
-    public Flux<Object> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
-        return this.createOperationPipeline().fetchSelectionsAsync(request);
+    public List<String> getExecuteHandlerNames() {
+        return executeHandlerNames;
     }
 
     private OperationPipeline createOperationPipeline() {
         OperationPipeline operationPipeline = new OperationPipeline(this.documentManager);
-        for (IOperationHandler operationHandler : operationHandlers) {
+        for (IOperationHandler operationHandler : pretreatmentHandlers) {
             operationPipeline.addHandler(operationHandler);
         }
         return operationPipeline;

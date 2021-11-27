@@ -6,6 +6,8 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 
 import javax.lang.model.element.*;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JavaElementToOperation {
@@ -22,10 +24,14 @@ public class JavaElementToOperation {
         methodToMutationOperation = new MethodToMutationOperation(manager, configuration);
     }
 
-    public Stream<String> buildOperationResources(PackageElement packageElement, TypeElement typeElement) {
+    public Map<String, String> buildOperationResources(PackageElement packageElement, TypeElement typeElement) {
         return typeElement.getEnclosedElements().stream()
                 .filter(element -> element.getKind().equals(ElementKind.METHOD))
-                .map(element -> executableElementToOperation((ExecutableElement) element));
+                .collect(Collectors.toMap(
+                        element -> element.getSimpleName().toString(),
+                        element -> executableElementToOperation((ExecutableElement) element)
+                        )
+                );
     }
 
     private String executableElementToOperation(ExecutableElement executableElement) {

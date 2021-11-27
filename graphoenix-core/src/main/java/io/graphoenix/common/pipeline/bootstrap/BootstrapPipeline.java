@@ -41,6 +41,10 @@ public class BootstrapPipeline extends ChainBase {
         this.manager = getGraphQLDocumentManager();
     }
 
+    public BootstrapPipeline(IGraphQLDocumentManager manager) {
+        this.manager = manager;
+    }
+
     public BootstrapPipeline(String graphQL) {
         this();
         this.manager.registerDocument(graphQL);

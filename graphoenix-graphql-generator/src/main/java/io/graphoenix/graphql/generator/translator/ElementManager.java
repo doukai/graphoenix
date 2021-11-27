@@ -2,7 +2,6 @@ package io.graphoenix.graphql.generator.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.operation.Field;
-import io.graphoenix.graphql.generator.operation.VariableDefinition;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.lang.model.element.ExecutableElement;
