@@ -97,12 +97,26 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(String graphql) {
+        return getOperationTypeVariables(DOCUMENT_UTIL.graphqlToDocument(graphql));
+    }
+
+    @Override
     public GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.DocumentContext documentContext) {
         return documentContext.definition().stream()
                 .filter(definitionContext -> definitionContext.operationDefinition() != null)
                 .findFirst()
                 .map(definitionContext -> definitionContext.operationDefinition().operationType())
                 .orElse(null);
+    }
+
+    @Override
+    public Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.DocumentContext documentContext) {
+        return documentContext.definition().stream()
+                .filter(definitionContext -> definitionContext.operationDefinition() != null)
+                .findFirst()
+                .map(definitionContext -> definitionContext.operationDefinition().variableDefinitions().variableDefinition().stream())
+                .orElse(Stream.empty());
     }
 
     @Override

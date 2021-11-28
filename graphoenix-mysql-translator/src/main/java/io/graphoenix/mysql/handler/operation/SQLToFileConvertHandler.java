@@ -11,39 +11,47 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SQLToFileConvertHandler implements IOperationHandler {
+    private IGraphQLDocumentManager manager;
 
     @Override
     public void setupManager(IGraphQLDocumentManager manager) {
+        this.manager = manager;
     }
 
     @Override
-    public Tuple2<String, String> query(Object graphQL) {
-        return Tuples.of(SqlFormatter.of(Dialect.MySql).format((String) graphQL), "sql");
+    public Tuple2<String, String> query(Object sql) {
+        return Tuples.of(
+                SqlFormatter.of(Dialect.MariaDb)
+                        .format((String) sql),
+                "sql");
     }
 
     @Override
-    public Tuple2<String, String> queryAsync(Object graphQL) {
-        return query(graphQL);
+    public Tuple2<String, String> queryAsync(Object sql) {
+        return query(sql);
     }
 
     @Override
-    public Tuple2<String, String> querySelectionsAsync(Object graphQL) {
-        return query(graphQL);
+    public Tuple2<String, String> querySelectionsAsync(Object sql) {
+        return query(sql);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Tuple2<String, String> mutation(Object graphQL) {
-        return Tuples.of(SqlFormatter.of(Dialect.MySql).format(((Stream<String>) graphQL).collect(Collectors.joining(";"))), "sql");
+    public Tuple2<String, String> mutation(Object sql) {
+        return Tuples.of(
+                SqlFormatter.of(Dialect.MariaDb)
+                        .format(((Stream<String>) sql).collect(Collectors.joining(";"))),
+                "sql");
     }
 
     @Override
-    public Tuple2<String, String> mutationAsync(Object graphQL) {
-        return mutationAsync(graphQL);
+    public Tuple2<String, String> mutationAsync(Object sql) {
+        return mutation(sql);
     }
 
     @Override
-    public Tuple2<String, String> subscription(Object graphQL) {
-        return null;
+    public Tuple2<String, String> subscription(Object sql) {
+        return query(sql);
     }
 }

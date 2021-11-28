@@ -22,7 +22,11 @@ public interface IGraphQLDocumentManager {
 
     GraphqlParser.OperationTypeContext getOperationType(String graphql);
 
+    Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(String graphql);
+
     GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.DocumentContext documentContext);
+
+    Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.DocumentContext documentContext);
 
     void registerFragment(String graphql);
 

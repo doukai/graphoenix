@@ -3,21 +3,22 @@ package io.graphoenix.mysql.translator;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
+import io.graphoenix.mysql.expression.IsExpression;
+import io.graphoenix.mysql.expression.JsonTable;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import net.sf.jsqlparser.util.cnfexpression.MultiOrExpression;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -317,7 +318,7 @@ public class GraphQLArgumentsToWhere {
                     } else if (manager.isScaLar(fieldTypeName)) {
                         return Optional.of(scalarValueWithVariableToExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable()));
                     } else if (manager.isEnum(fieldTypeName)) {
-                        return Optional.of(enumValueToExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable().enumValue()));
+                        return Optional.of(enumValueWithVariableToExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable()));
                     } else {
                         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
@@ -368,7 +369,7 @@ public class GraphQLArgumentsToWhere {
                     } else if (manager.isScaLar(fieldTypeName)) {
                         return Optional.of(scalarValueWithVariableToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), objectFieldWithVariableContext.valueWithVariable()));
                     } else if (manager.isEnum(fieldTypeName)) {
-                        return Optional.of(enumValueToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), objectFieldWithVariableContext.valueWithVariable().enumValue()));
+                        return Optional.of(enumValueWithVariableToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), objectFieldWithVariableContext.valueWithVariable()));
                     } else {
                         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
@@ -625,6 +626,10 @@ public class GraphQLArgumentsToWhere {
                 inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
                         .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
                 return Optional.of(inExpression);
+            } else if (valueWithVariableContext.variable() != null) {
+                InExpression inExpression = new InExpression();
+                inExpression.setLeftExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level));
+                inExpression.setRightExpression(selectVariablesFromJsonArray(typeContext, inputValueDefinitionContext, valueWithVariableContext));
             }
         }
         return Optional.empty();
@@ -761,16 +766,16 @@ public class GraphQLArgumentsToWhere {
 
             Optional<GraphqlParser.ValueWithVariableContext> subValueWithVariableContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
                     .filter(fieldInputValueDefinitionContext ->
-                            !manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
-                                    !manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
+                            !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
+                                    manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
                     .findFirst()
                     .flatMap(subInputValueDefinitionContext -> manager.getObjectFieldWithVariableFromInputValueDefinition(valueWithVariableContext.objectValueWithVariable(), subInputValueDefinitionContext))
                     .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable);
 
             Optional<GraphqlParser.ValueContext> subDefaultValueContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
                     .filter(fieldInputValueDefinitionContext ->
-                            !manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
-                                    !manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
+                            !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
+                                    manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
                     .findFirst()
                     .flatMap(manager::getDefaultValueFromInputValueDefinition);
 
@@ -812,16 +817,16 @@ public class GraphQLArgumentsToWhere {
 
             Optional<GraphqlParser.ValueContext> subValueContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
                     .filter(fieldInputValueDefinitionContext ->
-                            !manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
-                                    !manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
+                            !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
+                                    manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
                     .findFirst()
                     .flatMap(subInputValueDefinitionContext -> manager.getObjectFieldFromInputValueDefinition(valueContext.objectValue(), subInputValueDefinitionContext))
                     .map(GraphqlParser.ObjectFieldContext::value);
 
             Optional<GraphqlParser.ValueContext> subDefaultValueContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
                     .filter(fieldInputValueDefinitionContext ->
-                            !manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
-                                    !manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
+                            !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
+                                    manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
                     .findFirst()
                     .flatMap(manager::getDefaultValueFromInputValueDefinition);
 
@@ -848,7 +853,7 @@ public class GraphQLArgumentsToWhere {
             return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, valueWithVariableContext));
         }
         if (valueWithVariableContext.enumValue() != null) {
-            return Optional.ofNullable(operatorEnumValueToExpression(leftExpression, enumValueContext, valueWithVariableContext.enumValue()));
+            return Optional.ofNullable(operatorEnumValueWithVariableToExpression(leftExpression, enumValueContext, valueWithVariableContext));
         }
         return Optional.ofNullable(operatorScalarValueToExpression(
                 leftExpression,
@@ -857,7 +862,8 @@ public class GraphQLArgumentsToWhere {
                 valueWithVariableContext.IntValue(),
                 valueWithVariableContext.FloatValue(),
                 valueWithVariableContext.BooleanValue(),
-                valueWithVariableContext.NullValue())
+                valueWithVariableContext.NullValue(),
+                valueWithVariableContext.variable())
         );
     }
 
@@ -868,7 +874,7 @@ public class GraphQLArgumentsToWhere {
             return Optional.of(operatorValueToInExpression(leftExpression, enumValueContext, valueContext));
         }
         if (valueContext.enumValue() != null) {
-            return Optional.ofNullable(operatorEnumValueToExpression(leftExpression, enumValueContext, valueContext.enumValue()));
+            return Optional.ofNullable(operatorEnumValueToExpression(leftExpression, enumValueContext, valueContext));
         }
         return Optional.ofNullable(operatorScalarValueToExpression(
                 leftExpression,
@@ -877,7 +883,9 @@ public class GraphQLArgumentsToWhere {
                 valueContext.IntValue(),
                 valueContext.FloatValue(),
                 valueContext.BooleanValue(),
-                valueContext.NullValue())
+                valueContext.NullValue(),
+                null)
+
         );
     }
 
@@ -911,46 +919,103 @@ public class GraphQLArgumentsToWhere {
 
     private Expression operatorEnumValueToExpression(Expression leftExpression,
                                                      GraphqlParser.EnumValueContext operator,
-                                                     GraphqlParser.EnumValueContext valueContext) {
+                                                     GraphqlParser.ValueContext valueContext) {
         switch (operator.enumValueName().getText()) {
             case "EQ":
-                return enumValueToExpression(leftExpression, valueContext);
+                return enumValueToExpression(leftExpression, valueContext.enumValue());
             case "NEQ":
-                return new NotExpression(enumValueToExpression(leftExpression, valueContext));
+                return new NotExpression(enumValueToExpression(leftExpression, valueContext.enumValue()));
             case "LK":
                 LikeExpression likeExpression = new LikeExpression();
                 likeExpression.setLeftExpression(leftExpression);
-                likeExpression.setRightExpression(new StringValue(valueContext.enumValueName().getText()));
+                likeExpression.setRightExpression(new StringValue(valueContext.enumValue().enumValueName().getText()));
                 return likeExpression;
             case "NLK":
                 LikeExpression notLikeExpression = new LikeExpression();
                 notLikeExpression.setNot(true);
                 notLikeExpression.setLeftExpression(leftExpression);
-                notLikeExpression.setRightExpression(new StringValue(valueContext.enumValueName().getText()));
+                notLikeExpression.setRightExpression(new StringValue(valueContext.enumValue().enumValueName().getText()));
                 return notLikeExpression;
             case "GT":
             case "NLTE":
                 GreaterThan greaterThan = new GreaterThan();
                 greaterThan.setLeftExpression(leftExpression);
-                greaterThan.setRightExpression(new StringValue(valueContext.enumValueName().getText()));
+                greaterThan.setRightExpression(new StringValue(valueContext.enumValue().enumValueName().getText()));
                 return greaterThan;
             case "GTE":
             case "NLT":
                 GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
                 greaterThanEquals.setLeftExpression(leftExpression);
-                greaterThanEquals.setRightExpression(new StringValue(valueContext.enumValueName().getText()));
+                greaterThanEquals.setRightExpression(new StringValue(valueContext.enumValue().enumValueName().getText()));
                 return greaterThanEquals;
             case "LT":
             case "NGTE":
                 MinorThan minorThan = new MinorThan();
                 minorThan.setLeftExpression(leftExpression);
-                minorThan.setRightExpression(new StringValue(valueContext.enumValueName().getText()));
+                minorThan.setRightExpression(new StringValue(valueContext.enumValue().enumValueName().getText()));
                 return minorThan;
             case "LTE":
             case "NGT":
                 MinorThanEquals minorThanEquals = new MinorThanEquals();
                 minorThanEquals.setLeftExpression(leftExpression);
-                minorThanEquals.setRightExpression(new StringValue(valueContext.enumValueName().getText()));
+                minorThanEquals.setRightExpression(new StringValue(valueContext.enumValue().enumValueName().getText()));
+                return minorThanEquals;
+            case "NIL":
+                IsNullExpression isNullExpression = new IsNullExpression();
+                isNullExpression.setLeftExpression(leftExpression);
+                return isNullExpression;
+            case "NNIL":
+                IsNullExpression isNotNullExpression = new IsNullExpression();
+                isNotNullExpression.setNot(true);
+                isNotNullExpression.setLeftExpression(leftExpression);
+                return isNotNullExpression;
+            default:
+                throw new GraphQLProblem(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
+        }
+    }
+
+    private Expression operatorEnumValueWithVariableToExpression(Expression leftExpression,
+                                                                 GraphqlParser.EnumValueContext operator,
+                                                                 GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        switch (operator.enumValueName().getText()) {
+            case "EQ":
+                return enumValueWithVariableToExpression(leftExpression, valueWithVariableContext);
+            case "NEQ":
+                return new NotExpression(enumValueWithVariableToExpression(leftExpression, valueWithVariableContext));
+            case "LK":
+                LikeExpression likeExpression = new LikeExpression();
+                likeExpression.setLeftExpression(leftExpression);
+                likeExpression.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
+                return likeExpression;
+            case "NLK":
+                LikeExpression notLikeExpression = new LikeExpression();
+                notLikeExpression.setNot(true);
+                notLikeExpression.setLeftExpression(leftExpression);
+                notLikeExpression.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
+                return notLikeExpression;
+            case "GT":
+            case "NLTE":
+                GreaterThan greaterThan = new GreaterThan();
+                greaterThan.setLeftExpression(leftExpression);
+                greaterThan.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
+                return greaterThan;
+            case "GTE":
+            case "NLT":
+                GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
+                greaterThanEquals.setLeftExpression(leftExpression);
+                greaterThanEquals.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
+                return greaterThanEquals;
+            case "LT":
+            case "NGTE":
+                MinorThan minorThan = new MinorThan();
+                minorThan.setLeftExpression(leftExpression);
+                minorThan.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
+                return minorThan;
+            case "LTE":
+            case "NGT":
+                MinorThanEquals minorThanEquals = new MinorThanEquals();
+                minorThanEquals.setLeftExpression(leftExpression);
+                minorThanEquals.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
                 return minorThanEquals;
             case "NIL":
                 IsNullExpression isNullExpression = new IsNullExpression();
@@ -972,12 +1037,13 @@ public class GraphQLArgumentsToWhere {
                                                        TerminalNode intValue,
                                                        TerminalNode floatValue,
                                                        TerminalNode booleanValue,
-                                                       TerminalNode nullValue) {
+                                                       TerminalNode nullValue,
+                                                       GraphqlParser.VariableContext variableContext) {
         switch (operator.enumValueName().getText()) {
             case "EQ":
-                return scalarValueToExpression(leftExpression, stringValue, intValue, floatValue, booleanValue, nullValue);
+                return scalarValueToExpression(leftExpression, stringValue, intValue, floatValue, booleanValue, nullValue, variableContext);
             case "NEQ":
-                return new NotExpression(scalarValueToExpression(leftExpression, stringValue, intValue, floatValue, booleanValue, nullValue));
+                return new NotExpression(scalarValueToExpression(leftExpression, stringValue, intValue, floatValue, booleanValue, nullValue, variableContext));
             case "LK":
                 LikeExpression likeExpression = new LikeExpression();
                 likeExpression.setLeftExpression(leftExpression);
@@ -1138,6 +1204,19 @@ public class GraphQLArgumentsToWhere {
         return equalsTo;
     }
 
+    protected Expression enumValueWithVariableToExpression(Expression leftExpression,
+                                                           GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+
+        EqualsTo equalsTo = new EqualsTo();
+        equalsTo.setLeftExpression(leftExpression);
+        if (valueWithVariableContext.variable() != null) {
+            equalsTo.setRightExpression(variableToJdbcNamedParameter(valueWithVariableContext.variable()));
+        } else {
+            equalsTo.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
+        }
+        return equalsTo;
+    }
+
     protected Expression scalarValueToExpression(Expression leftExpression,
                                                  GraphqlParser.ValueContext valueContext) {
         return scalarValueToExpression(leftExpression,
@@ -1145,7 +1224,8 @@ public class GraphQLArgumentsToWhere {
                 valueContext.IntValue(),
                 valueContext.FloatValue(),
                 valueContext.BooleanValue(),
-                valueContext.NullValue());
+                valueContext.NullValue(),
+                null);
     }
 
     protected Expression scalarValueWithVariableToExpression(Expression leftExpression,
@@ -1155,7 +1235,8 @@ public class GraphQLArgumentsToWhere {
                 valueWithVariableContext.IntValue(),
                 valueWithVariableContext.FloatValue(),
                 valueWithVariableContext.BooleanValue(),
-                valueWithVariableContext.NullValue());
+                valueWithVariableContext.NullValue(),
+                valueWithVariableContext.variable());
     }
 
     protected Expression scalarValueToExpression(Expression leftExpression,
@@ -1163,7 +1244,8 @@ public class GraphQLArgumentsToWhere {
                                                  TerminalNode intValue,
                                                  TerminalNode floatValue,
                                                  TerminalNode booleanValue,
-                                                 TerminalNode nullValue) {
+                                                 TerminalNode nullValue,
+                                                 GraphqlParser.VariableContext variableContext) {
         if (stringValue != null) {
             EqualsTo equalsTo = new EqualsTo();
             equalsTo.setLeftExpression(leftExpression);
@@ -1188,12 +1270,22 @@ public class GraphQLArgumentsToWhere {
             IsNullExpression isNullExpression = new IsNullExpression();
             isNullExpression.setLeftExpression(leftExpression);
             return isNullExpression;
+        } else if (variableContext != null) {
+            EqualsTo equalsTo = new EqualsTo();
+            equalsTo.setLeftExpression(leftExpression);
+            equalsTo.setRightExpression(variableToJdbcNamedParameter(variableContext));
+            return equalsTo;
         }
         return null;
     }
 
     protected Optional<Expression> isBooleanExpression(Expression leftExpression, GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        if (valueWithVariableContext.BooleanValue() != null) {
+        if (valueWithVariableContext.variable() != null) {
+            IsExpression isExpression = new IsExpression();
+            isExpression.setLeftExpression(leftExpression);
+            isExpression.setRightExpression(variableToJdbcNamedParameter(valueWithVariableContext.variable()));
+            return Optional.of(isExpression);
+        } else if (valueWithVariableContext.BooleanValue() != null) {
             IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
             isBooleanExpression.setLeftExpression(leftExpression);
             isBooleanExpression.setIsTrue(Boolean.parseBoolean(valueWithVariableContext.BooleanValue().getText()));
@@ -1242,5 +1334,57 @@ public class GraphQLArgumentsToWhere {
         subSelect.setSelectBody(body);
         existsExpression.setRightExpression(subSelect);
         return existsExpression;
+    }
+
+    protected JdbcNamedParameter variableToJdbcNamedParameter(GraphqlParser.VariableContext variableContext) {
+        JdbcNamedParameter jdbcNamedParameter = new JdbcNamedParameter();
+        jdbcNamedParameter.setName(variableContext.name().getText());
+        return jdbcNamedParameter;
+    }
+
+    protected SubSelect selectVariablesFromJsonArray(GraphqlParser.TypeContext typeContext,
+                                                     GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
+                                                     GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        SubSelect subSelect = new SubSelect();
+        JsonTable jsonTable = new JsonTable();
+        JdbcNamedParameter jdbcNamedParameter = new JdbcNamedParameter();
+        jdbcNamedParameter.setName(valueWithVariableContext.variable().name().getText());
+        jsonTable.setJson(jdbcNamedParameter);
+        jsonTable.setPath("'$[*]'");
+        ColumnDefinition columnDefinition = new ColumnDefinition();
+        columnDefinition.setColumnName(inputValueDefinitionContext.name().getText());
+        ColDataType colDataType = new ColDataType();
+        String fieldTypeName = manager.getFieldTypeName(typeContext);
+        if (manager.isEnum(fieldTypeName)) {
+            colDataType.setDataType("INT");
+        } else if (manager.isScaLar(fieldTypeName)) {
+            switch (fieldTypeName) {
+                case "ID":
+                case "Int":
+                    colDataType.setDataType("INT");
+                    break;
+                case "Boolean":
+                    colDataType.setDataType("BOOL");
+                    break;
+                case "String":
+                    colDataType.setDataType("VARCHAR");
+                    colDataType.setArgumentsStringList(Collections.singletonList("255"));
+                    break;
+                case "Float":
+                    colDataType.setDataType("FLOAT");
+                    break;
+            }
+        } else {
+            //TODO
+        }
+        columnDefinition.setColumnSpecs(Arrays.asList("PATH", "'$'"));
+        jsonTable.setColumnDefinitions(Collections.singletonList(columnDefinition));
+        jsonTable.setAlias(new Alias(valueWithVariableContext.variable().name().getText()));
+
+        PlainSelect body = new PlainSelect();
+        body.setSelectItems(Collections.singletonList(new AllColumns()));
+        body.setFromItem(jsonTable);
+        subSelect.setSelectBody(body);
+        return subSelect;
     }
 }

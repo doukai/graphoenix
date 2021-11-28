@@ -8,7 +8,6 @@ import io.graphoenix.spi.config.JavaGeneratorConfig;
 import javax.lang.model.element.*;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class JavaElementToOperation {
 

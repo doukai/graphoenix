@@ -20,14 +20,15 @@ import reactor.core.publisher.Mono;
 )
 public interface OperationTest {
 
-    @QueryOperation(value = "userList", layers = 1)
-    @UserExpression(opr = Operator.NEQ, name = "name")
-    User queryUser(String name, Sex sex);
+//    @QueryOperation(value = "userList", layers = 1)
+//    @UserExpression(opr = Operator.NEQ, name = "name")
+//    User queryUser(String name, Sex sex);
 
     @QueryOperation("userList")
     @UserExpressions(
             value = {
-                    @UserExpression(opr = Operator.NEQ, name = {"dk1", "dk2"})
+                    @UserExpression($name = {"name", "name2"}),
+                    @UserExpression(opr = Operator.NEQ, sex = Sex.MAN)
             },
             roles = {
                     @RoleExpression(opr = Operator.NEQ, name = "role1"),
@@ -35,8 +36,8 @@ public interface OperationTest {
     )
     Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version);
 
-    @MutationOperation("user")
-    @UserInput(name = "name1",  age = 11, login = "login1", password = "password1")
-    User mutationUser(Sex sex, String name);
+//    @MutationOperation("user")
+//    @UserInput(name = "name1", age = 11, login = "login1", password = "password1")
+//    User mutationUser(Sex sex, String name);
 
 }

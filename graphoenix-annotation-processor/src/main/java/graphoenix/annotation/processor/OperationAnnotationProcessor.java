@@ -21,6 +21,7 @@ import javax.lang.model.util.Elements;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.File;
+import java.io.IOException;
 import java.io.Writer;
 import java.net.URI;
 import java.nio.file.Paths;
@@ -103,8 +104,8 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                         JavaElementToOperation javaElementToOperation = new JavaElementToOperation(manager, javaGeneratorConfig);
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
 
-                        ThrowingBiFunction<GraphQLCodeGenerator, String, Tuple2<String, String>, Exception> pretreatment = GraphQLCodeGenerator::pretreatment;
-                        ThrowingBiConsumer<Filer, Map.Entry<String, Tuple2<String, String>>, Exception> createResource = (filer, entry) -> {
+                        ThrowingBiFunction<GraphQLCodeGenerator, String, Tuple2<String, String>, Exception> generatorPretreatment = GraphQLCodeGenerator::pretreatment;
+                        ThrowingBiConsumer<Filer, Map.Entry<String, Tuple2<String, String>>, IOException> createResource = (filer, entry) -> {
                             FileObject fileObject = filer.createResource(
                                     StandardLocation.SOURCE_OUTPUT,
                                     packageElement.getQualifiedName(),
@@ -120,7 +121,7 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                         };
 
                         operationResourcesContent.entrySet().stream().collect(Collectors
-                                .toMap(Map.Entry::getKey, entry -> pretreatment.unchecked().apply(generator, entry.getValue())))
+                                .toMap(Map.Entry::getKey, entry -> generatorPretreatment.unchecked().apply(generator, entry.getValue())))
                                 .entrySet()
                                 .forEach(entry -> createResource.asFunction().unchecked().apply(processingEnv.getFiler(), entry));
 
