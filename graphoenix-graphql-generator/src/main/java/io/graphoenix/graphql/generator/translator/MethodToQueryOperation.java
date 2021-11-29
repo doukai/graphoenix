@@ -12,6 +12,7 @@ import io.graphoenix.spi.config.JavaGeneratorConfig;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.TypeKind;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -309,11 +310,17 @@ public class MethodToQueryOperation {
         return getListVariable(expression, parentExecutableElement)
                 .flatMap(list ->
                         list.size() == 1 ?
-                                elementManager.getVariableName(parentExecutableElement, ((AnnotationValue) list.get(0)).getValue().toString()) :
+                                getVariableName(parentExecutableElement, ((AnnotationValue) list.get(0)).getValue().toString()) :
                                 Optional.of("in")
                 );
     }
 
+    public Optional<String> getVariableName(ExecutableElement executableElement, String name) {
+        return executableElement.getParameters().stream()
+                .filter(parameter -> parameter.getSimpleName().toString().equals(name))
+                .findFirst()
+                .map(parameter -> parameter.asType().getKind().equals(TypeKind.ARRAY) ? "in" : "val");
+    }
 
     private Optional<List<?>> getListValue(AnnotationMirror expression) {
         return expression.getElementValues().entrySet().stream()

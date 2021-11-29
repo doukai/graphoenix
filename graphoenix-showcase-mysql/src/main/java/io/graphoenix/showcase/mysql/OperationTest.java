@@ -22,14 +22,14 @@ import java.util.List;
 )
 public interface OperationTest {
 
-    @QueryOperation(value = "userList", layers = 1)
-    @UserExpression($name = "name")
-    User queryUser(List[] name, String name2, Sex sex);
+//    @QueryOperation(value = "userList", layers = 1)
+//    @UserExpression($name = "name")
+//    User queryUser(List[] name, String name2, Sex sex);
 
 //    @QueryOperation("userList")
 //    @UserExpressions(
 //            value = {
-//                    @UserExpression($name = {"name", "name2"}),
+//                    @UserExpression(name = {"name", "name2"}),
 //                    @UserExpression(opr = Operator.NEQ, sex = Sex.MAN)
 //            },
 //            roles = {
@@ -38,8 +38,8 @@ public interface OperationTest {
 //    )
 //    Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version);
 
-//    @MutationOperation("user")
-//    @UserInput(name = "name1", age = 11, login = "login1", password = "password1")
-//    User mutationUser(Sex sex, String name);
+    @MutationOperation("user")
+    @UserInput(name = "name1", age = 11, login = "login1", password = "password1")
+    User mutationUser(Sex sex, String name);
 
 }

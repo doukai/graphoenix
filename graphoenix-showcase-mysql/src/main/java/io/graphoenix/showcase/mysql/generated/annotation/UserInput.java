@@ -42,6 +42,10 @@ public @interface UserInput {
 
   String $sex() default "";
 
+  String $organization() default "";
+
+  String $roles() default "";
+
   String $name() default "";
 
   String $id() default "";

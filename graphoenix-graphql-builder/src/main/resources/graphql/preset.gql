@@ -24,6 +24,8 @@ enum Operator {
     NGT
     NIL
     NNIL
+    IN
+    NIN
 }
 
 enum Conditional {

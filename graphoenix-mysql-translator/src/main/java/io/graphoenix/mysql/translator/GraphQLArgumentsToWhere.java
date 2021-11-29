@@ -1355,7 +1355,7 @@ public class GraphQLArgumentsToWhere {
         JdbcNamedParameter jdbcNamedParameter = new JdbcNamedParameter();
         jdbcNamedParameter.setName(valueWithVariableContext.variable().name().getText());
         jsonTable.setJson(jdbcNamedParameter);
-        jsonTable.setPath("'$[*]'");
+        jsonTable.setPath(new StringValue("$[*]"));
         ColumnDefinition columnDefinition = new ColumnDefinition();
         columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(valueWithVariableContext.variable().name().getText()));
         ColDataType colDataType = new ColDataType();

@@ -1,6 +1,7 @@
 package io.graphoenix.mysql.expression;
 
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.TableFunction;
@@ -11,7 +12,7 @@ public class JsonTable extends TableFunction {
 
     private Expression json;
 
-    private String path;
+    private StringValue path;
 
     private List<ColumnDefinition> columnDefinitions;
 
@@ -23,11 +24,11 @@ public class JsonTable extends TableFunction {
         this.json = json;
     }
 
-    public String getPath() {
+    public StringValue getPath() {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setPath(StringValue path) {
         this.path = path;
     }
 

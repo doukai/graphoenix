@@ -5,6 +5,7 @@ import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
@@ -1275,7 +1276,13 @@ public class GraphQLMutationToStatements {
         if (useDuplicate && columnList.size() > 0) {
             insert.setUseDuplicate(true);
             insert.setDuplicateUpdateColumns(columnList);
-            insert.setDuplicateUpdateExpressionList(expressionList.getExpressions());
+            List<Expression> values = columnList.stream().map(column -> {
+                Function function = new Function();
+                function.setName("VALUES");
+                function.setParameters(new ExpressionList(Collections.singletonList(column)));
+                return function;
+            }).collect(Collectors.toList());
+            insert.setDuplicateUpdateExpressionList(values);
         }
         return insert;
     }

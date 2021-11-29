@@ -26,4 +26,6 @@ public @interface RoleInput {
   String $id() default "";
 
   String $version() default "";
+
+  String $users() default "";
 }

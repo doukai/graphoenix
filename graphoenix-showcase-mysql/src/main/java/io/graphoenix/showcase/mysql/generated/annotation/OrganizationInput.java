@@ -25,9 +25,13 @@ public @interface OrganizationInput {
 
   String $isDeprecated() default "";
 
+  String $above() default "";
+
   String $name() default "";
 
   String $id() default "";
 
   String $version() default "";
+
+  String $users() default "";
 }

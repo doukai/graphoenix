@@ -6,7 +6,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeKind;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,12 +43,5 @@ public class ElementManager {
         return executableElement.getParameters().stream()
                 .filter(parameter -> parameter.getSimpleName().toString().equals(name))
                 .findFirst();
-    }
-
-    public Optional<String> getVariableName(ExecutableElement executableElement, String name) {
-        return executableElement.getParameters().stream()
-                .filter(parameter -> parameter.getSimpleName().toString().equals(name))
-                .findFirst()
-                .map(parameter -> parameter.asType().getKind().equals(TypeKind.ARRAY) ? "in" : "val");
     }
 }

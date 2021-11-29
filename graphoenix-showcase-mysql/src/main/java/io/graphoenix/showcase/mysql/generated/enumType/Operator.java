@@ -30,5 +30,9 @@ public enum Operator {
 
   NIL,
 
-  NNIL
+  NNIL,
+
+  IN,
+
+  NIN
 }
