@@ -93,7 +93,7 @@ public class MethodToQueryOperation {
                         Map.of(
                                 getOperatorArgumentName(expression),
                                 getOperator(expression).orElseGet(() -> getDefaultOperator(expression).orElseThrow()),
-                                "val",
+                                getValueName(expression).orElseGet(() -> getVariableName(expression, executableElement).orElseThrow()),
                                 getValue(expression).orElseGet(() -> getVariable(expression, executableElement).orElseThrow())
                         ));
     }
@@ -147,7 +147,7 @@ public class MethodToQueryOperation {
                                                                 Map.of(
                                                                         getOperatorArgumentName(expression),
                                                                         getOperator(expression).orElseGet(() -> getDefaultOperator(expression).orElseThrow()),
-                                                                        "val",
+                                                                        getValueName(expression).orElseGet(() -> getVariableName(expression, executableElement).orElseThrow()),
                                                                         getValue(expression).orElseGet(() -> getVariable(expression, executableElement).orElseThrow())
                                                                 )
                                                 ))
@@ -284,13 +284,18 @@ public class MethodToQueryOperation {
                 );
     }
 
-    private Optional<Object> getVariable(AnnotationMirror expression, ExecutableElement parentExecutableElement) {
+
+    private Optional<List<?>> getListVariable(AnnotationMirror expression, ExecutableElement parentExecutableElement) {
         return expression.getElementValues().entrySet().stream()
                 .filter(entry -> !entry.getKey().getReturnType().toString().equals(operatorName))
                 .filter(entry -> entry.getKey().getSimpleName().toString().startsWith("$"))
                 .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                 .findFirst()
-                .map(entry -> (List<?>) entry.getValue().getValue())
+                .map(entry -> (List<?>) entry.getValue().getValue());
+    }
+
+    private Optional<Object> getVariable(AnnotationMirror expression, ExecutableElement parentExecutableElement) {
+        return getListVariable(expression, parentExecutableElement)
                 .map(list -> list.stream()
                         .map(value -> elementManager.getParameterFromExecutableElement(parentExecutableElement, ((AnnotationValue) value).getValue().toString()))
                         .filter(Optional::isPresent)
@@ -300,14 +305,33 @@ public class MethodToQueryOperation {
                 .map(variableElements -> variableElements.size() == 1 ? variableElements.get(0) : variableElements);
     }
 
-    private Optional<Object> getValue(AnnotationMirror expression) {
+    private Optional<String> getVariableName(AnnotationMirror expression, ExecutableElement parentExecutableElement) {
+        return getListVariable(expression, parentExecutableElement)
+                .flatMap(list ->
+                        list.size() == 1 ?
+                                elementManager.getVariableName(parentExecutableElement, ((AnnotationValue) list.get(0)).getValue().toString()) :
+                                Optional.of("in")
+                );
+    }
+
+
+    private Optional<List<?>> getListValue(AnnotationMirror expression) {
         return expression.getElementValues().entrySet().stream()
                 .filter(entry -> !entry.getKey().getReturnType().toString().equals(operatorName))
                 .filter(entry -> !entry.getKey().getSimpleName().toString().startsWith("$"))
                 .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                 .findFirst()
-                .map(entry -> (List<?>) entry.getValue().getValue())
+                .map(entry -> (List<?>) entry.getValue().getValue());
+    }
+
+    private Optional<Object> getValue(AnnotationMirror expression) {
+        return getListValue(expression)
                 .map(values -> values.size() == 1 ? values.get(0) : values);
+    }
+
+    private Optional<String> getValueName(AnnotationMirror expression) {
+        return getListValue(expression)
+                .map(values -> values.size() == 1 ? "val" : "in");
     }
 
     private VariableDefinition buildVariableDefinition(String queryFieldName, String argumentName, String variableName) {

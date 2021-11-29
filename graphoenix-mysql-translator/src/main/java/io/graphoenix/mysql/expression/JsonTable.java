@@ -46,7 +46,7 @@ public class JsonTable extends TableFunction {
                 json + "," +
                 path +
                 " COLUMNS (" + PlainSelect.getStringList(columnDefinitions, true, false) + ")" +
-                ") AS " + getAlias();
+                ") " + getAlias();
     }
 
 }

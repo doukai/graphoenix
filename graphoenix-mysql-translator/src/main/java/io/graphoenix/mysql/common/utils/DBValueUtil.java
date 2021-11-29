@@ -21,6 +21,10 @@ public enum DBValueUtil {
     }
 
     public Expression scalarValueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        if (valueWithVariableContext.variable() != null) {
+            return variableToJdbcNamedParameter(valueWithVariableContext.variable());
+        }
+
         return scalarValueToDBValue(valueWithVariableContext.StringValue(),
                 valueWithVariableContext.IntValue(),
                 valueWithVariableContext.FloatValue(),
@@ -33,6 +37,9 @@ public enum DBValueUtil {
     }
 
     public Expression enumValueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        if (valueWithVariableContext.variable() != null) {
+            return variableToJdbcNamedParameter(valueWithVariableContext.variable());
+        }
         return new StringValue(valueWithVariableContext.enumValue().enumValueName().getText());
 
     }
@@ -50,6 +57,12 @@ public enum DBValueUtil {
             return new NullValue();
         }
         return null;
+    }
+
+    public JdbcNamedParameter variableToJdbcNamedParameter(GraphqlParser.VariableContext variableContext) {
+        JdbcNamedParameter jdbcNamedParameter = new JdbcNamedParameter();
+        jdbcNamedParameter.setName(variableContext.name().getText());
+        return jdbcNamedParameter;
     }
 
     public SetStatement createInsertIdSetStatement(String typeName, String idFieldName, int level, int index) {

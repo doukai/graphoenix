@@ -626,10 +626,6 @@ public class GraphQLArgumentsToWhere {
                 inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
                         .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
                 return Optional.of(inExpression);
-            } else if (valueWithVariableContext.variable() != null) {
-                InExpression inExpression = new InExpression();
-                inExpression.setLeftExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level));
-                inExpression.setRightExpression(selectVariablesFromJsonArray(typeContext, inputValueDefinitionContext, valueWithVariableContext));
             }
         }
         return Optional.empty();
@@ -764,29 +760,31 @@ public class GraphQLArgumentsToWhere {
                     .flatMap(manager::getDefaultValueFromInputValueDefinition)
                     .map(GraphqlParser.ValueContext::enumValue);
 
-            Optional<GraphqlParser.ValueWithVariableContext> subValueWithVariableContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
+            Optional<GraphqlParser.InputValueDefinitionContext> subInputValueDefinitionContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
                     .filter(fieldInputValueDefinitionContext ->
                             !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
                                     manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
-                    .findFirst()
-                    .flatMap(subInputValueDefinitionContext -> manager.getObjectFieldWithVariableFromInputValueDefinition(valueWithVariableContext.objectValueWithVariable(), subInputValueDefinitionContext))
+                    .filter(fieldInputValueDefinitionContext ->
+                            valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable().stream()
+                                    .anyMatch(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fieldInputValueDefinitionContext.name().getText()))
+                    )
+                    .findFirst();
+
+            Optional<GraphqlParser.ValueWithVariableContext> subValueWithVariableContext = subInputValueDefinitionContext
+                    .flatMap(fieldInputValueDefinitionContext -> manager.getObjectFieldWithVariableFromInputValueDefinition(valueWithVariableContext.objectValueWithVariable(), fieldInputValueDefinitionContext))
                     .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable);
 
-            Optional<GraphqlParser.ValueContext> subDefaultValueContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
-                    .filter(fieldInputValueDefinitionContext ->
-                            !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
-                                    manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
-                    .findFirst()
+            Optional<GraphqlParser.ValueContext> subDefaultValueContext = subInputValueDefinitionContext
                     .flatMap(manager::getDefaultValueFromInputValueDefinition);
 
             if (operatorEnumValueContext.isPresent() && subValueWithVariableContext.isPresent()) {
-                return operatorValueWithVariableToExpression(leftExpression, operatorEnumValueContext.get(), subValueWithVariableContext.get());
+                return operatorValueWithVariableToExpression(leftExpression, operatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subValueWithVariableContext.get());
             } else if (operatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
-                return operatorValueToExpression(leftExpression, operatorEnumValueContext.get(), subDefaultValueContext.get());
+                return operatorValueToExpression(leftExpression, operatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
             } else if (defaultOperatorEnumValueContext.isPresent() && subValueWithVariableContext.isPresent()) {
-                return operatorValueWithVariableToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subValueWithVariableContext.get());
+                return operatorValueWithVariableToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subValueWithVariableContext.get());
             } else if (defaultOperatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
-                return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subDefaultValueContext.get());
+                return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
             } else {
                 throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
@@ -815,29 +813,31 @@ public class GraphQLArgumentsToWhere {
                     .flatMap(manager::getDefaultValueFromInputValueDefinition)
                     .map(GraphqlParser.ValueContext::enumValue);
 
-            Optional<GraphqlParser.ValueContext> subValueContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
+            Optional<GraphqlParser.InputValueDefinitionContext> subInputValueDefinitionContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
                     .filter(fieldInputValueDefinitionContext ->
                             !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
                                     manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
-                    .findFirst()
-                    .flatMap(subInputValueDefinitionContext -> manager.getObjectFieldFromInputValueDefinition(valueContext.objectValue(), subInputValueDefinitionContext))
+                    .filter(fieldInputValueDefinitionContext ->
+                            valueContext.objectValue().objectField().stream()
+                                    .anyMatch(objectFieldContext -> objectFieldContext.name().getText().equals(fieldInputValueDefinitionContext.name().getText()))
+                    )
+                    .findFirst();
+
+            Optional<GraphqlParser.ValueContext> subValueContext = subInputValueDefinitionContext
+                    .flatMap(fieldInputValueDefinitionContext -> manager.getObjectFieldFromInputValueDefinition(valueContext.objectValue(), fieldInputValueDefinitionContext))
                     .map(GraphqlParser.ObjectFieldContext::value);
 
-            Optional<GraphqlParser.ValueContext> subDefaultValueContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
-                    .filter(fieldInputValueDefinitionContext ->
-                            !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
-                                    manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
-                    .findFirst()
+            Optional<GraphqlParser.ValueContext> subDefaultValueContext = subInputValueDefinitionContext
                     .flatMap(manager::getDefaultValueFromInputValueDefinition);
 
             if (operatorEnumValueContext.isPresent() && subValueContext.isPresent()) {
-                return operatorValueToExpression(leftExpression, operatorEnumValueContext.get(), subValueContext.get());
+                return operatorValueToExpression(leftExpression, operatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subValueContext.get());
             } else if (operatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
-                return operatorValueToExpression(leftExpression, operatorEnumValueContext.get(), subDefaultValueContext.get());
+                return operatorValueToExpression(leftExpression, operatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
             } else if (defaultOperatorEnumValueContext.isPresent() && subValueContext.isPresent()) {
-                return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subValueContext.get());
+                return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subValueContext.get());
             } else if (defaultOperatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
-                return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subDefaultValueContext.get());
+                return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
             } else {
                 throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
@@ -848,9 +848,14 @@ public class GraphQLArgumentsToWhere {
 
     private Optional<Expression> operatorValueWithVariableToExpression(Expression leftExpression,
                                                                        GraphqlParser.EnumValueContext enumValueContext,
+                                                                       GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                        GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+
+        if (manager.fieldTypeIsList(inputValueDefinitionContext.type()) && valueWithVariableContext.variable() != null) {
+            return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, inputValueDefinitionContext, valueWithVariableContext));
+        }
         if (valueWithVariableContext.arrayValueWithVariable() != null) {
-            return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, valueWithVariableContext));
+            return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, inputValueDefinitionContext, valueWithVariableContext));
         }
         if (valueWithVariableContext.enumValue() != null) {
             return Optional.ofNullable(operatorEnumValueWithVariableToExpression(leftExpression, enumValueContext, valueWithVariableContext));
@@ -869,6 +874,7 @@ public class GraphQLArgumentsToWhere {
 
     private Optional<Expression> operatorValueToExpression(Expression leftExpression,
                                                            GraphqlParser.EnumValueContext enumValueContext,
+                                                           GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                            GraphqlParser.ValueContext valueContext) {
         if (valueContext.arrayValue() != null) {
             return Optional.of(operatorValueToInExpression(leftExpression, enumValueContext, valueContext));
@@ -905,12 +911,18 @@ public class GraphQLArgumentsToWhere {
 
     private Expression operatorValueWithVariableToInExpression(Expression leftExpression,
                                                                GraphqlParser.EnumValueContext enumValueContext,
+                                                               GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+
         InExpression inExpression = new InExpression();
         inExpression.setLeftExpression(leftExpression);
-        inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                .map(DB_VALUE_UTIL::valueWithVariableToDBValue)
-                .collect(Collectors.toList())));
+        if (valueWithVariableContext.variable() != null) {
+            inExpression.setRightExpression(selectVariablesFromJsonArray(inputValueDefinitionContext, valueWithVariableContext));
+        } else {
+            inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+                    .map(DB_VALUE_UTIL::valueWithVariableToDBValue)
+                    .collect(Collectors.toList())));
+        }
         if ("NIN".equals(enumValueContext.enumValueName().getText())) {
             inExpression.setNot(true);
         }
@@ -1210,7 +1222,7 @@ public class GraphQLArgumentsToWhere {
         EqualsTo equalsTo = new EqualsTo();
         equalsTo.setLeftExpression(leftExpression);
         if (valueWithVariableContext.variable() != null) {
-            equalsTo.setRightExpression(variableToJdbcNamedParameter(valueWithVariableContext.variable()));
+            equalsTo.setRightExpression(DB_VALUE_UTIL.variableToJdbcNamedParameter(valueWithVariableContext.variable()));
         } else {
             equalsTo.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
         }
@@ -1273,7 +1285,7 @@ public class GraphQLArgumentsToWhere {
         } else if (variableContext != null) {
             EqualsTo equalsTo = new EqualsTo();
             equalsTo.setLeftExpression(leftExpression);
-            equalsTo.setRightExpression(variableToJdbcNamedParameter(variableContext));
+            equalsTo.setRightExpression(DB_VALUE_UTIL.variableToJdbcNamedParameter(variableContext));
             return equalsTo;
         }
         return null;
@@ -1283,7 +1295,7 @@ public class GraphQLArgumentsToWhere {
         if (valueWithVariableContext.variable() != null) {
             IsExpression isExpression = new IsExpression();
             isExpression.setLeftExpression(leftExpression);
-            isExpression.setRightExpression(variableToJdbcNamedParameter(valueWithVariableContext.variable()));
+            isExpression.setRightExpression(DB_VALUE_UTIL.variableToJdbcNamedParameter(valueWithVariableContext.variable()));
             return Optional.of(isExpression);
         } else if (valueWithVariableContext.BooleanValue() != null) {
             IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
@@ -1336,14 +1348,7 @@ public class GraphQLArgumentsToWhere {
         return existsExpression;
     }
 
-    protected JdbcNamedParameter variableToJdbcNamedParameter(GraphqlParser.VariableContext variableContext) {
-        JdbcNamedParameter jdbcNamedParameter = new JdbcNamedParameter();
-        jdbcNamedParameter.setName(variableContext.name().getText());
-        return jdbcNamedParameter;
-    }
-
-    protected SubSelect selectVariablesFromJsonArray(GraphqlParser.TypeContext typeContext,
-                                                     GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
+    protected SubSelect selectVariablesFromJsonArray(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                      GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         SubSelect subSelect = new SubSelect();
         JsonTable jsonTable = new JsonTable();
@@ -1352,9 +1357,9 @@ public class GraphQLArgumentsToWhere {
         jsonTable.setJson(jdbcNamedParameter);
         jsonTable.setPath("'$[*]'");
         ColumnDefinition columnDefinition = new ColumnDefinition();
-        columnDefinition.setColumnName(inputValueDefinitionContext.name().getText());
+        columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(valueWithVariableContext.variable().name().getText()));
         ColDataType colDataType = new ColDataType();
-        String fieldTypeName = manager.getFieldTypeName(typeContext);
+        String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
         if (manager.isEnum(fieldTypeName)) {
             colDataType.setDataType("INT");
         } else if (manager.isScaLar(fieldTypeName)) {
@@ -1377,6 +1382,7 @@ public class GraphQLArgumentsToWhere {
         } else {
             //TODO
         }
+        columnDefinition.setColDataType(colDataType);
         columnDefinition.setColumnSpecs(Arrays.asList("PATH", "'$'"));
         jsonTable.setColumnDefinitions(Collections.singletonList(columnDefinition));
         jsonTable.setAlias(new Alias(valueWithVariableContext.variable().name().getText()));
