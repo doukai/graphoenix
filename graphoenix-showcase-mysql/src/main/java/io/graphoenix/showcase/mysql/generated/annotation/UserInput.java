@@ -22,6 +22,10 @@ public @interface UserInput {
 
   Sex sex() default Sex.MAN;
 
+  OrganizationInnerInput organization() default @OrganizationInnerInput;
+
+  RoleInnerInput[] roles() default {};
+
   String name() default "";
 
   int id() default 0;

@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 @TypeInput
-public @interface RoleInput {
+public @interface RoleInnerInput {
   boolean isDeprecated() default false;
 
   String name() default "";
@@ -19,8 +19,6 @@ public @interface RoleInput {
 
   int version() default 0;
 
-  UserInnerInput[] users() default {};
-
   String $isDeprecated() default "";
 
   String $name() default "";
@@ -28,6 +26,4 @@ public @interface RoleInput {
   String $id() default "";
 
   String $version() default "";
-
-  String $users() default "";
 }

@@ -374,7 +374,11 @@ public class TypeSpecBuilder {
         } else if (manager.isObject(nameContext.getText())) {
             Optional<GraphqlParser.ObjectTypeDefinitionContext> object = manager.getObject(nameContext.getText());
             if (object.isPresent()) {
-                return ClassName.get(configuration.getObjectTypePackageName(), object.get().name().getText());
+                if (isAnnotation) {
+                    return ClassName.get(configuration.getAnnotationPackageName(), object.get().name().getText() + "InnerInput");
+                } else {
+                    return ClassName.get(configuration.getObjectTypePackageName(), object.get().name().getText());
+                }
             }
         } else if (manager.isEnum(nameContext.getText())) {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
@@ -459,6 +463,9 @@ public class TypeSpecBuilder {
     }
 
     public CodeBlock buildAnnotationDefaultValue(GraphqlParser.TypeContext typeContext) {
+        if (manager.fieldTypeIsList(typeContext)) {
+            return CodeBlock.of("$L", "{}");
+        }
         if (manager.isScaLar(manager.getFieldTypeName(typeContext))) {
             Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(manager.getFieldTypeName(typeContext));
             if (scaLar.isPresent()) {
@@ -471,6 +478,14 @@ public class TypeSpecBuilder {
                         "$T.$L",
                         ClassName.get(configuration.getEnumTypePackageName(), enumType.get().name().getText()),
                         enumType.get().enumValueDefinitions().enumValueDefinition(0).enumValue().enumValueName().getText()
+                );
+            }
+        } else if (manager.isObject(manager.getFieldTypeName(typeContext))) {
+            Optional<GraphqlParser.ObjectTypeDefinitionContext> object = manager.getObject(manager.getFieldTypeName(typeContext));
+            if (object.isPresent()) {
+                return CodeBlock.of(
+                        "@$T",
+                        ClassName.get(configuration.getAnnotationPackageName(), object.get().name().getText() + "InnerInput")
                 );
             }
         }
@@ -680,7 +695,58 @@ public class TypeSpecBuilder {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .map(objectTypeDefinitionContext ->
-                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Input")
+                                TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Input")
+                                        .addModifiers(Modifier.PUBLIC)
+                                        .addAnnotation(
+                                                AnnotationSpec.builder(Retention.class)
+                                                        .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                                        .build()
+                                        )
+                                        .addAnnotation(
+                                                AnnotationSpec.builder(Target.class)
+                                                        .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
+                                                        .build()
+                                        )
+                                        .addAnnotation(TypeInput.class)
+                                        .addMethods(
+                                                manager.getFields(objectTypeDefinitionContext.name().getText())
+//                                                .filter(fieldDefinitionContext ->
+//                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+//                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+//                                                )
+                                                        .map(fieldDefinitionContext ->
+                                                                MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                        .returns(buildType(fieldDefinitionContext.type(), true))
+                                                                        .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type()))
+                                                                        .build()
+                                                        )
+                                                        .collect(Collectors.toList())
+                                        )
+                                        .addMethods(
+                                                manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                        .map(fieldDefinitionContext ->
+                                                                MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
+                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                        .returns(String.class)
+                                                                        .defaultValue("$S", "")
+                                                                        .build()
+                                                        )
+                                                        .collect(Collectors.toList())
+                                        )
+                                        .build()
+                );
+    }
+
+    public Stream<TypeSpec> buildObjectTypeInnerInputAnnotations() {
+        return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
+                .map(objectTypeDefinitionContext ->
+                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "InnerInput")
                                 .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(
                                         AnnotationSpec.builder(Retention.class)
@@ -710,6 +776,10 @@ public class TypeSpecBuilder {
                                 )
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext ->
+                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                )
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)

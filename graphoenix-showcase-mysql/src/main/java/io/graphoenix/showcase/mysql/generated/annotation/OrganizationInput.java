@@ -15,11 +15,15 @@ public @interface OrganizationInput {
 
   boolean isDeprecated() default false;
 
+  OrganizationInnerInput above() default @OrganizationInnerInput;
+
   String name() default "";
 
   int id() default 0;
 
   int version() default 0;
+
+  UserInnerInput[] users() default {};
 
   String $aboveId() default "";
 
