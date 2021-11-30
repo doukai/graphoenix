@@ -299,8 +299,6 @@ public class MethodToQueryOperation {
         return getListVariable(expression, parentExecutableElement)
                 .map(list -> list.stream()
                         .map(value -> elementManager.getParameterFromExecutableElement(parentExecutableElement, ((AnnotationValue) value).getValue().toString()))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
                         .collect(Collectors.toList())
                 )
                 .map(variableElements -> variableElements.size() == 1 ? variableElements.get(0) : variableElements);

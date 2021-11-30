@@ -61,31 +61,64 @@ public class MethodToMutationOperation {
                     String fieldName = entry.getKey().getSimpleName().toString();
                     Object value = entry.getValue().getValue();
                     Argument argument = new Argument();
-                    if (entry.getKey().getSimpleName().toString().startsWith("$")) {
+                    if (fieldName.startsWith("$")) {
                         argument.setName(fieldName.substring(1));
-                        if (value instanceof Collection<?>) {
-                            argument.setValueWithVariable(
-                                    ((Collection<?>) value).stream()
-                                            .map(item -> elementManager.getParameterFromExecutableElement(executableElement, ((AnnotationValue) item).getValue().toString()).orElseThrow())
-                                            .collect(Collectors.toList())
-                            );
-                        } else {
-                            argument.setValueWithVariable(elementManager.getParameterFromExecutableElement(executableElement, value.toString()).orElseThrow());
-                        }
+                        argument.setValueWithVariable(rebuildVariable(executableElement, value));
                     } else {
                         argument.setName(fieldName);
-                        if (value instanceof Collection<?>) {
-                            argument.setValueWithVariable(
-                                    ((Collection<?>) value).stream()
-                                            .map(item -> ((AnnotationValue) item).getValue())
-                                            .collect(Collectors.toList())
-                            );
-                        } else {
-                            argument.setValueWithVariable(value);
-                        }
+                        argument.setValueWithVariable(rebuildValue(executableElement, value));
                     }
                     return argument;
                 });
+    }
+
+    private Object rebuildValue(ExecutableElement executableElement, Object value) {
+        if (value instanceof Collection<?>) {
+            return ((Collection<?>) value).stream()
+                    .map(item -> rebuildValue(executableElement, ((AnnotationValue) item).getValue()))
+                    .collect(Collectors.toList());
+        } else {
+            if (value instanceof AnnotationMirror) {
+                return rebuildAnnotationMirror(executableElement, (AnnotationMirror) value);
+            } else {
+                return value;
+            }
+        }
+    }
+
+    private Object rebuildVariable(ExecutableElement executableElement, Object value) {
+        if (value instanceof Collection<?>) {
+            return ((Collection<?>) value).stream()
+                    .map(item -> rebuildVariable(executableElement, ((AnnotationValue) item).getValue()))
+                    .collect(Collectors.toList());
+        } else {
+            if (value instanceof AnnotationMirror) {
+                return rebuildAnnotationMirror(executableElement, (AnnotationMirror) value);
+            } else {
+                return elementManager.getParameterFromExecutableElement(executableElement, value.toString());
+            }
+        }
+    }
+
+    private Object rebuildAnnotationMirror(ExecutableElement executableElement, AnnotationMirror value) {
+        return value.getElementValues().entrySet().stream()
+                .collect(Collectors.toMap(entry -> {
+                            String fieldName = entry.getKey().getSimpleName().toString();
+                            if (fieldName.startsWith("$")) {
+                                return fieldName.substring(1);
+                            } else {
+                                return fieldName;
+                            }
+                        }, entry -> {
+                            String fieldName = entry.getKey().getSimpleName().toString();
+                            if (fieldName.startsWith("$")) {
+                                return rebuildVariable(executableElement, entry.getValue().getValue());
+                            } else {
+                                return rebuildValue(executableElement, entry.getValue().getValue());
+                            }
+                        }
+                        )
+                );
     }
 
     private Stream<String> getVariableArgumentNames(AnnotationMirror inputs) {

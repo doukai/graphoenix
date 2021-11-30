@@ -7,7 +7,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,9 +38,10 @@ public class ElementManager {
                 );
     }
 
-    public Optional<? extends VariableElement> getParameterFromExecutableElement(ExecutableElement executableElement, String name) {
+    public VariableElement getParameterFromExecutableElement(ExecutableElement executableElement, String name) {
         return executableElement.getParameters().stream()
                 .filter(parameter -> parameter.getSimpleName().toString().equals(name))
-                .findFirst();
+                .findFirst()
+                .orElseThrow();
     }
 }

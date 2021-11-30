@@ -22,6 +22,7 @@ public class SQLToFileConvertHandler implements IOperationHandler {
     public Tuple2<String, String> query(Object sql) {
         return Tuples.of(
                 SqlFormatter.of(Dialect.MariaDb)
+                        .extend(cfg -> cfg.plusNamedPlaceholderTypes(":"))
                         .format((String) sql),
                 "sql");
     }
@@ -41,6 +42,7 @@ public class SQLToFileConvertHandler implements IOperationHandler {
     public Tuple2<String, String> mutation(Object sql) {
         return Tuples.of(
                 SqlFormatter.of(Dialect.MariaDb)
+                        .extend(cfg -> cfg.plusNamedPlaceholderTypes(":"))
                         .format(((Stream<String>) sql).collect(Collectors.joining(";"))),
                 "sql");
     }

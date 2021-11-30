@@ -39,7 +39,7 @@ public interface OperationTest {
 //    Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version);
 
     @MutationOperation("user")
-    @UserInput(name = "name1", age = 11, login = "login1", password = "password1")
-    User mutationUser(Sex sex, String name);
+    @UserInput($name = "name", $sex = "sex", login = "login1", password = "password1", organization = @OrganizationInnerInput($name = "orgName", version = 2))
+    User mutationUser(Sex sex, String name, String orgName);
 
 }
