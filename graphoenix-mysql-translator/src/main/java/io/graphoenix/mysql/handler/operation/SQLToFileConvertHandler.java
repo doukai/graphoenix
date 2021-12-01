@@ -13,6 +13,8 @@ import java.util.stream.Stream;
 public class SQLToFileConvertHandler implements IOperationHandler {
     private IGraphQLDocumentManager manager;
 
+    private final SqlFormatter.Formatter formatter = SqlFormatter.of(Dialect.MariaDb).extend(cfg -> cfg.plusNamedPlaceholderTypes(":"));
+
     @Override
     public void setupManager(IGraphQLDocumentManager manager) {
         this.manager = manager;
@@ -20,11 +22,7 @@ public class SQLToFileConvertHandler implements IOperationHandler {
 
     @Override
     public Tuple2<String, String> query(Object sql) {
-        return Tuples.of(
-                SqlFormatter.of(Dialect.MariaDb)
-                        .extend(cfg -> cfg.plusNamedPlaceholderTypes(":"))
-                        .format((String) sql),
-                "sql");
+        return Tuples.of(formatter.format((String) sql), "sql");
     }
 
     @Override
@@ -40,11 +38,7 @@ public class SQLToFileConvertHandler implements IOperationHandler {
     @Override
     @SuppressWarnings("unchecked")
     public Tuple2<String, String> mutation(Object sql) {
-        return Tuples.of(
-                SqlFormatter.of(Dialect.MariaDb)
-                        .extend(cfg -> cfg.plusNamedPlaceholderTypes(":"))
-                        .format(((Stream<String>) sql).collect(Collectors.joining(";"))),
-                "sql");
+        return Tuples.of(formatter.format(((Stream<String>) sql).collect(Collectors.joining(";"))), "sql");
     }
 
     @Override

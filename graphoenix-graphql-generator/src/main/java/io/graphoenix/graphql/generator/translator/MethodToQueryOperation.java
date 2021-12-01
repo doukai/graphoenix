@@ -347,7 +347,15 @@ public class MethodToQueryOperation {
 
     private String getTypeName(String queryFieldName, String argumentName) {
         return manager.getField(getQueryTypeName(queryFieldName), argumentName)
-                .map(fieldDefinitionContext -> fieldDefinitionContext.type().getText())
+                .map(fieldDefinitionContext -> {
+                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                            if (manager.isObject(fieldTypeName)) {
+                                return fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + "Input");
+                            } else {
+                                return fieldDefinitionContext.type().getText();
+                            }
+                        }
+                )
                 .orElseThrow();
     }
 

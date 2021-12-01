@@ -3,8 +3,12 @@ package io.graphoenix.mysql.common.utils;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.statement.SetStatement;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import java.util.Arrays;
 
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 
@@ -30,6 +34,16 @@ public enum DBValueUtil {
                 valueWithVariableContext.FloatValue(),
                 valueWithVariableContext.BooleanValue(),
                 valueWithVariableContext.NullValue());
+    }
+
+    public Expression objectFieldVariableToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        JdbcNamedParameter jdbcNamedParameter = new JdbcNamedParameter();
+        jdbcNamedParameter.setName(valueWithVariableContext.variable().name().getText());
+
+        Function function = new Function();
+        function.setName("JSON_EXTRACT");
+        function.setParameters(new ExpressionList(Arrays.asList(jdbcNamedParameter, new StringValue("$." + fieldDefinitionContext.name().getText()))));
+        return function;
     }
 
     public Expression enumValueToDBValue(GraphqlParser.ValueContext valueContext) {

@@ -39,18 +39,18 @@ public interface OperationTest {
 //    )
 //    Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version);
 
-//    @MutationOperation("user")
-//    @UserInput(
-//            $name = "name",
-//            $sex = "sex",
-//            login = "login1", password = "password1",
-//            organization = @OrganizationInnerInput($name = "orgName", version = 2),
-//            $roles = "roles"
-//    )
-//    User mutationUser(Sex sex, String name, String orgName, List<Role> roles);
-
-
     @MutationOperation("user")
-    User mutationUser(io.graphoenix.showcase.mysql.generated.inputObjectType.UserInput userInput);
+    @UserInput(
+            $name = "name",
+            $sex = "sex",
+            login = "login1", password = "password1",
+            organization = @OrganizationInnerInput($name = "orgName", version = 2),
+            $roles = "roles"
+    )
+    User mutationUser(Sex sex, String name, String orgName, List<Role> roles);
+
+
+//    @MutationOperation("user")
+//    User mutationUser(io.graphoenix.showcase.mysql.generated.inputObjectType.UserInput userInput);
 
 }

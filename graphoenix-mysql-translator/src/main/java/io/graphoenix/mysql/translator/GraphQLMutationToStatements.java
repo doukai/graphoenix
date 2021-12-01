@@ -1058,6 +1058,24 @@ public class GraphQLMutationToStatements {
         return Stream.of(insert);
     }
 
+    protected Stream<Statement> objectVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                      GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
+                                                                      GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
+                                                                      int level,
+                                                                      int index) {
+        String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        Table table = typeToTable(fieldDefinitionContext);
+
+        List<GraphqlParser.InputValueDefinitionContext> fieldList = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
+                .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
+
+        Insert insert = objectValueWithVariableToInsert(table, fieldDefinitionContext.type(), fieldList, objectValueWithVariableContext);
+
+
+        return Stream.of(insert);
+    }
+
     protected Stream<Statement> objectValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                    GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
                                                                    GraphqlParser.ObjectValueContext objectValueContext,
@@ -1132,6 +1150,43 @@ public class GraphQLMutationToStatements {
                 )
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .collect(Collectors.toList());
+
+        ExpressionList expressionList = new ExpressionList(
+                inputValueDefinitionContextList.stream()
+                        .map(inputValueDefinitionContext ->
+                                manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext)
+                                        .map(fieldDefinitionContext ->
+                                                manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
+                                                        .map(objectFieldWithVariableContext -> objectFieldWithVariableToDBValue(fieldDefinitionContext, objectFieldWithVariableContext))
+                                                        .orElseGet(() -> defaultValueToDBValue(inputValueDefinitionContext))
+                                        )
+                        )
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList())
+        );
+        return insertExpression(table, columnList, expressionList, true);
+    }
+
+
+    protected Insert objectVariableToInsert(Table table,
+                                            GraphqlParser.TypeContext typeContext,
+                                            List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
+                                            GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+
+        List<Column> columnList = inputValueDefinitionContextList.stream()
+                .map(inputValueDefinitionContext ->
+                        manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext)
+                                .filter(fieldDefinitionContext ->
+                                        !manager.fieldTypeIsList(fieldDefinitionContext.type()) &&
+                                                manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) &&
+                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                )
+                )
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(fieldDefinitionContext -> DB_NAME_UTIL.fieldToColumn(table, fieldDefinitionContext))
                 .collect(Collectors.toList());
 
         ExpressionList expressionList = new ExpressionList(
