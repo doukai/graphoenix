@@ -9,6 +9,13 @@ type User @table(engine:"InnoDB"){
     organizationId: Int
     organization: Organization @map(from: "organizationId", to: "id")
     roles: [Role!] @map(from: "id", with:{type: "UserRole" from: "userId", to: "roleId"}, to: "id")
+    phones: [String] @map(from: "id", with:{type: "UserPhones" from: "userId", to: "phone"})
+}
+
+type UserPhones @table(engine:"InnoDB"){
+    id: ID @column(autoIncrement:true)
+    userId  : Int
+    phone  : String
 }
 
 enum Sex {

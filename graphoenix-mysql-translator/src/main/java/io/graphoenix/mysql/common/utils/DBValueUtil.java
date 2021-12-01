@@ -36,13 +36,13 @@ public enum DBValueUtil {
                 valueWithVariableContext.NullValue());
     }
 
-    public Expression objectFieldVariableToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+    public Expression objectFieldVariableToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         JdbcNamedParameter jdbcNamedParameter = new JdbcNamedParameter();
         jdbcNamedParameter.setName(valueWithVariableContext.variable().name().getText());
 
         Function function = new Function();
         function.setName("JSON_EXTRACT");
-        function.setParameters(new ExpressionList(Arrays.asList(jdbcNamedParameter, new StringValue("$." + fieldDefinitionContext.name().getText()))));
+        function.setParameters(new ExpressionList(Arrays.asList(jdbcNamedParameter, new StringValue("$." + inputValueDefinitionContext.name().getText()))));
         return function;
     }
 

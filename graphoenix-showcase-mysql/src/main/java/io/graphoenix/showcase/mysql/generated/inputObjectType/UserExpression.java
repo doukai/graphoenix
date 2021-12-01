@@ -28,6 +28,8 @@ public class UserExpression {
 
   private RoleExpression roles;
 
+  private StringExpression phones;
+
   private IntExpression version;
 
   @DefaultValue("=false")
@@ -116,6 +118,14 @@ public class UserExpression {
 
   public void setRoles(RoleExpression roles) {
     this.roles = roles;
+  }
+
+  public StringExpression getPhones() {
+    return this.phones;
+  }
+
+  public void setPhones(StringExpression phones) {
+    this.phones = phones;
   }
 
   public IntExpression getVersion() {

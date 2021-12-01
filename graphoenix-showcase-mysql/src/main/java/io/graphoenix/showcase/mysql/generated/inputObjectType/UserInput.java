@@ -33,6 +33,8 @@ public class UserInput {
 
   private Set<RoleInput> roles;
 
+  private Set<String> phones;
+
   private Integer version;
 
   private Boolean isDeprecated;
@@ -115,6 +117,14 @@ public class UserInput {
 
   public void setRoles(Set<RoleInput> roles) {
     this.roles = roles;
+  }
+
+  public Set<String> getPhones() {
+    return this.phones;
+  }
+
+  public void setPhones(Set<String> phones) {
+    this.phones = phones;
   }
 
   public Integer getVersion() {

@@ -1356,8 +1356,6 @@ public class GraphQLArgumentsToWhere {
         jdbcNamedParameter.setName(valueWithVariableContext.variable().name().getText());
         jsonTable.setJson(jdbcNamedParameter);
         jsonTable.setPath(new StringValue("$[*]"));
-        ColumnDefinition columnDefinition = new ColumnDefinition();
-        columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(valueWithVariableContext.variable().name().getText()));
         ColDataType colDataType = new ColDataType();
         String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
         if (manager.isEnum(fieldTypeName)) {
@@ -1382,6 +1380,8 @@ public class GraphQLArgumentsToWhere {
         } else {
             //TODO
         }
+        ColumnDefinition columnDefinition = new ColumnDefinition();
+        columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(valueWithVariableContext.variable().name().getText()));
         columnDefinition.setColDataType(colDataType);
         columnDefinition.setColumnSpecs(Arrays.asList("PATH", "'$'"));
         jsonTable.setColumnDefinitions(Collections.singletonList(columnDefinition));

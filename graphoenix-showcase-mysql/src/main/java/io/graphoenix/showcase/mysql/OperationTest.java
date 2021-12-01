@@ -44,10 +44,11 @@ public interface OperationTest {
             $name = "name",
             $sex = "sex",
             login = "login1", password = "password1",
-            organization = @OrganizationInnerInput($name = "orgName", version = 2),
-            $roles = "roles"
+            $organization = "organizationInput",
+            $roles = "roles",
+            $phones = "phones"
     )
-    User mutationUser(Sex sex, String name, String orgName, List<Role> roles);
+    User mutationUser(Sex sex, String name, String orgName, List<io.graphoenix.showcase.mysql.generated.inputObjectType.RoleInput> roles, io.graphoenix.showcase.mysql.generated.inputObjectType.OrganizationInput organizationInput, List<String> phones);
 
 
 //    @MutationOperation("user")

@@ -10,12 +10,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 @TypeExpressions
-public @interface UserExpressions {
+public @interface UserPhonesExpressions {
   Conditional cond() default Conditional.AND;
 
-  UserExpression[] value() default {};
-
-  RoleExpression[] roles() default {};
-
-  OrganizationExpression[] organization() default {};
+  UserPhonesExpression[] value() default {};
 }

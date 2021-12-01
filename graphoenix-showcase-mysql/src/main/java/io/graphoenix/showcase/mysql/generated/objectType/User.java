@@ -37,6 +37,8 @@ public class User implements Meta {
 
   private Set<Role> roles;
 
+  private Set<String> phones;
+
   private Integer version;
 
   private Boolean isDeprecated;
@@ -119,6 +121,14 @@ public class User implements Meta {
 
   public void setRoles(Set<Role> roles) {
     this.roles = roles;
+  }
+
+  public Set<String> getPhones() {
+    return this.phones;
+  }
+
+  public void setPhones(Set<String> phones) {
+    this.phones = phones;
   }
 
   @Override
