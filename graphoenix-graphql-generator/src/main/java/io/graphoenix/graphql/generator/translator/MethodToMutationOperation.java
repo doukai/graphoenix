@@ -7,10 +7,12 @@ import io.graphoenix.graphql.generator.operation.VariableDefinition;
 import io.graphoenix.spi.annotation.TypeInput;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
+import org.eclipse.microprofile.graphql.Input;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.VariableElement;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +54,12 @@ public class MethodToMutationOperation {
     private Optional<? extends AnnotationMirror> getInputAnnotation(ExecutableElement executableElement) {
         return executableElement.getAnnotationMirrors().stream()
                 .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getAnnotation(TypeInput.class) != null)
+                .findFirst();
+    }
+
+    private Optional<? extends VariableElement> getInputParameter(ExecutableElement executableElement) {
+        return executableElement.getParameters().stream()
+                .filter(parameter -> parameter.getAnnotationMirrors().stream().anyMatch(annotationMirror -> annotationMirror.getAnnotationType().getAnnotation(Input.class) != null))
                 .findFirst();
     }
 
@@ -149,7 +157,7 @@ public class MethodToMutationOperation {
 
     private String getTypeName(String mutationFieldName, String argumentName) {
         return manager.getField(getMutationTypeName(mutationFieldName), argumentName)
-                .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
+                .map(fieldDefinitionContext -> fieldDefinitionContext.type().getText())
                 .orElseThrow();
     }
 

@@ -7,6 +7,7 @@ import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandle
 import io.graphoenix.showcase.mysql.generated.annotation.*;
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import io.graphoenix.showcase.mysql.generated.enumType.Sex;
+import io.graphoenix.showcase.mysql.generated.objectType.Role;
 import io.graphoenix.showcase.mysql.generated.objectType.User;
 import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.annotation.MutationOperation;
@@ -38,8 +39,18 @@ public interface OperationTest {
 //    )
 //    Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version);
 
+//    @MutationOperation("user")
+//    @UserInput(
+//            $name = "name",
+//            $sex = "sex",
+//            login = "login1", password = "password1",
+//            organization = @OrganizationInnerInput($name = "orgName", version = 2),
+//            $roles = "roles"
+//    )
+//    User mutationUser(Sex sex, String name, String orgName, List<Role> roles);
+
+
     @MutationOperation("user")
-    @UserInput($name = "name", $sex = "sex", login = "login1", password = "password1", organization = @OrganizationInnerInput($name = "orgName", version = 2))
-    User mutationUser(Sex sex, String name, String orgName);
+    User mutationUser(io.graphoenix.showcase.mysql.generated.inputObjectType.UserInput userInput);
 
 }

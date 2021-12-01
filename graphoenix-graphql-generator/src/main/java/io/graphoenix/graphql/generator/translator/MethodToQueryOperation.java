@@ -347,7 +347,7 @@ public class MethodToQueryOperation {
 
     private String getTypeName(String queryFieldName, String argumentName) {
         return manager.getField(getQueryTypeName(queryFieldName), argumentName)
-                .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
+                .map(fieldDefinitionContext -> fieldDefinitionContext.type().getText())
                 .orElseThrow();
     }
 
