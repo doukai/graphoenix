@@ -8,8 +8,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @AutoFactory
 public class GraphQLDataFetcher {
@@ -27,16 +25,16 @@ public class GraphQLDataFetcher {
         this.operationHandlers = operationHandlers;
     }
 
-    public Object fetch(GraphQLRequest request) throws Exception {
-        return this.createOperationPipeline().fetch(request.getQuery());
+    public <T> T fetch(GraphQLRequest request, Class<T> clazz) throws Exception {
+        return this.createOperationPipeline().fetch(request.getQuery(), clazz);
     }
 
-    public Mono<Object> fetchAsync(GraphQLRequest request) throws Exception {
-        return this.createOperationPipeline().fetchAsync(request.getQuery());
+    public <T> T fetchAsync(GraphQLRequest request, Class<T> clazz) throws Exception {
+        return this.createOperationPipeline().fetchAsync(request.getQuery(), clazz);
     }
 
-    public Flux<Object> fetchSelectionsAsync(GraphQLRequest request) throws Exception {
-        return this.createOperationPipeline().fetchSelectionsAsync(request.getQuery());
+    public <T> T fetchSelectionsAsync(GraphQLRequest request, Class<T> clazz) throws Exception {
+        return this.createOperationPipeline().fetchSelectionsAsync(request.getQuery(), clazz);
     }
 
     private OperationPipeline createOperationPipeline() {

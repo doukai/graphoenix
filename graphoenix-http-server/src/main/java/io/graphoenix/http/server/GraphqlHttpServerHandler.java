@@ -59,7 +59,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         try {
             requestBody = requestHandler.handle(request);
             log.info("Handle http query:{}", requestBody.getQuery());
-            String jsonResult = (String) dataFetcher.fetch(requestBody);
+            String jsonResult = dataFetcher.fetch(requestBody, String.class);
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));
             response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);

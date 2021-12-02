@@ -13,6 +13,7 @@ import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import org.javatuples.Pair;
 import reactor.util.function.Tuple2;
 
 import javax.annotation.processing.*;
@@ -104,8 +105,8 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                         JavaElementToOperation javaElementToOperation = new JavaElementToOperation(manager, javaGeneratorConfig);
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
 
-                        ThrowingBiFunction<GraphQLCodeGenerator, String, Tuple2<String, String>, Exception> generatorPretreatment = GraphQLCodeGenerator::pretreatment;
-                        ThrowingBiConsumer<Filer, Map.Entry<String, Tuple2<String, String>>, IOException> createResource = (filer, entry) -> {
+                        ThrowingBiFunction<GraphQLCodeGenerator, String, Pair<String, String>, Exception> generatorPretreatment = GraphQLCodeGenerator::pretreatment;
+                        ThrowingBiConsumer<Filer, Map.Entry<String, Pair<String, String>>, IOException> createResource = (filer, entry) -> {
                             FileObject fileObject = filer.createResource(
                                     StandardLocation.SOURCE_OUTPUT,
                                     packageElement.getQualifiedName(),
@@ -113,10 +114,10 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                                             .concat("_")
                                             .concat(entry.getKey())
                                             .concat(".")
-                                            .concat(entry.getValue().getT2())
+                                            .concat(entry.getValue().getValue1())
                             );
                             Writer writer = fileObject.openWriter();
-                            writer.write(entry.getValue().getT1());
+                            writer.write(entry.getValue().getValue0());
                             writer.close();
                         };
 

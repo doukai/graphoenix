@@ -1,14 +1,13 @@
 package io.graphoenix.common.pipeline.operation;
 
+import io.graphoenix.common.pipeline.PipelineContext;
 import io.graphoenix.common.utils.HandlerUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.dto.*;
 import io.graphoenix.spi.dto.type.AsyncType;
 import io.graphoenix.spi.dto.type.ExecuteType;
 import io.graphoenix.spi.handler.IOperationHandler;
 import org.apache.commons.chain.impl.ChainBase;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.javatuples.Pair;
 
 public class OperationPipeline extends ChainBase {
 
@@ -38,35 +37,66 @@ public class OperationPipeline extends ChainBase {
         return this;
     }
 
-    public Object fetch(String graphQL) throws Exception {
-        OperationContext operationContext = new OperationContext();
-        operationContext.setExecuteType(ExecuteType.SYNC);
-        operationContext.setAsyncType(AsyncType.OPERATION);
-        operationContext.setCurrentData(graphQL);
-        operationContext.setManager(this.manager);
-        this.execute(operationContext);
-        return operationContext.getCurrentData();
+    private PipelineContext fetch(String graphQL) throws Exception {
+        PipelineContext pipelineContext = new PipelineContext();
+        pipelineContext.setManager(this.manager);
+        pipelineContext.add(ExecuteType.SYNC);
+        pipelineContext.add(AsyncType.OPERATION);
+        pipelineContext.add(graphQL);
+        this.execute(pipelineContext);
+        return pipelineContext;
     }
 
-    @SuppressWarnings("unchecked")
-    public Mono<Object> fetchAsync(String graphQL) throws Exception {
-        OperationContext operationContext = new OperationContext();
-        operationContext.setExecuteType(ExecuteType.ASYNC);
-        operationContext.setAsyncType(AsyncType.OPERATION);
-        operationContext.setCurrentData(graphQL);
-        operationContext.setManager(this.manager);
-        this.execute(operationContext);
-        return ((Mono<Object>) operationContext.getCurrentData());
+    public <T> T fetch(String graphQL, Class<T> clazz) throws Exception {
+        return fetch(graphQL).poll(clazz);
     }
 
-    @SuppressWarnings("unchecked")
-    public Flux<Object> fetchSelectionsAsync(String graphQL) throws Exception {
-        OperationContext operationContext = new OperationContext();
-        operationContext.setExecuteType(ExecuteType.ASYNC);
-        operationContext.setAsyncType(AsyncType.SELECTION);
-        operationContext.setCurrentData(graphQL);
-        operationContext.setManager(this.manager);
-        this.execute(operationContext);
-        return ((Flux<Object>) operationContext.getCurrentData());
+    public <A, B> Pair<A, B> fetch(String graphQL, Class<A> clazzA, Class<B> clazzB) throws Exception {
+        PipelineContext pipelineContext = fetch(graphQL);
+        A a = pipelineContext.poll(clazzA);
+        B b = pipelineContext.poll(clazzB);
+        return Pair.with(a, b);
+    }
+
+    private PipelineContext fetchAsync(String graphQL) throws Exception {
+        PipelineContext pipelineContext = new PipelineContext();
+        pipelineContext.setManager(this.manager);
+        pipelineContext.add(ExecuteType.ASYNC);
+        pipelineContext.add(AsyncType.OPERATION);
+        pipelineContext.add(graphQL);
+        this.execute(pipelineContext);
+        return pipelineContext;
+    }
+
+    public <T> T fetchAsync(String graphQL, Class<T> clazz) throws Exception {
+        return fetchAsync(graphQL).poll(clazz);
+    }
+
+    public <A, B> Pair<A, B> fetchAsync(String graphQL, Class<A> clazzA, Class<B> clazzB) throws Exception {
+        PipelineContext pipelineContext = fetchAsync(graphQL);
+        A a = pipelineContext.poll(clazzA);
+        B b = pipelineContext.poll(clazzB);
+        return Pair.with(a, b);
+    }
+
+    private PipelineContext fetchSelectionsAsync(String graphQL) throws Exception {
+        PipelineContext pipelineContext = new PipelineContext();
+        pipelineContext.setManager(this.manager);
+        pipelineContext.add(ExecuteType.ASYNC);
+        pipelineContext.add(AsyncType.SELECTION);
+        pipelineContext.add(graphQL);
+        this.execute(pipelineContext);
+        return pipelineContext;
+    }
+
+    public <T> T fetchSelectionsAsync(String graphQL, Class<T> clazz) throws Exception {
+        return fetchSelectionsAsync(graphQL).poll(clazz);
+    }
+
+    public <A, B> Pair<A, B> fetchSelectionsAsync(String graphQL, Class<A> clazzA, Class<B> clazzB) throws Exception {
+        PipelineContext pipelineContext = fetchSelectionsAsync(graphQL);
+        A a = pipelineContext.poll(clazzA);
+        B b = pipelineContext.poll(clazzB);
+        return Pair.with(a, b);
     }
 }

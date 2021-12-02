@@ -1,6 +1,6 @@
 package io.graphoenix.common.pipeline.operation;
 
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.common.pipeline.PipelineContext;
 import io.graphoenix.spi.dto.type.AsyncType;
 import io.graphoenix.spi.dto.type.ExecuteType;
 import io.graphoenix.spi.dto.type.OperationType;
@@ -8,8 +8,7 @@ import io.graphoenix.spi.handler.IOperationHandler;
 import org.apache.commons.chain.Command;
 import org.apache.commons.chain.Context;
 
-import static io.graphoenix.common.pipeline.operation.OperationConstant.MANAGER_KEY;
-import static io.graphoenix.common.pipeline.operation.OperationConstant.CURRENT_DATA_KEY;
+import static io.graphoenix.common.pipeline.PipelineContext.INSTANCE_KEY;
 
 public class OperationHandler implements Command {
 
@@ -20,27 +19,27 @@ public class OperationHandler implements Command {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean execute(Context context) throws Exception {
 
-        operationHandler.setupManager((IGraphQLDocumentManager) context.get(MANAGER_KEY));
-        OperationType operationType = (OperationType) context.get(OperationConstant.OPERATION_TYPE_KEY);
-        ExecuteType executeType = (ExecuteType) context.get(OperationConstant.EXECUTE_TYPE_KEY);
-        AsyncType asyncType = (AsyncType) context.get(OperationConstant.ASYNC_TYPE_KEY);
+        PipelineContext pipelineContext = (PipelineContext) context.get(INSTANCE_KEY);
+        operationHandler.init(pipelineContext);
+        OperationType operationType = pipelineContext.poll(OperationType.class);
+        ExecuteType executeType = pipelineContext.poll(ExecuteType.class);
+        AsyncType asyncType = pipelineContext.poll(AsyncType.class);
 
         switch (operationType) {
             case QUERY:
                 switch (executeType) {
                     case SYNC:
-                        context.put(CURRENT_DATA_KEY, operationHandler.query(context.get(CURRENT_DATA_KEY)));
+                        operationHandler.query(pipelineContext);
                         break;
                     case ASYNC:
                         switch (asyncType) {
                             case OPERATION:
-                                context.put(CURRENT_DATA_KEY, operationHandler.queryAsync(context.get(CURRENT_DATA_KEY)));
+                                operationHandler.queryAsync(pipelineContext);
                                 break;
                             case SELECTION:
-                                context.put(CURRENT_DATA_KEY, operationHandler.querySelectionsAsync(context.get(CURRENT_DATA_KEY)));
+                                operationHandler.querySelectionsAsync(pipelineContext);
                                 break;
                         }
                 }
@@ -48,15 +47,15 @@ public class OperationHandler implements Command {
             case MUTATION:
                 switch (executeType) {
                     case SYNC:
-                        context.put(CURRENT_DATA_KEY, operationHandler.mutation(context.get(CURRENT_DATA_KEY)));
+                        operationHandler.mutation(pipelineContext);
                         break;
                     case ASYNC:
-                        context.put(CURRENT_DATA_KEY, operationHandler.mutationAsync(context.get(CURRENT_DATA_KEY)));
+                        operationHandler.mutationAsync(pipelineContext);
                         break;
                 }
                 break;
             case SUBSCRIPTION:
-                context.put(CURRENT_DATA_KEY, operationHandler.subscription(context.get(CURRENT_DATA_KEY)));
+                operationHandler.subscription(pipelineContext);
                 break;
         }
         return false;

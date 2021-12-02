@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,11 +67,17 @@ public class MutationExecutor {
                 .block();
     }
 
-    public Mono<String> executeMutations(Stream<String> sqlStream) {
+    public Mono<String> executeMutations(Stream<String> sqlStream, Map<String, Object> parameters) {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
                     connection.beginTransaction();
-                    return Flux.fromStream(sqlStream.map(connection::createStatement))
+                    return Flux.fromStream(sqlStream
+                            .map(sql -> {
+                                        Statement statement = connection.createStatement(sql);
+                                        parameters.forEach(statement::bind);
+                                        return statement;
+                                    }
+                            ))
                             .flatMap(Statement::execute)
                             .flatMap(result -> result.map((row, rowMetadata) -> row.get(0, String.class)))
                             .last()

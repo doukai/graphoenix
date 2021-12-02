@@ -4,7 +4,6 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import io.graphoenix.spi.dto.SelectionResult;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
@@ -12,6 +11,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
+import org.javatuples.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,15 +38,15 @@ public class GraphQLQueryToSelect {
         return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL)).toString();
     }
 
-    public Stream<SelectionResult<String>> createSelectsSQL(String graphQL) {
-        return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(result -> new SelectionResult<>(result.getName(), result.getData().toString()));
+    public Stream<Pair<String, String>> createSelectsSQL(String graphQL) {
+        return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(result -> Pair.with(result.getValue0(), result.getValue1().toString()));
     }
 
     public Select createSelect(String graphQL) {
         return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
-    public Stream<SelectionResult<Select>> createSelects(String graphQL) {
+    public Stream<Pair<String, Select>> createSelects(String graphQL) {
         return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
@@ -62,7 +62,7 @@ public class GraphQLQueryToSelect {
         throw new GraphQLProblem().push(QUERY_NOT_EXIST);
     }
 
-    public Stream<SelectionResult<Select>> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+    public Stream<Pair<String, Select>> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
             if (queryOperationTypeDefinition.isPresent()) {
@@ -71,15 +71,15 @@ public class GraphQLQueryToSelect {
                 }
                 return operationDefinitionContext.selectionSet().selection().stream()
                         .map(selectionContext ->
-                                new SelectionResult<>(
+                                Pair.with(
                                         selectionContext.field().name().getText(),
                                         manager.getQueryOperationTypeDefinition().map(
                                                 operationTypeDefinitionContext ->
                                                         objectSelectionToSelect(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().selectionSet().selection())
                                         )
                                 )
-                        ).filter(result -> result.getData().isPresent())
-                        .map(result -> new SelectionResult<>(result.getName(), result.getData().get()));
+                        ).filter(result -> result.getValue1().isPresent())
+                        .map(result -> Pair.with(result.getValue0(), result.getValue1().get()));
             }
         }
         throw new GraphQLProblem().push(QUERY_NOT_EXIST);

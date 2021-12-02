@@ -6,6 +6,7 @@ import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
+import org.javatuples.Pair;
 import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
@@ -38,9 +39,8 @@ public class GraphQLCodeGenerator {
         this.executeHandlerNames.addAll(executeHandlerNames);
     }
 
-    @SuppressWarnings("unchecked")
-    public Tuple2<String, String> pretreatment(String graphQL) throws Exception {
-        return (Tuple2<String, String>) this.createOperationPipeline().fetch(graphQL);
+    public Pair<String, String> pretreatment(String graphQL) throws Exception {
+        return this.createOperationPipeline().fetch(graphQL, String.class, String.class);
     }
 
     public List<String> getExecuteHandlerNames() {
