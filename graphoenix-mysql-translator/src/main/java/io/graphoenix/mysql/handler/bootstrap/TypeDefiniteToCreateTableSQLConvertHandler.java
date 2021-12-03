@@ -15,6 +15,6 @@ public class TypeDefiniteToCreateTableSQLConvertHandler implements IBootstrapHan
         GraphQLTypeToTable graphqlTypeToTable = new GraphQLTypeToTable(manager);
         Stream<String> sqlStream = graphqlTypeToTable.createTablesSQL();
         context.add(sqlStream);
-        return true;
+        return false;
     }
 }

@@ -13,6 +13,6 @@ public class IntrospectionMutationBuildHandler implements IBootstrapHandler {
         IGraphQLDocumentManager manager = context.getManager();
         Operation operation = new IntrospectionMutationBuilder(manager).buildIntrospectionSchemaMutation();
         context.add(operation.toString());
-        return true;
+        return false;
     }
 }

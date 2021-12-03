@@ -20,6 +20,6 @@ public class CreateTableSQLExecuteHandler implements IBootstrapHandler {
         TableCreator tableCreator = new TableCreator(connectionCreator);
         Stream<String> sqlStream = context.poll(Stream.class);
         tableCreator.createTables(sqlStream).block();
-        return true;
+        return false;
     }
 }

@@ -4,7 +4,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IPipelineContext;
 import org.apache.commons.chain.impl.ContextBase;
 
-import java.util.Queue;
+import java.util.*;
 
 public class PipelineContext extends ContextBase implements IPipelineContext {
 
@@ -14,7 +14,14 @@ public class PipelineContext extends ContextBase implements IPipelineContext {
 
     private IGraphQLDocumentManager manager;
 
-    private Queue<Object> dataQueue;
+    private final Queue<Object> dataQueue;
+
+    private final Map<Class<?>, Enum<?>> statusMap;
+
+    public PipelineContext() {
+        this.dataQueue = new LinkedList<>();
+        this.statusMap = new HashMap<>();
+    }
 
     @Override
     public synchronized PipelineContext getInstance() {
@@ -32,6 +39,16 @@ public class PipelineContext extends ContextBase implements IPipelineContext {
     @Override
     public void setManager(IGraphQLDocumentManager manager) {
         this.manager = manager;
+    }
+
+    @Override
+    public void addStatus(Enum<?> status) {
+        this.statusMap.put(status.getClass(), status);
+    }
+
+    @Override
+    public <T> T getStatus(Class<T> clazz) throws ClassCastException {
+        return clazz.cast(this.statusMap.get(clazz));
     }
 
     @Override

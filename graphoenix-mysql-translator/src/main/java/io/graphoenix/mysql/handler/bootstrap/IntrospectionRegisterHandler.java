@@ -13,6 +13,6 @@ public class IntrospectionRegisterHandler implements IBootstrapHandler {
         IGraphQLDocumentManager manager = context.getManager();
         manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/preset.gql"));
         manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/introspectionTypes.gql"));
-        return true;
+        return false;
     }
 }

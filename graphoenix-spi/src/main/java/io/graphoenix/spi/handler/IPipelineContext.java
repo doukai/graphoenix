@@ -10,6 +10,10 @@ public interface IPipelineContext {
 
     void setManager(IGraphQLDocumentManager manager);
 
+    void addStatus(Enum<?> status);
+
+    <T> T getStatus(Class<T> clazz) throws ClassCastException;
+
     IPipelineContext add(Object object);
 
     <T> T poll(Class<T> clazz);

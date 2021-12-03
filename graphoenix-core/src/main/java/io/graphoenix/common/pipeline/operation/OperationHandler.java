@@ -23,9 +23,9 @@ public class OperationHandler implements Command {
 
         PipelineContext pipelineContext = (PipelineContext) context.get(INSTANCE_KEY);
         operationHandler.init(pipelineContext);
-        OperationType operationType = pipelineContext.poll(OperationType.class);
-        ExecuteType executeType = pipelineContext.poll(ExecuteType.class);
-        AsyncType asyncType = pipelineContext.poll(AsyncType.class);
+        OperationType operationType = pipelineContext.getStatus(OperationType.class);
+        ExecuteType executeType = pipelineContext.getStatus(ExecuteType.class);
+        AsyncType asyncType = pipelineContext.getStatus(AsyncType.class);
 
         switch (operationType) {
             case QUERY:
@@ -60,4 +60,6 @@ public class OperationHandler implements Command {
         }
         return false;
     }
+
+
 }

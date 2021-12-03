@@ -19,12 +19,13 @@ public class OperationRouter implements Command {
         IGraphQLDocumentManager manager = pipelineContext.getManager();
         GraphqlParser.OperationTypeContext operationTypeContext = manager.getOperationType(graphQL);
         if (operationTypeContext == null || operationTypeContext.QUERY() != null) {
-            pipelineContext.add(OperationType.QUERY);
+            pipelineContext.addStatus(OperationType.QUERY);
         } else if (operationTypeContext.MUTATION() != null) {
-            pipelineContext.add(OperationType.MUTATION);
+            pipelineContext.addStatus(OperationType.MUTATION);
         } else if (operationTypeContext.SUBSCRIPTION() != null) {
-            pipelineContext.add(OperationType.SUBSCRIPTION);
+            pipelineContext.addStatus(OperationType.SUBSCRIPTION);
         }
+        pipelineContext.add(graphQL);
         return false;
     }
 }

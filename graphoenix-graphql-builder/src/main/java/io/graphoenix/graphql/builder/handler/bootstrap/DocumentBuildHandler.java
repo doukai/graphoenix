@@ -25,6 +25,6 @@ public class DocumentBuildHandler implements IBootstrapHandler {
             manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream(graphQLFileName));
         }
         manager.registerDocument(new DocumentBuilder(manager).buildDocument().toString());
-        return true;
+        return false;
     }
 }

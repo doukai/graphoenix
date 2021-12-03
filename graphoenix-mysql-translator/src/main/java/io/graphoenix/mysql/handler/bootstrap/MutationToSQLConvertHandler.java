@@ -21,6 +21,6 @@ public class MutationToSQLConvertHandler implements IBootstrapHandler {
         String graphQL = context.poll(String.class);
         Stream<String> statementsSQL = mutationToStatements.createStatementsSQL(graphQL);
         context.add(statementsSQL);
-        return true;
+        return false;
     }
 }

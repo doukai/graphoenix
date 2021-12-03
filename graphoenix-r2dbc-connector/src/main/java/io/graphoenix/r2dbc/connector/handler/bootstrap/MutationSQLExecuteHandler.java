@@ -30,6 +30,6 @@ public class MutationSQLExecuteHandler implements IBootstrapHandler {
                     log.info(count + " introspection data SQL insert success");
                 });
         log.info("All introspection data SQL insert success");
-        return true;
+        return false;
     }
 }

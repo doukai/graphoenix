@@ -40,8 +40,8 @@ public class OperationPipeline extends ChainBase {
     private PipelineContext fetch(String graphQL) throws Exception {
         PipelineContext pipelineContext = new PipelineContext();
         pipelineContext.setManager(this.manager);
-        pipelineContext.add(ExecuteType.SYNC);
-        pipelineContext.add(AsyncType.OPERATION);
+        pipelineContext.addStatus(ExecuteType.SYNC);
+        pipelineContext.addStatus(AsyncType.OPERATION);
         pipelineContext.add(graphQL);
         this.execute(pipelineContext);
         return pipelineContext;
@@ -61,8 +61,8 @@ public class OperationPipeline extends ChainBase {
     private PipelineContext fetchAsync(String graphQL) throws Exception {
         PipelineContext pipelineContext = new PipelineContext();
         pipelineContext.setManager(this.manager);
-        pipelineContext.add(ExecuteType.ASYNC);
-        pipelineContext.add(AsyncType.OPERATION);
+        pipelineContext.addStatus(ExecuteType.ASYNC);
+        pipelineContext.addStatus(AsyncType.OPERATION);
         pipelineContext.add(graphQL);
         this.execute(pipelineContext);
         return pipelineContext;
@@ -82,8 +82,8 @@ public class OperationPipeline extends ChainBase {
     private PipelineContext fetchSelectionsAsync(String graphQL) throws Exception {
         PipelineContext pipelineContext = new PipelineContext();
         pipelineContext.setManager(this.manager);
-        pipelineContext.add(ExecuteType.ASYNC);
-        pipelineContext.add(AsyncType.SELECTION);
+        pipelineContext.addStatus(ExecuteType.ASYNC);
+        pipelineContext.addStatus(AsyncType.SELECTION);
         pipelineContext.add(graphQL);
         this.execute(pipelineContext);
         return pipelineContext;
