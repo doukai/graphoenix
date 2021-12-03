@@ -66,4 +66,15 @@ public class PipelineContext extends ContextBase implements IPipelineContext {
     public Object poll() {
         return dataQueue.poll();
     }
+
+
+    @Override
+    public <T> T element(Class<T> clazz) throws ClassCastException {
+        return clazz.cast(dataQueue.element());
+    }
+
+    @Override
+    public Object element() {
+        return dataQueue.element();
+    }
 }

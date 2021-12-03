@@ -15,7 +15,7 @@ public class OperationRouter implements Command {
     public boolean execute(Context context) {
 
         PipelineContext pipelineContext = (PipelineContext) context.get(INSTANCE_KEY);
-        String graphQL = pipelineContext.poll(String.class);
+        String graphQL = pipelineContext.element(String.class);
         IGraphQLDocumentManager manager = pipelineContext.getManager();
         GraphqlParser.OperationTypeContext operationTypeContext = manager.getOperationType(graphQL);
         if (operationTypeContext == null || operationTypeContext.QUERY() != null) {
@@ -25,7 +25,6 @@ public class OperationRouter implements Command {
         } else if (operationTypeContext.SUBSCRIPTION() != null) {
             pipelineContext.addStatus(OperationType.SUBSCRIPTION);
         }
-        pipelineContext.add(graphQL);
         return false;
     }
 }

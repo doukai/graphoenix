@@ -19,4 +19,8 @@ public interface IPipelineContext {
     <T> T poll(Class<T> clazz);
 
     Object poll();
+
+    <T> T element(Class<T> clazz) throws ClassCastException;
+
+    Object element();
 }

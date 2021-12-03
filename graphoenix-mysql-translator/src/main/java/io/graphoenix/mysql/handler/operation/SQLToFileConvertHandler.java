@@ -20,37 +20,43 @@ public class SQLToFileConvertHandler implements IOperationHandler {
     }
 
     @Override
-    public void query(IPipelineContext context) {
+    public boolean query(IPipelineContext context) {
         String sql = context.poll(String.class);
         context.add(formatter.format(sql));
         context.add("sql");
+        return false;
     }
 
     @Override
-    public void queryAsync(IPipelineContext context) {
+    public boolean queryAsync(IPipelineContext context) {
         query(context);
+        return false;
     }
 
     @Override
-    public void querySelectionsAsync(IPipelineContext context) {
+    public boolean querySelectionsAsync(IPipelineContext context) {
         query(context);
+        return false;
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void mutation(IPipelineContext context) {
+    public boolean mutation(IPipelineContext context) {
         Stream<String> sqlStream = context.poll(Stream.class);
         context.add(formatter.format(sqlStream.collect(Collectors.joining(";"))));
         context.add("sql");
+        return false;
     }
 
     @Override
-    public void mutationAsync(IPipelineContext context) {
+    public boolean mutationAsync(IPipelineContext context) {
         mutation(context);
+        return false;
     }
 
     @Override
-    public void subscription(IPipelineContext context) {
+    public boolean subscription(IPipelineContext context) {
         //TODO
+        return false;
     }
 }

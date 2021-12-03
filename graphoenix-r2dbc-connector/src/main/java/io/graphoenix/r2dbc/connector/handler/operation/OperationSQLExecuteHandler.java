@@ -31,47 +31,53 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
     }
 
     @Override
-    public void query(IPipelineContext context) throws Exception {
+    public boolean query(IPipelineContext context) throws Exception {
         String sql = context.poll(String.class);
         Map<String, Object> parameters = context.poll(Map.class);
         String result = queryExecutor.executeQuery(sql, parameters).block();
         context.add(result);
+        return false;
     }
 
     @Override
-    public void queryAsync(IPipelineContext context) throws Exception {
+    public boolean queryAsync(IPipelineContext context) throws Exception {
         String sql = context.poll(String.class);
         Map<String, Object> parameters = context.poll(Map.class);
         Mono<String> result = queryExecutor.executeQuery(sql, parameters);
         context.add(result);
+        return false;
     }
 
     @Override
-    public void querySelectionsAsync(IPipelineContext context) throws Exception {
+    public boolean querySelectionsAsync(IPipelineContext context) throws Exception {
         Stream<Pair<String, String>> sqlStream = context.poll(Stream.class);
         Map<String, Object> parameters = context.poll(Map.class);
         Flux<Pair<String, String>> result = queryExecutor.executeQuery(sqlStream, parameters);
         context.add(result);
+        return false;
     }
 
     @Override
-    public void mutation(IPipelineContext context) throws Exception {
+    public boolean mutation(IPipelineContext context) throws Exception {
         Stream<String> sqlStream = context.poll(Stream.class);
         Map<String, Object> parameters = context.poll(Map.class);
         String result = mutationExecutor.executeMutations(sqlStream, parameters).block();
         context.add(result);
+        return false;
     }
 
     @Override
-    public void mutationAsync(IPipelineContext context) throws Exception {
+    public boolean mutationAsync(IPipelineContext context) throws Exception {
         Stream<String> sqlStream = context.poll(Stream.class);
         Map<String, Object> parameters = context.poll(Map.class);
         Mono<String> result = mutationExecutor.executeMutations(sqlStream, parameters);
         context.add(result);
+        return false;
     }
 
     @Override
-    public void subscription(IPipelineContext context) throws Exception {
+    public boolean subscription(IPipelineContext context) throws Exception {
         //TODO
+        return false;
     }
 }

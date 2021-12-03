@@ -28,41 +28,47 @@ public class OperationToSQLConvertHandler implements IOperationHandler {
     }
 
     @Override
-    public void query(IPipelineContext context) throws Exception {
+    public boolean query(IPipelineContext context) throws Exception {
         String graphQL = context.poll(String.class);
         manager.registerFragment(graphQL);
         String sql = this.graphqlQueryToSelect.createSelectSQL(graphQL);
         context.add(sql);
+        return false;
     }
 
     @Override
-    public void queryAsync(IPipelineContext context) throws Exception {
+    public boolean queryAsync(IPipelineContext context) throws Exception {
         query(context);
+        return false;
     }
 
     @Override
-    public void querySelectionsAsync(IPipelineContext context) throws Exception {
+    public boolean querySelectionsAsync(IPipelineContext context) throws Exception {
         String graphQL = context.poll(String.class);
         manager.registerFragment(graphQL);
         Stream<Pair<String, String>> sqlPair = this.graphqlQueryToSelect.createSelectsSQL(graphQL);
         context.add(sqlPair);
+        return false;
     }
 
     @Override
-    public void mutation(IPipelineContext context) throws Exception {
+    public boolean mutation(IPipelineContext context) throws Exception {
         String graphQL = context.poll(String.class);
         manager.registerFragment(graphQL);
         Stream<String> sqlStream = this.graphqlMutationToStatements.createStatementsSQL(graphQL);
         context.add(sqlStream);
+        return false;
     }
 
     @Override
-    public void mutationAsync(IPipelineContext context) throws Exception {
+    public boolean mutationAsync(IPipelineContext context) throws Exception {
         mutation(context);
+        return false;
     }
 
     @Override
-    public void subscription(IPipelineContext context) throws Exception {
+    public boolean subscription(IPipelineContext context) throws Exception {
         //TODO
+        return false;
     }
 }

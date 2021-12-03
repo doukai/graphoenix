@@ -31,35 +31,26 @@ public class OperationHandler implements Command {
             case QUERY:
                 switch (executeType) {
                     case SYNC:
-                        operationHandler.query(pipelineContext);
-                        break;
+                        return operationHandler.query(pipelineContext);
                     case ASYNC:
                         switch (asyncType) {
                             case OPERATION:
-                                operationHandler.queryAsync(pipelineContext);
-                                break;
+                                return operationHandler.queryAsync(pipelineContext);
                             case SELECTION:
-                                operationHandler.querySelectionsAsync(pipelineContext);
-                                break;
+                                return operationHandler.querySelectionsAsync(pipelineContext);
                         }
                 }
-                break;
             case MUTATION:
                 switch (executeType) {
                     case SYNC:
-                        operationHandler.mutation(pipelineContext);
-                        break;
+                        return operationHandler.mutation(pipelineContext);
                     case ASYNC:
-                        operationHandler.mutationAsync(pipelineContext);
-                        break;
+                        return operationHandler.mutationAsync(pipelineContext);
                 }
-                break;
             case SUBSCRIPTION:
                 operationHandler.subscription(pipelineContext);
-                break;
+            default:
+                return true;
         }
-        return false;
     }
-
-
 }
