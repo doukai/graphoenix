@@ -28,7 +28,7 @@ public class OperationToSQLConvertHandler implements IOperationHandler {
     }
 
     @Override
-    public boolean query(IPipelineContext context) throws Exception {
+    public boolean query(IPipelineContext context) {
         String graphQL = context.poll(String.class);
         manager.registerFragment(graphQL);
         String sql = this.graphqlQueryToSelect.createSelectSQL(graphQL);
@@ -37,13 +37,13 @@ public class OperationToSQLConvertHandler implements IOperationHandler {
     }
 
     @Override
-    public boolean queryAsync(IPipelineContext context) throws Exception {
+    public boolean queryAsync(IPipelineContext context) {
         query(context);
         return false;
     }
 
     @Override
-    public boolean querySelectionsAsync(IPipelineContext context) throws Exception {
+    public boolean querySelectionsAsync(IPipelineContext context) {
         String graphQL = context.poll(String.class);
         manager.registerFragment(graphQL);
         Stream<Pair<String, String>> sqlPair = this.graphqlQueryToSelect.createSelectsSQL(graphQL);
@@ -52,7 +52,7 @@ public class OperationToSQLConvertHandler implements IOperationHandler {
     }
 
     @Override
-    public boolean mutation(IPipelineContext context) throws Exception {
+    public boolean mutation(IPipelineContext context) {
         String graphQL = context.poll(String.class);
         manager.registerFragment(graphQL);
         Stream<String> sqlStream = this.graphqlMutationToStatements.createStatementsSQL(graphQL);
@@ -61,13 +61,13 @@ public class OperationToSQLConvertHandler implements IOperationHandler {
     }
 
     @Override
-    public boolean mutationAsync(IPipelineContext context) throws Exception {
+    public boolean mutationAsync(IPipelineContext context) {
         mutation(context);
         return false;
     }
 
     @Override
-    public boolean subscription(IPipelineContext context) throws Exception {
+    public boolean subscription(IPipelineContext context) {
         //TODO
         return false;
     }

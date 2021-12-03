@@ -8,6 +8,8 @@ import io.graphoenix.spi.dto.type.ExecuteType;
 import io.graphoenix.spi.handler.IOperationHandler;
 import org.apache.commons.chain.impl.ChainBase;
 import org.javatuples.Pair;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class OperationPipeline extends ChainBase {
 
@@ -72,6 +74,10 @@ public class OperationPipeline extends ChainBase {
         return fetchAsync(graphQL).poll(clazz);
     }
 
+    public <T> Mono<T> fetchAsyncToMono(String graphQL, Class<T> clazz) throws Exception {
+        return fetchAsync(graphQL).pollMono(clazz);
+    }
+
     public <A, B> Pair<A, B> fetchAsync(String graphQL, Class<A> clazzA, Class<B> clazzB) throws Exception {
         PipelineContext pipelineContext = fetchAsync(graphQL);
         A a = pipelineContext.poll(clazzA);
@@ -98,5 +104,10 @@ public class OperationPipeline extends ChainBase {
         A a = pipelineContext.poll(clazzA);
         B b = pipelineContext.poll(clazzB);
         return Pair.with(a, b);
+    }
+
+    public <A, B> Flux<Pair<A, B>> fetchSelectionsAsyncToFlux(String graphQL, Class<A> clazzA, Class<B> clazzB) throws Exception {
+        PipelineContext pipelineContext = fetchSelectionsAsync(graphQL);
+        return pipelineContext.pollFluxPair(clazzA, clazzB);
     }
 }

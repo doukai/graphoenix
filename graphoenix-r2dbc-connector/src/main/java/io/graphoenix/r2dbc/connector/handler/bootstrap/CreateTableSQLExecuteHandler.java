@@ -14,11 +14,10 @@ import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 public class CreateTableSQLExecuteHandler implements IBootstrapHandler {
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean execute(IPipelineContext context) {
         ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, R2DBCConfig.class));
         TableCreator tableCreator = new TableCreator(connectionCreator);
-        Stream<String> sqlStream = context.poll(Stream.class);
+        Stream<String> sqlStream = context.pollStream(String.class);
         tableCreator.createTables(sqlStream).block();
         return false;
     }

@@ -19,11 +19,10 @@ public class MutationSQLExecuteHandler implements IBootstrapHandler {
     private static final int sqlCount = 500;
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean execute(IPipelineContext context) {
         ConnectionCreator connectionCreator = new ConnectionCreator(YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, R2DBCConfig.class));
         MutationExecutor mutationExecutor = new MutationExecutor(connectionCreator);
-        Stream<String> sqlStream = context.poll(Stream.class);
+        Stream<String> sqlStream = context.pollStream(String.class);
         log.info("introspection data SQL insert started");
         mutationExecutor.executeMutationsInBatchByGroup(sqlStream, sqlCount)
                 .forEach(count -> {

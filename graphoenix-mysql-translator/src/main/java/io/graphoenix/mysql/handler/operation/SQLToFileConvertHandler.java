@@ -40,9 +40,8 @@ public class SQLToFileConvertHandler implements IOperationHandler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean mutation(IPipelineContext context) {
-        Stream<String> sqlStream = context.poll(Stream.class);
+        Stream<String> sqlStream = context.pollStream(String.class);
         context.add(formatter.format(sqlStream.collect(Collectors.joining(";"))));
         context.add("sql");
         return false;

@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 
-@SuppressWarnings("unchecked")
 public class OperationSQLExecuteHandler implements IOperationHandler {
 
     private QueryExecutor queryExecutor;
@@ -31,52 +30,52 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
     }
 
     @Override
-    public boolean query(IPipelineContext context) throws Exception {
+    public boolean query(IPipelineContext context) {
         String sql = context.poll(String.class);
-        Map<String, Object> parameters = context.poll(Map.class);
+        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
         String result = queryExecutor.executeQuery(sql, parameters).block();
         context.add(result);
         return false;
     }
 
     @Override
-    public boolean queryAsync(IPipelineContext context) throws Exception {
+    public boolean queryAsync(IPipelineContext context) {
         String sql = context.poll(String.class);
-        Map<String, Object> parameters = context.poll(Map.class);
+        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
         Mono<String> result = queryExecutor.executeQuery(sql, parameters);
         context.add(result);
         return false;
     }
 
     @Override
-    public boolean querySelectionsAsync(IPipelineContext context) throws Exception {
-        Stream<Pair<String, String>> sqlStream = context.poll(Stream.class);
-        Map<String, Object> parameters = context.poll(Map.class);
+    public boolean querySelectionsAsync(IPipelineContext context) {
+        Stream<Pair<String, String>> sqlStream = context.pollStreamPair(String.class, String.class);
+        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
         Flux<Pair<String, String>> result = queryExecutor.executeQuery(sqlStream, parameters);
         context.add(result);
         return false;
     }
 
     @Override
-    public boolean mutation(IPipelineContext context) throws Exception {
-        Stream<String> sqlStream = context.poll(Stream.class);
-        Map<String, Object> parameters = context.poll(Map.class);
+    public boolean mutation(IPipelineContext context) {
+        Stream<String> sqlStream = context.pollStream(String.class);
+        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
         String result = mutationExecutor.executeMutations(sqlStream, parameters).block();
         context.add(result);
         return false;
     }
 
     @Override
-    public boolean mutationAsync(IPipelineContext context) throws Exception {
-        Stream<String> sqlStream = context.poll(Stream.class);
-        Map<String, Object> parameters = context.poll(Map.class);
+    public boolean mutationAsync(IPipelineContext context) {
+        Stream<String> sqlStream = context.pollStream(String.class);
+        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
         Mono<String> result = mutationExecutor.executeMutations(sqlStream, parameters);
         context.add(result);
         return false;
     }
 
     @Override
-    public boolean subscription(IPipelineContext context) throws Exception {
+    public boolean subscription(IPipelineContext context) {
         //TODO
         return false;
     }

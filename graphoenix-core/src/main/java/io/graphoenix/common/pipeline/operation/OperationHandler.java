@@ -48,7 +48,7 @@ public class OperationHandler implements Command {
                         return operationHandler.mutationAsync(pipelineContext);
                 }
             case SUBSCRIPTION:
-                operationHandler.subscription(pipelineContext);
+                return operationHandler.subscription(pipelineContext);
             default:
                 return true;
         }
