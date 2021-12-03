@@ -7,7 +7,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
 import org.javatuples.Pair;
-import reactor.util.function.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -17,7 +17,10 @@ public class PipelineContext extends ContextBase implements IPipelineContext {
     private Queue<Object> dataQueue;
 
     @Override
-    public PipelineContext getInstance() {
+    public synchronized PipelineContext getInstance() {
+        if (instance == null) {
+            instance = this;
+        }
         return instance;
     }
 
@@ -40,5 +43,10 @@ public class PipelineContext extends ContextBase implements IPipelineContext {
     @Override
     public <T> T poll(Class<T> clazz) throws ClassCastException {
         return clazz.cast(dataQueue.poll());
+    }
+
+    @Override
+    public Object poll() {
+        return dataQueue.poll();
     }
 }

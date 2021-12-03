@@ -13,4 +13,6 @@ public interface IPipelineContext {
     IPipelineContext add(Object object);
 
     <T> T poll(Class<T> clazz);
+
+    Object poll();
 }

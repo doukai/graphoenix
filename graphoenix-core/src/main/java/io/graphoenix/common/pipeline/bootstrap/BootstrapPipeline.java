@@ -1,5 +1,6 @@
 package io.graphoenix.common.pipeline.bootstrap;
 
+import io.graphoenix.common.pipeline.PipelineContext;
 import io.graphoenix.common.utils.HandlerUtil;
 import io.graphoenix.common.manager.*;
 import io.graphoenix.spi.antlr.*;
@@ -56,9 +57,9 @@ public class BootstrapPipeline extends ChainBase {
     }
 
     public IGraphQLDocumentManager buildManager() throws Exception {
-        BootstrapContext bootstrapContext = new BootstrapContext();
-        bootstrapContext.setManager(this.manager);
-        this.execute(bootstrapContext);
+        PipelineContext pipelineContext = new PipelineContext();
+        pipelineContext.setManager(this.manager);
+        this.execute(pipelineContext);
         return manager;
     }
 
