@@ -38,8 +38,8 @@ public class GraphQLCodeGenerator {
         this.executeHandlerNames.addAll(executeHandlerNames);
     }
 
-    public Pair<String, String> pretreatment(String graphQL) throws Exception {
-        return this.createOperationPipeline().fetch(graphQL, String.class, String.class);
+    public String pretreatment(String graphQL) throws Exception {
+        return this.createOperationPipeline().fetch(graphQL, String.class);
     }
 
     public List<String> getExecuteHandlerNames() {

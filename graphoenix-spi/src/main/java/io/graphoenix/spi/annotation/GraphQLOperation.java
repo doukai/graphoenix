@@ -15,4 +15,6 @@ public @interface GraphQLOperation {
     Class<? extends IOperationHandler>[] pretreatmentHandlers() default {};
 
     Class<? extends IOperationHandler>[] executeHandlers() default {};
+
+    String suffix() default "";
 }

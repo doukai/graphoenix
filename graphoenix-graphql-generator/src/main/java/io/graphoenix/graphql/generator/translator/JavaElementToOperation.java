@@ -27,7 +27,8 @@ public class JavaElementToOperation {
         return typeElement.getEnclosedElements().stream()
                 .filter(element -> element.getKind().equals(ElementKind.METHOD))
                 .collect(Collectors.toMap(
-                        element -> element.getSimpleName().toString(),
+                        element -> element.getSimpleName().toString()
+                                .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
                         element -> executableElementToOperation((ExecutableElement) element)
                         )
                 );

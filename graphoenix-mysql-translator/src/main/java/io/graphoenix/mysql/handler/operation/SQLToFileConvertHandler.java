@@ -23,7 +23,6 @@ public class SQLToFileConvertHandler implements IOperationHandler {
     public boolean query(IPipelineContext context) {
         String sql = context.poll(String.class);
         context.add(formatter.format(sql));
-        context.add("sql");
         return false;
     }
 
@@ -43,7 +42,6 @@ public class SQLToFileConvertHandler implements IOperationHandler {
     public boolean mutation(IPipelineContext context) {
         Stream<String> sqlStream = context.pollStream(String.class);
         context.add(formatter.format(sqlStream.collect(Collectors.joining(";"))));
-        context.add("sql");
         return false;
     }
 

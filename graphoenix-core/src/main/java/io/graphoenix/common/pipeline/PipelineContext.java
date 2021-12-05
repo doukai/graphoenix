@@ -29,6 +29,11 @@ public class PipelineContext extends ContextBase implements IPipelineContext {
         this.statusMap = new HashMap<>();
     }
 
+    public PipelineContext(Object... objects) {
+        this();
+        this.dataQueue.addAll(Arrays.asList(objects));
+    }
+
     @Override
     public synchronized PipelineContext getInstance() {
         if (instance == null) {

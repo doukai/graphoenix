@@ -19,25 +19,22 @@ import java.util.List;
 @GraphQLOperation(
         bootstrapHandlers = DocumentBuildHandler.class,
         pretreatmentHandlers = {OperationToSQLConvertHandler.class, SQLToFileConvertHandler.class},
-        executeHandlers = OperationSQLExecuteHandler.class
+        executeHandlers = OperationSQLExecuteHandler.class,
+        suffix = "sql"
 )
 public interface OperationTest {
 
-//    @QueryOperation(value = "userList", layers = 1)
-//    @UserExpression($name = "name")
-//    User queryUser(List[] name, String name2, Sex sex);
+    @QueryOperation(value = "userList", layers = 1)
+    User queryUser(List[] name, String name2, Sex sex) throws Exception;
 
-//    @QueryOperation("userList")
-//    @UserExpressions(
-//            value = {
-//                    @UserExpression(name = {"name", "name2"}),
-//                    @UserExpression(opr = Operator.NEQ, sex = Sex.MAN)
-//            },
-//            roles = {
-//                    @RoleExpression(opr = Operator.NEQ, name = "role1"),
-//            }
-//    )
-//    Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version);
+    @QueryOperation(value = "userList", layers = 1)
+    List<User> queryUserList(List[] name, String name2, Sex sex) throws Exception;
+
+    @QueryOperation("userList")
+    Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version) throws Exception;
+
+    @QueryOperation("userList")
+    Mono<List<User>> queryUserListAsync(String name, Sex sex, Sex sex2, int version) throws Exception;
 
     @MutationOperation("user")
     @UserInput(
@@ -48,10 +45,7 @@ public interface OperationTest {
             $roles = "roles",
             $phones = "phones"
     )
-    User mutationUser(Sex sex, String name, String orgName, List<io.graphoenix.showcase.mysql.generated.inputObjectType.RoleInput> roles, io.graphoenix.showcase.mysql.generated.inputObjectType.OrganizationInput organizationInput, List<String> phones);
+    User mutationUser(Sex sex, String name, String orgName, List<io.graphoenix.showcase.mysql.generated.inputObjectType.RoleInput> roles, io.graphoenix.showcase.mysql.generated.inputObjectType.OrganizationInput organizationInput, List<String> phones) throws Exception;
 
-
-//    @MutationOperation("user")
-//    User mutationUser(io.graphoenix.showcase.mysql.generated.inputObjectType.UserInput userInput);
 
 }

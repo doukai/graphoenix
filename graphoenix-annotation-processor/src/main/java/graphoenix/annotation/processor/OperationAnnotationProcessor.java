@@ -13,8 +13,6 @@ import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import org.javatuples.Pair;
-import reactor.util.function.Tuple2;
 
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;
@@ -99,14 +97,21 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                                 )
                                 .orElseThrow();
 
+                        String suffix = elementValuesWithDefaults.entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals("suffix"))
+                                .findFirst()
+                                .map(entry -> (String) entry.getValue().getValue())
+                                .orElseThrow();
+
+
                         GraphQLCodeGenerator generator = new GraphQLCodeGeneratorFactory().create(manager, bootstrapHandlers, pretreatmentHandlers, executeHandlers);
 
                         PackageElement packageElement = elementUtils.getPackageOf(typeElement);
                         JavaElementToOperation javaElementToOperation = new JavaElementToOperation(manager, javaGeneratorConfig);
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
 
-                        ThrowingBiFunction<GraphQLCodeGenerator, String, Pair<String, String>, Exception> generatorPretreatment = GraphQLCodeGenerator::pretreatment;
-                        ThrowingBiConsumer<Filer, Map.Entry<String, Pair<String, String>>, IOException> createResource = (filer, entry) -> {
+                        ThrowingBiFunction<GraphQLCodeGenerator, String, String, Exception> generatorPretreatment = GraphQLCodeGenerator::pretreatment;
+                        ThrowingBiConsumer<Filer, Map.Entry<String, String>, IOException> createResource = (filer, entry) -> {
                             FileObject fileObject = filer.createResource(
                                     StandardLocation.SOURCE_OUTPUT,
                                     packageElement.getQualifiedName(),
@@ -114,10 +119,10 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                                             .concat("_")
                                             .concat(entry.getKey())
                                             .concat(".")
-                                            .concat(entry.getValue().getValue1())
+                                            .concat(suffix)
                             );
                             Writer writer = fileObject.openWriter();
-                            writer.write(entry.getValue().getValue0());
+                            writer.write(entry.getValue());
                             writer.close();
                         };
 
@@ -127,7 +132,7 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                                 .forEach(entry -> createResource.asFunction().unchecked().apply(processingEnv.getFiler(), entry));
 
                         OperationInterfaceImplementer implementer = new OperationInterfaceImplementer(manager, javaGeneratorConfig);
-                        implementer.buildImplementClass(packageElement, typeElement).writeTo(processingEnv.getFiler());
+                        implementer.buildImplementClass(packageElement, typeElement, executeHandlers, suffix).writeTo(processingEnv.getFiler());
 
                     } catch (Exception e) {
                         e.printStackTrace();
