@@ -39,7 +39,7 @@ public class OperationInterfaceImplementer {
                 .addStaticBlock(buildFileContentFieldInitializeCodeBlock(packageElement, typeElement, suffix))
                 .addMethods(typeElement.getEnclosedElements()
                         .stream().filter(element -> element.getKind().equals(ElementKind.METHOD))
-                        .map(element -> executableElementToMethodSpec((ExecutableElement) element))
+                        .map(element -> executableElementToMethodSpec(typeElement, (ExecutableElement) element))
                         .collect(Collectors.toList())
                 )
                 .addMethod(addOperationHandlersMethodSpec(executeHandlerNames))
@@ -49,12 +49,16 @@ public class OperationInterfaceImplementer {
 
     private List<FieldSpec> buildFileContentFields(TypeElement typeElement) {
         return typeElement.getEnclosedElements().stream()
-                .map(this::buildFileContentField)
+                .map(element -> buildFileContentField(typeElement, element))
                 .collect(Collectors.toList());
     }
 
-    private FieldSpec buildFileContentField(Element element) {
-        return FieldSpec.builder(TypeName.get(String.class), element.getSimpleName().toString(), Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).build();
+    private FieldSpec buildFileContentField(TypeElement typeElement, Element element) {
+        return FieldSpec.builder(
+                TypeName.get(String.class),
+                element.getSimpleName().toString()
+                        .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
+                Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).build();
     }
 
 
@@ -63,7 +67,8 @@ public class OperationInterfaceImplementer {
         typeElement.getEnclosedElements().forEach(element ->
                 builder.addStatement(
                         "$L = fileToString($T.class,$S)",
-                        element.getSimpleName().toString(),
+                        element.getSimpleName().toString()
+                                .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
                         ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"),
                         typeElement.getSimpleName().toString()
                                 .concat("_")
@@ -76,7 +81,7 @@ public class OperationInterfaceImplementer {
         return builder.build();
     }
 
-    private MethodSpec executableElementToMethodSpec(ExecutableElement executableElement) {
+    private MethodSpec executableElementToMethodSpec(TypeElement typeElement, ExecutableElement executableElement) {
 
         return MethodSpec.methodBuilder(executableElement.getSimpleName().toString())
                 .addModifiers(Modifier.PUBLIC)
@@ -91,7 +96,8 @@ public class OperationInterfaceImplementer {
                         "return $L(new $T($L, $T.of($L)), $T.class)",
                         getMethodName(executableElement),
                         ClassName.get(PipelineContext.class),
-                        executableElement.getSimpleName().toString(),
+                        executableElement.getSimpleName().toString()
+                                .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
                         ClassName.get(Map.class),
                         CodeBlock.join(
                                 executableElement.getParameters().stream()
