@@ -37,9 +37,10 @@ public enum GraphQLErrorType {
     private final String description;
     private Object[] variables;
 
-    GraphQLErrorType(int code, String description) {
+    GraphQLErrorType(int code, String description, Object... variables) {
         this.code = code;
         this.description = description;
+        this.variables = variables;
     }
 
     public String getDescription() {

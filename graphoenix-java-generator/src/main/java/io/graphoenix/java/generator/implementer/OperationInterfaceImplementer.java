@@ -10,6 +10,7 @@ import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import reactor.core.publisher.Mono;
 
+import javax.inject.Singleton;
 import javax.lang.model.element.*;
 import java.util.Collection;
 import java.util.List;
@@ -30,8 +31,8 @@ public class OperationInterfaceImplementer {
         this.configuration = configuration;
     }
 
-    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, List<String> executeHandlerNames, String suffix) {
-        TypeSpec implement = TypeSpec.classBuilder(ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"))
+    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, List<String> executeHandlerNames, String suffix, boolean useInject) {
+        TypeSpec.Builder builder = TypeSpec.classBuilder(ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"))
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(TypeName.get(GraphQLDAO.class))
                 .addSuperinterface(typeElement.asType())
@@ -42,9 +43,11 @@ public class OperationInterfaceImplementer {
                         .map(element -> executableElementToMethodSpec(typeElement, (ExecutableElement) element))
                         .collect(Collectors.toList())
                 )
-                .addMethod(addOperationHandlersMethodSpec(executeHandlerNames))
-                .build();
-        return JavaFile.builder(packageElement.getQualifiedName().toString(), implement).build();
+                .addMethod(addOperationHandlersMethodSpec(executeHandlerNames));
+        if (useInject) {
+            builder.addAnnotation(Singleton.class);
+        }
+        return JavaFile.builder(packageElement.getQualifiedName().toString(), builder.build()).build();
     }
 
     private List<FieldSpec> buildFileContentFields(TypeElement typeElement) {

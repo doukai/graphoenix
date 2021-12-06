@@ -4,6 +4,7 @@ import io.graphoenix.graphql.builder.handler.bootstrap.DocumentBuildHandler;
 import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
 import io.graphoenix.mysql.handler.operation.SQLToFileConvertHandler;
 import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
+import io.graphoenix.r2dbc.connector.handler.operation.R2dbcParameterProcessHandler;
 import io.graphoenix.showcase.mysql.generated.annotation.*;
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import io.graphoenix.showcase.mysql.generated.enumType.Sex;
@@ -19,33 +20,47 @@ import java.util.List;
 @GraphQLOperation(
         bootstrapHandlers = DocumentBuildHandler.class,
         pretreatmentHandlers = {OperationToSQLConvertHandler.class, SQLToFileConvertHandler.class},
-        executeHandlers = OperationSQLExecuteHandler.class,
+        executeHandlers = {R2dbcParameterProcessHandler.class, OperationSQLExecuteHandler.class},
         suffix = "sql"
 )
 public interface OperationTest {
 
     @QueryOperation(value = "userList", layers = 1)
-    User queryUser(List[] name, String name2, Sex sex) throws Exception;
+    @UserExpression($name = "name")
+    User queryUser(String name) throws Exception;
 
     @QueryOperation(value = "userList", layers = 1)
-    List<User> queryUserList(List[] name, String name2, Sex sex) throws Exception;
+    @UserExpression($sex = "sex")
+    List<User> queryUserList(Sex sex) throws Exception;
 
     @QueryOperation("userList")
-    Mono<User> queryUserAsync(String name, Sex sex, Sex sex2, int version) throws Exception;
+    @UserExpressions(
+            value = {
+                    @UserExpression($name = "name"),
+                    @UserExpression($sex = "sex")
+            },
+            roles = @RoleExpression($name = "roleName")
+    )
+    Mono<User> queryUserAsync(String name, Sex sex, String roleName) throws Exception;
 
     @QueryOperation("userList")
-    Mono<List<User>> queryUserListAsync(String name, Sex sex, Sex sex2, int version) throws Exception;
+    @UserExpressions(
+            value = {
+                    @UserExpression($name = "name"),
+                    @UserExpression($sex = "sex")
+            },
+            roles = @RoleExpression($name = "roleName")
+    )
+    Mono<List<User>> queryUserListAsync(String name, Sex sex, String roleName) throws Exception;
 
     @MutationOperation("user")
     @UserInput(
             $name = "name",
             $sex = "sex",
             login = "login1", password = "password1",
-            $organization = "organizationInput",
+            $organization = "organization",
             $roles = "roles",
             $phones = "phones"
     )
-    User mutationUser(Sex sex, String name, String orgName, List<io.graphoenix.showcase.mysql.generated.inputObjectType.RoleInput> roles, io.graphoenix.showcase.mysql.generated.inputObjectType.OrganizationInput organizationInput, List<String> phones) throws Exception;
-
-
+    User mutationUser(Sex sex, String name, String orgName, List<io.graphoenix.showcase.mysql.generated.inputObjectType.RoleInput> roles, io.graphoenix.showcase.mysql.generated.inputObjectType.OrganizationInput organization, List<String> phones) throws Exception;
 }

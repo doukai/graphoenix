@@ -103,6 +103,12 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                                 .map(entry -> (String) entry.getValue().getValue())
                                 .orElseThrow();
 
+                        boolean useInject = elementValuesWithDefaults.entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals("useInject"))
+                                .findFirst()
+                                .map(entry -> (boolean) entry.getValue().getValue())
+                                .orElseThrow();
+
 
                         GraphQLCodeGenerator generator = new GraphQLCodeGeneratorFactory().create(manager, bootstrapHandlers, pretreatmentHandlers, executeHandlers);
 
@@ -126,13 +132,14 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                             writer.close();
                         };
 
-                        operationResourcesContent.entrySet().stream().collect(Collectors
+                        operationResourcesContent.entrySet().stream()
+                                .collect(Collectors
                                 .toMap(Map.Entry::getKey, entry -> generatorPretreatment.unchecked().apply(generator, entry.getValue())))
                                 .entrySet()
                                 .forEach(entry -> createResource.asFunction().unchecked().apply(processingEnv.getFiler(), entry));
 
                         OperationInterfaceImplementer implementer = new OperationInterfaceImplementer(manager, javaGeneratorConfig);
-                        implementer.buildImplementClass(packageElement, typeElement, executeHandlers, suffix).writeTo(processingEnv.getFiler());
+                        implementer.buildImplementClass(packageElement, typeElement, executeHandlers, suffix, useInject).writeTo(processingEnv.getFiler());
 
                     } catch (Exception e) {
                         e.printStackTrace();

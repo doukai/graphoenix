@@ -17,4 +17,6 @@ public @interface GraphQLOperation {
     Class<? extends IOperationHandler>[] executeHandlers() default {};
 
     String suffix() default "";
+    
+    boolean useInject() default false;
 }
