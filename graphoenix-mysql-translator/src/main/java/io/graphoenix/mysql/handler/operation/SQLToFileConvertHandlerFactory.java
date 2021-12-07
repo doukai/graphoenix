@@ -8,8 +8,8 @@ import javax.inject.Singleton;
 
 @Singleton
 @Component(modules = MySQLTranslatorModule.class)
-public interface OperationToSQLConvertHandlerFactory extends IOperationHandlerFactory {
+public interface SQLToFileConvertHandlerFactory extends IOperationHandlerFactory {
 
     @Override
-    OperationToSQLConvertHandler createHandler();
+    SQLToFileConvertHandler createHandler();
 }

@@ -18,6 +18,7 @@ import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import net.sf.jsqlparser.util.cnfexpression.MultiOrExpression;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,6 +34,7 @@ public class GraphQLArgumentsToWhere {
     private final IGraphQLDocumentManager manager;
     private final IGraphQLFieldMapManager mapper;
 
+    @Inject
     public GraphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
         this.manager = manager;
         this.mapper = mapper;

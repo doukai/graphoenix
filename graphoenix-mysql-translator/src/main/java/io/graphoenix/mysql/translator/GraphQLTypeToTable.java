@@ -8,6 +8,7 @@ import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +24,7 @@ public class GraphQLTypeToTable {
 
     final private IGraphQLDocumentManager manager;
 
+    @Inject
     public GraphQLTypeToTable(IGraphQLDocumentManager graphqlAntlrManager) {
         this.manager = graphqlAntlrManager;
     }

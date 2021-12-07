@@ -13,6 +13,7 @@ import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import org.javatuples.Pair;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,6 +29,7 @@ public class GraphQLQueryToSelect {
     private final IGraphQLFieldMapManager mapper;
     private final GraphQLArgumentsToWhere argumentsToWhere;
 
+    @Inject
     public GraphQLQueryToSelect(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLArgumentsToWhere argumentsToWhere) {
         this.manager = manager;
         this.mapper = mapper;

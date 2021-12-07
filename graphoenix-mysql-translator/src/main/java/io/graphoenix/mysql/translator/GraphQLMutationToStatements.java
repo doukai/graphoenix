@@ -21,6 +21,7 @@ import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,6 +39,7 @@ public class GraphQLMutationToStatements {
     private final IGraphQLFieldMapManager mapper;
     private final GraphQLQueryToSelect graphqlQueryToSelect;
 
+    @Inject
     public GraphQLMutationToStatements(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLQueryToSelect graphqlQueryToSelect) {
         this.manager = manager;
         this.mapper = mapper;

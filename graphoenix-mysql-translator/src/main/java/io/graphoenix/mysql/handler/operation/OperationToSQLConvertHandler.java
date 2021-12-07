@@ -1,34 +1,33 @@
 package io.graphoenix.mysql.handler.operation;
 
-import io.graphoenix.common.manager.GraphQLFieldMapManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.mysql.translator.GraphQLArgumentsToWhere;
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
 import io.graphoenix.spi.handler.IOperationHandler;
 import io.graphoenix.spi.handler.IPipelineContext;
 import org.javatuples.Pair;
 
+import javax.inject.Inject;
 import java.util.stream.Stream;
 
 public class OperationToSQLConvertHandler implements IOperationHandler {
 
     private final GraphQLQueryToSelect graphqlQueryToSelect;
     private final GraphQLMutationToStatements graphqlMutationToStatements;
-    private IGraphQLDocumentManager manager;
-    private GraphQLFieldMapManager mapper;
-//    private MysqlTranslateConfig config;
+    private final IGraphQLDocumentManager manager;
 
 
-    public OperationToSQLConvertHandler(GraphQLQueryToSelect graphqlQueryToSelect, GraphQLMutationToStatements graphqlMutationToStatements) {
+    @Inject
+    public OperationToSQLConvertHandler(IGraphQLDocumentManager manager,
+                                        GraphQLQueryToSelect graphqlQueryToSelect,
+                                        GraphQLMutationToStatements graphqlMutationToStatements) {
+        this.manager = manager;
         this.graphqlQueryToSelect = graphqlQueryToSelect;
         this.graphqlMutationToStatements = graphqlMutationToStatements;
     }
 
     @Override
     public void init(IPipelineContext context) {
-
-//        this.config = YAML_CONFIG_LOADER.loadAs(Hammurabi.configName, MysqlTranslateConfig.class);
     }
 
     @Override
