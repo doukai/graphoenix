@@ -19,6 +19,8 @@ dependencies {
     compile "commons-chain:commons-chain:1.2"
     compile "com.google.guava:guava:30.1.1-jre"
     compile 'com.google.code.gson:gson:2.8.8'
+    compile 'com.google.dagger:dagger:2.40.5'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
     compile "com.google.auto.factory:auto-factory:1.0.1"
     annotationProcessor "com.google.auto.factory:auto-factory:1.0.1"
     compile "org.zalando:problem:0.26.0"

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ public class MutationExecutor {
 
     private final IConnectionCreator connectionCreator;
 
+    @Inject
     public MutationExecutor(IConnectionCreator connectionCreator) {
         this.connectionCreator = connectionCreator;
     }
@@ -72,12 +74,12 @@ public class MutationExecutor {
                 .flatMap(connection -> {
                     connection.beginTransaction();
                     return Flux.fromStream(sqlStream
-                            .map(sql -> {
-                                        Statement statement = connection.createStatement(sql);
-                                        parameters.forEach(statement::bind);
-                                        return statement;
-                                    }
-                            ))
+                                    .map(sql -> {
+                                                Statement statement = connection.createStatement(sql);
+                                                parameters.forEach(statement::bind);
+                                                return statement;
+                                            }
+                                    ))
                             .flatMap(Statement::execute)
                             .flatMap(result -> result.map((row, rowMetadata) -> row.get(0, String.class)))
                             .last()

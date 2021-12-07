@@ -13,17 +13,21 @@ import java.util.stream.Stream;
 
 public class OperationToSQLConvertHandler implements IOperationHandler {
 
-    private GraphQLQueryToSelect graphqlQueryToSelect;
-    private GraphQLMutationToStatements graphqlMutationToStatements;
+    private final GraphQLQueryToSelect graphqlQueryToSelect;
+    private final GraphQLMutationToStatements graphqlMutationToStatements;
     private IGraphQLDocumentManager manager;
+    private GraphQLFieldMapManager mapper;
 //    private MysqlTranslateConfig config;
+
+
+    public OperationToSQLConvertHandler(GraphQLQueryToSelect graphqlQueryToSelect, GraphQLMutationToStatements graphqlMutationToStatements) {
+        this.graphqlQueryToSelect = graphqlQueryToSelect;
+        this.graphqlMutationToStatements = graphqlMutationToStatements;
+    }
 
     @Override
     public void init(IPipelineContext context) {
-        this.manager = context.getManager();
-        GraphQLFieldMapManager mapper = new GraphQLFieldMapManager(manager);
-        this.graphqlQueryToSelect = new GraphQLQueryToSelect(manager, mapper, new GraphQLArgumentsToWhere(manager, mapper));
-        this.graphqlMutationToStatements = new GraphQLMutationToStatements(manager, mapper, this.graphqlQueryToSelect);
+
 //        this.config = YAML_CONFIG_LOADER.loadAs(Hammurabi.configName, MysqlTranslateConfig.class);
     }
 

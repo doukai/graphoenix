@@ -9,7 +9,7 @@ import io.graphoenix.mysql.handler.bootstrap.MutationToSQLConvertHandler;
 import io.graphoenix.mysql.handler.bootstrap.TypeDefiniteToCreateTableSQLConvertHandler;
 import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
 import io.graphoenix.r2dbc.connector.handler.bootstrap.CreateTableSQLExecuteHandler;
-import io.graphoenix.r2dbc.connector.handler.bootstrap.MutationSQLExecuteHandler;
+import io.graphoenix.r2dbc.connector.handler.bootstrap.IntrospectionMutationExecuteHandler;
 import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
@@ -35,7 +35,7 @@ public class Application {
                         new CreateTableSQLExecuteHandler(),
                         new IntrospectionMutationBuildHandler(),
                         new MutationToSQLConvertHandler(),
-                        new MutationSQLExecuteHandler()
+                        new IntrospectionMutationExecuteHandler()
                 };
     }
 

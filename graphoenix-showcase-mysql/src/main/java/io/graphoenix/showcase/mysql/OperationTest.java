@@ -4,11 +4,8 @@ import io.graphoenix.graphql.builder.handler.bootstrap.DocumentBuildHandler;
 import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
 import io.graphoenix.mysql.handler.operation.SQLToFileConvertHandler;
 import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
-import io.graphoenix.r2dbc.connector.handler.operation.R2dbcParameterProcessHandler;
 import io.graphoenix.showcase.mysql.generated.annotation.*;
-import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import io.graphoenix.showcase.mysql.generated.enumType.Sex;
-import io.graphoenix.showcase.mysql.generated.objectType.Role;
 import io.graphoenix.showcase.mysql.generated.objectType.User;
 import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.annotation.MutationOperation;
@@ -20,7 +17,7 @@ import java.util.List;
 @GraphQLOperation(
         bootstrapHandlers = DocumentBuildHandler.class,
         pretreatmentHandlers = {OperationToSQLConvertHandler.class, SQLToFileConvertHandler.class},
-        executeHandlers = {R2dbcParameterProcessHandler.class, OperationSQLExecuteHandler.class},
+        executeHandlers = OperationSQLExecuteHandler.class,
         suffix = "sql"
 )
 public interface OperationTest {

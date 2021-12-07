@@ -6,6 +6,7 @@ import org.javatuples.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -13,6 +14,7 @@ public class QueryExecutor {
 
     private final IConnectionCreator connectionCreator;
 
+    @Inject
     public QueryExecutor(IConnectionCreator connectionCreator) {
         this.connectionCreator = connectionCreator;
     }
