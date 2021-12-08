@@ -12,7 +12,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 
 import javax.inject.Singleton;
-import java.io.FileNotFoundException;
 
 @Module(includes = DocumentManagerModule.class)
 public class GraphQLGeneratorModule {
@@ -20,12 +19,7 @@ public class GraphQLGeneratorModule {
     @Provides
     @Singleton
     JavaGeneratorConfig javaGeneratorConfig() {
-        try {
-            return YamlConfigUtil.YAML_CONFIG_UTIL.loadAs(JavaGeneratorConfig.class);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return YamlConfigUtil.YAML_CONFIG_UTIL.loadAs(JavaGeneratorConfig.class);
     }
 
     @Provides

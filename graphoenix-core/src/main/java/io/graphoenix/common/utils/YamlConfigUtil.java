@@ -10,12 +10,12 @@ public enum YamlConfigUtil {
 
     YAML_CONFIG_UTIL;
 
-    public <T> T loadAs(Class<T> type) throws FileNotFoundException {
+    public <T> T loadAs(Class<T> type) {
         String name = Hammurabi.CONFIG_FILE_NAME;
         return loadAs(name, type);
     }
 
-    public <T> T loadAs(String name, Class<T> type) throws FileNotFoundException {
+    public <T> T loadAs(String name, Class<T> type) {
         InputStream inputStream = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream(name);
@@ -29,7 +29,11 @@ public enum YamlConfigUtil {
                     .concat("resources")
                     .concat(File.separator)
                     .concat(name);
-            inputStream = new FileInputStream(resourcesPath);
+            try {
+                inputStream = new FileInputStream(resourcesPath);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
         return loadAs(inputStream, type);
     }

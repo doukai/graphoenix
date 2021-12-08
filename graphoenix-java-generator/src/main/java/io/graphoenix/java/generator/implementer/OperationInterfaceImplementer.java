@@ -6,8 +6,6 @@ import io.graphoenix.common.pipeline.GraphQLDAO;
 import io.graphoenix.common.pipeline.PipelineContext;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
@@ -24,14 +22,7 @@ import static com.squareup.javapoet.TypeName.VOID;
 
 public class OperationInterfaceImplementer {
 
-    private final IGraphQLDocumentManager manager;
-    private final JavaGeneratorConfig configuration;
     private final ThrowingFunction<String, Class<?>, ClassNotFoundException> classForName = Class::forName;
-
-    public OperationInterfaceImplementer(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
-        this.manager = manager;
-        this.configuration = configuration;
-    }
 
     public void writeToFiler(PackageElement packageElement, TypeElement typeElement, Set<String> executeHandlerNames, String suffix, boolean useInject, Filer filer) throws IOException {
         this.buildImplementClass(packageElement, typeElement, executeHandlerNames, suffix, useInject).writeTo(filer);
