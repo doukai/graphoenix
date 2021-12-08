@@ -4,6 +4,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
+import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 public class ElementManager {
     private final IGraphQLDocumentManager manager;
 
+    @Inject
     public ElementManager(IGraphQLDocumentManager manager) {
         this.manager = manager;
     }

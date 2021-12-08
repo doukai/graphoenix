@@ -27,10 +27,6 @@ public class OperationToSQLConvertHandler implements IOperationHandler {
     }
 
     @Override
-    public void init(IPipelineContext context) {
-    }
-
-    @Override
     public boolean query(IPipelineContext context) {
         String graphQL = context.poll(String.class);
         manager.registerFragment(graphQL);

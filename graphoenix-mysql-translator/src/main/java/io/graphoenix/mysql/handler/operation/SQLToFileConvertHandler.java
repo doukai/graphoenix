@@ -13,10 +13,6 @@ public class SQLToFileConvertHandler implements IOperationHandler {
     private final SqlFormatter.Formatter formatter = SqlFormatter.of(Dialect.MariaDb).extend(cfg -> cfg.plusNamedPlaceholderTypes(":"));
 
     @Override
-    public void init(IPipelineContext context) {
-    }
-
-    @Override
     public boolean query(IPipelineContext context) {
         String sql = context.poll(String.class);
         context.add(formatter.format(sql));

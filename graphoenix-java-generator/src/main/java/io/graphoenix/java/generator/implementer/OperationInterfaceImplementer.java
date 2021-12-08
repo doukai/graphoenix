@@ -10,8 +10,10 @@ import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.processing.Filer;
 import javax.inject.Singleton;
 import javax.lang.model.element.*;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,11 @@ public class OperationInterfaceImplementer {
         this.configuration = configuration;
     }
 
-    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, List<String> executeHandlerNames, String suffix, boolean useInject) {
+    public void writeToFiler(PackageElement packageElement, TypeElement typeElement, Set<String> executeHandlerNames, String suffix, boolean useInject, Filer filer) throws IOException {
+        this.buildImplementClass(packageElement, typeElement, executeHandlerNames, suffix, useInject).writeTo(filer);
+    }
+
+    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, Set<String> executeHandlerNames, String suffix, boolean useInject) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"))
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(TypeName.get(GraphQLDAO.class))
@@ -161,7 +167,7 @@ public class OperationInterfaceImplementer {
         return null;
     }
 
-    private MethodSpec addOperationHandlersMethodSpec(List<String> executeHandlerNames) {
+    private MethodSpec addOperationHandlersMethodSpec(Set<String> executeHandlerNames) {
 
         MethodSpec.Builder addOperationHandlers = MethodSpec.methodBuilder("addOperationHandlers")
                 .addModifiers(Modifier.PROTECTED)

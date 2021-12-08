@@ -1,10 +1,13 @@
 package io.graphoenix.java.generator.builder;
 
+import com.pivovarit.function.ThrowingBiConsumer;
 import com.squareup.javapoet.JavaFile;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import one.util.streamex.StreamEx;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -12,10 +15,15 @@ public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final JavaGeneratorConfig configuration;
+    private final ThrowingBiConsumer<JavaFile, File, IOException> JavaFileWriteTo = JavaFile::writeTo;
 
     public JavaFileBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
         this.manager = manager;
         this.configuration = configuration;
+    }
+
+    public void writeToPath(File path) {
+        this.buildJavaFileList().forEach(javaFile -> JavaFileWriteTo.uncheck().accept(javaFile, path));
     }
 
     public Stream<JavaFile> buildJavaFileList() {

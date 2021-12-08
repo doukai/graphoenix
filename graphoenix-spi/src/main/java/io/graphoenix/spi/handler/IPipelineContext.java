@@ -1,6 +1,5 @@
 package io.graphoenix.spi.handler;
 
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.javatuples.Pair;
 import org.reactivestreams.Publisher;
 
@@ -10,10 +9,6 @@ import java.util.stream.Stream;
 public interface IPipelineContext {
 
     IPipelineContext getInstance();
-
-    IGraphQLDocumentManager getManager();
-
-    void setManager(IGraphQLDocumentManager manager);
 
     void addStatus(Enum<?> status);
 

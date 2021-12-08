@@ -22,7 +22,6 @@ public class OperationHandler implements Command {
     public boolean execute(Context context) throws Exception {
 
         PipelineContext pipelineContext = (PipelineContext) context.get(INSTANCE_KEY);
-        operationHandler.init(pipelineContext);
         OperationType operationType = pipelineContext.getStatus(OperationType.class);
         ExecuteType executeType = pipelineContext.getStatus(ExecuteType.class);
         AsyncType asyncType = pipelineContext.getStatus(AsyncType.class);

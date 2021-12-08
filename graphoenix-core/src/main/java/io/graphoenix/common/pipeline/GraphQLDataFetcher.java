@@ -1,10 +1,8 @@
 package io.graphoenix.common.pipeline;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import io.graphoenix.common.pipeline.bootstrap.BootstrapPipeline;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.common.pipeline.operation.OperationRouter;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
@@ -12,20 +10,45 @@ import org.javatuples.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@AutoFactory
+import javax.inject.Inject;
+import java.util.HashSet;
+import java.util.Set;
+
 public class GraphQLDataFetcher {
 
-    private final IGraphQLDocumentManager documentManager;
-    private final IOperationHandler[] operationHandlers;
+    private final OperationRouter router;
 
-    public GraphQLDataFetcher(@Provided IBootstrapHandler[] bootstrapHandlers,
-                              @Provided IOperationHandler[] operationHandlers) throws Exception {
+    private Set<IBootstrapHandler> bootstrapHandlers;
+    private Set<IOperationHandler> operationHandlers;
+
+    @Inject
+    public GraphQLDataFetcher(OperationRouter router) {
+        this.router = router;
+    }
+
+    public GraphQLDataFetcher addBootstrapHandler(IBootstrapHandler bootstrapHandler) {
+        if (bootstrapHandler == null) {
+            bootstrapHandlers = new HashSet<>();
+        }
+        this.bootstrapHandlers.add(bootstrapHandler);
+        return this;
+    }
+
+    public GraphQLDataFetcher bootstrap() throws Exception {
         BootstrapPipeline bootstrapPipeline = new BootstrapPipeline();
         for (IBootstrapHandler bootstrapHandler : bootstrapHandlers) {
             bootstrapPipeline.addHandler(bootstrapHandler);
         }
-        this.documentManager = bootstrapPipeline.buildManager();
-        this.operationHandlers = operationHandlers;
+        bootstrapPipeline.execute();
+        return this;
+    }
+
+    public GraphQLDataFetcher addOperationHandler(IOperationHandler operationHandler) {
+        if (operationHandlers == null) {
+            operationHandlers = new HashSet<>();
+        }
+        this.operationHandlers.add(operationHandler);
+        return this;
     }
 
     public String fetch(GraphQLRequest request) throws Exception {
@@ -41,7 +64,7 @@ public class GraphQLDataFetcher {
     }
 
     private OperationPipeline createOperationPipeline() {
-        OperationPipeline operationPipeline = new OperationPipeline(this.documentManager);
+        OperationPipeline operationPipeline = new OperationPipeline(router);
         for (IOperationHandler operationHandler : operationHandlers) {
             operationPipeline.addHandler(operationHandler);
         }

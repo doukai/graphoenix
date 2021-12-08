@@ -6,6 +6,7 @@ import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.antlr.v4.runtime.RuleContext;
 
+import javax.inject.Inject;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,13 +20,14 @@ public class DocumentBuilder {
 
     private final GraphqlParser.InterfaceTypeDefinitionContext metaInterfaceTypeDefinitionContext;
 
-    public DocumentBuilder(IGraphQLDocumentManager manager) throws IOException {
+    @Inject
+    public DocumentBuilder(IGraphQLDocumentManager manager) {
         this.manager = manager;
-        manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
         this.metaInterfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElse(null);
     }
 
-    public Document buildDocument() {
+    public Document buildDocument() throws IOException {
+        manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         ObjectType queryType;
         if (queryOperationTypeDefinition.isPresent()) {

@@ -16,6 +16,9 @@ import io.graphoenix.spi.config.R2DBCConfig;
 
 import javax.inject.Singleton;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 
 @Module
@@ -24,7 +27,12 @@ public class R2dbcConnectorModule {
     @Provides
     @Singleton
     public R2DBCConfig config() {
-        return YAML_CONFIG_UTIL.loadAs(Hammurabi.CONFIG_FILE_NAME, R2DBCConfig.class);
+        try {
+            return YAML_CONFIG_UTIL.loadAs(R2DBCConfig.class);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Provides

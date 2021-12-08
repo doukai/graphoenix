@@ -1,6 +1,5 @@
 package io.graphoenix.common.pipeline;
 
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IPipelineContext;
 import org.apache.commons.chain.impl.ContextBase;
 import org.javatuples.Pair;
@@ -17,8 +16,6 @@ public class PipelineContext extends ContextBase implements IPipelineContext {
     public static final String INSTANCE_KEY = "instance";
 
     private PipelineContext instance;
-
-    private IGraphQLDocumentManager manager;
 
     private final Queue<Object> dataQueue;
 
@@ -40,16 +37,6 @@ public class PipelineContext extends ContextBase implements IPipelineContext {
             instance = this;
         }
         return instance;
-    }
-
-    @Override
-    public IGraphQLDocumentManager getManager() {
-        return manager;
-    }
-
-    @Override
-    public void setManager(IGraphQLDocumentManager manager) {
-        this.manager = manager;
     }
 
     @Override

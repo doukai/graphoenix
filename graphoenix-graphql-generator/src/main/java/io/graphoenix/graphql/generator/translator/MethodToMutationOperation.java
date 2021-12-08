@@ -6,8 +6,8 @@ import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.graphql.generator.operation.VariableDefinition;
 import io.graphoenix.spi.annotation.TypeInput;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
 
+import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -22,9 +22,10 @@ public class MethodToMutationOperation {
     private final IGraphQLDocumentManager manager;
     private final ElementManager elementManager;
 
-    public MethodToMutationOperation(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
+    @Inject
+    public MethodToMutationOperation(IGraphQLDocumentManager manager, ElementManager elementManager) {
         this.manager = manager;
-        this.elementManager = new ElementManager(manager);
+        this.elementManager = elementManager;
     }
 
     public String executableElementToMutation(String mutationFieldName, ExecutableElement executableElement, int layers) {
@@ -103,20 +104,20 @@ public class MethodToMutationOperation {
     private Object rebuildAnnotationMirror(ExecutableElement executableElement, AnnotationMirror value) {
         return value.getElementValues().entrySet().stream()
                 .collect(Collectors.toMap(entry -> {
-                            String fieldName = entry.getKey().getSimpleName().toString();
-                            if (fieldName.startsWith("$")) {
-                                return fieldName.substring(1);
-                            } else {
-                                return fieldName;
-                            }
-                        }, entry -> {
-                            String fieldName = entry.getKey().getSimpleName().toString();
-                            if (fieldName.startsWith("$")) {
-                                return rebuildVariable(executableElement, entry.getValue().getValue());
-                            } else {
-                                return rebuildValue(executableElement, entry.getValue().getValue());
-                            }
-                        }
+                                    String fieldName = entry.getKey().getSimpleName().toString();
+                                    if (fieldName.startsWith("$")) {
+                                        return fieldName.substring(1);
+                                    } else {
+                                        return fieldName;
+                                    }
+                                }, entry -> {
+                                    String fieldName = entry.getKey().getSimpleName().toString();
+                                    if (fieldName.startsWith("$")) {
+                                        return rebuildVariable(executableElement, entry.getValue().getValue());
+                                    } else {
+                                        return rebuildValue(executableElement, entry.getValue().getValue());
+                                    }
+                                }
                         )
                 );
     }

@@ -2,8 +2,6 @@ package io.graphoenix.spi.handler;
 
 public interface IOperationHandler {
 
-    void init(IPipelineContext context) throws Exception;
-
     boolean query(IPipelineContext context) throws Exception;
 
     boolean queryAsync(IPipelineContext context) throws Exception;

@@ -1,54 +1,91 @@
 package io.graphoenix.common.pipeline;
 
-import com.google.auto.factory.AutoFactory;
 import io.graphoenix.common.pipeline.bootstrap.BootstrapPipeline;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
+import io.graphoenix.common.pipeline.operation.OperationRouter;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
-import org.javatuples.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Set;
 
-@AutoFactory
+import static io.graphoenix.common.utils.BootstrapHandlerUtil.BOOTSTRAP_HANDLER_UTIL;
+import static io.graphoenix.common.utils.OperationHandlerUtil.OPERATION_HANDLER_UTIL;
+
 public class GraphQLCodeGenerator {
 
-    private final IGraphQLDocumentManager documentManager;
-    private final List<IOperationHandler> pretreatmentHandlers;
-    private final List<String> executeHandlerNames;
+    private final IGraphQLDocumentManager manager;
+    private final OperationRouter router;
+    private Set<IBootstrapHandler> bootstrapHandlers;
+    private Set<IOperationHandler> operationHandlers;
 
-    public GraphQLCodeGenerator(IGraphQLDocumentManager manager,
-                                List<String> bootstrapHandlerNames,
-                                List<String> pretreatmentHandlerNames,
-                                List<String> executeHandlerNames) throws Exception {
-        BootstrapPipeline bootstrapPipeline = new BootstrapPipeline(manager);
-
-        for (String bootstrapHandlerName : bootstrapHandlerNames) {
-            bootstrapPipeline.addHandler((IBootstrapHandler) Class.forName(bootstrapHandlerName).getDeclaredConstructor().newInstance());
-        }
-        this.documentManager = bootstrapPipeline.buildManager();
-
-        this.pretreatmentHandlers = new ArrayList<>();
-        for (String pretreatmentHandlerName : pretreatmentHandlerNames) {
-            this.pretreatmentHandlers.add((IOperationHandler) Class.forName(pretreatmentHandlerName).getDeclaredConstructor().newInstance());
-        }
-
-        this.executeHandlerNames = new ArrayList<>();
-        this.executeHandlerNames.addAll(executeHandlerNames);
+    @Inject
+    public GraphQLCodeGenerator(IGraphQLDocumentManager manager, OperationRouter router) {
+        this.manager = manager;
+        this.router = router;
     }
 
-    public String pretreatment(String graphQL) throws Exception {
+    public GraphQLCodeGenerator registerDocument(String graphQL) {
+        manager.registerDocument(graphQL);
+        return this;
+    }
+
+    public GraphQLCodeGenerator registerDocument(InputStream inputStream) throws IOException {
+        manager.registerDocument(inputStream);
+        return this;
+    }
+
+    public GraphQLCodeGenerator registerFile(String graphqlFileName) throws IOException {
+        manager.registerFile(graphqlFileName);
+        return this;
+    }
+
+    public GraphQLCodeGenerator registerPath(Path graphqlPath) throws IOException {
+        manager.registerPath(graphqlPath);
+        return this;
+    }
+
+    public GraphQLCodeGenerator addBootstrapHandlers(Set<String> bootstrapHandlerNames) throws Exception {
+        if (this.bootstrapHandlers == null) {
+            this.bootstrapHandlers = new HashSet<>();
+        }
+        for (String bootstrapHandlerName : bootstrapHandlerNames) {
+            this.bootstrapHandlers.add(BOOTSTRAP_HANDLER_UTIL.get(bootstrapHandlerName));
+        }
+        return this;
+    }
+
+    public GraphQLCodeGenerator addOperationHandlers(Set<String> operationHandlerNames) throws Exception {
+        if (this.operationHandlers == null) {
+            this.operationHandlers = new HashSet<>();
+        }
+        for (String operationHandlerName : operationHandlerNames) {
+            this.operationHandlers.add(OPERATION_HANDLER_UTIL.get(operationHandlerName));
+        }
+        return this;
+    }
+
+    public GraphQLCodeGenerator bootstrap() throws Exception {
+        BootstrapPipeline bootstrapPipeline = new BootstrapPipeline();
+        for (IBootstrapHandler bootstrapHandler : bootstrapHandlers) {
+            bootstrapPipeline.addHandler(bootstrapHandler);
+        }
+        bootstrapPipeline.execute();
+        return this;
+    }
+
+    public String generate(String graphQL) throws Exception {
         return this.createOperationPipeline().fetch(graphQL, String.class);
     }
 
-    public List<String> getExecuteHandlerNames() {
-        return executeHandlerNames;
-    }
-
     private OperationPipeline createOperationPipeline() {
-        OperationPipeline operationPipeline = new OperationPipeline(this.documentManager);
-        for (IOperationHandler operationHandler : pretreatmentHandlers) {
+        OperationPipeline operationPipeline = new OperationPipeline(router);
+        for (IOperationHandler operationHandler : operationHandlers) {
             operationPipeline.addHandler(operationHandler);
         }
         return operationPipeline;

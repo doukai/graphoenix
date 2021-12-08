@@ -1,7 +1,5 @@
 package io.graphoenix.common.manager;
 
-import com.google.auto.factory.AutoFactory;
-import com.google.auto.factory.Provided;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.*;
 
@@ -13,7 +11,6 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
 
-@AutoFactory
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     private final IGraphQLOperationManager graphQLOperationManager;
@@ -40,18 +37,18 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     private final IGraphQLFragmentManager graphQLFragmentManager;
 
-    public GraphQLDocumentManager(@Provided IGraphQLOperationManager graphQLOperationManager,
-                                  @Provided IGraphQLSchemaManager graphQLSchemaManager,
-                                  @Provided IGraphQLDirectiveManager graphQLDirectiveManager,
-                                  @Provided IGraphQLObjectManager graphQLObjectManager,
-                                  @Provided IGraphQLInterfaceManager graphQLInterfaceManager,
-                                  @Provided IGraphQLUnionManager graphQLUnionManager,
-                                  @Provided IGraphQLFieldManager graphQLFieldManager,
-                                  @Provided IGraphQLInputObjectManager graphQLInputObjectManager,
-                                  @Provided IGraphQLInputValueManager graphQLInputValueManager,
-                                  @Provided IGraphQLEnumManager graphQLEnumManager,
-                                  @Provided IGraphQLScalarManager graphQLScalarManager,
-                                  @Provided IGraphQLFragmentManager graphQLFragmentManager) {
+    public GraphQLDocumentManager(IGraphQLOperationManager graphQLOperationManager,
+                                  IGraphQLSchemaManager graphQLSchemaManager,
+                                  IGraphQLDirectiveManager graphQLDirectiveManager,
+                                  IGraphQLObjectManager graphQLObjectManager,
+                                  IGraphQLInterfaceManager graphQLInterfaceManager,
+                                  IGraphQLUnionManager graphQLUnionManager,
+                                  IGraphQLFieldManager graphQLFieldManager,
+                                  IGraphQLInputObjectManager graphQLInputObjectManager,
+                                  IGraphQLInputValueManager graphQLInputValueManager,
+                                  IGraphQLEnumManager graphQLEnumManager,
+                                  IGraphQLScalarManager graphQLScalarManager,
+                                  IGraphQLFragmentManager graphQLFragmentManager) {
         this.graphQLOperationManager = graphQLOperationManager;
         this.graphQLSchemaManager = graphQLSchemaManager;
         this.graphQLDirectiveManager = graphQLDirectiveManager;

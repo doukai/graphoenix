@@ -1,8 +1,6 @@
 package io.graphoenix.common.pipeline.operation;
 
 import io.graphoenix.common.pipeline.PipelineContext;
-import io.graphoenix.common.utils.HandlerUtil;
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.AsyncType;
 import io.graphoenix.spi.dto.type.ExecuteType;
 import io.graphoenix.spi.handler.IOperationHandler;
@@ -11,22 +9,13 @@ import org.javatuples.Pair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.inject.Inject;
+
 public class OperationPipeline extends ChainBase {
 
-    private IGraphQLDocumentManager manager;
-
-    public OperationPipeline() {
-        addCommand(new OperationRouter());
-    }
-
-    public OperationPipeline(IGraphQLDocumentManager manager) {
-        this.manager = manager;
-        addCommand(new OperationRouter());
-    }
-
-    public OperationPipeline setupManager(IGraphQLDocumentManager manager) {
-        this.manager = manager;
-        return this;
+    @Inject
+    public OperationPipeline(OperationRouter router) {
+        addCommand(router);
     }
 
     public OperationPipeline addHandler(IOperationHandler handler) {
@@ -34,14 +23,8 @@ public class OperationPipeline extends ChainBase {
         return this;
     }
 
-    public <T extends IOperationHandler> OperationPipeline addHandler(Class<T> handlerClass) {
-        addCommand(new OperationHandler(HandlerUtil.HANDLER_UTIL.create(handlerClass)));
-        return this;
-    }
-
     private PipelineContext fetch(String graphQL) throws Exception {
         PipelineContext pipelineContext = new PipelineContext();
-        pipelineContext.setManager(this.manager);
         pipelineContext.addStatus(ExecuteType.SYNC);
         pipelineContext.addStatus(AsyncType.OPERATION);
         pipelineContext.add(graphQL);
@@ -62,7 +45,6 @@ public class OperationPipeline extends ChainBase {
 
     private PipelineContext fetchAsync(String graphQL) throws Exception {
         PipelineContext pipelineContext = new PipelineContext();
-        pipelineContext.setManager(this.manager);
         pipelineContext.addStatus(ExecuteType.ASYNC);
         pipelineContext.addStatus(AsyncType.OPERATION);
         pipelineContext.add(graphQL);
@@ -87,7 +69,6 @@ public class OperationPipeline extends ChainBase {
 
     private PipelineContext fetchSelectionsAsync(String graphQL) throws Exception {
         PipelineContext pipelineContext = new PipelineContext();
-        pipelineContext.setManager(this.manager);
         pipelineContext.addStatus(ExecuteType.ASYNC);
         pipelineContext.addStatus(AsyncType.SELECTION);
         pipelineContext.add(graphQL);

@@ -7,16 +7,24 @@ import io.graphoenix.spi.dto.type.OperationType;
 import org.apache.commons.chain.Command;
 import org.apache.commons.chain.Context;
 
+import javax.inject.Inject;
+
 import static io.graphoenix.common.pipeline.PipelineContext.INSTANCE_KEY;
 
 public class OperationRouter implements Command {
+
+    private final IGraphQLDocumentManager manager;
+
+    @Inject
+    public OperationRouter(IGraphQLDocumentManager manager) {
+        this.manager = manager;
+    }
 
     @Override
     public boolean execute(Context context) {
 
         PipelineContext pipelineContext = (PipelineContext) context.get(INSTANCE_KEY);
         String graphQL = pipelineContext.element(String.class);
-        IGraphQLDocumentManager manager = pipelineContext.getManager();
         GraphqlParser.OperationTypeContext operationTypeContext = manager.getOperationType(graphQL);
         if (operationTypeContext == null || operationTypeContext.QUERY() != null) {
             pipelineContext.addStatus(OperationType.QUERY);

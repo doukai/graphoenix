@@ -7,6 +7,7 @@ import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
+import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,11 +18,7 @@ public class IntrospectionMutationBuilder {
 
     private final int levelThreshold;
 
-    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager, int levelThreshold) {
-        this.manager = manager;
-        this.levelThreshold = levelThreshold;
-    }
-
+    @Inject
     public IntrospectionMutationBuilder(IGraphQLDocumentManager manager) {
         this.manager = manager;
         this.levelThreshold = 1;

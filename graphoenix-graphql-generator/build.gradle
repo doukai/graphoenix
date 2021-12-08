@@ -14,6 +14,7 @@ repositories {
 dependencies {
     implementation project(":graphoenix-core")
     implementation 'org.antlr:ST4:4.3'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }

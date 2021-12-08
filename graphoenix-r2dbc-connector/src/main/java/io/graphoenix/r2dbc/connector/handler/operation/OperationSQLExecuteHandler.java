@@ -29,10 +29,6 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
     }
 
     @Override
-    public void init(IPipelineContext context) {
-    }
-
-    @Override
     public boolean query(IPipelineContext context) {
         String sql = context.poll(String.class);
         Map<String, Object> parameters = context.pollMap(String.class, Object.class);

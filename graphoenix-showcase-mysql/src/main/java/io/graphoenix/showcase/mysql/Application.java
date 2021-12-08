@@ -1,18 +1,15 @@
 package io.graphoenix.showcase.mysql;
 
-import io.graphoenix.common.pipeline.GraphQLDataFetcherFactory;
-import io.graphoenix.graphql.builder.handler.bootstrap.DocumentBuildHandler;
-import io.graphoenix.graphql.builder.handler.bootstrap.IntrospectionMutationBuildHandler;
+import io.graphoenix.common.pipeline.DaggerGraphQLDataFetcherFactory;
+import io.graphoenix.common.pipeline.GraphQLDataFetcher;
+import io.graphoenix.graphql.builder.handler.bootstrap.DaggerDocumentBuildHandlerFactory;
+import io.graphoenix.graphql.builder.handler.bootstrap.DaggerIntrospectionMutationBuildHandlerFactory;
 import io.graphoenix.http.server.GraphqlHttpServer;
-import io.graphoenix.mysql.handler.bootstrap.IntrospectionRegisterHandler;
-import io.graphoenix.mysql.handler.bootstrap.MutationToSQLConvertHandler;
-import io.graphoenix.mysql.handler.bootstrap.TypeDefiniteToCreateTableSQLConvertHandler;
-import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
-import io.graphoenix.r2dbc.connector.handler.bootstrap.CreateTableSQLExecuteHandler;
-import io.graphoenix.r2dbc.connector.handler.bootstrap.IntrospectionMutationExecuteHandler;
-import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
-import io.graphoenix.spi.handler.IBootstrapHandler;
-import io.graphoenix.spi.handler.IOperationHandler;
+import io.graphoenix.mysql.handler.bootstrap.*;
+import io.graphoenix.mysql.handler.operation.DaggerOperationToSQLConvertHandlerFactory;
+import io.graphoenix.r2dbc.connector.handler.bootstrap.DaggerCreateTableSQLExecuteHandlerFactory;
+import io.graphoenix.r2dbc.connector.handler.bootstrap.DaggerIntrospectionMutationExecuteHandlerFactory;
+import io.graphoenix.r2dbc.connector.handler.operation.DaggerOperationSQLExecuteHandlerFactory;
 
 public class Application {
 
@@ -21,28 +18,19 @@ public class Application {
     }
 
     private void run() throws Exception {
-        GraphQLDataFetcherFactory dataFetcherFactory = new GraphQLDataFetcherFactory(this::addBootstraps, this::addOperations);
-        GraphqlHttpServer graphqlHttpServer = new GraphqlHttpServer(dataFetcherFactory.create());
+        GraphQLDataFetcher dataFetcher = DaggerGraphQLDataFetcherFactory.create()
+                .buildFetcher()
+                .addBootstrapHandler(DaggerIntrospectionRegisterHandlerFactory.create().createHandler())
+                .addBootstrapHandler(DaggerDocumentBuildHandlerFactory.create().createHandler())
+                .addBootstrapHandler(DaggerTypeDefiniteToCreateTableSQLConvertHandlerFactory.create().createHandler())
+                .addBootstrapHandler(DaggerCreateTableSQLExecuteHandlerFactory.create().createHandler())
+                .addBootstrapHandler(DaggerIntrospectionMutationBuildHandlerFactory.create().createHandler())
+                .addBootstrapHandler(DaggerMutationToSQLConvertHandlerFactory.create().createHandler())
+                .addBootstrapHandler(DaggerIntrospectionMutationExecuteHandlerFactory.create().createHandler())
+                .bootstrap()
+                .addOperationHandler(DaggerOperationToSQLConvertHandlerFactory.create().createHandler())
+                .addOperationHandler(DaggerOperationSQLExecuteHandlerFactory.create().createHandler());
+        GraphqlHttpServer graphqlHttpServer = new GraphqlHttpServer(dataFetcher);
         graphqlHttpServer.run();
-    }
-
-    public IBootstrapHandler[] addBootstraps() {
-        return new IBootstrapHandler[]
-                {
-                        new IntrospectionRegisterHandler(),
-                        new DocumentBuildHandler("auth.gql"),
-                        new TypeDefiniteToCreateTableSQLConvertHandler(),
-                        new CreateTableSQLExecuteHandler(),
-                        new IntrospectionMutationBuildHandler(),
-                        new MutationToSQLConvertHandler(),
-                        new IntrospectionMutationExecuteHandler()
-                };
-    }
-
-    public IOperationHandler[] addOperations() {
-        return new IOperationHandler[]{
-                new OperationToSQLConvertHandler(),
-                new OperationSQLExecuteHandler()
-        };
     }
 }

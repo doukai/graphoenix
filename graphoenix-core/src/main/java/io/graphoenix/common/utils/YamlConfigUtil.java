@@ -1,18 +1,36 @@
 package io.graphoenix.common.utils;
 
+import io.graphoenix.common.constant.Hammurabi;
 import one.util.streamex.StreamEx;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.InputStream;
+import java.io.*;
 
 public enum YamlConfigUtil {
 
     YAML_CONFIG_UTIL;
 
-    public <T> T loadAs(String name, Class<T> type) {
+    public <T> T loadAs(Class<T> type) throws FileNotFoundException {
+        String name = Hammurabi.CONFIG_FILE_NAME;
+        return loadAs(name, type);
+    }
+
+    public <T> T loadAs(String name, Class<T> type) throws FileNotFoundException {
         InputStream inputStream = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream(name);
+        if (inputStream == null) {
+            String resourcesPath = System.getProperty("user.dir")
+                    .concat(File.separator)
+                    .concat("src")
+                    .concat(File.separator)
+                    .concat("main")
+                    .concat(File.separator)
+                    .concat("resources")
+                    .concat(File.separator)
+                    .concat(name);
+            inputStream = new FileInputStream(resourcesPath);
+        }
         return loadAs(inputStream, type);
     }
 

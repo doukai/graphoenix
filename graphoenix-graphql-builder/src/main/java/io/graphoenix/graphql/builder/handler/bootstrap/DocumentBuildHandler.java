@@ -5,26 +5,23 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IPipelineContext;
 
+import javax.inject.Inject;
 import java.io.IOException;
 
 public class DocumentBuildHandler implements IBootstrapHandler {
 
-    private String graphQLFileName;
+    private final IGraphQLDocumentManager manager;
+    private final DocumentBuilder documentBuilder;
 
-    public DocumentBuildHandler() {
-    }
-
-    public DocumentBuildHandler(String graphQL) {
-        this.graphQLFileName = graphQL;
+    @Inject
+    public DocumentBuildHandler(IGraphQLDocumentManager manager, DocumentBuilder documentBuilder) {
+        this.manager = manager;
+        this.documentBuilder = documentBuilder;
     }
 
     @Override
     public boolean execute(IPipelineContext context) throws IOException {
-        IGraphQLDocumentManager manager = context.getManager();
-        if (this.graphQLFileName != null) {
-            manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream(graphQLFileName));
-        }
-        manager.registerDocument(new DocumentBuilder(manager).buildDocument().toString());
+        manager.registerDocument(documentBuilder.buildDocument().toString());
         return false;
     }
 }

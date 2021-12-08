@@ -9,6 +9,7 @@ import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
 
+import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -27,11 +28,12 @@ public class MethodToQueryOperation {
     private final IGraphQLDocumentManager manager;
     private final ElementManager elementManager;
 
-    public MethodToQueryOperation(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
+    @Inject
+    public MethodToQueryOperation(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration, ElementManager elementManager) {
         this.conditionalName = configuration.getEnumTypePackageName().concat(".Conditional");
         this.operatorName = configuration.getEnumTypePackageName().concat(".Operator");
         this.manager = manager;
-        this.elementManager = new ElementManager(manager);
+        this.elementManager = elementManager;
     }
 
     public String executableElementToQuery(String queryFieldName, ExecutableElement executableElement, int layers) {

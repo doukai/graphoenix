@@ -5,9 +5,10 @@ import com.pivovarit.function.ThrowingBiConsumer;
 import com.pivovarit.function.ThrowingBiFunction;
 import io.graphoenix.common.constant.Hammurabi;
 import io.graphoenix.common.manager.SimpleGraphQLDocumentManager;
+import io.graphoenix.common.pipeline.DaggerGraphQLCodeGeneratorFactory;
 import io.graphoenix.common.pipeline.GraphQLCodeGenerator;
-import io.graphoenix.common.pipeline.GraphQLCodeGeneratorFactory;
 import io.graphoenix.common.utils.YamlConfigUtil;
+import io.graphoenix.graphql.generator.translator.DaggerJavaElementToOperationFactory;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
 import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.config.JavaGeneratorConfig;
@@ -46,20 +47,6 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                 if (bundleClassElement.getKind().equals(ElementKind.INTERFACE)) {
                     TypeElement typeElement = (TypeElement) bundleClassElement;
                     try {
-                        String resourcesPath = System.getProperty("user.dir").concat(File.separator).concat("src").concat(File.separator).concat("main").concat(File.separator).concat("resources").concat(File.separator);
-                        URI configUri = new File(resourcesPath.concat(Hammurabi.CONFIG_FILE_NAME)).toURI();
-                        JavaGeneratorConfig javaGeneratorConfig = YamlConfigUtil.YAML_CONFIG_UTIL.loadAs(configUri.toURL().openStream(), JavaGeneratorConfig.class);
-                        IGraphQLDocumentManager manager = new SimpleGraphQLDocumentManager();
-                        if (javaGeneratorConfig.getGraphQL() != null) {
-                            manager.registerDocument(javaGeneratorConfig.getGraphQL());
-                        } else if (javaGeneratorConfig.getGraphQLFileName() != null) {
-                            URI graphQLFileUri = new File(resourcesPath.concat(javaGeneratorConfig.getGraphQLFileName())).toURI();
-                            manager.registerDocument(graphQLFileUri.toURL().openStream());
-                        } else if (javaGeneratorConfig.getGraphQLPath() != null) {
-                            URI graphQLPathUri = new File(resourcesPath.concat(javaGeneratorConfig.getGraphQLPath())).toURI();
-                            manager.registerPath(Paths.get(graphQLPathUri));
-                        }
-
                         String graphQLOperationClassName = GraphQLOperation.class.getName();
                         AnnotationMirror graphQLOperationMirror = typeElement.getAnnotationMirrors().stream()
                                 .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(graphQLOperationClassName))
@@ -69,31 +56,31 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                         final Elements elementUtils = this.processingEnv.getElementUtils();
 
                         Map<? extends ExecutableElement, ? extends AnnotationValue> elementValuesWithDefaults = elementUtils.getElementValuesWithDefaults(graphQLOperationMirror);
-                        List<String> bootstrapHandlers = elementValuesWithDefaults.entrySet().stream()
+                        Set<String> bootstrapHandlers = elementValuesWithDefaults.entrySet().stream()
                                 .filter(entry -> entry.getKey().getSimpleName().toString().equals("bootstrapHandlers"))
                                 .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                                 .findFirst()
                                 .map(entry -> ((List<?>) entry.getValue().getValue()).stream()
                                         .map(item -> ((AnnotationValue) item).getValue().toString())
-                                        .collect(Collectors.toList())
+                                        .collect(Collectors.toSet())
                                 )
                                 .orElseThrow();
-                        List<String> pretreatmentHandlers = elementValuesWithDefaults.entrySet().stream()
+                        Set<String> pretreatmentHandlers = elementValuesWithDefaults.entrySet().stream()
                                 .filter(entry -> entry.getKey().getSimpleName().toString().equals("pretreatmentHandlers"))
                                 .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                                 .findFirst()
                                 .map(entry -> ((List<?>) entry.getValue().getValue()).stream()
                                         .map(item -> ((AnnotationValue) item).getValue().toString())
-                                        .collect(Collectors.toList())
+                                        .collect(Collectors.toSet())
                                 )
                                 .orElseThrow();
-                        List<String> executeHandlers = elementValuesWithDefaults.entrySet().stream()
+                        Set<String> executeHandlers = elementValuesWithDefaults.entrySet().stream()
                                 .filter(entry -> entry.getKey().getSimpleName().toString().equals("executeHandlers"))
                                 .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                                 .findFirst()
                                 .map(entry -> ((List<?>) entry.getValue().getValue()).stream()
                                         .map(item -> ((AnnotationValue) item).getValue().toString())
-                                        .collect(Collectors.toList())
+                                        .collect(Collectors.toSet())
                                 )
                                 .orElseThrow();
 
@@ -109,14 +96,32 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                                 .map(entry -> (boolean) entry.getValue().getValue())
                                 .orElseThrow();
 
+                        GraphQLCodeGenerator generator = DaggerGraphQLCodeGeneratorFactory.create()
+                                .buildGenerator()
+                                .addBootstrapHandlers(bootstrapHandlers)
+                                .addOperationHandlers(pretreatmentHandlers);
 
-                        GraphQLCodeGenerator generator = new GraphQLCodeGeneratorFactory().create(manager, bootstrapHandlers, pretreatmentHandlers, executeHandlers);
+                        String resourcesPath = System.getProperty("user.dir").concat(File.separator).concat("src").concat(File.separator).concat("main").concat(File.separator).concat("resources").concat(File.separator);
+                        URI configUri = new File(resourcesPath.concat(Hammurabi.CONFIG_FILE_NAME)).toURI();
+                        JavaGeneratorConfig javaGeneratorConfig = YamlConfigUtil.YAML_CONFIG_UTIL.loadAs(configUri.toURL().openStream(), JavaGeneratorConfig.class);
+
+                        if (javaGeneratorConfig.getGraphQL() != null) {
+                            generator.registerDocument(javaGeneratorConfig.getGraphQL());
+                        } else if (javaGeneratorConfig.getGraphQLFileName() != null) {
+                            URI graphQLFileUri = new File(resourcesPath.concat(javaGeneratorConfig.getGraphQLFileName())).toURI();
+                            generator.registerDocument(graphQLFileUri.toURL().openStream());
+                        } else if (javaGeneratorConfig.getGraphQLPath() != null) {
+                            URI graphQLPathUri = new File(resourcesPath.concat(javaGeneratorConfig.getGraphQLPath())).toURI();
+                            generator.registerPath(Paths.get(graphQLPathUri));
+                        }
+
+                        generator.bootstrap();
 
                         PackageElement packageElement = elementUtils.getPackageOf(typeElement);
-                        JavaElementToOperation javaElementToOperation = new JavaElementToOperation(manager, javaGeneratorConfig);
+                        JavaElementToOperation javaElementToOperation = DaggerJavaElementToOperationFactory.create().build();
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
 
-                        ThrowingBiFunction<GraphQLCodeGenerator, String, String, Exception> generatorPretreatment = GraphQLCodeGenerator::pretreatment;
+                        ThrowingBiFunction<GraphQLCodeGenerator, String, String, Exception> generatorPretreatment = GraphQLCodeGenerator::generate;
                         ThrowingBiConsumer<Filer, Map.Entry<String, String>, IOException> createResource = (filer, entry) -> {
                             FileObject fileObject = filer.createResource(
                                     StandardLocation.SOURCE_OUTPUT,
@@ -134,12 +139,12 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
 
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors
-                                .toMap(Map.Entry::getKey, entry -> generatorPretreatment.unchecked().apply(generator, entry.getValue())))
+                                        .toMap(Map.Entry::getKey, entry -> generatorPretreatment.unchecked().apply(generator, entry.getValue())))
                                 .entrySet()
                                 .forEach(entry -> createResource.asFunction().unchecked().apply(processingEnv.getFiler(), entry));
 
                         OperationInterfaceImplementer implementer = new OperationInterfaceImplementer(manager, javaGeneratorConfig);
-                        implementer.buildImplementClass(packageElement, typeElement, executeHandlers, suffix, useInject).writeTo(processingEnv.getFiler());
+                        implementer.writeToFiler(packageElement, typeElement, executeHandlers, suffix, useInject, processingEnv.getFiler());
 
                     } catch (Exception e) {
                         e.printStackTrace();
