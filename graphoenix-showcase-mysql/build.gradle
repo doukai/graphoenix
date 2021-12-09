@@ -31,6 +31,7 @@ dependencies {
     implementation project(":graphoenix-http-server")
     implementation project(":graphoenix-mysql-translator")
     compile project(":graphoenix-r2dbc-connector")
+    annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-annotation-processor")
     annotationProcessor project(":graphoenix-mysql-translator")
     annotationProcessor project(":graphoenix-r2dbc-connector")

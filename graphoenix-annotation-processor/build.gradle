@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     compile project(":graphoenix-core")
+    compile project(":graphoenix-config")
     compile project(":graphoenix-graphql-builder")
     compile project(":graphoenix-java-generator")
     compile project(":graphoenix-graphql-generator")
