@@ -27,12 +27,7 @@ public class R2dbcConnectorModule {
     @Provides
     @Singleton
     public R2DBCConfig config() {
-        try {
-            return YAML_CONFIG_UTIL.loadAs(R2DBCConfig.class);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return YAML_CONFIG_UTIL.loadAs(R2DBCConfig.class);
     }
 
     @Provides

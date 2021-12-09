@@ -1,8 +1,6 @@
 package io.graphoenix.common.utils;
 
 import io.graphoenix.common.constant.Hammurabi;
-import one.util.streamex.StreamEx;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 
@@ -16,6 +14,7 @@ public enum YamlConfigUtil {
     }
 
     public <T> T loadAs(String name, Class<T> type) {
+
         InputStream inputStream = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream(name);
@@ -39,10 +38,6 @@ public enum YamlConfigUtil {
     }
 
     public <T> T loadAs(InputStream inputStream, Class<T> type) {
-        Yaml yaml = new Yaml();
-        return StreamEx.of(yaml.loadAll(inputStream).iterator())
-                .findFirst(object -> object.getClass().isAssignableFrom(type))
-                .map(type::cast)
-                .orElseThrow();
+        return null;
     }
 }

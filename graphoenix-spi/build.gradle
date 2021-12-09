@@ -16,8 +16,9 @@ dependencies {
     antlr "org.antlr:antlr4:4.9.2"
     compile 'org.reactivestreams:reactive-streams:1.0.3'
     compile 'org.eclipse.microprofile.graphql:microprofile-graphql-api:1.0.3'
+    compile 'org.eclipse.microprofile.config:microprofile-config-api:3.0'
     compile 'jakarta.annotation:jakarta.annotation-api:2.0.0'
-    compile 'jakarta.persistence:jakarta.persistence-api:3.0.0'
+    compile 'jakarta.persistence:jakarta.persistence-api:3.0.0' 
     compile 'javax.inject:javax.inject:1'
     compile 'javax.validation:validation-api:2.0.1.Final'
     compile 'org.javatuples:javatuples:1.2'
