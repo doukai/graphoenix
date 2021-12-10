@@ -16,6 +16,8 @@ public class Application {
 
     @ConfigProperty(name = "generator.basePackageName")
     String basePackageName;
+    @ConfigProperty(name = "generator.a")
+    int a[];
 
     public static void main(String[] args) throws Exception {
         new Application().run();

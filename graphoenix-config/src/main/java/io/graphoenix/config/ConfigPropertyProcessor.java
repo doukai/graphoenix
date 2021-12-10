@@ -2,24 +2,23 @@ package io.graphoenix.config;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import com.typesafe.config.ConfigValue;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import spoon.pattern.internal.node.StringNode;
 import spoon.processing.AbstractAnnotationProcessor;
-import spoon.reflect.code.CtAssignment;
-import spoon.reflect.code.CtCodeSnippetStatement;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtNewArray;
 import spoon.reflect.declaration.*;
-import spoon.reflect.path.CtRole;
-import spoon.support.reflect.declaration.CtFieldImpl;
+import spoon.reflect.reference.CtTypeReference;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-import static spoon.reflect.path.CtRole.FIELD;
+import static spoon.reflect.path.CtRole.DEFAULT_EXPRESSION;
 
-public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigProperty, CtElement> {
+public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigProperty, CtField<?>> {
 
     private final static String[] configNames = {"application.conf", "application.json", "application.properties", "reference.conf"};
     private final String resourcesPath = System.getProperty("user.dir").concat(File.separator).concat("src").concat(File.separator).concat("main").concat(File.separator).concat("resources").concat(File.separator);
@@ -30,7 +29,9 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
     }
 
     @Override
-    public void process(ConfigProperty annotation, CtElement element) {
+    public void process(ConfigProperty annotation, CtField<?> element) {
+        getEnvironment().setAutoImports(true);
+
         Config config = Arrays.stream(Objects.requireNonNull(new File(resourcesPath).listFiles()))
                 .filter(file -> Arrays.asList(configNames).contains(file.getName()))
                 .map(ConfigFactory::parseFile)
@@ -43,14 +44,24 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
                 .findFirst()
                 .orElseThrow();
 
-        String configKeyName = configProperty.getValueAsString("name");
-        String configString = config.getString(configKeyName);
+        String configKey = configProperty.getValueAsString("name");
+        CtTypeReference<?> type = element.getType();
 
-//        String value = String.format("%s = \"%s\"", ((CtFieldImpl<?>) element).getSimpleName(), new StringNode(configString));
-//        CtCodeSnippetStatement ctCodeSnippet = getFactory().Core().createCodeSnippetStatement().setValue(value);
-//        CtAssignment<Object, Object> assignment = getFactory().Core().createAssignment();
-        ((CtField<?>) element).setDefaultExpression(getFactory().Code().createCodeSnippetExpression("test"));
+        element.setDefaultExpression(typeToExpression(type, config, configKey));
+    }
 
-
+    private CtExpression<? extends CtVariable<?>> typeToExpression(CtTypeReference<?> type, Config config, String configKey) {
+        if (type.isPrimitive()) {
+            return getFactory().Code().createCodeSnippetExpression(config.getValue(configKey).render());
+        } else if (type.isArray()) {
+            CtNewArray<Object> newArray = getFactory().createNewArray();
+            newArray.setElements(
+                    config.getList(configKey).stream()
+                            .map(configValue -> getFactory().Code().createCodeSnippetExpression(configValue.render()))
+                            .collect(Collectors.toList())
+            );
+            return newArray.getValueByRole(DEFAULT_EXPRESSION);
+        }
+        return null;
     }
 }

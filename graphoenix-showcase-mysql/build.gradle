@@ -5,7 +5,7 @@ buildscript {
     dependencies {
         classpath 'fr.inria.gforge.spoon:spoon-gradle-plugin:1.4'
         classpath 'io.graphoenix:graphoenix-config:1.0-SNAPSHOT'
-        classpath files('build/classes/main')
+//        classpath files('build/classes/main')
     }
 }
 
