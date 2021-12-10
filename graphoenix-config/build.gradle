@@ -1,6 +1,7 @@
 plugins {
     id 'java'
 }
+apply plugin: 'maven'
 
 group 'io.graphoenix'
 version '1.0-SNAPSHOT'
@@ -10,14 +11,12 @@ repositories {
 }
 
 dependencies {
-    compile project(":graphoenix-spi")
+    compile 'org.eclipse.microprofile.config:microprofile-config-api:3.0'
     compile "com.typesafe:config:1.4.1"
+    compile 'fr.inria.gforge.spoon:spoon-core:10.0.0'
+
     compile "com.google.auto.service:auto-service:1.0.1"
     annotationProcessor "com.google.auto.service:auto-service:1.0.1"
-
-    compile files("${System.properties['java.home']}/../lib/tools.jar")
-    compile 'org.projectlombok:lombok:1.14.8'
-    annotationProcessor 'org.projectlombok:lombok:1.14.8'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
