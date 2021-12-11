@@ -7,17 +7,25 @@ package io.graphoenix.showcase.mysql;
 //import io.graphoenix.http.server.GraphqlHttpServer;
 //import io.graphoenix.mysql.handler.bootstrap.*;
 //import io.graphoenix.mysql.handler.operation.DaggerOperationToSQLConvertHandlerFactory;
+
+import io.graphoenix.spi.config.JavaGeneratorConfig;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 //import io.graphoenix.r2dbc.connector.handler.bootstrap.DaggerCreateTableSQLExecuteHandlerFactory;
 //import io.graphoenix.r2dbc.connector.handler.bootstrap.DaggerIntrospectionMutationExecuteHandlerFactory;
 //import io.graphoenix.r2dbc.connector.handler.operation.DaggerOperationSQLExecuteHandlerFactory;
 
 public class Application {
 
-    @ConfigProperty(name = "generator.basePackageName")
-    String basePackageName;
-    @ConfigProperty(name = "generator.a")
-    int a[];
+    //    @ConfigProperty(name = "generator.basePackageName")
+//    String basePackageName;
+//    @ConfigProperty(name = "generator.b")
+//    List<Integer> b;
+    @ConfigProperty(name = "generator")
+    Map<String,Object> generator;
 
     public static void main(String[] args) throws Exception {
         new Application().run();
