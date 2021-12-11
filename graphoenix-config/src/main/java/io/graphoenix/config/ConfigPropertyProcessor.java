@@ -1,7 +1,6 @@
 package io.graphoenix.config;
 
 import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValue;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import spoon.processing.AbstractAnnotationProcessor;
@@ -10,16 +9,15 @@ import spoon.reflect.code.CtNewArray;
 import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtTypeReference;
 
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.config.CompileConfig.COMPILE_CONFIG;
+
 public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigProperty, CtField<Object>> {
 
-    private final static String[] configNames = {"application.conf", "application.json", "application.properties", "reference.conf"};
-    private final String resourcesPath = System.getProperty("user.dir").concat(File.separator).concat("src").concat(File.separator).concat("main").concat(File.separator).concat("resources").concat(File.separator);
     private CtTypeReference<?> collectionTypeReference;
     private CtTypeReference<?> setTypeReference;
     private CtTypeReference<?> mapTypeReference;
@@ -37,13 +35,7 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
 
     @Override
     public void process(ConfigProperty annotation, CtField<Object> element) {
-
-        Config config = Arrays.stream(Objects.requireNonNull(new File(resourcesPath).listFiles()))
-                .filter(file -> Arrays.asList(configNames).contains(file.getName()))
-                .map(ConfigFactory::parseFile)
-                .findFirst()
-                .orElseThrow();
-
+        Config config = COMPILE_CONFIG.getConfig();
         CtAnnotation<? extends Annotation> configProperty = element.getAnnotations().stream()
                 .filter(ctAnnotation -> ctAnnotation.getName().equals(ConfigProperty.class.getSimpleName()))
                 .findFirst()
@@ -75,6 +67,8 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
             } else {
                 return getFactory().createCodeSnippetExpression("List.of(" + valueList + ")");
             }
+        } else if (type.isEnum()) {
+            return getFactory().createCodeSnippetExpression(type.getSimpleName() + "." + config.getString(configKey));
         } else if (type.isSubtypeOf(mapTypeReference)) {
             String valueList = config.getObject(configKey).entrySet().stream()
                     .flatMap(entry -> Stream.of("\"" + entry.getKey() + "\"", entry.getValue().render()))

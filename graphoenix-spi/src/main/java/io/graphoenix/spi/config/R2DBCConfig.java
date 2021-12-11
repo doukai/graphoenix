@@ -12,6 +12,31 @@ public class R2DBCConfig {
     private int poolMaxSize;
     private long poolMaxIdleTime;
 
+    public R2DBCConfig() {
+    }
+
+    public R2DBCConfig(String driver,
+                       String protocol,
+                       String database,
+                       String host,
+                       int port,
+                       String user,
+                       String password,
+                       boolean usePool,
+                       int poolMaxSize,
+                       long poolMaxIdleTime) {
+        this.driver = driver;
+        this.protocol = protocol;
+        this.database = database;
+        this.host = host;
+        this.port = port;
+        this.user = user;
+        this.password = password;
+        this.usePool = usePool;
+        this.poolMaxSize = poolMaxSize;
+        this.poolMaxIdleTime = poolMaxIdleTime;
+    }
+
     public String getDriver() {
         return driver;
     }

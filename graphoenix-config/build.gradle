@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    compile 'org.eclipse.microprofile.config:microprofile-config-api:3.0'
-    implementation "com.typesafe:config:1.4.1"
+    compile project(":graphoenix-spi")
+    compile "com.typesafe:config:1.4.1"
     implementation 'fr.inria.gforge.spoon:spoon-core:10.0.0'
 
     compileOnly "com.google.auto.service:auto-service:1.0.1"

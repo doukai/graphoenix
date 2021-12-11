@@ -5,6 +5,10 @@ public class GraphQLBuilderConfig {
 
     boolean englishPlural = false;
 
+    public GraphQLBuilderConfig(boolean englishPlural) {
+        this.englishPlural = englishPlural;
+    }
+
     public boolean isEnglishPlural() {
         return englishPlural;
     }

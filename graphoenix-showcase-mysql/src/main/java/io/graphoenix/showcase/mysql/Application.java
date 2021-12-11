@@ -24,8 +24,8 @@ public class Application {
 //    String basePackageName;
 //    @ConfigProperty(name = "generator.b")
 //    List<Integer> b;
-    @ConfigProperty(name = "generator")
-    Map<String,Object> generator;
+    @ConfigProperty(name = "generator.sex")
+    Sex sex;
 
     public static void main(String[] args) throws Exception {
         new Application().run();

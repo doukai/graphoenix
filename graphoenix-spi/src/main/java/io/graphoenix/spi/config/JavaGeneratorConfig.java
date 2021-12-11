@@ -24,6 +24,33 @@ public class JavaGeneratorConfig {
 
     private String graphQLPath;
 
+    public JavaGeneratorConfig() {
+    }
+
+    public JavaGeneratorConfig(String basePackageName,
+                               String objectTypePackageName,
+                               String interfaceTypePackageName,
+                               String unionTypePackageName,
+                               String enumTypePackageName,
+                               String inputObjectTypePackageName,
+                               String directivePackageName,
+                               String annotationPackageName,
+                               String graphQL,
+                               String graphQLFileName,
+                               String graphQLPath) {
+        this.basePackageName = basePackageName;
+        this.objectTypePackageName = objectTypePackageName;
+        this.interfaceTypePackageName = interfaceTypePackageName;
+        this.unionTypePackageName = unionTypePackageName;
+        this.enumTypePackageName = enumTypePackageName;
+        this.inputObjectTypePackageName = inputObjectTypePackageName;
+        this.directivePackageName = directivePackageName;
+        this.annotationPackageName = annotationPackageName;
+        this.graphQL = graphQL;
+        this.graphQLFileName = graphQLFileName;
+        this.graphQLPath = graphQLPath;
+    }
+
     public String getBasePackageName() {
         return basePackageName;
     }
