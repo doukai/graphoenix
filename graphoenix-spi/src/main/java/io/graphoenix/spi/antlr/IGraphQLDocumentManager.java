@@ -2,6 +2,7 @@ package io.graphoenix.spi.antlr;
 
 import graphql.parser.antlr.GraphqlParser;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -10,11 +11,11 @@ import java.util.stream.Stream;
 
 public interface IGraphQLDocumentManager {
 
-    void registerDocument(String graphql);
+    void registerGraphQL(String graphQL);
 
-    void registerDocument(InputStream inputStream) throws IOException;
+    void registerInputStream(InputStream inputStream) throws IOException;
 
-    void registerFile(String graphqlFileName) throws IOException;
+    void registerFile(File graphqlFile) throws IOException;
 
     void registerPath(Path graphqlPath) throws IOException;
 

@@ -1,4 +1,4 @@
-package io.graphoenix.http.server.handler;
+package io.graphoenix.http.handler;
 
 import com.google.gson.Gson;
 import io.graphoenix.spi.dto.GraphQLRequest;

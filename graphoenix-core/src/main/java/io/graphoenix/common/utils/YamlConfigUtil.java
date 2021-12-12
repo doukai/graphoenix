@@ -1,6 +1,6 @@
 package io.graphoenix.common.utils;
 
-import io.graphoenix.common.constant.Hammurabi;
+import io.graphoenix.spi.constant.Hammurabi;
 
 import java.io.*;
 
@@ -9,8 +9,7 @@ public enum YamlConfigUtil {
     YAML_CONFIG_UTIL;
 
     public <T> T loadAs(Class<T> type) {
-        String name = Hammurabi.CONFIG_FILE_NAME;
-        return loadAs(name, type);
+        return loadAs("name", type);
     }
 
     public <T> T loadAs(String name, Class<T> type) {

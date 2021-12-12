@@ -1,5 +1,8 @@
 package io.graphoenix.spi.config;
 
+import org.eclipse.microprofile.config.inject.ConfigProperties;
+
+@ConfigProperties(prefix = "codegen.java")
 public class JavaGeneratorConfig {
 
     private String basePackageName;

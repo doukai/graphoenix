@@ -23,8 +23,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.common.constant.Hammurabi.DEPRECATED_FIELD_NAME;
-import static io.graphoenix.common.constant.Hammurabi.DEPRECATED_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_INPUT_NAME;
 import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.*;

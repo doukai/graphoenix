@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -15,6 +16,9 @@ import java.util.Optional;
 public enum DocumentUtil {
 
     DOCUMENT_UTIL;
+    ThrowingFunction<InputStream, CharStream, IOException> fromStream = CharStreams::fromStream;
+    ThrowingFunction<String, CharStream, IOException> fromFileName = CharStreams::fromFileName;
+    ThrowingFunction<Path, CharStream, IOException> fromPath = CharStreams::fromPath;
 
     public GraphqlParser.DocumentContext graphqlToDocument(String graphql) {
         CodePointCharStream charStream;
@@ -28,9 +32,8 @@ public enum DocumentUtil {
         return graphqlToDocument(charStream);
     }
 
-    public Optional<GraphqlParser.DocumentContext> graphqlTryToDocument(InputStream inputStream) {
-        ThrowingFunction<InputStream, CharStream, IOException> fromFileName = CharStreams::fromStream;
-        return fromFileName.lift().apply(inputStream).map(this::graphqlToDocument);
+    public GraphqlParser.DocumentContext graphqlTryToDocument(InputStream inputStream) {
+        return graphqlToDocument(fromStream.uncheck().apply(inputStream));
     }
 
     public GraphqlParser.OperationDefinitionContext graphqlToOperation(InputStream inputStream) throws IOException {
@@ -39,20 +42,18 @@ public enum DocumentUtil {
         return graphqlToOperation(charStream);
     }
 
-    public Optional<GraphqlParser.OperationDefinitionContext> graphqlTryToOperation(InputStream inputStream) {
-        ThrowingFunction<InputStream, CharStream, IOException> fromFileName = CharStreams::fromStream;
-        return fromFileName.lift().apply(inputStream).map(this::graphqlToOperation);
+    public GraphqlParser.OperationDefinitionContext graphqlTryToOperation(InputStream inputStream) {
+        return graphqlToOperation(fromStream.uncheck().apply(inputStream));
     }
 
-    public GraphqlParser.DocumentContext graphqlFileToDocument(String graphqlFileName) throws IOException {
+    public GraphqlParser.DocumentContext graphqlFileToDocument(File graphqlFile) throws IOException {
         CharStream charStream;
-        charStream = CharStreams.fromFileName(graphqlFileName);
+        charStream = CharStreams.fromFileName(graphqlFile.getName());
         return graphqlToDocument(charStream);
     }
 
-    public Optional<GraphqlParser.DocumentContext> graphqlFileTryToDocument(String graphqlFileName) {
-        ThrowingFunction<String, CharStream, IOException> fromFileName = CharStreams::fromFileName;
-        return fromFileName.lift().apply(graphqlFileName).map(this::graphqlToDocument);
+    public GraphqlParser.DocumentContext graphqlFileTryToDocument(String graphqlFileName) {
+        return graphqlToDocument(fromFileName.uncheck().apply(graphqlFileName));
     }
 
 
@@ -62,9 +63,8 @@ public enum DocumentUtil {
         return graphqlToDocument(charStream);
     }
 
-    public Optional<GraphqlParser.DocumentContext> graphqlPathTryToDocument(Path graphqlPath) {
-        ThrowingFunction<Path, CharStream, IOException> fromFileName = CharStreams::fromPath;
-        return fromFileName.lift().apply(graphqlPath).map(this::graphqlToDocument);
+    public GraphqlParser.DocumentContext graphqlPathTryToDocument(Path graphqlPath) {
+        return graphqlToDocument(fromPath.uncheck().apply(graphqlPath));
     }
 
     public GraphqlParser.OperationDefinitionContext graphqlToOperation(String graphql) {

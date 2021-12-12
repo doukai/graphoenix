@@ -2,7 +2,6 @@ package io.graphoenix.r2dbc.connector.module;
 
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.common.constant.Hammurabi;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
@@ -13,27 +12,20 @@ import io.graphoenix.r2dbc.connector.handler.bootstrap.IntrospectionMutationExec
 import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
 import io.graphoenix.spi.config.R2DBCConfig;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
-import static io.graphoenix.common.utils.YamlConfigUtil.YAML_CONFIG_UTIL;
 
 @Module
 public class R2dbcConnectorModule {
 
-    @Provides
-    @Singleton
-    public R2DBCConfig config() {
-        return YAML_CONFIG_UTIL.loadAs(R2DBCConfig.class);
-    }
+    @ConfigProperty
+    public R2DBCConfig r2DBCConfig;
 
     @Provides
     @Singleton
     public IConnectionCreator connectionCreator() {
-        return new ConnectionCreator(config());
+        return new ConnectionCreator(r2DBCConfig);
     }
 
     @Provides

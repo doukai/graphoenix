@@ -18,8 +18,8 @@ public class IntrospectionRegisterHandler implements IBootstrapHandler {
 
     @Override
     public boolean execute(IPipelineContext context) throws IOException {
-        manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/preset.gql"));
-        manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/introspectionTypes.gql"));
+        manager.registerInputStream(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/preset.gql"));
+        manager.registerInputStream(this.getClass().getClassLoader().getResourceAsStream("graphql/mysql/introspectionTypes.gql"));
         return false;
     }
 }

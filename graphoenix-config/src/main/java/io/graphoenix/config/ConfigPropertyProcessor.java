@@ -2,6 +2,7 @@ package io.graphoenix.config;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
+import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import spoon.processing.AbstractAnnotationProcessor;
 import spoon.reflect.code.CtExpression;
@@ -14,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.config.CompileConfig.COMPILE_CONFIG;
+import static io.graphoenix.config.ConfigUtil.CONFIG_UTil;
 
 public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigProperty, CtField<Object>> {
 
@@ -35,15 +36,14 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
 
     @Override
     public void process(ConfigProperty annotation, CtField<Object> element) {
-        Config config = COMPILE_CONFIG.getConfig();
-        CtAnnotation<? extends Annotation> configProperty = element.getAnnotations().stream()
+        Config config = CONFIG_UTil.getConfig();
+        String configKey = element.getAnnotations().stream()
                 .filter(ctAnnotation -> ctAnnotation.getName().equals(ConfigProperty.class.getSimpleName()))
                 .findFirst()
-                .orElseThrow();
+                .map(ctAnnotation -> ctAnnotation.getValueAsString("name"))
+                .orElseGet(() -> element.getType().getAnnotation(ConfigProperties.class).prefix());
 
-        String configKey = configProperty.getValueAsString("name");
         CtTypeReference<Object> type = element.getType();
-
         element.setDefaultExpression(typeToExpression(type, config, configKey));
     }
 

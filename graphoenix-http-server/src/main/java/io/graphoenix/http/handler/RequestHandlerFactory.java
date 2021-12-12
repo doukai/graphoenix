@@ -1,4 +1,4 @@
-package io.graphoenix.http.server.handler;
+package io.graphoenix.http.handler;
 
 import io.netty.handler.codec.http.HttpMethod;
 

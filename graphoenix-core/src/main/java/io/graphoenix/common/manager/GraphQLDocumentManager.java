@@ -3,6 +3,7 @@ package io.graphoenix.common.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -64,18 +65,18 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public void registerDocument(String graphql) {
-        registerDocument(DOCUMENT_UTIL.graphqlToDocument(graphql));
+    public void registerGraphQL(String graphQL) {
+        registerDocument(DOCUMENT_UTIL.graphqlToDocument(graphQL));
     }
 
     @Override
-    public void registerDocument(InputStream inputStream) throws IOException {
+    public void registerInputStream(InputStream inputStream) throws IOException {
         registerDocument(DOCUMENT_UTIL.graphqlToDocument(inputStream));
     }
 
     @Override
-    public void registerFile(String graphqlFileName) throws IOException {
-        registerDocument(DOCUMENT_UTIL.graphqlFileToDocument(graphqlFileName));
+    public void registerFile(File graphqlFile) throws IOException {
+        registerDocument(DOCUMENT_UTIL.graphqlFileToDocument(graphqlFile));
     }
 
     @Override

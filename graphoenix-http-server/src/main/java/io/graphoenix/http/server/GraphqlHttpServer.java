@@ -14,11 +14,10 @@ import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
 
 public class GraphqlHttpServer {
 
@@ -28,28 +27,16 @@ public class GraphqlHttpServer {
 
     private final HttpServerConfig httpServerConfig;
 
-    private final GraphQLDataFetcher dataFetcher;
+    private final GraphqlHttpServerInitializer graphqlHttpServerInitializer;
 
-    public GraphqlHttpServer(NettyConfig nettyConfig, HttpServerConfig httpServerConfig, GraphQLDataFetcher dataFetcher) {
+    @Inject
+    public GraphqlHttpServer(NettyConfig nettyConfig, HttpServerConfig httpServerConfig, GraphqlHttpServerInitializer graphqlHttpServerInitializer) {
         this.nettyConfig = nettyConfig;
         this.httpServerConfig = httpServerConfig;
-        this.dataFetcher = dataFetcher;
-    }
-
-    public GraphqlHttpServer(GraphQLDataFetcher dataFetcher) {
-        this(new NettyConfig(), new HttpServerConfig(), dataFetcher);
+        this.graphqlHttpServerInitializer = graphqlHttpServerInitializer;
     }
 
     public void run() throws Exception {
-
-        // Configure SSL.
-        final SslContext sslCtx;
-        if (httpServerConfig.isSsl()) {
-            SelfSignedCertificate ssc = new SelfSignedCertificate();
-            sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();
-        } else {
-            sslCtx = null;
-        }
 
         EventLoopGroup bossGroup;
         EventLoopGroup workerGroup;
@@ -77,7 +64,7 @@ public class GraphqlHttpServer {
                     //表示系统用于临时存放已完成三次握手的请求的队列的最大长度,如果连接建立频繁，服务器处理创建新连接较慢，可以适当调大这个参数
                     .option(ChannelOption.SO_BACKLOG, httpServerConfig.getSoBackLog())
                     .handler(new LoggingHandler(LogLevel.INFO))
-                    .childHandler(new GraphqlHttpServerInitializer(sslCtx, dataFetcher));
+                    .childHandler(graphqlHttpServerInitializer);
 
             Channel ch = b.bind(httpServerConfig.getPort()).sync().channel();
 

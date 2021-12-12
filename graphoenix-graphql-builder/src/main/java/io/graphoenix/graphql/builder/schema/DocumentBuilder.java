@@ -7,12 +7,15 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.antlr.v4.runtime.RuleContext;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.common.constant.Hammurabi.META_INTERFACE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
 
 public class DocumentBuilder {
 
@@ -26,8 +29,32 @@ public class DocumentBuilder {
         this.metaInterfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElse(null);
     }
 
+    public DocumentBuilder registerGraphQL(String graphQL) {
+        manager.registerGraphQL(graphQL);
+        return this;
+    }
+
+    public DocumentBuilder registerInputStream(InputStream inputStream) throws IOException {
+        manager.registerInputStream(inputStream);
+        return this;
+    }
+
+    public DocumentBuilder registerFile(File graphqlFile) throws IOException {
+        manager.registerFile(graphqlFile);
+        return this;
+    }
+
+    public DocumentBuilder registerPath(Path graphqlPath) throws IOException {
+        manager.registerPath(graphqlPath);
+        return this;
+    }
+
+    public void buildManager() throws IOException {
+        manager.registerGraphQL(buildDocument().toString());
+    }
+
     public Document buildDocument() throws IOException {
-        manager.registerDocument(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
+        manager.registerInputStream(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         ObjectType queryType;
         if (queryOperationTypeDefinition.isPresent()) {

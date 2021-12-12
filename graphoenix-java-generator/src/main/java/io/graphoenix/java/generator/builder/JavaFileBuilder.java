@@ -6,8 +6,11 @@ import io.graphoenix.spi.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import one.util.streamex.StreamEx;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -15,11 +18,14 @@ public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final JavaGeneratorConfig configuration;
+    private final TypeSpecBuilder typeSpecBuilder;
     private final ThrowingBiConsumer<JavaFile, File, IOException> JavaFileWriteTo = JavaFile::writeTo;
 
-    public JavaFileBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
+    @Inject
+    public JavaFileBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration, TypeSpecBuilder typeSpecBuilder) {
         this.manager = manager;
         this.configuration = configuration;
+        this.typeSpecBuilder = typeSpecBuilder;
     }
 
     public void writeToPath(File path) {
@@ -27,8 +33,6 @@ public class JavaFileBuilder {
     }
 
     public Stream<JavaFile> buildJavaFileList() {
-
-        TypeSpecBuilder typeSpecBuilder = new TypeSpecBuilder(manager, configuration);
 
         return StreamEx.of(manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()))
                 .append(manager.getDirectives()

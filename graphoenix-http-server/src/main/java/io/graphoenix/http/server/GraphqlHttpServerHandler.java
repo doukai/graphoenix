@@ -3,8 +3,8 @@ package io.graphoenix.http.server;
 import com.google.common.net.MediaType;
 import io.graphoenix.common.error.GraphQLProblem;
 import io.graphoenix.common.pipeline.GraphQLDataFetcher;
-import io.graphoenix.http.server.handler.RequestHandler;
-import io.graphoenix.http.server.handler.RequestHandlerFactory;
+import io.graphoenix.http.handler.RequestHandler;
+import io.graphoenix.http.handler.RequestHandlerFactory;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.dto.GraphQLResponse;
 import io.netty.buffer.Unpooled;
@@ -20,6 +20,7 @@ import io.netty.handler.codec.http.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 
 import static io.graphoenix.common.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
@@ -38,6 +39,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
     private final GraphQLDataFetcher dataFetcher;
 
+    @Inject
     public GraphqlHttpServerHandler(GraphQLDataFetcher dataFetcher) {
         this.dataFetcher = dataFetcher;
     }

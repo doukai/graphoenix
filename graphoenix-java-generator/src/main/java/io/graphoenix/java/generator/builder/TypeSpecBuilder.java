@@ -11,6 +11,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.eclipse.microprofile.graphql.*;
 import org.eclipse.microprofile.graphql.Enum;
 
+import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import java.lang.annotation.*;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class TypeSpecBuilder {
     private final IGraphQLDocumentManager manager;
     private final JavaGeneratorConfig configuration;
 
+    @Inject
     public TypeSpecBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
         this.manager = manager;
         this.configuration = configuration;

@@ -1,7 +1,6 @@
 package io.graphoenix.graphql.builder.handler.bootstrap;
 
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IPipelineContext;
 
@@ -10,18 +9,16 @@ import java.io.IOException;
 
 public class DocumentBuildHandler implements IBootstrapHandler {
 
-    private final IGraphQLDocumentManager manager;
     private final DocumentBuilder documentBuilder;
 
     @Inject
-    public DocumentBuildHandler(IGraphQLDocumentManager manager, DocumentBuilder documentBuilder) {
-        this.manager = manager;
+    public DocumentBuildHandler( DocumentBuilder documentBuilder) {
         this.documentBuilder = documentBuilder;
     }
 
     @Override
     public boolean execute(IPipelineContext context) throws IOException {
-        manager.registerDocument(documentBuilder.buildDocument().toString());
+        documentBuilder.buildManager();
         return false;
     }
 }

@@ -1,8 +1,7 @@
 package graphoenix.annotation.processor;
 
 import com.google.auto.service.AutoService;
-import com.pivovarit.function.ThrowingBiConsumer;
-import com.pivovarit.function.ThrowingBiFunction;
+import com.pivovarit.function.ThrowingConsumer;
 import io.graphoenix.common.pipeline.DaggerGraphQLCodeGeneratorFactory;
 import io.graphoenix.common.pipeline.GraphQLCodeGenerator;
 import io.graphoenix.graphql.generator.translator.DaggerJavaElementToOperationFactory;
@@ -26,7 +25,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.config.CompileConfig.COMPILE_CONFIG;
+import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
+import static io.graphoenix.config.ConfigUtil.CONFIG_UTil;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphQLOperation")
 @AutoService(Processor.class)
@@ -95,16 +95,15 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                                 .addBootstrapHandlers(bootstrapHandlers)
                                 .addOperationHandlers(pretreatmentHandlers);
 
-                        String resourcesPath = System.getProperty("user.dir").concat(File.separator).concat("src").concat(File.separator).concat("main").concat(File.separator).concat("resources").concat(File.separator);
-                        JavaGeneratorConfig javaGeneratorConfig = COMPILE_CONFIG.getValue("generator", JavaGeneratorConfig.class);
+                        JavaGeneratorConfig javaGeneratorConfig = CONFIG_UTil.getValue(JavaGeneratorConfig.class);
 
                         if (javaGeneratorConfig.getGraphQL() != null) {
-                            generator.registerDocument(javaGeneratorConfig.getGraphQL());
+                            generator.registerGraphQL(javaGeneratorConfig.getGraphQL());
                         } else if (javaGeneratorConfig.getGraphQLFileName() != null) {
-                            URI graphQLFileUri = new File(resourcesPath.concat(javaGeneratorConfig.getGraphQLFileName())).toURI();
-                            generator.registerDocument(graphQLFileUri.toURL().openStream());
+                            URI graphQLFileUri = new File(RESOURCES_PATH.concat(javaGeneratorConfig.getGraphQLFileName())).toURI();
+                            generator.registerInputStream(graphQLFileUri.toURL().openStream());
                         } else if (javaGeneratorConfig.getGraphQLPath() != null) {
-                            URI graphQLPathUri = new File(resourcesPath.concat(javaGeneratorConfig.getGraphQLPath())).toURI();
+                            URI graphQLPathUri = new File(RESOURCES_PATH.concat(javaGeneratorConfig.getGraphQLPath())).toURI();
                             generator.registerPath(Paths.get(graphQLPathUri));
                         }
 
@@ -114,8 +113,8 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                         JavaElementToOperation javaElementToOperation = DaggerJavaElementToOperationFactory.create().build();
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
 
-                        ThrowingBiFunction<GraphQLCodeGenerator, String, String, Exception> generatorPretreatment = GraphQLCodeGenerator::generate;
-                        ThrowingBiConsumer<Filer, Map.Entry<String, String>, IOException> createResource = (filer, entry) -> {
+                        ThrowingConsumer<Map.Entry<String, String>, IOException> createResource = (entry) -> {
+                            Filer filer = processingEnv.getFiler();
                             FileObject fileObject = filer.createResource(
                                     StandardLocation.SOURCE_OUTPUT,
                                     packageElement.getQualifiedName(),
@@ -132,9 +131,9 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
 
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors
-                                        .toMap(Map.Entry::getKey, entry -> generatorPretreatment.unchecked().apply(generator, entry.getValue())))
+                                        .toMap(Map.Entry::getKey, entry -> generator.tryGenerate(entry.getValue())))
                                 .entrySet()
-                                .forEach(entry -> createResource.asFunction().unchecked().apply(processingEnv.getFiler(), entry));
+                                .forEach(entry -> createResource.asFunction().uncheck().apply(entry));
 
                         OperationInterfaceImplementer implementer = new OperationInterfaceImplementer();
                         implementer.writeToFiler(packageElement, typeElement, executeHandlers, suffix, useInject, processingEnv.getFiler());

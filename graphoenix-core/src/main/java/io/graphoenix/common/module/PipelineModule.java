@@ -29,26 +29,4 @@ public class PipelineModule {
     GraphQLCodeGenerator graphQLCodeGenerator(IGraphQLDocumentManager manager) {
         return new GraphQLCodeGenerator(manager, operationRouter(manager));
     }
-
-     class test{
-        private int a = 0;
-        private String b = "3";
-
-        public int getA() {
-            return a;
-        }
-
-        public void setA(int a) {
-            this.a = a;
-        }
-
-        public String getB() {
-            return b;
-        }
-
-        public void setB(String b) {
-            this.b = b;
-        }
-    }
-
 }

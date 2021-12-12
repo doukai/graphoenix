@@ -29,7 +29,7 @@ public class GraphQLBuilderModule {
     @Provides
     @Singleton
     public DocumentBuildHandler documentBuildHandler(IGraphQLDocumentManager manager) {
-        return new DocumentBuildHandler(manager, documentBuilder(manager));
+        return new DocumentBuildHandler(documentBuilder(manager));
     }
 
     @Provides

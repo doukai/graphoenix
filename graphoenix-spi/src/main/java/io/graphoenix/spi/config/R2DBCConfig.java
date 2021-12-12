@@ -1,5 +1,8 @@
 package io.graphoenix.spi.config;
 
+import org.eclipse.microprofile.config.inject.ConfigProperties;
+
+@ConfigProperties(prefix = "r2dbc")
 public class R2DBCConfig {
     private String driver;
     private String protocol = "pipes";

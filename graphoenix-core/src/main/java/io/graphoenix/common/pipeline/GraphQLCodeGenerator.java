@@ -1,5 +1,6 @@
 package io.graphoenix.common.pipeline;
 
+import com.pivovarit.function.ThrowingFunction;
 import io.graphoenix.common.pipeline.bootstrap.BootstrapPipeline;
 import io.graphoenix.common.pipeline.operation.OperationPipeline;
 import io.graphoenix.common.pipeline.operation.OperationRouter;
@@ -8,6 +9,7 @@ import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -30,18 +32,18 @@ public class GraphQLCodeGenerator {
         this.router = router;
     }
 
-    public GraphQLCodeGenerator registerDocument(String graphQL) {
-        manager.registerDocument(graphQL);
+    public GraphQLCodeGenerator registerGraphQL(String graphQL) {
+        manager.registerGraphQL(graphQL);
         return this;
     }
 
-    public GraphQLCodeGenerator registerDocument(InputStream inputStream) throws IOException {
-        manager.registerDocument(inputStream);
+    public GraphQLCodeGenerator registerInputStream(InputStream inputStream) throws IOException {
+        manager.registerInputStream(inputStream);
         return this;
     }
 
-    public GraphQLCodeGenerator registerFile(String graphqlFileName) throws IOException {
-        manager.registerFile(graphqlFileName);
+    public GraphQLCodeGenerator registerFile(File graphqlFile) throws IOException {
+        manager.registerFile(graphqlFile);
         return this;
     }
 
@@ -81,6 +83,11 @@ public class GraphQLCodeGenerator {
 
     public String generate(String graphQL) throws Exception {
         return this.createOperationPipeline().fetch(graphQL, String.class);
+    }
+
+    public String tryGenerate(String graphQL) {
+        ThrowingFunction<String, String, Exception> generate = this::generate;
+        return generate.uncheck().apply(graphQL);
     }
 
     private OperationPipeline createOperationPipeline() {
