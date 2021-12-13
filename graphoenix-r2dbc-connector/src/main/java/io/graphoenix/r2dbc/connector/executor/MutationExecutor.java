@@ -1,7 +1,7 @@
 package io.graphoenix.r2dbc.connector.executor;
 
 import com.google.common.collect.Lists;
-import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
+import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.r2dbc.spi.Batch;
 import io.r2dbc.spi.Statement;
 import org.slf4j.Logger;
@@ -19,10 +19,10 @@ public class MutationExecutor {
 
     private static final Logger log = LoggerFactory.getLogger(MutationExecutor.class);
 
-    private final IConnectionCreator connectionCreator;
+    private final ConnectionCreator connectionCreator;
 
     @Inject
-    public MutationExecutor(IConnectionCreator connectionCreator) {
+    public MutationExecutor(ConnectionCreator connectionCreator) {
         this.connectionCreator = connectionCreator;
     }
 
@@ -74,12 +74,12 @@ public class MutationExecutor {
                 .flatMap(connection -> {
                     connection.beginTransaction();
                     return Flux.fromStream(sqlStream
-                                    .map(sql -> {
-                                                Statement statement = connection.createStatement(sql);
-                                                parameters.forEach(statement::bind);
-                                                return statement;
-                                            }
-                                    ))
+                            .map(sql -> {
+                                        Statement statement = connection.createStatement(sql);
+                                        parameters.forEach(statement::bind);
+                                        return statement;
+                                    }
+                            ))
                             .flatMap(Statement::execute)
                             .flatMap(result -> result.map((row, rowMetadata) -> row.get(0, String.class)))
                             .last()

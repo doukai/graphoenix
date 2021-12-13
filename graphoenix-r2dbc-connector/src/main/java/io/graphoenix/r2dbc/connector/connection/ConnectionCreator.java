@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
 
-public class ConnectionCreator implements IConnectionCreator {
+public class ConnectionCreator {
 
     private final ConnectionFactoryCreator connectionFactoryCreator;
     private final ConnectionPoolCreator connectionPoolCreator;
@@ -19,7 +19,6 @@ public class ConnectionCreator implements IConnectionCreator {
         this.r2DBCConfig = r2DBCConfig;
     }
 
-    @Override
     public Mono<Connection> createConnection() {
         if (r2DBCConfig.getUsePool()) {
             return Mono.from(connectionPoolCreator.createConnectionPool().create());

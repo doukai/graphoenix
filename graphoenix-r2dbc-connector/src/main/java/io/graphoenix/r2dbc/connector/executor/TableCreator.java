@@ -1,7 +1,6 @@
 package io.graphoenix.r2dbc.connector.executor;
 
-import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
-import io.r2dbc.spi.Batch;
+import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
@@ -9,10 +8,10 @@ import java.util.stream.Stream;
 
 public class TableCreator {
 
-    private final IConnectionCreator connectionCreator;
+    private final ConnectionCreator connectionCreator;
 
     @Inject
-    public TableCreator(IConnectionCreator connectionCreator) {
+    public TableCreator(ConnectionCreator connectionCreator) {
         this.connectionCreator = connectionCreator;
     }
 

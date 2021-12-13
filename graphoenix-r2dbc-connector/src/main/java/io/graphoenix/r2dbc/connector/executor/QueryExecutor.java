@@ -1,6 +1,6 @@
 package io.graphoenix.r2dbc.connector.executor;
 
-import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
+import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.r2dbc.spi.Statement;
 import org.javatuples.Pair;
 import reactor.core.publisher.Flux;
@@ -12,24 +12,23 @@ import java.util.stream.Stream;
 
 public class QueryExecutor {
 
-    private final IConnectionCreator connectionCreator;
+    private final ConnectionCreator connectionCreator;
 
     @Inject
-    public QueryExecutor(IConnectionCreator connectionCreator) {
+    public QueryExecutor(ConnectionCreator connectionCreator) {
         this.connectionCreator = connectionCreator;
     }
 
     public Mono<String> executeQuery(String sql, Map<String, Object> parameters) {
-        return null;
-//        return connectionCreator.createConnection()
-//                .flatMap(connection -> {
-//                            Statement statement = connection.createStatement(sql);
-//                            parameters.forEach(statement::bind);
-//                            return Mono.from(statement.execute())
-//                                    .doFinally(signalType -> connection.close());
-//                        }
-//                )
-//                .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))));
+        return connectionCreator.createConnection()
+                .flatMap(connection -> {
+                            Statement statement = connection.createStatement(sql);
+                            parameters.forEach(statement::bind);
+                            return Mono.from(statement.execute())
+                                    .doFinally(signalType -> connection.close());
+                        }
+                )
+                .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))));
     }
 
 

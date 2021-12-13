@@ -35,7 +35,7 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
     public void init() {
         super.init();
         Environment environment = getEnvironment();
-//        environment.setAutoImports(true);
+        environment.setAutoImports(true);
         environment.setEncoding(StandardCharsets.UTF_8);
 
         collectionTypeReference = getFactory().Type().createReference(Collection.class);
@@ -48,7 +48,7 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
     public void process(ConfigProperty annotation, CtField<Object> element) {
         Config config = CONFIG_UTil.getConfig();
         String configKey = element.getAnnotations().stream()
-                .filter(ctAnnotation -> ctAnnotation.getName().equals(ConfigProperty.class.getSimpleName()))
+                .filter(ctAnnotation -> ctAnnotation.getType().getSimpleName().equals(ConfigProperty.class.getSimpleName()))
                 .filter(ctAnnotation -> !ctAnnotation.getValueAsString("name").equals(""))
                 .findFirst()
                 .map(ctAnnotation -> ctAnnotation.getValueAsString("name"))

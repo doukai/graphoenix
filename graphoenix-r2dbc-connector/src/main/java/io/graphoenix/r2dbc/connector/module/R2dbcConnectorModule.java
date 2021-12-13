@@ -5,7 +5,6 @@ import dagger.Provides;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.graphoenix.r2dbc.connector.connection.ConnectionFactoryCreator;
 import io.graphoenix.r2dbc.connector.connection.ConnectionPoolCreator;
-import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.executor.TableCreator;
@@ -38,7 +37,7 @@ public class R2dbcConnectorModule {
 
     @Provides
     @Singleton
-    public IConnectionCreator connectionCreator() {
+    public ConnectionCreator connectionCreator() {
         return new ConnectionCreator(connectionFactoryCreator(), connectionPoolCreator(), r2dbcConfig);
     }
 
