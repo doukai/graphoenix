@@ -4,6 +4,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigValue;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import spoon.compiler.Environment;
 import spoon.processing.AbstractAnnotationProcessor;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtNewArray;
@@ -11,6 +12,7 @@ import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.lang.annotation.Annotation;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,9 +27,17 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
     private CtTypeReference<?> stringTypeReference;
 
     @Override
+    public boolean shoudBeConsumed(CtAnnotation<? extends Annotation> annotation) {
+        return super.shoudBeConsumed(annotation);
+    }
+
+    @Override
     public void init() {
         super.init();
-        getEnvironment().setAutoImports(true);
+        Environment environment = getEnvironment();
+//        environment.setAutoImports(true);
+        environment.setEncoding(StandardCharsets.UTF_8);
+
         collectionTypeReference = getFactory().Type().createReference(Collection.class);
         setTypeReference = getFactory().Type().createReference(Set.class);
         mapTypeReference = getFactory().Type().createReference(Map.class);
@@ -39,9 +49,10 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
         Config config = CONFIG_UTil.getConfig();
         String configKey = element.getAnnotations().stream()
                 .filter(ctAnnotation -> ctAnnotation.getName().equals(ConfigProperty.class.getSimpleName()))
+                .filter(ctAnnotation -> !ctAnnotation.getValueAsString("name").equals(""))
                 .findFirst()
                 .map(ctAnnotation -> ctAnnotation.getValueAsString("name"))
-                .orElseGet(() -> element.getType().getAnnotation(ConfigProperties.class).prefix());
+                .orElseGet(() -> element.getType().getTypeDeclaration().getAnnotation(ConfigProperties.class).prefix());
 
         CtTypeReference<Object> type = element.getType();
         element.setDefaultExpression(typeToExpression(type, config, configKey));
@@ -49,7 +60,7 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
 
     @SuppressWarnings("unchecked")
     private CtExpression<Object> typeToExpression(CtTypeReference<Object> type, Config config, String configKey) {
-        if (type.isPrimitive() || type.isSubtypeOf(stringTypeReference)) {
+        if (type.isPrimitive() || type.unbox().isPrimitive() || type.isSubtypeOf(stringTypeReference)) {
             return getFactory().createCodeSnippetExpression(config.hasPath(configKey) ? config.getValue(configKey).render() : "null");
         } else if (type.isArray()) {
             CtNewArray<Object> newArray = getFactory().createNewArray();

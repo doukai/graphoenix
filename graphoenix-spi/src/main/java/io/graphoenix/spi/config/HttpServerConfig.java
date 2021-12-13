@@ -6,16 +6,13 @@ import org.eclipse.microprofile.config.inject.ConfigProperties;
 public class HttpServerConfig {
 
     private String graphqlContextPath = "graphql";
-    private boolean ssl;
-    private boolean tcpNoDelay = true;
-    private boolean soKeepAlive;
-    private int soBackLog = 128;
-    private int port = 8080;
+    private Boolean ssl;
+    private Boolean tcpNoDelay = true;
+    private Boolean soKeepAlive;
+    private Integer soBackLog = 128;
+    private Integer port = 8080;
 
-    public HttpServerConfig() {
-    }
-
-    public HttpServerConfig(String graphqlContextPath, boolean ssl, boolean tcpNoDelay, boolean soKeepAlive, int soBackLog, int port) {
+    public HttpServerConfig(String graphqlContextPath, Boolean ssl, Boolean tcpNoDelay, Boolean soKeepAlive, Integer soBackLog, Integer port) {
         this.graphqlContextPath = graphqlContextPath;
         this.ssl = ssl;
         this.tcpNoDelay = tcpNoDelay;
@@ -32,43 +29,43 @@ public class HttpServerConfig {
         this.graphqlContextPath = graphqlContextPath;
     }
 
-    public boolean isSsl() {
+    public Boolean getSsl() {
         return ssl;
     }
 
-    public void setSsl(boolean ssl) {
+    public void setSsl(Boolean ssl) {
         this.ssl = ssl;
     }
 
-    public boolean isTcpNoDelay() {
+    public Boolean getTcpNoDelay() {
         return tcpNoDelay;
     }
 
-    public void setTcpNoDelay(boolean tcpNoDelay) {
+    public void setTcpNoDelay(Boolean tcpNoDelay) {
         this.tcpNoDelay = tcpNoDelay;
     }
 
-    public boolean isSoKeepAlive() {
+    public Boolean getSoKeepAlive() {
         return soKeepAlive;
     }
 
-    public void setSoKeepAlive(boolean soKeepAlive) {
+    public void setSoKeepAlive(Boolean soKeepAlive) {
         this.soKeepAlive = soKeepAlive;
     }
 
-    public int getSoBackLog() {
+    public Integer getSoBackLog() {
         return soBackLog;
     }
 
-    public void setSoBackLog(int soBackLog) {
+    public void setSoBackLog(Integer soBackLog) {
         this.soBackLog = soBackLog;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(Integer port) {
         this.port = port;
     }
 }

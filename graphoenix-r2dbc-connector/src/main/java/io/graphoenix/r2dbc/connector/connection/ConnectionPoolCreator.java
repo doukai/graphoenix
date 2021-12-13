@@ -4,18 +4,24 @@ import io.graphoenix.spi.config.R2DBCConfig;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 
+import javax.inject.Inject;
 import java.time.Duration;
 
-import static io.graphoenix.r2dbc.connector.connection.ConnectionFactoryCreator.FACTORY_CREATOR;
+public class ConnectionPoolCreator {
 
-public enum ConnectionPoolCreator {
+    private final ConnectionFactoryCreator connectionFactoryCreator;
+    private final R2DBCConfig r2DBCConfig;
 
-    CONNECTION_POOL_CREATOR;
+    @Inject
+    public ConnectionPoolCreator(ConnectionFactoryCreator connectionFactoryCreator, R2DBCConfig r2DBCConfig) {
+        this.connectionFactoryCreator = connectionFactoryCreator;
+        this.r2DBCConfig = r2DBCConfig;
+    }
 
-    public ConnectionPool createConnectionPool(R2DBCConfig r2DBCConfig) {
+    public ConnectionPool createConnectionPool() {
 
         ConnectionPoolConfiguration poolConfiguration = ConnectionPoolConfiguration
-                .builder(FACTORY_CREATOR.createFactory(r2DBCConfig))
+                .builder(connectionFactoryCreator.createFactory())
                 .maxIdleTime(Duration.ofMillis(r2DBCConfig.getPoolMaxIdleTime()))
                 .maxSize(r2DBCConfig.getPoolMaxSize())
                 .build();

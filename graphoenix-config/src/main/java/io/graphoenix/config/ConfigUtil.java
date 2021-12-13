@@ -10,19 +10,18 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
-import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
-
 public enum ConfigUtil {
     CONFIG_UTil;
+    private static final String RESOURCES_PATH = System.getProperty("user.dir").concat(File.separator).concat("src").concat(File.separator).concat("main").concat(File.separator).concat("resources").concat(File.separator);
     private static final String[] configNames = {"application.conf", "application.json", "application.properties", "reference.conf"};
     private static final Config config;
 
     static {
         config = Arrays.stream(Objects.requireNonNull(new File(RESOURCES_PATH).listFiles()))
                 .filter(file -> Arrays.asList(configNames).contains(file.getName()))
-                .map(ConfigFactory::parseFile)
                 .findFirst()
-                .orElseThrow();
+                .map(ConfigFactory::parseFile)
+                .orElseGet(ConfigFactory::load);
     }
 
     public Config getConfig() {

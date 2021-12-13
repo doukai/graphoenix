@@ -5,11 +5,15 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 
-public enum ConnectionFactoryCreator {
+public class ConnectionFactoryCreator {
 
-    FACTORY_CREATOR;
+    private final R2DBCConfig r2DBCConfig;
 
-    public ConnectionFactory createFactory(R2DBCConfig r2DBCConfig) {
+    public ConnectionFactoryCreator(R2DBCConfig r2DBCConfig) {
+        this.r2DBCConfig = r2DBCConfig;
+    }
+
+    public ConnectionFactory createFactory() {
 
         ConnectionFactoryOptions options = ConnectionFactoryOptions.builder()
                 .option(ConnectionFactoryOptions.DRIVER, r2DBCConfig.getDriver())

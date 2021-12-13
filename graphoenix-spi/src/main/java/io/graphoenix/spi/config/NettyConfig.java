@@ -5,20 +5,17 @@ import org.eclipse.microprofile.config.inject.ConfigProperties;
 @ConfigProperties(prefix = "netty")
 public class NettyConfig {
 
-    private boolean epoll;
+    private Boolean epoll;
 
-    public NettyConfig() {
-    }
-
-    public NettyConfig(boolean epoll) {
+    public NettyConfig(Boolean epoll) {
         this.epoll = epoll;
     }
 
-    public boolean isEpoll() {
+    public Boolean getEpoll() {
         return epoll;
     }
 
-    public void setEpoll(boolean epoll) {
+    public void setEpoll(Boolean epoll) {
         this.epoll = epoll;
     }
 }

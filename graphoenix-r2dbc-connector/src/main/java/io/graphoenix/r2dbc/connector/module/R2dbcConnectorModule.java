@@ -3,6 +3,8 @@ package io.graphoenix.r2dbc.connector.module;
 import dagger.Module;
 import dagger.Provides;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
+import io.graphoenix.r2dbc.connector.connection.ConnectionFactoryCreator;
+import io.graphoenix.r2dbc.connector.connection.ConnectionPoolCreator;
 import io.graphoenix.r2dbc.connector.connection.IConnectionCreator;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
@@ -20,12 +22,24 @@ import javax.inject.Singleton;
 public class R2dbcConnectorModule {
 
     @ConfigProperty
-    public R2DBCConfig r2DBCConfig;
+    public R2DBCConfig r2dbcConfig;
+
+    @Provides
+    @Singleton
+    public ConnectionFactoryCreator connectionFactoryCreator() {
+        return new ConnectionFactoryCreator(r2dbcConfig);
+    }
+
+    @Provides
+    @Singleton
+    public ConnectionPoolCreator connectionPoolCreator() {
+        return new ConnectionPoolCreator(connectionFactoryCreator(), r2dbcConfig);
+    }
 
     @Provides
     @Singleton
     public IConnectionCreator connectionCreator() {
-        return new ConnectionCreator(r2DBCConfig);
+        return new ConnectionCreator(connectionFactoryCreator(), connectionPoolCreator(), r2dbcConfig);
     }
 
     @Provides

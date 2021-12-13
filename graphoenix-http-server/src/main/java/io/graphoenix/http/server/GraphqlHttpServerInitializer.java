@@ -26,7 +26,7 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
     @Inject
     public GraphqlHttpServerInitializer(HttpServerConfig httpServerConfig, GraphqlHttpServerHandler httpServerHandler) {
         // Configure SSL.
-        if (httpServerConfig.isSsl()) {
+        if (httpServerConfig.getSsl()) {
             try {
                 SelfSignedCertificate ssc = new SelfSignedCertificate();
                 this.sslCtx = SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey()).build();

@@ -11,8 +11,13 @@ import io.graphoenix.mysql.handler.operation.DaggerOperationToSQLConvertHandlerF
 import io.graphoenix.r2dbc.connector.handler.bootstrap.DaggerCreateTableSQLExecuteHandlerFactory;
 import io.graphoenix.r2dbc.connector.handler.bootstrap.DaggerIntrospectionMutationExecuteHandlerFactory;
 import io.graphoenix.r2dbc.connector.handler.operation.DaggerOperationSQLExecuteHandlerFactory;
+import io.graphoenix.spi.config.JavaGeneratorConfig;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 public class Application {
+
+    @ConfigProperty
+    JavaGeneratorConfig javaGeneratorConfig = new JavaGeneratorConfig("io.graphoenix.showcase.mysql.generated", null, null, null, null, null, null, null, null, "auth.gql", null);
 
     public static void main(String[] args) throws Exception {
         new Application().run();

@@ -17,18 +17,20 @@ public class TableCreator {
     }
 
     public Mono<Integer> createTable(String sql) {
-        return connectionCreator.createConnection()
-                .flatMap(connection -> Mono.from(connection.createStatement(sql).execute()).doFinally(signalType -> connection.close()))
-                .flatMap(result -> Mono.from(result.getRowsUpdated()));
+        return null;
+//        return connectionCreator.createConnection()
+//                .flatMap(connection -> Mono.from(connection.createStatement(sql).execute()).doFinally(signalType -> connection.close()))
+//                .flatMap(result -> Mono.from(result.getRowsUpdated()));
     }
 
     public Mono<Integer> createTables(Stream<String> sqlStream) {
-        return connectionCreator.createConnection()
-                .flatMap(connection -> {
-                    Batch batch = connection.createBatch();
-                    sqlStream.forEach(batch::add);
-                    return Mono.from(batch.execute()).doFinally(signalType -> connection.close())
-                            .flatMap(result -> Mono.from(result.getRowsUpdated()));
-                });
+        return null;
+//        return connectionCreator.createConnection()
+//                .flatMap(connection -> {
+//                    Batch batch = connection.createBatch();
+//                    sqlStream.forEach(batch::add);
+//                    return Mono.from(batch.execute()).doFinally(signalType -> connection.close())
+//                            .flatMap(result -> Mono.from(result.getRowsUpdated()));
+//                });
     }
 }
