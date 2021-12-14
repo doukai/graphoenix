@@ -11,13 +11,12 @@ import spoon.reflect.code.CtNewArray;
 import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtTypeReference;
 
-import java.lang.annotation.Annotation;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.config.ConfigUtil.CONFIG_UTil;
+import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 
 public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigProperty, CtField<Object>> {
 
@@ -25,11 +24,6 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
     private CtTypeReference<?> setTypeReference;
     private CtTypeReference<?> mapTypeReference;
     private CtTypeReference<?> stringTypeReference;
-
-    @Override
-    public boolean shoudBeConsumed(CtAnnotation<? extends Annotation> annotation) {
-        return super.shoudBeConsumed(annotation);
-    }
 
     @Override
     public void init() {
@@ -46,7 +40,7 @@ public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigP
 
     @Override
     public void process(ConfigProperty annotation, CtField<Object> element) {
-        Config config = CONFIG_UTil.getConfig();
+        Config config = CONFIG_UTIL.getConfig();
         String configKey = element.getAnnotations().stream()
                 .filter(ctAnnotation -> ctAnnotation.getType().getSimpleName().equals(ConfigProperty.class.getSimpleName()))
                 .filter(ctAnnotation -> !ctAnnotation.getValueAsString("name").equals(""))

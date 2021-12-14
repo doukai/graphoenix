@@ -3,17 +3,38 @@ package io.graphoenix.mysql.translator;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
+import io.graphoenix.mysql.common.utils.DBNameUtil;
+import io.graphoenix.mysql.common.utils.DBValueUtil;
 import io.graphoenix.mysql.expression.IsExpression;
 import io.graphoenix.mysql.expression.JsonTable;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import net.sf.jsqlparser.expression.*;
-import net.sf.jsqlparser.expression.operators.relational.*;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.JdbcNamedParameter;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.NotExpression;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.ExistsExpression;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsBooleanExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
+import net.sf.jsqlparser.expression.operators.relational.LikeExpression;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import net.sf.jsqlparser.util.cnfexpression.MultiOrExpression;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -25,19 +46,21 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_INPUT_NAME;
-import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
-import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.*;
 
 public class GraphQLArgumentsToWhere {
 
     private final IGraphQLDocumentManager manager;
     private final IGraphQLFieldMapManager mapper;
+    private final DBNameUtil dbNameUtil;
+    private final DBValueUtil dbValueUtil;
 
     @Inject
-    public GraphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
+    public GraphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
         this.manager = manager;
         this.mapper = mapper;
+        this.dbNameUtil = dbNameUtil;
+        this.dbValueUtil = dbValueUtil;
     }
 
     protected Optional<Expression> argumentsToMultipleExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
@@ -45,7 +68,7 @@ public class GraphQLArgumentsToWhere {
                                                                  int level) {
 
         if (argumentsContext == null) {
-            return Optional.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(fieldDefinitionContext.type()), DEPRECATED_FIELD_NAME, level)));
+            return Optional.of(isFalseExpression(dbNameUtil.fieldToColumn(manager.getFieldTypeName(fieldDefinitionContext.type()), DEPRECATED_FIELD_NAME, level)));
         }
 
         Stream<Expression> expressionStream = argumentsToExpressionList(fieldDefinitionContext.type(), fieldDefinitionContext.argumentsDefinition(), argumentsContext, level);
@@ -61,7 +84,7 @@ public class GraphQLArgumentsToWhere {
             Stream<Expression> expressionStream = objectValueWithVariableToExpressionList(typeContext, inputObjectTypeDefinitionContext.get().inputObjectValueDefinitions(), objectValueWithVariableContext, level);
             return expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueWithVariableContext, inputObjectTypeDefinitionContext.get()));
         } else {
-            return Optional.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
+            return Optional.of(isFalseExpression(dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
         }
     }
 
@@ -74,7 +97,7 @@ public class GraphQLArgumentsToWhere {
             Stream<Expression> expressionStream = objectValueToExpressionList(typeContext, inputObjectTypeDefinitionContext.get().inputObjectValueDefinitions(), objectValueContext, level);
             return expressionStreamToMultipleExpression(expressionStream, hasOrConditional(objectValueContext, inputObjectTypeDefinitionContext.get()));
         } else {
-            return Optional.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
+            return Optional.of(isFalseExpression(dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
         }
     }
 
@@ -151,7 +174,7 @@ public class GraphQLArgumentsToWhere {
                 return Stream.empty();
             }
         }
-        return Stream.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
+        return Stream.of(isFalseExpression(dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
     }
 
     protected Stream<Expression> notDeprecatedExpression(GraphqlParser.TypeContext typeContext,
@@ -167,7 +190,7 @@ public class GraphQLArgumentsToWhere {
                 return Stream.empty();
             }
         }
-        return Stream.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
+        return Stream.of(isFalseExpression(dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
     }
 
     protected Stream<Expression> notDeprecatedExpression(GraphqlParser.TypeContext typeContext,
@@ -183,7 +206,7 @@ public class GraphQLArgumentsToWhere {
                 return Stream.empty();
             }
         }
-        return Stream.of(isFalseExpression(DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
+        return Stream.of(isFalseExpression(dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), DEPRECATED_FIELD_NAME, level)));
     }
 
 
@@ -626,7 +649,7 @@ public class GraphQLArgumentsToWhere {
                 InExpression inExpression = new InExpression();
                 inExpression.setLeftExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level));
                 inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                        .map(DB_VALUE_UTIL::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
+                        .map(dbValueUtil::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
                 return Optional.of(inExpression);
             }
         }
@@ -641,7 +664,7 @@ public class GraphQLArgumentsToWhere {
             if (valueContext.arrayValue() != null) {
                 InExpression inExpression = new InExpression();
                 inExpression.setLeftExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level));
-                inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(DB_VALUE_UTIL::scalarValueToDBValue).collect(Collectors.toList())));
+                inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(dbValueUtil::scalarValueToDBValue).collect(Collectors.toList())));
                 return Optional.of(inExpression);
             }
         }
@@ -903,7 +926,7 @@ public class GraphQLArgumentsToWhere {
         InExpression inExpression = new InExpression();
         inExpression.setLeftExpression(leftExpression);
         inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream()
-                .map(DB_VALUE_UTIL::valueToDBValue)
+                .map(dbValueUtil::valueToDBValue)
                 .collect(Collectors.toList())));
         if ("NIN".equals(enumValueContext.enumValueName().getText())) {
             inExpression.setNot(true);
@@ -922,7 +945,7 @@ public class GraphQLArgumentsToWhere {
             inExpression.setRightExpression(selectVariablesFromJsonArray(inputValueDefinitionContext, valueWithVariableContext));
         } else {
             inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                    .map(DB_VALUE_UTIL::valueWithVariableToDBValue)
+                    .map(dbValueUtil::valueWithVariableToDBValue)
                     .collect(Collectors.toList())));
         }
         if ("NIN".equals(enumValueContext.enumValueName().getText())) {
@@ -1061,37 +1084,37 @@ public class GraphQLArgumentsToWhere {
             case "LK":
                 LikeExpression likeExpression = new LikeExpression();
                 likeExpression.setLeftExpression(leftExpression);
-                likeExpression.setRightExpression(DB_VALUE_UTIL.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                likeExpression.setRightExpression(dbValueUtil.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return likeExpression;
             case "NLK":
                 LikeExpression notLikeExpression = new LikeExpression();
                 notLikeExpression.setNot(true);
                 notLikeExpression.setLeftExpression(leftExpression);
-                notLikeExpression.setRightExpression(DB_VALUE_UTIL.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                notLikeExpression.setRightExpression(dbValueUtil.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return notLikeExpression;
             case "GT":
             case "NLTE":
                 GreaterThan greaterThan = new GreaterThan();
                 greaterThan.setLeftExpression(leftExpression);
-                greaterThan.setRightExpression(DB_VALUE_UTIL.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                greaterThan.setRightExpression(dbValueUtil.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return greaterThan;
             case "GTE":
             case "NLT":
                 GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
                 greaterThanEquals.setLeftExpression(leftExpression);
-                greaterThanEquals.setRightExpression(DB_VALUE_UTIL.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                greaterThanEquals.setRightExpression(dbValueUtil.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return greaterThanEquals;
             case "LT":
             case "NGTE":
                 MinorThan minorThan = new MinorThan();
                 minorThan.setLeftExpression(leftExpression);
-                minorThan.setRightExpression(DB_VALUE_UTIL.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                minorThan.setRightExpression(dbValueUtil.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return minorThan;
             case "LTE":
             case "NGT":
                 MinorThanEquals minorThanEquals = new MinorThanEquals();
                 minorThanEquals.setLeftExpression(leftExpression);
-                minorThanEquals.setRightExpression(DB_VALUE_UTIL.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
+                minorThanEquals.setRightExpression(dbValueUtil.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue));
                 return minorThanEquals;
             case "NIL":
                 IsNullExpression isNullExpression = new IsNullExpression();
@@ -1151,7 +1174,7 @@ public class GraphQLArgumentsToWhere {
         body.setSelectItems(Collections.singletonList(new AllColumns()));
 
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        Table table = DB_NAME_UTIL.typeToTable(fieldTypeName, level);
+        Table table = dbNameUtil.typeToTable(fieldTypeName, level);
         body.setFromItem(table);
 
         String parentTypeName = objectTypeDefinitionContext.name().getText();
@@ -1161,9 +1184,9 @@ public class GraphQLArgumentsToWhere {
         Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
 
         if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
-            Table parentTable = DB_NAME_UTIL.typeToTable(objectTypeDefinitionContext, level - 1);
+            Table parentTable = dbNameUtil.typeToTable(objectTypeDefinitionContext, level - 1);
             EqualsTo idEqualsTo = new EqualsTo();
-            idEqualsTo.setLeftExpression(DB_NAME_UTIL.fieldToColumn(table, toFieldDefinition.get()));
+            idEqualsTo.setLeftExpression(dbNameUtil.fieldToColumn(table, toFieldDefinition.get()));
             boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
 
             if (mapWithType) {
@@ -1173,20 +1196,20 @@ public class GraphQLArgumentsToWhere {
 
                 if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
 
-                    Table withTable = DB_NAME_UTIL.typeToTable(mapWithObjectDefinition.get(), level);
+                    Table withTable = dbNameUtil.typeToTable(mapWithObjectDefinition.get(), level);
                     SubSelect selectWithTable = new SubSelect();
                     PlainSelect subPlainSelect = new PlainSelect();
-                    subPlainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(DB_NAME_UTIL.fieldToColumn(withTable, mapWithToFieldDefinition.get()))));
+                    subPlainSelect.setSelectItems(Collections.singletonList(new SelectExpressionItem(dbNameUtil.fieldToColumn(withTable, mapWithToFieldDefinition.get()))));
                     EqualsTo equalsWithTableColumn = new EqualsTo();
-                    equalsWithTableColumn.setLeftExpression(DB_NAME_UTIL.fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
-                    equalsWithTableColumn.setRightExpression(DB_NAME_UTIL.fieldToColumn(parentTable, fromFieldDefinition.get()));
+                    equalsWithTableColumn.setLeftExpression(dbNameUtil.fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
+                    equalsWithTableColumn.setRightExpression(dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get()));
                     subPlainSelect.setWhere(equalsWithTableColumn);
                     subPlainSelect.setFromItem(withTable);
                     selectWithTable.setSelectBody(subPlainSelect);
                     idEqualsTo.setRightExpression(selectWithTable);
                 }
             } else {
-                idEqualsTo.setRightExpression(DB_NAME_UTIL.fieldToColumn(parentTable, fromFieldDefinition.get()));
+                idEqualsTo.setRightExpression(dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get()));
             }
             body.setWhere(idEqualsTo);
         }
@@ -1194,19 +1217,19 @@ public class GraphQLArgumentsToWhere {
     }
 
     protected Column argumentToColumn(GraphqlParser.TypeContext typeContext, GraphqlParser.ArgumentContext argumentContext, int level) {
-        return DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), argumentContext, level);
+        return dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), argumentContext, level);
     }
 
     protected Column inputValueToColumn(GraphqlParser.TypeContext typeContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, int level) {
-        return DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), inputValueDefinitionContext, level);
+        return dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), inputValueDefinitionContext, level);
     }
 
     protected Column objectFieldWithVariableToColumn(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext, int level) {
-        return DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), objectFieldWithVariableContext, level);
+        return dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), objectFieldWithVariableContext, level);
     }
 
     protected Column objectFieldToColumn(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectFieldContext objectFieldContext, int level) {
-        return DB_NAME_UTIL.fieldToColumn(manager.getFieldTypeName(typeContext), objectFieldContext, level);
+        return dbNameUtil.fieldToColumn(manager.getFieldTypeName(typeContext), objectFieldContext, level);
     }
 
     protected Expression enumValueToExpression(Expression leftExpression,
@@ -1224,7 +1247,7 @@ public class GraphQLArgumentsToWhere {
         EqualsTo equalsTo = new EqualsTo();
         equalsTo.setLeftExpression(leftExpression);
         if (valueWithVariableContext.variable() != null) {
-            equalsTo.setRightExpression(DB_VALUE_UTIL.variableToJdbcNamedParameter(valueWithVariableContext.variable()));
+            equalsTo.setRightExpression(dbValueUtil.variableToJdbcNamedParameter(valueWithVariableContext.variable()));
         } else {
             equalsTo.setRightExpression(new StringValue(valueWithVariableContext.enumValue().enumValueName().getText()));
         }
@@ -1287,7 +1310,7 @@ public class GraphQLArgumentsToWhere {
         } else if (variableContext != null) {
             EqualsTo equalsTo = new EqualsTo();
             equalsTo.setLeftExpression(leftExpression);
-            equalsTo.setRightExpression(DB_VALUE_UTIL.variableToJdbcNamedParameter(variableContext));
+            equalsTo.setRightExpression(dbValueUtil.variableToJdbcNamedParameter(variableContext));
             return equalsTo;
         }
         return null;
@@ -1297,7 +1320,7 @@ public class GraphQLArgumentsToWhere {
         if (valueWithVariableContext.variable() != null) {
             IsExpression isExpression = new IsExpression();
             isExpression.setLeftExpression(leftExpression);
-            isExpression.setRightExpression(DB_VALUE_UTIL.variableToJdbcNamedParameter(valueWithVariableContext.variable()));
+            isExpression.setRightExpression(dbValueUtil.variableToJdbcNamedParameter(valueWithVariableContext.variable()));
             return Optional.of(isExpression);
         } else if (valueWithVariableContext.BooleanValue() != null) {
             IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
@@ -1383,7 +1406,7 @@ public class GraphQLArgumentsToWhere {
             //TODO
         }
         ColumnDefinition columnDefinition = new ColumnDefinition();
-        columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(valueWithVariableContext.variable().name().getText()));
+        columnDefinition.setColumnName(dbNameUtil.graphqlFieldNameToColumnName(valueWithVariableContext.variable().name().getText()));
         columnDefinition.setColDataType(colDataType);
         columnDefinition.setColumnSpecs(Arrays.asList("PATH", "'$'"));
         jsonTable.setColumnDefinitions(Collections.singletonList(columnDefinition));

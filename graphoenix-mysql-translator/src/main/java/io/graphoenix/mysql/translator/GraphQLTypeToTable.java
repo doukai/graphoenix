@@ -2,6 +2,7 @@ package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
+import io.graphoenix.mysql.common.utils.DBNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
@@ -16,17 +17,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.*;
 
 public class GraphQLTypeToTable {
 
-    final private IGraphQLDocumentManager manager;
+    private final IGraphQLDocumentManager manager;
+    private final DBNameUtil dbNameUtil;
 
     @Inject
-    public GraphQLTypeToTable(IGraphQLDocumentManager graphqlAntlrManager) {
-        this.manager = graphqlAntlrManager;
+    public GraphQLTypeToTable(IGraphQLDocumentManager manager, DBNameUtil dbNameUtil) {
+        this.manager = manager;
+        this.dbNameUtil = dbNameUtil;
     }
 
     public Stream<String> createTablesSQL() {
@@ -37,10 +38,6 @@ public class GraphQLTypeToTable {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .map(this::createTable).map(CreateTable::toString);
-    }
-
-    public Stream<String> createTablesSQL(String graphql) {
-        return createTablesSQL(DOCUMENT_UTIL.graphqlToDocument(graphql));
     }
 
     public Stream<String> createTablesSQL(IGraphQLDocumentManager manager) {
@@ -82,7 +79,7 @@ public class GraphQLTypeToTable {
 
     protected CreateTable createTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         CreateTable createTable = new CreateTable();
-        Table table = DB_NAME_UTIL.typeToTable(objectTypeDefinitionContext);
+        Table table = dbNameUtil.typeToTable(objectTypeDefinitionContext);
         createTable.setTable(table);
         createTable.setColumnDefinitions(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::createColumn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
         createTable.setIfNotExists(true);
@@ -110,7 +107,7 @@ public class GraphQLTypeToTable {
             return Optional.empty();
         }
         ColumnDefinition columnDefinition = new ColumnDefinition();
-        columnDefinition.setColumnName(DB_NAME_UTIL.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
+        columnDefinition.setColumnName(dbNameUtil.graphqlFieldNameToColumnName(fieldDefinitionContext.name().getText()));
         columnDefinition.setColDataType(createColDataType(typeNameContext, fieldDefinitionContext.directives()));
         List<String> columnSpecs = new ArrayList<>();
         if (typeNameContext.name().getText().equals("ID")) {
@@ -121,7 +118,7 @@ public class GraphQLTypeToTable {
         }
         columnDirectiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecs::addAll);
         if (fieldDefinitionContext.description() != null) {
-            columnSpecs.add("COMMENT " + DB_NAME_UTIL.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
+            columnSpecs.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
         }
         columnDefinition.setColumnSpecs(columnSpecs);
         return Optional.of(columnDefinition);
@@ -142,7 +139,7 @@ public class GraphQLTypeToTable {
 
         colDataType.setArgumentsStringList(manager.getEnum(typeNameContext.name().getText()).map(enumTypeDefinitionContext -> enumTypeDefinitionContext.enumValueDefinitions()
                 .enumValueDefinition().stream()
-                .map(value -> DB_NAME_UTIL.stringValueToDBVarchar(value.getText())).collect(Collectors.toList())).orElse(Collections.emptyList()));
+                .map(value -> dbNameUtil.stringValueToDBVarchar(value.getText())).collect(Collectors.toList())).orElse(Collections.emptyList()));
 
         return colDataType;
     }
@@ -158,19 +155,19 @@ public class GraphQLTypeToTable {
         switch (typeNameContext.name().getText()) {
             case "ID":
             case "Int":
-                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
                 argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));
                 break;
             case "Boolean":
-                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "String":
-                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
                 argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));
                 break;
             case "Float":
-                colDataType.setDataType(dataType.map(argumentContext -> DB_NAME_UTIL.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 decimals.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
@@ -188,7 +185,7 @@ public class GraphQLTypeToTable {
             directiveToTableOption(objectTypeDefinitionContext.directives()).ifPresent(tableOptionsList::addAll);
         }
         if (objectTypeDefinitionContext.description() != null) {
-            tableOptionsList.add("COMMENT " + DB_NAME_UTIL.graphqlDescriptionToDBComment(objectTypeDefinitionContext.description().getText()));
+            tableOptionsList.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(objectTypeDefinitionContext.description().getText()));
         }
         return tableOptionsList;
     }
@@ -202,7 +199,7 @@ public class GraphQLTypeToTable {
         if (argumentContext.valueWithVariable().BooleanValue() != null) {
             return argumentContext.name().getText();
         } else {
-            return DB_NAME_UTIL.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
+            return dbNameUtil.directiveToTableOption(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
         }
     }
 
@@ -213,9 +210,9 @@ public class GraphQLTypeToTable {
 
     protected String argumentToColumnSpecs(GraphqlParser.ArgumentContext argumentContext) {
         if (argumentContext.valueWithVariable().BooleanValue() != null) {
-            return DB_NAME_UTIL.booleanDirectiveTocColumnDefinition(argumentContext.name().getText());
+            return dbNameUtil.booleanDirectiveTocColumnDefinition(argumentContext.name().getText());
         } else {
-            return DB_NAME_UTIL.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
+            return dbNameUtil.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
         }
     }
 

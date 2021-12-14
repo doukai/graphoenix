@@ -3,6 +3,8 @@ package io.graphoenix.mysql.module;
 import dagger.Module;
 import dagger.Provides;
 import io.graphoenix.common.module.DocumentManagerModule;
+import io.graphoenix.mysql.common.utils.DBNameUtil;
+import io.graphoenix.mysql.common.utils.DBValueUtil;
 import io.graphoenix.mysql.handler.bootstrap.IntrospectionRegisterHandler;
 import io.graphoenix.mysql.handler.bootstrap.MutationToSQLConvertHandler;
 import io.graphoenix.mysql.handler.bootstrap.TypeDefiniteToCreateTableSQLConvertHandler;
@@ -22,26 +24,38 @@ public class MySQLTranslatorModule {
 
     @Provides
     @Singleton
+    public DBNameUtil dbNameUtil() {
+        return new DBNameUtil();
+    }
+
+    @Provides
+    @Singleton
+    public DBValueUtil dbValueUtil() {
+        return new DBValueUtil(dbNameUtil());
+    }
+
+    @Provides
+    @Singleton
     public GraphQLTypeToTable graphQLTypeToTable(IGraphQLDocumentManager manager) {
-        return new GraphQLTypeToTable(manager);
+        return new GraphQLTypeToTable(manager, dbNameUtil());
     }
 
     @Provides
     @Singleton
     public GraphQLArgumentsToWhere graphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
-        return new GraphQLArgumentsToWhere(manager, mapper);
+        return new GraphQLArgumentsToWhere(manager, mapper, dbNameUtil(), dbValueUtil());
     }
 
     @Provides
     @Singleton
     public GraphQLQueryToSelect graphQLQueryToSelect(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
-        return new GraphQLQueryToSelect(manager, mapper, graphQLArgumentsToWhere(manager, mapper));
+        return new GraphQLQueryToSelect(manager, mapper, graphQLArgumentsToWhere(manager, mapper), dbNameUtil(), dbValueUtil());
     }
 
     @Provides
     @Singleton
     public GraphQLMutationToStatements graphQLMutationToStatements(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
-        return new GraphQLMutationToStatements(manager, mapper, graphQLQueryToSelect(manager, mapper));
+        return new GraphQLMutationToStatements(manager, mapper, graphQLQueryToSelect(manager, mapper), dbNameUtil(), dbValueUtil());
     }
 
     @Provides
@@ -65,7 +79,7 @@ public class MySQLTranslatorModule {
     @Provides
     @Singleton
     public MutationToSQLConvertHandler mutationToSQLConvertHandler(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
-        return new MutationToSQLConvertHandler(manager, mapper);
+        return new MutationToSQLConvertHandler(graphQLMutationToStatements(manager, mapper));
     }
 
     @Provides

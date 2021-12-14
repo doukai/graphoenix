@@ -5,7 +5,6 @@ import io.graphoenix.spi.handler.IBootstrapHandler;
 import static org.joor.Reflect.*;
 
 public enum BootstrapHandlerUtil {
-
     BOOTSTRAP_HANDLER_UTIL;
 
     public IBootstrapHandler get(String className) {

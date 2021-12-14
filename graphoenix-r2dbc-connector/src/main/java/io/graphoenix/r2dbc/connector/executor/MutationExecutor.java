@@ -3,6 +3,7 @@ package io.graphoenix.r2dbc.connector.executor;
 import com.google.common.collect.Lists;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.r2dbc.spi.Batch;
+import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,11 @@ public class MutationExecutor {
                     return Flux.from(batch.execute())
                             .last()
                             .doOnSuccess(result -> connection.commitTransaction())
-//                            .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))))
-                            .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> (String) row.get(0))))
+                            .flatMap(this::getJsonStringFromResult)
                             .doOnError(throwable -> connection.rollbackTransaction())
                             .doFinally(signalType -> connection.close());
                 });
     }
-
 
     public Stream<Integer> executeMutationsInBatchByGroup(Stream<String> sqlStream, int itemCount) {
         List<List<String>> sqlListGroup = Lists.partition(sqlStream.collect(Collectors.toList()), itemCount);
@@ -75,19 +74,22 @@ public class MutationExecutor {
                 .flatMap(connection -> {
                     connection.beginTransaction();
                     return Flux.fromStream(sqlStream
-                            .map(sql -> {
-                                        Statement statement = connection.createStatement(sql);
-                                        parameters.forEach(statement::bind);
-                                        return statement;
-                                    }
-                            ))
+                                    .map(sql -> {
+                                                Statement statement = connection.createStatement(sql);
+                                                parameters.forEach(statement::bind);
+                                                return statement;
+                                            }
+                                    ))
                             .flatMap(Statement::execute)
-//                            .flatMap(result -> result.map((row, rowMetadata) -> row.get(0, String.class)))
-                            .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+                            .flatMap(this::getJsonStringFromResult)
                             .last()
                             .doOnSuccess(result -> connection.commitTransaction())
                             .doOnError(throwable -> connection.rollbackTransaction())
                             .doFinally(signalType -> connection.close());
                 });
+    }
+
+    private Mono<String> getJsonStringFromResult(Result result) {
+        return Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class)));
     }
 }

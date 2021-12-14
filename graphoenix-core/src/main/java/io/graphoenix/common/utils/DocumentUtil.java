@@ -11,14 +11,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Optional;
 
 public enum DocumentUtil {
 
     DOCUMENT_UTIL;
-    ThrowingFunction<InputStream, CharStream, IOException> fromStream = CharStreams::fromStream;
-    ThrowingFunction<String, CharStream, IOException> fromFileName = CharStreams::fromFileName;
-    ThrowingFunction<Path, CharStream, IOException> fromPath = CharStreams::fromPath;
+    final ThrowingFunction<InputStream, CharStream, IOException> fromStream = CharStreams::fromStream;
+    final ThrowingFunction<String, CharStream, IOException> fromFileName = CharStreams::fromFileName;
+    final ThrowingFunction<Path, CharStream, IOException> fromPath = CharStreams::fromPath;
 
     public GraphqlParser.DocumentContext graphqlToDocument(String graphql) {
         CodePointCharStream charStream;
@@ -48,12 +47,12 @@ public enum DocumentUtil {
 
     public GraphqlParser.DocumentContext graphqlFileToDocument(File graphqlFile) throws IOException {
         CharStream charStream;
-        charStream = CharStreams.fromFileName(graphqlFile.getName());
+        charStream = CharStreams.fromFileName(graphqlFile.getPath());
         return graphqlToDocument(charStream);
     }
 
-    public GraphqlParser.DocumentContext graphqlFileTryToDocument(String graphqlFileName) {
-        return graphqlToDocument(fromFileName.uncheck().apply(graphqlFileName));
+    public GraphqlParser.DocumentContext graphqlFileTryToDocument(File graphqlFile) {
+        return graphqlToDocument(fromFileName.uncheck().apply(graphqlFile.getPath()));
     }
 
 

@@ -9,16 +9,14 @@ import one.util.streamex.StreamEx;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final JavaGeneratorConfig configuration;
     private final TypeSpecBuilder typeSpecBuilder;
+    private final JavaGeneratorConfig configuration;
     private final ThrowingBiConsumer<JavaFile, File, IOException> JavaFileWriteTo = JavaFile::writeTo;
 
     @Inject

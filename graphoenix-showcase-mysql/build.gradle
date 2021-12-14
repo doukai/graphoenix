@@ -3,6 +3,7 @@ buildscript {
         mavenLocal()
     }
     dependencies {
+        classpath 'io.graphoenix:graphoenix-gradle-plugin:1.0-SNAPSHOT'
         classpath 'fr.inria.gforge.spoon:spoon-gradle-plugin:1.4'
         classpath 'io.graphoenix:graphoenix-config:1.0-SNAPSHOT'
     }
@@ -12,6 +13,12 @@ plugins {
     id 'java'
 }
 
+apply plugin: 'io.graphoenix'
+javaCodegen {
+    basePackageName = "io.graphoenix.showcase.mysql"
+    graphQLFileName = "auth.gql"
+}
+
 apply plugin: 'spoon'
 spoon {
     processors = ['io.graphoenix.config.ConfigPropertyProcessor']
@@ -19,7 +26,6 @@ spoon {
 
 group 'io.graphoenix'
 version '1.0-SNAPSHOT'
-
 
 repositories {
     mavenCentral()

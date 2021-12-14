@@ -2,14 +2,24 @@ package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.common.error.GraphQLProblem;
+import io.graphoenix.mysql.common.utils.DBNameUtil;
+import io.graphoenix.mysql.common.utils.DBValueUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import org.javatuples.Pair;
 
@@ -19,8 +29,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
-import static io.graphoenix.mysql.common.utils.DBValueUtil.DB_VALUE_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.*;
 
 public class GraphQLQueryToSelect {
@@ -28,12 +36,16 @@ public class GraphQLQueryToSelect {
     private final IGraphQLDocumentManager manager;
     private final IGraphQLFieldMapManager mapper;
     private final GraphQLArgumentsToWhere argumentsToWhere;
+    private final DBNameUtil dbNameUtil;
+    private final DBValueUtil dbValueUtil;
 
     @Inject
-    public GraphQLQueryToSelect(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLArgumentsToWhere argumentsToWhere) {
+    public GraphQLQueryToSelect(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLArgumentsToWhere argumentsToWhere, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
         this.manager = manager;
         this.mapper = mapper;
         this.argumentsToWhere = argumentsToWhere;
+        this.dbNameUtil = dbNameUtil;
+        this.dbValueUtil = dbValueUtil;
     }
 
     public String createSelectSQL(String graphQL) {
@@ -262,8 +274,8 @@ public class GraphQLQueryToSelect {
 
             if (idFieldName.isPresent()) {
                 Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), selectionContext.field().arguments())
-                        .map(DB_VALUE_UTIL::createIdValueExpression)
-                        .orElseGet(() -> DB_VALUE_UTIL.createInsertIdUserVariable(typeName, idFieldName.get(), 0, 0));
+                        .map(dbValueUtil::createIdValueExpression)
+                        .orElseGet(() -> dbValueUtil.createInsertIdUserVariable(typeName, idFieldName.get(), 0, 0));
 
                 EqualsTo idEqualsTo = new EqualsTo();
                 idEqualsTo.setLeftExpression(fieldToColumn(typeToTable(typeName, level), idFieldName.get()));
@@ -353,16 +365,16 @@ public class GraphQLQueryToSelect {
 
     protected Table typeToTable(String typeName, int level) {
         if (manager.isQueryOperationType(typeName) || manager.isMutationOperationType(typeName)) {
-            return DB_NAME_UTIL.dualTable();
+            return dbNameUtil.dualTable();
         }
-        return DB_NAME_UTIL.typeToTable(typeName, level);
+        return dbNameUtil.typeToTable(typeName, level);
     }
 
     protected Column fieldToColumn(Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return DB_NAME_UTIL.fieldToColumn(table, fieldDefinitionContext);
+        return dbNameUtil.fieldToColumn(table, fieldDefinitionContext);
     }
 
     protected Column fieldToColumn(Table table, String fieldName) {
-        return DB_NAME_UTIL.fieldToColumn(table, fieldName);
+        return dbNameUtil.fieldToColumn(table, fieldName);
     }
 }

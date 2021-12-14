@@ -5,7 +5,6 @@ import io.graphoenix.spi.handler.IOperationHandler;
 import static org.joor.Reflect.onClass;
 
 public enum OperationHandlerUtil {
-
     OPERATION_HANDLER_UTIL;
 
     public IOperationHandler get(String className) {

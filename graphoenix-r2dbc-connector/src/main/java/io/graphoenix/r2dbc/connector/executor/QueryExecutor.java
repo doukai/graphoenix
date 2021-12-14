@@ -1,6 +1,7 @@
 package io.graphoenix.r2dbc.connector.executor;
 
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
+import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import org.javatuples.Pair;
 import reactor.core.publisher.Flux;
@@ -28,31 +29,30 @@ public class QueryExecutor {
                                     .doFinally(signalType -> connection.close());
                         }
                 )
-//                .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))));
-                .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> (String) row.get(0))));
+                .flatMap(this::getJsonStringFromResult);
     }
-
 
     public Flux<Pair<String, String>> executeQuery(Stream<Pair<String, String>> sqlStream, Map<String, Object> parameters) {
         return connectionCreator.createConnection()
                 .flatMapMany(connection ->
-                                Flux.fromStream(
-                                        sqlStream.map(
-                                                pair -> {
-                                                    Statement statement = connection.createStatement(pair.getValue1());
-                                                    parameters.forEach(statement::bind);
-                                                    return Pair.with(
-                                                            pair.getValue0(),
-                                                            Mono.from(statement.execute())
-                                                                    .flatMap(result ->
-//                                                                    Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class)))
-                                                                                    Mono.from(result.map((row, rowMetadata) -> (String) row.get(0)))
-                                                                    )
-                                                                    .block()
-                                                    );
-                                                }
-                                        )
-                                ).doFinally(signalType -> connection.close())
+                        Flux.fromStream(
+                                sqlStream.map(
+                                        pair -> {
+                                            Statement statement = connection.createStatement(pair.getValue1());
+                                            parameters.forEach(statement::bind);
+                                            return Pair.with(
+                                                    pair.getValue0(),
+                                                    Mono.from(statement.execute())
+                                                            .flatMap(this::getJsonStringFromResult)
+                                                            .block()
+                                            );
+                                        }
+                                )
+                        ).doFinally(signalType -> connection.close())
                 );
+    }
+
+    private Mono<String> getJsonStringFromResult(Result result) {
+        return Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class)));
     }
 }

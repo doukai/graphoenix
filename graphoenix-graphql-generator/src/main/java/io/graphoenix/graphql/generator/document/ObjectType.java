@@ -63,12 +63,9 @@ public class ObjectType {
 
     public ObjectType addFields(List<Field> fields) {
         if (this.fields == null) {
-            this.fields = fields;
-        } else {
-            if (fields != null) {
-                this.fields.addAll(fields);
-            }
+            this.fields = new ArrayList<>();
         }
+        this.fields.addAll(fields);
         return this;
     }
 

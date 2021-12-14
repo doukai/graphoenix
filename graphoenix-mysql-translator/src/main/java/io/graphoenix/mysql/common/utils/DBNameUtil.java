@@ -7,9 +7,7 @@ import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
-public enum DBNameUtil {
-
-    DB_NAME_UTIL;
+public class DBNameUtil {
 
     public String graphqlTypeNameToTableName(String graphqlTypeName) {
 

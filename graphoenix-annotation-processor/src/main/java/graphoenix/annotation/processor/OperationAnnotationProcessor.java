@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
-import static io.graphoenix.config.ConfigUtil.CONFIG_UTil;
+import static io.graphoenix.config.ConfigUtil.RESOURCES_CONFIG_UTIL;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphQLOperation")
 @AutoService(Processor.class)
@@ -95,7 +95,7 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                                 .addBootstrapHandlers(bootstrapHandlers)
                                 .addOperationHandlers(pretreatmentHandlers);
 
-                        JavaGeneratorConfig javaGeneratorConfig = CONFIG_UTil.getValue(JavaGeneratorConfig.class);
+                        JavaGeneratorConfig javaGeneratorConfig = RESOURCES_CONFIG_UTIL.getValue(JavaGeneratorConfig.class);
 
                         if (javaGeneratorConfig.getGraphQL() != null) {
                             generator.registerGraphQL(javaGeneratorConfig.getGraphQL());

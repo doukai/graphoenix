@@ -3,7 +3,6 @@ package io.graphoenix.common.utils;
 import java.util.ServiceLoader;
 
 public enum HandlerUtil {
-
     HANDLER_UTIL;
 
     public <T> T create(Class<T> handlerClass) {

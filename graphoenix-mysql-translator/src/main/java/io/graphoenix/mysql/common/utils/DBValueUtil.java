@@ -5,16 +5,19 @@ import graphql.parser.antlr.GraphqlParser;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.statement.SetStatement;
-import net.sf.jsqlparser.statement.select.SubSelect;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 
-import static io.graphoenix.mysql.common.utils.DBNameUtil.DB_NAME_UTIL;
+public class DBValueUtil {
 
-public enum DBValueUtil {
+    private final DBNameUtil dbNameUtil;
 
-    DB_VALUE_UTIL;
+    @Inject
+    public DBValueUtil(DBNameUtil dbNameUtil) {
+        this.dbNameUtil = dbNameUtil;
+    }
 
     public Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
         return scalarValueToDBValue(valueContext.StringValue(),
@@ -80,14 +83,14 @@ public enum DBValueUtil {
     }
 
     public SetStatement createInsertIdSetStatement(String typeName, String idFieldName, int level, int index) {
-        String idVariableName = "@" + DB_NAME_UTIL.graphqlFieldNameToVariableName(typeName, idFieldName) + "_" + level + "_" + index;
+        String idVariableName = "@" + dbNameUtil.graphqlFieldNameToVariableName(typeName, idFieldName) + "_" + level + "_" + index;
         Function function = new Function();
         function.setName("LAST_INSERT_ID");
         return new SetStatement(idVariableName, function);
     }
 
     public UserVariable createInsertIdUserVariable(String typeName, String idFieldName, int level, int index) {
-        String idVariableName = DB_NAME_UTIL.graphqlFieldNameToVariableName(typeName, idFieldName) + "_" + level + "_" + index;
+        String idVariableName = dbNameUtil.graphqlFieldNameToVariableName(typeName, idFieldName) + "_" + level + "_" + index;
         UserVariable userVariable = new UserVariable();
         userVariable.setName(idVariableName);
         return userVariable;

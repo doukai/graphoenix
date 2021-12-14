@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum GraphQLResponseUtil {
-
     GRAPHQL_RESPONSE_UTIL;
 
     private final GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
