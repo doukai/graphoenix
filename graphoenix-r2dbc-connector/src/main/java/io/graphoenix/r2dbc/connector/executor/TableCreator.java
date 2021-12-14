@@ -1,6 +1,7 @@
 package io.graphoenix.r2dbc.connector.executor;
 
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
+import io.r2dbc.spi.Batch;
 import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
@@ -16,20 +17,18 @@ public class TableCreator {
     }
 
     public Mono<Integer> createTable(String sql) {
-        return null;
-//        return connectionCreator.createConnection()
-//                .flatMap(connection -> Mono.from(connection.createStatement(sql).execute()).doFinally(signalType -> connection.close()))
-//                .flatMap(result -> Mono.from(result.getRowsUpdated()));
+        return connectionCreator.createConnection()
+                .flatMap(connection -> Mono.from(connection.createStatement(sql).execute()).doFinally(signalType -> connection.close()))
+                .flatMap(result -> Mono.from(result.getRowsUpdated()));
     }
 
     public Mono<Integer> createTables(Stream<String> sqlStream) {
-        return null;
-//        return connectionCreator.createConnection()
-//                .flatMap(connection -> {
-//                    Batch batch = connection.createBatch();
-//                    sqlStream.forEach(batch::add);
-//                    return Mono.from(batch.execute()).doFinally(signalType -> connection.close())
-//                            .flatMap(result -> Mono.from(result.getRowsUpdated()));
-//                });
+        return connectionCreator.createConnection()
+                .flatMap(connection -> {
+                    Batch batch = connection.createBatch();
+                    sqlStream.forEach(batch::add);
+                    return Mono.from(batch.execute()).doFinally(signalType -> connection.close())
+                            .flatMap(result -> Mono.from(result.getRowsUpdated()));
+                });
     }
 }

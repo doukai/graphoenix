@@ -21,24 +21,24 @@ import javax.inject.Singleton;
 public class R2dbcConnectorModule {
 
     @ConfigProperty
-    public R2DBCConfig r2dbcConfig;
+    public R2DBCConfig r2DBCConfig;
 
     @Provides
     @Singleton
     public ConnectionFactoryCreator connectionFactoryCreator() {
-        return new ConnectionFactoryCreator(r2dbcConfig);
+        return new ConnectionFactoryCreator(r2DBCConfig);
     }
 
     @Provides
     @Singleton
     public ConnectionPoolCreator connectionPoolCreator() {
-        return new ConnectionPoolCreator(connectionFactoryCreator(), r2dbcConfig);
+        return new ConnectionPoolCreator(connectionFactoryCreator(), r2DBCConfig);
     }
 
     @Provides
     @Singleton
     public ConnectionCreator connectionCreator() {
-        return new ConnectionCreator(connectionFactoryCreator(), connectionPoolCreator(), r2dbcConfig);
+        return new ConnectionCreator(connectionFactoryCreator(), connectionPoolCreator(), r2DBCConfig);
     }
 
     @Provides

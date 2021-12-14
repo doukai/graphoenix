@@ -35,7 +35,8 @@ public class MutationExecutor {
                     return Flux.from(batch.execute())
                             .last()
                             .doOnSuccess(result -> connection.commitTransaction())
-                            .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))))
+//                            .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class))))
+                            .flatMap(result -> Mono.from(result.map((row, rowMetadata) -> (String) row.get(0))))
                             .doOnError(throwable -> connection.rollbackTransaction())
                             .doFinally(signalType -> connection.close());
                 });
@@ -81,7 +82,8 @@ public class MutationExecutor {
                                     }
                             ))
                             .flatMap(Statement::execute)
-                            .flatMap(result -> result.map((row, rowMetadata) -> row.get(0, String.class)))
+//                            .flatMap(result -> result.map((row, rowMetadata) -> row.get(0, String.class)))
+                            .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
                             .last()
                             .doOnSuccess(result -> connection.commitTransaction())
                             .doOnError(throwable -> connection.rollbackTransaction())
