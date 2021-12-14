@@ -1,20 +1,5 @@
-buildscript {
-    repositories {
-        mavenLocal()
-    }
-    dependencies {
-        classpath 'fr.inria.gforge.spoon:spoon-gradle-plugin:1.4'
-        classpath 'io.graphoenix:graphoenix-config:1.0-SNAPSHOT'
-    }
-}
-
 plugins {
     id 'java'
-}
-
-apply plugin: 'spoon'
-spoon {
-    processors = ['io.graphoenix.config.ConfigPropertyProcessor']
 }
 
 group 'io.graphoenix'
