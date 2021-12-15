@@ -4,5 +4,5 @@ import javax.annotation.processing.Filer;
 
 public interface DaggerExpansionProcessor {
 
-    void process(String source, Filer filer);
+    String process(String source, Filer filer);
 }

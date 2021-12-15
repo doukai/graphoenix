@@ -6,6 +6,7 @@ import com.sun.source.util.Trees;
 import javax.annotation.processing.*;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.util.Iterator;
 import java.util.ServiceLoader;
 import java.util.Set;
 
@@ -27,7 +28,12 @@ public class DaggerGeneratedAnnotationProcessor extends AbstractProcessor {
             Set<? extends Element> bundleClasses = roundEnv.getElementsAnnotatedWith(annotation);
             for (Element bundleClassElement : bundleClasses) {
                 ServiceLoader<DaggerExpansionProcessor> expansionProcessors = ServiceLoader.load(DaggerExpansionProcessor.class, DaggerGeneratedAnnotationProcessor.class.getClassLoader());
-                expansionProcessors.forEach(daggerExpansionProcessor -> daggerExpansionProcessor.process(trees.getPath(bundleClassElement).getCompilationUnit().toString(), this.processingEnv.getFiler()));
+                Iterator<DaggerExpansionProcessor> processorIterator = expansionProcessors.iterator();
+                String sourceCode = trees.getPath(bundleClassElement).getCompilationUnit().toString();
+                Filer filer = this.processingEnv.getFiler();
+                while (processorIterator.hasNext()) {
+                    sourceCode = processorIterator.next().process(sourceCode, filer);
+                }
             }
         }
         return false;
