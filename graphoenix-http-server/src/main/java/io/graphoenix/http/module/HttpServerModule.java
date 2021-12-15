@@ -1,5 +1,6 @@
 package io.graphoenix.http.module;
 
+import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
 import io.graphoenix.common.module.PipelineModule;

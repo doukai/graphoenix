@@ -14,7 +14,8 @@ dependencies {
     implementation 'io.netty:netty-all:4.1.69.Final'
     implementation 'io.netty:netty-codec-http2:4.1.69.Final'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
-    annotationProcessor project(":graphoenix-annotation-processor")
+//    annotationProcessor project(":graphoenix-annotation-processor")
+    annotationProcessor project(":graphoenix-dagger")
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }

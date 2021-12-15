@@ -34,9 +34,7 @@ public class GraphqlHttpServer {
         this.httpServerConfig = httpServerConfig;
         this.graphqlHttpServerInitializer = graphqlHttpServerInitializer;
     }
-
     public void run() throws Exception {
-
         EventLoopGroup bossGroup;
         EventLoopGroup workerGroup;
         Class<? extends ServerSocketChannel> serverSocketChannelClazz;

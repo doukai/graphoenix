@@ -1,4 +1,4 @@
-package graphoenix.annotation.processor;
+package io.graphoenix.dagger;
 
 import javax.annotation.processing.Filer;
 
