@@ -1,4 +1,4 @@
-package io.graphoenix.dagger;
+package io.graphoenix.spi.annotation.dagger;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -12,4 +12,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 public @interface AutoComponent {
     String value() default "get";
+
+    String name() default "";
+
+    String packageName() default "";
 }

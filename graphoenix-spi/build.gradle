@@ -16,6 +16,7 @@ dependencies {
     antlr "org.antlr:antlr4:4.9.2"
     compile 'org.reactivestreams:reactive-streams:1.0.3'
     compile 'io.r2dbc:r2dbc-spi:0.8.5.RELEASE'
+    compile 'com.google.dagger:dagger-compiler:2.40.5'
     compile 'org.eclipse.microprofile.graphql:microprofile-graphql-api:1.0.3'
     compile 'org.eclipse.microprofile.config:microprofile-config-api:3.0'
     compile 'jakarta.annotation:jakarta.annotation-api:2.0.0'
