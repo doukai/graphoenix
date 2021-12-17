@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.nio.file.Path;
 
 public enum DocumentUtil {
-
     DOCUMENT_UTIL;
     final ThrowingFunction<InputStream, CharStream, IOException> fromStream = CharStreams::fromStream;
     final ThrowingFunction<String, CharStream, IOException> fromFileName = CharStreams::fromFileName;
