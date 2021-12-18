@@ -97,7 +97,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                     .filter(Optional::isPresent)
                                                     .map(Optional::get)
                                                     .filter(methodDeclaration -> methodDeclaration.getType().isClassOrInterfaceType())
-                                                    .map(methodDeclaration ->
+                                                    .forEach(methodDeclaration ->
                                                             buildProxy(
                                                                     compilationUnit.getPackageDeclaration().orElseThrow(),
                                                                     classOrInterfaceDeclaration,
@@ -107,34 +107,52 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                                                     importDeclaration.getName().getIdentifier().equals(((ClassOrInterfaceType) methodDeclaration.getType()).getName().getIdentifier())
                                                                             ).findFirst().orElseThrow()
                                                             )
-                                                    ).collect(Collectors.toList());
+                                                    );
                                         }
                                 )
                 );
     }
 
-    protected Optional<CompilationUnit> buildProxy(PackageDeclaration packageDeclaration, ClassOrInterfaceDeclaration moduleDeclaration, MethodDeclaration methodDeclaration, ImportDeclaration importDeclaration) {
+    protected void buildProxy(PackageDeclaration packageDeclaration, ClassOrInterfaceDeclaration moduleDeclaration, MethodDeclaration methodDeclaration, ImportDeclaration importDeclaration) {
         ClassOrInterfaceType methodDeclarationType = (ClassOrInterfaceType) methodDeclaration.getType();
         TypeElement typeElement = this.processingEnv.getElementUtils().getTypeElement(importDeclaration.getNameAsString());
         String sourceCode = trees.getPath(typeElement).getCompilationUnit().toString();
 
         javaParser.parse(sourceCode)
                 .ifSuccessful(compilationUnit ->
-                        compilationUnit.getTypes().stream()
-                                .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
-                                .map(typeDeclaration -> (ClassOrInterfaceDeclaration) typeDeclaration)
-                                .forEach(classOrInterfaceDeclaration -> {
+                                compilationUnit.getTypes().stream()
+                                        .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
+                                        .map(typeDeclaration -> (ClassOrInterfaceDeclaration) typeDeclaration)
+                                        .forEach(classOrInterfaceDeclaration -> {
+                                                    ClassOrInterfaceDeclaration proxyDeclaration = classOrInterfaceDeclaration.clone();
+//                                            classOrInterfaceDeclaration.getMembers().stream()
+//                                                    .filter(BodyDeclaration::isMethodDeclaration)
+//                                                    .map(BodyDeclaration::toMethodDeclaration)
+//                                                    .filter(Optional::isPresent)
+//                                                    .map(Optional::get);
 
-                                            classOrInterfaceDeclaration.getMembers().stream()
-                                                    .filter(BodyDeclaration::isMethodDeclaration)
-                                                    .map(BodyDeclaration::toMethodDeclaration)
-                                                    .filter(Optional::isPresent)
-                                                    .map(Optional::get);
+                                                    proxyDeclaration.getExtendedTypes().clear();
+                                                    proxyDeclaration.getMembers().clear();
 
-                                        }
-                                )
+                                                    proxyDeclaration
+                                                            .addExtendedType(classOrInterfaceDeclaration.getNameAsString())
+                                                            .setName(classOrInterfaceDeclaration.getNameAsString() + "Proxy");
+
+                                                    CompilationUnit proxyCompilationUnit = compilationUnit.clone();
+                                                    proxyCompilationUnit.getImports().clear();
+                                                    proxyCompilationUnit.getTypes().clear();
+                                                    proxyCompilationUnit.addType(proxyDeclaration);
+                                                    TypeDeclaration<?> componentType = proxyCompilationUnit.getType(0);
+                                                    try {
+                                                        Writer writer = processingEnv.getFiler().createSourceFile(componentType.getFullyQualifiedName().orElseGet(componentType::getNameAsString)).openWriter();
+                                                        writer.write(proxyCompilationUnit.toString());
+                                                        writer.close();
+                                                    } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                        )
                 );
-        return Optional.empty();
     }
 
     protected CompilationUnit buildComponent(PackageDeclaration packageDeclaration, ClassOrInterfaceDeclaration moduleDeclaration, MethodDeclaration methodDeclaration, ImportDeclaration importDeclaration) {
@@ -165,6 +183,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .addImport(moduleDeclaration.getFullyQualifiedName().orElseGet(methodDeclaration::getNameAsString))
                 .addImport(Singleton.class)
                 .addImport(Component.class);
+
         ClassOrInterfaceDeclaration classOrInterfaceDeclaration = new ClassOrInterfaceDeclaration()
                 .setPublic(true)
                 .setInterface(true)
