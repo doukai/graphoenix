@@ -15,7 +15,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.auto.service.AutoService;
 import com.sun.source.util.Trees;
 import dagger.Component;
-import io.graphoenix.spi.annotation.dagger.AutoComponent;
+import io.graphoenix.spi.annotation.dagger.GPXComponent;
 
 import javax.annotation.processing.*;
 import javax.inject.Singleton;
@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes("dagger.Module")
 @AutoService(Processor.class)
@@ -59,52 +60,95 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                                 .map(typeDeclaration -> (ClassOrInterfaceDeclaration) typeDeclaration)
                                 .forEach(classOrInterfaceDeclaration -> {
-                                    classOrInterfaceDeclaration.getMembers().stream()
-                                            .filter(BodyDeclaration::isMethodDeclaration)
-                                            .map(BodyDeclaration::toMethodDeclaration)
-                                            .filter(Optional::isPresent)
-                                            .map(Optional::get)
-                                            .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(AutoComponent.class))
-                                            .filter(methodDeclaration -> methodDeclaration.getType().isClassOrInterfaceType())
-                                            .map(methodDeclaration ->
-                                                    buildComponent(
-                                                            compilationUnit.getPackageDeclaration().orElseThrow(),
-                                                            classOrInterfaceDeclaration,
-                                                            methodDeclaration,
-                                                            compilationUnit.getImports().stream()
-                                                                    .filter(importDeclaration ->
-                                                                            importDeclaration.getName().getIdentifier().equals(((ClassOrInterfaceType) methodDeclaration.getType()).getName().getIdentifier())
-                                                                    ).findFirst().orElseThrow()
+                                            classOrInterfaceDeclaration.getMembers().stream()
+                                                    .filter(BodyDeclaration::isMethodDeclaration)
+                                                    .map(BodyDeclaration::toMethodDeclaration)
+                                                    .filter(Optional::isPresent)
+                                                    .map(Optional::get)
+                                                    .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(GPXComponent.class))
+                                                    .filter(methodDeclaration -> methodDeclaration.getType().isClassOrInterfaceType())
+                                                    .map(methodDeclaration ->
+                                                            buildComponent(
+                                                                    compilationUnit.getPackageDeclaration().orElseThrow(),
+                                                                    classOrInterfaceDeclaration,
+                                                                    methodDeclaration,
+                                                                    compilationUnit.getImports().stream()
+                                                                            .filter(importDeclaration ->
+                                                                                    importDeclaration.getName().getIdentifier().equals(((ClassOrInterfaceType) methodDeclaration.getType()).getName().getIdentifier())
+                                                                            ).findFirst().orElseThrow()
+                                                            )
                                                     )
-                                            )
-                                            .forEach(ComponentCompilationUnit -> {
-                                                        TypeDeclaration<?> componentType = ComponentCompilationUnit.getType(0);
-                                                        try {
-                                                            Writer writer = filer.createSourceFile(componentType.getFullyQualifiedName().orElseGet(componentType::getNameAsString)).openWriter();
-                                                            writer.write(ComponentCompilationUnit.toString());
-                                                            writer.close();
-                                                        } catch (IOException e) {
-                                                            e.printStackTrace();
-                                                        }
-                                                    }
+                                                    .forEach(ComponentCompilationUnit -> {
+                                                                TypeDeclaration<?> componentType = ComponentCompilationUnit.getType(0);
+                                                                try {
+                                                                    Writer writer = filer.createSourceFile(componentType.getFullyQualifiedName().orElseGet(componentType::getNameAsString)).openWriter();
+                                                                    writer.write(ComponentCompilationUnit.toString());
+                                                                    writer.close();
+                                                                } catch (IOException e) {
+                                                                    e.printStackTrace();
+                                                                }
+                                                            }
 
-                                            );
-                                })
+                                                    );
+
+                                            classOrInterfaceDeclaration.getMembers().stream()
+                                                    .filter(BodyDeclaration::isMethodDeclaration)
+                                                    .map(BodyDeclaration::toMethodDeclaration)
+                                                    .filter(Optional::isPresent)
+                                                    .map(Optional::get)
+                                                    .filter(methodDeclaration -> methodDeclaration.getType().isClassOrInterfaceType())
+                                                    .map(methodDeclaration ->
+                                                            buildProxy(
+                                                                    compilationUnit.getPackageDeclaration().orElseThrow(),
+                                                                    classOrInterfaceDeclaration,
+                                                                    methodDeclaration,
+                                                                    compilationUnit.getImports().stream()
+                                                                            .filter(importDeclaration ->
+                                                                                    importDeclaration.getName().getIdentifier().equals(((ClassOrInterfaceType) methodDeclaration.getType()).getName().getIdentifier())
+                                                                            ).findFirst().orElseThrow()
+                                                            )
+                                                    ).collect(Collectors.toList());
+                                        }
+                                )
                 );
+    }
+
+    protected Optional<CompilationUnit> buildProxy(PackageDeclaration packageDeclaration, ClassOrInterfaceDeclaration moduleDeclaration, MethodDeclaration methodDeclaration, ImportDeclaration importDeclaration) {
+        ClassOrInterfaceType methodDeclarationType = (ClassOrInterfaceType) methodDeclaration.getType();
+        TypeElement typeElement = this.processingEnv.getElementUtils().getTypeElement(importDeclaration.getNameAsString());
+        String sourceCode = trees.getPath(typeElement).getCompilationUnit().toString();
+
+        javaParser.parse(sourceCode)
+                .ifSuccessful(compilationUnit ->
+                        compilationUnit.getTypes().stream()
+                                .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
+                                .map(typeDeclaration -> (ClassOrInterfaceDeclaration) typeDeclaration)
+                                .forEach(classOrInterfaceDeclaration -> {
+
+                                            classOrInterfaceDeclaration.getMembers().stream()
+                                                    .filter(BodyDeclaration::isMethodDeclaration)
+                                                    .map(BodyDeclaration::toMethodDeclaration)
+                                                    .filter(Optional::isPresent)
+                                                    .map(Optional::get);
+
+                                        }
+                                )
+                );
+        return Optional.empty();
     }
 
     protected CompilationUnit buildComponent(PackageDeclaration packageDeclaration, ClassOrInterfaceDeclaration moduleDeclaration, MethodDeclaration methodDeclaration, ImportDeclaration importDeclaration) {
         ClassOrInterfaceType methodDeclarationType = (ClassOrInterfaceType) methodDeclaration.getType();
-        AnnotationExpr annotationExpr = methodDeclaration.getAnnotationByClass(AutoComponent.class).orElseThrow();
+        AnnotationExpr annotationExpr = methodDeclaration.getAnnotationByClass(GPXComponent.class).orElseThrow();
 
         String getMethodName = annotationExpr.asNormalAnnotationExpr().getPairs().stream()
-                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
+                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("getMethodName"))
                 .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr().asString())
                 .findFirst()
-                .orElseGet(() -> getAnnotationDefaultValue(AutoComponent.class, "value", String.class).orElseThrow());
+                .orElseGet(() -> getAnnotationDefaultValue(GPXComponent.class, "getMethodName", String.class).orElseThrow());
 
         String componentName = annotationExpr.asNormalAnnotationExpr().getPairs().stream()
-                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
+                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
                 .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr().asString())
                 .findFirst()
                 .orElseGet(() -> methodDeclarationType.getNameAsString().concat("Component"));

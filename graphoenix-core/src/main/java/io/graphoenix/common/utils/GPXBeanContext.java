@@ -1,7 +1,6 @@
 package io.graphoenix.common.utils;
 
-import org.javatuples.Pair;
-
+import java.io.*;
 import java.lang.invoke.CallSite;
 import java.lang.invoke.LambdaConversionException;
 import java.lang.invoke.LambdaMetafactory;
@@ -10,94 +9,96 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.regex.Pattern;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class GPXBeanContext {
 
-    private static final Pattern FIELD_SEPARATOR = Pattern.compile("\\.");
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
-    private static final ClassValue<Function<?, ?>> CACHE = new ClassValue<>() {
-        @Override
-        protected Function<?, ?> computeValue(Class<?> type) {
-            return Function.identity();
+    private static final Map<Class<?>, Supplier<?>> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, String> FACTORIES = new HashMap<>();
+
+    static {
+        InputStream resourceAsStream = GPXBeanContext.class.getResourceAsStream("/META-INF/graphoenix.factories");
+        assert resourceAsStream != null;
+        BufferedReader reader = new BufferedReader(new InputStreamReader(resourceAsStream));
+        try {
+            while (reader.ready()) {
+                String[] factoryPair = reader.readLine().split("=");
+                FACTORIES.putIfAbsent(factoryPair[0], factoryPair[1]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-    };
+    }
 
     private GPXBeanContext() {
     }
 
-
-    public static <T> T getBean(Class<T> beanClass) {
-        return null;
+    public static <T> T get(Class<T> beanClass) {
+        return beanClass.cast(getCachedSupplier(beanClass).get());
     }
 
-    private static Function<?, ?> getCachedFunction(Class<?> javaBeanClass) {
-        final Function<?, ?> function = CACHE.get(javaBeanClass);
-        if (function != null) {
-            return function;
+    private static <T> Supplier<?> getCachedSupplier(Class<T> beanClass) {
+        final Supplier<?> supplier = CACHE.get(beanClass);
+        if (supplier != null) {
+            return supplier;
         }
-        return createAndCacheFunction(javaBeanClass);
+        return createAndCacheSupplier(beanClass);
     }
 
-    private static Function<?, ?> createAndCacheFunction(Class<?> javaBeanClass) {
-        return cacheAndGetFunction(javaBeanClass,
-                createFunctions(javaBeanClass)
-                        .stream()
-                        .reduce(Function::andThen)
-                        .orElseThrow(IllegalStateException::new)
-        );
+    private static <T> Supplier<?> createAndCacheSupplier(Class<T> beanClass) {
+        return cacheAndGetSupplier(beanClass, createSupplier(beanClass));
     }
 
-    private static Function<?, ?> cacheAndGetFunction(String path, Class<?> javaBeanClass, Function<?, ?> functionToBeCached) {
-        Function<?, ?> cachedFunction = CACHE.get(javaBeanClass).putIfAbsent(path, functionToBeCached);
-        return cachedFunction != null ? cachedFunction : functionToBeCached;
+    private static <T> Supplier<?> cacheAndGetSupplier(Class<T> beanClass, Supplier<?> supplierToBeCached) {
+        Supplier<?> cachedSupplier = CACHE.putIfAbsent(beanClass, supplierToBeCached);
+        return cachedSupplier != null ? cachedSupplier : supplierToBeCached;
     }
 
-    private static List<Function<?, ?>> createFunctions(Class<?> javaBeanClass, String path) {
-        List<Function<?, ?>> functions = new ArrayList<>();
-        Stream.of(FIELD_SEPARATOR.split(path))
-                .reduce(javaBeanClass, (nestedJavaBeanClass, fieldName) -> {
-                    Pair<? extends Class<?>, Function<?, ?>> getFunction = createFunction(nestedJavaBeanClass);
-                    functions.add(getFunction.getValue1());
-                    return getFunction.getValue0();
-                }, (previousClass, nextClass) -> nextClass);
-        return functions;
-    }
-
-    private static Pair<? extends Class<?>, Function<?, ?>> createFunction(Class<?> clazz) {
-        return Stream.of(clazz.getDeclaredMethods())
-                .filter(method -> isCreateMethod(clazz, method))
-                .map(GPXBeanContext::createTupleWithReturnTypeAndGetter)
+    private static <T> Supplier<?> createSupplier(Class<T> beanClass) {
+        return Stream.of(getFactoryClass(beanClass).orElseThrow().getDeclaredMethods())
+                .filter(method -> isCreateMethod(beanClass, method))
+                .map(GPXBeanContext::creatorMethodToSupplier)
                 .findFirst()
                 .orElseThrow(IllegalStateException::new);
     }
 
-    private static <T> boolean isCreateMethod(Class<T> clazz, Method method) {
-        return method.getParameterCount() == 0 &&
-                Modifier.isStatic(method.getModifiers()) &&
-                method.getReturnType().isInstance(clazz);
-    }
-
-    private static Pair<? extends Class<?>, Function<?, ?>> createTupleWithReturnTypeAndGetter(Method getterMethod) {
+    private static <T> Optional<Class<?>> getFactoryClass(Class<T> beanClass) {
         try {
-            return Pair.with(
-                    getterMethod.getReturnType(),
-                    (Function<?, ?>) createCallSite(LOOKUP.unreflect(getterMethod)).getTarget().invokeExact()
-            );
-        } catch (Throwable e) {
-            throw new IllegalArgumentException("Lambda creation failed for getterMethod (" + getterMethod.getName() + ").", e);
+            return Optional.of(Class.forName(FACTORIES.get(beanClass.getName())));
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 
-    private static CallSite createCallSite(MethodHandle getterMethodHandle) throws LambdaConversionException {
-        return LambdaMetafactory.metafactory(LOOKUP, "apply",
-                MethodType.methodType(Function.class),
-                MethodType.methodType(Object.class, Object.class),
-                getterMethodHandle, getterMethodHandle.type());
+    private static <T> boolean isCreateMethod(Class<T> beanClass, Method method) {
+        return method.getParameterCount() == 0 &&
+                Modifier.isStatic(method.getModifiers()) &&
+                method.getReturnType().isInstance(beanClass);
+    }
+
+    private static Supplier<?> creatorMethodToSupplier(Method creatorMethod) {
+        try {
+            return (Supplier<?>) createCallSite(LOOKUP.unreflect(creatorMethod)).getTarget().invokeExact();
+        } catch (Throwable e) {
+            throw new IllegalArgumentException("Lambda creation failed for creatorMethod (" + creatorMethod.getName() + ").", e);
+        }
+    }
+
+    private static CallSite createCallSite(MethodHandle createSupplierHandle) throws LambdaConversionException {
+        return LambdaMetafactory.metafactory(
+                LOOKUP,
+                "get",
+                MethodType.methodType(Supplier.class),
+                MethodType.methodType(Object.class),
+                createSupplierHandle,
+                createSupplierHandle.type()
+        );
     }
 }

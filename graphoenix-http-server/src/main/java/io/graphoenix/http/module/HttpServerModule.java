@@ -7,7 +7,7 @@ import io.graphoenix.common.pipeline.GraphQLDataFetcher;
 import io.graphoenix.http.server.GraphqlHttpServer;
 import io.graphoenix.http.server.GraphqlHttpServerHandler;
 import io.graphoenix.http.server.GraphqlHttpServerInitializer;
-import io.graphoenix.spi.annotation.dagger.AutoComponent;
+import io.graphoenix.spi.annotation.dagger.GPXComponent;
 import io.graphoenix.spi.config.HttpServerConfig;
 import io.graphoenix.spi.config.NettyConfig;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -36,7 +36,7 @@ public class HttpServerModule {
 
     @Provides
     @Singleton
-    @AutoComponent
+    @GPXComponent
     public GraphqlHttpServer graphqlHttpServer(GraphQLDataFetcher dataFetcher) {
         return new GraphqlHttpServer(nettyConfig, httpServerConfig, graphqlHttpServerInitializer(dataFetcher));
     }

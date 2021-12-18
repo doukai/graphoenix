@@ -10,10 +10,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Target(METHOD)
 @Retention(RUNTIME)
-public @interface AutoComponent {
-    String value() default "get";
+public @interface GPXComponent {
+    String value() default "";
 
-    String name() default "";
+    String getMethodName() default "get";
 
     String packageName() default "";
 }
