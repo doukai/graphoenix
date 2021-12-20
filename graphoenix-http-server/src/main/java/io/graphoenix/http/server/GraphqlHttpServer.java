@@ -16,7 +16,6 @@ import io.netty.handler.logging.LoggingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 public class GraphqlHttpServer {
@@ -36,7 +35,6 @@ public class GraphqlHttpServer {
         this.graphqlHttpServerInitializer = graphqlHttpServerInitializer;
     }
 
-    @Nonnull
     public void run() throws Exception {
         EventLoopGroup bossGroup;
         EventLoopGroup workerGroup;

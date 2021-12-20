@@ -5,8 +5,7 @@ import io.graphoenix.spi.aop.InvocationContext;
 
 public class TestAop implements Interceptor {
     @Override
-    public boolean before(InvocationContext context) {
-        return false;
+    public void before(InvocationContext context) {
     }
 
     @Override

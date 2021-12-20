@@ -26,6 +26,8 @@ public class HttpServerModule {
     @ConfigProperty
     private NettyConfig nettyConfig;
 
+    @Provides
+    @Singleton
     @InterceptorBean(Nonnull.class)
     public TestAop testAop() {
         return new TestAop();
@@ -44,7 +46,6 @@ public class HttpServerModule {
 
     @Provides
     @Singleton
-    @GPXComponent
     public GraphqlHttpServer graphqlHttpServer(GraphQLDataFetcher dataFetcher) {
         return new GraphqlHttpServer(nettyConfig, httpServerConfig, graphqlHttpServerInitializer(dataFetcher));
     }

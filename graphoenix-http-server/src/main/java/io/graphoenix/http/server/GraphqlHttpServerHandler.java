@@ -20,12 +20,14 @@ import io.netty.handler.codec.http.HttpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
 
 import static io.graphoenix.common.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import static javax.annotation.meta.When.UNKNOWN;
 
 public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -42,6 +44,12 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     @Inject
     public GraphqlHttpServerHandler(GraphQLDataFetcher dataFetcher) {
         this.dataFetcher = dataFetcher;
+    }
+
+
+    @Nonnull(when = UNKNOWN)
+    public String test() {
+        return "test";
     }
 
     @Override
