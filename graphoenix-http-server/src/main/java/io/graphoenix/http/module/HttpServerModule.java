@@ -8,7 +8,6 @@ import io.graphoenix.http.server.GraphqlHttpServer;
 import io.graphoenix.http.server.GraphqlHttpServerHandler;
 import io.graphoenix.http.server.GraphqlHttpServerInitializer;
 import io.graphoenix.http.server.TestAop;
-import io.graphoenix.spi.annotation.dagger.GPXComponent;
 import io.graphoenix.spi.aop.InterceptorBean;
 import io.graphoenix.spi.config.HttpServerConfig;
 import io.graphoenix.spi.config.NettyConfig;
@@ -20,10 +19,10 @@ import javax.inject.Singleton;
 @Module(includes = PipelineModule.class)
 public class HttpServerModule {
 
-    @ConfigProperty
+    @ConfigProperty(name = "aaa.bbb")
     private HttpServerConfig httpServerConfig;
 
-    @ConfigProperty
+    @ConfigProperty(name = "ccc.ddd")
     private NettyConfig nettyConfig;
 
     @Provides
