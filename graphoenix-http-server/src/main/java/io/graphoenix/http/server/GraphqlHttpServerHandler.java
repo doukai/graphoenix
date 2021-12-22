@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 import static io.graphoenix.common.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
@@ -48,7 +49,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
 
     @Nonnull(when = UNKNOWN)
-    public String test() {
+    public String test(String a, File b) {
         return "test";
     }
 

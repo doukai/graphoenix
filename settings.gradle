@@ -12,4 +12,5 @@ include 'graphoenix-gradle-plugin'
 include 'graphoenix-annotation-processor'
 include 'graphoenix-config'
 include 'graphoenix-dagger'
+include 'graphoenix-aop'
 

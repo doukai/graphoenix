@@ -1,90 +1,81 @@
 package io.graphoenix.config;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigValue;
-import org.eclipse.microprofile.config.inject.ConfigProperties;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.google.auto.service.AutoService;
+import io.graphoenix.dagger.DaggerProxyProcessor;
+import org.eclipse.microprofile.config.Config;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import spoon.compiler.Environment;
-import spoon.processing.AbstractAnnotationProcessor;
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtNewArray;
-import spoon.reflect.declaration.*;
-import spoon.reflect.reference.CtTypeReference;
 
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
-
-public class ConfigPropertyProcessor extends AbstractAnnotationProcessor<ConfigProperty, CtField<Object>> {
-
-    private CtTypeReference<?> collectionTypeReference;
-    private CtTypeReference<?> setTypeReference;
-    private CtTypeReference<?> mapTypeReference;
-    private CtTypeReference<?> stringTypeReference;
+@AutoService(DaggerProxyProcessor.class)
+public class ConfigPropertyProcessor implements DaggerProxyProcessor {
 
     @Override
-    public void init() {
-        super.init();
-        Environment environment = getEnvironment();
-        environment.setAutoImports(true);
-        environment.setEncoding(StandardCharsets.UTF_8);
+    public void buildComponentProxy(CompilationUnit moduleCompilationUnit,
+                                    ClassOrInterfaceDeclaration moduleClassDeclaration,
+                                    CompilationUnit componentCompilationUnit,
+                                    ClassOrInterfaceDeclaration componentClassDeclaration,
+                                    CompilationUnit componentProxyCompilationUnit,
+                                    ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
 
-        collectionTypeReference = getFactory().Type().createReference(Collection.class);
-        setTypeReference = getFactory().Type().createReference(Set.class);
-        mapTypeReference = getFactory().Type().createReference(Map.class);
-        stringTypeReference = getFactory().Type().createReference(String.class);
+
     }
 
     @Override
-    public void process(ConfigProperty annotation, CtField<Object> element) {
-        Config config = CONFIG_UTIL.getConfig();
-        String configKey = element.getAnnotations().stream()
-                .filter(ctAnnotation -> ctAnnotation.getType().getSimpleName().equals(ConfigProperty.class.getSimpleName()))
-                .filter(ctAnnotation -> !ctAnnotation.getValueAsString("name").equals(""))
-                .findFirst()
-                .map(ctAnnotation -> ctAnnotation.getValueAsString("name"))
-                .orElseGet(() -> element.getType().getTypeDeclaration().getAnnotation(ConfigProperties.class).prefix());
+    public void buildModuleProxy(CompilationUnit moduleCompilationUnit,
+                                 ClassOrInterfaceDeclaration moduleCLassDeclaration,
+                                 List<CompilationUnit> componentProxyCompilationUnits,
+                                 CompilationUnit moduleProxyCompilationUnit,
+                                 ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+        moduleProxyClassDeclaration.addField(Config.class, "config", Modifier.Keyword.PRIVATE).getVariable(0).setInitializer("ConfigProvider.getConfig();");
 
-        CtTypeReference<Object> type = element.getType();
-        element.setDefaultExpression(typeToExpression(type, config, configKey));
+        List<FieldDeclaration> configPropertyFieldDeclarations = getConfigPropertyFieldDeclarations(moduleCLassDeclaration);
+
+        configPropertyFieldDeclarations
+                .forEach(fieldDeclaration ->
+                        moduleProxyClassDeclaration.addField(fieldDeclaration.getElementType(), fieldDeclaration.getVariable(0).getNameAsString(), fieldDeclaration.getModifiers().stream().map(Modifier::getKeyword).toArray(Modifier.Keyword[]::new))
+                                .getVariable(0)
+                                .setInitializer(
+                                        "config.getValue("
+                                                .concat(
+                                                        fieldDeclaration.getAnnotationByClass(ConfigProperty.class)
+                                                                .orElseThrow()
+                                                                .asNormalAnnotationExpr().getPairs().stream()
+                                                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
+                                                                .findFirst()
+                                                                .orElseThrow()
+                                                                .getValue().toString()
+                                                )
+                                                .concat(",")
+                                                .concat(fieldDeclaration.getElementType().asClassOrInterfaceType().getNameAsString())
+                                                .concat(".class);"))
+                );
+
+        moduleProxyCompilationUnit.addImport(Config.class).addImport(ConfigProvider.class);
     }
 
-    @SuppressWarnings("unchecked")
-    private CtExpression<Object> typeToExpression(CtTypeReference<Object> type, Config config, String configKey) {
-        if (type.isPrimitive() || type.unbox().isPrimitive() || type.isSubtypeOf(stringTypeReference)) {
-            return getFactory().createCodeSnippetExpression(config.hasPath(configKey) ? config.getValue(configKey).render() : "null");
-        } else if (type.isArray()) {
-            CtNewArray<Object> newArray = getFactory().createNewArray();
-            return newArray.setElements(
-                    config.getList(configKey).stream()
-                            .map(configValue -> getFactory().createCodeSnippetExpression(configValue.render()))
-                            .collect(Collectors.toList())
-            );
-        } else if (type.isSubtypeOf(collectionTypeReference)) {
-            String valueList = config.getList(configKey).stream()
-                    .map(ConfigValue::render)
-                    .collect(Collectors.joining(","));
-            if (type.isSubtypeOf(setTypeReference)) {
-                return getFactory().createCodeSnippetExpression("Set.of(" + valueList + ")");
-            } else {
-                return getFactory().createCodeSnippetExpression("List.of(" + valueList + ")");
-            }
-        } else if (type.isEnum()) {
-            return getFactory().createCodeSnippetExpression(type.getSimpleName() + "." + config.getString(configKey));
-        } else if (type.isSubtypeOf(mapTypeReference)) {
-            String valueList = config.getObject(configKey).entrySet().stream()
-                    .flatMap(entry -> Stream.of("\"" + entry.getKey() + "\"", entry.getValue().render()))
-                    .collect(Collectors.joining(","));
-            return getFactory().createCodeSnippetExpression("Map.of(" + valueList + ")");
-        } else if (type.isClass()) {
-            CtExpression<Object>[] ctExpressions = type.getAllFields().stream()
-                    .map(ctFieldReference -> typeToExpression((CtTypeReference<Object>) ctFieldReference.getType(), config, configKey.concat(".").concat(ctFieldReference.getSimpleName())))
-                    .toArray(CtExpression[]::new);
-            return getFactory().createConstructorCall(type, ctExpressions);
-        }
-        return null;
+    @Override
+    public void buildComponentProxyComponent(CompilationUnit moduleProxyCompilationUnit,
+                                             ClassOrInterfaceDeclaration moduleProxyClassDeclaration,
+                                             CompilationUnit componentProxyCompilationUnit,
+                                             ClassOrInterfaceDeclaration componentProxyClassDeclaration,
+                                             CompilationUnit componentProxyComponentCompilationUnit,
+                                             ClassOrInterfaceDeclaration componentProxyComponentInterfaceDeclaration) {
+
+    }
+
+    protected List<FieldDeclaration> getConfigPropertyFieldDeclarations(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+        return classOrInterfaceDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isFieldDeclaration)
+                .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(ConfigProperty.class))
+                .map(bodyDeclaration -> (FieldDeclaration) bodyDeclaration)
+                .collect(Collectors.toList());
     }
 }
