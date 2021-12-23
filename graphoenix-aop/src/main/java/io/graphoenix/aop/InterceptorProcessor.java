@@ -19,6 +19,7 @@ import io.graphoenix.spi.aop.InterceptorBean;
 import io.graphoenix.spi.aop.InvocationContext;
 
 import javax.inject.Inject;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -169,6 +170,11 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
     }
 
     @Override
+    public Optional<CompilationUnit> createComponentProxy(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
+        return Optional.empty();
+    }
+
+    @Override
     public void buildModuleProxy(CompilationUnit moduleCompilationUnit,
                                  ClassOrInterfaceDeclaration moduleCLassDeclaration,
                                  List<CompilationUnit> componentProxyCompilationUnits,
@@ -261,6 +267,11 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                              CompilationUnit componentProxyComponentCompilationUnit,
                                              ClassOrInterfaceDeclaration componentProxyComponentInterfaceDeclaration) {
 
+    }
+
+    @Override
+    public Class<? extends Annotation> support() {
+        return InterceptorBean.class;
     }
 
     protected Optional<MethodDeclaration> getInterceptorBeanMethodDeclaration(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, AnnotationExpr annotationExpr) {

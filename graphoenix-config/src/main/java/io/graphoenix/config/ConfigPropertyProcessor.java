@@ -13,7 +13,9 @@ import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @AutoService(DaggerProxyProcessor.class)
@@ -26,6 +28,11 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                     ClassOrInterfaceDeclaration componentClassDeclaration,
                                     CompilationUnit componentProxyCompilationUnit,
                                     ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
+    }
+
+    @Override
+    public Optional<CompilationUnit> createComponentProxy(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
+        return Optional.empty();
     }
 
     @Override
@@ -91,6 +98,11 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                              ClassOrInterfaceDeclaration componentProxyClassDeclaration,
                                              CompilationUnit componentProxyComponentCompilationUnit,
                                              ClassOrInterfaceDeclaration componentProxyComponentInterfaceDeclaration) {
+    }
+
+    @Override
+    public Class<? extends Annotation> support() {
+        return ConfigProperty.class;
     }
 
     protected List<FieldDeclaration> getConfigPropertyFieldDeclarations(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {

@@ -4,14 +4,12 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -19,7 +17,6 @@ import com.google.auto.service.AutoService;
 import com.sun.source.util.Trees;
 import dagger.Component;
 import dagger.Module;
-import io.graphoenix.spi.aop.InterceptorBean;
 import jakarta.annotation.Generated;
 
 import javax.annotation.processing.*;
@@ -30,10 +27,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.lang.annotation.Annotation;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,6 +43,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
     private Filer filer;
     private Elements elements;
     private ServiceLoader<DaggerProxyProcessor> daggerProxyProcessors;
+    private Set<Class<? extends Annotation>> supports;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -57,6 +53,10 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         this.filer = this.processingEnv.getFiler();
         this.elements = this.processingEnv.getElementUtils();
         this.daggerProxyProcessors = ServiceLoader.load(DaggerProxyProcessor.class, DaggerModuleProcessor.class.getClassLoader());
+        this.supports = new HashSet<>();
+        for (DaggerProxyProcessor daggerProxyProcessor : this.daggerProxyProcessors) {
+            this.supports.add(daggerProxyProcessor.support());
+        }
     }
 
     @Override
@@ -75,6 +75,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
     protected void buildComponents(String sourceCode) {
         javaParser.parse(sourceCode)
                 .ifSuccessful(moduleCompilationUnit -> {
+
                             List<CompilationUnit> componentProxyCompilationUnits = moduleCompilationUnit.getTypes().stream()
                                     .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                                     .filter(typeDeclaration -> typeDeclaration.hasModifier(Modifier.Keyword.PUBLIC))
@@ -82,7 +83,13 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                     .flatMap(moduleClassDeclaration ->
                                             moduleClassDeclaration.getMembers().stream()
                                                     .filter(BodyDeclaration::isMethodDeclaration)
-                                                    .filter(bodyDeclaration -> !bodyDeclaration.isAnnotationPresent(InterceptorBean.class))
+                                                    .filter(bodyDeclaration ->
+                                                            bodyDeclaration.getAnnotations().stream()
+                                                                    .noneMatch(annotationExpr ->
+                                                                            supports.stream().map(Class::getSimpleName)
+                                                                                    .anyMatch(name -> name.equals(annotationExpr.getNameAsString()))
+                                                                    )
+                                                    )
                                                     .map(BodyDeclaration::toMethodDeclaration)
                                                     .filter(Optional::isPresent)
                                                     .map(Optional::get)
