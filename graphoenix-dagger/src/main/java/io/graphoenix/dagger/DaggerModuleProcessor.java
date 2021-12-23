@@ -4,12 +4,14 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -34,6 +36,8 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
 
 @SupportedAnnotationTypes("dagger.Module")
 @AutoService(Processor.class)
@@ -83,7 +87,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                     .filter(Optional::isPresent)
                                                     .map(Optional::get)
                                                     .filter(methodDeclaration -> methodDeclaration.getType().isClassOrInterfaceType())
-                                                    .map(methodDeclaration -> methodDeclaration.getType().asClassOrInterfaceType())
+                                                    .map(DAGGER_PROCESSOR_UTIL::getMethodReturnType)
                                                     .flatMap(componentType ->
                                                             buildComponentProxy(
                                                                     moduleCompilationUnit,
@@ -189,7 +193,6 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         ClassOrInterfaceDeclaration moduleProxyClassDeclaration = new ClassOrInterfaceDeclaration()
                 .setPublic(true)
                 .setName(moduleClassDeclaration.getNameAsString() + "Proxy")
-                .addAnnotation(moduleClassDeclaration.getAnnotationByClass(Module.class).orElseThrow())
                 .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr("io.graphoenix.dagger.DaggerModuleProcessor")).setName(Generated.class.getSimpleName()));
 
         componentProxyCompilationUnits
@@ -204,7 +207,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(declaration -> declaration.getType().isClassOrInterfaceType())
-                                                    .filter(declaration -> declaration.getType().asClassOrInterfaceType().getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString()))
+                                                    .filter(declaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(declaration).getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString()))
                                                     .findFirst()
                                                     .orElseThrow();
 
@@ -213,7 +216,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                             moduleProxyClassDeclaration
                                                     .addMethod(componentMethodDeclaration.getNameAsString(), Modifier.Keyword.PUBLIC)
                                                     .setParameters(componentMethodDeclaration.getParameters())
-                                                    .setType(componentProxyClassDeclaration.getNameAsString())
+                                                    .setType(componentMethodDeclaration.getType())
                                                     .setAnnotations(componentMethodDeclaration.getAnnotations())
                                                     .setBody(blockStmt);
 
@@ -235,6 +238,20 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         CompilationUnit moduleProxyCompilationUnit = new CompilationUnit().addType(moduleProxyClassDeclaration)
                 .addImport(Module.class)
                 .addImport(Generated.class);
+
+        NormalAnnotationExpr moduleAnnotationExpr = new NormalAnnotationExpr();
+        moduleAnnotationExpr.setName(Module.class.getSimpleName());
+        moduleClassDeclaration.getAnnotationByClass(Module.class).orElseThrow()
+                .clone()
+                .asNormalAnnotationExpr().getPairs()
+                .forEach(memberValuePair -> {
+                    if (memberValuePair.getValue().isClassExpr()) {
+                        moduleProxyCompilationUnit.addImport(getNameByType(moduleCompilationUnit, memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType().getName()) + "Proxy");
+                        memberValuePair.getValue().asClassExpr().setType(memberValuePair.getValue().asClassExpr().getTypeAsString() + "Proxy");
+                    }
+                    moduleAnnotationExpr.addPair(memberValuePair.getNameAsString(), memberValuePair.getValue());
+                });
+        moduleProxyClassDeclaration.addAnnotation(moduleAnnotationExpr);
 
         moduleCompilationUnit.getPackageDeclaration().ifPresent(moduleProxyCompilationUnit::setPackageDeclaration);
 
@@ -273,7 +290,15 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .addAnnotation(Singleton.class)
                 .addAnnotation(new NormalAnnotationExpr().addPair("modules", modules).setName(Component.class.getSimpleName()));
 
-        componentProxyComponentInterfaceDeclaration.addMethod("get").setType(componentProxyClassDeclaration.getNameAsString()).removeBody();
+        componentProxyComponentInterfaceDeclaration.addMethod("get").setType(
+                moduleProxyClassDeclaration.getMembers()
+                        .stream().filter(BodyDeclaration::isMethodDeclaration)
+                        .map(BodyDeclaration::asMethodDeclaration)
+                        .filter(methodDeclaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(methodDeclaration).getNameAsString().equals(componentProxyClassDeclaration.getNameAsString()))
+                        .findFirst()
+                        .orElseThrow()
+                        .getType()
+        ).removeBody();
 
         CompilationUnit componentProxyComponentCompilationUnit = new CompilationUnit()
                 .addType(componentProxyComponentInterfaceDeclaration)
@@ -461,13 +486,13 @@ public class DaggerModuleProcessor extends AbstractProcessor {
             return;
         }
 
-        Optional<ImportDeclaration> sourceImportInAsterisk = source.getImports().stream()
+        Optional<ImportDeclaration> classImportInAsterisk = source.getImports().stream()
                 .filter(ImportDeclaration::isAsterisk)
                 .filter(importDeclaration -> classExist(importDeclaration.getNameAsString().concat(".").concat(name)))
                 .findFirst();
 
-        if (sourceImportInAsterisk.isPresent()) {
-            target.addImport(sourceImportInAsterisk.get());
+        if (classImportInAsterisk.isPresent()) {
+            target.addImport(classImportInAsterisk.get());
             return;
         }
 

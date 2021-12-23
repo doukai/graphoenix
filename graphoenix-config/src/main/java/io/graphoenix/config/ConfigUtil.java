@@ -10,10 +10,11 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
+import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
+
 public enum ConfigUtil {
     CONFIG_UTIL(false),
     RESOURCES_CONFIG_UTIL(true);
-    private static final String RESOURCES_PATH = System.getProperty("user.dir").concat(File.separator).concat("src").concat(File.separator).concat("main").concat(File.separator).concat("resources").concat(File.separator);
     private static final String[] configNames = {"application.conf", "application.json", "application.properties", "reference.conf"};
     private final boolean fromResources;
 
