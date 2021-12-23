@@ -15,6 +15,7 @@ dependencies {
     compile project(":graphoenix-spi")
     compile "io.projectreactor:reactor-core:3.4.11"
     compile 'one.util:streamex:0.8.0'
+    compile "io.vavr:vavr:0.10.4"
     compile "commons-chain:commons-chain:1.2"
     compile "com.google.guava:guava:30.1.1-jre"
     compile 'com.google.code.gson:gson:2.8.8'

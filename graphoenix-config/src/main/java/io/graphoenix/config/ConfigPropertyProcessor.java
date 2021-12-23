@@ -5,8 +5,10 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.expr.*;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
+import io.vavr.control.Try;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -24,8 +26,6 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                     ClassOrInterfaceDeclaration componentClassDeclaration,
                                     CompilationUnit componentProxyCompilationUnit,
                                     ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
-
-
     }
 
     @Override
@@ -34,7 +34,8 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                  List<CompilationUnit> componentProxyCompilationUnits,
                                  CompilationUnit moduleProxyCompilationUnit,
                                  ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
-        moduleProxyClassDeclaration.addField(Config.class, "config", Modifier.Keyword.PRIVATE).getVariable(0).setInitializer("ConfigProvider.getConfig();");
+
+        moduleProxyClassDeclaration.addField(Config.class, "config", Modifier.Keyword.PRIVATE).getVariable(0).setInitializer(new MethodCallExpr().setName("getConfig").setScope(new NameExpr("ConfigProvider")));
 
         List<FieldDeclaration> configPropertyFieldDeclarations = getConfigPropertyFieldDeclarations(moduleCLassDeclaration);
 
@@ -43,19 +44,41 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                         moduleProxyClassDeclaration.addField(fieldDeclaration.getElementType(), fieldDeclaration.getVariable(0).getNameAsString(), fieldDeclaration.getModifiers().stream().map(Modifier::getKeyword).toArray(Modifier.Keyword[]::new))
                                 .getVariable(0)
                                 .setInitializer(
-                                        "config.getValue("
-                                                .concat(
-                                                        fieldDeclaration.getAnnotationByClass(ConfigProperty.class)
+                                        new MethodCallExpr()
+                                                .setName("orElse")
+                                                .addArgument(new MethodCallExpr().setName("getValue")
+                                                        .addArgument(fieldDeclaration
+                                                                .getAnnotationByClass(ConfigProperty.class)
+                                                                .map(annotationExpr ->
+                                                                        annotationExpr
+                                                                                .asNormalAnnotationExpr().getPairs().stream()
+                                                                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("defaultValue"))
+                                                                                .findFirst()
+                                                                                .map(MemberValuePair::getValue)
+                                                                                .orElseGet(() -> new StringLiteralExpr(Try.of(() -> (String) ConfigProperty.class.getMethod("defaultValue").getDefaultValue()).get()))
+                                                                )
                                                                 .orElseThrow()
-                                                                .asNormalAnnotationExpr().getPairs().stream()
-                                                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
-                                                                .findFirst()
-                                                                .orElseThrow()
-                                                                .getValue().toString()
+                                                        )
+                                                        .addArgument(new ClassExpr().setType(fieldDeclaration.getElementType()))
+                                                        .setScope(new NameExpr("config"))
                                                 )
-                                                .concat(",")
-                                                .concat(fieldDeclaration.getElementType().asClassOrInterfaceType().getNameAsString())
-                                                .concat(".class);"))
+                                                .setScope(
+                                                        new MethodCallExpr().setName("getOptionalValue")
+                                                                .addArgument(fieldDeclaration
+                                                                        .getAnnotationByClass(ConfigProperty.class)
+                                                                        .orElseThrow()
+                                                                        .asNormalAnnotationExpr().getPairs().stream()
+                                                                        .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
+                                                                        .findFirst()
+                                                                        .orElseThrow()
+                                                                        .getValue()
+                                                                )
+                                                                .addArgument(new ClassExpr().setType(fieldDeclaration.getElementType()))
+                                                                .setScope(new NameExpr("config"))
+                                                )
+
+
+                                )
                 );
 
         moduleProxyCompilationUnit.addImport(Config.class).addImport(ConfigProvider.class);
@@ -68,7 +91,6 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                              ClassOrInterfaceDeclaration componentProxyClassDeclaration,
                                              CompilationUnit componentProxyComponentCompilationUnit,
                                              ClassOrInterfaceDeclaration componentProxyComponentInterfaceDeclaration) {
-
     }
 
     protected List<FieldDeclaration> getConfigPropertyFieldDeclarations(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {

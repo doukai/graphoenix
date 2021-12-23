@@ -19,7 +19,7 @@ import javax.inject.Singleton;
 @Module(includes = PipelineModule.class)
 public class HttpServerModule {
 
-    @ConfigProperty(name = "aaa.bbb")
+    @ConfigProperty(name = "aaa.bbb",defaultValue = "cccc.aaaa")
     private HttpServerConfig httpServerConfig;
 
     @ConfigProperty(name = "ccc.ddd")
