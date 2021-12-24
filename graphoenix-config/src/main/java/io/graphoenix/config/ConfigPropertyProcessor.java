@@ -43,6 +43,11 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
     }
 
     @Override
+    public void prepareModuleProxy(BodyDeclaration<?> moduleBodyDeclaration, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, List<CompilationUnit> componentProxyCompilationUnits, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+
+    }
+
+    @Override
     public void buildModuleProxy(CompilationUnit moduleCompilationUnit,
                                  ClassOrInterfaceDeclaration moduleCLassDeclaration,
                                  List<CompilationUnit> componentProxyCompilationUnits,

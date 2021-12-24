@@ -26,8 +26,15 @@ public interface DaggerProxyProcessor {
                                                    CompilationUnit moduleCompilationUnit,
                                                    ClassOrInterfaceDeclaration moduleClassDeclaration);
 
+    void prepareModuleProxy(BodyDeclaration<?> moduleBodyDeclaration,
+                            CompilationUnit moduleCompilationUnit,
+                            ClassOrInterfaceDeclaration moduleClassDeclaration,
+                            List<CompilationUnit> componentProxyCompilationUnits,
+                            CompilationUnit moduleProxyCompilationUnit,
+                            ClassOrInterfaceDeclaration moduleProxyClassDeclaration);
+
     void buildModuleProxy(CompilationUnit moduleCompilationUnit,
-                          ClassOrInterfaceDeclaration moduleCLassDeclaration,
+                          ClassOrInterfaceDeclaration moduleClassDeclaration,
                           List<CompilationUnit> componentProxyCompilationUnits,
                           CompilationUnit moduleProxyCompilationUnit,
                           ClassOrInterfaceDeclaration moduleProxyClassDeclaration);

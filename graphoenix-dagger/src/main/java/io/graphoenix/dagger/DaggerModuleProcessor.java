@@ -110,22 +110,22 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                     .ifPresent(
                                             moduleClassDeclaration ->
                                                     moduleClassDeclaration.getMembers().stream()
-                                                    .flatMap(bodyDeclaration ->
-                                                            daggerProxyProcessors.stream()
-                                                                    .filter(daggerProxyProcessor ->
-                                                                            bodyDeclaration.getAnnotations().stream()
-                                                                                    .anyMatch(annotationExpr -> annotationExpr.getNameAsString().equals(daggerProxyProcessor.support().getSimpleName()))
-                                                                    )
-                                                                    .map(daggerProxyProcessor -> daggerProxyProcessor.createComponentProxy(bodyDeclaration, moduleCompilationUnit, moduleClassDeclaration))
-                                                                    .filter(Optional::isPresent)
-                                                                    .map(Optional::get)
-                                                    )
-                                                    .forEach(compilationUnit -> {
-                                                                importAllTypesFromSource(compilationUnit, moduleCompilationUnit);
-                                                                this.writeToFiler(compilationUnit);
-                                                                this.writeToFiler(buildComponentProxy(moduleCompilationUnit, moduleClassDeclaration, compilationUnit));
-                                                            }
-                                                    )
+                                                            .flatMap(bodyDeclaration ->
+                                                                    daggerProxyProcessors.stream()
+                                                                            .filter(daggerProxyProcessor ->
+                                                                                    bodyDeclaration.getAnnotations().stream()
+                                                                                            .anyMatch(annotationExpr -> annotationExpr.getNameAsString().equals(daggerProxyProcessor.support().getSimpleName()))
+                                                                            )
+                                                                            .map(daggerProxyProcessor -> daggerProxyProcessor.createComponentProxy(bodyDeclaration, moduleCompilationUnit, moduleClassDeclaration))
+                                                                            .filter(Optional::isPresent)
+                                                                            .map(Optional::get)
+                                                            )
+                                                            .forEach(compilationUnit -> {
+                                                                        importAllTypesFromSource(compilationUnit, moduleCompilationUnit);
+                                                                        this.writeToFiler(compilationUnit);
+                                                                        this.writeToFiler(buildComponentProxy(moduleCompilationUnit, moduleClassDeclaration, compilationUnit));
+                                                                    }
+                                                            )
                                     );
 
                             componentProxyCompilationUnits.forEach(this::writeToFiler);
@@ -208,6 +208,30 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .setName(moduleClassDeclaration.getNameAsString() + "Proxy")
                 .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr("io.graphoenix.dagger.DaggerModuleProcessor")).setName(Generated.class.getSimpleName()));
 
+        CompilationUnit moduleProxyCompilationUnit = new CompilationUnit().addType(moduleProxyClassDeclaration)
+                .addImport(Module.class)
+                .addImport(Generated.class);
+
+        moduleClassDeclaration.getMembers()
+                .forEach(bodyDeclaration ->
+                        daggerProxyProcessors.stream()
+                                .filter(daggerProxyProcessor ->
+                                        bodyDeclaration.getAnnotations().stream()
+                                                .anyMatch(annotationExpr -> annotationExpr.getNameAsString().equals(daggerProxyProcessor.support().getSimpleName()))
+                                )
+                                .forEach(daggerProxyProcessor ->
+                                        daggerProxyProcessor
+                                                .prepareModuleProxy(
+                                                        bodyDeclaration,
+                                                        moduleCompilationUnit,
+                                                        moduleClassDeclaration,
+                                                        componentProxyCompilationUnits,
+                                                        moduleProxyCompilationUnit,
+                                                        moduleProxyClassDeclaration
+                                                )
+                                )
+                );
+
         componentProxyCompilationUnits
                 .forEach(componentProxyCompilationUnit ->
                         DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit)
@@ -244,10 +268,6 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                 )
                 );
 
-        CompilationUnit moduleProxyCompilationUnit = new CompilationUnit().addType(moduleProxyClassDeclaration)
-                .addImport(Module.class)
-                .addImport(Generated.class);
-
         NormalAnnotationExpr moduleAnnotationExpr = new NormalAnnotationExpr();
         moduleAnnotationExpr.setName(Module.class.getSimpleName());
         moduleClassDeclaration.getAnnotationByClass(Module.class).orElseThrow()
@@ -270,8 +290,8 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 componentProxyCompilationUnit -> DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit)
                         .ifPresent(componentProxyClassDeclaration ->
                                 moduleProxyCompilationUnit.addImport(componentProxyCompilationUnit.getPackageDeclaration()
-                                .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(componentProxyClassDeclaration.getNameAsString()))
-                                .orElseGet(componentProxyClassDeclaration::getNameAsString)))
+                                        .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(componentProxyClassDeclaration.getNameAsString()))
+                                        .orElseGet(componentProxyClassDeclaration::getNameAsString)))
         );
 
         importAllTypesFromSource(moduleProxyClassDeclaration, moduleProxyCompilationUnit, moduleCompilationUnit);

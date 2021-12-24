@@ -9,13 +9,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AssignExpr;
-import com.github.javaparser.ast.expr.ClassExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.FieldAccessExpr;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.ThisExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -77,17 +71,28 @@ public class ChainProcessor implements DaggerProxyProcessor {
             CompilationUnit chainsImplCompilationUnit = new CompilationUnit().addType(chainsImplDeclaration);
             chainsDefineCompilationUnit.getPackageDeclaration().ifPresent(chainsImplCompilationUnit::setPackageDeclaration);
 
+            ConstructorDeclaration constructorDeclaration;
+            BlockStmt constructorDeclarationBody;
+
             if (chainsDefineClassOrInterfaceDeclaration.isInterface()) {
                 chainsImplDeclaration.addImplementedType(type);
+
+                constructorDeclaration = chainsImplDeclaration.addConstructor(Modifier.Keyword.PUBLIC)
+                        .addAnnotation(Inject.class);
+
+                constructorDeclarationBody = constructorDeclaration.createBody();
             } else {
                 chainsImplDeclaration.addExtendedType(type);
+                constructorDeclaration = chainsImplDeclaration.getConstructors().stream()
+                        .filter(injectConstructorDeclaration -> injectConstructorDeclaration.isAnnotationPresent(Inject.class)).findFirst()
+                        .orElseGet(() -> chainsImplDeclaration.addConstructor(Modifier.Keyword.PUBLIC)
+                                .addAnnotation(Inject.class));
+
+                constructorDeclarationBody = chainsImplDeclaration.getConstructors().stream()
+                        .filter(injectConstructorDeclaration -> injectConstructorDeclaration.isAnnotationPresent(Inject.class)).findFirst()
+                        .map(ConstructorDeclaration::getBody)
+                        .orElseGet(constructorDeclaration::createBody);
             }
-
-            ConstructorDeclaration constructorDeclaration = chainsImplDeclaration.addConstructor(Modifier.Keyword.PUBLIC)
-                    .addAnnotation(Inject.class)
-                    .setParameters(moduleBodyDeclaration.asMethodDeclaration().getParameters());
-
-            BlockStmt constructorDeclarationBody = constructorDeclaration.createBody();
 
             List<MethodDeclaration> methodDeclarationList = chainsDefineClassOrInterfaceDeclaration.getMembers().stream()
                     .filter(BodyDeclaration::isMethodDeclaration)
@@ -174,6 +179,57 @@ public class ChainProcessor implements DaggerProxyProcessor {
             return Optional.of(chainsImplCompilationUnit);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public void prepareModuleProxy(BodyDeclaration<?> moduleBodyDeclaration,
+                                   CompilationUnit moduleCompilationUnit,
+                                   ClassOrInterfaceDeclaration moduleClassDeclaration,
+                                   List<CompilationUnit> componentProxyCompilationUnits,
+                                   CompilationUnit moduleProxyCompilationUnit,
+                                   ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+
+        if (moduleBodyDeclaration.isMethodDeclaration()) {
+
+
+            MethodDeclaration originalMethodDeclaration = moduleBodyDeclaration.asMethodDeclaration();
+
+            ClassOrInterfaceType classOrInterfaceType = getReturnTypeFromMethod(originalMethodDeclaration).orElseThrow();
+
+            ClassOrInterfaceType type = getReturnTypeFromMethod(moduleBodyDeclaration.asMethodDeclaration()).orElseThrow();
+            CompilationUnit chainsDefineCompilationUnit = this.getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, type).orElseThrow();
+            chainsDefineCompilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleProxyCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(classOrInterfaceType + "ImplProxy")));
+
+            MethodDeclaration methodDeclaration = new MethodDeclaration()
+                    .setName(originalMethodDeclaration.getName())
+                    .setParameters(originalMethodDeclaration.getParameters())
+                    .setAnnotations(originalMethodDeclaration.getAnnotations())
+                    .setType(classOrInterfaceType.getNameAsString() + "ImplProxy");
+
+            BlockStmt body = methodDeclaration.createBody();
+
+
+            ObjectCreationExpr objectCreationExpr = new ObjectCreationExpr().setType(classOrInterfaceType + "ImplProxy");
+
+            DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(chainsDefineCompilationUnit).orElseThrow()
+                    .getConstructors().stream()
+                    .filter(constructorDeclaration -> constructorDeclaration.isAnnotationPresent(Inject.class))
+                    .findFirst()
+                    .ifPresent(constructorDeclaration ->
+                            constructorDeclaration.getParameters().forEach(parameter -> objectCreationExpr.addArgument(parameter.getNameAsExpression()))
+                    );
+
+            originalMethodDeclaration.getBody().orElseThrow()
+                    .getStatements().stream()
+                    .filter(Statement::isExpressionStmt)
+                    .map(statement -> statement.asExpressionStmt().getExpression())
+                    .filter(Expression::isMethodCallExpr)
+                    .map(Expression::asMethodCallExpr)
+                    .forEach(objectCreationExpr::addArgument);
+
+            body.addStatement(new ReturnStmt().setExpression(objectCreationExpr));
+            moduleProxyClassDeclaration.addMember(methodDeclaration);
+        }
     }
 
     @Override
