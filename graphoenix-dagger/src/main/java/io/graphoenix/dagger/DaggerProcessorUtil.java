@@ -2,10 +2,14 @@ package io.graphoenix.dagger;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
@@ -77,5 +81,33 @@ public enum DaggerProcessorUtil {
                 .map(Expression::asMethodCallExpr)
                 .filter(methodCallExpr -> methodCallExpr.getNameAsString().equals(methodDeclaration.getNameAsString()))
                 .forEach(methodCallExpr -> methodCallExpr.addArgument(parameter.getNameAsExpression()));
+    }
+
+
+    public MethodDeclaration getMethodDeclarationByMethodCallExpr(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, MethodDeclaration containerMethodDeclaration, MethodCallExpr methodCallExpr) {
+
+        NodeList<Node> parameterList = new NodeList<>();
+        parameterList.addAll(methodCallExpr.getArguments().stream()
+                .map(expression -> getParameterByArgument(containerMethodDeclaration, expression)).collect(Collectors.toList()));
+
+        return classOrInterfaceDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isMethodDeclaration)
+                .map(BodyDeclaration::asMethodDeclaration)
+                .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()))
+                .filter(methodDeclaration -> methodDeclaration.getParameters().toString().equals(parameterList.toString()))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    public Parameter getParameterByArgument(MethodDeclaration methodDeclaration, Expression expression) {
+        return methodDeclaration.getParameters().stream().filter(parameter -> parameter.getNameAsExpression().equals(expression)).findFirst().orElseThrow();
+    }
+
+    public Optional<ClassOrInterfaceDeclaration> getPublicClassOrInterfaceDeclaration(CompilationUnit compilationUnit) {
+        return compilationUnit.getTypes().stream()
+                .filter(typeDeclaration -> typeDeclaration.hasModifier(Modifier.Keyword.PUBLIC))
+                .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
+                .map(BodyDeclaration::asClassOrInterfaceDeclaration)
+                .findFirst();
     }
 }

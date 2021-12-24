@@ -13,6 +13,7 @@ import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
 import io.graphoenix.spi.aop.InterceptorBean;
@@ -23,6 +24,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static com.github.javaparser.ast.expr.AssignExpr.Operator.ASSIGN;
@@ -30,6 +32,11 @@ import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
 
 @AutoService(DaggerProxyProcessor.class)
 public class InterceptorProcessor implements DaggerProxyProcessor {
+
+    @Override
+    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType) {
+
+    }
 
     @Override
     public void buildComponentProxy(CompilationUnit moduleCompilationUnit,
@@ -170,7 +177,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
     }
 
     @Override
-    public Optional<CompilationUnit> createComponentProxy(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
+    public Optional<CompilationUnit> createComponentProxy(BodyDeclaration<?> moduleBodyDeclaration, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
         return Optional.empty();
     }
 

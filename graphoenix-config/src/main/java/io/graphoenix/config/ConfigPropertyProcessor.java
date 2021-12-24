@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
 import io.vavr.control.Try;
@@ -16,10 +17,16 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @AutoService(DaggerProxyProcessor.class)
 public class ConfigPropertyProcessor implements DaggerProxyProcessor {
+
+    @Override
+    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType) {
+
+    }
 
     @Override
     public void buildComponentProxy(CompilationUnit moduleCompilationUnit,
@@ -31,7 +38,7 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
     }
 
     @Override
-    public Optional<CompilationUnit> createComponentProxy(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
+    public Optional<CompilationUnit> createComponentProxy(BodyDeclaration<?> moduleBodyDeclaration, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
         return Optional.empty();
     }
 

@@ -1,13 +1,18 @@
 package io.graphoenix.dagger;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public interface DaggerProxyProcessor {
+
+    void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType);
 
     void buildComponentProxy(CompilationUnit moduleCompilationUnit,
                              ClassOrInterfaceDeclaration moduleClassDeclaration,
@@ -17,7 +22,8 @@ public interface DaggerProxyProcessor {
                              ClassOrInterfaceDeclaration componentProxyClassDeclaration);
 
 
-    Optional<CompilationUnit> createComponentProxy(CompilationUnit moduleCompilationUnit,
+    Optional<CompilationUnit> createComponentProxy(BodyDeclaration<?> moduleBodyDeclaration,
+                                                   CompilationUnit moduleCompilationUnit,
                                                    ClassOrInterfaceDeclaration moduleClassDeclaration);
 
     void buildModuleProxy(CompilationUnit moduleCompilationUnit,

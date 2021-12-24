@@ -31,6 +31,7 @@ dependencies {
     annotationProcessor project(":graphoenix-dagger")
     annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-aop")
+    annotationProcessor project(":graphoenix-patterns")
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'

@@ -13,5 +13,5 @@ include 'graphoenix-annotation-processor'
 include 'graphoenix-config'
 include 'graphoenix-dagger'
 include 'graphoenix-aop'
-include 'graphoenix-chain'
+include 'graphoenix-patterns'
 

@@ -3,10 +3,11 @@ package io.graphoenix.common.module;
 import dagger.Module;
 import dagger.Provides;
 import io.graphoenix.common.pipeline.ChainTest;
+import io.graphoenix.common.pipeline.GraphQLCodeGenerator;
 import io.graphoenix.common.pipeline.GraphQLDataFetcher;
 import io.graphoenix.common.pipeline.operation.OperationRouter;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.chain.BeanChain;
+import io.graphoenix.spi.patterns.ChainsBean;
 
 import javax.inject.Singleton;
 
@@ -25,16 +26,19 @@ public class PipelineModule {
         return new GraphQLDataFetcher(operationRouter(manager));
     }
 
-    //    @Provides
-//    @Singleton
-//    GraphQLCodeGenerator graphQLCodeGenerator(IGraphQLDocumentManager manager) {
-//        return new GraphQLCodeGenerator(manager, operationRouter(manager));
-//    }
+    @Provides
+    @Singleton
+    GraphQLCodeGenerator graphQLCodeGenerator(IGraphQLDocumentManager manager) {
+        return new GraphQLCodeGenerator(manager, operationRouter(manager));
+    }
 
-    @BeanChain(ChainTest.class)
-    void chainTest(IGraphQLDocumentManager manager) {
+    @Provides
+    @Singleton
+    @ChainsBean
+    Class<?> chainTest(IGraphQLDocumentManager manager) {
         operationRouter(manager);
-        operationRouter(manager);
-        operationRouter(manager);
+        graphQLDataFetcher(manager);
+        graphQLCodeGenerator(manager);
+        return ChainTest.class;
     }
 }
