@@ -2,6 +2,7 @@ package io.graphoenix.chain;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -55,14 +56,10 @@ public class ChainProcessor implements DaggerProxyProcessor {
     public Optional<CompilationUnit> createComponentProxy(BodyDeclaration<?> moduleBodyDeclaration, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
 
         if (moduleBodyDeclaration.isMethodDeclaration()) {
+
             ClassOrInterfaceType type = getReturnTypeFromMethod(moduleBodyDeclaration.asMethodDeclaration()).orElseThrow();
             CompilationUnit chainsDefineCompilationUnit = this.getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, type).orElseThrow();
-            ClassOrInterfaceDeclaration chainsDefineClassOrInterfaceDeclaration = chainsDefineCompilationUnit.getTypes().stream()
-                    .filter(typeDeclaration -> typeDeclaration.hasModifier(Modifier.Keyword.PUBLIC))
-                    .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
-                    .map(BodyDeclaration::asClassOrInterfaceDeclaration)
-                    .findFirst()
-                    .orElseThrow();
+            ClassOrInterfaceDeclaration chainsDefineClassOrInterfaceDeclaration = DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(chainsDefineCompilationUnit).orElseThrow();
 
             ClassOrInterfaceDeclaration chainsImplDeclaration = new ClassOrInterfaceDeclaration()
                     .addModifier(Modifier.Keyword.PUBLIC)
@@ -76,17 +73,13 @@ public class ChainProcessor implements DaggerProxyProcessor {
 
             if (chainsDefineClassOrInterfaceDeclaration.isInterface()) {
                 chainsImplDeclaration.addImplementedType(type);
-
-                constructorDeclaration = chainsImplDeclaration.addConstructor(Modifier.Keyword.PUBLIC)
-                        .addAnnotation(Inject.class);
-
+                constructorDeclaration = chainsImplDeclaration.addConstructor(Modifier.Keyword.PUBLIC).addAnnotation(Inject.class);
                 constructorDeclarationBody = constructorDeclaration.createBody();
             } else {
                 chainsImplDeclaration.addExtendedType(type);
                 constructorDeclaration = chainsImplDeclaration.getConstructors().stream()
                         .filter(injectConstructorDeclaration -> injectConstructorDeclaration.isAnnotationPresent(Inject.class)).findFirst()
-                        .orElseGet(() -> chainsImplDeclaration.addConstructor(Modifier.Keyword.PUBLIC)
-                                .addAnnotation(Inject.class));
+                        .orElseGet(() -> chainsImplDeclaration.addConstructor(Modifier.Keyword.PUBLIC).addAnnotation(Inject.class));
 
                 constructorDeclarationBody = chainsImplDeclaration.getConstructors().stream()
                         .filter(injectConstructorDeclaration -> injectConstructorDeclaration.isAnnotationPresent(Inject.class)).findFirst()
@@ -128,39 +121,37 @@ public class ChainProcessor implements DaggerProxyProcessor {
                                     Expression argument;
                                     if (blockStmt.getStatements().size() == 0) {
                                         blockStmt.addStatement(
-                                                new VariableDeclarationExpr()
-                                                        .addVariable(
-                                                                new VariableDeclarator()
-                                                                        .setType(methodDeclaration.getType())
-                                                                        .setName(methodCallExpr.getNameAsString().concat("Result"))
-                                                                        .setInitializer(
-                                                                                new MethodCallExpr()
-                                                                                        .setName(methodDeclaration.getName())
-                                                                                        .setScope(methodCallExpr.getNameAsExpression())
-                                                                                        .setArguments(
-                                                                                                new NodeList<>(methodDeclaration.getParameters().stream()
-                                                                                                        .map(NodeWithSimpleName::getNameAsExpression)
-                                                                                                        .collect(Collectors.toList())
-                                                                                                )
+                                                new VariableDeclarationExpr().addVariable(
+                                                        new VariableDeclarator()
+                                                                .setType(methodDeclaration.getType())
+                                                                .setName(methodCallExpr.getNameAsString().concat("Result"))
+                                                                .setInitializer(
+                                                                        new MethodCallExpr()
+                                                                                .setName(methodDeclaration.getName())
+                                                                                .setScope(methodCallExpr.getNameAsExpression())
+                                                                                .setArguments(
+                                                                                        new NodeList<>(methodDeclaration.getParameters().stream()
+                                                                                                .map(NodeWithSimpleName::getNameAsExpression)
+                                                                                                .collect(Collectors.toList())
                                                                                         )
-                                                                        )
-                                                        )
+                                                                                )
+                                                                )
+                                                )
                                         );
                                     } else {
                                         argument = blockStmt.getStatement(blockStmt.getStatements().size() - 1).asExpressionStmt().getExpression().asVariableDeclarationExpr().getVariable(0).getNameAsExpression();
                                         blockStmt.addStatement(
-                                                new VariableDeclarationExpr()
-                                                        .addVariable(
-                                                                new VariableDeclarator()
-                                                                        .setType(methodDeclaration.getType())
-                                                                        .setName(methodCallExpr.getNameAsString().concat("Result"))
-                                                                        .setInitializer(
-                                                                                new MethodCallExpr()
-                                                                                        .setName(methodDeclaration.getName())
-                                                                                        .setScope(methodCallExpr.getNameAsExpression())
-                                                                                        .addArgument(argument)
-                                                                        )
-                                                        )
+                                                new VariableDeclarationExpr().addVariable(
+                                                        new VariableDeclarator()
+                                                                .setType(methodDeclaration.getType())
+                                                                .setName(methodCallExpr.getNameAsString().concat("Result"))
+                                                                .setInitializer(
+                                                                        new MethodCallExpr()
+                                                                                .setName(methodDeclaration.getName())
+                                                                                .setScope(methodCallExpr.getNameAsExpression())
+                                                                                .addArgument(argument)
+                                                                )
+                                                )
                                         );
                                     }
                                 }
@@ -175,7 +166,6 @@ public class ChainProcessor implements DaggerProxyProcessor {
                         chainsImplDeclaration.addMember(methodDeclaration);
                     }
             );
-
             return Optional.of(chainsImplCompilationUnit);
         }
         return Optional.empty();
@@ -191,25 +181,20 @@ public class ChainProcessor implements DaggerProxyProcessor {
 
         if (moduleBodyDeclaration.isMethodDeclaration()) {
 
-
             MethodDeclaration originalMethodDeclaration = moduleBodyDeclaration.asMethodDeclaration();
+            ClassOrInterfaceType originalMethodReturnType = getReturnTypeFromMethod(originalMethodDeclaration).orElseThrow();
+            CompilationUnit chainsDefineCompilationUnit = this.getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, originalMethodReturnType).orElseThrow();
+            chainsDefineCompilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleProxyCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(originalMethodReturnType + "ImplProxy")));
 
-            ClassOrInterfaceType classOrInterfaceType = getReturnTypeFromMethod(originalMethodDeclaration).orElseThrow();
-
-            ClassOrInterfaceType type = getReturnTypeFromMethod(moduleBodyDeclaration.asMethodDeclaration()).orElseThrow();
-            CompilationUnit chainsDefineCompilationUnit = this.getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, type).orElseThrow();
-            chainsDefineCompilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleProxyCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(classOrInterfaceType + "ImplProxy")));
-
-            MethodDeclaration methodDeclaration = new MethodDeclaration()
+            MethodDeclaration moduleProxyMethodDeclaration = new MethodDeclaration()
                     .setName(originalMethodDeclaration.getName())
                     .setParameters(originalMethodDeclaration.getParameters())
                     .setAnnotations(originalMethodDeclaration.getAnnotations())
-                    .setType(classOrInterfaceType.getNameAsString() + "ImplProxy");
+                    .setType(originalMethodReturnType.getNameAsString() + "ImplProxy");
 
-            BlockStmt body = methodDeclaration.createBody();
-
-
-            ObjectCreationExpr objectCreationExpr = new ObjectCreationExpr().setType(classOrInterfaceType + "ImplProxy");
+            moduleProxyMethodDeclaration.getAnnotationByClass(ChainsBean.class).ifPresent(Node::remove);
+            BlockStmt body = moduleProxyMethodDeclaration.createBody();
+            ObjectCreationExpr objectCreationExpr = new ObjectCreationExpr().setType(originalMethodReturnType + "ImplProxy");
 
             DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(chainsDefineCompilationUnit).orElseThrow()
                     .getConstructors().stream()
@@ -228,7 +213,7 @@ public class ChainProcessor implements DaggerProxyProcessor {
                     .forEach(objectCreationExpr::addArgument);
 
             body.addStatement(new ReturnStmt().setExpression(objectCreationExpr));
-            moduleProxyClassDeclaration.addMember(methodDeclaration);
+            moduleProxyClassDeclaration.addMember(moduleProxyMethodDeclaration);
         }
     }
 
