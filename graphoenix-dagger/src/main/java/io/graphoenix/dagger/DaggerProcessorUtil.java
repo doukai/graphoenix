@@ -8,12 +8,14 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 
 import java.util.List;
 import java.util.Optional;
@@ -108,6 +110,20 @@ public enum DaggerProcessorUtil {
                 .filter(typeDeclaration -> typeDeclaration.hasModifier(Modifier.Keyword.PUBLIC))
                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
+                .findFirst();
+    }
+
+    public Optional<ClassOrInterfaceType> getReturnTypeFromMethod(MethodDeclaration methodDeclaration) {
+        return methodDeclaration.getBody().orElseThrow().getStatements().stream()
+                .filter(Statement::isReturnStmt)
+                .map(Statement::asReturnStmt)
+                .filter(returnStmt -> returnStmt.getExpression().isPresent())
+                .map(returnStmt -> returnStmt.getExpression().get())
+                .filter(Expression::isClassExpr)
+                .map(Expression::asClassExpr)
+                .map(ClassExpr::getType)
+                .filter(Type::isClassOrInterfaceType)
+                .map(Type::asClassOrInterfaceType)
                 .findFirst();
     }
 }
