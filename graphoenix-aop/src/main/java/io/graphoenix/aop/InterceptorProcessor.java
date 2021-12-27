@@ -24,6 +24,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
 public class InterceptorProcessor implements DaggerProxyProcessor {
 
     @Override
-    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType) {
+    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType, BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource) {
 
     }
 
@@ -228,7 +229,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(superTypeMethodDeclaration.getNameAsString()))
-                                                    .filter(methodDeclaration -> methodDeclaration.getParameters().toString().equals(superTypeMethodDeclaration.getParameters().toString()))
+                                                    .filter(methodDeclaration -> DAGGER_PROCESSOR_UTIL.hasSameParameters(methodDeclaration.getParameters(), superTypeMethodDeclaration.getParameters()))
                                                     .findFirst()
                                                     .orElseThrow();
 

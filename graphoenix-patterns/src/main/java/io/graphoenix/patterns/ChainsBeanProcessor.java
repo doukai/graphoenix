@@ -4,8 +4,20 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.ThisExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalBlockStmt;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -18,9 +30,9 @@ import io.graphoenix.spi.patterns.ChainsBean;
 
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -34,7 +46,8 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
     private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType;
 
     @Override
-    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType) {
+    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType,
+                     BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource) {
         this.getCompilationUnitByClassOrInterfaceType = getCompilationUnitByClassOrInterfaceType;
     }
 
@@ -115,6 +128,8 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
                         );
                         methodDeclarationList.forEach(
                                 methodDeclaration -> {
+                                    methodDeclaration.getAnnotations().clear();
+                                    methodDeclaration.addAnnotation(Override.class);
                                     BlockStmt blockStmt = methodDeclaration.getBody().orElseThrow();
 
                                     NodeList<Expression> methodParameterNameList = new NodeList<>(methodDeclaration.getParameters().stream()
@@ -164,19 +179,6 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
         return Optional.empty();
     }
 
-    private Optional<NameExpr> getLastReturnVariable(MethodDeclaration methodDeclaration) {
-        BlockStmt blockStmt = methodDeclaration.getBody().orElseThrow();
-        int size = blockStmt.getStatements().size();
-        return IntStream.range(0, size)
-                .mapToObj(index -> blockStmt.getStatement(size - 1 - index))
-                .filter(Statement::isExpressionStmt)
-                .map(Statement::asExpressionStmt)
-                .filter(expressionStmt -> expressionStmt.getExpression().isVariableDeclarationExpr())
-                .map(expressionStmt -> expressionStmt.getExpression().asVariableDeclarationExpr())
-                .map(variableDeclarationExpr -> variableDeclarationExpr.getVariable(0).getNameAsExpression())
-                .findFirst();
-    }
-
     @Override
     public void prepareModuleProxy(BodyDeclaration<?> moduleBodyDeclaration,
                                    CompilationUnit moduleCompilationUnit,
@@ -190,17 +192,22 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
             MethodDeclaration originalMethodDeclaration = moduleBodyDeclaration.asMethodDeclaration();
             ClassOrInterfaceType originalMethodReturnType = DAGGER_PROCESSOR_UTIL.getReturnTypeFromMethod(originalMethodDeclaration).orElseThrow();
             CompilationUnit chainsDefineCompilationUnit = this.getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, originalMethodReturnType).orElseThrow();
-            chainsDefineCompilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleProxyCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(originalMethodReturnType + "ImplProxy")));
+            chainsDefineCompilationUnit.getPackageDeclaration()
+                    .ifPresent(packageDeclaration -> {
+                                moduleProxyCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(originalMethodReturnType.getNameAsString()));
+                                moduleProxyCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(originalMethodReturnType.getNameAsString() + "ImplProxy"));
+                            }
+                    );
 
             MethodDeclaration moduleProxyMethodDeclaration = new MethodDeclaration()
                     .setName(originalMethodDeclaration.getName())
                     .setParameters(originalMethodDeclaration.getParameters())
                     .setAnnotations(originalMethodDeclaration.getAnnotations())
-                    .setType(originalMethodReturnType.getNameAsString() + "ImplProxy");
+                    .setType(originalMethodReturnType.getNameAsString());
 
             moduleProxyMethodDeclaration.getAnnotationByClass(ChainsBean.class).ifPresent(Node::remove);
             BlockStmt body = moduleProxyMethodDeclaration.createBody();
-            ObjectCreationExpr objectCreationExpr = new ObjectCreationExpr().setType(originalMethodReturnType + "ImplProxy");
+            ObjectCreationExpr objectCreationExpr = new ObjectCreationExpr().setType(originalMethodReturnType.getNameAsString() + "ImplProxy");
 
             DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(chainsDefineCompilationUnit).orElseThrow()
                     .getConstructors().stream()
@@ -246,5 +253,18 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
     @Override
     public Class<? extends Annotation> support() {
         return ChainsBean.class;
+    }
+
+    private Optional<NameExpr> getLastReturnVariable(MethodDeclaration methodDeclaration) {
+        BlockStmt blockStmt = methodDeclaration.getBody().orElseThrow();
+        int size = blockStmt.getStatements().size();
+        return IntStream.range(0, size)
+                .mapToObj(index -> blockStmt.getStatement(size - 1 - index))
+                .filter(Statement::isExpressionStmt)
+                .map(Statement::asExpressionStmt)
+                .filter(expressionStmt -> expressionStmt.getExpression().isVariableDeclarationExpr())
+                .map(expressionStmt -> expressionStmt.getExpression().asVariableDeclarationExpr())
+                .map(variableDeclarationExpr -> variableDeclarationExpr.getVariable(0).getNameAsExpression())
+                .findFirst();
     }
 }

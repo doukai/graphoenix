@@ -2,7 +2,6 @@ package io.graphoenix.dagger;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -20,6 +19,7 @@ import com.github.javaparser.ast.type.Type;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public enum DaggerProcessorUtil {
     DAGGER_PROCESSOR_UTIL;
@@ -88,7 +88,7 @@ public enum DaggerProcessorUtil {
 
     public MethodDeclaration getMethodDeclarationByMethodCallExpr(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, MethodDeclaration containerMethodDeclaration, MethodCallExpr methodCallExpr) {
 
-        NodeList<Node> parameterList = new NodeList<>();
+        NodeList<Parameter> parameterList = new NodeList<>();
         parameterList.addAll(methodCallExpr.getArguments().stream()
                 .map(expression -> getParameterByArgument(containerMethodDeclaration, expression)).collect(Collectors.toList()));
 
@@ -96,9 +96,18 @@ public enum DaggerProcessorUtil {
                 .filter(BodyDeclaration::isMethodDeclaration)
                 .map(BodyDeclaration::asMethodDeclaration)
                 .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()))
-                .filter(methodDeclaration -> methodDeclaration.getParameters().toString().equals(parameterList.toString()))
+                .filter(methodDeclaration -> hasSameParameters(methodDeclaration.getParameters(), parameterList))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    public boolean hasSameParameters(NodeList<Parameter> target, NodeList<Parameter> source) {
+        if (target.size() != source.size()) {
+            return false;
+        }
+        return IntStream.range(0, target.size())
+                .mapToObj(index -> target.get(index).getType().asString().equals(source.get(index).getType().asString()))
+                .reduce(true, (left, right) -> left && right);
     }
 
     public Parameter getParameterByArgument(MethodDeclaration methodDeclaration, Expression expression) {

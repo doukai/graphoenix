@@ -1,6 +1,13 @@
 package io.graphoenix.common.pipeline;
 
+import io.graphoenix.spi.handler.IBootstrapHandler;
+import org.apache.commons.chain.Context;
+
 public interface ChainTest {
 
-    Integer generate(String graphQL) throws Exception;
+    GraphQLCodeGenerator registerGraphQL(String graphQL);
+
+    GraphQLDataFetcher addBootstrapHandler(IBootstrapHandler bootstrapHandler);
+
+    boolean execute(Context context);
 }

@@ -7,7 +7,7 @@ import io.graphoenix.common.pipeline.GraphQLCodeGenerator;
 import io.graphoenix.common.pipeline.GraphQLDataFetcher;
 import io.graphoenix.common.pipeline.operation.OperationRouter;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.patterns.ChainsBean;
+import io.graphoenix.spi.patterns.CompositeBean;
 
 import javax.inject.Singleton;
 
@@ -34,7 +34,7 @@ public class PipelineModule {
 
     @Provides
     @Singleton
-    @ChainsBean
+    @CompositeBean
     Class<?> chainTest(IGraphQLDocumentManager manager) {
         operationRouter(manager);
         graphQLDataFetcher(manager);
