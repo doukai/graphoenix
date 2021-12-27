@@ -67,7 +67,7 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
         if (moduleBodyDeclaration.isMethodDeclaration()) {
             MethodDeclaration originalMethodDeclaration = moduleBodyDeclaration.asMethodDeclaration();
 
-            ClassOrInterfaceType type = DAGGER_PROCESSOR_UTIL.getReturnTypeFromMethod(originalMethodDeclaration).orElseThrow();
+            ClassOrInterfaceType type = originalMethodDeclaration.getType().asClassOrInterfaceType();
             CompilationUnit chainsDefineCompilationUnit = this.getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, type).orElseThrow();
             ClassOrInterfaceDeclaration chainsDefineClassOrInterfaceDeclaration = DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(chainsDefineCompilationUnit).orElseThrow();
 
@@ -106,12 +106,26 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
 
             methodDeclarationList.forEach(NodeWithOptionalBlockStmt::createBody);
 
+            String builderVariableName = originalMethodDeclaration.getBody().orElseThrow()
+                    .getStatements().stream()
+                    .filter(Statement::isExpressionStmt)
+                    .map(statement -> statement.asExpressionStmt().getExpression())
+                    .filter(Expression::isVariableDeclarationExpr)
+                    .map(expression -> expression.asVariableDeclarationExpr().getVariable(0))
+                    .filter(variableDeclarator -> variableDeclarator.getType().isClassOrInterfaceType())
+                    .filter(variableDeclarator -> variableDeclarator.getType().asClassOrInterfaceType().getNameAsString().equals("ChainsBeanBuilder"))
+                    .map(NodeWithSimpleName::getNameAsString)
+                    .findFirst()
+                    .orElseThrow();
+
             originalMethodDeclaration.getBody().orElseThrow()
                     .getStatements().stream()
                     .filter(Statement::isExpressionStmt)
                     .map(Statement::asExpressionStmt)
                     .filter(expressionStmt -> expressionStmt.getExpression().isMethodCallExpr())
-                    .map(expressionStmt -> expressionStmt.getExpression().asMethodCallExpr())
+                    .filter(expressionStmt -> expressionStmt.getExpression().asMethodCallExpr().getScope().isPresent())
+                    .filter(expressionStmt -> expressionStmt.getExpression().asMethodCallExpr().getScope().orElseThrow().asNameExpr().getNameAsString().equals(builderVariableName))
+                    .map(expressionStmt -> expressionStmt.getExpression().asMethodCallExpr().getArguments())
                     .forEach(methodCallExpr -> {
                         MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), methodCallExpr);
                         chainsImplDeclaration.addField(callMethodDeclaration.getType(), callMethodDeclaration.getNameAsString(), Modifier.Keyword.PRIVATE);
