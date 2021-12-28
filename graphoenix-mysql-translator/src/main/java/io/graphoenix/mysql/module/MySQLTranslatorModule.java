@@ -9,7 +9,7 @@ import io.graphoenix.mysql.handler.bootstrap.IntrospectionRegisterHandler;
 import io.graphoenix.mysql.handler.bootstrap.MutationToSQLConvertHandler;
 import io.graphoenix.mysql.handler.bootstrap.TypeDefiniteToCreateTableSQLConvertHandler;
 import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
-import io.graphoenix.mysql.handler.operation.SQLToFileConvertHandler;
+import io.graphoenix.mysql.handler.operation.SQLFormatHandler;
 import io.graphoenix.mysql.translator.GraphQLArgumentsToWhere;
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
@@ -66,8 +66,8 @@ public class MySQLTranslatorModule {
 
     @Provides
     @Singleton
-    public SQLToFileConvertHandler sqlToFileConvertHandler() {
-        return new SQLToFileConvertHandler();
+    public SQLFormatHandler sqlToFileConvertHandler() {
+        return new SQLFormatHandler();
     }
 
     @Provides

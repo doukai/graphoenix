@@ -6,6 +6,8 @@ import io.graphoenix.mysql.common.utils.DBNameUtil;
 import io.graphoenix.mysql.common.utils.DBValueUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -21,15 +23,28 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
-import org.javatuples.Pair;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.error.GraphQLErrorType.*;
+import static io.graphoenix.spi.error.GraphQLErrorType.FIELD_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.OPERATION_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.QUERY_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.SELECTION_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 
 public class GraphQLQueryToSelect {
 
@@ -52,15 +67,15 @@ public class GraphQLQueryToSelect {
         return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL)).toString();
     }
 
-    public Stream<Pair<String, String>> createSelectsSQL(String graphQL) {
-        return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(result -> Pair.with(result.getValue0(), result.getValue1().toString()));
+    public Stream<Tuple2<String, String>> createSelectsSQL(String graphQL) {
+        return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL)).map(result -> Tuple.of(result._1(), result._2().toString()));
     }
 
     public Select createSelect(String graphQL) {
         return operationDefinitionToSelect(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
-    public Stream<Pair<String, Select>> createSelects(String graphQL) {
+    public Stream<Tuple2<String, Select>> createSelects(String graphQL) {
         return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
@@ -76,7 +91,7 @@ public class GraphQLQueryToSelect {
         throw new GraphQLProblem().push(QUERY_NOT_EXIST);
     }
 
-    public Stream<Pair<String, Select>> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+    public Stream<Tuple2<String, Select>> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
             if (queryOperationTypeDefinition.isPresent()) {
@@ -85,15 +100,15 @@ public class GraphQLQueryToSelect {
                 }
                 return operationDefinitionContext.selectionSet().selection().stream()
                         .map(selectionContext ->
-                                Pair.with(
+                                Tuple.of(
                                         selectionContext.field().name().getText(),
                                         manager.getQueryOperationTypeDefinition().map(
                                                 operationTypeDefinitionContext ->
                                                         objectSelectionToSelect(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().selectionSet().selection())
                                         )
                                 )
-                        ).filter(result -> result.getValue1().isPresent())
-                        .map(result -> Pair.with(result.getValue0(), result.getValue1().get()));
+                        ).filter(result -> result._2().isPresent())
+                        .map(result -> Tuple.of(result._1(), result._2().get()));
             }
         }
         throw new GraphQLProblem().push(QUERY_NOT_EXIST);

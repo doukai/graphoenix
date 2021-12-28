@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+}
+
+group 'io.graphoenix'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(":graphoenix-spi")
+    implementation project(":graphoenix-mysql-translator")
+    implementation project(":graphoenix-r2dbc-connector")
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
+    annotationProcessor project(":graphoenix-dagger")
+    annotationProcessor project(":graphoenix-config")
+    annotationProcessor project(":graphoenix-aop")
+    annotationProcessor project(":graphoenix-patterns")
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+}
+
+test {
+    useJUnitPlatform()
+}

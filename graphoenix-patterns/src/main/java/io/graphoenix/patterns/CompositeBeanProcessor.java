@@ -13,12 +13,14 @@ import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
 import io.graphoenix.spi.patterns.CompositeBean;
@@ -99,7 +101,23 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                     .forEach(arguments -> {
 
                         String methodName = arguments.get(0).asStringLiteralExpr().asString();
-                        MethodCallExpr compositeBeanMethodCallExpr = arguments.get(1).asMethodCallExpr();
+//                        MethodCallExpr compositeBeanMethodCallExpr = arguments.get(1).asMethodCallExpr();
+
+                        Expression compositeBeanExpression = arguments.get(1);
+                        String compositeBeanName;
+                        Type compositeBeanType;
+                        NameExpr compositeBeanNameExpr;
+                        if (compositeBeanExpression.isMethodCallExpr()) {
+                            compositeBeanName = compositeBeanExpression.asMethodCallExpr().getNameAsString();
+                            MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), compositeBeanExpression.asMethodCallExpr());
+                            compositeBeanType = callMethodDeclaration.getType();
+                            compositeBeanNameExpr = callMethodDeclaration.getNameAsExpression();
+                        } else {
+                            compositeBeanName = compositeBeanExpression.asNameExpr().getNameAsString();
+                            compositeBeanType = moduleBodyDeclaration.asMethodDeclaration().getParameterByName(compositeBeanExpression.asNameExpr().getNameAsString()).orElseThrow().getType();
+                            compositeBeanNameExpr = compositeBeanExpression.asNameExpr();
+                        }
+
                         String compositeBeanMethodName;
                         if (arguments.size() == 3) {
                             compositeBeanMethodName = arguments.get(2).asStringLiteralExpr().asString();
@@ -107,30 +125,29 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                             compositeBeanMethodName = methodName;
                         }
 
-                        MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), compositeBeanMethodCallExpr);
-                        compositeImplDeclaration.addField(callMethodDeclaration.getType(), callMethodDeclaration.getNameAsString(), Modifier.Keyword.PRIVATE);
+                        compositeImplDeclaration.addField(compositeBeanType, compositeBeanName, Modifier.Keyword.PRIVATE);
 
-                        Optional<Parameter> parameter = callMethodDeclaration.getParameterByName(compositeBeanMethodCallExpr.getNameAsString());
+                        Optional<Parameter> parameter = constructorDeclaration.getParameterByName(compositeBeanName);
                         if (parameter.isEmpty()) {
                             constructorDeclaration.addParameter(
                                     new Parameter()
-                                            .setType(callMethodDeclaration.getType())
-                                            .setName(compositeBeanMethodCallExpr.getName())
+                                            .setType(compositeBeanType)
+                                            .setName(compositeBeanName)
                             );
                         }
                         constructorDeclarationBody.addStatement(
                                 new AssignExpr()
-                                        .setTarget(new FieldAccessExpr().setName(callMethodDeclaration.getName()).setScope(new ThisExpr()))
+                                        .setTarget(new FieldAccessExpr().setName(compositeBeanName).setScope(new ThisExpr()))
                                         .setOperator(ASSIGN)
-                                        .setValue(callMethodDeclaration.getNameAsExpression())
+                                        .setValue(compositeBeanNameExpr)
                         );
 
                         compositeMethodDeclarationList.stream()
                                 .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodName))
                                 .findFirst()
                                 .ifPresent(compositeMethodDeclaration -> {
-                                            MethodDeclaration componentMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), compositeBeanMethodCallExpr);
-                                            Optional<CompilationUnit> componentCompilationUnit = getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, componentMethodDeclaration.getType().asClassOrInterfaceType());
+//                                            MethodDeclaration componentMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), compositeBeanMethodCallExpr);
+                                            Optional<CompilationUnit> componentCompilationUnit = getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, compositeBeanType.asClassOrInterfaceType());
                                             componentCompilationUnit.flatMap(DAGGER_PROCESSOR_UTIL::getPublicClassOrInterfaceDeclaration)
                                                     .flatMap(classOrInterfaceDeclaration ->
                                                             classOrInterfaceDeclaration.getMembers().stream()
@@ -153,7 +170,7 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                                                                                         .collect(Collectors.toList())
                                                                         )
                                                                 )
-                                                                .setScope(compositeBeanMethodCallExpr.getNameAsExpression());
+                                                                .setScope(compositeBeanNameExpr);
                                                         if (methodDeclaration.getType().isVoidType()) {
                                                             blockStmt.addStatement(methodCallExpr);
                                                         } else {
@@ -206,12 +223,21 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
 
             PATTERNS_UTIL.getBuilderMethodArgumentsStream(originalMethodDeclaration, "CompositeBeanBuilder")
                     .forEach(arguments -> {
-                        MethodCallExpr compositeBeanMethodCallExpr = arguments.get(1).asMethodCallExpr();
+                        Expression compositeBeanExpression = arguments.get(1);
+                        String compositeBeanName;
+                        
+                        if (compositeBeanExpression.isMethodCallExpr()) {
+                            compositeBeanName = compositeBeanExpression.asMethodCallExpr().getNameAsString();
+
+                        } else {
+                            compositeBeanName = compositeBeanExpression.asNameExpr().getNameAsString();
+                        }
+
                         Optional<Expression> argument = objectCreationExpr.getArguments().stream()
-                                .filter(expression -> expression.asMethodCallExpr().getNameAsString().equals(compositeBeanMethodCallExpr.getNameAsString()))
+                                .filter(expression -> expression.asMethodCallExpr().getNameAsString().equals(compositeBeanName))
                                 .findFirst();
                         if (argument.isEmpty()) {
-                            objectCreationExpr.addArgument(compositeBeanMethodCallExpr);
+                            objectCreationExpr.addArgument(compositeBeanExpression);
                         }
                     });
 

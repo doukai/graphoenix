@@ -1,11 +1,9 @@
 package io.graphoenix.r2dbc.connector.handler.operation;
 
-import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
-import io.graphoenix.spi.handler.IOperationHandler;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
-import io.graphoenix.spi.handler.IPipelineContext;
-import org.javatuples.Pair;
+import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
+import io.vavr.Tuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -13,7 +11,7 @@ import javax.inject.Inject;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class OperationSQLExecuteHandler implements IOperationHandler {
+public class OperationSQLExecuteHandler {
 
     private final QueryExecutor queryExecutor;
 
@@ -28,54 +26,15 @@ public class OperationSQLExecuteHandler implements IOperationHandler {
         this.r2dbcParameterProcessor = r2dbcParameterProcessor;
     }
 
-    @Override
-    public boolean query(IPipelineContext context) {
-        String sql = context.poll(String.class);
-        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
-        String result = queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters)).block();
-        context.add(result);
-        return false;
+    public Mono<String> query(String sql, Map<String, Object> parameters) {
+        return queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters));
     }
 
-    @Override
-    public boolean queryAsync(IPipelineContext context) {
-        String sql = context.poll(String.class);
-        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
-        Mono<String> result = queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters));
-        context.add(result);
-        return false;
+    public Flux<Tuple2<String, String>> querySelections(Stream<Tuple2<String, String>> sqlStream, Map<String, Object> parameters) {
+        return queryExecutor.executeQuery(sqlStream, r2dbcParameterProcessor.process(parameters));
     }
 
-    @Override
-    public boolean querySelectionsAsync(IPipelineContext context) {
-        Stream<Pair<String, String>> sqlStream = context.pollStreamPair(String.class, String.class);
-        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
-        Flux<Pair<String, String>> result = queryExecutor.executeQuery(sqlStream, r2dbcParameterProcessor.process(parameters));
-        context.add(result);
-        return false;
-    }
-
-    @Override
-    public boolean mutation(IPipelineContext context) {
-        Stream<String> sqlStream = context.pollStream(String.class);
-        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
-        String result = mutationExecutor.executeMutations(sqlStream, r2dbcParameterProcessor.process(parameters)).block();
-        context.add(result);
-        return false;
-    }
-
-    @Override
-    public boolean mutationAsync(IPipelineContext context) {
-        Stream<String> sqlStream = context.pollStream(String.class);
-        Map<String, Object> parameters = context.pollMap(String.class, Object.class);
-        Mono<String> result = mutationExecutor.executeMutations(sqlStream, r2dbcParameterProcessor.process(parameters));
-        context.add(result);
-        return false;
-    }
-
-    @Override
-    public boolean subscription(IPipelineContext context) {
-        //TODO
-        return false;
+    public Mono<String> mutation(Stream<String> sqlStream, Map<String, Object> parameters) {
+        return mutationExecutor.executeMutations(sqlStream, r2dbcParameterProcessor.process(parameters));
     }
 }

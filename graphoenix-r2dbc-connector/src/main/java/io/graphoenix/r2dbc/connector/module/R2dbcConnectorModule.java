@@ -20,7 +20,7 @@ import javax.inject.Singleton;
 @Module
 public class R2dbcConnectorModule {
 
-    @ConfigProperty
+    @ConfigProperty(name = "r2dbc")
     public R2DBCConfig r2DBCConfig;
 
     @Provides

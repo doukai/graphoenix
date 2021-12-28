@@ -24,6 +24,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
 import io.graphoenix.spi.patterns.ChainsBean;
@@ -113,30 +114,43 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
                     .forEach(arguments -> {
 
                         String methodName = arguments.get(0).asStringLiteralExpr().asString();
-                        MethodCallExpr chainsBeanMethodCallExpr = arguments.get(1).asMethodCallExpr();
+                        Expression chainsBeanExpression = arguments.get(1);
+                        String chainsBeanName;
+                        Type chainsBeanType;
+                        NameExpr chainsBeanNameExpr;
+                        if (chainsBeanExpression.isMethodCallExpr()) {
+                            chainsBeanName = chainsBeanExpression.asMethodCallExpr().getNameAsString();
+                            MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), chainsBeanExpression.asMethodCallExpr());
+                            chainsBeanType = callMethodDeclaration.getType();
+                            chainsBeanNameExpr = callMethodDeclaration.getNameAsExpression();
+                        } else {
+                            chainsBeanName = chainsBeanExpression.asNameExpr().getNameAsString();
+                            chainsBeanType = moduleBodyDeclaration.asMethodDeclaration().getParameterByName(chainsBeanExpression.asNameExpr().getNameAsString()).orElseThrow().getType();
+                            chainsBeanNameExpr = chainsBeanExpression.asNameExpr();
+                        }
+
                         String chainsBeanMethodName;
                         if (arguments.size() == 3) {
                             chainsBeanMethodName = arguments.get(2).asStringLiteralExpr().asString();
                         } else {
                             chainsBeanMethodName = methodName;
                         }
-                        MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), chainsBeanMethodCallExpr);
-                        chainsImplDeclaration.addField(callMethodDeclaration.getType(), callMethodDeclaration.getNameAsString(), Modifier.Keyword.PRIVATE);
+                        chainsImplDeclaration.addField(chainsBeanType, chainsBeanName, Modifier.Keyword.PRIVATE);
 
-                        Optional<Parameter> parameter = callMethodDeclaration.getParameterByName(chainsBeanMethodCallExpr.getNameAsString());
+                        Optional<Parameter> parameter = constructorDeclaration.getParameterByName(chainsBeanName);
                         if (parameter.isEmpty()) {
                             constructorDeclaration.addParameter(
                                     new Parameter()
-                                            .setType(callMethodDeclaration.getType())
-                                            .setName(chainsBeanMethodCallExpr.getName())
+                                            .setType(chainsBeanType)
+                                            .setName(chainsBeanName)
                             );
                         }
 
                         constructorDeclarationBody.addStatement(
                                 new AssignExpr()
-                                        .setTarget(new FieldAccessExpr().setName(callMethodDeclaration.getName()).setScope(new ThisExpr()))
+                                        .setTarget(new FieldAccessExpr().setName(chainsBeanName).setScope(new ThisExpr()))
                                         .setOperator(ASSIGN)
-                                        .setValue(callMethodDeclaration.getNameAsExpression())
+                                        .setValue(chainsBeanNameExpr)
                         );
 
                         chainsMethodDeclarationList.stream()
@@ -154,7 +168,7 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
 
                                             MethodCallExpr stepMethodCallExpr = new MethodCallExpr()
                                                     .setName(chainsBeanMethodName)
-                                                    .setScope(chainsBeanMethodCallExpr.getNameAsExpression());
+                                                    .setScope(chainsBeanNameExpr);
 
                                             Optional<NameExpr> lastReturnVariable = getLastReturnVariable(methodDeclaration);
                                             if (lastReturnVariable.isPresent()) {
@@ -163,14 +177,14 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
                                                 stepMethodCallExpr.setArguments(methodParameterNameList);
                                             }
 
-                                            if (callMethodDeclaration.getType().isVoidType()) {
+                                            if (chainsBeanType.isVoidType()) {
                                                 blockStmt.addStatement(stepMethodCallExpr);
                                             } else {
                                                 blockStmt.addStatement(
                                                         new VariableDeclarationExpr().addVariable(
                                                                 new VariableDeclarator()
                                                                         .setType(methodDeclaration.getType())
-                                                                        .setName(chainsBeanMethodCallExpr.getNameAsString().concat("Result"))
+                                                                        .setName(chainsBeanName.concat("Result"))
                                                                         .setInitializer(stepMethodCallExpr)
                                                         )
                                                 );
@@ -192,9 +206,17 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
 
             PATTERNS_UTIL.getBuilderMethodArgumentsStream(originalMethodDeclaration, "ChainsBeanBuilder")
                     .forEach(arguments -> {
-                        MethodCallExpr chainsBeanMethodCallExpr = arguments.get(1).asMethodCallExpr();
-                        MethodDeclaration componentMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), chainsBeanMethodCallExpr);
-                        Optional<CompilationUnit> componentCompilationUnit = getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, componentMethodDeclaration.getType().asClassOrInterfaceType());
+
+                        Expression chainsBeanExpression = arguments.get(1);
+                        Type chainsBeanType;
+                        if (chainsBeanExpression.isMethodCallExpr()) {
+                            MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), chainsBeanExpression.asMethodCallExpr());
+                            chainsBeanType = callMethodDeclaration.getType();
+                        } else {
+                            chainsBeanType = moduleBodyDeclaration.asMethodDeclaration().getParameterByName(chainsBeanExpression.asNameExpr().getNameAsString()).orElseThrow().getType();
+                        }
+
+                        Optional<CompilationUnit> componentCompilationUnit = getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, chainsBeanType.asClassOrInterfaceType());
                         importAllTypesFromSource.accept(chainsImplCompilationUnit, componentCompilationUnit.orElseThrow());
                     });
 
@@ -243,12 +265,21 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
 
             PATTERNS_UTIL.getBuilderMethodArgumentsStream(originalMethodDeclaration, "ChainsBeanBuilder")
                     .forEach(arguments -> {
-                        MethodCallExpr chainsBeanMethodCallExpr = arguments.get(1).asMethodCallExpr();
+                        Expression chainsBeanExpression = arguments.get(1);
+                        String chainsBeanName;
+
+                        if (chainsBeanExpression.isMethodCallExpr()) {
+                            chainsBeanName = chainsBeanExpression.asMethodCallExpr().getNameAsString();
+                        } else {
+                            chainsBeanName = chainsBeanExpression.asNameExpr().getNameAsString();
+                        }
+
                         Optional<Expression> argument = objectCreationExpr.getArguments().stream()
-                                .filter(expression -> expression.asMethodCallExpr().getNameAsString().equals(chainsBeanMethodCallExpr.getNameAsString()))
+                                .filter(expression -> expression.asMethodCallExpr().getNameAsString().equals(chainsBeanName))
                                 .findFirst();
+
                         if (argument.isEmpty()) {
-                            objectCreationExpr.addArgument(chainsBeanMethodCallExpr);
+                            objectCreationExpr.addArgument(chainsBeanExpression);
                         }
                     });
 

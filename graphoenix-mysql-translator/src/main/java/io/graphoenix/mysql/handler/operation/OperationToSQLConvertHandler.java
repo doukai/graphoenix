@@ -1,16 +1,14 @@
 package io.graphoenix.mysql.handler.operation;
 
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
-import io.graphoenix.spi.handler.IOperationHandler;
-import io.graphoenix.spi.handler.IPipelineContext;
-import org.javatuples.Pair;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.vavr.Tuple2;
 
 import javax.inject.Inject;
 import java.util.stream.Stream;
 
-public class OperationToSQLConvertHandler implements IOperationHandler {
+public class OperationToSQLConvertHandler {
 
     private final GraphQLQueryToSelect graphqlQueryToSelect;
     private final GraphQLMutationToStatements graphqlMutationToStatements;
@@ -26,48 +24,18 @@ public class OperationToSQLConvertHandler implements IOperationHandler {
         this.graphqlMutationToStatements = graphqlMutationToStatements;
     }
 
-    @Override
-    public boolean query(IPipelineContext context) {
-        String graphQL = context.poll(String.class);
+    public String query(String graphQL) {
         manager.registerFragment(graphQL);
-        String sql = this.graphqlQueryToSelect.createSelectSQL(graphQL);
-        context.add(sql);
-        return false;
+        return this.graphqlQueryToSelect.createSelectSQL(graphQL);
     }
 
-    @Override
-    public boolean queryAsync(IPipelineContext context) {
-        query(context);
-        return false;
-    }
-
-    @Override
-    public boolean querySelectionsAsync(IPipelineContext context) {
-        String graphQL = context.poll(String.class);
+    public Stream<Tuple2<String, String>> querySelectionsAsync(String graphQL) {
         manager.registerFragment(graphQL);
-        Stream<Pair<String, String>> sqlPair = this.graphqlQueryToSelect.createSelectsSQL(graphQL);
-        context.add(sqlPair);
-        return false;
+        return this.graphqlQueryToSelect.createSelectsSQL(graphQL);
     }
 
-    @Override
-    public boolean mutation(IPipelineContext context) {
-        String graphQL = context.poll(String.class);
+    public Stream<String> mutation(String graphQL) {
         manager.registerFragment(graphQL);
-        Stream<String> sqlStream = this.graphqlMutationToStatements.createStatementsSQL(graphQL);
-        context.add(sqlStream);
-        return false;
-    }
-
-    @Override
-    public boolean mutationAsync(IPipelineContext context) {
-        mutation(context);
-        return false;
-    }
-
-    @Override
-    public boolean subscription(IPipelineContext context) {
-        //TODO
-        return false;
+        return this.graphqlMutationToStatements.createStatementsSQL(graphQL);
     }
 }

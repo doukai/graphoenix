@@ -25,10 +25,7 @@ public class IntrospectionMutationExecuteHandler implements IBootstrapHandler {
     public boolean execute(IPipelineContext context) {
         Stream<String> sqlStream = context.pollStream(String.class);
         log.info("introspection data SQL insert started");
-        mutationExecutor.executeMutationsInBatchByGroup(sqlStream, sqlCount)
-                .forEach(count -> {
-                    log.info(count + " introspection data SQL insert success");
-                });
+        mutationExecutor.executeMutationsInBatchByGroup(sqlStream, sqlCount).forEach(count -> log.info(count + " introspection data SQL insert success"));
         log.info("All introspection data SQL insert success");
         return false;
     }

@@ -7,30 +7,20 @@ import io.graphoenix.common.pipeline.GraphQLDataFetcher;
 import io.graphoenix.http.server.GraphqlHttpServer;
 import io.graphoenix.http.server.GraphqlHttpServerHandler;
 import io.graphoenix.http.server.GraphqlHttpServerInitializer;
-import io.graphoenix.http.server.TestAop;
-import io.graphoenix.spi.aop.InterceptorBean;
 import io.graphoenix.spi.config.HttpServerConfig;
 import io.graphoenix.spi.config.NettyConfig;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
-import javax.annotation.Nonnull;
 import javax.inject.Singleton;
 
 @Module(includes = PipelineModule.class)
 public class HttpServerModule {
 
-    @ConfigProperty(name = "aaa.bbb",defaultValue = "cccc.aaaa")
+    @ConfigProperty(name = "server")
     private HttpServerConfig httpServerConfig;
 
-    @ConfigProperty(name = "ccc.ddd")
+    @ConfigProperty(name = "netty")
     private NettyConfig nettyConfig;
-
-    @Provides
-    @Singleton
-    @InterceptorBean(Nonnull.class)
-    public TestAop testAop() {
-        return new TestAop();
-    }
 
     @Provides
     public GraphqlHttpServerHandler graphqlHttpServerHandler(GraphQLDataFetcher dataFetcher) {
