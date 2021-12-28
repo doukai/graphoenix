@@ -18,7 +18,6 @@ import com.github.javaparser.ast.expr.ThisExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
-import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
@@ -34,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static com.github.javaparser.ast.expr.AssignExpr.Operator.ASSIGN;
 import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
+import static io.graphoenix.patterns.PatternsUtil.PATTERNS_UTIL;
 
 @AutoService(DaggerProxyProcessor.class)
 public class CompositeBeanProcessor implements DaggerProxyProcessor {
@@ -58,7 +58,7 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
         if (moduleBodyDeclaration.isMethodDeclaration()) {
             MethodDeclaration originalMethodDeclaration = moduleBodyDeclaration.asMethodDeclaration();
 
-            ClassOrInterfaceType type = DAGGER_PROCESSOR_UTIL.getReturnTypeFromMethod(originalMethodDeclaration).orElseThrow();
+            ClassOrInterfaceType type = PATTERNS_UTIL.getBuilderReturnType(originalMethodDeclaration).orElseThrow();
             CompilationUnit compositeDefineCompilationUnit = this.getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, type).orElseThrow();
             ClassOrInterfaceDeclaration compositeDefineClassOrInterfaceDeclaration = DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(compositeDefineCompilationUnit).orElseThrow();
             ClassOrInterfaceDeclaration compositeImplDeclaration = new ClassOrInterfaceDeclaration()
@@ -94,47 +94,53 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                     .filter(methodDeclaration -> methodDeclaration.getBody().isEmpty())
                     .collect(Collectors.toList());
 
-            originalMethodDeclaration.getBody().orElseThrow()
-                    .getStatements().stream()
-                    .filter(Statement::isExpressionStmt)
-                    .map(Statement::asExpressionStmt)
-                    .filter(expressionStmt -> expressionStmt.getExpression().isMethodCallExpr())
-                    .map(expressionStmt -> expressionStmt.getExpression().asMethodCallExpr())
-                    .forEach(methodCallExpr -> {
-                        MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), methodCallExpr);
+
+            PATTERNS_UTIL.getBuilderMethodArgumentsStream(originalMethodDeclaration, "CompositeBeanBuilder")
+                    .forEach(arguments -> {
+
+                        String methodName = arguments.get(0).asStringLiteralExpr().asString();
+                        MethodCallExpr compositeBeanMethodCallExpr = arguments.get(1).asMethodCallExpr();
+                        String compositeBeanMethodName;
+                        if (arguments.size() == 3) {
+                            compositeBeanMethodName = arguments.get(2).asStringLiteralExpr().asString();
+                        } else {
+                            compositeBeanMethodName = methodName;
+                        }
+
+                        MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), compositeBeanMethodCallExpr);
                         compositeImplDeclaration.addField(callMethodDeclaration.getType(), callMethodDeclaration.getNameAsString(), Modifier.Keyword.PRIVATE);
-                        constructorDeclaration.addParameter(
-                                new Parameter()
-                                        .setType(callMethodDeclaration.getType())
-                                        .setName(methodCallExpr.getName())
-                        );
+
+                        Optional<Parameter> parameter = callMethodDeclaration.getParameterByName(compositeBeanMethodCallExpr.getNameAsString());
+                        if (parameter.isEmpty()) {
+                            constructorDeclaration.addParameter(
+                                    new Parameter()
+                                            .setType(callMethodDeclaration.getType())
+                                            .setName(compositeBeanMethodCallExpr.getName())
+                            );
+                        }
                         constructorDeclarationBody.addStatement(
                                 new AssignExpr()
                                         .setTarget(new FieldAccessExpr().setName(callMethodDeclaration.getName()).setScope(new ThisExpr()))
                                         .setOperator(ASSIGN)
                                         .setValue(callMethodDeclaration.getNameAsExpression())
                         );
-                    });
 
-            compositeMethodDeclarationList.forEach(
-                    compositeMethodDeclaration -> {
-                        originalMethodDeclaration.getBody().orElseThrow()
-                                .getStatements().stream()
-                                .filter(Statement::isExpressionStmt)
-                                .map(Statement::asExpressionStmt)
-                                .filter(expressionStmt -> expressionStmt.getExpression().isMethodCallExpr())
-                                .map(expressionStmt -> expressionStmt.getExpression().asMethodCallExpr())
-                                .forEach(componentMethodCallExpr -> {
-                                            MethodDeclaration componentMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), componentMethodCallExpr);
+                        compositeMethodDeclarationList.stream()
+                                .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodName))
+                                .findFirst()
+                                .ifPresent(compositeMethodDeclaration -> {
+                                            MethodDeclaration componentMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), compositeBeanMethodCallExpr);
                                             Optional<CompilationUnit> componentCompilationUnit = getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, componentMethodDeclaration.getType().asClassOrInterfaceType());
                                             componentCompilationUnit.flatMap(DAGGER_PROCESSOR_UTIL::getPublicClassOrInterfaceDeclaration)
-                                                    .flatMap(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getMembers().stream()
-                                                            .filter(BodyDeclaration::isMethodDeclaration)
-                                                            .map(BodyDeclaration::asMethodDeclaration)
-                                                            .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(compositeMethodDeclaration.getNameAsString()))
-                                                            .filter(methodDeclaration -> methodDeclaration.getType().asString().equals(compositeMethodDeclaration.getType().asString()))
-                                                            .filter(methodDeclaration -> DAGGER_PROCESSOR_UTIL.hasSameParameters(methodDeclaration.getParameters(), compositeMethodDeclaration.getParameters()))
-                                                            .findFirst())
+                                                    .flatMap(classOrInterfaceDeclaration ->
+                                                            classOrInterfaceDeclaration.getMembers().stream()
+                                                                    .filter(BodyDeclaration::isMethodDeclaration)
+                                                                    .map(BodyDeclaration::asMethodDeclaration)
+                                                                    .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(compositeBeanMethodName))
+                                                                    .filter(methodDeclaration -> methodDeclaration.getType().asString().equals(compositeMethodDeclaration.getType().asString()))
+                                                                    .filter(methodDeclaration -> DAGGER_PROCESSOR_UTIL.hasSameParameters(methodDeclaration.getParameters(), compositeMethodDeclaration.getParameters()))
+                                                                    .findFirst()
+                                                    )
                                                     .ifPresent(methodDeclaration -> {
                                                         methodDeclaration.getAnnotations().clear();
                                                         methodDeclaration.addAnnotation(Override.class);
@@ -147,7 +153,7 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                                                                                         .collect(Collectors.toList())
                                                                         )
                                                                 )
-                                                                .setScope(componentMethodCallExpr.getNameAsExpression());
+                                                                .setScope(compositeBeanMethodCallExpr.getNameAsExpression());
                                                         if (methodDeclaration.getType().isVoidType()) {
                                                             blockStmt.addStatement(methodCallExpr);
                                                         } else {
@@ -158,8 +164,9 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                                                     });
                                         }
                                 );
-                    }
-            );
+
+
+                    });
             return Optional.of(compositeImplCompilationUnit);
         }
         return Optional.empty();
@@ -171,7 +178,7 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
         if (moduleBodyDeclaration.isMethodDeclaration()) {
 
             MethodDeclaration originalMethodDeclaration = moduleBodyDeclaration.asMethodDeclaration();
-            ClassOrInterfaceType originalMethodReturnType = DAGGER_PROCESSOR_UTIL.getReturnTypeFromMethod(originalMethodDeclaration).orElseThrow();
+            ClassOrInterfaceType originalMethodReturnType = PATTERNS_UTIL.getBuilderReturnType(originalMethodDeclaration).orElseThrow();
             CompilationUnit compositeDefineCompilationUnit = this.getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, originalMethodReturnType).orElseThrow();
             compositeDefineCompilationUnit.getPackageDeclaration()
                     .ifPresent(packageDeclaration -> {
@@ -183,7 +190,7 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                     .setName(originalMethodDeclaration.getName())
                     .setParameters(originalMethodDeclaration.getParameters())
                     .setAnnotations(originalMethodDeclaration.getAnnotations())
-                    .setType(originalMethodReturnType.getNameAsString());
+                    .setType(originalMethodDeclaration.getType());
 
             moduleProxyMethodDeclaration.getAnnotationByClass(CompositeBean.class).ifPresent(Node::remove);
             BlockStmt body = moduleProxyMethodDeclaration.createBody();
@@ -197,13 +204,16 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                             constructorDeclaration.getParameters().forEach(parameter -> objectCreationExpr.addArgument(parameter.getNameAsExpression()))
                     );
 
-            originalMethodDeclaration.getBody().orElseThrow()
-                    .getStatements().stream()
-                    .filter(Statement::isExpressionStmt)
-                    .map(statement -> statement.asExpressionStmt().getExpression())
-                    .filter(Expression::isMethodCallExpr)
-                    .map(Expression::asMethodCallExpr)
-                    .forEach(objectCreationExpr::addArgument);
+            PATTERNS_UTIL.getBuilderMethodArgumentsStream(originalMethodDeclaration, "CompositeBeanBuilder")
+                    .forEach(arguments -> {
+                        MethodCallExpr compositeBeanMethodCallExpr = arguments.get(1).asMethodCallExpr();
+                        Optional<Expression> argument = objectCreationExpr.getArguments().stream()
+                                .filter(expression -> expression.asMethodCallExpr().getNameAsString().equals(compositeBeanMethodCallExpr.getNameAsString()))
+                                .findFirst();
+                        if (argument.isEmpty()) {
+                            objectCreationExpr.addArgument(compositeBeanMethodCallExpr);
+                        }
+                    });
 
             body.addStatement(new ReturnStmt().setExpression(objectCreationExpr));
             moduleProxyClassDeclaration.addMember(moduleProxyMethodDeclaration);

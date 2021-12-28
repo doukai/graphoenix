@@ -9,8 +9,6 @@ import io.graphoenix.common.pipeline.operation.OperationRouter;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.patterns.ChainsBean;
 import io.graphoenix.spi.patterns.ChainsBeanBuilder;
-import io.graphoenix.spi.patterns.CompositeBean;
-import io.graphoenix.spi.patterns.CompositeBeanBuilder;
 
 import javax.inject.Singleton;
 
@@ -40,20 +38,20 @@ public class PipelineModule {
     @ChainsBean
     ChainTest chainTest(IGraphQLDocumentManager manager) {
         ChainsBeanBuilder chainsBeanBuilder = ChainsBeanBuilder.create();
-        chainsBeanBuilder.add("gen", operationRouter(manager));
-        chainsBeanBuilder.add("gen", graphQLDataFetcher(manager));
-        chainsBeanBuilder.add("gen", graphQLCodeGenerator(manager));
+        chainsBeanBuilder.add("execute", operationRouter(manager));
+        chainsBeanBuilder.add("execute", graphQLDataFetcher(manager));
+        chainsBeanBuilder.add("execute", graphQLCodeGenerator(manager));
         return chainsBeanBuilder.build(ChainTest.class);
     }
 
-    @Provides
-    @Singleton
-    @CompositeBean
-    ChainTest chainTest2(IGraphQLDocumentManager manager) {
-        CompositeBeanBuilder compositeBeanBuilder = CompositeBeanBuilder.create();
-        compositeBeanBuilder.put("gen", operationRouter(manager));
-        compositeBeanBuilder.put("gen", graphQLDataFetcher(manager));
-        compositeBeanBuilder.put("gen", graphQLCodeGenerator(manager));
-        return compositeBeanBuilder.build(ChainTest.class);
-    }
+//    @Provides
+//    @Singleton
+//    @CompositeBean
+//    ChainTest chainTest(IGraphQLDocumentManager manager) {
+//        CompositeBeanBuilder compositeBeanBuilder = CompositeBeanBuilder.create();
+//        compositeBeanBuilder.put("execute", operationRouter(manager));
+//        compositeBeanBuilder.put("addBootstrapHandler", graphQLDataFetcher(manager));
+//        compositeBeanBuilder.put("registerGraphQL", graphQLCodeGenerator(manager));
+//        return compositeBeanBuilder.build(ChainTest.class);
+//    }
 }
