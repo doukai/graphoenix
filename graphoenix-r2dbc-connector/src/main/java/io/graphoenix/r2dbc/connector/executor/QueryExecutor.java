@@ -21,16 +21,26 @@ public class QueryExecutor {
         this.connectionCreator = connectionCreator;
     }
 
+    public Mono<String> executeQuery(String sql) {
+        return executeQuery(sql, null);
+    }
+
     public Mono<String> executeQuery(String sql, Map<String, Object> parameters) {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
                             Statement statement = connection.createStatement(sql);
-                            parameters.forEach(statement::bind);
+                            if (parameters != null) {
+                                parameters.forEach(statement::bind);
+                            }
                             return Mono.from(statement.execute())
                                     .doFinally(signalType -> connection.close());
                         }
                 )
                 .flatMap(this::getJsonStringFromResult);
+    }
+
+    public Flux<Tuple2<String, String>> executeQuery(Stream<Tuple2<String, String>> sqlStream) {
+        return executeQuery(sqlStream, null);
     }
 
     public Flux<Tuple2<String, String>> executeQuery(Stream<Tuple2<String, String>> sqlStream, Map<String, Object> parameters) {
@@ -40,7 +50,9 @@ public class QueryExecutor {
                                 sqlStream.map(
                                         tuple2 -> {
                                             Statement statement = connection.createStatement(tuple2._1());
-                                            parameters.forEach(statement::bind);
+                                            if (parameters != null) {
+                                                parameters.forEach(statement::bind);
+                                            }
                                             return Tuple.of(
                                                     tuple2._2(),
                                                     Mono.from(statement.execute())

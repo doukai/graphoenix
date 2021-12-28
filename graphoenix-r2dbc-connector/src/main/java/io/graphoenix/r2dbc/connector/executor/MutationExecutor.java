@@ -69,17 +69,23 @@ public class MutationExecutor {
                 .block();
     }
 
+    public Mono<String> executeMutations(Stream<String> sqlStream) {
+        return executeMutations(sqlStream, null);
+    }
+
     public Mono<String> executeMutations(Stream<String> sqlStream, Map<String, Object> parameters) {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
                     connection.beginTransaction();
                     return Flux.fromStream(sqlStream
-                                    .map(sql -> {
-                                                Statement statement = connection.createStatement(sql);
-                                                parameters.forEach(statement::bind);
-                                                return statement;
-                                            }
-                                    ))
+                            .map(sql -> {
+                                        Statement statement = connection.createStatement(sql);
+                                        if (parameters != null) {
+                                            parameters.forEach(statement::bind);
+                                        }
+                                        return statement;
+                                    }
+                            ))
                             .flatMap(Statement::execute)
                             .flatMap(this::getJsonStringFromResult)
                             .last()

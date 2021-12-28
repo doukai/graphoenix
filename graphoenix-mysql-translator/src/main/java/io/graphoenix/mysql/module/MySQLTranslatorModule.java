@@ -66,7 +66,7 @@ public class MySQLTranslatorModule {
 
     @Provides
     @Singleton
-    public SQLFormatHandler sqlToFileConvertHandler() {
+    public SQLFormatHandler sqlFormatHandler() {
         return new SQLFormatHandler();
     }
 

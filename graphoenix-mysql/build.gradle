@@ -10,9 +10,9 @@ repositories {
 }
 
 dependencies {
-    implementation project(":graphoenix-spi")
-    implementation project(":graphoenix-mysql-translator")
-    implementation project(":graphoenix-r2dbc-connector")
+    implementation project(":graphoenix-core")
+    compile project(":graphoenix-mysql-translator")
+    compile project(":graphoenix-r2dbc-connector")
     annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
     annotationProcessor project(":graphoenix-dagger")
     annotationProcessor project(":graphoenix-config")

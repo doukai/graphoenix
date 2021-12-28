@@ -135,23 +135,25 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
                         } else {
                             chainsBeanMethodName = methodName;
                         }
-                        chainsImplDeclaration.addField(chainsBeanType, chainsBeanName, Modifier.Keyword.PRIVATE);
 
                         Optional<Parameter> parameter = constructorDeclaration.getParameterByName(chainsBeanName);
                         if (parameter.isEmpty()) {
+
+                            chainsImplDeclaration.addField(chainsBeanType, chainsBeanName, Modifier.Keyword.PRIVATE);
+
                             constructorDeclaration.addParameter(
                                     new Parameter()
                                             .setType(chainsBeanType)
                                             .setName(chainsBeanName)
                             );
+                            constructorDeclarationBody.addStatement(
+                                    new AssignExpr()
+                                            .setTarget(new FieldAccessExpr().setName(chainsBeanName).setScope(new ThisExpr()))
+                                            .setOperator(ASSIGN)
+                                            .setValue(chainsBeanNameExpr)
+                            );
                         }
 
-                        constructorDeclarationBody.addStatement(
-                                new AssignExpr()
-                                        .setTarget(new FieldAccessExpr().setName(chainsBeanName).setScope(new ThisExpr()))
-                                        .setOperator(ASSIGN)
-                                        .setValue(chainsBeanNameExpr)
-                        );
 
                         chainsMethodDeclarationList.stream()
                                 .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodName))
