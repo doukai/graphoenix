@@ -27,6 +27,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
+import io.graphoenix.dagger.ProcessorTools;
 import io.graphoenix.spi.patterns.ChainsBean;
 
 import javax.inject.Inject;
@@ -47,12 +48,15 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
 
     private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType;
     private BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource;
+    private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<String>> getTypeNameByClassOrInterfaceType;
+    private BiConsumer<CompilationUnit, String> importAllTypesFromTypeName;
 
     @Override
-    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType,
-                     BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource) {
-        this.getCompilationUnitByClassOrInterfaceType = getCompilationUnitByClassOrInterfaceType;
-        this.importAllTypesFromSource = importAllTypesFromSource;
+    public void init(ProcessorTools processorTools) {
+        this.getCompilationUnitByClassOrInterfaceType = processorTools.getGetCompilationUnitByClassOrInterfaceType();
+        this.importAllTypesFromSource = processorTools.getImportAllTypesFromSource();
+        this.getTypeNameByClassOrInterfaceType = processorTools.getGetTypeNameByClassOrInterfaceType();
+        this.importAllTypesFromTypeName = processorTools.getImportAllTypesFromTypeName();
     }
 
     @Override
@@ -206,22 +210,6 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
                     }
             );
 
-            PATTERNS_UTIL.getBuilderMethodArgumentsStream(originalMethodDeclaration, "ChainsBeanBuilder")
-                    .forEach(arguments -> {
-
-                        Expression chainsBeanExpression = arguments.get(1);
-                        Type chainsBeanType;
-                        if (chainsBeanExpression.isMethodCallExpr()) {
-                            MethodDeclaration callMethodDeclaration = DAGGER_PROCESSOR_UTIL.getMethodDeclarationByMethodCallExpr(moduleClassDeclaration, moduleBodyDeclaration.asMethodDeclaration(), chainsBeanExpression.asMethodCallExpr());
-                            chainsBeanType = callMethodDeclaration.getType();
-                        } else {
-                            chainsBeanType = moduleBodyDeclaration.asMethodDeclaration().getParameterByName(chainsBeanExpression.asNameExpr().getNameAsString()).orElseThrow().getType();
-                        }
-
-                        Optional<CompilationUnit> componentCompilationUnit = getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, chainsBeanType.asClassOrInterfaceType());
-                        importAllTypesFromSource.accept(chainsImplCompilationUnit, componentCompilationUnit.orElseThrow());
-                    });
-
             return Optional.of(chainsImplCompilationUnit);
         }
         return Optional.empty();
@@ -272,16 +260,16 @@ public class ChainsBeanProcessor implements DaggerProxyProcessor {
 
                         if (chainsBeanExpression.isMethodCallExpr()) {
                             chainsBeanName = chainsBeanExpression.asMethodCallExpr().getNameAsString();
+
+                            Optional<Expression> argument = objectCreationExpr.getArguments().stream()
+                                    .filter(expression -> expression.asMethodCallExpr().getNameAsString().equals(chainsBeanName))
+                                    .findFirst();
+
+                            if (argument.isEmpty()) {
+                                objectCreationExpr.addArgument(chainsBeanExpression);
+                            }
                         } else {
                             chainsBeanName = chainsBeanExpression.asNameExpr().getNameAsString();
-                        }
-
-                        Optional<Expression> argument = objectCreationExpr.getArguments().stream()
-                                .filter(expression -> expression.asMethodCallExpr().getNameAsString().equals(chainsBeanName))
-                                .findFirst();
-
-                        if (argument.isEmpty()) {
-                            objectCreationExpr.addArgument(chainsBeanExpression);
                         }
                     });
 

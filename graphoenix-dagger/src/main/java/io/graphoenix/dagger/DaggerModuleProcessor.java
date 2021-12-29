@@ -47,12 +47,16 @@ import javax.lang.model.util.Elements;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
@@ -81,9 +85,17 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         this.supports = new HashSet<>();
         for (DaggerProxyProcessor daggerProxyProcessor : this.daggerProxyProcessors) {
             this.supports.add(daggerProxyProcessor.support());
-            daggerProxyProcessor.init(this::getCompilationUnitByClassOrInterfaceType, this::importAllTypesFromSource);
+            daggerProxyProcessor.init(
+                    new ProcessorTools()
+                            .setImportAllTypesFromClass(this::importAllTypesFromClass)
+                            .setImportAllTypesFromSource(this::importAllTypesFromSource)
+                            .setImportAllTypesFromTypeName(this::importAllTypesFromTypeName)
+                            .setGetTypeNameByClassOrInterfaceType(this::getTypeNameByClassOrInterfaceType)
+                            .setGetCompilationUnitByClassOrInterfaceType(this::getCompilationUnitByClassOrInterfaceType)
+            );
         }
     }
+
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -376,6 +388,143 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 );
     }
 
+    protected void importAllTypesFromTypeName(CompilationUnit target, String typeName) {
+        DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(target)
+                .ifPresent(classOrInterfaceDeclaration -> importAllTypesFromTypeName(classOrInterfaceDeclaration, target, typeName));
+    }
+
+    protected void importAllTypesFromTypeName(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, CompilationUnit target, String typeName) {
+        TreePath treePath = trees.getPath(elements.getTypeElement(typeName));
+        if (treePath != null) {
+            importAllTypesFromSource(classOrInterfaceDeclaration, target, javaParser.parse(treePath.getCompilationUnit().toString()).getResult().orElseThrow());
+        } else {
+            try {
+                importAllTypesFromClass(classOrInterfaceDeclaration, target, Class.forName(typeName, false, getClass().getClassLoader()));
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    protected void importAllTypesFromClass(CompilationUnit target, Class<?> clazz) {
+        DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(target)
+                .ifPresent(classOrInterfaceDeclaration -> importAllTypesFromClass(classOrInterfaceDeclaration, target, clazz));
+    }
+
+    protected void importAllTypesFromClass(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, CompilationUnit target, Class<?> clazz) {
+        classOrInterfaceDeclaration.getAnnotations().forEach(
+                annotationExpr -> Arrays.stream(clazz.getAnnotations())
+                        .filter(annotation -> annotation.annotationType().getSimpleName().equals(annotationExpr.getName().getIdentifier()))
+                        .findFirst()
+                        .ifPresent(annotation -> importType(target, annotation.annotationType()))
+        );
+
+        classOrInterfaceDeclaration.getConstructors().forEach(
+                constructorDeclaration -> Arrays.stream(clazz.getConstructors())
+                        .filter(constructor -> constructor.getName().equals(constructorDeclaration.getNameAsString()))
+                        .findFirst()
+                        .ifPresent(constructor -> {
+                                    importAllTypesFromClass(constructorDeclaration, target, constructor);
+                                    Arrays.stream(constructor.getAnnotations()).forEach(annotation -> importType(target, annotation.annotationType()));
+                                }
+
+                        )
+        );
+
+        classOrInterfaceDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isMethodDeclaration)
+                .map(BodyDeclaration::asMethodDeclaration)
+                .forEach(methodDeclaration -> Arrays.stream(clazz.getMethods())
+                        .filter(method -> isSameMethod(methodDeclaration, method))
+                        .findFirst()
+                        .ifPresent(method -> {
+                                    importType(target, method.getReturnType());
+                                    Arrays.stream(method.getParameterTypes()).forEach(type -> importType(target, type));
+                                    Arrays.stream(method.getAnnotations()).forEach(annotation -> importType(target, annotation.annotationType()));
+                                }
+                        )
+                );
+
+        classOrInterfaceDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isMethodDeclaration)
+                .map(BodyDeclaration::asMethodDeclaration)
+                .map(MethodDeclaration::getBody)
+                .filter(blockStmt -> blockStmt.isPresent())
+                .map(blockStmt -> blockStmt.get())
+                .forEach(blockStmt -> {
+                            blockStmt.getStatements()
+                                    .forEach(
+                                            statement -> {
+
+                                                if (statement.isReturnStmt()) {
+                                                    statement.asReturnStmt().getExpression().ifPresent(expression -> importType(target, expression));
+                                                } else if (statement.isExpressionStmt()) {
+
+                                                    importType(target, statement.asExpressionStmt().getExpression());
+                                                }
+                                            }
+                                    );
+                        }
+                );
+
+        classOrInterfaceDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isFieldDeclaration)
+                .map(BodyDeclaration::asFieldDeclaration)
+                .forEach(fieldDeclaration ->
+                        fieldDeclaration.getVariables().forEach(
+                                variableDeclarator -> Arrays.stream(clazz.getFields())
+                                        .filter(field -> field.getName().equals(variableDeclarator.getName().getIdentifier()))
+                                        .findFirst()
+                                        .ifPresent(field -> {
+                                                    importType(target, field.getType());
+                                                    Arrays.stream(field.getAnnotations()).forEach(annotation -> importType(target, annotation.annotationType()));
+                                                }
+                                        )
+                        )
+                );
+    }
+
+    protected void importType(CompilationUnit target, Expression expression) {
+    }
+
+    protected void importType(CompilationUnit target, Class<?> type) {
+        target.addImport(type.getName());
+        Arrays.stream(type.getTypeParameters())
+                .forEach(
+                        classTypeVariable -> importType(target, classTypeVariable.getGenericDeclaration())
+                );
+    }
+
+    private boolean isSameMethod(MethodDeclaration methodDeclaration, Method method) {
+        if (!methodDeclaration.getName().getIdentifier().equals(method.getName())) {
+            return false;
+        }
+
+        if (methodDeclaration.getParameters().size() != method.getParameterCount()) {
+            return false;
+        }
+
+        return IntStream.range(0, methodDeclaration.getParameters().size())
+                .mapToObj(index -> methodDeclaration.getParameter(index).getType().asString().equals(method.getParameters()[index].getType().getSimpleName()))
+                .reduce(true, (left, right) -> left && right);
+    }
+
+    protected void importAllTypesFromClass(ConstructorDeclaration constructorDeclaration, CompilationUnit target, Constructor<?> constructor) {
+        constructorDeclaration.getAnnotations().forEach(
+                annotationExpr -> Arrays.stream(constructor.getAnnotations())
+                        .filter(annotation -> annotation.toString().equals(annotationExpr.getNameAsString()))
+                        .findFirst()
+                        .ifPresent(annotation -> target.addImport(annotation.toString()))
+        );
+
+        constructorDeclaration.getParameters().stream()
+                .filter(parameter -> parameter.getType().isClassOrInterfaceType())
+                .forEach(parameter -> Arrays.stream(constructor.getParameters())
+                        .filter(param -> param.getName().equals(parameter.getName().getIdentifier()))
+                        .findFirst()
+                        .ifPresent(param -> target.addImport(param.getType().getName()))
+                );
+    }
 
     protected void importAllTypesFromSource(CompilationUnit target, CompilationUnit source) {
         DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(target)
@@ -574,6 +723,14 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
     protected boolean classExist(String className) {
         return elements.getTypeElement(className) != null;
+    }
+
+    public Optional<String> getTypeNameByClassOrInterfaceType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
+        TypeElement elementByType = getElementByType(compilationUnit, type);
+        if (elementByType != null && elementByType.getQualifiedName() != null) {
+            return Optional.of(elementByType.getQualifiedName().toString());
+        }
+        return Optional.empty();
     }
 
     public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {

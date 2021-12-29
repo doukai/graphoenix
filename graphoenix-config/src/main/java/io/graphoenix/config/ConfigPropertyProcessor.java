@@ -5,10 +5,14 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.expr.ClassExpr;
+import com.github.javaparser.ast.expr.MemberValuePair;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
+import io.graphoenix.dagger.ProcessorTools;
 import io.vavr.control.Try;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -17,15 +21,13 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @AutoService(DaggerProxyProcessor.class)
 public class ConfigPropertyProcessor implements DaggerProxyProcessor {
 
     @Override
-    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType, BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource) {
+    public void init(ProcessorTools processorTools) {
 
     }
 

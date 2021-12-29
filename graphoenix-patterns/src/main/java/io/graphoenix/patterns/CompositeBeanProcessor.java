@@ -23,6 +23,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
+import io.graphoenix.dagger.ProcessorTools;
 import io.graphoenix.spi.patterns.CompositeBean;
 
 import javax.inject.Inject;
@@ -44,9 +45,9 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
     private BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource;
 
     @Override
-    public void init(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType, BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource) {
-        this.getCompilationUnitByClassOrInterfaceType = getCompilationUnitByClassOrInterfaceType;
-        this.importAllTypesFromSource = importAllTypesFromSource;
+    public void init(ProcessorTools processorTools) {
+        this.getCompilationUnitByClassOrInterfaceType = processorTools.getGetCompilationUnitByClassOrInterfaceType();
+        this.importAllTypesFromSource = processorTools.getImportAllTypesFromSource();
     }
 
     @Override
@@ -225,7 +226,7 @@ public class CompositeBeanProcessor implements DaggerProxyProcessor {
                     .forEach(arguments -> {
                         Expression compositeBeanExpression = arguments.get(1);
                         String compositeBeanName;
-                        
+
                         if (compositeBeanExpression.isMethodCallExpr()) {
                             compositeBeanName = compositeBeanExpression.asMethodCallExpr().getNameAsString();
 
