@@ -11,15 +11,13 @@ repositories {
 
 dependencies {
     implementation project(":graphoenix-core")
-    compile project(":graphoenix-mysql-translator")
-    compile project(":graphoenix-r2dbc-connector")
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
-    annotationProcessor project(":graphoenix-mysql-translator")
-    annotationProcessor project(":graphoenix-r2dbc-connector")
+    implementation project(":graphoenix-mysql-translator")
+    implementation project(":graphoenix-r2dbc-connector")
+
     annotationProcessor project(":graphoenix-dagger")
     annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-aop")
-    annotationProcessor project(":graphoenix-patterns")
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
 }

@@ -9,20 +9,9 @@ import java.util.function.BiFunction;
 
 public class ProcessorTools {
 
-    private BiConsumer<CompilationUnit, Class<?>> importAllTypesFromClass;
     private BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource;
-    private BiConsumer<CompilationUnit, String> importAllTypesFromTypeName;
     private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<String>> getTypeNameByClassOrInterfaceType;
     private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType;
-
-    public BiConsumer<CompilationUnit, Class<?>> getImportAllTypesFromClass() {
-        return importAllTypesFromClass;
-    }
-
-    public ProcessorTools setImportAllTypesFromClass(BiConsumer<CompilationUnit, Class<?>> importAllTypesFromClass) {
-        this.importAllTypesFromClass = importAllTypesFromClass;
-        return this;
-    }
 
     public BiConsumer<CompilationUnit, CompilationUnit> getImportAllTypesFromSource() {
         return importAllTypesFromSource;
@@ -30,15 +19,6 @@ public class ProcessorTools {
 
     public ProcessorTools setImportAllTypesFromSource(BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource) {
         this.importAllTypesFromSource = importAllTypesFromSource;
-        return this;
-    }
-
-    public BiConsumer<CompilationUnit, String> getImportAllTypesFromTypeName() {
-        return importAllTypesFromTypeName;
-    }
-
-    public ProcessorTools setImportAllTypesFromTypeName(BiConsumer<CompilationUnit, String> importAllTypesFromTypeName) {
-        this.importAllTypesFromTypeName = importAllTypesFromTypeName;
         return this;
     }
 

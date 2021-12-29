@@ -27,11 +27,9 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-core:2.14.1"
     compile "org.apache.logging.log4j:log4j-slf4j-impl:2.14.1"
 
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
     annotationProcessor project(":graphoenix-dagger")
     annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-aop")
-    annotationProcessor project(":graphoenix-patterns")
 
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'

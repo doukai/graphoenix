@@ -24,17 +24,17 @@ public class OperationToSQLConvertHandler {
         this.graphqlMutationToStatements = graphqlMutationToStatements;
     }
 
-    public String query(String graphQL) {
+    public String queryToSelect(String graphQL) {
         manager.registerFragment(graphQL);
         return this.graphqlQueryToSelect.createSelectSQL(graphQL);
     }
 
-    public Stream<Tuple2<String, String>> querySelectionsAsync(String graphQL) {
+    public Stream<Tuple2<String, String>> querySelectionsToSelects(String graphQL) {
         manager.registerFragment(graphQL);
         return this.graphqlQueryToSelect.createSelectsSQL(graphQL);
     }
 
-    public Stream<String> mutation(String graphQL) {
+    public Stream<String> mutationToStatements(String graphQL) {
         manager.registerFragment(graphQL);
         return this.graphqlMutationToStatements.createStatementsSQL(graphQL);
     }
