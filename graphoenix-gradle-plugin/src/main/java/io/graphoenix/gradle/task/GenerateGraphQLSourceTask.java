@@ -1,6 +1,6 @@
 package io.graphoenix.gradle.task;
 
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;

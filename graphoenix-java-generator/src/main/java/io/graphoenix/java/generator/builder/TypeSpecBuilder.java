@@ -6,7 +6,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.annotation.TypeExpression;
 import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.annotation.TypeInput;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.eclipse.microprofile.graphql.*;
 import org.eclipse.microprofile.graphql.Enum;

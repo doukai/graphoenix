@@ -12,7 +12,7 @@ import io.graphoenix.r2dbc.connector.handler.bootstrap.CreateTableSQLExecuteHand
 import io.graphoenix.r2dbc.connector.handler.bootstrap.IntrospectionMutationExecuteHandler;
 import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
-import io.graphoenix.spi.config.R2DBCConfig;
+import io.graphoenix.r2dbc.connector.config.R2DBCConfig;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
@@ -20,7 +20,7 @@ import javax.inject.Singleton;
 @Module
 public class R2dbcConnectorModule {
 
-    @ConfigProperty(name = "r2dbc")
+    @ConfigProperty
     public R2DBCConfig r2DBCConfig;
 
     @Provides

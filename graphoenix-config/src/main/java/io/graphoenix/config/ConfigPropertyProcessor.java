@@ -10,24 +10,33 @@ import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
 import io.graphoenix.dagger.ProcessorTools;
 import io.vavr.control.Try;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+
+import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
 
 @AutoService(DaggerProxyProcessor.class)
 public class ConfigPropertyProcessor implements DaggerProxyProcessor {
 
+    private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType;
+
     @Override
     public void init(ProcessorTools processorTools) {
+
+        this.getCompilationUnitByClassOrInterfaceType = processorTools.getGetCompilationUnitByClassOrInterfaceType();
 
     }
 
@@ -52,14 +61,18 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
 
     @Override
     public void buildModuleProxy(CompilationUnit moduleCompilationUnit,
-                                 ClassOrInterfaceDeclaration moduleCLassDeclaration,
+                                 ClassOrInterfaceDeclaration moduleClassDeclaration,
                                  List<CompilationUnit> componentProxyCompilationUnits,
                                  CompilationUnit moduleProxyCompilationUnit,
                                  ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
 
+        if (moduleClassDeclaration.isInterface()) {
+            return;
+        }
+
         moduleProxyClassDeclaration.addField(Config.class, "config", Modifier.Keyword.PRIVATE).getVariable(0).setInitializer(new MethodCallExpr().setName("getConfig").setScope(new NameExpr("ConfigProvider")));
 
-        List<FieldDeclaration> configPropertyFieldDeclarations = getConfigPropertyFieldDeclarations(moduleCLassDeclaration);
+        List<FieldDeclaration> configPropertyFieldDeclarations = getConfigPropertyFieldDeclarations(moduleClassDeclaration);
 
         configPropertyFieldDeclarations
                 .forEach(fieldDeclaration ->
@@ -92,7 +105,20 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                                                         .asNormalAnnotationExpr().getPairs().stream()
                                                                         .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
                                                                         .findFirst()
-                                                                        .orElseThrow()
+                                                                        .orElseGet(() -> getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, fieldDeclaration.getElementType().asClassOrInterfaceType())
+                                                                                .map(DAGGER_PROCESSOR_UTIL::getPublicClassOrInterfaceDeclaration)
+                                                                                .filter(Optional::isPresent)
+                                                                                .map(Optional::get)
+                                                                                .map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getAnnotationByClass(ConfigProperties.class))
+                                                                                .filter(Optional::isPresent)
+                                                                                .map(Optional::get)
+                                                                                .map(annotationExpr ->
+                                                                                        annotationExpr.asNormalAnnotationExpr().getPairs().stream()
+                                                                                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("prefix"))
+                                                                                                .findFirst()
+                                                                                                .orElseThrow()
+                                                                                )
+                                                                                .orElseThrow())
                                                                         .getValue()
                                                                 )
                                                                 .addArgument(new ClassExpr().setType(fieldDeclaration.getElementType()))

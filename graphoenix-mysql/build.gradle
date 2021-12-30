@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation project(":graphoenix-core")
+    implementation project(":graphoenix-graphql-builder")
     implementation project(":graphoenix-mysql-translator")
     implementation project(":graphoenix-r2dbc-connector")
 

@@ -2,12 +2,12 @@ package io.graphoenix.java.generator.module;
 
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.common.module.DocumentManagerModule;
+import io.graphoenix.core.module.DocumentManagerModule;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.java.generator.builder.TypeSpecBuilder;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;

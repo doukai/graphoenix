@@ -1,6 +1,6 @@
 package io.graphoenix.r2dbc.connector.connection;
 
-import io.graphoenix.spi.config.R2DBCConfig;
+import io.graphoenix.r2dbc.connector.config.R2DBCConfig;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;

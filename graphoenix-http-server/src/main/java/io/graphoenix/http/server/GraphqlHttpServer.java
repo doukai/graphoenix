@@ -1,7 +1,7 @@
 package io.graphoenix.http.server;
 
-import io.graphoenix.spi.config.NettyConfig;
-import io.graphoenix.spi.config.HttpServerConfig;
+import io.graphoenix.http.config.NettyConfig;
+import io.graphoenix.http.config.HttpServerConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;

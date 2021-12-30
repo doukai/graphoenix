@@ -7,7 +7,6 @@ import io.graphoenix.graphql.generator.operation.VariableDefinition;
 import io.graphoenix.spi.annotation.TypeExpression;
 import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
 
 import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
@@ -29,9 +28,9 @@ public class MethodToQueryOperation {
     private final ElementManager elementManager;
 
     @Inject
-    public MethodToQueryOperation(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration, ElementManager elementManager) {
-        this.conditionalName = configuration.getEnumTypePackageName().concat(".Conditional");
-        this.operatorName = configuration.getEnumTypePackageName().concat(".Operator");
+    public MethodToQueryOperation(IGraphQLDocumentManager manager, ElementManager elementManager) {
+        this.conditionalName = ".Conditional";
+        this.operatorName = ".Operator";
         this.manager = manager;
         this.elementManager = elementManager;
     }
@@ -120,7 +119,7 @@ public class MethodToQueryOperation {
 
     private Stream<Argument> getValueArguments(ExecutableElement executableElement, AnnotationMirror expressions) {
         return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> !entry.getKey().getReturnType().toString().endsWith(conditionalName))
                 .filter(entry -> entry.getKey().getSimpleName().toString().equals("value"))
                 .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
                 .map(entry -> (Collection<?>) entry.getValue().getValue())
@@ -134,7 +133,7 @@ public class MethodToQueryOperation {
 
     private Stream<Argument> getRelationValueArguments(ExecutableElement executableElement, AnnotationMirror expressions) {
         return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> !entry.getKey().getReturnType().toString().endsWith(conditionalName))
                 .filter(entry -> !entry.getKey().getSimpleName().toString().equals("value"))
                 .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
                 .map(entry ->
@@ -160,7 +159,7 @@ public class MethodToQueryOperation {
 
     private String getConditionalArgumentName(AnnotationMirror expressions) {
         return expressions.getAnnotationType().asElement().getEnclosedElements().stream()
-                .filter(element -> ((ExecutableElement) element).getReturnType().toString().equals(conditionalName))
+                .filter(element -> ((ExecutableElement) element).getReturnType().toString().endsWith(conditionalName))
                 .findFirst()
                 .map(element -> element.getSimpleName().toString())
                 .orElseThrow();
@@ -168,21 +167,21 @@ public class MethodToQueryOperation {
 
     private Optional<AnnotationValue> getConditional(AnnotationMirror expressions) {
         return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> entry.getKey().getReturnType().toString().endsWith(conditionalName))
                 .findFirst()
                 .map(Map.Entry::getValue);
     }
 
     private Optional<AnnotationValue> getDefaultConditional(AnnotationMirror expressions) {
         return expressions.getAnnotationType().asElement().getEnclosedElements().stream()
-                .filter(element -> ((ExecutableElement) element).getReturnType().toString().equals(conditionalName))
+                .filter(element -> ((ExecutableElement) element).getReturnType().toString().endsWith(conditionalName))
                 .findFirst()
                 .map(element -> ((ExecutableElement) element).getDefaultValue());
     }
 
     private String getOperatorArgumentName(AnnotationMirror expression) {
         return expression.getAnnotationType().asElement().getEnclosedElements().stream()
-                .filter(element -> ((ExecutableElement) element).getReturnType().toString().equals(operatorName))
+                .filter(element -> ((ExecutableElement) element).getReturnType().toString().endsWith(operatorName))
                 .findFirst()
                 .map(element -> element.getSimpleName().toString())
                 .orElseThrow();
@@ -190,21 +189,21 @@ public class MethodToQueryOperation {
 
     private Optional<AnnotationValue> getOperator(AnnotationMirror expression) {
         return expression.getElementValues().entrySet().stream()
-                .filter(entry -> entry.getKey().getReturnType().toString().equals(operatorName))
+                .filter(entry -> entry.getKey().getReturnType().toString().endsWith(operatorName))
                 .findFirst()
                 .map(Map.Entry::getValue);
     }
 
     private Optional<AnnotationValue> getDefaultOperator(AnnotationMirror expression) {
         return expression.getAnnotationType().asElement().getEnclosedElements().stream()
-                .filter(element -> ((ExecutableElement) element).getReturnType().toString().equals(operatorName))
+                .filter(element -> ((ExecutableElement) element).getReturnType().toString().endsWith(operatorName))
                 .findFirst()
                 .map(element -> ((ExecutableElement) element).getDefaultValue());
     }
 
     private Optional<String> getValueArgumentName(AnnotationMirror expression) {
         return expression.getElementValues().keySet().stream()
-                .filter(annotationValue -> !annotationValue.getReturnType().toString().equals(operatorName))
+                .filter(annotationValue -> !annotationValue.getReturnType().toString().endsWith(operatorName))
                 .filter(annotationValue -> !annotationValue.getSimpleName().toString().startsWith("$"))
                 .findFirst()
                 .map(annotationValue -> annotationValue.getSimpleName().toString());
@@ -212,7 +211,7 @@ public class MethodToQueryOperation {
 
     private Optional<String> getVariableArgumentName(AnnotationMirror expression) {
         return expression.getElementValues().keySet().stream()
-                .filter(annotationValue -> !annotationValue.getReturnType().toString().equals(operatorName))
+                .filter(annotationValue -> !annotationValue.getReturnType().toString().endsWith(operatorName))
                 .filter(annotationValue -> annotationValue.getSimpleName().toString().startsWith("$"))
                 .findFirst()
                 .map(annotationValue -> annotationValue.getSimpleName().toString());
@@ -220,7 +219,7 @@ public class MethodToQueryOperation {
 
     private Stream<String> getVariableArgumentNames(AnnotationMirror expressions) {
         return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> !entry.getKey().getReturnType().toString().endsWith(conditionalName))
                 .filter(entry -> entry.getKey().getSimpleName().toString().equals("value"))
                 .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
                 .map(entry -> (Collection<?>) entry.getValue().getValue())
@@ -236,7 +235,7 @@ public class MethodToQueryOperation {
 
     private Stream<String> getRelationValueArgumentNames(AnnotationMirror expressions) {
         return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> !entry.getKey().getReturnType().toString().endsWith(conditionalName))
                 .filter(entry -> !entry.getKey().getSimpleName().toString().equals("value"))
                 .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
                 .map(entry -> (Collection<?>) entry.getValue().getValue())
@@ -262,7 +261,7 @@ public class MethodToQueryOperation {
 
     private Stream<String> getExpressionsVariableNamesByArgumentName(AnnotationMirror expressions, String variableArgumentName) {
         return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> !entry.getKey().getReturnType().toString().endsWith(conditionalName))
                 .filter(entry -> entry.getKey().getSimpleName().toString().equals("value"))
                 .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
                 .map(entry -> (Collection<?>) entry.getValue().getValue())
@@ -276,7 +275,7 @@ public class MethodToQueryOperation {
 
     private Stream<String> getRelationExpressionsVariableNamesByArgumentName(AnnotationMirror expressions, String variableArgumentName) {
         return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
+                .filter(entry -> !entry.getKey().getReturnType().toString().endsWith(conditionalName))
                 .filter(entry -> !entry.getKey().getSimpleName().toString().equals("value"))
                 .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
                 .map(entry -> (Collection<?>) entry.getValue().getValue())
@@ -290,7 +289,7 @@ public class MethodToQueryOperation {
 
     private Optional<List<?>> getListVariable(AnnotationMirror expression, ExecutableElement parentExecutableElement) {
         return expression.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(operatorName))
+                .filter(entry -> !entry.getKey().getReturnType().toString().endsWith(operatorName))
                 .filter(entry -> entry.getKey().getSimpleName().toString().startsWith("$"))
                 .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                 .findFirst()
@@ -324,7 +323,7 @@ public class MethodToQueryOperation {
 
     private Optional<List<?>> getListValue(AnnotationMirror expression) {
         return expression.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(operatorName))
+                .filter(entry -> !entry.getKey().getReturnType().toString().endsWith(operatorName))
                 .filter(entry -> !entry.getKey().getSimpleName().toString().startsWith("$"))
                 .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                 .findFirst()

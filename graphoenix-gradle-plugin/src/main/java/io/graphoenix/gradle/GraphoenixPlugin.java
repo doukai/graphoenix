@@ -1,7 +1,7 @@
 package io.graphoenix.gradle;
 
 import io.graphoenix.gradle.task.GenerateGraphQLSourceTask;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 

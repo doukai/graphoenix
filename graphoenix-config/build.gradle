@@ -13,7 +13,7 @@ repositories {
 dependencies {
     compile project(":graphoenix-spi")
     implementation project(":graphoenix-dagger")
-    implementation "com.typesafe:config:1.4.1"
+    compile "com.typesafe:config:1.4.1"
     implementation "io.vavr:vavr:0.10.4"
 
     implementation "com.google.auto.service:auto-service:1.0.1"

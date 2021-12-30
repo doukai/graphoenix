@@ -2,8 +2,8 @@ package io.graphoenix.java.generator.implementer;
 
 import com.pivovarit.function.ThrowingFunction;
 import com.squareup.javapoet.*;
-import io.graphoenix.common.pipeline.GraphQLDAO;
-import io.graphoenix.common.pipeline.PipelineContext;
+import io.graphoenix.core.pipeline.GraphQLDAO;
+import io.graphoenix.core.pipeline.PipelineContext;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import reactor.core.publisher.Mono;

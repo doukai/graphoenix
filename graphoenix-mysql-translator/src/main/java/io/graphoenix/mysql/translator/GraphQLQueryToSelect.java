@@ -1,7 +1,7 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.common.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.mysql.common.utils.DBNameUtil;
 import io.graphoenix.mysql.common.utils.DBValueUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -33,7 +33,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.common.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.spi.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.spi.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;

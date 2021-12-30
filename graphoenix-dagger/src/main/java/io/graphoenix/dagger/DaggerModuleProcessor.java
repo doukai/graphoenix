@@ -9,17 +9,22 @@ import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.Name;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.expr.SimpleName;
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.SuperExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -31,6 +36,8 @@ import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import dagger.Component;
 import dagger.Module;
+import io.graphoenix.spi.context.BaseModuleContext;
+import io.graphoenix.spi.context.ModuleContext;
 import jakarta.annotation.Generated;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -53,7 +60,6 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
 
@@ -90,7 +96,6 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         }
     }
 
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {
@@ -119,18 +124,21 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                                                     .anyMatch(name -> name.equals(annotationExpr.getNameAsString()))
                                                                     )
                                                     )
-                                                    .map(BodyDeclaration::toMethodDeclaration)
-                                                    .filter(Optional::isPresent)
-                                                    .map(Optional::get)
+                                                    .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(methodDeclaration -> methodDeclaration.getType().isClassOrInterfaceType())
                                                     .map(DAGGER_PROCESSOR_UTIL::getMethodReturnType)
-                                                    .flatMap(componentType ->
-                                                            buildComponentProxy(
-                                                                    moduleCompilationUnit,
-                                                                    moduleClassDeclaration,
-                                                                    getSourceByType(moduleCompilationUnit, componentType)
-                                                            )
+                                                    .map(componentType ->
+                                                            getCompilationUnitByClassOrInterfaceType(moduleCompilationUnit, componentType)
+                                                                    .map(compilationUnit ->
+                                                                            buildComponentProxy(
+                                                                                    moduleCompilationUnit,
+                                                                                    moduleClassDeclaration,
+                                                                                    compilationUnit
+                                                                            )
+                                                                    )
                                                     )
+                                                    .filter(Optional::isPresent)
+                                                    .map(Optional::get)
                                     )
                                     .collect(Collectors.toList());
 
@@ -160,25 +168,33 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
                             DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit)
                                     .ifPresent(moduleClassDeclaration -> {
+
                                                 CompilationUnit moduleProxyCompilationUnit = buildModuleProxy(componentProxyCompilationUnits, moduleCompilationUnit, moduleClassDeclaration);
                                                 writeToFiler(moduleProxyCompilationUnit);
-                                                componentProxyCompilationUnits.forEach(
+
+                                                List<CompilationUnit> componentProxyComponentCompilationUnits = componentProxyCompilationUnits.stream().map(
                                                         componentProxyCompilationUnit ->
-                                                                DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit)
-                                                                        .ifPresent(componentProxyClassDeclaration -> DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleProxyCompilationUnit)
-                                                                                .ifPresent(moduleProxyClassDeclaration -> writeToFiler(buildComponentProxyComponent(componentProxyCompilationUnit, componentProxyClassDeclaration, moduleProxyCompilationUnit, moduleProxyClassDeclaration))))
+                                                                buildComponentProxyComponent(
+                                                                        componentProxyCompilationUnit,
+                                                                        DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit).orElseThrow(),
+                                                                        moduleProxyCompilationUnit,
+                                                                        DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleProxyCompilationUnit).orElseThrow()
+                                                                )
+                                                ).collect(Collectors.toList());
+
+                                                componentProxyComponentCompilationUnits.forEach(this::writeToFiler);
+
+                                                DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleProxyCompilationUnit).ifPresent(
+                                                        moduleProxyClassDeclaration -> {
+
+                                                            CompilationUnit moduleContextCompilationUnit = buildModuleContext(componentProxyComponentCompilationUnits, moduleProxyCompilationUnit, moduleProxyClassDeclaration);
+                                                            writeToFiler(moduleContextCompilationUnit);
+                                                        }
                                                 );
                                             }
                                     );
                         }
                 );
-    }
-
-    protected Stream<CompilationUnit> buildComponentProxy(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, String componentSource) {
-        return javaParser.parse(componentSource).getResult().stream()
-                .flatMap(componentCompilationUnit ->
-                        DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).stream()
-                                .map(componentClassDeclaration -> buildComponentProxy(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, componentClassDeclaration)));
     }
 
     protected CompilationUnit buildComponentProxy(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, CompilationUnit componentCompilationUnit) {
@@ -231,10 +247,22 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
     protected CompilationUnit buildModuleProxy(List<CompilationUnit> componentProxyCompilationUnits, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
 
+        if (moduleClassDeclaration.getNameAsString().equals("HandlerModule")) {
+            moduleClassDeclaration.getNameAsString();
+        }
+
         ClassOrInterfaceDeclaration moduleProxyClassDeclaration = new ClassOrInterfaceDeclaration()
                 .setPublic(true)
                 .setName(moduleClassDeclaration.getNameAsString() + "Proxy")
                 .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr("io.graphoenix.dagger.DaggerModuleProcessor")).setName(Generated.class.getSimpleName()));
+
+        if (moduleClassDeclaration.isInterface()) {
+            moduleProxyClassDeclaration.setInterface(true);
+        }
+
+        if (moduleClassDeclaration.isAbstract()) {
+            moduleProxyClassDeclaration.setAbstract(true);
+        }
 
         CompilationUnit moduleProxyCompilationUnit = new CompilationUnit().addType(moduleProxyClassDeclaration)
                 .addImport(Module.class)
@@ -259,6 +287,12 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                 )
                                 )
                 );
+
+        moduleClassDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isMethodDeclaration)
+                .map(BodyDeclaration::asMethodDeclaration)
+                .filter(methodDeclaration -> methodDeclaration.getBody().isEmpty())
+                .forEach(moduleProxyClassDeclaration::addMember);
 
         componentProxyCompilationUnits
                 .forEach(componentProxyCompilationUnit ->
@@ -303,6 +337,8 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .asNormalAnnotationExpr().getPairs()
                 .forEach(memberValuePair -> {
                     if (memberValuePair.getValue().isClassExpr()) {
+
+                        memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType();
                         moduleProxyCompilationUnit.addImport(getNameByType(moduleCompilationUnit, memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType().getName()) + "Proxy");
                         memberValuePair.getValue().asClassExpr().setType(memberValuePair.getValue().asClassExpr().getTypeAsString() + "Proxy");
                     } else if (memberValuePair.getValue().isArrayInitializerExpr()) {
@@ -310,6 +346,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                 .filter(Expression::isClassExpr)
                                 .map(Expression::asClassExpr)
                                 .forEach(classExpr -> {
+                                    classExpr.getType().asClassOrInterfaceType();
                                     moduleProxyCompilationUnit.addImport(getNameByType(moduleCompilationUnit, classExpr.getType().asClassOrInterfaceType().getName()) + "Proxy");
                                     classExpr.setType(classExpr.getTypeAsString() + "Proxy");
                                 });
@@ -376,6 +413,76 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
         return componentProxyComponentCompilationUnit;
     }
+
+
+    protected CompilationUnit buildModuleContext(List<CompilationUnit> componentProxyComponentCompilationUnits, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+        ClassOrInterfaceDeclaration moduleContextInterfaceDeclaration = new ClassOrInterfaceDeclaration()
+                .setPublic(true)
+                .setName(moduleProxyClassDeclaration.getNameAsString().concat("Context"))
+                .addAnnotation(new SingleMemberAnnotationExpr().setMemberValue(new ClassExpr().setType(ModuleContext.class)).setName(AutoService.class.getSimpleName()))
+                .addExtendedType(BaseModuleContext.class);
+
+        CompilationUnit moduleContextComponentCompilationUnit = new CompilationUnit()
+                .addType(moduleContextInterfaceDeclaration)
+                .addImport(AutoService.class)
+                .addImport(ModuleContext.class)
+                .addImport(BaseModuleContext.class);
+
+        moduleProxyCompilationUnit.getPackageDeclaration().ifPresent(moduleContextComponentCompilationUnit::setPackageDeclaration);
+
+        BlockStmt blockStmt = moduleContextInterfaceDeclaration.addStaticInitializer();
+
+        componentProxyComponentCompilationUnits.forEach(
+                componentProxyComponentCompilationUnit -> {
+
+                    ClassOrInterfaceDeclaration componentProxyComponentClassDeclaration = DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyComponentCompilationUnit).orElseThrow();
+
+                    String daggerClassName = "Dagger".concat(componentProxyComponentClassDeclaration.getNameAsString());
+                    String daggerVariableName = "dagger".concat(componentProxyComponentClassDeclaration.getNameAsString());
+
+                    ClassOrInterfaceType componentType = componentProxyComponentClassDeclaration.getMembers().stream()
+                            .filter(BodyDeclaration::isMethodDeclaration)
+                            .map(BodyDeclaration::asMethodDeclaration)
+                            .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals("get"))
+                            .map(MethodDeclaration::getType)
+                            .filter(Type::isClassOrInterfaceType)
+                            .map(Type::asClassOrInterfaceType)
+                            .findFirst()
+                            .orElseThrow();
+
+                    moduleContextComponentCompilationUnit.addImport(getNameByType(componentProxyComponentCompilationUnit, componentType));
+
+                    blockStmt.addStatement(new VariableDeclarationExpr()
+                            .addVariable(
+                                    new VariableDeclarator()
+                                            .setType(componentProxyComponentClassDeclaration.getNameAsString())
+                                            .setName(daggerVariableName)
+                                            .setInitializer(
+                                                    new MethodCallExpr()
+                                                            .setName("create")
+                                                            .setScope(new NameExpr().setName(daggerClassName))
+                                            )
+                            )
+                    );
+                    blockStmt.addStatement(
+                            new MethodCallExpr()
+                                    .setName("put")
+                                    .addArgument(new ClassExpr().setType(componentType))
+                                    .addArgument(new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName)))
+                    );
+                    componentProxyComponentCompilationUnit.getPackageDeclaration()
+                            .ifPresent(packageDeclaration -> {
+                                        moduleContextComponentCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(componentProxyComponentClassDeclaration.getNameAsString()));
+                                        moduleContextComponentCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(daggerClassName));
+                                    }
+                            );
+                }
+        );
+
+
+        return moduleContextComponentCompilationUnit;
+    }
+
 
     protected void writeToFiler(CompilationUnit compilationUnit) {
         DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(compilationUnit)
@@ -514,6 +621,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
     protected void addImport(Type type, CompilationUnit target, CompilationUnit source) {
         if (type.isClassOrInterfaceType()) {
             addImport(type.asClassOrInterfaceType().getName(), target, source);
+            type.asClassOrInterfaceType().getTypeArguments().ifPresent(types -> types.forEach(subType -> addImport(subType, target, source)));
         } else if (type.isTypeParameter()) {
             addImport(type.asTypeParameter().getElementType(), target, source);
             type.asTypeParameter().getTypeBound()
@@ -582,9 +690,10 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         return elements.getTypeElement(getNameByType(compilationUnit, type));
     }
 
-    protected String getSourceByType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
-        return trees.getPath(getElementByType(compilationUnit, type)).getCompilationUnit().toString();
-    }
+//    protected Optional<String> getSourceByType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
+//        getElementByType(compilationUnit, type)
+//        return trees.getPath(getElementByType(compilationUnit, type)).getCompilationUnit().toString();
+//    }
 
     protected boolean classExist(String className) {
         return elements.getTypeElement(className) != null;

@@ -2,7 +2,7 @@ package io.graphoenix.java.generator.builder;
 
 import com.pivovarit.function.ThrowingBiConsumer;
 import com.squareup.javapoet.JavaFile;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import one.util.streamex.StreamEx;
 

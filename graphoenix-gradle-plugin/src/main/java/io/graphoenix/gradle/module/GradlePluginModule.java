@@ -2,13 +2,13 @@ package io.graphoenix.gradle.module;
 
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.common.module.DocumentManagerModule;
+import io.graphoenix.core.module.DocumentManagerModule;
 import io.graphoenix.gradle.task.GraphQLSourceGenerator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.java.generator.builder.TypeSpecBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 
 import javax.inject.Singleton;
 

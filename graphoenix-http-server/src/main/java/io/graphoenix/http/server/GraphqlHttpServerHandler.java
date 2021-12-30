@@ -1,34 +1,35 @@
 package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
-import io.graphoenix.common.error.GraphQLProblem;
-import io.graphoenix.common.pipeline.GraphQLDataFetcher;
+import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.pipeline.operation.OperationRouter;
 import io.graphoenix.http.handler.RequestHandler;
 import io.graphoenix.http.handler.RequestHandlerFactory;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.dto.GraphQLResponse;
+import io.graphoenix.spi.dto.type.OperationType;
+import io.graphoenix.spi.handler.OperationHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.*;
-import io.netty.util.AsciiString;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpUtil;
-
+import io.netty.util.AsciiString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
-import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
-import static io.graphoenix.common.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
-import static io.netty.handler.codec.http.HttpResponseStatus.*;
+import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
+import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-import static javax.annotation.meta.When.UNKNOWN;
 
 public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
@@ -40,17 +41,13 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private static final AsciiString CONTENT_TYPE = AsciiString.cached("Content-Type");
     private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
-    private final GraphQLDataFetcher dataFetcher;
+    private final Optional<OperationHandler> operationHandler;
+    private final OperationRouter operationRouter;
 
     @Inject
-    public GraphqlHttpServerHandler(GraphQLDataFetcher dataFetcher) {
-        this.dataFetcher = dataFetcher;
-    }
-
-
-    @Nonnull(when = UNKNOWN)
-    public String test(String a, File b) {
-        return "test";
+    public GraphqlHttpServerHandler(Optional<OperationHandler> operationHandler, OperationRouter operationRouter) {
+        this.operationHandler = operationHandler;
+        this.operationRouter = operationRouter;
     }
 
     @Override
@@ -66,11 +63,20 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         GraphQLResponse graphQLResponse = null;
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK);
 
-
         try {
             requestBody = requestHandler.handle(request);
             log.info("Handle http query:{}", requestBody.getQuery());
-            String jsonResult = dataFetcher.fetch(requestBody);
+            OperationType type = operationRouter.getType(requestBody.getQuery());
+
+            String jsonResult = null;
+            switch (type) {
+                case QUERY:
+                    jsonResult = ((Mono<String>) operationHandler.orElseThrow().query(requestBody.getQuery(), requestBody.getVariables())).block();
+                    break;
+                case MUTATION:
+                    jsonResult = ((Mono<String>) operationHandler.orElseThrow().mutation(requestBody.getQuery(), requestBody.getVariables())).block();
+                    break;
+            }
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));
             response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);

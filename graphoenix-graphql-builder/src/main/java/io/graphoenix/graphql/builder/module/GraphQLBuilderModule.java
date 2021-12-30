@@ -2,7 +2,7 @@ package io.graphoenix.graphql.builder.module;
 
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.common.module.DocumentManagerModule;
+import io.graphoenix.core.module.DocumentManagerModule;
 import io.graphoenix.graphql.builder.handler.bootstrap.DocumentBuildHandler;
 import io.graphoenix.graphql.builder.handler.bootstrap.IntrospectionMutationBuildHandler;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;

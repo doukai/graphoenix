@@ -2,12 +2,12 @@ package graphoenix.annotation.processor;
 
 import com.google.auto.service.AutoService;
 import com.pivovarit.function.ThrowingConsumer;
-import io.graphoenix.common.pipeline.DaggerGraphQLCodeGeneratorFactory;
-import io.graphoenix.common.pipeline.GraphQLCodeGenerator;
+import io.graphoenix.core.pipeline.DaggerGraphQLCodeGeneratorFactory;
+import io.graphoenix.core.pipeline.GraphQLCodeGenerator;
 import io.graphoenix.graphql.generator.translator.DaggerJavaElementToOperationFactory;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
 import io.graphoenix.spi.annotation.GraphQLOperation;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
 
 import javax.annotation.processing.*;

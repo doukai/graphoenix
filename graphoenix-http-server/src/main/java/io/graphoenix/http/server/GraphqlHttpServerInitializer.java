@@ -1,10 +1,15 @@
 package io.graphoenix.http.server;
 
-import io.graphoenix.spi.config.HttpServerConfig;
+import io.graphoenix.http.config.HttpServerConfig;
+import io.graphoenix.spi.handler.BootstrapHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.cors.CorsConfig;
 import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
@@ -16,6 +21,7 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import javax.inject.Inject;
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
+import java.util.Optional;
 
 public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
@@ -23,8 +29,12 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 
     private final GraphqlHttpServerHandler httpServerHandler;
 
+    private final Optional<BootstrapHandler> bootstrapHandler;
+
     @Inject
-    public GraphqlHttpServerInitializer(HttpServerConfig httpServerConfig, GraphqlHttpServerHandler httpServerHandler) {
+    public GraphqlHttpServerInitializer(HttpServerConfig httpServerConfig,
+                                        Optional<BootstrapHandler> bootstrapHandler,
+                                        GraphqlHttpServerHandler httpServerHandler) {
         // Configure SSL.
         if (httpServerConfig.getSsl()) {
             try {
@@ -36,6 +46,7 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
         } else {
             this.sslCtx = null;
         }
+        this.bootstrapHandler = bootstrapHandler;
         this.httpServerHandler = httpServerHandler;
     }
 
@@ -61,5 +72,7 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
         p.addLast("chunked", new ChunkedWriteHandler());
         p.addLast("cors", new CorsHandler(corsConfig));
         p.addLast("httpServerHandler", httpServerHandler);
+
+        bootstrapHandler.orElseThrow().bootstrap();
     }
 }

@@ -20,7 +20,7 @@ public class TypesafeConfig implements Config {
 
     @Override
     public <T> T getValue(String propertyName, Class<T> propertyType) {
-        return ConfigBeanFactory.create(config, propertyType);
+        return ConfigBeanFactory.create(config.getConfig(propertyName), propertyType);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class TypesafeConfig implements Config {
     @Override
     public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
         if (config.hasPath(propertyName)) {
-            return Optional.of(ConfigBeanFactory.create(config, propertyType));
+            return Optional.of(ConfigBeanFactory.create(config.getConfig(propertyName), propertyType));
         }
         return Optional.empty();
     }

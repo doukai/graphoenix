@@ -13,6 +13,7 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,17 +24,31 @@ public enum DaggerProcessorUtil {
     DAGGER_PROCESSOR_UTIL;
 
     public ClassOrInterfaceType getMethodReturnType(MethodDeclaration methodDeclaration) {
-        return methodDeclaration.getBody().orElseThrow()
-                .getStatements().stream()
-                .filter(Statement::isReturnStmt)
-                .map(Statement::asReturnStmt)
-                .map(ReturnStmt::getExpression)
-                .map(Optional::orElseThrow)
-                .filter(Expression::isObjectCreationExpr)
-                .map(Expression::asObjectCreationExpr)
-                .map(ObjectCreationExpr::getType)
-                .findFirst()
-                .orElseThrow();
+        return methodDeclaration.getBody()
+                .map(blockStmt -> blockStmt.getStatements().stream()
+                        .filter(Statement::isReturnStmt)
+                        .map(Statement::asReturnStmt)
+                        .map(ReturnStmt::getExpression)
+                        .map(Optional::orElseThrow)
+                        .filter(Expression::isObjectCreationExpr)
+                        .map(Expression::asObjectCreationExpr)
+                        .map(ObjectCreationExpr::getType)
+                        .findFirst()
+                        .orElseGet(() ->
+                                blockStmt.getStatements().stream()
+                                        .filter(Statement::isReturnStmt)
+                                        .map(Statement::asReturnStmt)
+                                        .map(ReturnStmt::getExpression)
+                                        .map(Optional::orElseThrow)
+                                        .filter(Expression::isNameExpr)
+                                        .map(Expression::asNameExpr)
+                                        .map(nameExpr -> methodDeclaration.getParameterByName(nameExpr.getNameAsString()).map(Parameter::getType).orElseThrow())
+                                        .filter(Type::isClassOrInterfaceType)
+                                        .map(Type::asClassOrInterfaceType)
+                                        .findFirst()
+                                        .orElseThrow())
+                )
+                .orElseGet(() -> methodDeclaration.getType().asClassOrInterfaceType());
     }
 
     public List<MethodDeclaration> findReferenceMethodDeclarations(CompilationUnit compilationUnit, MethodDeclaration methodDeclaration) {

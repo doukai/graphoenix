@@ -2,7 +2,7 @@ package io.graphoenix.mysql.module;
 
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.common.module.DocumentManagerModule;
+import io.graphoenix.core.module.DocumentManagerModule;
 import io.graphoenix.mysql.common.utils.DBNameUtil;
 import io.graphoenix.mysql.common.utils.DBValueUtil;
 import io.graphoenix.mysql.handler.bootstrap.IntrospectionRegisterHandler;

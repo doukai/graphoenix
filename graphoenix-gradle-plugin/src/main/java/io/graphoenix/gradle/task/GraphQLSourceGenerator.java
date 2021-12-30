@@ -2,7 +2,7 @@ package io.graphoenix.gradle.task;
 
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import org.gradle.api.tasks.SourceSet;
 
 import javax.inject.Inject;

@@ -2,7 +2,7 @@ package io.graphoenix.mysql.translator;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.common.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.mysql.common.utils.DBNameUtil;
 import io.graphoenix.mysql.common.utils.DBValueUtil;
 import io.graphoenix.mysql.expression.IsExpression;

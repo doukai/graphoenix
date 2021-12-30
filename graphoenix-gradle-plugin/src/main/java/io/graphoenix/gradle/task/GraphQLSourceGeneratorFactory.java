@@ -3,7 +3,7 @@ package io.graphoenix.gradle.task;
 import dagger.BindsInstance;
 import dagger.Component;
 import io.graphoenix.gradle.module.GradlePluginModule;
-import io.graphoenix.spi.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 
 import javax.inject.Singleton;
 
