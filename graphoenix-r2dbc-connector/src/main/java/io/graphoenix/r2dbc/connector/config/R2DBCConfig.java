@@ -7,25 +7,31 @@ import org.eclipse.microprofile.config.inject.ConfigProperties;
 public class R2DBCConfig {
 
     @Optional
-    private String driver;
+    private String driver = "mariadb";
+
     @Optional
     private String protocol = "pipes";
-    @Optional
+
     private String database;
+
     @Optional
-    private String host;
+    private String host = "localhost";
+
     @Optional
-    private Integer port;
-    @Optional
+    private Integer port = 3306;
+
     private String user;
-    @Optional
+
     private String password;
+
     @Optional
-    private Boolean usePool;
+    private Boolean usePool = true;
+
     @Optional
-    private Integer poolMaxSize;
+    private Integer poolMaxSize = 20;
+
     @Optional
-    private Long poolMaxIdleTime;
+    private Long poolMaxIdleTime = 1000L;
 
     public String getDriver() {
         return driver;

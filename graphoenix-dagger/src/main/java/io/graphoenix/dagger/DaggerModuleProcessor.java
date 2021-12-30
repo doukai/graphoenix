@@ -39,6 +39,7 @@ import dagger.Module;
 import io.graphoenix.spi.context.BaseModuleContext;
 import io.graphoenix.spi.context.ModuleContext;
 import jakarta.annotation.Generated;
+import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -51,6 +52,7 @@ import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
@@ -246,10 +248,6 @@ public class DaggerModuleProcessor extends AbstractProcessor {
     }
 
     protected CompilationUnit buildModuleProxy(List<CompilationUnit> componentProxyCompilationUnits, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-
-        if (moduleClassDeclaration.getNameAsString().equals("HandlerModule")) {
-            moduleClassDeclaration.getNameAsString();
-        }
 
         ClassOrInterfaceDeclaration moduleProxyClassDeclaration = new ClassOrInterfaceDeclaration()
                 .setPublic(true)
@@ -713,6 +711,16 @@ public class DaggerModuleProcessor extends AbstractProcessor {
             TreePath treePath = trees.getPath(elementByType);
             if (treePath != null) {
                 return javaParser.parse(treePath.getCompilationUnit().toString()).getResult();
+            } else {
+                try {
+                    ClassFileToJavaSourceDecompiler decompiler = new ClassFileToJavaSourceDecompiler();
+                    DecompilerPrinter decompilerPrinter = new DecompilerPrinter();
+                    decompiler.decompile(new DecompilerLoader(), decompilerPrinter,  elementByType.asType().toString());
+                    String source = decompilerPrinter.toString();
+                    return javaParser.parse(source).getResult();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
         return Optional.empty();

@@ -1,5 +1,6 @@
 package io.graphoenix.java.generator.config;
 
+import com.typesafe.config.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
 @ConfigProperties(prefix = "codegen.java")
@@ -7,24 +8,34 @@ public class JavaGeneratorConfig {
 
     private String basePackageName;
 
+    @Optional
     private String objectTypePackageName;
 
+    @Optional
     private String interfaceTypePackageName;
 
+    @Optional
     private String unionTypePackageName;
 
+    @Optional
     private String enumTypePackageName;
 
+    @Optional
     private String inputObjectTypePackageName;
 
+    @Optional
     private String directivePackageName;
 
+    @Optional
     private String annotationPackageName;
 
+    @Optional
     private String graphQL;
 
+    @Optional
     private String graphQLFileName;
 
+    @Optional
     private String graphQLPath;
 
     public String getBasePackageName() {

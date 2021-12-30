@@ -1,25 +1,28 @@
 package io.graphoenix.http.config;
 
+import com.typesafe.config.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
 @ConfigProperties(prefix = "http")
 public class HttpServerConfig {
 
+    @Optional
     private String graphqlContextPath = "graphql";
-    private Boolean ssl;
-    private Boolean tcpNoDelay = true;
-    private Boolean soKeepAlive;
-    private Integer soBackLog = 128;
-    private Integer port = 8080;
 
-    public HttpServerConfig(String graphqlContextPath, Boolean ssl, Boolean tcpNoDelay, Boolean soKeepAlive, Integer soBackLog, Integer port) {
-        this.graphqlContextPath = graphqlContextPath;
-        this.ssl = ssl;
-        this.tcpNoDelay = tcpNoDelay;
-        this.soKeepAlive = soKeepAlive;
-        this.soBackLog = soBackLog;
-        this.port = port;
-    }
+    @Optional
+    private Boolean ssl = false;
+
+    @Optional
+    private Boolean tcpNoDelay = true;
+
+    @Optional
+    private Boolean soKeepAlive = false;
+
+    @Optional
+    private Integer soBackLog = 128;
+
+    @Optional
+    private Integer port = 8080;
 
     public String getGraphqlContextPath() {
         return graphqlContextPath;

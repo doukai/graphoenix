@@ -1,15 +1,13 @@
 package io.graphoenix.http.config;
 
+import com.typesafe.config.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
 @ConfigProperties(prefix = "netty")
 public class NettyConfig {
 
-    private Boolean epoll;
-
-    public NettyConfig(Boolean epoll) {
-        this.epoll = epoll;
-    }
+    @Optional
+    private Boolean epoll = false;
 
     public Boolean getEpoll() {
         return epoll;

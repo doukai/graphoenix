@@ -4,14 +4,13 @@ import com.typesafe.config.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
 @ConfigProperties(prefix = "mysql")
-@Optional
 public class MysqlConfig {
 
     @Optional
-    private Boolean crateTable;
+    private Boolean crateTable = true;
 
     @Optional
-    private Boolean crateIntrospection;
+    private Boolean crateIntrospection = false;
 
     public Boolean getCrateTable() {
         return crateTable;
