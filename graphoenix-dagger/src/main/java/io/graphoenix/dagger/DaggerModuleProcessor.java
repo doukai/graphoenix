@@ -304,7 +304,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                     .findFirst()
                                                     .orElseThrow();
 
-                                            BlockStmt blockStmt = componentMethodDeclaration.getBody().orElseThrow().clone();
+                                            BlockStmt blockStmt = componentMethodDeclaration.getBody().orElseGet(componentMethodDeclaration::createBody);
 
                                             moduleProxyClassDeclaration
                                                     .addMethod(componentMethodDeclaration.getNameAsString(), Modifier.Keyword.PUBLIC)
@@ -715,7 +715,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 try {
                     ClassFileToJavaSourceDecompiler decompiler = new ClassFileToJavaSourceDecompiler();
                     DecompilerPrinter decompilerPrinter = new DecompilerPrinter();
-                    decompiler.decompile(new DecompilerLoader(), decompilerPrinter,  elementByType.asType().toString());
+                    decompiler.decompile(new DecompilerLoader(elementByType.asType().toString()), decompilerPrinter, elementByType.asType().toString());
                     String source = decompilerPrinter.toString();
                     return javaParser.parse(source).getResult();
                 } catch (Exception e) {
