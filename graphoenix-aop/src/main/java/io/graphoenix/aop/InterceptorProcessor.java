@@ -46,7 +46,6 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
 
     @Override
     public void init(ProcessorTools processorTools) {
-
     }
 
     @Override
@@ -188,22 +187,18 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
     }
 
     @Override
-    public Optional<CompilationUnit> createComponentProxy(BodyDeclaration<?> moduleBodyDeclaration, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-        return Optional.empty();
-    }
-
-    @Override
-    public void prepareModuleProxy(BodyDeclaration<?> moduleBodyDeclaration, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, List<CompilationUnit> componentProxyCompilationUnits, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
-
-    }
-
-    @Override
     public void buildModuleProxy(CompilationUnit moduleCompilationUnit,
                                  ClassOrInterfaceDeclaration moduleClassDeclaration,
                                  List<CompilationUnit> componentProxyCompilationUnits,
                                  CompilationUnit moduleProxyCompilationUnit,
                                  ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+
+        if (moduleClassDeclaration.isInterface()) {
+            return;
+        }
+
         List<MethodDeclaration> interceptorBeanMethodDeclarations = getInterceptorBeanMethodDeclarations(moduleClassDeclaration);
+
         interceptorBeanMethodDeclarations
                 .forEach(methodDeclaration -> {
                             moduleProxyClassDeclaration
@@ -221,6 +216,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
                                 .forEach(componentProxyClassDeclaration -> {
+
                                             MethodDeclaration superTypeMethodDeclaration = moduleClassDeclaration.getMembers().stream()
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
@@ -231,7 +227,8 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
 
                                             ConstructorDeclaration injectConstructorDeclaration = componentProxyClassDeclaration.getConstructors().stream()
                                                     .filter(constructorDeclaration -> constructorDeclaration.isAnnotationPresent(Inject.class))
-                                                    .findFirst().orElseThrow();
+                                                    .findFirst()
+                                                    .orElseThrow();
 
                                             NodeList<Parameter> injectConstructorDeclarationParameters = injectConstructorDeclaration.getParameters();
 
@@ -254,12 +251,9 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                                         objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
 
                                                                         injectConstructorDeclarationParameters.stream().skip(objectCreationExpr.getArguments().size())
-                                                                                .forEach(parameter ->
-                                                                                        {
+                                                                                .forEach(parameter -> {
                                                                                             MethodDeclaration interceptorBeanMethodDeclaration = interceptorBeanMethodDeclarations.stream()
-                                                                                                    .filter(methodDeclaration ->
-                                                                                                            methodDeclaration.getType().asClassOrInterfaceType().getNameAsString().equals(parameter.getType().asClassOrInterfaceType().getNameAsString())
-                                                                                                    )
+                                                                                                    .filter(methodDeclaration -> methodDeclaration.getType().asClassOrInterfaceType().getNameAsString().equals(parameter.getType().asClassOrInterfaceType().getNameAsString()))
                                                                                                     .findFirst()
                                                                                                     .orElseThrow();
 
@@ -289,7 +283,6 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                              ClassOrInterfaceDeclaration componentProxyClassDeclaration,
                                              CompilationUnit componentProxyComponentCompilationUnit,
                                              ClassOrInterfaceDeclaration componentProxyComponentInterfaceDeclaration) {
-
     }
 
     @Override

@@ -1,8 +1,6 @@
 package io.graphoenix.dagger;
 
-
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -13,19 +11,27 @@ import java.util.zip.ZipInputStream;
 
 public class DecompilerLoader implements Loader {
 
-    protected HashMap<String, byte[]> map = new HashMap<>();
+    private final HashMap<String, byte[]> map = new HashMap<>();
 
-    public HashMap<String, byte[]> getMap() {
-        return map;
+    @Override
+    public boolean canLoad(String className) {
+        return map.containsKey(className + ".class") || loadAndCache(className);
     }
 
-    public DecompilerLoader(String className) throws LoaderException {
+    @Override
+    public byte[] load(String className) {
+        if (map.containsKey(className + ".class") || loadAndCache(className)) {
+            return map.get(className + ".class");
+        }
+        return null;
+    }
+
+    private boolean loadAndCache(String className) {
 
         byte[] buffer = new byte[1024 * 2];
 
         try {
-            InputStream is = new FileInputStream(Paths.get(Class.forName(className).getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
-
+            InputStream is = new FileInputStream(Paths.get(Class.forName(className, false, DecompilerLoader.class.getClassLoader()).getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
             ZipInputStream zis = new ZipInputStream(is);
             ZipEntry ze = zis.getNextEntry();
 
@@ -38,25 +44,17 @@ public class DecompilerLoader implements Loader {
                         out.write(buffer, 0, read);
                         read = zis.read(buffer);
                     }
-
                     map.put(ze.getName().replace("/", "."), out.toByteArray());
                 }
                 ze = zis.getNextEntry();
             }
-
             zis.closeEntry();
+            if (map.containsKey(className + ".class")) {
+                return true;
+            }
         } catch (IOException | ClassNotFoundException | URISyntaxException e) {
-            throw new LoaderException(e);
+            e.printStackTrace();
         }
-    }
-
-    @Override
-    public boolean canLoad(String internalName) {
-        return map.containsKey(internalName + ".class");
-    }
-
-    @Override
-    public byte[] load(String internalName) {
-        return map.get(internalName + ".class");
+        return false;
     }
 }

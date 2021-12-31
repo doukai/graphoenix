@@ -32,9 +32,7 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
 
     @Override
     public void init(ProcessorTools processorTools) {
-
         this.getCompilationUnitByClassOrInterfaceType = processorTools.getGetCompilationUnitByClassOrInterfaceType();
-
     }
 
     @Override
@@ -44,16 +42,6 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                     ClassOrInterfaceDeclaration componentClassDeclaration,
                                     CompilationUnit componentProxyCompilationUnit,
                                     ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
-    }
-
-    @Override
-    public Optional<CompilationUnit> createComponentProxy(BodyDeclaration<?> moduleBodyDeclaration, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-        return Optional.empty();
-    }
-
-    @Override
-    public void prepareModuleProxy(BodyDeclaration<?> moduleBodyDeclaration, CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, List<CompilationUnit> componentProxyCompilationUnits, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
-
     }
 
     @Override
