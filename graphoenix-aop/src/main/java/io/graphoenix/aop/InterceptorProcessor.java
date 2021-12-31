@@ -199,11 +199,11 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
 
     @Override
     public void buildModuleProxy(CompilationUnit moduleCompilationUnit,
-                                 ClassOrInterfaceDeclaration moduleCLassDeclaration,
+                                 ClassOrInterfaceDeclaration moduleClassDeclaration,
                                  List<CompilationUnit> componentProxyCompilationUnits,
                                  CompilationUnit moduleProxyCompilationUnit,
                                  ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
-        List<MethodDeclaration> interceptorBeanMethodDeclarations = getInterceptorBeanMethodDeclarations(moduleCLassDeclaration);
+        List<MethodDeclaration> interceptorBeanMethodDeclarations = getInterceptorBeanMethodDeclarations(moduleClassDeclaration);
         interceptorBeanMethodDeclarations
                 .forEach(methodDeclaration -> {
                             moduleProxyClassDeclaration
@@ -221,7 +221,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
                                 .forEach(componentProxyClassDeclaration -> {
-                                            MethodDeclaration superTypeMethodDeclaration = moduleCLassDeclaration.getMembers().stream()
+                                            MethodDeclaration superTypeMethodDeclaration = moduleClassDeclaration.getMembers().stream()
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(declaration -> declaration.getType().isClassOrInterfaceType())

@@ -304,24 +304,27 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                     .findFirst()
                                                     .orElseThrow();
 
-                                            BlockStmt blockStmt = componentMethodDeclaration.getBody().orElseGet(componentMethodDeclaration::createBody);
+                                            componentMethodDeclaration.getBody()
+                                                    .ifPresent(
+                                                            blockStmt -> {
+                                                                moduleProxyClassDeclaration
+                                                                        .addMethod(componentMethodDeclaration.getNameAsString(), Modifier.Keyword.PUBLIC)
+                                                                        .setParameters(componentMethodDeclaration.getParameters())
+                                                                        .setType(componentMethodDeclaration.getType())
+                                                                        .setAnnotations(componentMethodDeclaration.getAnnotations())
+                                                                        .setBody(blockStmt);
 
-                                            moduleProxyClassDeclaration
-                                                    .addMethod(componentMethodDeclaration.getNameAsString(), Modifier.Keyword.PUBLIC)
-                                                    .setParameters(componentMethodDeclaration.getParameters())
-                                                    .setType(componentMethodDeclaration.getType())
-                                                    .setAnnotations(componentMethodDeclaration.getAnnotations())
-                                                    .setBody(blockStmt);
-
-                                            blockStmt.getStatements()
-                                                    .forEach(statement -> {
-                                                                if (statement.isReturnStmt()) {
-                                                                    Expression expression = statement.asReturnStmt().getExpression().orElseThrow();
-                                                                    if (expression.isObjectCreationExpr()) {
-                                                                        ObjectCreationExpr objectCreationExpr = expression.asObjectCreationExpr();
-                                                                        objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
-                                                                    }
-                                                                }
+                                                                blockStmt.getStatements()
+                                                                        .forEach(statement -> {
+                                                                                    if (statement.isReturnStmt()) {
+                                                                                        Expression expression = statement.asReturnStmt().getExpression().orElseThrow();
+                                                                                        if (expression.isObjectCreationExpr()) {
+                                                                                            ObjectCreationExpr objectCreationExpr = expression.asObjectCreationExpr();
+                                                                                            objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                        );
                                                             }
                                                     );
                                         }
