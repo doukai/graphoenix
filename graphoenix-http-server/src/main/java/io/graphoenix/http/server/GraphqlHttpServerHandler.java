@@ -24,7 +24,6 @@ import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
@@ -41,11 +40,11 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private static final AsciiString CONTENT_TYPE = AsciiString.cached("Content-Type");
     private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
-    private final Optional<OperationHandler> operationHandler;
+    private final OperationHandler operationHandler;
     private final OperationRouter operationRouter;
 
     @Inject
-    public GraphqlHttpServerHandler(Optional<OperationHandler> operationHandler, OperationRouter operationRouter) {
+    public GraphqlHttpServerHandler(OperationHandler operationHandler, OperationRouter operationRouter) {
         this.operationHandler = operationHandler;
         this.operationRouter = operationRouter;
     }
@@ -71,10 +70,10 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             String jsonResult = null;
             switch (type) {
                 case QUERY:
-                    jsonResult = ((Mono<String>) operationHandler.orElseThrow().query(requestBody.getQuery(), requestBody.getVariables())).block();
+                    jsonResult = ((Mono<String>) operationHandler.query(requestBody.getQuery(), requestBody.getVariables())).block();
                     break;
                 case MUTATION:
-                    jsonResult = ((Mono<String>) operationHandler.orElseThrow().mutation(requestBody.getQuery(), requestBody.getVariables())).block();
+                    jsonResult = ((Mono<String>) operationHandler.mutation(requestBody.getQuery(), requestBody.getVariables())).block();
                     break;
             }
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));

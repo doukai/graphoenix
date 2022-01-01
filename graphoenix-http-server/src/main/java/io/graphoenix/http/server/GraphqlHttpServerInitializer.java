@@ -21,7 +21,6 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import javax.inject.Inject;
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
-import java.util.Optional;
 
 public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
@@ -29,11 +28,11 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 
     private final GraphqlHttpServerHandler httpServerHandler;
 
-    private final Optional<BootstrapHandler> bootstrapHandler;
+    private final BootstrapHandler bootstrapHandler;
 
     @Inject
     public GraphqlHttpServerInitializer(HttpServerConfig httpServerConfig,
-                                        Optional<BootstrapHandler> bootstrapHandler,
+                                        BootstrapHandler bootstrapHandler,
                                         GraphqlHttpServerHandler httpServerHandler) {
         // Configure SSL.
         if (httpServerConfig.getSsl()) {
@@ -73,6 +72,6 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
         p.addLast("cors", new CorsHandler(corsConfig));
         p.addLast("httpServerHandler", httpServerHandler);
 
-        bootstrapHandler.orElseThrow().bootstrap();
+        bootstrapHandler.bootstrap();
     }
 }

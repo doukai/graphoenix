@@ -11,13 +11,11 @@ import io.graphoenix.http.server.GraphqlHttpServerInitializer;
 import io.graphoenix.http.config.NettyConfig;
 import io.graphoenix.spi.handler.BootstrapHandler;
 import io.graphoenix.spi.handler.OperationHandler;
-import io.graphoenix.core.module.HandlerModule;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
-import java.util.Optional;
 
-@Module(includes = {PipelineModule.class, HandlerModule.class})
+@Module(includes = PipelineModule.class)
 public class HttpServerModule {
 
     @ConfigProperty
@@ -27,19 +25,19 @@ public class HttpServerModule {
     private NettyConfig nettyConfig;
 
     @Provides
-    public GraphqlHttpServerHandler graphqlHttpServerHandler(Optional<OperationHandler> operationHandler, OperationRouter operationRouter) {
+    public GraphqlHttpServerHandler graphqlHttpServerHandler(OperationHandler operationHandler, OperationRouter operationRouter) {
         return new GraphqlHttpServerHandler(operationHandler, operationRouter);
     }
 
     @Provides
     @Singleton
-    public GraphqlHttpServerInitializer graphqlHttpServerInitializer(Optional<OperationHandler> operationHandler, OperationRouter operationRouter, Optional<BootstrapHandler> bootstrapHandler) {
+    public GraphqlHttpServerInitializer graphqlHttpServerInitializer(OperationHandler operationHandler, OperationRouter operationRouter, BootstrapHandler bootstrapHandler) {
         return new GraphqlHttpServerInitializer(httpServerConfig, bootstrapHandler, graphqlHttpServerHandler(operationHandler, operationRouter));
     }
 
     @Provides
     @Singleton
-    public GraphqlHttpServer graphqlHttpServer(Optional<OperationHandler> operationHandler, OperationRouter operationRouter, Optional<BootstrapHandler> bootstrapHandler) {
+    public GraphqlHttpServer graphqlHttpServer(OperationHandler operationHandler, OperationRouter operationRouter, BootstrapHandler bootstrapHandler) {
         return new GraphqlHttpServer(nettyConfig, httpServerConfig, graphqlHttpServerInitializer(operationHandler, operationRouter, bootstrapHandler));
     }
 }

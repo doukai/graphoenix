@@ -1,6 +1,7 @@
 package io.graphoenix.dagger;
 
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.api.loader.LoaderException;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -15,23 +16,28 @@ public class DecompilerLoader implements Loader {
 
     @Override
     public boolean canLoad(String className) {
-        return map.containsKey(className + ".class") || loadAndCache(className);
+        try {
+            return map.containsKey(className + ".class") || loadAndCache(className);
+        } catch (LoaderException e) {
+            return false;
+        }
     }
 
     @Override
-    public byte[] load(String className) {
+    public byte[] load(String className) throws LoaderException {
         if (map.containsKey(className + ".class") || loadAndCache(className)) {
             return map.get(className + ".class");
         }
         return null;
     }
 
-    private boolean loadAndCache(String className) {
+    private boolean loadAndCache(String className) throws LoaderException {
 
         byte[] buffer = new byte[1024 * 2];
 
         try {
-            InputStream is = new FileInputStream(Paths.get(Class.forName(className, false, DecompilerLoader.class.getClassLoader()).getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
+            InputStream is = new FileInputStream(Paths.get(Class.forName(className, false, getClass().getClassLoader()).getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
+
             ZipInputStream zis = new ZipInputStream(is);
             ZipEntry ze = zis.getNextEntry();
 
@@ -53,7 +59,7 @@ public class DecompilerLoader implements Loader {
                 return true;
             }
         } catch (IOException | ClassNotFoundException | URISyntaxException e) {
-            e.printStackTrace();
+            throw new LoaderException(e);
         }
         return false;
     }

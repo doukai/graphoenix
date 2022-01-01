@@ -366,7 +366,12 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .setType(moduleProxyClassDeclaration.getMembers().stream()
                         .filter(BodyDeclaration::isMethodDeclaration)
                         .map(BodyDeclaration::asMethodDeclaration)
-                        .filter(methodDeclaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(methodDeclaration).getNameAsString().equals(componentProxyClassDeclaration.getNameAsString()))
+                        .filter(methodDeclaration ->
+                                DAGGER_PROCESSOR_UTIL.getMethodReturnType(methodDeclaration).getNameAsString().equals(componentProxyClassDeclaration.getNameAsString()) ||
+                                        componentProxyClassDeclaration.getExtendedTypes().stream()
+                                                .map(NodeWithSimpleName::getNameAsString)
+                                                .anyMatch(name -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(methodDeclaration).getNameAsString().equals(name))
+                        )
                         .findFirst()
                         .orElseThrow()
                         .getType()
