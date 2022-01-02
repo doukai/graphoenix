@@ -232,6 +232,10 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                     .findFirst()
                                                     .orElseThrow();
 
+                                            if (componentProxyClassDeclaration.getConstructors().size() == 0) {
+                                                componentProxyClassDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
+                                            }
+
                                             componentProxyClassDeclaration.getConstructors()
                                                     .forEach(constructorDeclaration ->
                                                             proxyMethodDeclaration.getBody()

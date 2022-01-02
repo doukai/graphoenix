@@ -2,6 +2,7 @@ package io.graphoenix.http.module;
 
 import dagger.Module;
 import dagger.Provides;
+import io.graphoenix.core.module.HandlerModule;
 import io.graphoenix.core.module.PipelineModule;
 import io.graphoenix.core.pipeline.operation.OperationRouter;
 import io.graphoenix.http.config.HttpServerConfig;
@@ -14,8 +15,9 @@ import io.graphoenix.spi.handler.OperationHandler;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
+import java.util.Optional;
 
-@Module(includes = PipelineModule.class)
+@Module(includes = {PipelineModule.class, HandlerModule.class})
 public class HttpServerModule {
 
     @ConfigProperty
@@ -25,19 +27,19 @@ public class HttpServerModule {
     private NettyConfig nettyConfig;
 
     @Provides
-    public GraphqlHttpServerHandler graphqlHttpServerHandler(OperationRouter operationRouter, OperationHandler operationHandler) {
-        return new GraphqlHttpServerHandler(operationRouter, operationHandler);
+    public GraphqlHttpServerHandler graphqlHttpServerHandler(OperationRouter operationRouter, Optional<OperationHandler> operationHandler) {
+        return new GraphqlHttpServerHandler(operationRouter, operationHandler.orElseThrow());
     }
 
     @Provides
     @Singleton
-    public GraphqlHttpServerInitializer graphqlHttpServerInitializer(OperationHandler operationHandler, OperationRouter operationRouter, BootstrapHandler bootstrapHandler) {
-        return new GraphqlHttpServerInitializer(httpServerConfig, graphqlHttpServerHandler(operationRouter, operationHandler), bootstrapHandler);
+    public GraphqlHttpServerInitializer graphqlHttpServerInitializer(Optional<OperationHandler> operationHandler, OperationRouter operationRouter, Optional<BootstrapHandler> bootstrapHandler) {
+        return new GraphqlHttpServerInitializer(httpServerConfig, graphqlHttpServerHandler(operationRouter, operationHandler), bootstrapHandler.orElseThrow());
     }
 
     @Provides
     @Singleton
-    public GraphqlHttpServer graphqlHttpServer(OperationHandler operationHandler, OperationRouter operationRouter, BootstrapHandler bootstrapHandler) {
+    public GraphqlHttpServer graphqlHttpServer(Optional<OperationHandler> operationHandler, OperationRouter operationRouter, Optional<BootstrapHandler> bootstrapHandler) {
         return new GraphqlHttpServer(nettyConfig, httpServerConfig, graphqlHttpServerInitializer(operationHandler, operationRouter, bootstrapHandler));
     }
 }
