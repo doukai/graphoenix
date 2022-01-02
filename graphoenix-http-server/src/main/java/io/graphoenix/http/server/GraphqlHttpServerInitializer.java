@@ -1,5 +1,6 @@
 package io.graphoenix.http.server;
 
+import dagger.assisted.AssistedInject;
 import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.spi.handler.BootstrapHandler;
 import io.netty.channel.ChannelInitializer;
@@ -18,7 +19,6 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
-import javax.inject.Inject;
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
 
@@ -30,10 +30,10 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 
     private final BootstrapHandler bootstrapHandler;
 
-    @Inject
+    @AssistedInject
     public GraphqlHttpServerInitializer(HttpServerConfig httpServerConfig,
-                                        BootstrapHandler bootstrapHandler,
-                                        GraphqlHttpServerHandler httpServerHandler) {
+                                        GraphqlHttpServerHandler httpServerHandler,
+                                        BootstrapHandler bootstrapHandler) {
         // Configure SSL.
         if (httpServerConfig.getSsl()) {
             try {
@@ -45,8 +45,8 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
         } else {
             this.sslCtx = null;
         }
-        this.bootstrapHandler = bootstrapHandler;
         this.httpServerHandler = httpServerHandler;
+        this.bootstrapHandler = bootstrapHandler;
     }
 
     @Override

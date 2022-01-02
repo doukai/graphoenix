@@ -25,14 +25,14 @@ public class HttpServerModule {
     private NettyConfig nettyConfig;
 
     @Provides
-    public GraphqlHttpServerHandler graphqlHttpServerHandler(OperationHandler operationHandler, OperationRouter operationRouter) {
-        return new GraphqlHttpServerHandler(operationHandler, operationRouter);
+    public GraphqlHttpServerHandler graphqlHttpServerHandler(OperationRouter operationRouter, OperationHandler operationHandler) {
+        return new GraphqlHttpServerHandler(operationRouter, operationHandler);
     }
 
     @Provides
     @Singleton
     public GraphqlHttpServerInitializer graphqlHttpServerInitializer(OperationHandler operationHandler, OperationRouter operationRouter, BootstrapHandler bootstrapHandler) {
-        return new GraphqlHttpServerInitializer(httpServerConfig, bootstrapHandler, graphqlHttpServerHandler(operationHandler, operationRouter));
+        return new GraphqlHttpServerInitializer(httpServerConfig, graphqlHttpServerHandler(operationRouter, operationHandler), bootstrapHandler);
     }
 
     @Provides

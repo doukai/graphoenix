@@ -1,6 +1,8 @@
 package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedInject;
 import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.pipeline.operation.OperationRouter;
 import io.graphoenix.http.handler.RequestHandler;
@@ -43,10 +45,10 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private final OperationHandler operationHandler;
     private final OperationRouter operationRouter;
 
-    @Inject
-    public GraphqlHttpServerHandler(OperationHandler operationHandler, OperationRouter operationRouter) {
-        this.operationHandler = operationHandler;
+    @AssistedInject
+    public GraphqlHttpServerHandler(OperationRouter operationRouter, @Assisted OperationHandler operationHandler) {
         this.operationRouter = operationRouter;
+        this.operationHandler = operationHandler;
     }
 
     @Override

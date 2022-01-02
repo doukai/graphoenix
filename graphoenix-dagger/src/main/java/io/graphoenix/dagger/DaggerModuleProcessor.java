@@ -47,7 +47,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -190,7 +189,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 constructorDeclaration -> {
                     ConstructorDeclaration componentProxyClassConstructor = componentProxyClassDeclaration
                             .addConstructor(Modifier.Keyword.PUBLIC)
-                            .addAnnotation(Inject.class)
+                            .setAnnotations(constructorDeclaration.getAnnotations())
                             .setParameters(constructorDeclaration.getParameters());
 
                     componentProxyClassConstructor
@@ -210,8 +209,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         );
 
         CompilationUnit componentProxyCompilationUnit = new CompilationUnit()
-                .addType(componentProxyClassDeclaration)
-                .addImport(Inject.class);
+                .addType(componentProxyClassDeclaration);
 
         componentCompilationUnit.getPackageDeclaration().ifPresent(componentProxyCompilationUnit::setPackageDeclaration);
 

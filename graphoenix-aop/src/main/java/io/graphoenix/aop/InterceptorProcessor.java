@@ -31,7 +31,6 @@ import io.graphoenix.dagger.ProcessorTools;
 import io.graphoenix.spi.aop.InterceptorBean;
 import io.graphoenix.spi.aop.InvocationContext;
 
-import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
@@ -225,13 +224,6 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                     .findFirst()
                                                     .orElseThrow();
 
-                                            ConstructorDeclaration injectConstructorDeclaration = componentProxyClassDeclaration.getConstructors().stream()
-                                                    .filter(constructorDeclaration -> constructorDeclaration.isAnnotationPresent(Inject.class))
-                                                    .findFirst()
-                                                    .orElseThrow();
-
-                                            NodeList<Parameter> injectConstructorDeclarationParameters = injectConstructorDeclaration.getParameters();
-
                                             MethodDeclaration proxyMethodDeclaration = moduleProxyClassDeclaration.getMembers().stream()
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
@@ -240,37 +232,39 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                     .findFirst()
                                                     .orElseThrow();
 
-                                            proxyMethodDeclaration.getBody()
-                                                    .orElseThrow()
-                                                    .getStatements()
-                                                    .forEach(statement -> {
-                                                                if (statement.isReturnStmt()) {
-                                                                    Expression expression = statement.asReturnStmt().getExpression().orElseThrow();
-                                                                    if (expression.isObjectCreationExpr()) {
-                                                                        ObjectCreationExpr objectCreationExpr = expression.asObjectCreationExpr();
-                                                                        objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
+                                            componentProxyClassDeclaration.getConstructors()
+                                                    .forEach(constructorDeclaration ->
+                                                            proxyMethodDeclaration.getBody()
+                                                                    .orElseThrow()
+                                                                    .getStatements()
+                                                                    .forEach(statement -> {
+                                                                                if (statement.isReturnStmt()) {
+                                                                                    Expression expression = statement.asReturnStmt().getExpression().orElseThrow();
+                                                                                    if (expression.isObjectCreationExpr()) {
+                                                                                        ObjectCreationExpr objectCreationExpr = expression.asObjectCreationExpr();
+                                                                                        objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
 
-                                                                        injectConstructorDeclarationParameters.stream().skip(objectCreationExpr.getArguments().size())
-                                                                                .forEach(parameter -> {
-                                                                                            MethodDeclaration interceptorBeanMethodDeclaration = interceptorBeanMethodDeclarations.stream()
-                                                                                                    .filter(methodDeclaration -> methodDeclaration.getType().asClassOrInterfaceType().getNameAsString().equals(parameter.getType().asClassOrInterfaceType().getNameAsString()))
-                                                                                                    .findFirst()
-                                                                                                    .orElseThrow();
+                                                                                        constructorDeclaration.getParameters().stream().skip(objectCreationExpr.getArguments().size())
+                                                                                                .forEach(parameter -> {
+                                                                                                            MethodDeclaration interceptorBeanMethodDeclaration = interceptorBeanMethodDeclarations.stream()
+                                                                                                                    .filter(methodDeclaration -> methodDeclaration.getType().asClassOrInterfaceType().getNameAsString().equals(parameter.getType().asClassOrInterfaceType().getNameAsString()))
+                                                                                                                    .findFirst()
+                                                                                                                    .orElseThrow();
 
-                                                                                            MethodCallExpr methodCallExpr = new MethodCallExpr().setName(interceptorBeanMethodDeclaration.getNameAsString());
-                                                                                            interceptorBeanMethodDeclaration.getParameters()
-                                                                                                    .forEach(interceptorBeanMethodParameter -> {
-                                                                                                                proxyMethodDeclaration.addParameter(interceptorBeanMethodParameter);
-                                                                                                                methodCallExpr.addArgument(interceptorBeanMethodParameter.getNameAsExpression());
-                                                                                                            }
-                                                                                                    );
-                                                                                            objectCreationExpr.addArgument(methodCallExpr);
-                                                                                        }
-                                                                                );
-                                                                    }
-                                                                }
-                                                            }
-                                                    );
+                                                                                                            MethodCallExpr methodCallExpr = new MethodCallExpr().setName(interceptorBeanMethodDeclaration.getNameAsString());
+                                                                                                            interceptorBeanMethodDeclaration.getParameters()
+                                                                                                                    .forEach(interceptorBeanMethodParameter -> {
+                                                                                                                                proxyMethodDeclaration.addParameter(interceptorBeanMethodParameter);
+                                                                                                                                methodCallExpr.addArgument(interceptorBeanMethodParameter.getNameAsExpression());
+                                                                                                                            }
+                                                                                                                    );
+                                                                                                            objectCreationExpr.addArgument(methodCallExpr);
+                                                                                                        }
+                                                                                                );
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                    ));
                                         }
                                 )
                 );
