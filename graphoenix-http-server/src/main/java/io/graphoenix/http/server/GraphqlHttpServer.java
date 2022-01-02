@@ -2,6 +2,7 @@ package io.graphoenix.http.server;
 
 import io.graphoenix.http.config.NettyConfig;
 import io.graphoenix.http.config.HttpServerConfig;
+import io.graphoenix.spi.handler.BootstrapHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -28,33 +29,39 @@ public class GraphqlHttpServer {
 
     private final GraphqlHttpServerInitializer graphqlHttpServerInitializer;
 
+    private final BootstrapHandler bootstrapHandler;
+
     @Inject
-    public GraphqlHttpServer(NettyConfig nettyConfig, HttpServerConfig httpServerConfig, GraphqlHttpServerInitializer graphqlHttpServerInitializer) {
+    public GraphqlHttpServer(NettyConfig nettyConfig,
+                             HttpServerConfig httpServerConfig,
+                             GraphqlHttpServerInitializer graphqlHttpServerInitializer,
+                             BootstrapHandler bootstrapHandler) {
         this.nettyConfig = nettyConfig;
         this.httpServerConfig = httpServerConfig;
         this.graphqlHttpServerInitializer = graphqlHttpServerInitializer;
+        this.bootstrapHandler = bootstrapHandler;
     }
 
     public void run() throws Exception {
         EventLoopGroup bossGroup;
         EventLoopGroup workerGroup;
-        Class<? extends ServerSocketChannel> serverSocketChannelClazz;
+        Class<? extends ServerSocketChannel> serverSocketChannelClass;
 
         // Configure the server.
         if (nettyConfig.getEpoll()) {
             bossGroup = new EpollEventLoopGroup(1);
             workerGroup = new EpollEventLoopGroup();
-            serverSocketChannelClazz = EpollServerSocketChannel.class;
+            serverSocketChannelClass = EpollServerSocketChannel.class;
         } else {
             bossGroup = new NioEventLoopGroup(1);
             workerGroup = new NioEventLoopGroup();
-            serverSocketChannelClazz = NioServerSocketChannel.class;
+            serverSocketChannelClass = NioServerSocketChannel.class;
         }
 
         try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-                    .channel(serverSocketChannelClazz)
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
+            serverBootstrap.group(bossGroup, workerGroup)
+                    .channel(serverSocketChannelClass)
                     // TCP默认开启了 Nagle 算法，该算法的作用是尽可能的发送大数据快，减少网络传输。TCP_NODELAY 参数的作用就是控制是否启用 Nagle 算法。
                     .childOption(ChannelOption.TCP_NODELAY, httpServerConfig.getTcpNoDelay())
                     // 是否开启 TCP 底层心跳机制
@@ -64,16 +71,17 @@ public class GraphqlHttpServer {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(graphqlHttpServerInitializer);
 
-            Channel ch = b.bind(httpServerConfig.getPort()).sync().channel();
+            Channel channel = serverBootstrap.bind(httpServerConfig.getPort()).sync().channel();
+
+            bootstrapHandler.bootstrap();
 
             log.info("Open your web browser and navigate to " +
                     (httpServerConfig.getSsl() ? "https" : "http") + "://127.0.0.1:" + httpServerConfig.getPort() + '/');
 
-            ch.closeFuture().sync();
+            channel.closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }
-
     }
 }

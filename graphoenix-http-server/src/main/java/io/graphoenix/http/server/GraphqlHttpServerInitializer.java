@@ -28,12 +28,9 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 
     private final GraphqlHttpServerHandler httpServerHandler;
 
-    private final BootstrapHandler bootstrapHandler;
-
     @Inject
     public GraphqlHttpServerInitializer(HttpServerConfig httpServerConfig,
-                                        GraphqlHttpServerHandler httpServerHandler,
-                                        BootstrapHandler bootstrapHandler) {
+                                        GraphqlHttpServerHandler httpServerHandler) {
         // Configure SSL.
         if (httpServerConfig.getSsl()) {
             try {
@@ -46,7 +43,6 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
             this.sslCtx = null;
         }
         this.httpServerHandler = httpServerHandler;
-        this.bootstrapHandler = bootstrapHandler;
     }
 
     @Override
@@ -71,7 +67,5 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
         p.addLast("chunked", new ChunkedWriteHandler());
         p.addLast("cors", new CorsHandler(corsConfig));
         p.addLast("httpServerHandler", httpServerHandler);
-
-        bootstrapHandler.bootstrap();
     }
 }

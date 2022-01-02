@@ -21,12 +21,9 @@ public class DocumentBuilder {
 
     private final IGraphQLDocumentManager manager;
 
-    private final GraphqlParser.InterfaceTypeDefinitionContext metaInterfaceTypeDefinitionContext;
-
     @Inject
     public DocumentBuilder(IGraphQLDocumentManager manager) {
         this.manager = manager;
-        this.metaInterfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElse(null);
     }
 
     public DocumentBuilder registerGraphQL(String graphQL) {
@@ -113,11 +110,9 @@ public class DocumentBuilder {
     }
 
     public List<Field> getMetaInterfaceFields() {
-        if (this.metaInterfaceTypeDefinitionContext != null) {
-            return metaInterfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                    .map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList());
-        }
-        return null;
+        return manager.getInterface(META_INTERFACE_NAME).orElseThrow()
+                .fieldsDefinition().fieldDefinition().stream()
+                .map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList());
     }
 
     public EnumType buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
@@ -220,12 +215,13 @@ public class DocumentBuilder {
         List<InputValue> inputValueList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .map(fieldDefinitionContext -> filedToArgument(fieldDefinitionContext, inputType))
                 .collect(Collectors.toList());
-        if (this.metaInterfaceTypeDefinitionContext != null) {
-            List<InputValue> metaInputValueList = this.metaInterfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                    .map(fieldDefinitionContext -> filedToArgument(fieldDefinitionContext, inputType))
-                    .collect(Collectors.toList());
-            inputValueList.addAll(metaInputValueList);
-        }
+        manager.getInterface(META_INTERFACE_NAME)
+                .ifPresent(interfaceTypeDefinitionContext -> {
+                    interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
+                            .forEach(fieldDefinitionContext ->
+                                    inputValueList.add(filedToArgument(fieldDefinitionContext, inputType))
+                            );
+                });
         return inputValueList;
     }
 
