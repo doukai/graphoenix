@@ -18,7 +18,7 @@ public class GradlePluginModule {
     @Provides
     @Singleton
     public DocumentBuilder documentBuilder(IGraphQLDocumentManager manager) {
-        return new DocumentBuilder(manager);
+        return new DocumentBuilder(graphQLBuilderConfig, manager);
     }
 
     @Provides

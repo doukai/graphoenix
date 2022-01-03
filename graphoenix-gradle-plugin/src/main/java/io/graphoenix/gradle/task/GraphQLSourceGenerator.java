@@ -27,29 +27,29 @@ public class GraphQLSourceGenerator {
 
     public void generate(SourceSet sourceSet) {
 
-        try {
-            if (javaGeneratorConfig.getGraphQL() != null) {
-                documentBuilder.registerGraphQL(javaGeneratorConfig.getGraphQL());
-            } else if (javaGeneratorConfig.getGraphQLFileName() != null) {
-                File graphQLFile = sourceSet.getResources().getFiles().stream()
-                        .filter(file -> file.getName().equals(javaGeneratorConfig.getGraphQLFileName()))
-                        .findFirst()
-                        .orElseThrow();
-                documentBuilder.registerFile(graphQLFile);
-            } else if (javaGeneratorConfig.getGraphQLPath() != null) {
-                Path graphQLPath = sourceSet.getResources().getSrcDirs().stream()
-                        .findFirst()
-                        .map(file -> Path.of(file.getPath() + File.pathSeparator + javaGeneratorConfig.getGraphQLPath()))
-                        .orElseThrow();
-                documentBuilder.registerPath(graphQLPath);
-            }
-            documentBuilder.buildManager();
-            sourceSet.getJava().getSrcDirs().stream()
-                    .findFirst()
-                    .ifPresent(javaFileBuilder::writeToPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            if (javaGeneratorConfig.getGraphQL() != null) {
+//                documentBuilder.registerGraphQL(javaGeneratorConfig.getGraphQL());
+//            } else if (javaGeneratorConfig.getGraphQLFileName() != null) {
+//                File graphQLFile = sourceSet.getResources().getFiles().stream()
+//                        .filter(file -> file.getName().equals(javaGeneratorConfig.getGraphQLFileName()))
+//                        .findFirst()
+//                        .orElseThrow();
+//                documentBuilder.registerFile(graphQLFile);
+//            } else if (javaGeneratorConfig.getGraphQLPath() != null) {
+//                Path graphQLPath = sourceSet.getResources().getSrcDirs().stream()
+//                        .findFirst()
+//                        .map(file -> Path.of(file.getPath() + File.pathSeparator + javaGeneratorConfig.getGraphQLPath()))
+//                        .orElseThrow();
+//                documentBuilder.registerPath(graphQLPath);
+//            }
+//            documentBuilder.buildManager();
+//            sourceSet.getJava().getSrcDirs().stream()
+//                    .findFirst()
+//                    .ifPresent(javaFileBuilder::writeToPath);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
 }

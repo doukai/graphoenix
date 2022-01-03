@@ -32,6 +32,11 @@ public class Argument {
         return valueWithVariable;
     }
 
+    public Argument setValueWithVariable(String valueWithVariable) {
+        this.valueWithVariable = valueWithVariable;
+        return this;
+    }
+
     public Argument setValueWithVariable(Object object) {
         this.valueWithVariable = new ValueWithVariable(object).toString();
         return this;

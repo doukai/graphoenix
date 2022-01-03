@@ -1,4 +1,4 @@
-package io.graphoenix.core.pipeline.operation;
+package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -6,12 +6,12 @@ import io.graphoenix.spi.dto.type.OperationType;
 
 import javax.inject.Inject;
 
-public class OperationRouter {
+public class GraphQLOperationRouter {
 
     private final IGraphQLDocumentManager manager;
 
     @Inject
-    public OperationRouter(IGraphQLDocumentManager manager) {
+    public GraphQLOperationRouter(IGraphQLDocumentManager manager) {
         this.manager = manager;
     }
 

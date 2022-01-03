@@ -7,7 +7,18 @@ import org.eclipse.microprofile.config.inject.ConfigProperties;
 public class GraphQLBuilderConfig {
 
     @Optional
+    private Boolean build = true;
+
+    @Optional
     private Boolean englishPlural = false;
+
+    public Boolean getBuild() {
+        return build;
+    }
+
+    public void setBuild(Boolean build) {
+        this.build = build;
+    }
 
     public Boolean getEnglishPlural() {
         return englishPlural;

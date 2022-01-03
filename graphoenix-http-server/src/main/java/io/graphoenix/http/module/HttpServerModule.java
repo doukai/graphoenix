@@ -3,8 +3,8 @@ package io.graphoenix.http.module;
 import dagger.Module;
 import dagger.Provides;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.module.PipelineModule;
-import io.graphoenix.core.pipeline.operation.OperationRouter;
+import io.graphoenix.core.manager.GraphQLOperationRouter;
+import io.graphoenix.core.module.DocumentManagerModule;
 import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.server.GraphqlHttpServer;
 import io.graphoenix.http.server.GraphqlHttpServerHandler;
@@ -16,7 +16,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
 
-@Module(includes = PipelineModule.class)
+@Module(includes = DocumentManagerModule.class)
 public class HttpServerModule {
 
     @ConfigProperty
@@ -26,19 +26,19 @@ public class HttpServerModule {
     private NettyConfig nettyConfig;
 
     @Provides
-    public GraphqlHttpServerHandler graphqlHttpServerHandler(OperationRouter operationRouter) {
-        return new GraphqlHttpServerHandler(operationRouter, BeanContext.get(OperationHandler.class));
+    public GraphqlHttpServerHandler graphqlHttpServerHandler(GraphQLOperationRouter graphQLOperationRouter) {
+        return new GraphqlHttpServerHandler(graphQLOperationRouter, BeanContext.get(OperationHandler.class));
     }
 
     @Provides
     @Singleton
-    public GraphqlHttpServerInitializer graphqlHttpServerInitializer(OperationRouter operationRouter) {
-        return new GraphqlHttpServerInitializer(httpServerConfig, graphqlHttpServerHandler(operationRouter));
+    public GraphqlHttpServerInitializer graphqlHttpServerInitializer(GraphQLOperationRouter graphQLOperationRouter) {
+        return new GraphqlHttpServerInitializer(httpServerConfig, graphqlHttpServerHandler(graphQLOperationRouter));
     }
 
     @Provides
     @Singleton
-    public GraphqlHttpServer graphqlHttpServer(OperationRouter operationRouter) {
-        return new GraphqlHttpServer(nettyConfig, httpServerConfig, graphqlHttpServerInitializer(operationRouter), BeanContext.get(BootstrapHandler.class));
+    public GraphqlHttpServer graphqlHttpServer(GraphQLOperationRouter graphQLOperationRouter) {
+        return new GraphqlHttpServer(nettyConfig, httpServerConfig, graphqlHttpServerInitializer(graphQLOperationRouter), BeanContext.get(BootstrapHandler.class));
     }
 }

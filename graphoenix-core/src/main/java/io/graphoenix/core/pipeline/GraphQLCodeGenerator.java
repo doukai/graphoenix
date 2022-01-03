@@ -3,7 +3,7 @@ package io.graphoenix.core.pipeline;
 import com.pivovarit.function.ThrowingFunction;
 import io.graphoenix.core.pipeline.bootstrap.BootstrapPipeline;
 import io.graphoenix.core.pipeline.operation.OperationPipeline;
-import io.graphoenix.core.pipeline.operation.OperationRouter;
+import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
@@ -22,12 +22,12 @@ import static io.graphoenix.core.utils.OperationHandlerUtil.OPERATION_HANDLER_UT
 public class GraphQLCodeGenerator {
 
     private final IGraphQLDocumentManager manager;
-    private final OperationRouter router;
+    private final GraphQLOperationRouter router;
     private Set<IBootstrapHandler> bootstrapHandlers;
     private Set<IOperationHandler> operationHandlers;
 
     @Inject
-    public GraphQLCodeGenerator(IGraphQLDocumentManager manager, OperationRouter router) {
+    public GraphQLCodeGenerator(IGraphQLDocumentManager manager, GraphQLOperationRouter router) {
         this.manager = manager;
         this.router = router;
     }

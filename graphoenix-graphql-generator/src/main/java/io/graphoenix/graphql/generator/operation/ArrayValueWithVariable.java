@@ -21,7 +21,15 @@ public class ArrayValueWithVariable {
     }
 
     public ArrayValueWithVariable(Collection<?> valueWithVariables) {
-        this.valueWithVariables = valueWithVariables.stream().map(ValueWithVariable::new).collect(Collectors.toList());
+        this(valueWithVariables, true);
+    }
+
+    public ArrayValueWithVariable(Collection<?> valueWithVariables, boolean toValueWithVariable) {
+        if (toValueWithVariable) {
+            this.valueWithVariables = valueWithVariables.stream().map(ValueWithVariable::new).collect(Collectors.toList());
+        } else {
+            this.valueWithVariables = valueWithVariables;
+        }
     }
 
     public Collection<?> getValueWithVariables() {

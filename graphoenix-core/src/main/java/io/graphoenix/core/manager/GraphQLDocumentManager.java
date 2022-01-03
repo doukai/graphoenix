@@ -6,7 +6,10 @@ import io.graphoenix.spi.antlr.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -75,8 +78,26 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public void registerFileByName(String graphqlFileName) throws IOException {
+        if (Files.exists(Path.of(graphqlFileName))) {
+            registerFile(new File(graphqlFileName));
+        } else {
+            registerInputStream(this.getClass().getClassLoader().getResourceAsStream(graphqlFileName));
+        }
+    }
+
+    @Override
     public void registerFile(File graphqlFile) throws IOException {
         registerDocument(DOCUMENT_UTIL.graphqlFileToDocument(graphqlFile));
+    }
+
+    @Override
+    public void registerPathByName(String graphqlPathName) throws IOException, URISyntaxException {
+        if (Files.exists(Path.of(graphqlPathName))) {
+            registerPath(Path.of(graphqlPathName));
+        } else {
+            registerPath(Path.of(Objects.requireNonNull(this.getClass().getClassLoader().getResource(graphqlPathName)).toURI()));
+        }
     }
 
     @Override

@@ -2,15 +2,16 @@ package io.graphoenix.graphql.builder.schema;
 
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.manager.GraphQLConfigRegister;
+import io.graphoenix.graphql.builder.config.GraphQLBuilderConfig;
 import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.antlr.v4.runtime.RuleContext;
 
 import javax.inject.Inject;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,39 +20,35 @@ import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
 
 public class DocumentBuilder {
 
+    private final GraphQLBuilderConfig graphQLBuilderConfig;
+
     private final IGraphQLDocumentManager manager;
 
+    private final IGraphQLFieldMapManager mapper;
+
+    private final GraphQLConfigRegister graphQLConfigRegister;
+
     @Inject
-    public DocumentBuilder(IGraphQLDocumentManager manager) {
+    public DocumentBuilder(GraphQLBuilderConfig graphQLBuilderConfig,
+                           IGraphQLDocumentManager manager,
+                           IGraphQLFieldMapManager mapper,
+                           GraphQLConfigRegister graphQLConfigRegister) {
+        this.graphQLBuilderConfig = graphQLBuilderConfig;
         this.manager = manager;
+        this.mapper = mapper;
+        this.graphQLConfigRegister = graphQLConfigRegister;
     }
 
-    public DocumentBuilder registerGraphQL(String graphQL) {
-        manager.registerGraphQL(graphQL);
-        return this;
-    }
-
-    public DocumentBuilder registerInputStream(InputStream inputStream) throws IOException {
-        manager.registerInputStream(inputStream);
-        return this;
-    }
-
-    public DocumentBuilder registerFile(File graphqlFile) throws IOException {
-        manager.registerFile(graphqlFile);
-        return this;
-    }
-
-    public DocumentBuilder registerPath(Path graphqlPath) throws IOException {
-        manager.registerPath(graphqlPath);
-        return this;
-    }
-
-    public void buildManager() throws IOException {
-        manager.registerGraphQL(buildDocument().toString());
+    public void buildManager() throws IOException, URISyntaxException {
+        graphQLConfigRegister.registerConfig();
+        if (graphQLBuilderConfig.getBuild()) {
+            manager.registerGraphQL(buildDocument().toString());
+        }
+        mapper.registerFieldMaps();
     }
 
     public Document buildDocument() throws IOException {
-        manager.registerInputStream(this.getClass().getClassLoader().getResourceAsStream("graphql/preset.gql"));
+        manager.registerFileByName("graphql/preset.gql");
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         ObjectType queryType;
         if (queryOperationTypeDefinition.isPresent()) {

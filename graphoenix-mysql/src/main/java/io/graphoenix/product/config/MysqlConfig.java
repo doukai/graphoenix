@@ -16,17 +16,15 @@ public class MysqlConfig {
         return crateTable;
     }
 
-    public MysqlConfig setCrateTable(Boolean crateTable) {
+    public void setCrateTable(Boolean crateTable) {
         this.crateTable = crateTable;
-        return this;
     }
 
     public Boolean getCrateIntrospection() {
         return crateIntrospection;
     }
 
-    public MysqlConfig setCrateIntrospection(Boolean crateIntrospection) {
+    public void setCrateIntrospection(Boolean crateIntrospection) {
         this.crateIntrospection = crateIntrospection;
-        return this;
     }
 }

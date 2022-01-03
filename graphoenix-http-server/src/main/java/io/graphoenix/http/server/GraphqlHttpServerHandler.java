@@ -2,7 +2,7 @@ package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
 import io.graphoenix.core.error.GraphQLProblem;
-import io.graphoenix.core.pipeline.operation.OperationRouter;
+import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.http.handler.RequestHandler;
 import io.graphoenix.http.handler.RequestHandlerFactory;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -41,11 +41,11 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
     private final OperationHandler operationHandler;
-    private final OperationRouter operationRouter;
+    private final GraphQLOperationRouter graphQLOperationRouter;
 
     @Inject
-    public GraphqlHttpServerHandler(OperationRouter operationRouter, OperationHandler operationHandler) {
-        this.operationRouter = operationRouter;
+    public GraphqlHttpServerHandler(GraphQLOperationRouter graphQLOperationRouter, OperationHandler operationHandler) {
+        this.graphQLOperationRouter = graphQLOperationRouter;
         this.operationHandler = operationHandler;
     }
 
@@ -65,7 +65,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         try {
             requestBody = requestHandler.handle(request);
             log.info("Handle http query:{}", requestBody.getQuery());
-            OperationType type = operationRouter.getType(requestBody.getQuery());
+            OperationType type = graphQLOperationRouter.getType(requestBody.getQuery());
 
             String jsonResult = null;
             switch (type) {

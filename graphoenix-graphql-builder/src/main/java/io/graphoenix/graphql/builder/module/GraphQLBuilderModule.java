@@ -2,22 +2,29 @@ package io.graphoenix.graphql.builder.module;
 
 import dagger.Module;
 import dagger.Provides;
+import io.graphoenix.core.manager.GraphQLConfigRegister;
 import io.graphoenix.core.module.DocumentManagerModule;
+import io.graphoenix.graphql.builder.config.GraphQLBuilderConfig;
 import io.graphoenix.graphql.builder.handler.bootstrap.DocumentBuildHandler;
 import io.graphoenix.graphql.builder.handler.bootstrap.IntrospectionMutationBuildHandler;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
 
 @Module(includes = DocumentManagerModule.class)
 public class GraphQLBuilderModule {
 
+    @ConfigProperty
+    private GraphQLBuilderConfig graphQLBuilderConfig;
+
     @Provides
     @Singleton
-    public DocumentBuilder documentBuilder(IGraphQLDocumentManager manager) {
-        return new DocumentBuilder(manager);
+    public DocumentBuilder documentBuilder(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLConfigRegister graphQLConfigRegister) {
+        return new DocumentBuilder(graphQLBuilderConfig, manager, mapper, graphQLConfigRegister);
     }
 
     @Provides
@@ -28,8 +35,8 @@ public class GraphQLBuilderModule {
 
     @Provides
     @Singleton
-    public DocumentBuildHandler documentBuildHandler(IGraphQLDocumentManager manager) {
-        return new DocumentBuildHandler(documentBuilder(manager));
+    public DocumentBuildHandler documentBuildHandler(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLConfigRegister graphQLConfigRegister) {
+        return new DocumentBuildHandler(documentBuilder(manager, mapper, graphQLConfigRegister));
     }
 
     @Provides

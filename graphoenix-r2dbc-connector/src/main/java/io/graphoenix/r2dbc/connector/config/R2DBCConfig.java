@@ -33,6 +33,12 @@ public class R2DBCConfig {
     @Optional
     private Long poolMaxIdleTime = 1000L;
 
+    @Optional
+    private Boolean crateTable = true;
+
+    @Optional
+    private Boolean crateIntrospection = false;
+
     public String getDriver() {
         return driver;
     }

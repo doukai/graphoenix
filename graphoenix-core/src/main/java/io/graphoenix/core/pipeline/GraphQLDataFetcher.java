@@ -2,7 +2,7 @@ package io.graphoenix.core.pipeline;
 
 import io.graphoenix.core.pipeline.bootstrap.BootstrapPipeline;
 import io.graphoenix.core.pipeline.operation.OperationPipeline;
-import io.graphoenix.core.pipeline.operation.OperationRouter;
+import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
@@ -16,13 +16,13 @@ import java.util.Set;
 
 public class GraphQLDataFetcher {
 
-    private final OperationRouter router;
+    private final GraphQLOperationRouter router;
 
     private Set<IBootstrapHandler> bootstrapHandlers;
     private Set<IOperationHandler> operationHandlers;
 
     @Inject
-    public GraphQLDataFetcher(OperationRouter router) {
+    public GraphQLDataFetcher(GraphQLOperationRouter router) {
         this.router = router;
     }
 

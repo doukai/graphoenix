@@ -2,13 +2,19 @@ package io.graphoenix.core.module;
 
 import dagger.Module;
 import dagger.Provides;
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.manager.*;
+import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.spi.antlr.*;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
 
 @Module
 public class DocumentManagerModule {
+
+    @ConfigProperty
+    GraphQLConfig graphQLConfig;
 
     @Provides
     @Singleton
@@ -103,7 +109,19 @@ public class DocumentManagerModule {
 
     @Provides
     @Singleton
-    IGraphQLFieldMapManager graphQLFieldMapManager() {
-        return new GraphQLFieldMapManager(graphQLDocumentManager());
+    IGraphQLFieldMapManager graphQLFieldMapManager(IGraphQLDocumentManager manager) {
+        return new GraphQLFieldMapManager(manager);
+    }
+
+    @Provides
+    @Singleton
+    GraphQLOperationRouter graphQLOperationRouter(IGraphQLDocumentManager manager) {
+        return new GraphQLOperationRouter(manager);
+    }
+
+    @Provides
+    @Singleton
+    GraphQLConfigRegister graphQLRegister(IGraphQLDocumentManager manager) {
+        return new GraphQLConfigRegister(graphQLConfig, manager);
     }
 }

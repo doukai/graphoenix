@@ -18,7 +18,7 @@ public class DocumentBuildHandler implements IBootstrapHandler {
 
     @Override
     public boolean execute(IPipelineContext context) throws IOException {
-        documentBuilder.buildManager();
+//        documentBuilder.buildManager();
         return false;
     }
 }

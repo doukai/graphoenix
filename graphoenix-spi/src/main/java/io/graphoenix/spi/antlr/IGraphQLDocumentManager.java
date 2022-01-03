@@ -5,6 +5,7 @@ import graphql.parser.antlr.GraphqlParser;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -15,7 +16,11 @@ public interface IGraphQLDocumentManager {
 
     void registerInputStream(InputStream inputStream) throws IOException;
 
+    void registerFileByName(String graphqlFileName) throws IOException;
+
     void registerFile(File graphqlFile) throws IOException;
+
+    void registerPathByName(String graphqlPathName) throws IOException, URISyntaxException;
 
     void registerPath(Path graphqlPath) throws IOException;
 

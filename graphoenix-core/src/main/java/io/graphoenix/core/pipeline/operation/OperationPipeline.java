@@ -1,5 +1,6 @@
 package io.graphoenix.core.pipeline.operation;
 
+import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.core.pipeline.PipelineContext;
 import io.graphoenix.spi.dto.type.AsyncType;
 import io.graphoenix.spi.dto.type.ExecuteType;
@@ -14,7 +15,7 @@ import javax.inject.Inject;
 public class OperationPipeline extends ChainBase {
 
     @Inject
-    public OperationPipeline(OperationRouter router) {
+    public OperationPipeline(GraphQLOperationRouter router) {
 //        addCommand(router);
     }
 
