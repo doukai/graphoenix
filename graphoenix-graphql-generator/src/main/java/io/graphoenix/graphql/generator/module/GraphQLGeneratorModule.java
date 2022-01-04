@@ -2,39 +2,46 @@ package io.graphoenix.graphql.generator.module;
 
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.core.module.DocumentManagerModule;
 import io.graphoenix.graphql.generator.translator.ElementManager;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
 import io.graphoenix.graphql.generator.translator.MethodToMutationOperation;
 import io.graphoenix.graphql.generator.translator.MethodToQueryOperation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
-@Module(includes = DocumentManagerModule.class)
+@Module
 public class GraphQLGeneratorModule {
+
+    private final IGraphQLDocumentManager manager;
+
+    @Inject
+    public GraphQLGeneratorModule(IGraphQLDocumentManager manager) {
+        this.manager = manager;
+    }
 
     @Provides
     @Singleton
-    ElementManager elementManager(IGraphQLDocumentManager manager) {
+    ElementManager elementManager() {
         return new ElementManager(manager);
     }
 
     @Provides
     @Singleton
-    MethodToQueryOperation methodToQueryOperation(IGraphQLDocumentManager manager) {
-        return new MethodToQueryOperation(manager, elementManager(manager));
+    MethodToQueryOperation methodToQueryOperation() {
+        return new MethodToQueryOperation(manager, elementManager());
     }
 
     @Provides
     @Singleton
-    MethodToMutationOperation methodToMutationOperation(IGraphQLDocumentManager manager) {
-        return new MethodToMutationOperation(manager, elementManager(manager));
+    MethodToMutationOperation methodToMutationOperation() {
+        return new MethodToMutationOperation(manager, elementManager());
     }
 
     @Provides
     @Singleton
-    JavaElementToOperation javaElementToOperation(IGraphQLDocumentManager manager) {
-        return new JavaElementToOperation(methodToQueryOperation(manager), methodToMutationOperation(manager));
+    JavaElementToOperation javaElementToOperation() {
+        return new JavaElementToOperation(methodToQueryOperation(), methodToMutationOperation());
     }
 }

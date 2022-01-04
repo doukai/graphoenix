@@ -12,6 +12,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
+import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
@@ -38,6 +39,7 @@ import dagger.Component;
 import dagger.Module;
 import io.graphoenix.spi.context.BaseModuleContext;
 import io.graphoenix.spi.context.ModuleContext;
+import io.vavr.Tuple2;
 import jakarta.annotation.Generated;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 
@@ -47,6 +49,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -60,6 +63,7 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
 
@@ -246,13 +250,38 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
         CompilationUnit moduleProxyCompilationUnit = new CompilationUnit().addType(moduleProxyClassDeclaration)
                 .addImport(Module.class)
-                .addImport(Generated.class);
+                .addImport(Generated.class)
+                .addImport("io.graphoenix.core.context.BeanContext");
 
         moduleClassDeclaration.getMembers().stream()
                 .filter(BodyDeclaration::isMethodDeclaration)
                 .map(BodyDeclaration::asMethodDeclaration)
                 .filter(methodDeclaration -> methodDeclaration.getBody().isEmpty())
                 .forEach(moduleProxyClassDeclaration::addMember);
+
+        moduleClassDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isFieldDeclaration)
+                .map(BodyDeclaration::asFieldDeclaration)
+                .filter(fieldDeclaration ->
+                        fieldDeclaration.getAnnotations().stream()
+                                .noneMatch(annotationExpr ->
+                                        supports.stream().map(Class::getSimpleName).anyMatch(name -> name.equals(annotationExpr.getNameAsString()))
+                                )
+                )
+                .filter(fieldDeclaration -> moduleClassDeclaration.getConstructors().stream()
+                        .noneMatch(constructorDeclaration ->
+                                constructorDeclaration.getBody().getStatements().stream()
+                                        .filter(Statement::isExpressionStmt)
+                                        .map(statement -> statement.asExpressionStmt().getExpression())
+                                        .filter(Expression::isAssignExpr)
+                                        .map(Expression::asAssignExpr)
+                                        .filter(assignExpr -> assignExpr.getTarget().isFieldAccessExpr())
+                                        .map(assignExpr -> assignExpr.getTarget().asFieldAccessExpr().getNameAsString())
+                                        .anyMatch(name ->
+                                                fieldDeclaration.getVariables().stream().anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(name))
+                                        )
+                        )
+                ).forEach(moduleProxyClassDeclaration::addMember);
 
         componentProxyCompilationUnits
                 .forEach(componentProxyCompilationUnit ->
@@ -333,9 +362,141 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                         )
         );
 
+        buildModuleProxyInjectField(
+                moduleClassDeclaration.getMembers().stream()
+                        .filter(BodyDeclaration::isFieldDeclaration)
+                        .map(BodyDeclaration::asFieldDeclaration)
+                        .filter(fieldDeclaration -> fieldDeclaration.isAnnotationPresent(Inject.class))
+                        .flatMap(fieldDeclaration ->
+                                fieldDeclaration.getVariables().stream()
+                                        .map(variableDeclarator ->
+                                                new Tuple2<>(variableDeclarator.getNameAsString(), variableDeclarator.getType())
+                                        )
+                        ),
+                moduleProxyClassDeclaration
+        );
+
+        moduleClassDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isConstructorDeclaration)
+                .map(BodyDeclaration::asConstructorDeclaration)
+                .filter(constructorDeclaration -> constructorDeclaration.isAnnotationPresent(Inject.class))
+                .forEach(constructorDeclaration ->
+                        buildModuleProxyInjectField(
+                                constructorDeclaration.getParameters().stream()
+                                        .map(parameter ->
+                                                new Tuple2<>(
+                                                        constructorDeclaration.getBody().getStatements().stream()
+                                                                .filter(Statement::isExpressionStmt)
+                                                                .map(statement -> statement.asExpressionStmt().getExpression())
+                                                                .filter(Expression::isAssignExpr)
+                                                                .map(Expression::asAssignExpr)
+                                                                .filter(assignExpr -> assignExpr.getValue().isNameExpr())
+                                                                .filter(assignExpr -> assignExpr.getValue().asNameExpr().getNameAsString().equals(parameter.getNameAsString()))
+                                                                .map(AssignExpr::getTarget)
+                                                                .filter(Expression::isFieldAccessExpr)
+                                                                .map(expression -> expression.asFieldAccessExpr().getNameAsString())
+                                                                .findFirst()
+                                                                .orElseThrow(),
+                                                        parameter.getType()
+                                                )
+                                        ),
+                                moduleProxyClassDeclaration
+                        )
+                );
+
+        moduleClassDeclaration.getMembers().stream()
+                .filter(BodyDeclaration::isMethodDeclaration)
+                .map(BodyDeclaration::asMethodDeclaration)
+                .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Inject.class))
+                .forEach(methodDeclaration ->
+                        buildModuleProxyInjectField(
+                                methodDeclaration.getParameters().stream()
+                                        .map(parameter ->
+                                                new Tuple2<>(
+                                                        methodDeclaration.getBody().orElseThrow().getStatements().stream()
+                                                                .filter(Statement::isExpressionStmt)
+                                                                .map(statement -> statement.asExpressionStmt().getExpression())
+                                                                .filter(Expression::isAssignExpr)
+                                                                .map(Expression::asAssignExpr)
+                                                                .filter(assignExpr -> assignExpr.getValue().isNameExpr())
+                                                                .filter(assignExpr -> assignExpr.getValue().asNameExpr().getNameAsString().equals(parameter.getNameAsString()))
+                                                                .map(AssignExpr::getTarget)
+                                                                .filter(Expression::isFieldAccessExpr)
+                                                                .map(expression -> expression.asFieldAccessExpr().getNameAsString())
+                                                                .findFirst()
+                                                                .orElseThrow(),
+                                                        parameter.getType()
+                                                )
+                                        ),
+                                moduleProxyClassDeclaration
+                        )
+                );
+
         importAllTypesFromSource(moduleProxyCompilationUnit, moduleCompilationUnit);
 
         return moduleProxyCompilationUnit;
+    }
+
+    protected void buildModuleProxyInjectField(Stream<Tuple2<String, Type>> injectFieldList, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+
+        injectFieldList.forEach(
+                field -> moduleProxyClassDeclaration.getMethods().stream()
+                        .filter(BodyDeclaration::isMethodDeclaration)
+                        .map(BodyDeclaration::asMethodDeclaration)
+                        .forEach(methodDeclaration ->
+                                methodDeclaration.getBody()
+                                        .ifPresent(blockStmt -> {
+                                                    List<String> parameterNameList = methodDeclaration.getParameters().stream().map(NodeWithSimpleName::getNameAsString).collect(Collectors.toList());
+                                                    blockStmt.getStatements().stream()
+                                                            .filter(Statement::isReturnStmt)
+                                                            .map(Statement::asReturnStmt)
+                                                            .forEach(returnStmt ->
+                                                                    returnStmt.getExpression()
+                                                                            .ifPresent(expression -> {
+                                                                                        if (expression.isObjectCreationExpr()) {
+                                                                                            replaceInjectArguments(expression, parameterNameList, field, expression.asObjectCreationExpr().getArguments().stream());
+                                                                                        } else if (expression.isMethodCallExpr()) {
+                                                                                            replaceInjectArguments(expression, parameterNameList, field, expression.asMethodCallExpr().getArguments().stream());
+                                                                                        } else if (expression.isNameExpr()) {
+                                                                                            replaceInjectArguments(expression, parameterNameList, field, Stream.of(expression.asNameExpr()));
+                                                                                        }
+                                                                                    }
+                                                                            )
+                                                            );
+                                                    blockStmt.getStatements().stream()
+                                                            .filter(Statement::isExpressionStmt)
+                                                            .map(statement -> statement.asExpressionStmt().getExpression())
+                                                            .forEach(expression -> {
+                                                                        if (expression.isObjectCreationExpr()) {
+                                                                            replaceInjectArguments(expression, parameterNameList, field, expression.asObjectCreationExpr().getArguments().stream());
+                                                                        } else if (expression.isMethodCallExpr()) {
+                                                                            replaceInjectArguments(expression, parameterNameList, field, expression.asMethodCallExpr().getArguments().stream());
+                                                                        } else if (expression.isNameExpr()) {
+                                                                            replaceInjectArguments(expression, parameterNameList, field, Stream.of(expression.asNameExpr()));
+                                                                        }
+                                                                    }
+                                                            );
+                                                }
+                                        )
+                        )
+        );
+    }
+
+    protected void replaceInjectArguments(Expression expression, List<String> parameterNameList, Tuple2<String, Type> field, Stream<Expression> arguments) {
+
+        arguments.filter(Expression::isNameExpr)
+                .map(Expression::asNameExpr)
+                .filter(argument -> !parameterNameList.contains(argument.getNameAsString()))
+                .filter(argument -> field._1().equals(argument.getNameAsString()))
+                .forEach(argument ->
+                        expression.replace(
+                                argument,
+                                new MethodCallExpr()
+                                        .setName("get")
+                                        .setScope(new NameExpr().setName("BeanContext"))
+                                        .addArgument(new ClassExpr().setType(field._2()))
+                        )
+                );
     }
 
     protected CompilationUnit buildComponentProxyComponent(CompilationUnit componentProxyCompilationUnit, CompilationUnit moduleProxyCompilationUnit) {

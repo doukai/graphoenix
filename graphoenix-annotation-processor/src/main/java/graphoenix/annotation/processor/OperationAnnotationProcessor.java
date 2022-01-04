@@ -1,30 +1,25 @@
 package graphoenix.annotation.processor;
 
 import com.google.auto.service.AutoService;
-import com.pivovarit.function.ThrowingConsumer;
-import io.graphoenix.core.pipeline.GraphQLCodeGenerator;
-import io.graphoenix.graphql.generator.translator.DaggerJavaElementToOperationFactory;
-import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
-import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.java.generator.config.JavaGeneratorConfig;
-import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
+import io.graphoenix.spi.annotation.GraphQLOperation;
 
-import javax.annotation.processing.*;
-import javax.lang.model.element.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 import static io.graphoenix.config.ConfigUtil.RESOURCES_CONFIG_UTIL;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphQLOperation")
@@ -108,25 +103,25 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
 
 //                        generator.bootstrap();
 
-                        PackageElement packageElement = elementUtils.getPackageOf(typeElement);
-                        JavaElementToOperation javaElementToOperation = DaggerJavaElementToOperationFactory.create().build();
-                        Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
-
-                        ThrowingConsumer<Map.Entry<String, String>, IOException> createResource = (entry) -> {
-                            Filer filer = processingEnv.getFiler();
-                            FileObject fileObject = filer.createResource(
-                                    StandardLocation.SOURCE_OUTPUT,
-                                    packageElement.getQualifiedName(),
-                                    typeElement.getSimpleName().toString()
-                                            .concat("_")
-                                            .concat(entry.getKey())
-                                            .concat(".")
-                                            .concat(suffix)
-                            );
-                            Writer writer = fileObject.openWriter();
-                            writer.write(entry.getValue());
-                            writer.close();
-                        };
+//                        PackageElement packageElement = elementUtils.getPackageOf(typeElement);
+//                        JavaElementToOperation javaElementToOperation = DaggerJavaElementToOperationFactory.create().build();
+//                        Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
+//
+//                        ThrowingConsumer<Map.Entry<String, String>, IOException> createResource = (entry) -> {
+//                            Filer filer = processingEnv.getFiler();
+//                            FileObject fileObject = filer.createResource(
+//                                    StandardLocation.SOURCE_OUTPUT,
+//                                    packageElement.getQualifiedName(),
+//                                    typeElement.getSimpleName().toString()
+//                                            .concat("_")
+//                                            .concat(entry.getKey())
+//                                            .concat(".")
+//                                            .concat(suffix)
+//                            );
+//                            Writer writer = fileObject.openWriter();
+//                            writer.write(entry.getValue());
+//                            writer.close();
+//                        };
 
 //                        operationResourcesContent.entrySet().stream()
 //                                .collect(Collectors
@@ -134,8 +129,8 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
 //                                .entrySet()
 //                                .forEach(entry -> createResource.asFunction().uncheck().apply(entry));
 
-                        OperationInterfaceImplementer implementer = new OperationInterfaceImplementer();
-                        implementer.writeToFiler(packageElement, typeElement, executeHandlers, suffix, useInject, processingEnv.getFiler());
+//                        OperationInterfaceImplementer implementer = new OperationInterfaceImplementer();
+//                        implementer.writeToFiler(packageElement, typeElement, executeHandlers, suffix, useInject, processingEnv.getFiler());
 
                     } catch (Exception e) {
                         e.printStackTrace();

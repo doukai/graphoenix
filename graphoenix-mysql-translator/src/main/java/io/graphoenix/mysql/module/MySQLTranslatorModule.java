@@ -2,7 +2,6 @@ package io.graphoenix.mysql.module;
 
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.core.module.DocumentManagerModule;
 import io.graphoenix.mysql.common.utils.DBNameUtil;
 import io.graphoenix.mysql.common.utils.DBValueUtil;
 import io.graphoenix.mysql.handler.bootstrap.IntrospectionRegisterHandler;
@@ -17,10 +16,20 @@ import io.graphoenix.mysql.translator.GraphQLTypeToTable;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
-@Module(includes = DocumentManagerModule.class)
+@Module
 public class MySQLTranslatorModule {
+
+    private final IGraphQLDocumentManager manager;
+    private final IGraphQLFieldMapManager mapper;
+
+    @Inject
+    public MySQLTranslatorModule(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
+        this.manager = manager;
+        this.mapper = mapper;
+    }
 
     @Provides
     @Singleton
@@ -36,32 +45,32 @@ public class MySQLTranslatorModule {
 
     @Provides
     @Singleton
-    public GraphQLTypeToTable graphQLTypeToTable(IGraphQLDocumentManager manager) {
+    public GraphQLTypeToTable graphQLTypeToTable() {
         return new GraphQLTypeToTable(manager, dbNameUtil());
     }
 
     @Provides
     @Singleton
-    public GraphQLArgumentsToWhere graphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
+    public GraphQLArgumentsToWhere graphQLArgumentsToWhere() {
         return new GraphQLArgumentsToWhere(manager, mapper, dbNameUtil(), dbValueUtil());
     }
 
     @Provides
     @Singleton
-    public GraphQLQueryToSelect graphQLQueryToSelect(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
-        return new GraphQLQueryToSelect(manager, mapper, graphQLArgumentsToWhere(manager, mapper), dbNameUtil(), dbValueUtil());
+    public GraphQLQueryToSelect graphQLQueryToSelect() {
+        return new GraphQLQueryToSelect(manager, mapper, graphQLArgumentsToWhere(), dbNameUtil(), dbValueUtil());
     }
 
     @Provides
     @Singleton
-    public GraphQLMutationToStatements graphQLMutationToStatements(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
-        return new GraphQLMutationToStatements(manager, mapper, graphQLQueryToSelect(manager, mapper), dbNameUtil(), dbValueUtil());
+    public GraphQLMutationToStatements graphQLMutationToStatements() {
+        return new GraphQLMutationToStatements(manager, mapper, graphQLQueryToSelect(), dbNameUtil(), dbValueUtil());
     }
 
     @Provides
     @Singleton
-    public OperationToSQLConvertHandler operationToSQLConvertHandler(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
-        return new OperationToSQLConvertHandler(manager, graphQLQueryToSelect(manager, mapper), graphQLMutationToStatements(manager, mapper));
+    public OperationToSQLConvertHandler operationToSQLConvertHandler() {
+        return new OperationToSQLConvertHandler(manager, graphQLQueryToSelect(), graphQLMutationToStatements());
     }
 
     @Provides
@@ -72,19 +81,19 @@ public class MySQLTranslatorModule {
 
     @Provides
     @Singleton
-    public IntrospectionRegisterHandler introspectionRegisterHandler(IGraphQLDocumentManager manager) {
+    public IntrospectionRegisterHandler introspectionRegisterHandler() {
         return new IntrospectionRegisterHandler(manager);
     }
 
     @Provides
     @Singleton
-    public MutationToSQLConvertHandler mutationToSQLConvertHandler(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
-        return new MutationToSQLConvertHandler(graphQLMutationToStatements(manager, mapper));
+    public MutationToSQLConvertHandler mutationToSQLConvertHandler() {
+        return new MutationToSQLConvertHandler(graphQLMutationToStatements());
     }
 
     @Provides
     @Singleton
-    public TypeDefiniteToCreateTableSQLConvertHandler typeDefiniteToCreateTableSQLConvertHandler(IGraphQLDocumentManager manager) {
-        return new TypeDefiniteToCreateTableSQLConvertHandler(graphQLTypeToTable(manager));
+    public TypeDefiniteToCreateTableSQLConvertHandler typeDefiniteToCreateTableSQLConvertHandler() {
+        return new TypeDefiniteToCreateTableSQLConvertHandler(graphQLTypeToTable());
     }
 }

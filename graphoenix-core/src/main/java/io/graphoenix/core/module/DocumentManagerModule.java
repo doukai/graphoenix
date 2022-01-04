@@ -3,9 +3,36 @@ package io.graphoenix.core.module;
 import dagger.Module;
 import dagger.Provides;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.manager.*;
+import io.graphoenix.core.manager.GraphQLConfigRegister;
+import io.graphoenix.core.manager.GraphQLDirectiveManager;
+import io.graphoenix.core.manager.GraphQLDocumentManager;
+import io.graphoenix.core.manager.GraphQLEnumManager;
+import io.graphoenix.core.manager.GraphQLFieldManager;
+import io.graphoenix.core.manager.GraphQLFieldMapManager;
+import io.graphoenix.core.manager.GraphQLFragmentManager;
+import io.graphoenix.core.manager.GraphQLInputObjectManager;
+import io.graphoenix.core.manager.GraphQLInputValueManager;
+import io.graphoenix.core.manager.GraphQLInterfaceManager;
+import io.graphoenix.core.manager.GraphQLObjectManager;
+import io.graphoenix.core.manager.GraphQLOperationManager;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
-import io.graphoenix.spi.antlr.*;
+import io.graphoenix.core.manager.GraphQLScalarManager;
+import io.graphoenix.core.manager.GraphQLSchemaManager;
+import io.graphoenix.core.manager.GraphQLUnionManager;
+import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLEnumManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import io.graphoenix.spi.antlr.IGraphQLFragmentManager;
+import io.graphoenix.spi.antlr.IGraphQLInputObjectManager;
+import io.graphoenix.spi.antlr.IGraphQLInputValueManager;
+import io.graphoenix.spi.antlr.IGraphQLInterfaceManager;
+import io.graphoenix.spi.antlr.IGraphQLObjectManager;
+import io.graphoenix.spi.antlr.IGraphQLOperationManager;
+import io.graphoenix.spi.antlr.IGraphQLScalarManager;
+import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
+import io.graphoenix.spi.antlr.IGraphQLUnionManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
@@ -15,6 +42,8 @@ public class DocumentManagerModule {
 
     @ConfigProperty
     GraphQLConfig graphQLConfig;
+
+    private final IGraphQLDocumentManager manager = graphQLDocumentManager();
 
     @Provides
     @Singleton
@@ -109,19 +138,19 @@ public class DocumentManagerModule {
 
     @Provides
     @Singleton
-    IGraphQLFieldMapManager graphQLFieldMapManager(IGraphQLDocumentManager manager) {
+    IGraphQLFieldMapManager graphQLFieldMapManager() {
         return new GraphQLFieldMapManager(manager);
     }
 
     @Provides
     @Singleton
-    GraphQLOperationRouter graphQLOperationRouter(IGraphQLDocumentManager manager) {
+    GraphQLOperationRouter graphQLOperationRouter() {
         return new GraphQLOperationRouter(manager);
     }
 
     @Provides
     @Singleton
-    GraphQLConfigRegister graphQLRegister(IGraphQLDocumentManager manager) {
+    GraphQLConfigRegister graphQLRegister() {
         return new GraphQLConfigRegister(graphQLConfig, manager);
     }
 }
