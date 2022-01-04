@@ -1,4 +1,4 @@
-package io.graphoenix.mysql.handler.operation;
+package io.graphoenix.mysql.handler;
 
 import com.github.vertical_blank.sqlformatter.SqlFormatter;
 import com.github.vertical_blank.sqlformatter.languages.Dialect;

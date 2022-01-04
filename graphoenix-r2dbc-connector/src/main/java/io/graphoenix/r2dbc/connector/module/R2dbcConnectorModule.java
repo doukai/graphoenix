@@ -8,9 +8,7 @@ import io.graphoenix.r2dbc.connector.connection.ConnectionPoolCreator;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.executor.TableCreator;
-import io.graphoenix.r2dbc.connector.handler.bootstrap.CreateTableSQLExecuteHandler;
-import io.graphoenix.r2dbc.connector.handler.bootstrap.IntrospectionMutationExecuteHandler;
-import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
+import io.graphoenix.r2dbc.connector.handler.OperationSQLExecuteHandler;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
 import io.graphoenix.r2dbc.connector.config.R2DBCConfig;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -69,17 +67,5 @@ public class R2dbcConnectorModule {
     @Singleton
     public OperationSQLExecuteHandler operationSQLExecuteHandler() {
         return new OperationSQLExecuteHandler(queryExecutor(), mutationExecutor(), r2dbcParameterProcessor());
-    }
-
-    @Provides
-    @Singleton
-    public IntrospectionMutationExecuteHandler introspectionMutationExecuteHandler() {
-        return new IntrospectionMutationExecuteHandler(mutationExecutor());
-    }
-
-    @Provides
-    @Singleton
-    public CreateTableSQLExecuteHandler createTableSQLExecuteHandler() {
-        return new CreateTableSQLExecuteHandler(tableCreator());
     }
 }

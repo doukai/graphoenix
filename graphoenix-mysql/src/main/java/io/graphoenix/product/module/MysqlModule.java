@@ -4,17 +4,20 @@ import dagger.Module;
 import dagger.Provides;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
+import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;
+import io.graphoenix.mysql.handler.SQLFormatHandler;
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.translator.GraphQLTypeToTable;
 import io.graphoenix.product.config.MysqlConfig;
 import io.graphoenix.product.handler.MysqlBootstrapHandler;
+import io.graphoenix.product.handler.MysqlGeneratorHandler;
 import io.graphoenix.product.handler.MysqlR2dbcHandler;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.TableCreator;
-import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
+import io.graphoenix.r2dbc.connector.handler.OperationSQLExecuteHandler;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.BootstrapHandler;
+import io.graphoenix.spi.handler.GeneratorHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -36,6 +39,7 @@ public class MysqlModule {
     private final MutationExecutor mutationExecutor;
     private final OperationToSQLConvertHandler operationToSQLConvertHandler;
     private final OperationSQLExecuteHandler operationSQLExecuteHandler;
+    private final SQLFormatHandler sqlFormatHandler;
 
     @Inject
     public MysqlModule(IGraphQLDocumentManager manager,
@@ -46,7 +50,8 @@ public class MysqlModule {
                        TableCreator tableCreator,
                        MutationExecutor mutationExecutor,
                        OperationToSQLConvertHandler operationToSQLConvertHandler,
-                       OperationSQLExecuteHandler operationSQLExecuteHandler) {
+                       OperationSQLExecuteHandler operationSQLExecuteHandler,
+                       SQLFormatHandler sqlFormatHandler) {
 
         this.manager = manager;
         this.documentBuilder = documentBuilder;
@@ -57,6 +62,7 @@ public class MysqlModule {
         this.mutationExecutor = mutationExecutor;
         this.operationToSQLConvertHandler = operationToSQLConvertHandler;
         this.operationSQLExecuteHandler = operationSQLExecuteHandler;
+        this.sqlFormatHandler = sqlFormatHandler;
     }
 
     @Provides
@@ -73,6 +79,12 @@ public class MysqlModule {
                 tableCreator,
                 mutationExecutor
         );
+    }
+
+    @Provides
+    @Singleton
+    public GeneratorHandler generatorHandler() {
+        return new MysqlGeneratorHandler(operationToSQLConvertHandler, sqlFormatHandler);
     }
 
     @Provides

@@ -24,11 +24,11 @@ public class OperationInterfaceImplementer {
 
     private final ThrowingFunction<String, Class<?>, ClassNotFoundException> classForName = Class::forName;
 
-    public void writeToFiler(PackageElement packageElement, TypeElement typeElement, Set<String> executeHandlerNames, String suffix, boolean useInject, Filer filer) throws IOException {
-        this.buildImplementClass(packageElement, typeElement, executeHandlerNames, suffix, useInject).writeTo(filer);
+    public void writeToFiler(PackageElement packageElement, TypeElement typeElement, String executeHandler, String suffix, boolean useInject, Filer filer) throws IOException {
+        this.buildImplementClass(packageElement, typeElement, executeHandler, suffix, useInject).writeTo(filer);
     }
 
-    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, Set<String> executeHandlerNames, String suffix, boolean useInject) {
+    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, String executeHandler, String suffix, boolean useInject) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"))
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(TypeName.get(GraphQLDAO.class))
@@ -40,7 +40,7 @@ public class OperationInterfaceImplementer {
                         .map(element -> executableElementToMethodSpec(typeElement, (ExecutableElement) element))
                         .collect(Collectors.toList())
                 )
-                .addMethod(addOperationHandlersMethodSpec(executeHandlerNames));
+                .addMethod(addOperationHandlersMethodSpec(executeHandler));
         if (useInject) {
             builder.addAnnotation(Singleton.class);
         }
@@ -158,20 +158,20 @@ public class OperationInterfaceImplementer {
         return null;
     }
 
-    private MethodSpec addOperationHandlersMethodSpec(Set<String> executeHandlerNames) {
+    private MethodSpec addOperationHandlersMethodSpec(String executeHandler) {
 
         MethodSpec.Builder addOperationHandlers = MethodSpec.methodBuilder("addOperationHandlers")
                 .addModifiers(Modifier.PROTECTED)
                 .addAnnotation(Override.class)
                 .returns(VOID);
 
-        executeHandlerNames.forEach(handlerName ->
-                addOperationHandlers
-                        .addStatement(
-                                "addOperationHandler(new $T())",
-                                ClassName.get(classForName.uncheck().apply(handlerName))
-                        )
-        );
+//        executeHandlerNames.forEach(handlerName ->
+//                addOperationHandlers
+//                        .addStatement(
+//                                "addOperationHandler(new $T())",
+//                                ClassName.get(classForName.uncheck().apply(handlerName))
+//                        )
+//        );
         return addOperationHandlers.build();
     }
 }

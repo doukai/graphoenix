@@ -216,12 +216,9 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .addType(componentProxyClassDeclaration);
 
         componentCompilationUnit.getPackageDeclaration().ifPresent(componentProxyCompilationUnit::setPackageDeclaration);
-
         daggerProxyProcessors.forEach(daggerProxyProcessor -> daggerProxyProcessor.buildComponentProxy(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration));
-
         importAllTypesFromSource(componentProxyClassDeclaration, componentProxyCompilationUnit, moduleCompilationUnit);
         importAllTypesFromSource(componentProxyClassDeclaration, componentProxyCompilationUnit, componentCompilationUnit);
-
         return componentProxyCompilationUnit;
     }
 
@@ -277,8 +274,8 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                         .map(Expression::asAssignExpr)
                                         .filter(assignExpr -> assignExpr.getTarget().isFieldAccessExpr())
                                         .map(assignExpr -> assignExpr.getTarget().asFieldAccessExpr().getNameAsString())
-                                        .anyMatch(name ->
-                                                fieldDeclaration.getVariables().stream().anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(name))
+                                        .anyMatch(fieldName ->
+                                                fieldDeclaration.getVariables().stream().anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(fieldName))
                                         )
                         )
                 ).forEach(moduleProxyClassDeclaration::addMember);
@@ -312,6 +309,25 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                                                         if (expression.isObjectCreationExpr()) {
                                                                                             ObjectCreationExpr objectCreationExpr = expression.asObjectCreationExpr();
                                                                                             objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
+
+                                                                                            expression.asObjectCreationExpr().getArguments().stream()
+                                                                                                    .filter(Expression::isMethodCallExpr)
+                                                                                                    .map(Expression::asMethodCallExpr)
+                                                                                                    .forEach(methodCallExpr ->
+                                                                                                            moduleClassDeclaration.getMethods().stream()
+                                                                                                                    .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Singleton.class))
+                                                                                                                    .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()))
+                                                                                                                    .findAny()
+                                                                                                                    .ifPresent(methodDeclaration ->
+                                                                                                                            expression.asObjectCreationExpr().getArguments().replace(
+                                                                                                                                    methodCallExpr,
+                                                                                                                                    new MethodCallExpr()
+                                                                                                                                            .setName("get")
+                                                                                                                                            .setScope(new NameExpr().setName("BeanContext"))
+                                                                                                                                            .addArgument(new ClassExpr().setType(methodDeclaration.getType()))
+                                                                                                                            )
+                                                                                                                    )
+                                                                                                    );
                                                                                         }
                                                                                     }
                                                                                 }
@@ -327,7 +343,6 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         moduleClassDeclaration.getAnnotationByClass(Module.class).orElseThrow().clone()
                 .asNormalAnnotationExpr().getPairs()
                 .forEach(memberValuePair -> {
-
                     if (memberValuePair.getValue().isClassExpr()) {
                         memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType();
                         moduleProxyCompilationUnit.addImport(getNameByType(moduleCompilationUnit, memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType().getName()) + "Proxy");
@@ -345,10 +360,9 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                     }
                     moduleAnnotationExpr.addPair(memberValuePair.getNameAsString(), memberValuePair.getValue());
                 });
+
         moduleProxyClassDeclaration.addAnnotation(moduleAnnotationExpr);
-
         moduleCompilationUnit.getPackageDeclaration().ifPresent(moduleProxyCompilationUnit::setPackageDeclaration);
-
         daggerProxyProcessors.forEach(daggerProxyProcessor -> daggerProxyProcessor.buildModuleProxy(moduleCompilationUnit, moduleClassDeclaration, componentProxyCompilationUnits, moduleProxyCompilationUnit, moduleProxyClassDeclaration));
 
         componentProxyCompilationUnits.forEach(
@@ -433,7 +447,6 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 );
 
         importAllTypesFromSource(moduleProxyCompilationUnit, moduleCompilationUnit);
-
         return moduleProxyCompilationUnit;
     }
 
@@ -451,38 +464,26 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                             .filter(Statement::isReturnStmt)
                                                             .map(Statement::asReturnStmt)
                                                             .forEach(returnStmt ->
-                                                                    returnStmt.getExpression()
-                                                                            .ifPresent(expression -> {
-                                                                                        if (expression.isObjectCreationExpr()) {
-                                                                                            replaceInjectArguments(expression, parameterNameList, field, expression.asObjectCreationExpr().getArguments().stream());
-                                                                                        } else if (expression.isMethodCallExpr()) {
-                                                                                            replaceInjectArguments(expression, parameterNameList, field, expression.asMethodCallExpr().getArguments().stream());
-                                                                                        } else if (expression.isNameExpr()) {
-                                                                                            replaceInjectArguments(expression, parameterNameList, field, Stream.of(expression.asNameExpr()));
-                                                                                        }
-                                                                                    }
-                                                                            )
+                                                                    returnStmt.getExpression().ifPresent(expression -> replaceInjectArguments(expression, parameterNameList, field))
                                                             );
                                                     blockStmt.getStatements().stream()
                                                             .filter(Statement::isExpressionStmt)
                                                             .map(statement -> statement.asExpressionStmt().getExpression())
-                                                            .forEach(expression -> {
-                                                                        if (expression.isObjectCreationExpr()) {
-                                                                            replaceInjectArguments(expression, parameterNameList, field, expression.asObjectCreationExpr().getArguments().stream());
-                                                                        } else if (expression.isMethodCallExpr()) {
-                                                                            replaceInjectArguments(expression, parameterNameList, field, expression.asMethodCallExpr().getArguments().stream());
-                                                                        } else if (expression.isNameExpr()) {
-                                                                            replaceInjectArguments(expression, parameterNameList, field, Stream.of(expression.asNameExpr()));
-                                                                        }
-                                                                    }
-                                                            );
+                                                            .forEach(expression -> replaceInjectArguments(expression, parameterNameList, field));
                                                 }
                                         )
                         )
         );
     }
 
-    protected void replaceInjectArguments(Expression expression, List<String> parameterNameList, Tuple2<String, Type> field, Stream<Expression> arguments) {
+    protected void replaceInjectArguments(Expression expression, List<String> parameterNameList, Tuple2<String, Type> field) {
+        Stream<Expression> arguments = Stream.empty();
+
+        if (expression.isObjectCreationExpr()) {
+            arguments = expression.asObjectCreationExpr().getArguments().stream();
+        } else if (expression.isMethodCallExpr()) {
+            arguments = expression.asMethodCallExpr().getArguments().stream();
+        }
 
         arguments.filter(Expression::isNameExpr)
                 .map(Expression::asNameExpr)
@@ -550,9 +551,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         );
 
         daggerProxyProcessors.forEach(daggerProxyProcessor -> daggerProxyProcessor.buildComponentProxyComponent(moduleProxyCompilationUnit, moduleProxyClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration, componentProxyComponentCompilationUnit, componentProxyComponentInterfaceDeclaration));
-
         importAllTypesFromSource(componentProxyComponentInterfaceDeclaration, componentProxyComponentCompilationUnit, moduleProxyCompilationUnit);
-
         return componentProxyComponentCompilationUnit;
     }
 

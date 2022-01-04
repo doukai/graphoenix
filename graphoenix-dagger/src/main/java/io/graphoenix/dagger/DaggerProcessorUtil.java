@@ -25,28 +25,22 @@ public enum DaggerProcessorUtil {
 
     public ClassOrInterfaceType getMethodReturnType(MethodDeclaration methodDeclaration) {
         return methodDeclaration.getBody()
-                .map(blockStmt -> blockStmt.getStatements().stream()
-                        .filter(Statement::isReturnStmt)
-                        .map(Statement::asReturnStmt)
-                        .map(ReturnStmt::getExpression)
-                        .map(Optional::orElseThrow)
-                        .filter(Expression::isObjectCreationExpr)
-                        .map(Expression::asObjectCreationExpr)
-                        .map(ObjectCreationExpr::getType)
-                        .findFirst()
-                        .orElseGet(() ->
-                                blockStmt.getStatements().stream()
-                                        .filter(Statement::isReturnStmt)
-                                        .map(Statement::asReturnStmt)
-                                        .map(ReturnStmt::getExpression)
-                                        .map(Optional::orElseThrow)
-                                        .filter(Expression::isNameExpr)
-                                        .map(Expression::asNameExpr)
-                                        .map(nameExpr -> methodDeclaration.getParameterByName(nameExpr.getNameAsString()).map(Parameter::getType).orElseThrow())
-                                        .filter(Type::isClassOrInterfaceType)
-                                        .map(Type::asClassOrInterfaceType)
-                                        .findFirst()
-                                        .orElseThrow())
+                .flatMap(blockStmt -> {
+                            List<ClassOrInterfaceType> classOrInterfaceTypeList = blockStmt.getStatements().stream()
+                                    .filter(Statement::isReturnStmt)
+                                    .map(Statement::asReturnStmt)
+                                    .map(ReturnStmt::getExpression)
+                                    .map(Optional::orElseThrow)
+                                    .filter(Expression::isObjectCreationExpr)
+                                    .map(Expression::asObjectCreationExpr)
+                                    .map(ObjectCreationExpr::getType)
+                                    .collect(Collectors.toList());
+                            if (classOrInterfaceTypeList.size() == 1) {
+                                return Optional.of(classOrInterfaceTypeList.get(0));
+                            } else {
+                                return Optional.empty();
+                            }
+                        }
                 )
                 .orElseGet(() -> methodDeclaration.getType().asClassOrInterfaceType());
     }

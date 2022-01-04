@@ -1,4 +1,4 @@
-package io.graphoenix.mysql.common.utils;
+package io.graphoenix.mysql.utils;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.CharMatcher;

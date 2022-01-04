@@ -1,4 +1,4 @@
-package io.graphoenix.mysql.handler.operation;
+package io.graphoenix.mysql.handler;
 
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.translator.GraphQLQueryToSelect;

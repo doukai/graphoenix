@@ -1,7 +1,7 @@
 package io.graphoenix.product.handler;
 
-import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
-import io.graphoenix.r2dbc.connector.handler.operation.OperationSQLExecuteHandler;
+import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;
+import io.graphoenix.r2dbc.connector.handler.OperationSQLExecuteHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.vavr.Tuple2;
 import reactor.core.publisher.Flux;

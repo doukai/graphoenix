@@ -2,13 +2,10 @@ package io.graphoenix.mysql.module;
 
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.mysql.common.utils.DBNameUtil;
-import io.graphoenix.mysql.common.utils.DBValueUtil;
-import io.graphoenix.mysql.handler.bootstrap.IntrospectionRegisterHandler;
-import io.graphoenix.mysql.handler.bootstrap.MutationToSQLConvertHandler;
-import io.graphoenix.mysql.handler.bootstrap.TypeDefiniteToCreateTableSQLConvertHandler;
-import io.graphoenix.mysql.handler.operation.OperationToSQLConvertHandler;
-import io.graphoenix.mysql.handler.operation.SQLFormatHandler;
+import io.graphoenix.mysql.utils.DBNameUtil;
+import io.graphoenix.mysql.utils.DBValueUtil;
+import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;
+import io.graphoenix.mysql.handler.SQLFormatHandler;
 import io.graphoenix.mysql.translator.GraphQLArgumentsToWhere;
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
@@ -77,23 +74,5 @@ public class MySQLTranslatorModule {
     @Singleton
     public SQLFormatHandler sqlFormatHandler() {
         return new SQLFormatHandler();
-    }
-
-    @Provides
-    @Singleton
-    public IntrospectionRegisterHandler introspectionRegisterHandler() {
-        return new IntrospectionRegisterHandler(manager);
-    }
-
-    @Provides
-    @Singleton
-    public MutationToSQLConvertHandler mutationToSQLConvertHandler() {
-        return new MutationToSQLConvertHandler(graphQLMutationToStatements());
-    }
-
-    @Provides
-    @Singleton
-    public TypeDefiniteToCreateTableSQLConvertHandler typeDefiniteToCreateTableSQLConvertHandler() {
-        return new TypeDefiniteToCreateTableSQLConvertHandler(graphQLTypeToTable());
     }
 }

@@ -2,7 +2,7 @@ package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
-import io.graphoenix.mysql.common.utils.DBNameUtil;
+import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;

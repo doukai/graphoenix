@@ -43,8 +43,6 @@ public class DocumentManagerModule {
     @ConfigProperty
     GraphQLConfig graphQLConfig;
 
-    private final IGraphQLDocumentManager manager = graphQLDocumentManager();
-
     @Provides
     @Singleton
     IGraphQLOperationManager graphQLOperationManager() {
@@ -139,18 +137,18 @@ public class DocumentManagerModule {
     @Provides
     @Singleton
     IGraphQLFieldMapManager graphQLFieldMapManager() {
-        return new GraphQLFieldMapManager(manager);
+        return new GraphQLFieldMapManager(graphQLDocumentManager());
     }
 
     @Provides
     @Singleton
     GraphQLOperationRouter graphQLOperationRouter() {
-        return new GraphQLOperationRouter(manager);
+        return new GraphQLOperationRouter(graphQLDocumentManager());
     }
 
     @Provides
     @Singleton
     GraphQLConfigRegister graphQLRegister() {
-        return new GraphQLConfigRegister(graphQLConfig, manager);
+        return new GraphQLConfigRegister(graphQLConfig, graphQLDocumentManager());
     }
 }

@@ -1,4 +1,4 @@
-package io.graphoenix.r2dbc.connector.handler.operation;
+package io.graphoenix.r2dbc.connector.handler;
 
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;

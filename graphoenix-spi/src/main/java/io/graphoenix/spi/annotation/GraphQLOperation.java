@@ -1,6 +1,5 @@
 package io.graphoenix.spi.annotation;
 
-import io.graphoenix.spi.handler.IBootstrapHandler;
 import io.graphoenix.spi.handler.IOperationHandler;
 
 import java.lang.annotation.*;
@@ -10,13 +9,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface GraphQLOperation {
 
-    Class<? extends IBootstrapHandler>[] bootstrapHandlers() default {};
+    Class<? extends IOperationHandler> executeHandler();
 
-    Class<? extends IOperationHandler>[] pretreatmentHandlers() default {};
-
-    Class<? extends IOperationHandler>[] executeHandlers() default {};
-
-    String suffix() default "";
-    
     boolean useInject() default false;
 }
