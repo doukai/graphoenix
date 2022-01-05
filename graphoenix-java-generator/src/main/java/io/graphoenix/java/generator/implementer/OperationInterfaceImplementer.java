@@ -100,7 +100,7 @@ public class OperationInterfaceImplementer {
                 .returns(TypeName.get(executableElement.getReturnType()))
                 .addException(ClassName.get(Exception.class))
                 .addStatement(
-                        "return $L(new $T($L, $T.of($L)), $T.class)",
+                        "return $L($L, $T.of($L), $T.class)",
                         getMethodName(executableElement),
                         executableElement.getSimpleName().toString()
                                 .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),

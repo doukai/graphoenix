@@ -4,9 +4,10 @@ import com.google.gson.GsonBuilder;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
-import io.graphoenix.spi.dao.OperationDAO;
+import io.graphoenix.spi.dao.BaseOperationDAO;
 import reactor.core.publisher.Mono;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,7 +15,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.ObjectCastUtil.OBJECT_CAST_UTIL;
 
-public abstract class R2DBCOperationDao implements OperationDAO {
+public class R2DBCOperationDAO extends BaseOperationDAO {
 
     private final GsonBuilder gsonBuilder = new GsonBuilder();
 
@@ -24,7 +25,8 @@ public abstract class R2DBCOperationDao implements OperationDAO {
 
     private final R2dbcParameterProcessor r2dbcParameterProcessor;
 
-    public R2DBCOperationDao(QueryExecutor queryExecutor, MutationExecutor mutationExecutor, R2dbcParameterProcessor r2dbcParameterProcessor) {
+    @Inject
+    public R2DBCOperationDAO(QueryExecutor queryExecutor, MutationExecutor mutationExecutor, R2dbcParameterProcessor r2dbcParameterProcessor) {
         this.queryExecutor = queryExecutor;
         this.mutationExecutor = mutationExecutor;
         this.r2dbcParameterProcessor = r2dbcParameterProcessor;

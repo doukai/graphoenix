@@ -1,14 +1,13 @@
 package io.graphoenix.java.generator.builder;
 
-import com.pivovarit.function.ThrowingBiConsumer;
+import com.google.common.collect.Streams;
 import com.squareup.javapoet.JavaFile;
 import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import one.util.streamex.StreamEx;
+import io.vavr.control.Try;
 
 import javax.inject.Inject;
 import java.io.File;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -17,7 +16,6 @@ public class JavaFileBuilder {
     private final IGraphQLDocumentManager manager;
     private final TypeSpecBuilder typeSpecBuilder;
     private JavaGeneratorConfig configuration;
-    private final ThrowingBiConsumer<JavaFile, File, IOException> JavaFileWriteTo = JavaFile::writeTo;
 
     @Inject
     public JavaFileBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration, TypeSpecBuilder typeSpecBuilder) {
@@ -26,23 +24,20 @@ public class JavaFileBuilder {
         this.typeSpecBuilder = typeSpecBuilder;
     }
 
-    public void writeToPath(File path, JavaGeneratorConfig JavaGeneratorConfig) {
-        this.buildJavaFileList(JavaGeneratorConfig).forEach(javaFile -> JavaFileWriteTo.uncheck().accept(javaFile, path));
+    public void setConfiguration(JavaGeneratorConfig configuration) {
+        this.configuration = configuration;
+        typeSpecBuilder.setConfiguration(configuration);
     }
 
     public void writeToPath(File path) {
-        this.buildJavaFileList().forEach(javaFile -> JavaFileWriteTo.uncheck().accept(javaFile, path));
-    }
-
-    public Stream<JavaFile> buildJavaFileList(JavaGeneratorConfig configuration) {
-        this.configuration = configuration;
-        return buildJavaFileList();
+        this.buildJavaFileList().forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
     }
 
     public Stream<JavaFile> buildJavaFileList() {
 
-        return StreamEx.of(manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()))
-                .append(manager.getDirectives()
+        return Streams.concat(
+                manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
+                manager.getDirectives()
                         .flatMap(directiveDefinitionContext ->
                                 directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                                         .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
@@ -50,20 +45,21 @@ public class JavaFileBuilder {
                                         .filter(Optional::isPresent)
                                         .map(Optional::get)
                         )
-                        .map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()))
-                .append(manager.getEnums().map(typeSpecBuilder::buildEnum).map(typeSpec -> JavaFile.builder(configuration.getEnumTypePackageName(), typeSpec).build()))
-                .append(manager.getInterfaces().map(typeSpecBuilder::buildInterface).map(typeSpec -> JavaFile.builder(configuration.getInterfaceTypePackageName(), typeSpec).build()))
-                .append(manager.getInputObjects().map(typeSpecBuilder::buildClass).map(typeSpec -> JavaFile.builder(configuration.getInputObjectTypePackageName(), typeSpec).build()))
-                .append(manager.getObjects()
+                        .map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
+                manager.getEnums().map(typeSpecBuilder::buildEnum).map(typeSpec -> JavaFile.builder(configuration.getEnumTypePackageName(), typeSpec).build()),
+                manager.getInterfaces().map(typeSpecBuilder::buildInterface).map(typeSpec -> JavaFile.builder(configuration.getInterfaceTypePackageName(), typeSpec).build()),
+                manager.getInputObjects().map(typeSpecBuilder::buildClass).map(typeSpec -> JavaFile.builder(configuration.getInputObjectTypePackageName(), typeSpec).build()),
+                manager.getObjects()
                         .filter(objectTypeDefinitionContext ->
                                 !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                         !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                         !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                         )
-                        .map(typeSpecBuilder::buildClass).map(typeSpec -> JavaFile.builder(configuration.getObjectTypePackageName(), typeSpec).build()))
-                .append(typeSpecBuilder.buildObjectTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()))
-                .append(typeSpecBuilder.buildObjectTypeExpressionsAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()))
-                .append(typeSpecBuilder.buildObjectTypeInputAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()))
-                .append(typeSpecBuilder.buildObjectTypeInnerInputAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()));
+                        .map(typeSpecBuilder::buildClass).map(typeSpec -> JavaFile.builder(configuration.getObjectTypePackageName(), typeSpec).build()),
+                typeSpecBuilder.buildObjectTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
+                typeSpecBuilder.buildObjectTypeExpressionsAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
+                typeSpecBuilder.buildObjectTypeInputAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
+                typeSpecBuilder.buildObjectTypeInnerInputAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build())
+        );
     }
 }

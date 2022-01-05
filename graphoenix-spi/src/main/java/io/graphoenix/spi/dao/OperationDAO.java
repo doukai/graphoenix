@@ -13,15 +13,6 @@ import java.util.Objects;
 
 public interface OperationDAO {
 
-    static <T> String fileToString(Class<T> clazz, String fileName) {
-        try {
-            return Files.readString(Path.of(Objects.requireNonNull(clazz.getResource(fileName)).toURI()), StandardCharsets.UTF_8);
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     <T> T findOne(String sql, Map<String, Object> parameters, Class<T> beanClass);
 
     <T> List<T> findAll(String sql, Map<String, Object> parameters, Class<T> beanClass);

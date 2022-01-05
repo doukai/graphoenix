@@ -40,7 +40,7 @@ public enum ConfigUtil {
     }
 
     public <T> T getValue(String propertyName, Class<T> propertyType) {
-        return ConfigBeanFactory.create(getConfig(), propertyType);
+        return ConfigBeanFactory.create(getConfig().getConfig(propertyName), propertyType);
     }
 
     public <T> Optional<T> getOptionalValue(Class<T> propertyType) {
@@ -50,7 +50,7 @@ public enum ConfigUtil {
 
     public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
         if (getConfig().hasPath(propertyName)) {
-            return Optional.of(ConfigBeanFactory.create(getConfig(), propertyType));
+            return Optional.of(ConfigBeanFactory.create(getConfig().getConfig(propertyName), propertyType));
         }
         return Optional.empty();
     }

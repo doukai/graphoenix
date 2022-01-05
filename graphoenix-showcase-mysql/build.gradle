@@ -14,7 +14,7 @@ plugins {
 
 apply plugin: 'io.graphoenix'
 javaCodegen {
-    basePackageName = "io.graphoenix.showcase.mysql"
+    basePackageName = "io.graphoenix.showcase.mysql.generated"
     graphQLFileName = "auth.gql"
 }
 

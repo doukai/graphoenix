@@ -12,12 +12,18 @@ import java.util.stream.Collectors;
 
 public class BeanContext {
 
-    private static final Set<ModuleContext> moduleContexts;
+    private static Set<ModuleContext> moduleContexts;
 
     private static final Map<Class<?>, Supplier<?>> contextCache = new HashMap<>();
 
     static {
         moduleContexts = ServiceLoader.load(ModuleContext.class, BeanContext.class.getClassLoader()).stream()
+                .map(ServiceLoader.Provider::get)
+                .collect(Collectors.toSet());
+    }
+
+    public static void load(ClassLoader classLoader) {
+        moduleContexts = ServiceLoader.load(ModuleContext.class, classLoader).stream()
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toSet());
     }

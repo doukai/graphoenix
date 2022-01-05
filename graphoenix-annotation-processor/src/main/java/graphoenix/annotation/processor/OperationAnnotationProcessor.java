@@ -13,6 +13,7 @@ import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.handler.GeneratorHandler;
 import io.vavr.control.Try;
 import org.apache.logging.log4j.util.Strings;
+import org.openjdk.tools.javac.code.Type;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -25,6 +26,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.FileObject;
@@ -58,6 +60,7 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
+        BeanContext.load(OperationAnnotationProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         this.operationRouter = BeanContext.get(GraphQLOperationRouter.class);
@@ -87,14 +90,14 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
                         TypeMirror operationDAO = graphQLOperationMirror.getElementValues().entrySet().stream()
                                 .filter(entry -> entry.getKey().getSimpleName().toString().equals("operationDAO"))
                                 .findFirst()
-                                .map(entry -> elementUtils.getTypeElement((String) entry.getValue().getValue()).asType())
+                                .map(entry -> ((DeclaredType) entry.getValue().getValue()).asElement().asType())
                                 .orElseThrow();
 
                         boolean useInject = graphQLOperationMirror.getElementValues().entrySet().stream()
                                 .filter(entry -> entry.getKey().getSimpleName().toString().equals("useInject"))
                                 .findFirst()
                                 .map(entry -> (boolean) entry.getValue().getValue())
-                                .orElseThrow();
+                                .orElse((boolean) GraphQLOperation.class.getMethod("useInject").getDefaultValue());
 
                         JavaGeneratorConfig javaGeneratorConfig = RESOURCES_CONFIG_UTIL.getValue(JavaGeneratorConfig.class);
 
@@ -116,16 +119,16 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
 
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors.toMap(
-                                                Map.Entry::getKey,
-                                                entry -> {
-                                                    switch (operationRouter.getType(entry.getValue())) {
-                                                        case QUERY:
-                                                            return generatorHandler.query(entry.getValue());
-                                                        case MUTATION:
-                                                            return generatorHandler.mutation(entry.getValue());
-                                                    }
-                                                    return Strings.EMPTY;
-                                                }
+                                        Map.Entry::getKey,
+                                        entry -> {
+                                            switch (operationRouter.getType(entry.getValue())) {
+                                                case QUERY:
+                                                    return generatorHandler.query(entry.getValue());
+                                                case MUTATION:
+                                                    return generatorHandler.mutation(entry.getValue());
+                                            }
+                                            return Strings.EMPTY;
+                                        }
                                         )
                                 )
                                 .forEach((key, value) -> Try.run(() -> {

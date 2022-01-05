@@ -14,8 +14,8 @@ repositories {
 
 dependencies {
     compile project(":graphoenix-core")
-    compile project(":graphoenix-java-generator")
-    compile project(":graphoenix-graphql-builder")
+    implementation project(":graphoenix-java-generator")
+    implementation project(":graphoenix-graphql-builder")
     compile "org.antlr:antlr4:4.9.2"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

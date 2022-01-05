@@ -24,11 +24,15 @@ import java.util.stream.Stream;
 public class TypeSpecBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final JavaGeneratorConfig configuration;
+    private JavaGeneratorConfig configuration;
 
     @Inject
     public TypeSpecBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
         this.manager = manager;
+        this.configuration = configuration;
+    }
+
+    public void setConfiguration(JavaGeneratorConfig configuration) {
         this.configuration = configuration;
     }
 

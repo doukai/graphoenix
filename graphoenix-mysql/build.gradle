@@ -13,8 +13,8 @@ repositories {
 dependencies {
     implementation project(":graphoenix-core")
     implementation project(":graphoenix-graphql-builder")
-    implementation project(":graphoenix-mysql-translator")
-    implementation project(":graphoenix-r2dbc-connector")
+    compile project(":graphoenix-mysql-translator")
+    compile project(":graphoenix-r2dbc-connector")
 
     annotationProcessor project(":graphoenix-dagger")
     annotationProcessor project(":graphoenix-config")
