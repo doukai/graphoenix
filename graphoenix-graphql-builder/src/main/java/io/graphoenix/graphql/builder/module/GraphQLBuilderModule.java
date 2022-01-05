@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.builder.module;
 
-import dagger.Module;
-import dagger.Provides;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.manager.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.config.GraphQLBuilderConfig;
 import io.graphoenix.graphql.builder.handler.bootstrap.IntrospectionMutationBuildHandler;

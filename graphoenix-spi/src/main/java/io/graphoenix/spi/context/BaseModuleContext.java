@@ -25,6 +25,10 @@ public abstract class BaseModuleContext implements ModuleContext {
         if (contextMap.get(beanClass) != null) {
             return Optional.of((Supplier<T>) contextMap.get(beanClass));
         }
-        return Optional.empty();
+        Optional<Map.Entry<Class<?>, Supplier<?>>> subType = contextMap.entrySet().stream()
+                .filter(classSupplierEntry -> classSupplierEntry.getKey().isAssignableFrom(beanClass))
+                .findFirst();
+
+        return subType.map(classSupplierEntry -> (Supplier<T>) classSupplierEntry.getValue());
     }
 }

@@ -218,7 +218,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(declaration -> declaration.getType().isClassOrInterfaceType())
-                                                    .filter(declaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(declaration).getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString()))
+                                                    .filter(declaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(declaration).anyMatch(type-> type.getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString())))
                                                     .findFirst()
                                                     .orElseThrow();
 

@@ -1,7 +1,7 @@
 package io.graphoenix.http.module;
 
-import dagger.Module;
-import dagger.Provides;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.config.NettyConfig;

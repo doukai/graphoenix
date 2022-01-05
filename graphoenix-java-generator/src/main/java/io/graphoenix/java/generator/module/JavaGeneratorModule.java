@@ -1,7 +1,7 @@
 package io.graphoenix.java.generator.module;
 
-import dagger.Module;
-import dagger.Provides;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.module.DocumentManagerModule;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.java.generator.builder.TypeSpecBuilder;

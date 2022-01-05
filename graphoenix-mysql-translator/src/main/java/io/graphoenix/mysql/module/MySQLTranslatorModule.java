@@ -1,7 +1,7 @@
 package io.graphoenix.mysql.module;
 
-import dagger.Module;
-import dagger.Provides;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.mysql.utils.DBValueUtil;
 import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;

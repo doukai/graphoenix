@@ -1,7 +1,7 @@
 package io.graphoenix.product.module;
 
-import dagger.Module;
-import dagger.Provides;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;

@@ -1,7 +1,7 @@
 package io.graphoenix.r2dbc.connector.module;
 
-import dagger.Module;
-import dagger.Provides;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.graphoenix.r2dbc.connector.connection.ConnectionFactoryCreator;
 import io.graphoenix.r2dbc.connector.connection.ConnectionPoolCreator;

@@ -1,7 +1,7 @@
 package io.graphoenix.core.module;
 
-import dagger.Module;
-import dagger.Provides;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.manager.GraphQLConfigRegister;
 import io.graphoenix.core.manager.GraphQLDirectiveManager;

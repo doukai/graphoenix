@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.generator.module;
 
-import dagger.Module;
-import dagger.Provides;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.graphoenix.graphql.generator.translator.ElementManager;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
 import io.graphoenix.graphql.generator.translator.MethodToMutationOperation;

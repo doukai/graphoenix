@@ -9,12 +9,17 @@ apply plugin: 'maven'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     implementation project(":graphoenix-core")
     implementation 'com.squareup:javapoet:1.13.0'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.40.5'
+
+    annotationProcessor project(":graphoenix-dagger")
+    annotationProcessor project(":graphoenix-config")
+    annotationProcessor project(":graphoenix-aop")
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }
