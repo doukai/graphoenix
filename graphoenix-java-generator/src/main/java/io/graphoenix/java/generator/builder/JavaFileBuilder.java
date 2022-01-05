@@ -16,7 +16,7 @@ public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeSpecBuilder typeSpecBuilder;
-    private final JavaGeneratorConfig configuration;
+    private JavaGeneratorConfig configuration;
     private final ThrowingBiConsumer<JavaFile, File, IOException> JavaFileWriteTo = JavaFile::writeTo;
 
     @Inject
@@ -26,8 +26,17 @@ public class JavaFileBuilder {
         this.typeSpecBuilder = typeSpecBuilder;
     }
 
+    public void writeToPath(File path, JavaGeneratorConfig JavaGeneratorConfig) {
+        this.buildJavaFileList(JavaGeneratorConfig).forEach(javaFile -> JavaFileWriteTo.uncheck().accept(javaFile, path));
+    }
+
     public void writeToPath(File path) {
         this.buildJavaFileList().forEach(javaFile -> JavaFileWriteTo.uncheck().accept(javaFile, path));
+    }
+
+    public Stream<JavaFile> buildJavaFileList(JavaGeneratorConfig configuration) {
+        this.configuration = configuration;
+        return buildJavaFileList();
     }
 
     public Stream<JavaFile> buildJavaFileList() {

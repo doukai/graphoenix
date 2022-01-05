@@ -1,5 +1,21 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath 'io.graphoenix:graphoenix-gradle-plugin:1.0-SNAPSHOT'
+    }
+}
+
 plugins {
     id 'java'
+}
+
+apply plugin: 'io.graphoenix'
+javaCodegen {
+    basePackageName = "io.graphoenix.showcase.mysql"
+    graphQLFileName = "auth.gql"
 }
 
 group 'io.graphoenix'

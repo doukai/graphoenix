@@ -30,16 +30,17 @@ public class MutationExecutor {
     public Mono<String> executeMutationsInBatch(Stream<String> sqlStream) {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
-                    connection.beginTransaction();
-                    Batch batch = connection.createBatch();
-                    sqlStream.forEach(batch::add);
-                    return Flux.from(batch.execute())
-                            .last()
-                            .doOnSuccess(result -> connection.commitTransaction())
-                            .flatMap(this::getJsonStringFromResult)
-                            .doOnError(throwable -> connection.rollbackTransaction())
-                            .doFinally(signalType -> connection.close());
-                });
+                            connection.beginTransaction();
+                            Batch batch = connection.createBatch();
+                            sqlStream.forEach(batch::add);
+                            return Flux.from(batch.execute())
+                                    .last()
+                                    .doOnSuccess(result -> connection.commitTransaction())
+                                    .flatMap(this::getJsonStringFromResult)
+                                    .doOnError(throwable -> connection.rollbackTransaction())
+                                    .doFinally(signalType -> connection.close());
+                        }
+                );
     }
 
     public Stream<Integer> executeMutationsInBatchByGroup(Stream<String> sqlStream, int itemCount) {
@@ -76,23 +77,24 @@ public class MutationExecutor {
     public Mono<String> executeMutations(Stream<String> sqlStream, Map<String, Object> parameters) {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
-                    connection.beginTransaction();
-                    return Flux.fromStream(sqlStream
-                            .map(sql -> {
-                                        Statement statement = connection.createStatement(sql);
-                                        if (parameters != null) {
-                                            parameters.forEach(statement::bind);
-                                        }
-                                        return statement;
-                                    }
-                            ))
-                            .flatMap(Statement::execute)
-                            .flatMap(this::getJsonStringFromResult)
-                            .last()
-                            .doOnSuccess(result -> connection.commitTransaction())
-                            .doOnError(throwable -> connection.rollbackTransaction())
-                            .doFinally(signalType -> connection.close());
-                });
+                            connection.beginTransaction();
+                            return Flux.fromStream(sqlStream
+                                            .map(sql -> {
+                                                        Statement statement = connection.createStatement(sql);
+                                                        if (parameters != null) {
+                                                            parameters.forEach(statement::bind);
+                                                        }
+                                                        return statement;
+                                                    }
+                                            ))
+                                    .flatMap(Statement::execute)
+                                    .flatMap(this::getJsonStringFromResult)
+                                    .last()
+                                    .doOnSuccess(result -> connection.commitTransaction())
+                                    .doOnError(throwable -> connection.rollbackTransaction())
+                                    .doFinally(signalType -> connection.close());
+                        }
+                );
     }
 
     private Mono<String> getJsonStringFromResult(Result result) {

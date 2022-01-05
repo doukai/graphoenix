@@ -6,6 +6,8 @@ apply plugin: 'maven'
 group 'io.graphoenix'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'maven'
+
 repositories {
     mavenCentral()
     jcenter()
@@ -13,9 +15,8 @@ repositories {
 
 dependencies {
     compile project(":graphoenix-spi")
-    implementation project(":graphoenix-dagger")
+    compile project(":graphoenix-dagger")
     compile "com.typesafe:config:1.4.1"
-    implementation "io.vavr:vavr:0.10.4"
 
     implementation "com.google.auto.service:auto-service:1.0.1"
     annotationProcessor "com.google.auto.service:auto-service:1.0.1"

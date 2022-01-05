@@ -1,4 +1,4 @@
-package io.graphoenix.spi.handler;
+package io.graphoenix.spi.dao;
 
 import org.reactivestreams.Publisher;
 
@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public interface OperationDAO {
@@ -21,17 +22,15 @@ public interface OperationDAO {
         return null;
     }
 
-    <T> T findOne(String sql, Class<T> clazz);
+    <T> T findOne(String sql, Map<String, Object> parameters, Class<T> beanClass);
 
-    <T> List<T> findAll(String sql, Class<T> clazz);
+    <T> List<T> findAll(String sql, Map<String, Object> parameters, Class<T> beanClass);
 
-    <T> T save(String sql, Class<T> clazz);
+    <T> T save(String sql, Map<String, Object> parameters, Class<T> beanClass);
 
-    <T> Publisher<T> findOneAsync(String sql, Class<T> clazz);
+    <T> Publisher<T> findOneAsync(String sql, Map<String, Object> parameters, Class<T> beanClass);
 
-    <T> Publisher<List<T>> findAllAsync(String sql, Class<T> clazz);
+    <T> Publisher<List<T>> findAllAsync(String sql, Map<String, Object> parameters, Class<T> beanClass);
 
-    <T> Publisher<T> saveAsync(String sql, Class<T> clazz);
-
-    void addOperationHandlers();
+    <T> Publisher<T> saveAsync(String sql, Map<String, Object> parameters, Class<T> beanClass);
 }

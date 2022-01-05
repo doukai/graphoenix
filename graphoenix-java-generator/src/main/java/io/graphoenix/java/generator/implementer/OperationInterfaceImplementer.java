@@ -1,16 +1,27 @@
 package io.graphoenix.java.generator.implementer;
 
-import com.pivovarit.function.ThrowingFunction;
-import com.squareup.javapoet.*;
-import io.graphoenix.core.pipeline.GraphQLDAO;
-import io.graphoenix.core.pipeline.PipelineContext;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Singleton;
-import javax.lang.model.element.*;
+import javax.inject.Inject;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -18,20 +29,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.squareup.javapoet.TypeName.VOID;
+import static io.graphoenix.core.utils.TryUtil.TRY_UTIL;
 
 public class OperationInterfaceImplementer {
 
-    private final ThrowingFunction<String, Class<?>, ClassNotFoundException> classForName = Class::forName;
-
-    public void writeToFiler(PackageElement packageElement, TypeElement typeElement, String executeHandler, String suffix, boolean useInject, Filer filer) throws IOException {
-        this.buildImplementClass(packageElement, typeElement, executeHandler, suffix, useInject).writeTo(filer);
+    public void writeToFiler(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix, boolean useInject, Filer filer) throws IOException {
+        this.buildImplementClass(packageElement, typeElement, operationDAO, suffix, useInject).writeTo(filer);
     }
 
-    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, String executeHandler, String suffix, boolean useInject) {
+    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix, boolean useInject) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"))
                 .addModifiers(Modifier.PUBLIC)
-                .superclass(TypeName.get(GraphQLDAO.class))
+                .superclass(operationDAO)
                 .addSuperinterface(typeElement.asType())
                 .addFields(buildFileContentFields(typeElement))
                 .addStaticBlock(buildFileContentFieldInitializeCodeBlock(packageElement, typeElement, suffix))
@@ -39,10 +48,9 @@ public class OperationInterfaceImplementer {
                         .stream().filter(element -> element.getKind().equals(ElementKind.METHOD))
                         .map(element -> executableElementToMethodSpec(typeElement, (ExecutableElement) element))
                         .collect(Collectors.toList())
-                )
-                .addMethod(addOperationHandlersMethodSpec(executeHandler));
+                );
         if (useInject) {
-            builder.addAnnotation(Singleton.class);
+            builder.addAnnotation(Inject.class);
         }
         return JavaFile.builder(packageElement.getQualifiedName().toString(), builder.build()).build();
     }
@@ -60,7 +68,6 @@ public class OperationInterfaceImplementer {
                         .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
                 Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).build();
     }
-
 
     private CodeBlock buildFileContentFieldInitializeCodeBlock(PackageElement packageElement, TypeElement typeElement, String suffix) {
         CodeBlock.Builder builder = CodeBlock.builder();
@@ -95,7 +102,6 @@ public class OperationInterfaceImplementer {
                 .addStatement(
                         "return $L(new $T($L, $T.of($L)), $T.class)",
                         getMethodName(executableElement),
-                        ClassName.get(PipelineContext.class),
                         executableElement.getSimpleName().toString()
                                 .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
                         ClassName.get(Map.class),
@@ -124,14 +130,15 @@ public class OperationInterfaceImplementer {
     }
 
     private String getMethodName(ExecutableElement executableElement) {
+
         TypeName typeName0 = ClassName.get(executableElement.getReturnType());
         if (typeName0 instanceof ParameterizedTypeName) {
-            Class<?> clazz0 = classForName.uncheck().apply(((ParameterizedTypeName) typeName0).rawType.toString());
-            if (clazz0.isAssignableFrom(Mono.class)) {
+            Class<?> class0 = TRY_UTIL.classForName.unchecked().apply(((ParameterizedTypeName) typeName0).rawType.toString());
+            if (class0.isAssignableFrom(Mono.class)) {
                 TypeName typeName1 = ((ParameterizedTypeName) typeName0).typeArguments.get(0);
                 if (typeName1 instanceof ParameterizedTypeName) {
-                    Class<?> clazz1 = classForName.uncheck().apply(((ParameterizedTypeName) typeName1).rawType.toString());
-                    if (clazz1.isAssignableFrom(List.class) || clazz1.isAssignableFrom(Set.class) || clazz1.isAssignableFrom(Collection.class)) {
+                    Class<?> class1 = TRY_UTIL.classForName.unchecked().apply(((ParameterizedTypeName) typeName1).rawType.toString());
+                    if (class1.isAssignableFrom(List.class) || class1.isAssignableFrom(Set.class) || class1.isAssignableFrom(Collection.class)) {
                         if (executableElement.getAnnotation(QueryOperation.class) != null) {
                             return "findAllAsync";
                         }
@@ -143,7 +150,7 @@ public class OperationInterfaceImplementer {
                         return "saveAsync";
                     }
                 }
-            } else if (clazz0.isAssignableFrom(List.class) || clazz0.isAssignableFrom(Set.class) || clazz0.isAssignableFrom(Collection.class)) {
+            } else if (class0.isAssignableFrom(List.class) || class0.isAssignableFrom(Set.class) || class0.isAssignableFrom(Collection.class)) {
                 if (executableElement.getAnnotation(QueryOperation.class) != null) {
                     return "findAll";
                 }
@@ -156,22 +163,5 @@ public class OperationInterfaceImplementer {
             }
         }
         return null;
-    }
-
-    private MethodSpec addOperationHandlersMethodSpec(String executeHandler) {
-
-        MethodSpec.Builder addOperationHandlers = MethodSpec.methodBuilder("addOperationHandlers")
-                .addModifiers(Modifier.PROTECTED)
-                .addAnnotation(Override.class)
-                .returns(VOID);
-
-//        executeHandlerNames.forEach(handlerName ->
-//                addOperationHandlers
-//                        .addStatement(
-//                                "addOperationHandler(new $T())",
-//                                ClassName.get(classForName.uncheck().apply(handlerName))
-//                        )
-//        );
-        return addOperationHandlers.build();
     }
 }

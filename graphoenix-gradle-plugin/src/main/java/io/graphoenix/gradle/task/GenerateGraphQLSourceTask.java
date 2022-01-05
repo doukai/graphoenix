@@ -14,7 +14,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
         assert javaGeneratorConfig != null;
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
 
-        GraphQLSourceGenerator graphQLSourceGenerator = DaggerGraphQLSourceGeneratorFactory.builder().config(javaGeneratorConfig).build().get();
-        graphQLSourceGenerator.generate(sourceSet);
+        GraphQLSourceGenerator graphQLSourceGenerator = new GraphQLSourceGenerator();
+        graphQLSourceGenerator.generate(sourceSet, javaGeneratorConfig);
     }
 }
