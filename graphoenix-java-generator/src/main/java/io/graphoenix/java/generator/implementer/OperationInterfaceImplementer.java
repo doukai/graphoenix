@@ -11,10 +11,10 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
+import io.vavr.CheckedFunction0;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -29,15 +29,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.core.utils.TryUtil.TRY_UTIL;
-
 public class OperationInterfaceImplementer {
 
-    public void writeToFiler(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix, boolean useInject, Filer filer) throws IOException {
-        this.buildImplementClass(packageElement, typeElement, operationDAO, suffix, useInject).writeTo(filer);
+    public void writeToFiler(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix, Filer filer) throws IOException {
+        this.buildImplementClass(packageElement, typeElement, operationDAO, suffix).writeTo(filer);
     }
 
-    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix, boolean useInject) {
+    public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"))
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(operationDAO)
@@ -49,9 +47,6 @@ public class OperationInterfaceImplementer {
                         .map(element -> executableElementToMethodSpec(typeElement, (ExecutableElement) element))
                         .collect(Collectors.toList())
                 );
-        if (useInject) {
-            builder.addAnnotation(Inject.class);
-        }
         return JavaFile.builder(packageElement.getQualifiedName().toString(), builder.build()).build();
     }
 
@@ -66,7 +61,10 @@ public class OperationInterfaceImplementer {
                 TypeName.get(String.class),
                 element.getSimpleName().toString()
                         .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
-                Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).build();
+                Modifier.PRIVATE,
+                Modifier.STATIC,
+                Modifier.FINAL
+        ).build();
     }
 
     private CodeBlock buildFileContentFieldInitializeCodeBlock(PackageElement packageElement, TypeElement typeElement, String suffix) {
@@ -133,11 +131,11 @@ public class OperationInterfaceImplementer {
 
         TypeName typeName0 = ClassName.get(executableElement.getReturnType());
         if (typeName0 instanceof ParameterizedTypeName) {
-            Class<?> class0 = TRY_UTIL.classForName.unchecked().apply(((ParameterizedTypeName) typeName0).rawType.toString());
+            Class<?> class0 = CheckedFunction0.of(() -> Class.forName(((ParameterizedTypeName) typeName0).rawType.toString())).unchecked().get();
             if (class0.isAssignableFrom(Mono.class)) {
                 TypeName typeName1 = ((ParameterizedTypeName) typeName0).typeArguments.get(0);
                 if (typeName1 instanceof ParameterizedTypeName) {
-                    Class<?> class1 = TRY_UTIL.classForName.unchecked().apply(((ParameterizedTypeName) typeName1).rawType.toString());
+                    Class<?> class1 = CheckedFunction0.of(() -> Class.forName(((ParameterizedTypeName) typeName1).rawType.toString())).unchecked().get();
                     if (class1.isAssignableFrom(List.class) || class1.isAssignableFrom(Set.class) || class1.isAssignableFrom(Collection.class)) {
                         if (executableElement.getAnnotation(QueryOperation.class) != null) {
                             return "findAllAsync";

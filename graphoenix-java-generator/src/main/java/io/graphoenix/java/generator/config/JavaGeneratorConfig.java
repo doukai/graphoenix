@@ -3,10 +3,10 @@ package io.graphoenix.java.generator.config;
 import com.typesafe.config.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
-@ConfigProperties(prefix = "codegen.java")
+@ConfigProperties(prefix = "javaGenerator")
 public class JavaGeneratorConfig {
 
-    private String basePackageName;
+    private String packageName;
 
     @Optional
     private String objectTypePackageName;
@@ -29,25 +29,16 @@ public class JavaGeneratorConfig {
     @Optional
     private String annotationPackageName;
 
-    @Optional
-    private String graphQL;
-
-    @Optional
-    private String graphQLFileName;
-
-    @Optional
-    private String graphQLPath;
-
-    public String getBasePackageName() {
-        return basePackageName;
+    public String getPackageName() {
+        return packageName;
     }
 
-    public void setBasePackageName(String basePackageName) {
-        this.basePackageName = basePackageName;
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
     }
 
     public String getObjectTypePackageName() {
-        return objectTypePackageName != null ? objectTypePackageName : basePackageName + ".objectType";
+        return objectTypePackageName != null ? objectTypePackageName : packageName + ".objectType";
     }
 
     public void setObjectTypePackageName(String objectTypePackageName) {
@@ -55,7 +46,7 @@ public class JavaGeneratorConfig {
     }
 
     public String getInterfaceTypePackageName() {
-        return interfaceTypePackageName != null ? interfaceTypePackageName : basePackageName + ".interfaceType";
+        return interfaceTypePackageName != null ? interfaceTypePackageName : packageName + ".interfaceType";
     }
 
     public void setInterfaceTypePackageName(String interfaceTypePackageName) {
@@ -63,7 +54,7 @@ public class JavaGeneratorConfig {
     }
 
     public String getUnionTypePackageName() {
-        return unionTypePackageName != null ? unionTypePackageName : basePackageName + ".unionType";
+        return unionTypePackageName != null ? unionTypePackageName : packageName + ".unionType";
     }
 
     public void setUnionTypePackageName(String unionTypePackageName) {
@@ -71,7 +62,7 @@ public class JavaGeneratorConfig {
     }
 
     public String getEnumTypePackageName() {
-        return enumTypePackageName != null ? enumTypePackageName : basePackageName + ".enumType";
+        return enumTypePackageName != null ? enumTypePackageName : packageName + ".enumType";
     }
 
     public void setEnumTypePackageName(String enumTypePackageName) {
@@ -79,7 +70,7 @@ public class JavaGeneratorConfig {
     }
 
     public String getInputObjectTypePackageName() {
-        return inputObjectTypePackageName != null ? inputObjectTypePackageName : basePackageName + ".inputObjectType";
+        return inputObjectTypePackageName != null ? inputObjectTypePackageName : packageName + ".inputObjectType";
     }
 
     public void setInputObjectTypePackageName(String inputObjectTypePackageName) {
@@ -87,7 +78,7 @@ public class JavaGeneratorConfig {
     }
 
     public String getDirectivePackageName() {
-        return directivePackageName != null ? directivePackageName : basePackageName + ".directive";
+        return directivePackageName != null ? directivePackageName : packageName + ".directive";
     }
 
     public void setDirectivePackageName(String directivePackageName) {
@@ -95,34 +86,10 @@ public class JavaGeneratorConfig {
     }
 
     public String getAnnotationPackageName() {
-        return annotationPackageName != null ? annotationPackageName : basePackageName + ".annotation";
+        return annotationPackageName != null ? annotationPackageName : packageName + ".annotation";
     }
 
     public void setAnnotationPackageName(String annotationPackageName) {
         this.annotationPackageName = annotationPackageName;
-    }
-
-    public String getGraphQL() {
-        return graphQL;
-    }
-
-    public void setGraphQL(String graphQL) {
-        this.graphQL = graphQL;
-    }
-
-    public String getGraphQLFileName() {
-        return graphQLFileName;
-    }
-
-    public void setGraphQLFileName(String graphQLFileName) {
-        this.graphQLFileName = graphQLFileName;
-    }
-
-    public String getGraphQLPath() {
-        return graphQLPath;
-    }
-
-    public void setGraphQLPath(String graphQLPath) {
-        this.graphQLPath = graphQLPath;
     }
 }

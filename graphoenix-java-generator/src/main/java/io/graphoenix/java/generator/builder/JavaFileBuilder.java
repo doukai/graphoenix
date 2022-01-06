@@ -15,7 +15,7 @@ public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeSpecBuilder typeSpecBuilder;
-    private JavaGeneratorConfig configuration;
+    private final JavaGeneratorConfig configuration;
 
     @Inject
     public JavaFileBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration, TypeSpecBuilder typeSpecBuilder) {
@@ -24,16 +24,19 @@ public class JavaFileBuilder {
         this.typeSpecBuilder = typeSpecBuilder;
     }
 
-    public void setConfiguration(JavaGeneratorConfig configuration) {
-        this.configuration = configuration;
-        typeSpecBuilder.setConfiguration(configuration);
-    }
-
     public void writeToPath(File path) {
         this.buildJavaFileList().forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
     }
 
+    public void writeToPath(File path, JavaGeneratorConfig configuration) {
+        this.buildJavaFileList(configuration, typeSpecBuilder.setConfiguration(configuration)).forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
+    }
+
     public Stream<JavaFile> buildJavaFileList() {
+        return buildJavaFileList(configuration, typeSpecBuilder);
+    }
+
+    public Stream<JavaFile> buildJavaFileList(JavaGeneratorConfig configuration, TypeSpecBuilder typeSpecBuilder) {
 
         return Streams.concat(
                 manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),

@@ -32,8 +32,9 @@ public class TypeSpecBuilder {
         this.configuration = configuration;
     }
 
-    public void setConfiguration(JavaGeneratorConfig configuration) {
+    public TypeSpecBuilder setConfiguration(JavaGeneratorConfig configuration) {
         this.configuration = configuration;
+        return this;
     }
 
     public TypeSpec buildClass(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

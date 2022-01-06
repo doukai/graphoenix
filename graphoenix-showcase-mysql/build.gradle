@@ -13,9 +13,11 @@ plugins {
 }
 
 apply plugin: 'io.graphoenix'
-javaCodegen {
-    basePackageName = "io.graphoenix.showcase.mysql.generated"
+graphql {
     graphQLFileName = "auth.gql"
+}
+javaGenerator {
+    packageName = "io.graphoenix.showcase.mysql.generated"
 }
 
 group 'io.graphoenix'
@@ -38,7 +40,7 @@ dependencies {
     annotationProcessor project(":graphoenix-dagger")
     annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-aop")
-    
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
 }

@@ -15,6 +15,12 @@ public class GraphQLConfig {
     @Optional
     private String graphQLPath;
 
+    @Optional
+    private Boolean build = true;
+
+    @Optional
+    private Boolean englishPlural = false;
+
     public String getGraphQL() {
         return graphQL;
     }
@@ -37,5 +43,21 @@ public class GraphQLConfig {
 
     public void setGraphQLPath(String graphQLPath) {
         this.graphQLPath = graphQLPath;
+    }
+
+    public Boolean getBuild() {
+        return build;
+    }
+
+    public void setBuild(Boolean build) {
+        this.build = build;
+    }
+
+    public Boolean getEnglishPlural() {
+        return englishPlural;
+    }
+
+    public void setEnglishPlural(Boolean englishPlural) {
+        this.englishPlural = englishPlural;
     }
 }

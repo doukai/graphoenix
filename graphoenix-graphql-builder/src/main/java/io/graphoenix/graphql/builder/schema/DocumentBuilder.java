@@ -2,9 +2,18 @@ package io.graphoenix.graphql.builder.schema;
 
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.manager.GraphQLConfigRegister;
-import io.graphoenix.graphql.builder.config.GraphQLBuilderConfig;
-import io.graphoenix.graphql.generator.document.*;
+import io.graphoenix.graphql.generator.document.Directive;
+import io.graphoenix.graphql.generator.document.Document;
+import io.graphoenix.graphql.generator.document.EnumType;
+import io.graphoenix.graphql.generator.document.EnumValue;
+import io.graphoenix.graphql.generator.document.Field;
+import io.graphoenix.graphql.generator.document.InputObjectType;
+import io.graphoenix.graphql.generator.document.InputValue;
+import io.graphoenix.graphql.generator.document.InterfaceType;
+import io.graphoenix.graphql.generator.document.ObjectType;
+import io.graphoenix.graphql.generator.document.Schema;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.antlr.v4.runtime.RuleContext;
@@ -12,7 +21,9 @@ import org.antlr.v4.runtime.RuleContext;
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,7 +31,7 @@ import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
 
 public class DocumentBuilder {
 
-    private final GraphQLBuilderConfig graphQLBuilderConfig;
+    private final GraphQLConfig graphQLConfig;
 
     private final IGraphQLDocumentManager manager;
 
@@ -29,11 +40,11 @@ public class DocumentBuilder {
     private final GraphQLConfigRegister graphQLConfigRegister;
 
     @Inject
-    public DocumentBuilder(GraphQLBuilderConfig graphQLBuilderConfig,
+    public DocumentBuilder(GraphQLConfig graphQLConfig,
                            IGraphQLDocumentManager manager,
                            IGraphQLFieldMapManager mapper,
                            GraphQLConfigRegister graphQLConfigRegister) {
-        this.graphQLBuilderConfig = graphQLBuilderConfig;
+        this.graphQLConfig = graphQLConfig;
         this.manager = manager;
         this.mapper = mapper;
         this.graphQLConfigRegister = graphQLConfigRegister;
@@ -41,7 +52,7 @@ public class DocumentBuilder {
 
     public void buildManager() throws IOException, URISyntaxException {
         graphQLConfigRegister.registerConfig();
-        if (graphQLBuilderConfig.getBuild()) {
+        if (graphQLConfig.getBuild()) {
             manager.registerGraphQL(buildDocument().toString());
         }
         mapper.registerFieldMaps();
