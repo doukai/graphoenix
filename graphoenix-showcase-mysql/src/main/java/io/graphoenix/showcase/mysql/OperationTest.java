@@ -9,8 +9,10 @@ import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import reactor.core.publisher.Mono;
 
+import javax.inject.Singleton;
 import java.util.List;
 
+@Singleton
 @GraphQLOperation(operationDAO = R2DBCOperationDAO.class)
 public interface OperationTest {
 
@@ -46,7 +48,8 @@ public interface OperationTest {
     @UserInput(
             $name = "name",
             $sex = "sex",
-            login = "login1", password = "password1",
+            login = "login1",
+            password = "password1",
             $organization = "organization",
             $roles = "roles",
             $phones = "phones"

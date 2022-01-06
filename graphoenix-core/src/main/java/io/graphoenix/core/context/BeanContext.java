@@ -76,4 +76,8 @@ public class BeanContext {
 
         return supplierOptional.map(Supplier::get);
     }
+
+    public static void cache(Class<?> beanClass, Supplier<?> supplier) {
+        contextCache.put(beanClass, supplier);
+    }
 }

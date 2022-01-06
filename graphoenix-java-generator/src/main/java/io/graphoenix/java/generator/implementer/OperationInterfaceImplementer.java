@@ -9,12 +9,14 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import io.vavr.CheckedFunction0;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
+import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -40,6 +42,7 @@ public class OperationInterfaceImplementer {
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(operationDAO)
                 .addSuperinterface(typeElement.asType())
+                .addMethod(buildGetInstanceMethod(packageElement, typeElement))
                 .addFields(buildFileContentFields(typeElement))
                 .addStaticBlock(buildFileContentFieldInitializeCodeBlock(packageElement, typeElement, suffix))
                 .addMethods(typeElement.getEnclosedElements()
@@ -47,6 +50,12 @@ public class OperationInterfaceImplementer {
                         .map(element -> executableElementToMethodSpec(typeElement, (ExecutableElement) element))
                         .collect(Collectors.toList())
                 );
+
+        boolean isSingleton = typeElement.getAnnotationMirrors().stream()
+                .anyMatch(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(Singleton.class.getName()));
+        if (isSingleton) {
+            builder.addType(buildInstanceHolder(packageElement, typeElement));
+        }
         return JavaFile.builder(packageElement.getQualifiedName().toString(), builder.build()).build();
     }
 
@@ -56,11 +65,50 @@ public class OperationInterfaceImplementer {
                 .collect(Collectors.toList());
     }
 
+
+    private TypeSpec buildInstanceHolder(PackageElement packageElement, TypeElement typeElement) {
+        ClassName typeClassName = ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl");
+        return TypeSpec.classBuilder("Holder")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                .addField(
+                        FieldSpec.builder(typeClassName, "INSTANCE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                                .initializer("new $T()", typeClassName)
+                                .build()
+                )
+                .build();
+    }
+
+    private FieldSpec buildInstanceField(PackageElement packageElement, TypeElement typeElement) {
+        return FieldSpec.builder(
+                ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"),
+                "INSTANCE",
+                Modifier.PRIVATE,
+                Modifier.STATIC
+        ).build();
+    }
+
+    private MethodSpec buildGetInstanceMethod(PackageElement packageElement, TypeElement typeElement) {
+        ClassName typeClassName = ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl");
+
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("get")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(typeClassName);
+
+        boolean isSingleton = typeElement.getAnnotationMirrors().stream()
+                .anyMatch(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(Singleton.class.getName()));
+
+        if (isSingleton) {
+            builder.addStatement("return Holder.INSTANCE");
+        } else {
+            builder.addStatement("return new $T()", typeClassName);
+        }
+        return builder.build();
+    }
+
     private FieldSpec buildFileContentField(TypeElement typeElement, Element element) {
         return FieldSpec.builder(
                 TypeName.get(String.class),
-                element.getSimpleName().toString()
-                        .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
+                element.getSimpleName().toString().concat("_" + typeElement.getEnclosedElements().indexOf(element)),
                 Modifier.PRIVATE,
                 Modifier.STATIC,
                 Modifier.FINAL
@@ -68,13 +116,20 @@ public class OperationInterfaceImplementer {
     }
 
     private CodeBlock buildFileContentFieldInitializeCodeBlock(PackageElement packageElement, TypeElement typeElement, String suffix) {
+        ClassName typeClassName = ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl");
         CodeBlock.Builder builder = CodeBlock.builder();
+        builder.addStatement(
+                "$T.cache($T.class, $T::get)",
+                TypeName.get(BeanContext.class),
+                ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString()),
+                typeClassName
+        );
         typeElement.getEnclosedElements().forEach(element ->
                 builder.addStatement(
                         "$L = fileToString($T.class,$S)",
                         element.getSimpleName().toString()
                                 .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
-                        ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"),
+                        typeClassName,
                         typeElement.getSimpleName().toString()
                                 .concat("_")
                                 .concat(element.getSimpleName().toString())

@@ -1,13 +1,13 @@
 package io.graphoenix.r2dbc.connector.dao;
 
 import com.google.gson.GsonBuilder;
+import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
 import io.graphoenix.spi.dao.BaseOperationDAO;
 import reactor.core.publisher.Mono;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,18 +19,11 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     private final GsonBuilder gsonBuilder = new GsonBuilder();
 
-    private final QueryExecutor queryExecutor;
+    private final QueryExecutor queryExecutor = BeanContext.get(QueryExecutor.class);
 
-    private final MutationExecutor mutationExecutor;
+    private final MutationExecutor mutationExecutor = BeanContext.get(MutationExecutor.class);
 
-    private final R2dbcParameterProcessor r2dbcParameterProcessor;
-
-    @Inject
-    public R2DBCOperationDAO(QueryExecutor queryExecutor, MutationExecutor mutationExecutor, R2dbcParameterProcessor r2dbcParameterProcessor) {
-        this.queryExecutor = queryExecutor;
-        this.mutationExecutor = mutationExecutor;
-        this.r2dbcParameterProcessor = r2dbcParameterProcessor;
-    }
+    private final R2dbcParameterProcessor r2dbcParameterProcessor = BeanContext.get(R2dbcParameterProcessor.class);
 
     @Override
     public <T> T findOne(String sql, Map<String, Object> parameters, Class<T> beanClass) {

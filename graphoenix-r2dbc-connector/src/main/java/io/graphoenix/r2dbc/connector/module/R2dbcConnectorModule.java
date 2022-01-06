@@ -1,7 +1,5 @@
 package io.graphoenix.r2dbc.connector.module;
 
-import io.graphoenix.r2dbc.connector.dao.R2DBCOperationDAO;
-import io.graphoenix.spi.dao.OperationDAO;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
@@ -69,11 +67,5 @@ public class R2dbcConnectorModule {
     @Singleton
     public OperationSQLExecuteHandler operationSQLExecuteHandler() {
         return new OperationSQLExecuteHandler(queryExecutor(), mutationExecutor(), r2dbcParameterProcessor());
-    }
-
-    @Provides
-    @Singleton
-    public OperationDAO operationDAO() {
-        return new R2DBCOperationDAO(queryExecutor(), mutationExecutor(), r2dbcParameterProcessor());
     }
 }
