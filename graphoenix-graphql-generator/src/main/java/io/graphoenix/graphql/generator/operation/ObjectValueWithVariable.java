@@ -1,6 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
-import com.pivovarit.function.ThrowingBiFunction;
+import io.vavr.CheckedFunction2;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -27,7 +27,7 @@ public class ObjectValueWithVariable {
 
     public ObjectValueWithVariable(Object objectValueWithVariable) {
         Class<?> clazz = objectValueWithVariable.getClass();
-        ThrowingBiFunction<Field, Object, Object, IllegalAccessException> getField = (field, object) -> {
+        CheckedFunction2<Field, Object, Object> getField = (field, object) -> {
             field.setAccessible(true);
             return field.get(object);
         };

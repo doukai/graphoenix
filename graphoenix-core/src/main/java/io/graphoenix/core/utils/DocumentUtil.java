@@ -1,6 +1,5 @@
 package io.graphoenix.core.utils;
 
-import com.pivovarit.function.ThrowingFunction;
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
 import org.antlr.v4.runtime.*;
@@ -14,9 +13,6 @@ import java.nio.file.Path;
 
 public enum DocumentUtil {
     DOCUMENT_UTIL;
-    final ThrowingFunction<InputStream, CharStream, IOException> fromStream = CharStreams::fromStream;
-    final ThrowingFunction<String, CharStream, IOException> fromFileName = CharStreams::fromFileName;
-    final ThrowingFunction<Path, CharStream, IOException> fromPath = CharStreams::fromPath;
 
     public GraphqlParser.DocumentContext graphqlToDocument(String graphql) {
         CodePointCharStream charStream;
@@ -30,18 +26,10 @@ public enum DocumentUtil {
         return graphqlToDocument(charStream);
     }
 
-    public GraphqlParser.DocumentContext graphqlTryToDocument(InputStream inputStream) {
-        return graphqlToDocument(fromStream.uncheck().apply(inputStream));
-    }
-
     public GraphqlParser.OperationDefinitionContext graphqlToOperation(InputStream inputStream) throws IOException {
         CharStream charStream;
         charStream = CharStreams.fromStream(inputStream);
         return graphqlToOperation(charStream);
-    }
-
-    public GraphqlParser.OperationDefinitionContext graphqlTryToOperation(InputStream inputStream) {
-        return graphqlToOperation(fromStream.uncheck().apply(inputStream));
     }
 
     public GraphqlParser.DocumentContext graphqlFileToDocument(File graphqlFile) throws IOException {
@@ -50,19 +38,10 @@ public enum DocumentUtil {
         return graphqlToDocument(charStream);
     }
 
-    public GraphqlParser.DocumentContext graphqlFileTryToDocument(File graphqlFile) {
-        return graphqlToDocument(fromFileName.uncheck().apply(graphqlFile.getPath()));
-    }
-
-
     public GraphqlParser.DocumentContext graphqlPathToDocument(Path graphqlPath) throws IOException {
         CharStream charStream;
         charStream = CharStreams.fromPath(graphqlPath);
         return graphqlToDocument(charStream);
-    }
-
-    public GraphqlParser.DocumentContext graphqlPathTryToDocument(Path graphqlPath) {
-        return graphqlToDocument(fromPath.uncheck().apply(graphqlPath));
     }
 
     public GraphqlParser.OperationDefinitionContext graphqlToOperation(String graphql) {
