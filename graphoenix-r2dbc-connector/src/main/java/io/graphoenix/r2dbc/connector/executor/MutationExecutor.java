@@ -97,6 +97,24 @@ public class MutationExecutor {
                 );
     }
 
+    public Mono<String> executeMutations(String sql) {
+        return executeMutations(sql, null);
+    }
+
+    public Mono<String> executeMutations(String sql, Map<String, Object> parameters) {
+        return connectionCreator.createConnection()
+                .flatMap(connection -> {
+                            Statement statement = connection.createStatement(sql);
+                            if (parameters != null) {
+                                parameters.forEach(statement::bind);
+                            }
+                            return Mono.from(statement.execute())
+                                    .doFinally(signalType -> connection.close());
+                        }
+                )
+                .flatMap(this::getJsonStringFromResult);
+    }
+
     private Mono<String> getJsonStringFromResult(Result result) {
         return Mono.from(result.map((row, rowMetadata) -> row.get(0, String.class)));
     }

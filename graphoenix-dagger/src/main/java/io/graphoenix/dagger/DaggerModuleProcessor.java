@@ -215,9 +215,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 }
         );
 
-        CompilationUnit componentProxyCompilationUnit = new CompilationUnit()
-                .addType(componentProxyClassDeclaration);
-
+        CompilationUnit componentProxyCompilationUnit = new CompilationUnit().addType(componentProxyClassDeclaration);
         componentCompilationUnit.getPackageDeclaration().ifPresent(componentProxyCompilationUnit::setPackageDeclaration);
         daggerProxyProcessors.forEach(daggerProxyProcessor -> daggerProxyProcessor.buildComponentProxy(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration));
         importAllTypesFromSource(componentProxyClassDeclaration, componentProxyCompilationUnit, moduleCompilationUnit);
@@ -255,40 +253,20 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .addImport("io.graphoenix.core.context.BeanContext");
 
         moduleClassDeclaration.getMembers().stream()
-                .filter(BodyDeclaration::isMethodDeclaration)
-                .map(BodyDeclaration::asMethodDeclaration)
-                .filter(methodDeclaration -> methodDeclaration.getBody().isEmpty())
-                .forEach(moduleProxyClassDeclaration::addMember);
-
-        moduleClassDeclaration.getMembers().stream()
-                .filter(BodyDeclaration::isFieldDeclaration)
-                .map(BodyDeclaration::asFieldDeclaration)
-                .filter(fieldDeclaration ->
-                        fieldDeclaration.getAnnotations().stream()
+                .filter(bodyDeclaration -> !bodyDeclaration.isConstructorDeclaration())
+                .filter(bodyDeclaration ->
+                        bodyDeclaration.getAnnotations().stream()
                                 .noneMatch(annotationExpr ->
                                         supports.stream().map(Class::getSimpleName).anyMatch(name -> name.equals(annotationExpr.getNameAsString()))
                                 )
-                )
-                .filter(fieldDeclaration -> moduleClassDeclaration.getConstructors().stream()
-                        .noneMatch(constructorDeclaration ->
-                                constructorDeclaration.getBody().getStatements().stream()
-                                        .filter(Statement::isExpressionStmt)
-                                        .map(statement -> statement.asExpressionStmt().getExpression())
-                                        .filter(Expression::isAssignExpr)
-                                        .map(Expression::asAssignExpr)
-                                        .filter(assignExpr -> assignExpr.getTarget().isFieldAccessExpr())
-                                        .map(assignExpr -> assignExpr.getTarget().asFieldAccessExpr().getNameAsString())
-                                        .anyMatch(fieldName ->
-                                                fieldDeclaration.getVariables().stream().anyMatch(variableDeclarator -> variableDeclarator.getNameAsString().equals(fieldName))
-                                        )
-                        )
-                ).forEach(moduleProxyClassDeclaration::addMember);
+                ).forEach(bodyDeclaration -> moduleProxyClassDeclaration.addMember(bodyDeclaration.clone()));
 
         componentProxyCompilationUnits
                 .forEach(componentProxyCompilationUnit ->
                         DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit)
                                 .ifPresent(componentProxyClassDeclaration -> {
-                                            MethodDeclaration componentMethodDeclaration = moduleClassDeclaration.getMembers().stream()
+
+                                            MethodDeclaration componentMethodDeclaration = moduleProxyClassDeclaration.getMembers().stream()
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(declaration -> declaration.getType().isClassOrInterfaceType())
@@ -298,27 +276,23 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
                                             componentMethodDeclaration.getBody()
                                                     .ifPresent(blockStmt -> {
-                                                                BlockStmt blockStmtProxy = blockStmt.clone();
-                                                                moduleProxyClassDeclaration
-                                                                        .addMethod(componentMethodDeclaration.getNameAsString(), Modifier.Keyword.PUBLIC)
-                                                                        .setParameters(componentMethodDeclaration.getParameters())
-                                                                        .setType(componentMethodDeclaration.getType())
-                                                                        .setAnnotations(componentMethodDeclaration.getAnnotations())
-                                                                        .setBody(blockStmtProxy);
 
-                                                                blockStmtProxy.getStatements()
+                                                                blockStmt.getStatements()
                                                                         .forEach(statement -> {
                                                                                     if (statement.isReturnStmt()) {
                                                                                         Expression expression = statement.asReturnStmt().getExpression().orElseThrow();
                                                                                         if (expression.isObjectCreationExpr()) {
                                                                                             ObjectCreationExpr objectCreationExpr = expression.asObjectCreationExpr();
-                                                                                            objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
+                                                                                            if (componentProxyClassDeclaration.getExtendedTypes().stream()
+                                                                                                    .anyMatch(classOrInterfaceType -> classOrInterfaceType.getNameAsString().equals(objectCreationExpr.getType().getNameAsString()))) {
+                                                                                                objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
+                                                                                            }
 
                                                                                             expression.asObjectCreationExpr().getArguments().stream()
                                                                                                     .filter(Expression::isMethodCallExpr)
                                                                                                     .map(Expression::asMethodCallExpr)
                                                                                                     .forEach(methodCallExpr ->
-                                                                                                            moduleClassDeclaration.getMethods().stream()
+                                                                                                            moduleProxyClassDeclaration.getMethods().stream()
                                                                                                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Singleton.class))
                                                                                                                     .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()))
                                                                                                                     .findAny()
@@ -383,7 +357,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                         )
         );
 
-        moduleClassDeclaration.getMembers().stream()
+        moduleProxyClassDeclaration.getMembers().stream()
                 .filter(BodyDeclaration::isFieldDeclaration)
                 .map(BodyDeclaration::asFieldDeclaration)
                 .filter(fieldDeclaration -> fieldDeclaration.isAnnotationPresent(Inject.class))
@@ -460,28 +434,40 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
     protected void buildModuleProxyInjectField(Stream<Tuple2<String, Type>> injectFieldList, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
 
-        injectFieldList.forEach(
-                field -> moduleProxyClassDeclaration.getMethods().stream()
-                        .filter(BodyDeclaration::isMethodDeclaration)
-                        .map(BodyDeclaration::asMethodDeclaration)
-                        .forEach(methodDeclaration ->
-                                methodDeclaration.getBody()
-                                        .ifPresent(blockStmt -> {
-                                                    List<String> parameterNameList = methodDeclaration.getParameters().stream().map(NodeWithSimpleName::getNameAsString).collect(Collectors.toList());
-                                                    blockStmt.getStatements().stream()
-                                                            .filter(Statement::isReturnStmt)
-                                                            .map(Statement::asReturnStmt)
-                                                            .forEach(returnStmt ->
-                                                                    returnStmt.getExpression().ifPresent(expression -> replaceInjectArguments(expression, parameterNameList, field))
-                                                            );
-                                                    blockStmt.getStatements().stream()
-                                                            .filter(Statement::isExpressionStmt)
-                                                            .map(statement -> statement.asExpressionStmt().getExpression())
-                                                            .forEach(expression -> replaceInjectArguments(expression, parameterNameList, field));
-                                                }
-                                        )
-                        )
-        );
+        injectFieldList
+                .forEach(field -> {
+                            moduleProxyClassDeclaration.getMethods().stream()
+                                    .filter(BodyDeclaration::isMethodDeclaration)
+                                    .map(BodyDeclaration::asMethodDeclaration)
+                                    .forEach(methodDeclaration ->
+                                            methodDeclaration.getBody()
+                                                    .ifPresent(blockStmt -> {
+                                                                List<String> parameterNameList = methodDeclaration.getParameters().stream().map(NodeWithSimpleName::getNameAsString).collect(Collectors.toList());
+                                                                blockStmt.getStatements().stream()
+                                                                        .filter(Statement::isReturnStmt)
+                                                                        .map(Statement::asReturnStmt)
+                                                                        .forEach(returnStmt ->
+                                                                                returnStmt.getExpression().ifPresent(expression -> replaceInjectArguments(expression, parameterNameList, field))
+                                                                        );
+                                                                blockStmt.getStatements().stream()
+                                                                        .filter(Statement::isExpressionStmt)
+                                                                        .map(statement -> statement.asExpressionStmt().getExpression())
+                                                                        .forEach(expression -> replaceInjectArguments(expression, parameterNameList, field));
+                                                            }
+                                                    )
+                                    );
+
+                            moduleProxyClassDeclaration.getFields().stream()
+                                    .flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
+                                    .filter(variableDeclarator -> variableDeclarator.getNameAsString().equals(field._1()))
+                                    .findAny()
+                                    .ifPresent(Node::remove);
+
+                            moduleProxyClassDeclaration.getFields().stream()
+                                    .filter(fieldDeclaration -> fieldDeclaration.getVariables().isEmpty())
+                                    .forEach(moduleProxyClassDeclaration::remove);
+                        }
+                );
     }
 
     protected void replaceInjectArguments(Expression expression, List<String> parameterNameList, Tuple2<String, Type> field) {

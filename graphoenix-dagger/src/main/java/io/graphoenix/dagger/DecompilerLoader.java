@@ -12,12 +12,12 @@ import java.util.zip.ZipInputStream;
 
 public class DecompilerLoader implements Loader {
 
-    private final HashMap<String, byte[]> map = new HashMap<>();
+    private final HashMap<String, byte[]> classBytesCache = new HashMap<>();
 
     @Override
     public boolean canLoad(String className) {
         try {
-            return map.containsKey(className + ".class") || loadAndCache(className);
+            return classBytesCache.containsKey(className + ".class") || loadAndCache(className);
         } catch (LoaderException e) {
             return false;
         }
@@ -25,10 +25,10 @@ public class DecompilerLoader implements Loader {
 
     @Override
     public byte[] load(String className) throws LoaderException {
-        if (map.containsKey(className + ".class") || loadAndCache(className)) {
-            return map.get(className + ".class");
+        if (classBytesCache.containsKey(className + ".class") || loadAndCache(className)) {
+            return classBytesCache.get(className + ".class");
         }
-        return null;
+        throw new LoaderException(className.concat(" not find"));
     }
 
     private boolean loadAndCache(String className) throws LoaderException {
@@ -36,26 +36,25 @@ public class DecompilerLoader implements Loader {
         byte[] buffer = new byte[1024 * 2];
 
         try {
-            InputStream is = new FileInputStream(Paths.get(Class.forName(className, false, getClass().getClassLoader()).getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
+            InputStream inputStream = new FileInputStream(Paths.get(Class.forName(className, false, getClass().getClassLoader()).getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
+            ZipInputStream zipInputStream = new ZipInputStream(inputStream);
+            ZipEntry zipEntry = zipInputStream.getNextEntry();
 
-            ZipInputStream zis = new ZipInputStream(is);
-            ZipEntry ze = zis.getNextEntry();
-
-            while (ze != null) {
-                if (!ze.isDirectory()) {
-                    ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    int read = zis.read(buffer);
+            while (zipEntry != null) {
+                if (!zipEntry.isDirectory()) {
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    int read = zipInputStream.read(buffer);
 
                     while (read > 0) {
-                        out.write(buffer, 0, read);
-                        read = zis.read(buffer);
+                        byteArrayOutputStream.write(buffer, 0, read);
+                        read = zipInputStream.read(buffer);
                     }
-                    map.put(ze.getName().replace("/", "."), out.toByteArray());
+                    classBytesCache.put(zipEntry.getName().replace("/", "."), byteArrayOutputStream.toByteArray());
                 }
-                ze = zis.getNextEntry();
+                zipEntry = zipInputStream.getNextEntry();
             }
-            zis.closeEntry();
-            if (map.containsKey(className + ".class")) {
+            zipInputStream.closeEntry();
+            if (classBytesCache.containsKey(className + ".class")) {
                 return true;
             }
         } catch (IOException | ClassNotFoundException | URISyntaxException e) {

@@ -11,7 +11,6 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.ObjectCastUtil.OBJECT_CAST_UTIL;
 
@@ -40,7 +39,7 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> T save(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        return gsonBuilder.create().fromJson(mutationExecutor.executeMutations(Stream.of(sql.split(";")), r2dbcParameterProcessor.process(parameters)).block(), beanClass);
+        return gsonBuilder.create().fromJson(mutationExecutor.executeMutations(sql, r2dbcParameterProcessor.process(parameters)).block(), beanClass);
     }
 
     @Override
@@ -58,7 +57,7 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> Mono<T> saveAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        Mono<String> jsonMono = mutationExecutor.executeMutations(Stream.of(sql.split(";")), r2dbcParameterProcessor.process(parameters));
+        Mono<String> jsonMono = mutationExecutor.executeMutations(sql, r2dbcParameterProcessor.process(parameters));
         return jsonMono.map(json -> gsonBuilder.create().fromJson(json, beanClass));
     }
 }

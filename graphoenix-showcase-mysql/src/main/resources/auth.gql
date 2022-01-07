@@ -1,6 +1,6 @@
-type User @table(engine:"InnoDB"){
+type User @table(engine:"InnoDB") {
     id: ID @column(autoIncrement:true)
-    login  : String!
+    login: String!
     password: String!
     name: String!
     age: Int
@@ -8,14 +8,14 @@ type User @table(engine:"InnoDB"){
     sex: Sex
     organizationId: Int
     organization: Organization @map(from: "organizationId", to: "id")
-    roles: [Role!] @map(from: "id", with:{type: "UserRole" from: "userId", to: "roleId"}, to: "id")
-    phones: [String] @map(from: "id", with:{type: "UserPhones" from: "userId", to: "phone"})
+    roles: [Role!] @map(from: "id", with:{type: "UserRole", from: "userId", to: "roleId"}, to: "id")
+    phones: [String] @map(from: "id", with:{type: "UserPhones", from: "userId", to: "phone"})
 }
 
-type UserPhones @table(engine:"InnoDB"){
+type UserPhones @table(engine:"InnoDB") {
     id: ID @column(autoIncrement:true)
-    userId  : Int
-    phone  : String
+    userId: Int
+    phone: String
 }
 
 enum Sex {
@@ -23,10 +23,10 @@ enum Sex {
     FEMALE
 }
 
-type UserRole @table(engine:"InnoDB"){
+type UserRole @table(engine:"InnoDB") {
     id: ID @column(autoIncrement:true)
-    userId  : Int
-    roleId  : Int
+    userId: Int
+    roleId: Int
 }
 
 type Role @table(engine:"InnoDB") {
@@ -37,7 +37,7 @@ type Role @table(engine:"InnoDB") {
 
 type Organization @table(engine:"InnoDB") {
     id: ID @column(autoIncrement:true)
-    aboveId:Int
+    aboveId: Int
     above: Organization @map(from: "aboveId", to: "id")
     users: [User!] @map(from: "id", to: "organizationId")
     name: String!

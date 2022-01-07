@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    implementation project(":graphoenix-core")
+    compile project(":graphoenix-core")
     implementation project(":graphoenix-http-server")
     implementation project(":graphoenix-mysql")
 
