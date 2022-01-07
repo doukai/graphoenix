@@ -69,11 +69,6 @@ public class DBNameUtil {
         return String.format("`%s`", stringValue);
     }
 
-    public String variableToDBVariable(String variableName) {
-        return variableName.replaceFirst("$", ":");
-    }
-
-
     public Table dualTable() {
         return new Table("dual");
     }
