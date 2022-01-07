@@ -13,7 +13,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.handler.GeneratorHandler;
 import io.vavr.control.Try;
-import org.apache.logging.log4j.util.Strings;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -110,16 +109,16 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
 
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors.toMap(
-                                                Map.Entry::getKey,
-                                                entry -> {
-                                                    switch (operationRouter.getType(entry.getValue())) {
-                                                        case QUERY:
-                                                            return generatorHandler.query(entry.getValue());
-                                                        case MUTATION:
-                                                            return generatorHandler.mutation(entry.getValue());
-                                                    }
-                                                    return Strings.EMPTY;
-                                                }
+                                        Map.Entry::getKey,
+                                        entry -> {
+                                            switch (operationRouter.getType(entry.getValue())) {
+                                                case QUERY:
+                                                    return generatorHandler.query(entry.getValue());
+                                                case MUTATION:
+                                                    return generatorHandler.mutation(entry.getValue());
+                                            }
+                                            return "";
+                                        }
                                         )
                                 )
                                 .forEach((key, value) -> Try.run(() -> {

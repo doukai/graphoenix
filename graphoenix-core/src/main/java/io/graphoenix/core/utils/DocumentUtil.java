@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Map;
 
 public enum DocumentUtil {
     DOCUMENT_UTIL;
@@ -57,31 +56,12 @@ public enum DocumentUtil {
         return graphqlToOperation(charStream);
     }
 
-    public GraphqlParser.OperationDefinitionContext graphqlToOperation(String graphql, Map<String, String> variables) {
-        CodePointCharStream charStream;
-        charStream = CharStreams.fromString(graphql);
-        return graphqlToOperation(charStream, variables);
-    }
-
     public GraphqlParser.DocumentContext graphqlToDocument(CharStream charStream) {
         return getGraphqlParser(charStream).document();
     }
 
     public GraphqlParser.OperationDefinitionContext graphqlToOperation(CharStream charStream) {
         return getGraphqlParser(charStream).operationDefinition();
-    }
-
-    public GraphqlParser.OperationDefinitionContext graphqlToOperation(CharStream charStream, Map<String, String> variables) {
-        //TODO
-        GraphqlParser.OperationDefinitionContext operationDefinitionContext = getGraphqlParser(charStream).operationDefinition();
-
-        operationDefinitionContext.variableDefinitions().variableDefinition().stream()
-                .map(variableDefinitionContext -> variableDefinitionContext.type().typeName());
-
-        operationDefinitionContext.selectionSet().selection().stream()
-                .forEach(selectionContext -> selectionContext.field().arguments());
-
-        return operationDefinitionContext;
     }
 
     public String getStringValue(TerminalNode stringValue) {
