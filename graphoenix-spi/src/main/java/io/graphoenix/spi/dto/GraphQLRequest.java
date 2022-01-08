@@ -10,6 +10,16 @@ public class GraphQLRequest {
 
     private Map<String, Object> variables;
 
+    public GraphQLRequest(String query) {
+        this.query = query;
+    }
+
+    public GraphQLRequest(String query, String operationName, Map<String, Object> variables) {
+        this.query = query;
+        this.operationName = operationName;
+        this.variables = variables;
+    }
+
     public String getQuery() {
         return query;
     }

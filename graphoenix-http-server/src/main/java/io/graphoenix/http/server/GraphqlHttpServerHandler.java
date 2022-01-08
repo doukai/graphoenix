@@ -59,7 +59,6 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         }
         RequestHandler requestHandler = RequestHandlerFactory.create(request.method());
         GraphQLRequest requestBody;
-        GraphQLResponse graphQLResponse = null;
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK);
 
         try {
