@@ -276,7 +276,6 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
                                             componentMethodDeclaration.getBody()
                                                     .ifPresent(blockStmt -> {
-
                                                                 blockStmt.getStatements()
                                                                         .forEach(statement -> {
                                                                                     if (statement.isReturnStmt()) {
@@ -291,21 +290,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                                                             expression.asObjectCreationExpr().getArguments().stream()
                                                                                                     .filter(Expression::isMethodCallExpr)
                                                                                                     .map(Expression::asMethodCallExpr)
-                                                                                                    .forEach(methodCallExpr ->
-                                                                                                            moduleProxyClassDeclaration.getMethods().stream()
-                                                                                                                    .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Singleton.class))
-                                                                                                                    .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()))
-                                                                                                                    .findAny()
-                                                                                                                    .ifPresent(methodDeclaration ->
-                                                                                                                            expression.asObjectCreationExpr().getArguments().replace(
-                                                                                                                                    methodCallExpr,
-                                                                                                                                    new MethodCallExpr()
-                                                                                                                                            .setName("get")
-                                                                                                                                            .setScope(new NameExpr().setName("BeanContext"))
-                                                                                                                                            .addArgument(new ClassExpr().setType(methodDeclaration.getType()))
-                                                                                                                            )
-                                                                                                                    )
-                                                                                                    );
+                                                                                                    .forEach(methodCallExpr -> replaceComponentMethod(expression.asObjectCreationExpr().getArguments(), methodCallExpr, moduleProxyClassDeclaration));
                                                                                         }
                                                                                     }
                                                                                 }
@@ -430,6 +415,30 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
         importAllTypesFromSource(moduleProxyCompilationUnit, moduleCompilationUnit);
         return moduleProxyCompilationUnit;
+    }
+
+    private void replaceComponentMethod(NodeList<Expression> arguments, MethodCallExpr methodCallExpr, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+
+        methodCallExpr.getArguments().stream()
+                .filter(Expression::isMethodCallExpr)
+                .map(Expression::asMethodCallExpr)
+                .forEach(innerMethodCallExpr -> replaceComponentMethod(methodCallExpr.getArguments(), innerMethodCallExpr, moduleProxyClassDeclaration));
+
+        if (methodCallExpr.getScope().isEmpty()) {
+            moduleProxyClassDeclaration.getMethods().stream()
+                    .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Singleton.class))
+                    .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()))
+                    .findAny()
+                    .ifPresent(methodDeclaration ->
+                            arguments.replace(
+                                    methodCallExpr,
+                                    new MethodCallExpr()
+                                            .setName("get")
+                                            .setScope(new NameExpr().setName("BeanContext"))
+                                            .addArgument(new ClassExpr().setType(methodDeclaration.getType()))
+                            )
+                    );
+        }
     }
 
     protected void buildModuleProxyInjectField(Stream<Tuple2<String, Type>> injectFieldList, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
@@ -667,13 +676,11 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         members.stream()
                 .filter(BodyDeclaration::isMethodDeclaration)
                 .map(BodyDeclaration::asMethodDeclaration)
-                .forEach(
-                        methodDeclaration -> {
+                .forEach(methodDeclaration -> {
                             addImport(methodDeclaration.getType(), target, source);
                             addImport(methodDeclaration.getAnnotations(), target, source);
                             methodDeclaration.getParameters()
-                                    .forEach(
-                                            parameter -> {
+                                    .forEach(parameter -> {
                                                 addImport(parameter.getType(), target, source);
                                                 addImport(parameter.getAnnotations(), target, source);
                                             }
@@ -701,8 +708,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
     }
 
     protected void addImport(BlockStmt blockStmt, CompilationUnit target, CompilationUnit source) {
-        blockStmt.getStatements()
-                .forEach(statement -> addImport(statement, target, source));
+        blockStmt.getStatements().forEach(statement -> addImport(statement, target, source));
     }
 
     protected void addImport(Statement statement, CompilationUnit target, CompilationUnit source) {
@@ -756,6 +762,9 @@ public class DaggerModuleProcessor extends AbstractProcessor {
             expression.asMethodCallExpr().getArguments().forEach(argExpr -> addImport(argExpr, target, source));
             expression.asMethodCallExpr().getTypeArguments().ifPresent(args -> args.forEach(arg -> addImport(arg.getElementType(), target, source)));
             expression.asMethodCallExpr().getScope().ifPresent(scopeExpr -> addImport(scopeExpr, target, source));
+        } else if (expression.isFieldAccessExpr()) {
+            addImport(expression.asFieldAccessExpr().getScope(), target, source);
+            expression.asFieldAccessExpr().getTypeArguments().ifPresent(args -> args.forEach(arg -> addImport(arg.getElementType(), target, source)));
         }
     }
 

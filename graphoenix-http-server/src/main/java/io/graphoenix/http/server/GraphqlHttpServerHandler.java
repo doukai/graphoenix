@@ -4,19 +4,14 @@ import com.google.common.net.MediaType;
 import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.http.handler.RequestHandler;
-import io.graphoenix.http.handler.RequestHandlerFactory;
 import io.graphoenix.spi.dto.GraphQLRequest;
-import io.graphoenix.spi.dto.GraphQLResponse;
 import io.graphoenix.spi.dto.type.OperationType;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpUtil;
+import io.netty.handler.codec.http.*;
 import io.netty.util.AsciiString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
@@ -40,11 +36,15 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private static final AsciiString CONTENT_TYPE = AsciiString.cached("Content-Type");
     private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
+    private final Map<HttpMethod, RequestHandler> requestHandlerMap;
     private final OperationHandler operationHandler;
     private final GraphQLOperationRouter graphQLOperationRouter;
 
     @Inject
-    public GraphqlHttpServerHandler(GraphQLOperationRouter graphQLOperationRouter, OperationHandler operationHandler) {
+    public GraphqlHttpServerHandler(Map<HttpMethod, RequestHandler> requestHandlerMap,
+                                    GraphQLOperationRouter graphQLOperationRouter,
+                                    OperationHandler operationHandler) {
+        this.requestHandlerMap = requestHandlerMap;
         this.graphQLOperationRouter = graphQLOperationRouter;
         this.operationHandler = operationHandler;
     }
@@ -57,7 +57,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
         if (uri.equals(FAVICON_ICO)) {
             return;
         }
-        RequestHandler requestHandler = RequestHandlerFactory.create(request.method());
+        RequestHandler requestHandler = requestHandlerMap.get(request.method());
         GraphQLRequest requestBody;
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK);
 

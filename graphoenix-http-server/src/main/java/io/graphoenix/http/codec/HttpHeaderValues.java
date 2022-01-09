@@ -3,6 +3,7 @@ package io.graphoenix.http.codec;
 import io.netty.util.AsciiString;
 
 public class HttpHeaderValues {
+
     /**
      * {@code "application/graphql"}
      */

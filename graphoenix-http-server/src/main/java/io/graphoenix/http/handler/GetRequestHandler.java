@@ -18,9 +18,7 @@ public class GetRequestHandler implements RequestHandler {
         String requestUri = fullHttpRequest.uri();
         QueryStringDecoder queryDecoder = new QueryStringDecoder(requestUri, StandardCharsets.UTF_8);
         Map<String, List<String>> parameters = queryDecoder.parameters();
-
-        Type type = new TypeToken<Map<String, Object>>() {
-        }.getType();
+        Type type = new TypeToken<Map<String, Object>>() {}.getType();
 
         return new GraphQLRequest(
                 parameters.get("query").get(0),

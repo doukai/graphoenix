@@ -20,7 +20,7 @@ public class PostRequestHandler implements RequestHandler {
         } else if (contentType.contentEquals(APPLICATION_GRAPHQL)) {
             return new GraphQLRequest(fullHttpRequest.content().toString(StandardCharsets.UTF_8));
         } else {
-            throw new IllegalArgumentException("unsupported content-type:".concat(contentType));
+            throw new IllegalArgumentException("unsupported content-type: ".concat(contentType));
         }
     }
 }

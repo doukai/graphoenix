@@ -1,5 +1,7 @@
 package io.graphoenix.http.module;
 
+import io.graphoenix.http.handler.GetRequestHandler;
+import io.graphoenix.http.handler.PostRequestHandler;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
@@ -10,10 +12,12 @@ import io.graphoenix.http.server.GraphqlHttpServerHandler;
 import io.graphoenix.http.server.GraphqlHttpServerInitializer;
 import io.graphoenix.spi.handler.BootstrapHandler;
 import io.graphoenix.spi.handler.OperationHandler;
+import io.netty.handler.codec.http.HttpMethod;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Map;
 
 @Module
 public class HttpServerModule {
@@ -37,8 +41,27 @@ public class HttpServerModule {
 
     @Provides
     @Singleton
+    public GetRequestHandler getRequestHandler() {
+        return new GetRequestHandler();
+    }
+
+    @Provides
+    @Singleton
+    public PostRequestHandler postRequestHandler() {
+        return new PostRequestHandler();
+    }
+
+    @Provides
+    @Singleton
     public GraphqlHttpServerHandler graphqlHttpServerHandler() {
-        return new GraphqlHttpServerHandler(graphQLOperationRouter, operationHandler);
+        return new GraphqlHttpServerHandler(
+                Map.of(
+                        HttpMethod.GET, getRequestHandler(),
+                        HttpMethod.POST, postRequestHandler()
+                ),
+                graphQLOperationRouter,
+                operationHandler
+        );
     }
 
     @Provides
