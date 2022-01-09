@@ -58,14 +58,12 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             return;
         }
         RequestHandler requestHandler = requestHandlerMap.get(request.method());
-        GraphQLRequest requestBody;
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK);
 
         try {
-            requestBody = requestHandler.handle(request);
+            GraphQLRequest requestBody = requestHandler.handle(request);
             log.info("Handle http query:{}", requestBody.getQuery());
             OperationType type = graphQLOperationRouter.getType(requestBody.getQuery());
-
             String jsonResult = null;
             switch (type) {
                 case QUERY:
