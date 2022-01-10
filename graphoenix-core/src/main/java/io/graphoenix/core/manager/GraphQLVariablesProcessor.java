@@ -41,7 +41,7 @@ public class GraphQLVariablesProcessor {
                     .forEach(subValueWithVariableContext -> replaceVariable(subValueWithVariableContext, operationDefinitionContext, variables));
         }
     }
-    
+
     private GraphqlParser.ValueContext getValueByVariable(GraphqlParser.VariableContext variableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, String> variables) {
         return operationDefinitionContext.variableDefinitions().variableDefinition().stream()
                 .filter(variableDefinitionContext -> variableDefinitionContext.variable().name().getText().equals(variableContext.name().getText()))
