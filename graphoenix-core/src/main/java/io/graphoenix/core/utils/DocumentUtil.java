@@ -68,6 +68,12 @@ public enum DocumentUtil {
         return stringValue.getText().substring(1, stringValue.getText().length() - 1);
     }
 
+    public GraphqlParser getGraphqlParser(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return getGraphqlParser(charStream);
+    }
+
     private GraphqlParser getGraphqlParser(CharStream charStream) {
         GraphqlLexer lexer = new GraphqlLexer(charStream);
         lexer.removeErrorListeners();

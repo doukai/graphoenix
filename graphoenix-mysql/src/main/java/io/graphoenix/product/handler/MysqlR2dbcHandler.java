@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class MysqlR2dbcHandler implements OperationHandler {
 
@@ -22,17 +23,20 @@ public class MysqlR2dbcHandler implements OperationHandler {
     }
 
     @Override
-    public Mono<String> query(String graphQL, Map<String, Object> parameters) {
-        return operationSQLExecuteHandler.query(operationToSQLConvertHandler.queryToSelect(graphQL), parameters);
+    public Mono<String> query(String graphQL, Map<String, String> variables) {
+        String select = operationToSQLConvertHandler.queryToSelect(graphQL, variables);
+        return operationSQLExecuteHandler.query(select);
     }
 
     @Override
-    public Flux<Tuple2<String, String>> querySelections(String graphQL, Map<String, Object> parameters) {
-        return operationSQLExecuteHandler.querySelections(operationToSQLConvertHandler.querySelectionsToSelects(graphQL), parameters);
+    public Flux<Tuple2<String, String>> querySelections(String graphQL, Map<String, String> variables) {
+        Stream<Tuple2<String, String>> selects = operationToSQLConvertHandler.querySelectionsToSelects(graphQL, variables);
+        return operationSQLExecuteHandler.querySelections(selects);
     }
 
     @Override
-    public Mono<String> mutation(String graphQL, Map<String, Object> parameters) {
-        return operationSQLExecuteHandler.mutation(operationToSQLConvertHandler.mutationToStatements(graphQL), parameters);
+    public Mono<String> mutation(String graphQL, Map<String, String> variables) {
+        Stream<String> statements = operationToSQLConvertHandler.mutationToStatements(graphQL, variables);
+        return operationSQLExecuteHandler.mutation(statements);
     }
 }

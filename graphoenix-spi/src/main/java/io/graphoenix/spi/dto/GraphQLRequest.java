@@ -8,13 +8,13 @@ public class GraphQLRequest {
 
     private String operationName;
 
-    private Map<String, Object> variables;
+    private Map<String, String> variables;
 
     public GraphQLRequest(String query) {
         this.query = query;
     }
 
-    public GraphQLRequest(String query, String operationName, Map<String, Object> variables) {
+    public GraphQLRequest(String query, String operationName, Map<String, String> variables) {
         this.query = query;
         this.operationName = operationName;
         this.variables = variables;
@@ -36,11 +36,11 @@ public class GraphQLRequest {
         this.operationName = operationName;
     }
 
-    public Map<String, Object> getVariables() {
+    public Map<String, String> getVariables() {
         return variables;
     }
 
-    public void setVariables(Map<String, Object> variables) {
+    public void setVariables(Map<String, String> variables) {
         this.variables = variables;
     }
 }

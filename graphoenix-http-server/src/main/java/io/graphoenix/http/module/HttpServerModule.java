@@ -1,17 +1,17 @@
 package io.graphoenix.http.module;
 
-import io.graphoenix.http.handler.GetRequestHandler;
-import io.graphoenix.http.handler.PostRequestHandler;
-import io.graphoenix.spi.module.Module;
-import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.config.NettyConfig;
+import io.graphoenix.http.handler.GetRequestHandler;
+import io.graphoenix.http.handler.PostRequestHandler;
 import io.graphoenix.http.server.GraphqlHttpServer;
 import io.graphoenix.http.server.GraphqlHttpServerHandler;
 import io.graphoenix.http.server.GraphqlHttpServerInitializer;
 import io.graphoenix.spi.handler.BootstrapHandler;
 import io.graphoenix.spi.handler.OperationHandler;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import io.netty.handler.codec.http.HttpMethod;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -52,7 +52,6 @@ public class HttpServerModule {
     }
 
     @Provides
-    @Singleton
     public GraphqlHttpServerHandler graphqlHttpServerHandler() {
         return new GraphqlHttpServerHandler(
                 Map.of(
@@ -67,7 +66,7 @@ public class HttpServerModule {
     @Provides
     @Singleton
     public GraphqlHttpServerInitializer graphqlHttpServerInitializer() {
-        return new GraphqlHttpServerInitializer(httpServerConfig, graphqlHttpServerHandler());
+        return new GraphqlHttpServerInitializer(httpServerConfig, this::graphqlHttpServerHandler);
     }
 
     @Provides

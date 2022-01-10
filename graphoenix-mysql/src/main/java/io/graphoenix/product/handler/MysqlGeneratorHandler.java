@@ -5,6 +5,7 @@ import io.graphoenix.mysql.handler.SQLFormatHandler;
 import io.graphoenix.spi.handler.GeneratorHandler;
 
 import javax.inject.Inject;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class MysqlGeneratorHandler implements GeneratorHandler {
@@ -19,13 +20,13 @@ public class MysqlGeneratorHandler implements GeneratorHandler {
     }
 
     @Override
-    public String query(String graphQL) {
+    public String query(String graphQL, Map<String, String> variables) {
         String select = operationToSQLConvertHandler.queryToSelect(graphQL);
         return sqlFormatHandler.query(select);
     }
 
     @Override
-    public String mutation(String graphQL) {
+    public String mutation(String graphQL, Map<String, String> variables) {
         Stream<String> statements = operationToSQLConvertHandler.mutationToStatements(graphQL);
         return sqlFormatHandler.mutation(statements);
     }

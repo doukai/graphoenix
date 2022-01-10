@@ -1,5 +1,6 @@
 package io.graphoenix.core.module;
 
+import io.graphoenix.core.manager.GraphQLVariablesProcessor;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.config.GraphQLConfig;
@@ -150,5 +151,11 @@ public class DocumentManagerModule {
     @Singleton
     GraphQLConfigRegister graphQLRegister() {
         return new GraphQLConfigRegister(graphQLConfig, graphQLDocumentManager());
+    }
+
+    @Provides
+    @Singleton
+    GraphQLVariablesProcessor graphQLVariablesProcessor() {
+        return new GraphQLVariablesProcessor();
     }
 }

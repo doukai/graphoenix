@@ -2,6 +2,7 @@ package io.graphoenix.core.context;
 
 import io.graphoenix.spi.context.ModuleContext;
 
+import javax.inject.Provider;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,17 @@ public class BeanContext {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> Provider<T> getProvider(Class<T> beanClass) {
+
+        Supplier<?> supplier = contextCache.get(beanClass);
+        if (supplier != null) {
+            return ((Supplier<T>) supplier)::get;
+        } else {
+            return getAndCacheProvider(beanClass);
+        }
+    }
+
     private static <T> T getAndCache(Class<T> beanClass) {
 
         Supplier<T> supplier = moduleContexts.stream()
@@ -50,6 +62,19 @@ public class BeanContext {
 
         contextCache.put(beanClass, supplier);
         return beanClass.cast(supplier.get());
+    }
+
+    private static <T> Provider<T> getAndCacheProvider(Class<T> beanClass) {
+
+        Supplier<T> supplier = moduleContexts.stream()
+                .map(moduleContext -> moduleContext.getOptional(beanClass))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .orElseThrow();
+
+        contextCache.put(beanClass, supplier);
+        return supplier::get;
     }
 
     public static <T> Optional<T> getOptional(Class<T> beanClass) {

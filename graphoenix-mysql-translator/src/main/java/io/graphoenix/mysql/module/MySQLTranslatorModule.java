@@ -1,5 +1,6 @@
 package io.graphoenix.mysql.module;
 
+import io.graphoenix.core.manager.GraphQLVariablesProcessor;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.graphoenix.mysql.utils.DBNameUtil;
@@ -21,11 +22,13 @@ public class MySQLTranslatorModule {
 
     private final IGraphQLDocumentManager manager;
     private final IGraphQLFieldMapManager mapper;
+    private final GraphQLVariablesProcessor graphQLVariablesProcessor;
 
     @Inject
-    public MySQLTranslatorModule(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
+    public MySQLTranslatorModule(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLVariablesProcessor graphQLVariablesProcessor) {
         this.manager = manager;
         this.mapper = mapper;
+        this.graphQLVariablesProcessor = graphQLVariablesProcessor;
     }
 
     @Provides
@@ -67,7 +70,7 @@ public class MySQLTranslatorModule {
     @Provides
     @Singleton
     public OperationToSQLConvertHandler operationToSQLConvertHandler() {
-        return new OperationToSQLConvertHandler(manager, graphQLQueryToSelect(), graphQLMutationToStatements());
+        return new OperationToSQLConvertHandler(manager, graphQLVariablesProcessor, graphQLQueryToSelect(), graphQLMutationToStatements());
     }
 
     @Provides

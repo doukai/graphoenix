@@ -52,6 +52,7 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -59,6 +60,8 @@ import javax.lang.model.util.Elements;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -291,6 +294,11 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                                                                     .filter(Expression::isMethodCallExpr)
                                                                                                     .map(Expression::asMethodCallExpr)
                                                                                                     .forEach(methodCallExpr -> replaceComponentMethod(expression.asObjectCreationExpr().getArguments(), methodCallExpr, moduleProxyClassDeclaration));
+
+                                                                                            expression.asObjectCreationExpr().getArguments().stream()
+                                                                                                    .filter(Expression::isMethodReferenceExpr)
+                                                                                                    .map(Expression::asMethodReferenceExpr)
+                                                                                                    .forEach(methodReferenceExpr -> replaceComponentMethod(expression.asObjectCreationExpr().getArguments(), methodReferenceExpr, moduleProxyClassDeclaration));
                                                                                         }
                                                                                     }
                                                                                 }
@@ -342,20 +350,18 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                         )
         );
 
-        moduleProxyClassDeclaration.getMembers().stream()
-                .filter(BodyDeclaration::isFieldDeclaration)
-                .map(BodyDeclaration::asFieldDeclaration)
-                .filter(fieldDeclaration -> fieldDeclaration.isAnnotationPresent(Inject.class))
-                .forEach(fieldDeclaration ->
-                        fieldDeclaration.getVariables()
-                                .forEach(variableDeclarator ->
-                                        variableDeclarator.setInitializer(
-                                                new MethodCallExpr()
-                                                        .setName("get")
-                                                        .setScope(new NameExpr().setName("BeanContext"))
-                                                        .addArgument(new ClassExpr().setType(variableDeclarator.getType())))
+        buildModuleProxyInjectField(
+                moduleProxyClassDeclaration.getFields().stream()
+                        .filter(fieldDeclaration -> fieldDeclaration.isAnnotationPresent(Inject.class))
+                        .flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
+                        .map(variableDeclarator ->
+                                new Tuple2<>(
+                                        variableDeclarator.getNameAsString(),
+                                        variableDeclarator.getType()
                                 )
-                );
+                        ),
+                moduleProxyClassDeclaration
+        );
 
         moduleClassDeclaration.getMembers().stream()
                 .filter(BodyDeclaration::isConstructorDeclaration)
@@ -424,7 +430,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .map(Expression::asMethodCallExpr)
                 .forEach(innerMethodCallExpr -> replaceComponentMethod(methodCallExpr.getArguments(), innerMethodCallExpr, moduleProxyClassDeclaration));
 
-        if (methodCallExpr.getScope().isEmpty()) {
+        if (methodCallExpr.getScope().isEmpty() || methodCallExpr.getScope().map(Expression::isThisExpr).isPresent()) {
             moduleProxyClassDeclaration.getMethods().stream()
                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Singleton.class))
                     .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()))
@@ -441,65 +447,120 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         }
     }
 
+    private void replaceComponentMethod(NodeList<Expression> arguments, MethodReferenceExpr methodReferenceExpr, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+
+        if (methodReferenceExpr.getScope().isThisExpr()) {
+            moduleProxyClassDeclaration.getMethods().stream()
+                    .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Singleton.class))
+                    .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodReferenceExpr.getIdentifier()))
+                    .findAny()
+                    .ifPresent(methodDeclaration ->
+                            arguments.replace(
+                                    methodReferenceExpr,
+                                    new MethodCallExpr()
+                                            .setName("getProvider")
+                                            .setScope(new NameExpr().setName("BeanContext"))
+                                            .addArgument(new ClassExpr().setType(methodDeclaration.getType()))
+                            )
+                    );
+        }
+    }
+
     protected void buildModuleProxyInjectField(Stream<Tuple2<String, Type>> injectFieldList, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
 
-        injectFieldList
-                .forEach(field -> {
-                            moduleProxyClassDeclaration.getMethods().stream()
-                                    .filter(BodyDeclaration::isMethodDeclaration)
-                                    .map(BodyDeclaration::asMethodDeclaration)
-                                    .forEach(methodDeclaration ->
-                                            methodDeclaration.getBody()
-                                                    .ifPresent(blockStmt -> {
-                                                                List<String> parameterNameList = methodDeclaration.getParameters().stream().map(NodeWithSimpleName::getNameAsString).collect(Collectors.toList());
-                                                                blockStmt.getStatements().stream()
-                                                                        .filter(Statement::isReturnStmt)
-                                                                        .map(Statement::asReturnStmt)
-                                                                        .forEach(returnStmt ->
-                                                                                returnStmt.getExpression().ifPresent(expression -> replaceInjectArguments(expression, parameterNameList, field))
-                                                                        );
-                                                                blockStmt.getStatements().stream()
-                                                                        .filter(Statement::isExpressionStmt)
-                                                                        .map(statement -> statement.asExpressionStmt().getExpression())
-                                                                        .forEach(expression -> replaceInjectArguments(expression, parameterNameList, field));
-                                                            }
-                                                    )
-                                    );
+        injectFieldList.forEach(field -> {
+                    moduleProxyClassDeclaration.getMethods().stream()
+                            .filter(BodyDeclaration::isMethodDeclaration)
+                            .map(BodyDeclaration::asMethodDeclaration)
+                            .forEach(methodDeclaration ->
+                                    methodDeclaration.getBody()
+                                            .ifPresent(blockStmt -> {
+                                                        List<String> parameterNameList = methodDeclaration.getParameters().stream().map(NodeWithSimpleName::getNameAsString).collect(Collectors.toList());
+                                                        blockStmt.getStatements().stream()
+                                                                .filter(Statement::isReturnStmt)
+                                                                .map(Statement::asReturnStmt)
+                                                                .forEach(returnStmt -> returnStmt.getExpression().ifPresent(expression -> replaceInjectArguments(expression, parameterNameList, field)));
+                                                        blockStmt.getStatements().stream()
+                                                                .filter(Statement::isExpressionStmt)
+                                                                .map(statement -> statement.asExpressionStmt().getExpression())
+                                                                .forEach(expression -> replaceInjectArguments(expression, parameterNameList, field));
+                                                    }
+                                            )
+                            );
 
-                            moduleProxyClassDeclaration.getFields().stream()
-                                    .flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
-                                    .filter(variableDeclarator -> variableDeclarator.getNameAsString().equals(field._1()))
-                                    .findAny()
-                                    .ifPresent(Node::remove);
+                    moduleProxyClassDeclaration.getFields().stream()
+                            .flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
+                            .filter(variableDeclarator -> variableDeclarator.getNameAsString().equals(field._1()))
+                            .findAny()
+                            .ifPresent(Node::remove);
 
-                            moduleProxyClassDeclaration.getFields().stream()
-                                    .filter(fieldDeclaration -> fieldDeclaration.getVariables().isEmpty())
-                                    .forEach(moduleProxyClassDeclaration::remove);
-                        }
-                );
+                    moduleProxyClassDeclaration.getFields().stream()
+                            .filter(fieldDeclaration -> fieldDeclaration.getVariables().isEmpty())
+                            .forEach(moduleProxyClassDeclaration::remove);
+                }
+        );
     }
 
     protected void replaceInjectArguments(Expression expression, List<String> parameterNameList, Tuple2<String, Type> field) {
-        Stream<Expression> arguments = Stream.empty();
+        List<Expression> arguments = Collections.emptyList();
 
         if (expression.isObjectCreationExpr()) {
-            arguments = expression.asObjectCreationExpr().getArguments().stream();
+            arguments = new ArrayList<>(expression.asObjectCreationExpr().getArguments());
         } else if (expression.isMethodCallExpr()) {
-            arguments = expression.asMethodCallExpr().getArguments().stream();
+            arguments = new ArrayList<>(expression.asMethodCallExpr().getArguments());
         }
 
-        arguments.filter(Expression::isNameExpr)
+        arguments.stream().filter(Expression::isNameExpr)
                 .map(Expression::asNameExpr)
                 .filter(argument -> !parameterNameList.contains(argument.getNameAsString()))
                 .filter(argument -> field._1().equals(argument.getNameAsString()))
-                .forEach(argument ->
-                        expression.replace(
-                                argument,
-                                new MethodCallExpr()
-                                        .setName("get")
-                                        .setScope(new NameExpr().setName("BeanContext"))
-                                        .addArgument(new ClassExpr().setType(field._2()))
-                        )
+                .forEach(argument -> {
+                            if (field._2().isClassOrInterfaceType()) {
+                                if (field._2().asClassOrInterfaceType().getNameAsString().equals(Provider.class.getSimpleName())) {
+                                    expression.replace(
+                                            argument,
+                                            new MethodCallExpr()
+                                                    .setName("getProvider")
+                                                    .setScope(new NameExpr().setName("BeanContext"))
+                                                    .addArgument(new ClassExpr().setType(field._2().asClassOrInterfaceType().getTypeArguments().orElseThrow().get(0)))
+                                    );
+                                } else {
+                                    expression.replace(
+                                            argument,
+                                            new MethodCallExpr()
+                                                    .setName("get")
+                                                    .setScope(new NameExpr().setName("BeanContext"))
+                                                    .addArgument(new ClassExpr().setType(field._2().asClassOrInterfaceType()))
+                                    );
+                                }
+                            }
+                        }
+                );
+
+        arguments.stream().filter(Expression::isMethodCallExpr)
+                .map(Expression::asMethodCallExpr)
+                .filter(methodCallExpr -> methodCallExpr.getScope().isPresent())
+                .filter(methodCallExpr -> methodCallExpr.getScope().get().isNameExpr())
+                .map(methodCallExpr -> methodCallExpr.getScope().get().asNameExpr())
+                .filter(argument -> !parameterNameList.contains(argument.getNameAsString()))
+                .filter(argument -> field._1().equals(argument.getNameAsString()))
+                .forEach(argument -> {
+                            if (field._2().isClassOrInterfaceType()) {
+                                if (field._2().asClassOrInterfaceType().getNameAsString().equals(Provider.class.getSimpleName())) {
+                                    expression.replace(
+                                            argument.getParentNode().orElseThrow(),
+                                            new MethodCallExpr()
+                                                    .setName("get")
+                                                    .setScope(
+                                                            new MethodCallExpr()
+                                                                    .setName("getProvider")
+                                                                    .setScope(new NameExpr().setName("BeanContext"))
+                                                                    .addArgument(new ClassExpr().setType(field._2().asClassOrInterfaceType().getTypeArguments().orElseThrow().get(0)))
+                                                    )
+                                    );
+                                }
+                            }
+                        }
                 );
     }
 

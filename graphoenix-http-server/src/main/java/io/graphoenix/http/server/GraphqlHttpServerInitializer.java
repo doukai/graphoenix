@@ -1,7 +1,6 @@
 package io.graphoenix.http.server;
 
 import io.graphoenix.http.config.HttpServerConfig;
-import io.graphoenix.spi.handler.BootstrapHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -19,6 +18,7 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
 
@@ -26,11 +26,11 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 
     private SslContext sslCtx;
 
-    private final GraphqlHttpServerHandler httpServerHandler;
+    private final Provider<GraphqlHttpServerHandler> httpServerHandler;
 
     @Inject
     public GraphqlHttpServerInitializer(HttpServerConfig httpServerConfig,
-                                        GraphqlHttpServerHandler httpServerHandler) {
+                                        Provider<GraphqlHttpServerHandler> httpServerHandler) {
         // Configure SSL.
         if (httpServerConfig.getSsl()) {
             try {
@@ -66,6 +66,6 @@ public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChann
 //        p.addLast("compressor",new HttpContentCompressor());
         p.addLast("chunked", new ChunkedWriteHandler());
         p.addLast("cors", new CorsHandler(corsConfig));
-        p.addLast("httpServerHandler", httpServerHandler);
+        p.addLast("httpServerHandler", httpServerHandler.get());
     }
 }
