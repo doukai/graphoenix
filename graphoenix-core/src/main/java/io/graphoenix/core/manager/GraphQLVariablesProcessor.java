@@ -8,31 +8,40 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 public class GraphQLVariablesProcessor {
 
-    public String buildVariables(String graphQL, Map<String, String> variables) {
-        GraphqlParser.OperationDefinitionContext operationDefinitionContext = DOCUMENT_UTIL.graphqlToOperation(graphQL);
+    public GraphqlParser.OperationDefinitionContext buildVariables(String graphQL, Map<String, String> variables) {
+        return buildVariables(DOCUMENT_UTIL.graphqlToOperation(graphQL), variables);
+    }
+
+    public GraphqlParser.OperationDefinitionContext buildVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, String> variables) {
         if (operationDefinitionContext.variableDefinitions() != null) {
             operationDefinitionContext.selectionSet().selection().forEach(selectionContext -> processSelection(selectionContext, operationDefinitionContext, variables));
-            operationDefinitionContext.variableDefinitions().removeLastChild();
         }
-        return operationDefinitionContext.getText();
+        return operationDefinitionContext;
     }
 
     private void processSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, String> variables) {
         if (selectionContext.field() != null && selectionContext.field().arguments() != null) {
-            selectionContext.field().arguments().argument().stream()
-                    .filter(argumentContext -> argumentContext.valueWithVariable().variable() != null)
-                    .forEach(argumentContext -> {
-                                GraphqlParser.ValueContext valueContext = getValueByVariable(argumentContext.valueWithVariable().variable(), operationDefinitionContext, variables);
-                                argumentContext.removeLastChild();
-                                argumentContext.addChild(valueContext);
-                            }
-                    );
+            selectionContext.field().arguments().argument().forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
         }
         if (selectionContext.field() != null && selectionContext.field().selectionSet() != null) {
             selectionContext.field().selectionSet().selection().forEach(subSelectionContext -> processSelection(subSelectionContext, operationDefinitionContext, variables));
         }
     }
 
+    private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, String> variables) {
+        if (valueWithVariableContext.variable() != null) {
+            GraphqlParser.ValueContext valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
+            valueWithVariableContext.removeLastChild();
+            valueWithVariableContext.addChild(valueContext);
+        } else if (valueWithVariableContext.objectValueWithVariable() != null) {
+            valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable()
+                    .forEach(objectFieldWithVariableContext -> replaceVariable(objectFieldWithVariableContext.valueWithVariable(), operationDefinitionContext, variables));
+        } else if (valueWithVariableContext.arrayValueWithVariable() != null) {
+            valueWithVariableContext.arrayValueWithVariable().valueWithVariable()
+                    .forEach(subValueWithVariableContext -> replaceVariable(subValueWithVariableContext, operationDefinitionContext, variables));
+        }
+    }
+    
     private GraphqlParser.ValueContext getValueByVariable(GraphqlParser.VariableContext variableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, String> variables) {
         return operationDefinitionContext.variableDefinitions().variableDefinition().stream()
                 .filter(variableDefinitionContext -> variableDefinitionContext.variable().name().getText().equals(variableContext.name().getText()))

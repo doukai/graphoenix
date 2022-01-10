@@ -79,6 +79,23 @@ public class GraphQLQueryToSelect {
         return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
+
+    public String createSelectSQL(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return operationDefinitionToSelect(operationDefinitionContext).toString();
+    }
+
+    public Stream<Tuple2<String, String>> createSelectsSQL(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return operationDefinitionToSelects(operationDefinitionContext).map(result -> Tuple.of(result._1(), result._2().toString()));
+    }
+
+    public Select createSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return operationDefinitionToSelect(operationDefinitionContext);
+    }
+
+    public Stream<Tuple2<String, Select>> createSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return operationDefinitionToSelects(operationDefinitionContext);
+    }
+
     public Select operationDefinitionToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
