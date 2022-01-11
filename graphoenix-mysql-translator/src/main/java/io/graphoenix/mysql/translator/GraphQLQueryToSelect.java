@@ -79,7 +79,6 @@ public class GraphQLQueryToSelect {
         return operationDefinitionToSelects(DOCUMENT_UTIL.graphqlToOperation(graphQL));
     }
 
-
     public String createSelectSQL(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return operationDefinitionToSelect(operationDefinitionContext).toString();
     }

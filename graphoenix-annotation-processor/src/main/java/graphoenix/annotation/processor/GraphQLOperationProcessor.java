@@ -40,7 +40,7 @@ import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphQLOperation")
 @AutoService(Processor.class)
-public class OperationAnnotationProcessor extends AbstractProcessor {
+public class GraphQLOperationProcessor extends AbstractProcessor {
 
     private IGraphQLDocumentManager manager;
 
@@ -61,7 +61,7 @@ public class OperationAnnotationProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        BeanContext.load(OperationAnnotationProcessor.class.getClassLoader());
+        BeanContext.load(GraphQLOperationProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         this.operationRouter = BeanContext.get(GraphQLOperationRouter.class);
