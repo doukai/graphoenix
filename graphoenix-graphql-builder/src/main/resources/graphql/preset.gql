@@ -74,3 +74,8 @@ directive @map(
     with: MapWith
     to: String
 ) on FIELD_DEFINITION
+
+directive @invoke(
+    class: String
+    method: String
+) on FIELD_DEFINITION
