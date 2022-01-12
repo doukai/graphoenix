@@ -11,11 +11,9 @@ import java.lang.annotation.Target;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target(ElementType.ANNOTATION_TYPE)
-public @interface MapWith {
-  String type();
+@Target({ElementType.FIELD})
+public @interface invoke {
+  String className();
 
-  String from();
-
-  String to();
+  String methodName();
 }

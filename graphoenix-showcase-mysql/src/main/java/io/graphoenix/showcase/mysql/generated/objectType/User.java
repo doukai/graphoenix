@@ -2,16 +2,15 @@ package io.graphoenix.showcase.mysql.generated.objectType;
 
 import io.graphoenix.showcase.mysql.generated.enumType.Sex;
 import io.graphoenix.showcase.mysql.generated.interfaceType.Meta;
-import java.lang.Boolean;
-import java.lang.Integer;
-import java.lang.Override;
-import java.lang.String;
-import java.util.Set;
+import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
+import java.util.Set;
+
 @Type
+@Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class User implements Meta {
   @Id
   private Integer id;

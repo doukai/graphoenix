@@ -31,14 +31,16 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     @Override
     public Stream<GraphqlParser.FieldDefinitionContext> getFieldDefinitions(String objectTypeName) {
-        return fieldDefinitionTree.entrySet().stream().filter(entry -> entry.getKey().equals(objectTypeName))
+        return fieldDefinitionTree.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(objectTypeName))
                 .map(Map.Entry::getValue)
                 .flatMap(stringFieldDefinitionContextMap -> stringFieldDefinitionContextMap.values().stream());
     }
 
     @Override
     public Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinition(String objectTypeName, String fieldName) {
-        return fieldDefinitionTree.entrySet().stream().filter(entry -> entry.getKey().equals(objectTypeName))
+        return fieldDefinitionTree.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(objectTypeName))
                 .map(Map.Entry::getValue).findFirst()
                 .flatMap(fieldDefinitionMap -> fieldDefinitionMap.entrySet().stream()
                         .filter(entry -> entry.getKey().equals(fieldName))

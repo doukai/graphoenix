@@ -1,10 +1,10 @@
 package io.graphoenix.showcase.mysql.generated.interfaceType;
 
-import java.lang.Boolean;
-import java.lang.Integer;
+import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.Interface;
 
 @Interface
+@Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public interface Meta {
   Integer version = null;
 

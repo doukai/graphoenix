@@ -8,6 +8,7 @@ import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.annotation.TypeInput;
 import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.*;
 import org.eclipse.microprofile.graphql.Enum;
 
@@ -37,10 +38,17 @@ public class TypeSpecBuilder {
         return this;
     }
 
+    private AnnotationSpec getGeneratedAnnotationSpec() {
+        return AnnotationSpec.builder(Generated.class)
+                .addMember("value", "$S", getClass().getName())
+                .build();
+    }
+
     public TypeSpec buildClass(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(objectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Type.class);
+                .addAnnotation(Type.class)
+                .addAnnotation(getGeneratedAnnotationSpec());
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(
                         fieldDefinitionContext -> {
@@ -71,7 +79,8 @@ public class TypeSpecBuilder {
     public TypeSpec buildClass(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(inputObjectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Input.class);
+                .addAnnotation(Input.class)
+                .addAnnotation(getGeneratedAnnotationSpec());
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .forEach(
                         inputValueDefinitionContext -> {
@@ -94,7 +103,8 @@ public class TypeSpecBuilder {
     public TypeSpec buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.enumBuilder(enumTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Enum.class);
+                .addAnnotation(Enum.class)
+                .addAnnotation(getGeneratedAnnotationSpec());
         enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
                 .forEach(enumValueDefinitionContext -> builder.addEnumConstant(enumValueDefinitionContext.enumValue().enumValueName().getText()));
         if (enumTypeDefinitionContext.description() != null) {
@@ -111,7 +121,8 @@ public class TypeSpecBuilder {
     public TypeSpec buildInterface(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.interfaceBuilder(interfaceTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Interface.class);
+                .addAnnotation(Interface.class)
+                .addAnnotation(getGeneratedAnnotationSpec());
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(
                         fieldDefinitionContext -> {
@@ -137,7 +148,8 @@ public class TypeSpecBuilder {
 
     public TypeSpec buildAnnotation(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.annotationBuilder(directiveDefinitionContext.name().getText())
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(getGeneratedAnnotationSpec());
         directiveDefinitionContext.argumentsDefinition().inputValueDefinition()
                 .forEach(inputValueDefinitionContext -> builder.addMethod(buildAnnotationMethod(inputValueDefinitionContext)));
         builder.addAnnotation(AnnotationSpec.builder(Documented.class).build());
@@ -168,7 +180,8 @@ public class TypeSpecBuilder {
 
     public TypeSpec buildAnnotation(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.annotationBuilder(inputObjectTypeDefinitionContext.name().getText())
-                .addModifiers(Modifier.PUBLIC);
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(getGeneratedAnnotationSpec());
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .stream().filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                 .forEach(inputValueDefinitionContext -> builder.addMethod(buildAnnotationMethod(inputValueDefinitionContext)));
@@ -276,7 +289,7 @@ public class TypeSpecBuilder {
         if (inputValueDefinitionContext.defaultValue() != null) {
             builder.addAnnotation(
                     AnnotationSpec.builder(DefaultValue.class)
-                            .addMember("value", "$S", inputValueDefinitionContext.defaultValue().getText())
+                            .addMember("value", "$S", inputValueDefinitionContext.defaultValue().value().getText())
                             .build()
             );
         }

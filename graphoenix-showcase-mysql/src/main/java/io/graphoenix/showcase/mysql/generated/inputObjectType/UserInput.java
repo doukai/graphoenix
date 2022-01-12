@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
 import io.graphoenix.showcase.mysql.generated.enumType.Sex;
+import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
@@ -9,6 +10,7 @@ import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
+@Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserInput {
   private Integer id;
 

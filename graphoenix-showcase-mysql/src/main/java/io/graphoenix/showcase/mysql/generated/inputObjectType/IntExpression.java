@@ -1,14 +1,16 @@
 package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
-import java.lang.Integer;
-import java.util.Set;
+import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
+import java.util.Set;
+
 @Input
+@Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class IntExpression {
-  @DefaultValue("=EQ")
+  @DefaultValue("EQ")
   private Operator opr;
 
   private Integer val;

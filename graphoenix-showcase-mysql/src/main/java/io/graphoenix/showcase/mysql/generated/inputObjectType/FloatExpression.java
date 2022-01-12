@@ -1,14 +1,16 @@
 package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
+import jakarta.annotation.Generated;
 import java.lang.Float;
 import java.util.Set;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input
+@Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class FloatExpression {
-  @DefaultValue("=EQ")
+  @DefaultValue("EQ")
   private Operator opr;
 
   private Float val;

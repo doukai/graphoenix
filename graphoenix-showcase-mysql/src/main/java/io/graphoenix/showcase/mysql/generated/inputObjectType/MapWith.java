@@ -1,9 +1,10 @@
 package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
-import java.lang.String;
+import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input
+@Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class MapWith {
   private String type;
 

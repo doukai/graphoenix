@@ -1,10 +1,12 @@
 package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
+import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input
+@Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserRoleInput {
   private Integer id;
 

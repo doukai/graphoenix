@@ -1,5 +1,7 @@
 package io.graphoenix.graphql.generator.module;
 
+import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
+import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.graphoenix.graphql.generator.translator.ElementManager;
@@ -43,5 +45,17 @@ public class GraphQLGeneratorModule {
     @Singleton
     JavaElementToOperation javaElementToOperation() {
         return new JavaElementToOperation(methodToQueryOperation(), methodToMutationOperation());
+    }
+
+    @Provides
+    @Singleton
+    JavaElementToEnum javaElementToEnum() {
+        return new JavaElementToEnum();
+    }
+
+    @Provides
+    @Singleton
+    JavaElementToObject javaElementToObject() {
+        return new JavaElementToObject();
     }
 }

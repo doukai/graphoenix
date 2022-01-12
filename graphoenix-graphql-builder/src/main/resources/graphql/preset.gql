@@ -76,6 +76,6 @@ directive @map(
 ) on FIELD_DEFINITION
 
 directive @invoke(
-    class: String
-    method: String
+    className: String
+    methodName: String
 ) on FIELD_DEFINITION
