@@ -1,15 +1,12 @@
 package io.graphoenix.graphql.generator.document;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class InputObjectType {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/document/InputObjectType.stg");
 
     private String name;
     private List<String> directives;
@@ -71,7 +68,7 @@ public class InputObjectType {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("inputObjectTypeDefinition");
+        ST st = new STGroupFile("stg/document/InputObjectType.stg").getInstanceOf("inputObjectTypeDefinition");
         st.add("inputObjectType", this);
         return st.render();
     }

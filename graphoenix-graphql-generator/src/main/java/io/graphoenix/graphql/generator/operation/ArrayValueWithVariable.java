@@ -1,7 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Arrays;
@@ -10,8 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ArrayValueWithVariable {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/ArrayValueWithVariable.stg");
 
     private Collection<?> valueWithVariables;
 
@@ -42,7 +39,7 @@ public class ArrayValueWithVariable {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("arrayValueWithVariableDefinition");
+        ST st = new STGroupFile("stg/operation/ArrayValueWithVariable.stg").getInstanceOf("arrayValueWithVariableDefinition");
         st.add("valueWithVariables", valueWithVariables.stream().map(Object::toString).collect(Collectors.toList()));
         return st.render();
     }

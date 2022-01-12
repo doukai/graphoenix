@@ -1,12 +1,9 @@
 package io.graphoenix.graphql.generator.introspection;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 public class __EnumValue {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/introspection/__EnumValue.stg");
 
     private String name;
 
@@ -50,7 +47,7 @@ public class __EnumValue {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("__enumValueDefinition");
+        ST st = new STGroupFile("stg/introspection/__EnumValue.stg").getInstanceOf("__enumValueDefinition");
         st.add("__enumValue", this);
         return st.render();
     }

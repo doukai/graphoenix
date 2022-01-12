@@ -1,12 +1,9 @@
 package io.graphoenix.graphql.generator.introspection;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 public class __InputValue {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/introspection/__InputValue.stg");
 
     private String name;
 
@@ -50,7 +47,7 @@ public class __InputValue {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("__inputValueDefinition");
+        ST st = new STGroupFile("stg/introspection/__InputValue.stg").getInstanceOf("__inputValueDefinition");
         st.add("__inputValue", this);
         return st.render();
     }

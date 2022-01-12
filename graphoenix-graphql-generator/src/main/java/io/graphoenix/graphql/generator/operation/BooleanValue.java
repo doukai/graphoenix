@@ -1,13 +1,11 @@
 package io.graphoenix.graphql.generator.operation;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
 
 public class BooleanValue {
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/BooleanValue.stg");
 
     private Boolean value;
 
@@ -29,7 +27,7 @@ public class BooleanValue {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("booleanValueDefinition");
+        ST st = new STGroupFile("stg/operation/BooleanValue.stg").getInstanceOf("booleanValueDefinition");
         st.add("booleanValue", this);
         return st.render();
     }

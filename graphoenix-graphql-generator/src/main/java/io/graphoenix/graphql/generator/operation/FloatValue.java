@@ -1,13 +1,11 @@
 package io.graphoenix.graphql.generator.operation;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
 
 public class FloatValue {
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/FloatValue.stg");
 
     private Number value;
 
@@ -29,7 +27,7 @@ public class FloatValue {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("floatValueDefinition");
+        ST st = new STGroupFile("stg/operation/FloatValue.stg").getInstanceOf("floatValueDefinition");
         st.add("floatValue", this);
         return st.render();
     }

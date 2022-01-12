@@ -1,14 +1,11 @@
 package io.graphoenix.graphql.generator.introspection;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.List;
 
 public class __Directive {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/introspection/__Directive.stg");
 
     private String name;
 
@@ -82,7 +79,7 @@ public class __Directive {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("__directiveDefinition");
+        ST st = new STGroupFile("stg/introspection/__Directive.stg").getInstanceOf("__directiveDefinition");
         st.add("__directive", this);
         return st.render();
     }

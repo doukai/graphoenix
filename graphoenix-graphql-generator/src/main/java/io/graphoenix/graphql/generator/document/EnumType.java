@@ -8,8 +8,6 @@ import java.util.List;
 
 public class EnumType {
 
-    private final STGroup stGroupFile = new STGroupFile("stg/document/EnumType.stg");
-
     private String name;
     private List<String> directives;
     private List<EnumValue> enumValues;
@@ -53,7 +51,7 @@ public class EnumType {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("enumTypeDefinition");
+        ST st = new STGroupFile("stg/document/EnumType.stg").getInstanceOf("enumTypeDefinition");
         st.add("enumType", this);
         return st.render();
     }

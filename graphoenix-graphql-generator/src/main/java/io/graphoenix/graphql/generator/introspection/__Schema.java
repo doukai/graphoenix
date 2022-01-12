@@ -1,14 +1,11 @@
 package io.graphoenix.graphql.generator.introspection;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.List;
 
 public class __Schema {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/introspection/__Schema.stg");
 
     private List<__Type> types;
 
@@ -72,7 +69,7 @@ public class __Schema {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("__schemaDefinition");
+        ST st = new STGroupFile("stg/introspection/__Schema.stg").getInstanceOf("__schemaDefinition");
         st.add("__schema", this);
         return st.render();
     }

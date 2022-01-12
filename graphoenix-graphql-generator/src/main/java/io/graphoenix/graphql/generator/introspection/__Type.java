@@ -8,8 +8,6 @@ import java.util.List;
 
 public class __Type {
 
-    private final STGroup stGroupFile = new STGroupFile("stg/introspection/__Type.stg");
-
     private __TypeKind kind;
 
     private String name;
@@ -102,7 +100,7 @@ public class __Type {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("__typeDefinition");
+        ST st = new STGroupFile("stg/introspection/__Type.stg").getInstanceOf("__typeDefinition");
         st.add("__type", this);
         return st.render();
     }

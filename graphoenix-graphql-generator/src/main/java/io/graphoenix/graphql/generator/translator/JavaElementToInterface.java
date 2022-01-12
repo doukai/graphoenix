@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.graphql.generator.document.Field;
-import io.graphoenix.graphql.generator.document.ObjectType;
+import io.graphoenix.graphql.generator.document.InterfaceType;
 import org.eclipse.microprofile.graphql.Ignore;
 
 import javax.inject.Inject;
@@ -11,17 +11,17 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Types;
 import java.util.stream.Collectors;
 
-public class JavaElementToObject {
+public class JavaElementToInterface {
 
     private final ElementManager elementManager;
 
     @Inject
-    public JavaElementToObject(ElementManager elementManager) {
+    public JavaElementToInterface(ElementManager elementManager) {
         this.elementManager = elementManager;
     }
 
-    public String buildObject(TypeElement typeElement, Types typeUtils) {
-        return new ObjectType()
+    public String buildInterface(TypeElement typeElement, Types typeUtils) {
+        return new InterfaceType()
                 .setName(elementManager.getNameFormElement(typeElement))
                 .setFields(
                         typeElement.getEnclosedElements().stream()

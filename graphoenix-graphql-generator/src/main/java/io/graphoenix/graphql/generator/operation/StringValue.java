@@ -1,14 +1,11 @@
 package io.graphoenix.graphql.generator.operation;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
 
 public class StringValue {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/StringValue.stg");
 
     private String value;
 
@@ -34,7 +31,7 @@ public class StringValue {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("stringValueDefinition");
+        ST st = new STGroupFile("stg/operation/StringValue.stg").getInstanceOf("stringValueDefinition");
         st.add("stringValue", this);
         return st.render();
     }

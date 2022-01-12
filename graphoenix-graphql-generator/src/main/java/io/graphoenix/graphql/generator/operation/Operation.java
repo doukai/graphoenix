@@ -1,7 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
@@ -10,8 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Operation {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/Operation.stg");
 
     private String operationType;
     private String name;
@@ -90,7 +87,7 @@ public class Operation {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("operationDefinition");
+        ST st = new STGroupFile("stg/operation/Operation.stg").getInstanceOf("operationDefinition");
         st.add("operation", this);
         return st.render();
     }

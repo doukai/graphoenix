@@ -1,14 +1,11 @@
 package io.graphoenix.graphql.generator.document;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.List;
 
 public class InputValue {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/document/InputValue.stg");
 
     private String name;
     private String typeName;
@@ -39,10 +36,12 @@ public class InputValue {
     }
 
     public InputValue setDefaultValue(String defaultValue) {
-        if (this.getTypeName() != null && this.getTypeName().equals("String")) {
-            this.defaultValue = "\"".concat(defaultValue).concat("\"");
-        } else {
-            this.defaultValue = defaultValue;
+        if (defaultValue != null) {
+            if (this.getTypeName() != null && this.getTypeName().equals("String")) {
+                this.defaultValue = "\"".concat(defaultValue).concat("\"");
+            } else {
+                this.defaultValue = defaultValue;
+            }
         }
         return this;
     }
@@ -67,7 +66,7 @@ public class InputValue {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("inputValueDefinition");
+        ST st = new STGroupFile("stg/document/InputValue.stg").getInstanceOf("inputValueDefinition");
         st.add("inputValue", this);
         return st.render();
     }

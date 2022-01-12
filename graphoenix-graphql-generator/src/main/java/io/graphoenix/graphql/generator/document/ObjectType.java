@@ -1,15 +1,12 @@
 package io.graphoenix.graphql.generator.document;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ObjectType {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/document/ObjectType.stg");
 
     private String name;
     private List<String> interfaces;
@@ -80,7 +77,7 @@ public class ObjectType {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("objectTypeDefinition");
+        ST st = new STGroupFile("stg/document/ObjectType.stg").getInstanceOf("objectTypeDefinition");
         st.add("objectType", this);
         return st.render();
     }

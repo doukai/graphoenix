@@ -1,14 +1,11 @@
 package io.graphoenix.graphql.generator.operation;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
 
 public class EnumValue {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/EnumValue.stg");
 
     private String value;
 
@@ -30,7 +27,7 @@ public class EnumValue {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("enumValueDefinition");
+        ST st = new STGroupFile("stg/operation/EnumValue.stg").getInstanceOf("enumValueDefinition");
         st.add("enumValue", this);
         return st.render();
     }

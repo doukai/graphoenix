@@ -1,12 +1,9 @@
 package io.graphoenix.graphql.generator.document;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 public class Schema {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/document/Schema.stg");
 
     private String query;
     private String mutation;
@@ -31,7 +28,7 @@ public class Schema {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("schemaDefinition");
+        ST st = new STGroupFile("stg/document/Schema.stg").getInstanceOf("schemaDefinition");
         st.add("schema", this);
         return st.render();
     }

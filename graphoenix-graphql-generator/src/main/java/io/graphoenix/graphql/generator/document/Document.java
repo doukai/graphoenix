@@ -1,15 +1,12 @@
 package io.graphoenix.graphql.generator.document;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Document {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/document/Document.stg");
 
     private List<String> definitions;
 
@@ -41,7 +38,7 @@ public class Document {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("schemaDefinition");
+        ST st = new STGroupFile("stg/document/Document.stg").getInstanceOf("schemaDefinition");
         st.add("schema", this);
         return st.render();
     }

@@ -1,13 +1,11 @@
 package io.graphoenix.graphql.generator.operation;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.List;
 
 public class VariableDefinition {
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/VariableDefinition.stg");
 
     private Variable variable;
     private String typeName;
@@ -62,7 +60,7 @@ public class VariableDefinition {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("variableDefinitionDefinition");
+        ST st = new STGroupFile("stg/operation/VariableDefinition.stg").getInstanceOf("variableDefinitionDefinition");
         st.add("variableDefinition", this);
         return st.render();
     }

@@ -3,6 +3,7 @@ package graphoenix.annotation.processor;
 import com.google.auto.service.AutoService;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
+import jakarta.annotation.Generated;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -38,24 +39,24 @@ public class EnumProcessor extends AbstractProcessor {
         for (TypeElement annotation : annotations) {
             Set<? extends Element> bundleClasses = roundEnv.getElementsAnnotatedWith(annotation);
             for (Element bundleClassElement : bundleClasses) {
-//                if (bundleClassElement.getAnnotation(Generated.class) == null) {
-                if (bundleClassElement.getKind().equals(ElementKind.ENUM)) {
-                    final Elements elementUtils = processingEnv.getElementUtils();
-                    final Filer filer = processingEnv.getFiler();
-                    TypeElement typeElement = (TypeElement) bundleClassElement;
-                    PackageElement packageElement = elementUtils.getPackageOf(typeElement);
+                if (bundleClassElement.getAnnotation(Generated.class) == null) {
+                    if (bundleClassElement.getKind().equals(ElementKind.ENUM)) {
+                        final Elements elementUtils = processingEnv.getElementUtils();
+                        final Filer filer = processingEnv.getFiler();
+                        TypeElement typeElement = (TypeElement) bundleClassElement;
+                        PackageElement packageElement = elementUtils.getPackageOf(typeElement);
 
-                    try {
-                        FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, packageElement.getQualifiedName(), typeElement.getSimpleName().toString().concat(".gql"));
-                        Writer writer = fileObject.openWriter();
-                        writer.write(javaElementToEnum.buildEnum(typeElement));
-                        writer.close();
+                        try {
+                            FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, packageElement.getQualifiedName(), typeElement.getSimpleName().toString().concat(".gql"));
+                            Writer writer = fileObject.openWriter();
+                            writer.write(javaElementToEnum.buildEnum(typeElement));
+                            writer.close();
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-//                }
             }
         }
         return false;

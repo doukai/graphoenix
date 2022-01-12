@@ -1,14 +1,11 @@
 package io.graphoenix.graphql.generator.document;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.List;
 
 public class InterfaceType {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/document/InterfaceType.stg");
 
     private String name;
     private List<String> interfaces;
@@ -74,7 +71,7 @@ public class InterfaceType {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("interfaceTypeDefinition");
+        ST st = new STGroupFile("stg/document/InterfaceType.stg").getInstanceOf("interfaceTypeDefinition");
         st.add("interfaceType", this);
         return st.render();
     }

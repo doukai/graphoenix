@@ -1,13 +1,8 @@
 package io.graphoenix.graphql.generator.module;
 
-import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
-import io.graphoenix.graphql.generator.translator.JavaElementToObject;
+import io.graphoenix.graphql.generator.translator.*;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
-import io.graphoenix.graphql.generator.translator.ElementManager;
-import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
-import io.graphoenix.graphql.generator.translator.MethodToMutationOperation;
-import io.graphoenix.graphql.generator.translator.MethodToQueryOperation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.inject.Inject;
@@ -50,12 +45,24 @@ public class GraphQLGeneratorModule {
     @Provides
     @Singleton
     JavaElementToEnum javaElementToEnum() {
-        return new JavaElementToEnum();
+        return new JavaElementToEnum(elementManager());
     }
 
     @Provides
     @Singleton
     JavaElementToObject javaElementToObject() {
-        return new JavaElementToObject();
+        return new JavaElementToObject(elementManager());
+    }
+
+    @Provides
+    @Singleton
+    JavaElementToInterface javaElementToInterface() {
+        return new JavaElementToInterface(elementManager());
+    }
+
+    @Provides
+    @Singleton
+    JavaElementToInputType javaElementToInputType() {
+        return new JavaElementToInputType(elementManager());
     }
 }

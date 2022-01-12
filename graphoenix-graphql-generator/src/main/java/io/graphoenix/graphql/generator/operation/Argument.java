@@ -1,12 +1,9 @@
 package io.graphoenix.graphql.generator.operation;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 public class Argument {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/operation/Argument.stg");
 
     private String name;
     private String valueWithVariable;
@@ -49,7 +46,7 @@ public class Argument {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("argumentDefinition");
+        ST st = new STGroupFile("stg/operation/Argument.stg").getInstanceOf("argumentDefinition");
         st.add("argument", this);
         return st.render();
     }

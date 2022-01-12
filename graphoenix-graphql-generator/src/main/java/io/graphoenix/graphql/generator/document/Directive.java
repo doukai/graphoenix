@@ -1,14 +1,11 @@
 package io.graphoenix.graphql.generator.document;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.List;
 
 public class Directive {
-
-    private final STGroup stGroupFile = new STGroupFile("stg/document/Directive.stg");
 
     private String name;
     private List<InputValue> arguments;
@@ -53,7 +50,7 @@ public class Directive {
 
     @Override
     public String toString() {
-        ST st = stGroupFile.getInstanceOf("directiveDefinition");
+        ST st = new STGroupFile("stg/document/Directive.stg").getInstanceOf("directiveDefinition");
         st.add("directive", this);
         return st.render();
     }
