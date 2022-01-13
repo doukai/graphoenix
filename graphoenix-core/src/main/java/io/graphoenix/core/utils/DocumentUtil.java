@@ -56,12 +56,22 @@ public enum DocumentUtil {
         return graphqlToOperation(charStream);
     }
 
+    public GraphqlParser.FieldDefinitionContext graphqlToFieldDefinition(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToFieldDefinition(charStream);
+    }
+
     public GraphqlParser.DocumentContext graphqlToDocument(CharStream charStream) {
         return getGraphqlParser(charStream).document();
     }
 
     public GraphqlParser.OperationDefinitionContext graphqlToOperation(CharStream charStream) {
         return getGraphqlParser(charStream).operationDefinition();
+    }
+
+    public GraphqlParser.FieldDefinitionContext graphqlToFieldDefinition(CharStream charStream) {
+        return getGraphqlParser(charStream).fieldDefinition();
     }
 
     public String getStringValue(TerminalNode stringValue) {

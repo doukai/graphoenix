@@ -22,12 +22,18 @@ public class JavaElementToObject {
 
     public String buildObject(TypeElement typeElement, Types typeUtils) {
         return new ObjectType()
-                .setName(elementManager.getNameFormElement(typeElement))
+                .setName(elementManager.getNameFromElement(typeElement))
+                .setDescription(elementManager.getDescriptionFromElement(typeElement))
                 .setFields(
                         typeElement.getEnclosedElements().stream()
                                 .filter(element -> element.getKind().equals(ElementKind.FIELD))
                                 .filter(element -> element.getAnnotation(Ignore.class) == null)
-                                .map(element -> new Field().setName(elementManager.getNameFormElement(element)).setTypeName(elementManager.typeElementToTypeName((VariableElement) element, typeUtils)))
+                                .map(element ->
+                                        new Field()
+                                                .setName(elementManager.getNameFromElement(element))
+                                                .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
+                                                .setDescription(elementManager.getDescriptionFromElement(element))
+                                )
                                 .collect(Collectors.toList())
                 )
                 .setInterfaces(

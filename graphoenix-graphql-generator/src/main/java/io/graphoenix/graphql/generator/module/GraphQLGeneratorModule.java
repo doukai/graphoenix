@@ -65,4 +65,10 @@ public class GraphQLGeneratorModule {
     JavaElementToInputType javaElementToInputType() {
         return new JavaElementToInputType(elementManager());
     }
+
+    @Provides
+    @Singleton
+    GraphQLApiBuilder graphQLApiBuilder() {
+        return new GraphQLApiBuilder(elementManager());
+    }
 }

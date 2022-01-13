@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.document;
 
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -34,6 +35,11 @@ public class Document {
             this.definitions.addAll(definitions);
         }
         return this;
+    }
+
+    public String toString(IGraphQLDocumentManager manager) {
+
+        return null;
     }
 
     @Override

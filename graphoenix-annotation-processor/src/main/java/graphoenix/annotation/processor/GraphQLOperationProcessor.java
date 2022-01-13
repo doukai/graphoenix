@@ -30,7 +30,9 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
+import java.io.IOException;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,19 +45,12 @@ import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 public class GraphQLOperationProcessor extends AbstractProcessor {
 
     private IGraphQLDocumentManager manager;
-
     private IGraphQLFieldMapManager mapper;
-
     private GraphQLOperationRouter operationRouter;
-
     private GraphQLConfigRegister configRegister;
-
     private DocumentBuilder documentBuilder;
-
     private GeneratorHandler generatorHandler;
-
     private JavaElementToOperation javaElementToOperation;
-
     private OperationInterfaceImplementer operationInterfaceImplementer;
 
     @Override
@@ -75,17 +70,27 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
+        GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
+        try {
+            configRegister.registerConfig(graphQLConfig, RESOURCES_PATH);
+            if (graphQLConfig.getBuild()) {
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            }
+            mapper.registerFieldMaps();
+        } catch (IOException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        final Elements elementUtils = processingEnv.getElementUtils();
+        final Filer filer = processingEnv.getFiler();
+
         for (TypeElement annotation : annotations) {
             Set<? extends Element> bundleClasses = roundEnv.getElementsAnnotatedWith(annotation);
 
             for (Element bundleClassElement : bundleClasses) {
-
                 if (bundleClassElement.getKind().equals(ElementKind.INTERFACE)) {
-                    final Elements elementUtils = processingEnv.getElementUtils();
-                    final Filer filer = processingEnv.getFiler();
                     TypeElement typeElement = (TypeElement) bundleClassElement;
                     PackageElement packageElement = elementUtils.getPackageOf(typeElement);
-                    GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
 
                     AnnotationMirror graphQLOperationMirror = typeElement.getAnnotationMirrors().stream()
                             .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(GraphQLOperation.class.getName()))
@@ -99,26 +104,19 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                             .orElseThrow();
 
                     try {
-                        configRegister.registerConfig(graphQLConfig, RESOURCES_PATH);
-                        if (graphQLConfig.getBuild()) {
-                            manager.registerGraphQL(documentBuilder.buildDocument().toString());
-                        }
-                        mapper.registerFieldMaps();
-
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
-
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors.toMap(
-                                        Map.Entry::getKey,
-                                        entry -> {
-                                            switch (operationRouter.getType(entry.getValue())) {
-                                                case QUERY:
-                                                    return generatorHandler.query(entry.getValue());
-                                                case MUTATION:
-                                                    return generatorHandler.mutation(entry.getValue());
-                                            }
-                                            return "";
-                                        }
+                                                Map.Entry::getKey,
+                                                entry -> {
+                                                    switch (operationRouter.getType(entry.getValue())) {
+                                                        case QUERY:
+                                                            return generatorHandler.query(entry.getValue());
+                                                        case MUTATION:
+                                                            return generatorHandler.mutation(entry.getValue());
+                                                    }
+                                                    return "";
+                                                }
                                         )
                                 )
                                 .forEach((key, value) -> Try.run(() -> {

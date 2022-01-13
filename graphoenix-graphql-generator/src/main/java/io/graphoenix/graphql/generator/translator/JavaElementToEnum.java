@@ -20,12 +20,17 @@ public class JavaElementToEnum {
 
     public String buildEnum(TypeElement typeElement) {
         return new EnumType()
-                .setName(elementManager.getNameFormElement(typeElement))
+                .setName(elementManager.getNameFromElement(typeElement))
+                .setDescription(elementManager.getDescriptionFromElement(typeElement))
                 .setEnumValues(
                         typeElement.getEnclosedElements().stream()
                                 .filter(element -> element.getKind().equals(ElementKind.ENUM_CONSTANT))
                                 .filter(element -> element.getAnnotation(Ignore.class) == null)
-                                .map(element -> new EnumValue().setName(elementManager.getNameFormElement(element)))
+                                .map(element ->
+                                        new EnumValue()
+                                                .setName(elementManager.getNameFromElement(element))
+                                                .setDescription(elementManager.getDescriptionFromElement(element))
+                                )
                                 .collect(Collectors.toList())
                 )
                 .toString();

@@ -3,6 +3,8 @@ package io.graphoenix.graphql.generator.translator;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import org.eclipse.microprofile.graphql.DefaultValue;
+import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
@@ -56,7 +58,7 @@ public class ElementManager {
                 .orElseThrow();
     }
 
-    public String getNameFormElement(Element element) {
+    public String getNameFromElement(Element element) {
         Name name = element.getAnnotation(Name.class);
         if (name != null) {
             return name.value();
@@ -65,14 +67,37 @@ public class ElementManager {
         }
     }
 
-    public String typeElementToTypeName(VariableElement variableElement, Types types) {
-        TypeElement typeElement = (TypeElement) types.asElement(variableElement.asType());
-        return typeElementToTypeName(variableElement, typeElement, types);
+    public String getDescriptionFromElement(Element element) {
+        Description description = element.getAnnotation(Description.class);
+        if (description != null) {
+            return description.value();
+        } else {
+            return null;
+        }
     }
 
-    public String typeElementToTypeName(VariableElement variableElement, TypeElement typeElement, Types types) {
+    public String getDefaultValueFromElement(Element element) {
+        DefaultValue defaultValue = element.getAnnotation(DefaultValue.class);
+        if (defaultValue != null) {
+            return defaultValue.value();
+        } else {
+            return null;
+        }
+    }
+
+    public String executableElementToTypeName(ExecutableElement executableElement, Types types) {
+        TypeElement typeElement = (TypeElement) types.asElement(executableElement.getReturnType());
+        return elementToTypeName(executableElement, typeElement, types);
+    }
+
+    public String variableElementToTypeName(VariableElement variableElement, Types types) {
+        TypeElement typeElement = (TypeElement) types.asElement(variableElement.asType());
+        return elementToTypeName(variableElement, typeElement, types);
+    }
+
+    public String elementToTypeName(Element element, TypeElement typeElement, Types types) {
         String typeName;
-        if (variableElement.getAnnotation(Id.class) != null) {
+        if (element.getAnnotation(Id.class) != null) {
             typeName = "ID";
         } else if (typeElement.getQualifiedName().toString().equals(Integer.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Short.class.getName()) ||
@@ -89,12 +114,12 @@ public class ElementManager {
         } else if (typeElement.getQualifiedName().toString().equals(Collection.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(List.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Set.class.getName())) {
-            typeName = "[".concat(typeElementToTypeName(variableElement, (TypeElement) types.asElement(((DeclaredType) variableElement.asType()).getTypeArguments().get(0)), types)).concat("]");
+            typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
         } else {
             typeName = typeElement.getSimpleName().toString();
         }
 
-        if (variableElement.getAnnotation(NonNull.class) != null) {
+        if (element.getAnnotation(NonNull.class) != null) {
             return typeName.concat("!");
         } else {
             return typeName;

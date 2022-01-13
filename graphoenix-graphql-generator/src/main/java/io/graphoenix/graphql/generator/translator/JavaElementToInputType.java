@@ -2,7 +2,6 @@ package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.graphql.generator.document.InputObjectType;
 import io.graphoenix.graphql.generator.document.InputValue;
-import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Ignore;
 
 import javax.inject.Inject;
@@ -23,16 +22,18 @@ public class JavaElementToInputType {
 
     public String buildInputType(TypeElement typeElement, Types typeUtils) {
         return new InputObjectType()
-                .setName(elementManager.getNameFormElement(typeElement))
+                .setName(elementManager.getNameFromElement(typeElement))
+                .setDescription(elementManager.getDescriptionFromElement(typeElement))
                 .setInputValues(
                         typeElement.getEnclosedElements().stream()
                                 .filter(element -> element.getKind().equals(ElementKind.FIELD))
                                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                                 .map(element ->
-                                        new InputValue().setName(
-                                                elementManager.getNameFormElement(element))
-                                                .setTypeName(elementManager.typeElementToTypeName((VariableElement) element, typeUtils))
-                                                .setDefaultValue(element.getAnnotation(DefaultValue.class) != null ? element.getAnnotation(DefaultValue.class).value() : null)
+                                        new InputValue()
+                                                .setName(elementManager.getNameFromElement(element))
+                                                .setDescription(elementManager.getDescriptionFromElement(element))
+                                                .setDefaultValue(elementManager.getDefaultValueFromElement(element))
+                                                .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                 )
                                 .collect(Collectors.toList())
                 )

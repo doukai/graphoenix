@@ -95,6 +95,18 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getDirectives().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
     }
 
+    public Document getDocument() {
+        return new Document()
+                .addDefinition(manager.getSchema().getText())
+                .addDefinitions(manager.getScalars().map(RuleContext::getText).collect(Collectors.toList()))
+                .addDefinitions(manager.getEnums().map(RuleContext::getText).collect(Collectors.toList()))
+                .addDefinitions(manager.getInterfaces().map(RuleContext::getText).collect(Collectors.toList()))
+                .addDefinitions(manager.getObjects().map(RuleContext::getText).collect(Collectors.toList()))
+                .addDefinitions(manager.getInputObjects().map(RuleContext::getText).collect(Collectors.toList()))
+                .addDefinitions(manager.getUnions().map(RuleContext::getText).collect(Collectors.toList()))
+                .addDefinitions(manager.getDirectives().map(RuleContext::getText).collect(Collectors.toList()));
+    }
+
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
 
         return new ObjectType()
