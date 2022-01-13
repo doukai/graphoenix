@@ -65,10 +65,6 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         this.generatorHandler = BeanContext.get(GeneratorHandler.class);
         this.javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         this.operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
         try {
@@ -80,6 +76,10 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         final Elements elementUtils = processingEnv.getElementUtils();
         final Filer filer = processingEnv.getFiler();

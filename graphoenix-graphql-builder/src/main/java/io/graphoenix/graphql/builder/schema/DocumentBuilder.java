@@ -4,16 +4,7 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.manager.GraphQLConfigRegister;
-import io.graphoenix.graphql.generator.document.Directive;
-import io.graphoenix.graphql.generator.document.Document;
-import io.graphoenix.graphql.generator.document.EnumType;
-import io.graphoenix.graphql.generator.document.EnumValue;
-import io.graphoenix.graphql.generator.document.Field;
-import io.graphoenix.graphql.generator.document.InputObjectType;
-import io.graphoenix.graphql.generator.document.InputValue;
-import io.graphoenix.graphql.generator.document.InterfaceType;
-import io.graphoenix.graphql.generator.document.ObjectType;
-import io.graphoenix.graphql.generator.document.Schema;
+import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.antlr.v4.runtime.RuleContext;
@@ -97,14 +88,28 @@ public class DocumentBuilder {
 
     public Document getDocument() {
         return new Document()
-                .addDefinition(manager.getSchema().getText())
-                .addDefinitions(manager.getScalars().map(RuleContext::getText).collect(Collectors.toList()))
-                .addDefinitions(manager.getEnums().map(RuleContext::getText).collect(Collectors.toList()))
-                .addDefinitions(manager.getInterfaces().map(RuleContext::getText).collect(Collectors.toList()))
-                .addDefinitions(manager.getObjects().map(RuleContext::getText).collect(Collectors.toList()))
-                .addDefinitions(manager.getInputObjects().map(RuleContext::getText).collect(Collectors.toList()))
-                .addDefinitions(manager.getUnions().map(RuleContext::getText).collect(Collectors.toList()))
-                .addDefinitions(manager.getDirectives().map(RuleContext::getText).collect(Collectors.toList()));
+                .addDefinition(buildSchema().toString())
+                .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toList()))
+                .addDefinitions(manager.getEnums().map(this::buildEnum).map(EnumType::toString).collect(Collectors.toList()))
+                .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toList()))
+                .addDefinitions(manager.getObjects().map(this::getObject).map(ObjectType::toString).collect(Collectors.toList()))
+                .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toList()))
+                //TODO union type
+                .addDefinitions(manager.getDirectives().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+    }
+
+    public Schema buildSchema() {
+        return new Schema()
+                .setQuery(manager.getQueryOperationTypeName().orElseThrow())
+                .setMutation(manager.getMutationOperationTypeName().orElseThrow());
+    }
+
+    public ScalarType buildScalarType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
+
+        return new ScalarType()
+                .setName(scalarTypeDefinitionContext.name().getText())
+                .setDescription(scalarTypeDefinitionContext.description() == null ? null : scalarTypeDefinitionContext.description().getText())
+                .setDirectives(scalarTypeDefinitionContext.directives() == null ? null : scalarTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
     }
 
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -112,11 +117,30 @@ public class DocumentBuilder {
         return new ObjectType()
                 .setName(objectTypeDefinitionContext.name().getText())
                 .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
-                .setInterfaces(objectTypeDefinitionContext.implementsInterfaces() == null ? null : objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toList()))
+                .setInterfaces(objectTypeDefinitionContext.implementsInterfaces() == null ? null : objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toSet()))
                 .addInterface(META_INTERFACE_NAME)
                 .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))).collect(Collectors.toList()))
                 .addFields(getMetaInterfaceFields())
                 .setDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
+    }
+
+    public ObjectType getObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+
+        return new ObjectType()
+                .setName(objectTypeDefinitionContext.name().getText())
+                .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
+                .setInterfaces(objectTypeDefinitionContext.implementsInterfaces() == null ? null : objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toSet()))
+                .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::getFiled).collect(Collectors.toList()))
+                .setDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
+    }
+
+    public InputObjectType buildInputObjectType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+
+        return new InputObjectType()
+                .setName(inputObjectTypeDefinitionContext.name().getText())
+                .setDescription(inputObjectTypeDefinitionContext.description() == null ? null : inputObjectTypeDefinitionContext.description().getText())
+                .setInputValues(inputObjectTypeDefinitionContext.inputObjectValueDefinitions() == null ? null : inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toList()))
+                .setDirectives(inputObjectTypeDefinitionContext.directives() == null ? null : inputObjectTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
     }
 
     public InterfaceType buildInterface(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
@@ -124,7 +148,7 @@ public class DocumentBuilder {
         return new InterfaceType()
                 .setName(interfaceTypeDefinitionContext.name().getText())
                 .setDescription(interfaceTypeDefinitionContext.description() == null ? null : interfaceTypeDefinitionContext.description().getText())
-                .setInterfaces(interfaceTypeDefinitionContext.implementsInterfaces() == null ? null : interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toList()))
+                .setInterfaces(interfaceTypeDefinitionContext.implementsInterfaces() == null ? null : interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toSet()))
                 .setFields(interfaceTypeDefinitionContext.fieldsDefinition() == null ? null : interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList()))
                 .setDirectives(interfaceTypeDefinitionContext.directives() == null ? null : interfaceTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
     }
@@ -147,7 +171,7 @@ public class DocumentBuilder {
         Field field = new Field().setName(fieldDefinitionContext.name().getText())
                 .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
                 .setTypeName(fieldDefinitionContext.type().getText())
-                .setArguments(fieldDefinitionContext.argumentsDefinition() == null ? null : fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toList()))
+//                .setArguments(fieldDefinitionContext.argumentsDefinition() == null ? null : fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toList()))
                 .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> filedObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
@@ -161,6 +185,14 @@ public class DocumentBuilder {
             field.addArgument(filedToArgument(fieldDefinitionContext, InputType.EXPRESSION));
         }
         return field;
+    }
+
+    public Field getFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return new Field().setName(fieldDefinitionContext.name().getText())
+                .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
+                .setTypeName(fieldDefinitionContext.type().getText())
+                .setArguments(fieldDefinitionContext.argumentsDefinition() == null ? null : fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toList()))
+                .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()));
     }
 
     public EnumValue buildEnumValue(GraphqlParser.EnumValueDefinitionContext enumValueDefinitionContext) {

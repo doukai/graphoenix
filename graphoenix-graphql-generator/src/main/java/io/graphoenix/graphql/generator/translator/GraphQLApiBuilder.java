@@ -17,7 +17,7 @@ public class GraphQLApiBuilder {
         this.elementManager = elementManager;
     }
 
-    public String variableElementToField(ExecutableElement executableElement, Types typeUtils) {
+    public Field variableElementToField(ExecutableElement executableElement, Types typeUtils) {
         return new Field()
                 .setName(elementManager.getNameFromElement(executableElement))
                 .setDescription(elementManager.getDescriptionFromElement(executableElement))
@@ -29,10 +29,9 @@ public class GraphQLApiBuilder {
                                                 .setName(elementManager.getNameFromElement(variableElement))
                                                 .setDescription(elementManager.getDescriptionFromElement(variableElement))
                                                 .setDefaultValue(elementManager.getDefaultValueFromElement(variableElement))
-                                                .setTypeName(elementManager.variableElementToTypeName(variableElement, typeUtils))
+                                                .setTypeName(elementManager.variableElementToInputTypeName(variableElement, typeUtils))
                                 )
                                 .collect(Collectors.toList())
-                )
-                .toString();
+                );
     }
 }

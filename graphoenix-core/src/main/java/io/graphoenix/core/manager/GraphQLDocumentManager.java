@@ -254,18 +254,6 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public IGraphQLDocumentManager registerField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        graphQLFieldManager.register(objectTypeDefinitionContext, fieldDefinitionContext);
-        return this;
-    }
-
-    @Override
-    public IGraphQLDocumentManager registerField(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        graphQLFieldManager.register(interfaceTypeDefinitionContext, fieldDefinitionContext);
-        return this;
-    }
-
-    @Override
     public Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterface(String name) {
         return graphQLInterfaceManager.getInterfaceTypeDefinition(name);
     }

@@ -20,7 +20,7 @@ public class JavaElementToInterface {
         this.elementManager = elementManager;
     }
 
-    public String buildInterface(TypeElement typeElement, Types typeUtils) {
+    public InterfaceType buildInterface(TypeElement typeElement, Types typeUtils) {
         return new InterfaceType()
                 .setName(elementManager.getNameFromElement(typeElement))
                 .setDescription(elementManager.getDescriptionFromElement(typeElement))
@@ -39,8 +39,7 @@ public class JavaElementToInterface {
                 .setInterfaces(
                         typeElement.getInterfaces().stream()
                                 .map(typeMirror -> typeUtils.asElement(typeMirror).getSimpleName().toString())
-                                .collect(Collectors.toList())
-                )
-                .toString();
+                                .collect(Collectors.toSet())
+                );
     }
 }

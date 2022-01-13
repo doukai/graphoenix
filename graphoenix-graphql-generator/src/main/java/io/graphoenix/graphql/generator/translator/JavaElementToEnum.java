@@ -18,7 +18,7 @@ public class JavaElementToEnum {
         this.elementManager = elementManager;
     }
 
-    public String buildEnum(TypeElement typeElement) {
+    public EnumType buildEnum(TypeElement typeElement) {
         return new EnumType()
                 .setName(elementManager.getNameFromElement(typeElement))
                 .setDescription(elementManager.getDescriptionFromElement(typeElement))
@@ -32,7 +32,6 @@ public class JavaElementToEnum {
                                                 .setDescription(elementManager.getDescriptionFromElement(element))
                                 )
                                 .collect(Collectors.toList())
-                )
-                .toString();
+                );
     }
 }

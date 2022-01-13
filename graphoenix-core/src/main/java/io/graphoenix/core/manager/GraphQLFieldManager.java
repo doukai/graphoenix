@@ -30,18 +30,6 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
-    public Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        fieldDefinitionTree.get(objectTypeDefinitionContext.name().getText()).put(fieldDefinitionContext.name().getText(), fieldDefinitionContext);
-        return fieldDefinitionTree;
-    }
-
-    @Override
-    public Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        fieldDefinitionTree.get(interfaceTypeDefinitionContext.name().getText()).put(fieldDefinitionContext.name().getText(), fieldDefinitionContext);
-        return fieldDefinitionTree;
-    }
-
-    @Override
     public Stream<GraphqlParser.FieldDefinitionContext> getFieldDefinitions(String objectTypeName) {
         return fieldDefinitionTree.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(objectTypeName))

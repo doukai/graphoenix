@@ -125,4 +125,45 @@ public class ElementManager {
             return typeName;
         }
     }
+
+    public String executableElementToInputTypeName(ExecutableElement executableElement, Types types) {
+        TypeElement typeElement = (TypeElement) types.asElement(executableElement.getReturnType());
+        return elementToInputTypeName(executableElement, typeElement, types);
+    }
+
+    public String variableElementToInputTypeName(VariableElement variableElement, Types types) {
+        TypeElement typeElement = (TypeElement) types.asElement(variableElement.asType());
+        return elementToInputTypeName(variableElement, typeElement, types);
+    }
+
+    public String elementToInputTypeName(Element element, TypeElement typeElement, Types types) {
+        String typeName;
+        if (element.getAnnotation(Id.class) != null) {
+            typeName = "ID";
+        } else if (typeElement.getQualifiedName().toString().equals(Integer.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Short.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Byte.class.getName())) {
+            typeName = "Int";
+        } else if (typeElement.getQualifiedName().toString().equals(Float.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Double.class.getName())) {
+            typeName = "Float";
+        } else if (typeElement.getQualifiedName().toString().equals(String.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Character.class.getName())) {
+            typeName = "String";
+        } else if (typeElement.getQualifiedName().toString().equals(Boolean.class.getName())) {
+            typeName = "Boolean";
+        } else if (typeElement.getQualifiedName().toString().equals(Collection.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(List.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Set.class.getName())) {
+            typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
+        } else {
+            typeName = typeElement.getSimpleName().toString().concat("Input");
+        }
+
+        if (element.getAnnotation(NonNull.class) != null) {
+            return typeName.concat("!");
+        } else {
+            return typeName;
+        }
+    }
 }

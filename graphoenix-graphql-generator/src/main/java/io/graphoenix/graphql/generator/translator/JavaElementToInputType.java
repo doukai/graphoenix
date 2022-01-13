@@ -20,7 +20,7 @@ public class JavaElementToInputType {
         this.elementManager = elementManager;
     }
 
-    public String buildInputType(TypeElement typeElement, Types typeUtils) {
+    public InputObjectType buildInputType(TypeElement typeElement, Types typeUtils) {
         return new InputObjectType()
                 .setName(elementManager.getNameFromElement(typeElement))
                 .setDescription(elementManager.getDescriptionFromElement(typeElement))
@@ -36,7 +36,6 @@ public class JavaElementToInputType {
                                                 .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                 )
                                 .collect(Collectors.toList())
-                )
-                .toString();
+                );
     }
 }

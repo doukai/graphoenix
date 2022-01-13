@@ -4,12 +4,14 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ObjectType {
 
     private String name;
-    private List<String> interfaces;
+    private Set<String> interfaces;
     private List<String> directives;
     private List<Field> fields;
     private String description;
@@ -23,18 +25,18 @@ public class ObjectType {
         return this;
     }
 
-    public List<String> getInterfaces() {
+    public Set<String> getInterfaces() {
         return interfaces;
     }
 
-    public ObjectType setInterfaces(List<String> interfaces) {
+    public ObjectType setInterfaces(Set<String> interfaces) {
         this.interfaces = interfaces;
         return this;
     }
 
     public ObjectType addInterface(String interfaceType) {
         if (this.interfaces == null) {
-            this.interfaces = new ArrayList<>();
+            this.interfaces = new HashSet<>();
         }
         this.interfaces.add(interfaceType);
         return this;
@@ -63,6 +65,14 @@ public class ObjectType {
             this.fields = new ArrayList<>();
         }
         this.fields.addAll(fields);
+        return this;
+    }
+
+    public ObjectType addField(Field field) {
+        if (this.fields == null) {
+            this.fields = new ArrayList<>();
+        }
+        this.fields.add(field);
         return this;
     }
 

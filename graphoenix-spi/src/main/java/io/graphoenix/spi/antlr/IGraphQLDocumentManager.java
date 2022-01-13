@@ -62,10 +62,6 @@ public interface IGraphQLDocumentManager {
 
     Optional<GraphqlParser.FieldDefinitionContext> getField(String objectName, String name);
 
-    IGraphQLDocumentManager registerField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
-
-    IGraphQLDocumentManager registerField(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
-
     Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterface(String name);
 
     Optional<GraphqlParser.UnionTypeDefinitionContext> getUnion(String name);

@@ -9,6 +9,8 @@ import java.util.List;
 
 public class Document {
 
+    private Schema schema;
+
     private List<String> definitions;
 
     public List<String> getDefinitions() {
@@ -44,8 +46,8 @@ public class Document {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/Document.stg").getInstanceOf("schemaDefinition");
-        st.add("schema", this);
+        ST st = new STGroupFile("stg/document/Document.stg").getInstanceOf("documentDefinition");
+        st.add("document", this);
         return st.render();
     }
 }

@@ -4,11 +4,12 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.List;
+import java.util.Set;
 
 public class InterfaceType {
 
     private String name;
-    private List<String> interfaces;
+    private Set<String> interfaces;
     private List<String> directives;
     private List<Field> fields;
     private String description;
@@ -22,11 +23,11 @@ public class InterfaceType {
         return this;
     }
 
-    public List<String> getInterfaces() {
+    public Set<String> getInterfaces() {
         return interfaces;
     }
 
-    public InterfaceType setInterfaces(List<String> interfaces) {
+    public InterfaceType setInterfaces(Set<String> interfaces) {
         this.interfaces = interfaces;
         return this;
     }

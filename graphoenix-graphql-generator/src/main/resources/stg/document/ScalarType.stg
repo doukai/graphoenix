@@ -1,0 +1,4 @@
+scalarTypeDefinition(scalarType) ::= <<
+<if(scalarType.description)>"<scalarType.description>"<endif>
+scalar <scalarType.name><if(scalarType.directives)> <scalarType.directives:{directive|<directive>};separator=" "><endif>
+>>

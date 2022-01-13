@@ -20,7 +20,7 @@ public class JavaElementToObject {
         this.elementManager = elementManager;
     }
 
-    public String buildObject(TypeElement typeElement, Types typeUtils) {
+    public ObjectType buildObject(TypeElement typeElement, Types typeUtils) {
         return new ObjectType()
                 .setName(elementManager.getNameFromElement(typeElement))
                 .setDescription(elementManager.getDescriptionFromElement(typeElement))
@@ -39,8 +39,7 @@ public class JavaElementToObject {
                 .setInterfaces(
                         typeElement.getInterfaces().stream()
                                 .map(typeMirror -> typeUtils.asElement(typeMirror).getSimpleName().toString())
-                                .collect(Collectors.toList())
-                )
-                .toString();
+                                .collect(Collectors.toSet())
+                );
     }
 }

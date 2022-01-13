@@ -1,10 +1,12 @@
 package graphoenix.annotation.processor;
 
 import com.google.auto.service.AutoService;
+import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.manager.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
+import io.graphoenix.graphql.generator.document.ObjectType;
 import io.graphoenix.graphql.generator.translator.GraphQLApiBuilder;
 import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
@@ -37,11 +39,9 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.Set;
 
 import static io.graphoenix.config.ConfigUtil.RESOURCES_CONFIG_UTIL;
-import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 
 @SupportedAnnotationTypes({
@@ -75,10 +75,6 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
-    }
-
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
         try {
@@ -89,23 +85,65 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
         }
+    }
 
-        final Elements elementUtils = processingEnv.getElementUtils();
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
+        if (annotations.isEmpty()) {
+            return true;
+        }
+
         final Types typeUtils = processingEnv.getTypeUtils();
         final Filer filer = processingEnv.getFiler();
 
-        for (TypeElement annotation : annotations) {
-            Set<? extends Element> bundleClasses = roundEnv.getElementsAnnotatedWith(annotation);
-            if (bundleClasses.size() > 0) {
+        roundEnv.getElementsAnnotatedWith(Enum.class).stream()
+                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getKind().equals(ElementKind.ENUM))
+                .forEach(element -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) element).toString()));
 
-                registerElements(bundleClasses, typeUtils);
-                bundleClasses.stream()
-                        .filter(element -> element.getAnnotation(GraphQLApi.class) != null)
-                        .filter(element -> element.getKind().equals(ElementKind.CLASS))
-                        .forEach(element -> registerGraphQLApiElement(element, typeUtils));
+        roundEnv.getElementsAnnotatedWith(Interface.class).stream()
+                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
+                .forEach(element -> {
+                            manager.registerGraphQL(javaElementToInterface.buildInterface((TypeElement) element, typeUtils).toString());
+                            element.getEnclosedElements().stream()
+                                    .filter(subElement -> subElement.getAnnotation(Generated.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
+                                    .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
+                                    .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
+                        }
+                );
 
-            }
-        }
+        roundEnv.getElementsAnnotatedWith(Type.class).stream()
+                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getKind().equals(ElementKind.CLASS))
+                .forEach(element -> {
+                            manager.registerGraphQL(javaElementToObject.buildObject((TypeElement) element, typeUtils).toString());
+                            element.getEnclosedElements().stream()
+                                    .filter(subElement -> subElement.getAnnotation(Generated.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
+                                    .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
+                                    .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
+                        }
+                );
+
+        roundEnv.getElementsAnnotatedWith(Input.class).stream()
+                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getKind().equals(ElementKind.CLASS))
+                .forEach(element -> {
+                            manager.registerGraphQL(javaElementToInputType.buildInputType((TypeElement) element, typeUtils).toString());
+                            element.getEnclosedElements().stream()
+                                    .filter(subElement -> subElement.getAnnotation(Generated.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
+                                    .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
+                                    .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
+                        }
+                );
+
+        roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                .filter(element -> element.getKind().equals(ElementKind.CLASS))
+                .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
         try {
             FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "all.gql");
@@ -117,61 +155,20 @@ public class GraphQLApiProcessor extends AbstractProcessor {
             e.printStackTrace();
         }
 
-        return true;
-    }
-
-    private void registerElements(Collection<? extends Element> elements, Types typeUtils) {
-
-        elements.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getAnnotation(Enum.class) != null)
-                .filter(element -> element.getKind().equals(ElementKind.ENUM))
-                .forEach(element -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) element)));
-
-        elements.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getAnnotation(Interface.class) != null)
-                .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
-                .forEach(element -> manager.registerGraphQL(javaElementToInterface.buildInterface((TypeElement) element, typeUtils)));
-
-        elements.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getAnnotation(Type.class) != null)
-                .filter(element -> element.getKind().equals(ElementKind.CLASS))
-                .forEach(element -> manager.registerGraphQL(javaElementToObject.buildObject((TypeElement) element, typeUtils)));
-
-        elements.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getAnnotation(Input.class) != null)
-                .filter(element -> element.getKind().equals(ElementKind.CLASS))
-                .forEach(element -> manager.registerGraphQL(javaElementToInputType.buildInputType((TypeElement) element, typeUtils)));
-
-        elements.stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getKind().equals(ElementKind.INTERFACE) || element.getKind().equals(ElementKind.CLASS))
-                .filter(element -> element.getAnnotation(Interface.class) != null || element.getAnnotation(Type.class) != null || element.getAnnotation(Input.class) != null)
-                .forEach(element ->
-                        element.getEnclosedElements().stream()
-                                .filter(subElement -> subElement.getAnnotation(Generated.class) == null)
-                                .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
-                                .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
-                                .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement)))
-                );
+        return false;
     }
 
     private void registerGraphQLApiElement(Element element, Types typeUtils) {
         element.getEnclosedElements().forEach(
                 subElement -> {
                     if (subElement.getAnnotation(Query.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                        manager.registerField(
-                                manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(),
-                                DOCUMENT_UTIL.graphqlToFieldDefinition(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils))
-                        );
+                        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow();
+                        ObjectType objectType = documentBuilder.getObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
+                        manager.registerGraphQL(objectType.toString());
                     } else if (subElement.getAnnotation(Mutation.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                        manager.registerField(
-                                manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(),
-                                DOCUMENT_UTIL.graphqlToFieldDefinition(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils))
-                        );
+                        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow();
+                        ObjectType objectType = documentBuilder.getObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
+                        manager.registerGraphQL(objectType.toString());
                     }
                 }
         );
