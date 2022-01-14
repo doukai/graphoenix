@@ -1,5 +1,7 @@
 package io.graphoenix.graphql.generator.operation;
 
+import graphql.parser.antlr.GraphqlParser;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.VariableElement;
@@ -13,6 +15,35 @@ public class ValueWithVariable {
 
     public ValueWithVariable(Object value) {
         this.valueWithVariable = getValueWithVariable(value);
+    }
+
+    public ValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        this.valueWithVariable = getValueWithVariable(valueWithVariableContext);
+    }
+
+    private Object getValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+
+        if (valueWithVariableContext.NullValue() != null) {
+            return new NullValue();
+        } else if (valueWithVariableContext.variable() != null) {
+            return new Variable(valueWithVariableContext.variable().name().getText());
+        } else if (valueWithVariableContext.BooleanValue() != null) {
+            return new BooleanValue(valueWithVariableContext.BooleanValue());
+        } else if (valueWithVariableContext.IntValue() != null) {
+            return new IntValue(valueWithVariableContext.IntValue());
+        } else if (valueWithVariableContext.FloatValue() != null) {
+            return new FloatValue(valueWithVariableContext.FloatValue());
+        } else if (valueWithVariableContext.StringValue() != null) {
+            return new StringValue(valueWithVariableContext.StringValue());
+        } else if (valueWithVariableContext.enumValue() != null) {
+            return new EnumValue(valueWithVariableContext.enumValue());
+        } else if (valueWithVariableContext.arrayValueWithVariable() != null) {
+            return new ArrayValueWithVariable(valueWithVariableContext.arrayValueWithVariable());
+        } else if (valueWithVariableContext.objectValueWithVariable() != null) {
+            return new ObjectValueWithVariable(valueWithVariableContext.objectValueWithVariable());
+        }
+
+        throw new RuntimeException();
     }
 
     private Object getValueWithVariable(Object value) {

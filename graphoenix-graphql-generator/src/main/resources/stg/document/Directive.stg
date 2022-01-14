@@ -1,4 +1,4 @@
-import "InputValue.stg"
+import "stg/operation/Argument.stg"
 directiveDefinition(directive) ::= <<
-<if(directive.description)>"<directive.description>" <endif>directive @<directive.name><if(directive.arguments)>(<directive.arguments:{argument|<inputValueDefinition(argument)>};separator=" ">)<endif> on <if(directive.directiveLocations)><directive.directiveLocations:{directiveLocation|<directiveLocation>};separator=" | "><endif>
+@<directive.name><if(directive.arguments)>(<directive.arguments:{argument|<argumentDefinition(argument)>};separator=" ">)<endif>
 >>

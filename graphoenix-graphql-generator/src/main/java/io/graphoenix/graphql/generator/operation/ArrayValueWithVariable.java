@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
+import graphql.parser.antlr.GraphqlParser;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -12,9 +13,12 @@ public class ArrayValueWithVariable {
 
     private Collection<?> valueWithVariables;
 
-
     public ArrayValueWithVariable(Arrays valueWithVariables) {
         this.valueWithVariables = Stream.of(valueWithVariables).map(ValueWithVariable::new).collect(Collectors.toList());
+    }
+
+    public ArrayValueWithVariable(GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext) {
+        this.valueWithVariables = arrayValueWithVariableContext.valueWithVariable().stream().map(ValueWithVariable::new).collect(Collectors.toList());
     }
 
     public ArrayValueWithVariable(Collection<?> valueWithVariables) {

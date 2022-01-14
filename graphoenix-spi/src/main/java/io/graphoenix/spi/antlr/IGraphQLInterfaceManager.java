@@ -15,4 +15,6 @@ public interface IGraphQLInterfaceManager {
     Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterfaceTypeDefinition(String interfaceTypeName);
 
     Stream<GraphqlParser.InterfaceTypeDefinitionContext> getInterfaceTypeDefinitions();
+
+    void clear();
 }

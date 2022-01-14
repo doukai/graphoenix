@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.document;
 
+import io.graphoenix.graphql.generator.operation.Argument;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -8,9 +9,7 @@ import java.util.List;
 public class Directive {
 
     private String name;
-    private List<InputValue> arguments;
-    private List<String> directiveLocations;
-    private String description;
+    private List<Argument> arguments;
 
     public String getName() {
         return name;
@@ -21,30 +20,12 @@ public class Directive {
         return this;
     }
 
-    public List<InputValue> getArguments() {
+    public List<Argument> getArguments() {
         return arguments;
     }
 
-    public Directive setArguments(List<InputValue> arguments) {
+    public Directive setArguments(List<Argument> arguments) {
         this.arguments = arguments;
-        return this;
-    }
-
-    public List<String> getDirectiveLocations() {
-        return directiveLocations;
-    }
-
-    public Directive setDirectiveLocations(List<String> directiveLocations) {
-        this.directiveLocations = directiveLocations;
-        return this;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Directive setDescription(String description) {
-        this.description = description;
         return this;
     }
 

@@ -27,4 +27,9 @@ public class GraphQLDirectiveManager implements IGraphQLDirectiveManager {
     public Stream<GraphqlParser.DirectiveDefinitionContext> getDirectiveDefinitions() {
         return directiveDefinitionMap.values().stream();
     }
+
+    @Override
+    public void clear() {
+        directiveDefinitionMap.clear();
+    }
 }

@@ -35,4 +35,9 @@ public class GraphQLInputValueManager implements IGraphQLInputValueManager {
                         .filter(entry -> entry.getKey().equals(inputValueName))
                         .map(Map.Entry::getValue).findFirst());
     }
+
+    @Override
+    public void clear() {
+        inputValueDefinitionTree.clear();
+    }
 }

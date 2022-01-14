@@ -40,4 +40,9 @@ public class GraphQLFragmentManager implements IGraphQLFragmentManager {
                         .filter(entry -> entry.getKey().equals(fragmentName))
                         .map(Map.Entry::getValue).findFirst());
     }
+
+    @Override
+    public void clear() {
+        fragmentDefinitionTree.clear();
+    }
 }

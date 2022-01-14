@@ -15,4 +15,6 @@ public interface IGraphQLFieldManager {
     Stream<GraphqlParser.FieldDefinitionContext> getFieldDefinitions(String objectTypeName);
 
     Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinition(String objectTypeName, String fieldName);
+
+    void clear();
 }

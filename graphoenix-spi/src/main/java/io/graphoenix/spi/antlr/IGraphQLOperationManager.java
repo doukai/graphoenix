@@ -15,4 +15,6 @@ public interface IGraphQLOperationManager {
     Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String operationTypeName);
 
     Stream<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions();
+
+    void clear();
 }

@@ -14,4 +14,6 @@ public interface IGraphQLInputObjectManager {
     Optional<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjectTypeDefinition(String inputObjectName);
 
     Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjectTypeDefinitions();
+
+    void clear();
 }

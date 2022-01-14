@@ -15,4 +15,6 @@ public interface IGraphQLObjectManager {
     Optional<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinition(String objectTypeName);
 
     Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitions();
+
+    void clear();
 }

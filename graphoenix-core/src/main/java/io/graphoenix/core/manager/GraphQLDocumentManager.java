@@ -480,4 +480,20 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             } else return typeContext.nonNullType().listType() != null;
         } else return typeContext.listType() != null;
     }
+
+    @Override
+    public void clear() {
+        graphQLOperationManager.clear();
+        graphQLSchemaManager.clear();
+        graphQLDirectiveManager.clear();
+        graphQLObjectManager.clear();
+        graphQLInterfaceManager.clear();
+        graphQLUnionManager.clear();
+        graphQLFieldManager.clear();
+        graphQLInputObjectManager.clear();
+        graphQLInputValueManager.clear();
+        graphQLEnumManager.clear();
+        graphQLScalarManager.clear();
+        graphQLFragmentManager.clear();
+    }
 }

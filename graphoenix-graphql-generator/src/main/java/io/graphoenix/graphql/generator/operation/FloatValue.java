@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -15,6 +16,10 @@ public class FloatValue {
 
     public FloatValue(Number value) {
         this.value = value;
+    }
+
+    public FloatValue(TerminalNode value) {
+        this.value = Float.valueOf(value.getText());
     }
 
     public Number getValue() {

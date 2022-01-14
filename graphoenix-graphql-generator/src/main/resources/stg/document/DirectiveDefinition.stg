@@ -1,0 +1,4 @@
+import "InputValue.stg"
+directiveDefinitionDefinition(directiveDefinition) ::= <<
+<if(directiveDefinition.description)>"<directiveDefinition.description>" <endif>directiveDefinition @<directiveDefinition.name><if(directiveDefinition.arguments)>(<directiveDefinition.arguments:{argument|<inputValueDefinition(argument)>};separator=" ">)<endif> on <if(directiveDefinition.directiveLocations)><directiveDefinition.directiveLocations:{directiveLocation|<directiveLocation>};separator=" | "><endif>
+>>

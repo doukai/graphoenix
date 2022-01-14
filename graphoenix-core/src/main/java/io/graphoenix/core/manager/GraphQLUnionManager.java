@@ -32,4 +32,9 @@ public class GraphQLUnionManager implements IGraphQLUnionManager {
     public Stream<GraphqlParser.UnionTypeDefinitionContext> getUnionTypeDefinitions() {
         return unionTypeDefinitionContextMap.values().stream();
     }
+
+    @Override
+    public void clear() {
+        unionTypeDefinitionContextMap.clear();
+    }
 }

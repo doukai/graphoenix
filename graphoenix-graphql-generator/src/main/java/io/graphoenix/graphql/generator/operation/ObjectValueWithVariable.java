@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
+import graphql.parser.antlr.GraphqlParser;
 import io.vavr.CheckedFunction2;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
@@ -29,6 +30,10 @@ public class ObjectValueWithVariable {
             return field.get(object);
         };
         this.objectValueWithVariable = Arrays.stream(clazz.getDeclaredFields()).collect(Collectors.toMap(Field::getName, field -> new ValueWithVariable(getField.unchecked().apply(field, objectValueWithVariable))));
+    }
+
+    public ObjectValueWithVariable(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        this.objectValueWithVariable = objectValueWithVariableContext.objectFieldWithVariable().stream().collect(Collectors.toMap(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText(), objectFieldWithVariableContext -> new ValueWithVariable(objectFieldWithVariableContext.valueWithVariable())));
     }
 
     @Override

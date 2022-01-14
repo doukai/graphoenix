@@ -13,4 +13,6 @@ public interface IGraphQLInputValueManager {
     Stream<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName);
 
     Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName, String inputValueName);
+
+    void clear();
 }

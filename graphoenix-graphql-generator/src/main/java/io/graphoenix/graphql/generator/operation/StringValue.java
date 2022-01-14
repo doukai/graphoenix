@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -19,6 +20,10 @@ public class StringValue {
 
     public StringValue(String value) {
         this.value = value;
+    }
+
+    public StringValue(TerminalNode value) {
+        this.value = value.getText().substring(1, value.getText().length() - 1);
     }
 
     public String getValue() {

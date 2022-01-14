@@ -32,4 +32,9 @@ public class GraphQLObjectManager implements IGraphQLObjectManager {
     public Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitions() {
         return objectTypeDefinitionMap.values().stream();
     }
+
+    @Override
+    public void clear() {
+        objectTypeDefinitionMap.clear();
+    }
 }

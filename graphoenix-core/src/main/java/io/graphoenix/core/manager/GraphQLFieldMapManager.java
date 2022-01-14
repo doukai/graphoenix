@@ -287,4 +287,9 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                 .findFirst()
                 );
     }
+
+    @Override
+    public void clear() {
+        fieldMapTree.clear();
+    }
 }

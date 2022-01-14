@@ -50,4 +50,6 @@ public interface IGraphQLFieldMapManager {
 
     Optional<GraphqlParser.ValueContext> getMapToValueFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                       GraphqlParser.ObjectValueContext objectValueContext);
+
+    void clear();
 }

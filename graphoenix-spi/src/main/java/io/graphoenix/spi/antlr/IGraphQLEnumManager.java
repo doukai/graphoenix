@@ -15,4 +15,6 @@ public interface IGraphQLEnumManager {
     Optional<GraphqlParser.EnumTypeDefinitionContext> getEnumTypeDefinition(String enumTypeName);
 
     Stream<GraphqlParser.EnumTypeDefinitionContext> getEnumTypeDefinitions();
+
+    void clear();
 }

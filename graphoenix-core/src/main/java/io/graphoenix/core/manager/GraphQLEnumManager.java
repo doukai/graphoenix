@@ -32,4 +32,9 @@ public class GraphQLEnumManager implements IGraphQLEnumManager {
     public Stream<GraphqlParser.EnumTypeDefinitionContext> getEnumTypeDefinitions() {
         return enumTypeDefinitionMap.values().stream();
     }
+
+    @Override
+    public void clear() {
+        enumTypeDefinitionMap.clear();
+    }
 }

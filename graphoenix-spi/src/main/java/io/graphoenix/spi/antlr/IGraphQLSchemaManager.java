@@ -7,4 +7,6 @@ public interface IGraphQLSchemaManager {
     void register(GraphqlParser.SchemaDefinitionContext schemaDefinitionContext);
 
     GraphqlParser.SchemaDefinitionContext getSchemaDefinitionContext();
+
+    void clear();
 }

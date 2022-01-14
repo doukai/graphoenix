@@ -32,4 +32,9 @@ public class GraphQLInterfaceManager implements IGraphQLInterfaceManager {
     public Stream<GraphqlParser.InterfaceTypeDefinitionContext> getInterfaceTypeDefinitions() {
         return interfaceTypeDefinitionMap.values().stream();
     }
+
+    @Override
+    public void clear() {
+        interfaceTypeDefinitionMap.clear();
+    }
 }

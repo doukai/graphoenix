@@ -32,4 +32,9 @@ public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
     public Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjectTypeDefinitions() {
         return inputObjectTypeDefinitionMap.values().stream();
     }
+
+    @Override
+    public void clear() {
+        inputObjectTypeDefinitionMap.clear();
+    }
 }

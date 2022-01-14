@@ -12,4 +12,6 @@ public interface IGraphQLDirectiveManager {
     Optional<GraphqlParser.DirectiveDefinitionContext> getDirectiveDefinition(String directiveName);
 
     Stream<GraphqlParser.DirectiveDefinitionContext> getDirectiveDefinitions();
+
+    void clear();
 }

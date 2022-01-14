@@ -16,4 +16,9 @@ public class GraphQLSchemaManager implements IGraphQLSchemaManager {
     public GraphqlParser.SchemaDefinitionContext getSchemaDefinitionContext() {
         return schemaDefinitionContext;
     }
+
+    @Override
+    public void clear() {
+        schemaDefinitionContext = null;
+    }
 }

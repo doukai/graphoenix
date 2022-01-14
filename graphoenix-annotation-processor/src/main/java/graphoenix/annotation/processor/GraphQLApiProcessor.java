@@ -77,6 +77,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
 
         GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
         try {
+            manager.clear();
             configRegister.registerConfig(graphQLConfig, RESOURCES_PATH);
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());

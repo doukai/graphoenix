@@ -32,4 +32,9 @@ public class GraphQLOperationManager implements IGraphQLOperationManager {
     public Stream<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions() {
         return operationTypeDefinitionMap.values().stream();
     }
+
+    @Override
+    public void clear() {
+        operationTypeDefinitionMap.clear();
+    }
 }

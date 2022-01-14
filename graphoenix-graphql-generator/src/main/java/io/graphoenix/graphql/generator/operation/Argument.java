@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
+import graphql.parser.antlr.GraphqlParser;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -41,6 +42,11 @@ public class Argument {
 
     public Argument setValueWithVariable(ValueWithVariable valueWithVariable) {
         this.valueWithVariable = valueWithVariable.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        this.valueWithVariable = new ValueWithVariable(valueWithVariableContext).toString();
         return this;
     }
 

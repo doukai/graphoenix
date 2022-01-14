@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -15,6 +16,10 @@ public class BooleanValue {
 
     public BooleanValue(Boolean value) {
         this.value = value;
+    }
+
+    public BooleanValue(TerminalNode value) {
+        this.value = Boolean.valueOf(value.getText());
     }
 
     public Boolean getValue() {

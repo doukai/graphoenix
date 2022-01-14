@@ -15,4 +15,6 @@ public interface IGraphQLUnionManager {
     Optional<GraphqlParser.UnionTypeDefinitionContext> getUnionTypeDefinition(String unionTypeName);
 
     Stream<GraphqlParser.UnionTypeDefinitionContext> getUnionTypeDefinitions();
+
+    void clear();
 }

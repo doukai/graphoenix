@@ -32,4 +32,9 @@ public class GraphQLScalarManager implements IGraphQLScalarManager {
     public Stream<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinitions() {
         return scalarTypeDefinitionMap.values().stream();
     }
+
+    @Override
+    public void clear() {
+        scalarTypeDefinitionMap.clear();
+    }
 }

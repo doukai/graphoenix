@@ -46,4 +46,9 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
                         .filter(entry -> entry.getKey().equals(fieldName))
                         .map(Map.Entry::getValue).findFirst());
     }
+
+    @Override
+    public void clear() {
+        fieldDefinitionTree.clear();
+    }
 }

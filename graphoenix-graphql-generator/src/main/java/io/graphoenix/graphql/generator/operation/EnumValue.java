@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.operation;
 
+import graphql.parser.antlr.GraphqlParser;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -15,6 +16,10 @@ public class EnumValue {
 
     public EnumValue(Enum<?> value) {
         this.value = value.name();
+    }
+
+    public EnumValue(GraphqlParser.EnumValueContext enumValueContext) {
+        this.value = enumValueContext.getText();
     }
 
     public String getValue() {

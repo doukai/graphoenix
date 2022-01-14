@@ -15,4 +15,6 @@ public interface IGraphQLScalarManager {
     Optional<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinition(String scalarTypeName);
 
     Stream<GraphqlParser.ScalarTypeDefinitionContext> getScalarTypeDefinitions();
+
+    void clear();
 }

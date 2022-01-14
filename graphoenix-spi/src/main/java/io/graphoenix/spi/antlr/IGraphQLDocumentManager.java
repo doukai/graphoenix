@@ -147,4 +147,6 @@ public interface IGraphQLDocumentManager {
     String getFieldTypeName(GraphqlParser.TypeContext typeContext);
 
     boolean fieldTypeIsList(GraphqlParser.TypeContext typeContext);
+
+    void clear();
 }

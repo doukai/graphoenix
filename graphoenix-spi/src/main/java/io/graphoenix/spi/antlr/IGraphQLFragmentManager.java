@@ -13,4 +13,6 @@ public interface IGraphQLFragmentManager {
     Stream<GraphqlParser.FragmentDefinitionContext> getFragmentDefinitions(String objectTypeName);
 
     Optional<GraphqlParser.FragmentDefinitionContext> getFragmentDefinition(String objectTypeName, String fragmentName);
+
+    void clear();
 }
