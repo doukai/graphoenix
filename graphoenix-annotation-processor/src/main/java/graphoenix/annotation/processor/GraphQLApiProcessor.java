@@ -32,7 +32,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -91,7 +90,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         if (annotations.isEmpty()) {
-            return true;
+            return false;
         }
 
         final Types typeUtils = processingEnv.getTypeUtils();
