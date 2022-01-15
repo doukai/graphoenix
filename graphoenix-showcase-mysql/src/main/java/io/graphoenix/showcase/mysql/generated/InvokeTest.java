@@ -5,31 +5,22 @@ import io.graphoenix.showcase.mysql.ApiTest;
 import io.graphoenix.showcase.mysql.generated.objectType.Organization;
 import io.graphoenix.showcase.mysql.generated.objectType.Role;
 import io.graphoenix.showcase.mysql.generated.objectType.User;
-import io.graphoenix.spi.handler.InvokeHandler;
+import io.graphoenix.spi.handler.BaseInvokeHandler;
 
-import java.util.Map;
 import java.util.function.Function;
 
-public class InvokeTest implements InvokeHandler {
-
-    private Map<Class<?>, Function<?, ?>> invokeFunctions;
+public class InvokeTest extends BaseInvokeHandler {
 
     private final ApiTest apiTest;
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> Function<T, ? extends T> getInvokeMethod(Class<T> beanCLass) {
-        return (Function<T, ? extends T>) invokeFunctions.get(beanCLass);
-    }
 
     public InvokeTest() {
         this.apiTest = BeanContext.get(ApiTest.class);
         Function<User, User> user = this::user;
-        invokeFunctions.put(User.class, user);
+        put(User.class, user);
         Function<Role, Role> role = this::role;
-        invokeFunctions.put(Role.class, role);
+        put(Role.class, role);
         Function<Organization, Organization> organization = this::organization;
-        invokeFunctions.put(Organization.class, organization);
+        put(Organization.class, organization);
     }
 
     public User user(User user) {

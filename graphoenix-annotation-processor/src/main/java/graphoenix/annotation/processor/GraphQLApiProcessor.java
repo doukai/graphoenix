@@ -12,15 +12,12 @@ import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
+import io.graphoenix.java.generator.config.JavaGeneratorConfig;
+import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.annotation.Generated;
+import org.eclipse.microprofile.graphql.*;
 import org.eclipse.microprofile.graphql.Enum;
-import org.eclipse.microprofile.graphql.GraphQLApi;
-import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.Interface;
-import org.eclipse.microprofile.graphql.Mutation;
-import org.eclipse.microprofile.graphql.Query;
-import org.eclipse.microprofile.graphql.Type;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -39,6 +36,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.RESOURCES_CONFIG_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
@@ -61,6 +59,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private JavaElementToInterface javaElementToInterface;
     private JavaElementToInputType javaElementToInputType;
     private GraphQLApiBuilder graphQLApiBuilder;
+    private InvokeHandlerImplementer invokeHandlerImplementer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -74,10 +73,11 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
+        this.invokeHandlerImplementer = BeanContext.get(InvokeHandlerImplementer.class);
 
         GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
         try {
-            manager.clear();
+            manager.clearAll();
             configRegister.registerConfig(graphQLConfig, RESOURCES_PATH);
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
@@ -145,11 +145,39 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
+        JavaGeneratorConfig javaGeneratorConfig = RESOURCES_CONFIG_UTIL.getValue(JavaGeneratorConfig.class);
+
         try {
             FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "all.gql");
             Writer writer = fileObject.openWriter();
             writer.write(documentBuilder.getDocument().toString());
             writer.close();
+
+            invokeHandlerImplementer
+                    .setConfiguration(javaGeneratorConfig)
+                    .setInvokeMethods(
+                            manager.getObjects()
+                                    .collect(Collectors.toMap(
+                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                            objectTypeDefinitionContext ->
+                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                            .collect(Collectors.toMap(
+                                                                    element -> (TypeElement) element,
+                                                                    element -> element.getEnclosedElements().stream()
+                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                            .filter(executableElement ->
+                                                                                    executableElement.getParameters().stream().anyMatch(
+                                                                                            variableElement -> variableElement.getAnnotation(Source.class) != null &&
+                                                                                                    variableElement.asType().toString().equals(javaGeneratorConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                                                    )
+                                                                            )
+                                                                            .collect(Collectors.toList())
+                                                                    )
+                                                            )
+                                            )
+                                    )
+                    ).writeToFiler(filer);
 
         } catch (IOException e) {
             e.printStackTrace();

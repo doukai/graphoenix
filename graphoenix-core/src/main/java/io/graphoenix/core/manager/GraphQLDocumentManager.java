@@ -482,7 +482,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public void clear() {
+    public void clearAll() {
         graphQLOperationManager.clear();
         graphQLSchemaManager.clear();
         graphQLDirectiveManager.clear();

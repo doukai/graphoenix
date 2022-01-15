@@ -1,5 +1,6 @@
 package io.graphoenix.java.generator.module;
 
+import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.module.DocumentManagerModule;
@@ -42,5 +43,11 @@ public class JavaGeneratorModule {
     @Singleton
     public OperationInterfaceImplementer operationInterfaceImplementer() {
         return new OperationInterfaceImplementer();
+    }
+
+    @Provides
+    @Singleton
+    public InvokeHandlerImplementer invokeHandlerImplementer() {
+        return new InvokeHandlerImplementer(manager);
     }
 }
