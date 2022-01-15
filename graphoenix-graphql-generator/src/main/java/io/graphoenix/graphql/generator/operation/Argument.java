@@ -45,6 +45,51 @@ public class Argument {
         return this;
     }
 
+    public Argument setValueWithVariable(NullValue value) {
+        this.valueWithVariable = value.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(BooleanValue value) {
+        this.valueWithVariable = value.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(IntValue value) {
+        this.valueWithVariable = value.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(FloatValue value) {
+        this.valueWithVariable = value.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(StringValue value) {
+        this.valueWithVariable = value.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(EnumValue value) {
+        this.valueWithVariable = value.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(ObjectValueWithVariable value) {
+        this.valueWithVariable = value.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(ArrayValueWithVariable value) {
+        this.valueWithVariable = value.toString();
+        return this;
+    }
+
+    public Argument setValueWithVariable(Variable variable) {
+        this.valueWithVariable = variable.toString();
+        return this;
+    }
+
     public Argument setValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         this.valueWithVariable = new ValueWithVariable(valueWithVariableContext).toString();
         return this;

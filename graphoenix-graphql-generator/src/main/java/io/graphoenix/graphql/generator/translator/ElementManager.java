@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
+import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -63,7 +64,15 @@ public class ElementManager {
         if (name != null) {
             return name.value();
         } else {
-            return element.getSimpleName().toString();
+            if (element.getSimpleName().toString().startsWith("get")) {
+                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, element.getSimpleName().toString().replaceFirst("get", ""));
+            } else if (element.getSimpleName().toString().startsWith("set")) {
+                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, element.getSimpleName().toString().replaceFirst("set", ""));
+            } else if (element.getSimpleName().toString().startsWith("is")) {
+                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, element.getSimpleName().toString().replaceFirst("is", ""));
+            } else {
+                return element.getSimpleName().toString();
+            }
         }
     }
 

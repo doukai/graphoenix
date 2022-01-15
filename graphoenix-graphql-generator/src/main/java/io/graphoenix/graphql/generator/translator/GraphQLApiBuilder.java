@@ -1,12 +1,16 @@
 package io.graphoenix.graphql.generator.translator;
 
+import io.graphoenix.graphql.generator.document.Directive;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.InputValue;
+import io.graphoenix.graphql.generator.operation.Argument;
+import io.graphoenix.graphql.generator.operation.StringValue;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Types;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GraphQLApiBuilder {
 
@@ -32,6 +36,23 @@ public class GraphQLApiBuilder {
                                                 .setTypeName(elementManager.variableElementToInputTypeName(variableElement, typeUtils))
                                 )
                                 .collect(Collectors.toList())
+                )
+                .setDirectives(
+                        Stream.of(new Directive()
+                                        .setName("invoke")
+                                        .addArgument(
+                                                new Argument()
+                                                        .setName("className")
+                                                        .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                        )
+                                        .addArgument(
+                                                new Argument()
+                                                        .setName("methodName")
+                                                        .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                        )
+                                )
+                                .map(Directive::toString).
+                                collect(Collectors.toList())
                 );
     }
 }

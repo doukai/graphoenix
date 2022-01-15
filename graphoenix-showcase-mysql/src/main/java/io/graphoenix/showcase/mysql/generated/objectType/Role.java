@@ -2,14 +2,11 @@ package io.graphoenix.showcase.mysql.generated.objectType;
 
 import io.graphoenix.showcase.mysql.generated.interfaceType.Meta;
 import jakarta.annotation.Generated;
-import java.lang.Boolean;
-import java.lang.Integer;
-import java.lang.Override;
-import java.lang.String;
-import java.util.Set;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
+
+import java.util.Set;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
@@ -25,6 +22,8 @@ public class Role implements Meta {
   private Integer version;
 
   private Boolean isDeprecated;
+
+  private String roleMark;
 
   public Integer getId() {
     return this.id;
@@ -68,5 +67,13 @@ public class Role implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String getRoleMark() {
+    return roleMark;
+  }
+
+  public void setRoleMark(String roleMark) {
+    this.roleMark = roleMark;
   }
 }

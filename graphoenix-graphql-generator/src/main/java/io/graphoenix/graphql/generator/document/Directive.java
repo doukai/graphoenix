@@ -4,6 +4,7 @@ import io.graphoenix.graphql.generator.operation.Argument;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Directive {
@@ -26,6 +27,14 @@ public class Directive {
 
     public Directive setArguments(List<Argument> arguments) {
         this.arguments = arguments;
+        return this;
+    }
+
+    public Directive addArgument(Argument argument) {
+        if (arguments == null) {
+            arguments = new ArrayList<>();
+        }
+        this.arguments.add(argument);
         return this;
     }
 
