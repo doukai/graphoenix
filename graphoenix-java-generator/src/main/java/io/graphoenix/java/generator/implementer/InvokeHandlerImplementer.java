@@ -2,7 +2,6 @@ package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -79,18 +78,23 @@ public class InvokeHandlerImplementer {
     public MethodSpec buildConstructor() {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
 
-        invokeMethods.forEach((key, value) ->
-                value.keySet().forEach(
-                        typeElement ->
-                                builder.addStatement("this.$L = $T.get($T.class)",
-                                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
-                                        ClassName.get(BeanContext.class),
-                                        ClassName.get(typeElement)
-                                )
-                )
-        );
+        invokeMethods.values().stream()
+                .flatMap(value -> value.keySet().stream())
+                .collect(Collectors.toSet())
+                .forEach(typeElement ->
+                        builder.addStatement("this.$L = $T.get($T.class)",
+                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
+                                ClassName.get(BeanContext.class),
+                                ClassName.get(typeElement)
+                        )
+                );
 
-        manager.getObjects().forEach(objectTypeDefinitionContext ->
+        manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                ).forEach(objectTypeDefinitionContext ->
                 builder.addStatement("$T<$T, $T> $L = this::$L",
                         ClassName.get(Function.class),
                         ClassName.get(configuration.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
@@ -107,7 +111,12 @@ public class InvokeHandlerImplementer {
     }
 
     public List<MethodSpec> buildTypeInvokeMethods() {
-        return manager.getObjects().map(this::buildTypeInvokeMethod).collect(Collectors.toList());
+        return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                ).map(this::buildTypeInvokeMethod).collect(Collectors.toList());
     }
 
     public MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -117,25 +126,24 @@ public class InvokeHandlerImplementer {
                 .addParameter(ClassName.get(configuration.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), getParameterName(objectTypeDefinitionContext));
 
         if (invokeMethods.get(objectTypeDefinitionContext.name().getText()) != null) {
-            MethodSpec.Builder nullCheckFlow = builder.beginControlFlow("if ($L != null)", getParameterName(objectTypeDefinitionContext));
+            builder.beginControlFlow("if ($L != null)", getParameterName(objectTypeDefinitionContext));
             invokeMethods.get(objectTypeDefinitionContext.name().getText())
                     .forEach((key, value) ->
                             value.forEach(executableElement ->
-                                    nullCheckFlow
-                                            .addStatement("$L.$L($L.$L($L))",
-                                                    getParameterName(objectTypeDefinitionContext),
-                                                    getInvokeFieldSetterMethodName(executableElement.getSimpleName().toString()),
-                                                    CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key.getSimpleName().toString()),
-                                                    executableElement.getSimpleName().toString(),
-                                                    getParameterName(objectTypeDefinitionContext)
-                                            )
+                                    builder.addStatement("$L.$L($L.$L($L))",
+                                            getParameterName(objectTypeDefinitionContext),
+                                            getInvokeFieldSetterMethodName(executableElement.getSimpleName().toString()),
+                                            CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key.getSimpleName().toString()),
+                                            executableElement.getSimpleName().toString(),
+                                            getParameterName(objectTypeDefinitionContext)
+                                    )
                             ));
 
             manager.getFields(objectTypeDefinitionContext.name().getText())
                     .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                     .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                     .forEach(fieldDefinitionContext ->
-                            nullCheckFlow.addStatement("$L($L.$L())",
+                            builder.addStatement("$L($L.$L())",
                                     getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                                     getParameterName(objectTypeDefinitionContext),
                                     getFieldGetterMethodName(fieldDefinitionContext)
@@ -146,22 +154,17 @@ public class InvokeHandlerImplementer {
                     .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                     .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                     .forEach(fieldDefinitionContext ->
-                            nullCheckFlow.addStatement(
-                                    CodeBlock.builder()
-                                            .beginControlFlow("if ($L.$L() != null)",
-                                                    getParameterName(objectTypeDefinitionContext),
-                                                    getFieldGetterMethodName(fieldDefinitionContext)
-                                            )
-                                            .add("$L.$L().forEach(this::$L)",
-                                                    getParameterName(objectTypeDefinitionContext),
-                                                    getFieldGetterMethodName(fieldDefinitionContext),
-                                                    getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                            )
-                                            .endControlFlow().build()
-                            )
+                            builder.beginControlFlow("if ($L.$L() != null)",
+                                    getParameterName(objectTypeDefinitionContext),
+                                    getFieldGetterMethodName(fieldDefinitionContext)
+                            ).addStatement("$L.$L().forEach(this::$L)",
+                                    getParameterName(objectTypeDefinitionContext),
+                                    getFieldGetterMethodName(fieldDefinitionContext),
+                                    getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                            ).endControlFlow().build()
                     );
 
-            nullCheckFlow.endControlFlow();
+            builder.endControlFlow();
         }
         builder.addStatement("return $L", getParameterName(objectTypeDefinitionContext));
 
