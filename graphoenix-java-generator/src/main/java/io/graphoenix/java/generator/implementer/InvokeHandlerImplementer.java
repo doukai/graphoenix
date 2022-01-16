@@ -1,24 +1,28 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.handler.BaseInvokeHandler;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class InvokeHandlerImplementer {
@@ -53,6 +57,7 @@ public class InvokeHandlerImplementer {
 
     public TypeSpec buildInvokeHandlerImpl() {
         return TypeSpec.classBuilder("InvokeHandlerImpl")
+                .superclass(BaseInvokeHandler.class)
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeInvokeMethods())
@@ -64,7 +69,9 @@ public class InvokeHandlerImplementer {
                 .flatMap(typeElementListMap ->
                         typeElementListMap.keySet().stream()
                                 .map(typeElement ->
-                                        FieldSpec.builder(ClassName.get(typeElement), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString())).build()
+                                        FieldSpec.builder(ClassName.get(typeElement), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
+                                                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                                                .build()
                                 )
                 ).collect(Collectors.toSet());
     }
@@ -84,12 +91,13 @@ public class InvokeHandlerImplementer {
         );
 
         manager.getObjects().forEach(objectTypeDefinitionContext ->
-                builder.addStatement("Function<$T, $T> $L = this::$L",
+                builder.addStatement("$T<$T, $T> $L = this::$L",
+                        ClassName.get(Function.class),
                         ClassName.get(configuration.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
                         ClassName.get(configuration.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
                         CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()),
                         CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
-                ).addStatement("put(User.class, user)",
+                ).addStatement("put($T.class, $L)",
                         ClassName.get(configuration.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
                         CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
                 )
@@ -103,18 +111,13 @@ public class InvokeHandlerImplementer {
     }
 
     public MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return MethodSpec.methodBuilder(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()))
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()))
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(configuration.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), getParameterName(objectTypeDefinitionContext))
-                .addStatement(buildTypeInvokeMethodStatement(objectTypeDefinitionContext))
-                .build();
-    }
-
-    public CodeBlock buildTypeInvokeMethodStatement(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        CodeBlock.Builder builder = CodeBlock.builder();
+                .returns(ClassName.get(configuration.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()))
+                .addParameter(ClassName.get(configuration.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), getParameterName(objectTypeDefinitionContext));
 
         if (invokeMethods.get(objectTypeDefinitionContext.name().getText()) != null) {
-            CodeBlock.Builder nullCheckFlow = builder.beginControlFlow("if ($L != null)", getParameterName(objectTypeDefinitionContext));
+            MethodSpec.Builder nullCheckFlow = builder.beginControlFlow("if ($L != null)", getParameterName(objectTypeDefinitionContext));
             invokeMethods.get(objectTypeDefinitionContext.name().getText())
                     .forEach((key, value) ->
                             value.forEach(executableElement ->
@@ -132,7 +135,7 @@ public class InvokeHandlerImplementer {
                     .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                     .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                     .forEach(fieldDefinitionContext ->
-                            nullCheckFlow.addStatement("$L($L.$L)",
+                            nullCheckFlow.addStatement("$L($L.$L())",
                                     getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                                     getParameterName(objectTypeDefinitionContext),
                                     getFieldGetterMethodName(fieldDefinitionContext)
@@ -145,11 +148,11 @@ public class InvokeHandlerImplementer {
                     .forEach(fieldDefinitionContext ->
                             nullCheckFlow.addStatement(
                                     CodeBlock.builder()
-                                            .beginControlFlow("if ($L.$L != null)",
+                                            .beginControlFlow("if ($L.$L() != null)",
                                                     getParameterName(objectTypeDefinitionContext),
                                                     getFieldGetterMethodName(fieldDefinitionContext)
                                             )
-                                            .addStatement("$L.$L.forEach(this::$L)",
+                                            .add("$L.$L().forEach(this::$L)",
                                                     getParameterName(objectTypeDefinitionContext),
                                                     getFieldGetterMethodName(fieldDefinitionContext),
                                                     getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
@@ -160,8 +163,9 @@ public class InvokeHandlerImplementer {
 
             nullCheckFlow.endControlFlow();
         }
+        builder.addStatement("return $L", getParameterName(objectTypeDefinitionContext));
 
-        return builder/*.addStatement("return $L", getParameterName(objectTypeDefinitionContext))*/.build();
+        return builder.build();
     }
 
     private String getParameterName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
