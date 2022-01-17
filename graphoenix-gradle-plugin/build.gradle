@@ -16,6 +16,7 @@ dependencies {
     compile project(":graphoenix-core")
     implementation project(":graphoenix-java-generator")
     implementation project(":graphoenix-graphql-builder")
+    implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.23.1'
     compile "org.antlr:antlr4:4.9.2"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

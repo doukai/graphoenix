@@ -5,6 +5,9 @@ import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.InputValue;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.StringValue;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import org.eclipse.microprofile.graphql.Source;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -54,5 +57,38 @@ public class GraphQLApiBuilder {
                                 .map(Directive::toString).
                                 collect(Collectors.toList())
                 );
+    }
+
+    public Tuple2<String, Field> variableElementToObjectField(ExecutableElement executableElement, Types typeUtils) {
+        return Tuple.of(
+                elementManager.variableElementToTypeName(
+                        executableElement.getParameters().stream()
+                                .filter(variableElement -> variableElement.getAnnotation(Source.class) != null)
+                                .findFirst()
+                                .orElseThrow(),
+                        typeUtils
+                ),
+                new Field()
+                        .setName(elementManager.getNameFromElement(executableElement))
+                        .setDescription(elementManager.getDescriptionFromElement(executableElement))
+                        .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
+                        .setDirectives(
+                                Stream.of(new Directive()
+                                                .setName("invoke")
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName("className")
+                                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                                )
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName("methodName")
+                                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                                )
+                                        )
+                                        .map(Directive::toString).
+                                        collect(Collectors.toList())
+                        )
+        );
     }
 }

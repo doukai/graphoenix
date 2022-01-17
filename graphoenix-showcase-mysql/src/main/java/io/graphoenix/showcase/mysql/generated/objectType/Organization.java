@@ -27,7 +27,7 @@ public class Organization implements Meta {
 
   private Boolean isDeprecated;
 
-  private String roleMark;
+  private Set<User> organizationUsers;
 
   public Integer getId() {
     return this.id;
@@ -89,11 +89,11 @@ public class Organization implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
-  public String getRoleMark() {
-    return roleMark;
+  public Set<User> getOrganizationUsers() {
+    return this.organizationUsers;
   }
 
-  public void setRoleMark(String roleMark) {
-    this.roleMark = roleMark;
+  public void setOrganizationUsers(Set<User> organizationUsers) {
+    this.organizationUsers = organizationUsers;
   }
 }

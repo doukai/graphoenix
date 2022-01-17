@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.generated.inputObjectType;
 
 import jakarta.annotation.Generated;
+import java.lang.String;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input

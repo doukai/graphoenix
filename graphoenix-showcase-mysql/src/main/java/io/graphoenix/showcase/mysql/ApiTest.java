@@ -7,6 +7,8 @@ import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 
+import java.util.Set;
+
 @GraphQLApi
 public class ApiTest {
 
@@ -23,5 +25,9 @@ public class ApiTest {
     @Query
     public String getOrganizationMark(@Source Organization organization) {
         return organization.getName();
+    }
+
+    public Set<User> getOrganizationUsers(@Source Organization organization) {
+        return organization.getUsers();
     }
 }

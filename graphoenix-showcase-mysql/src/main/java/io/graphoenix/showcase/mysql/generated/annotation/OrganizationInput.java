@@ -15,6 +15,8 @@ public @interface OrganizationInput {
 
   boolean isDeprecated() default false;
 
+  UserInnerInput[] organizationUsers() default {};
+
   OrganizationInnerInput above() default @OrganizationInnerInput;
 
   String name() default "";
@@ -28,6 +30,8 @@ public @interface OrganizationInput {
   String $aboveId() default "";
 
   String $isDeprecated() default "";
+
+  String $organizationUsers() default "";
 
   String $above() default "";
 

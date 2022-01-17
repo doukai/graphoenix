@@ -15,6 +15,8 @@ public @interface OrganizationExpressions {
 
   OrganizationExpression[] value() default {};
 
+  UserExpression[] organizationUsers() default {};
+
   OrganizationExpression[] above() default {};
 
   UserExpression[] users() default {};

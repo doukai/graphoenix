@@ -50,8 +50,7 @@ public class TypeSpecBuilder {
                 .addAnnotation(Type.class)
                 .addAnnotation(getGeneratedAnnotationSpec());
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
-                .forEach(
-                        fieldDefinitionContext -> {
+                .forEach(fieldDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(fieldDefinitionContext);
                             builder.addField(fieldSpec);
                             addGetterAndSetter(fieldSpec, builder, objectTypeDefinitionContext.implementsInterfaces());
@@ -59,8 +58,7 @@ public class TypeSpecBuilder {
                 );
         if (objectTypeDefinitionContext.implementsInterfaces() != null) {
             objectTypeDefinitionContext.implementsInterfaces().typeName()
-                    .forEach(
-                            typeNameContext -> {
+                    .forEach(typeNameContext -> {
                                 builder.addSuperinterface(ClassName.get(configuration.getInterfaceTypePackageName(), typeNameContext.name().getText()));
                             }
                     );

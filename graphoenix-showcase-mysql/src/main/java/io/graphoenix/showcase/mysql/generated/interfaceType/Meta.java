@@ -1,6 +1,8 @@
 package io.graphoenix.showcase.mysql.generated.interfaceType;
 
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
+import java.lang.Integer;
 import org.eclipse.microprofile.graphql.Interface;
 
 @Interface

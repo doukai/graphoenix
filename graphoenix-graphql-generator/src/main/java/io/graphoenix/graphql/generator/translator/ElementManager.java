@@ -12,6 +12,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -123,7 +124,14 @@ public class ElementManager {
         } else if (typeElement.getQualifiedName().toString().equals(Collection.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(List.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Set.class.getName())) {
-            typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
+
+            if (element.getKind().equals(ElementKind.METHOD)) {
+                typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0)), types)).concat("]");
+            } else if (element.getKind().equals(ElementKind.FIELD)) {
+                typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
+            } else {
+                throw new RuntimeException();
+            }
         } else {
             typeName = typeElement.getSimpleName().toString();
         }
@@ -164,7 +172,14 @@ public class ElementManager {
         } else if (typeElement.getQualifiedName().toString().equals(Collection.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(List.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Set.class.getName())) {
-            typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
+
+            if (element.getKind().equals(ElementKind.METHOD)) {
+                typeName = "[".concat(elementToInputTypeName(element, (TypeElement) types.asElement(((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0)), types)).concat("]");
+            } else if (element.getKind().equals(ElementKind.FIELD)) {
+                typeName = "[".concat(elementToInputTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
+            } else {
+                throw new RuntimeException();
+            }
         } else {
             typeName = typeElement.getSimpleName().toString().concat("Input");
         }
