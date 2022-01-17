@@ -9,8 +9,8 @@ public class BaseInvokeHandler implements InvokeHandler {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Function<T, ? extends T> getInvokeMethod(Class<T> beanCLass) {
-        return (Function<T, ? extends T>) invokeFunctions.get(beanCLass);
+    public <T> Function<T, T> getInvokeMethod(Class<T> beanCLass) {
+        return (Function<T, T>) invokeFunctions.get(beanCLass);
     }
 
     protected void put(Class<?> beanClass, Function<?, ?> function) {

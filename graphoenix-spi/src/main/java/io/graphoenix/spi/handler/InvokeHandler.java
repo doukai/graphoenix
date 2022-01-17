@@ -4,5 +4,5 @@ import java.util.function.Function;
 
 public interface InvokeHandler {
 
-    <T> Function<T, ? extends T> getInvokeMethod(Class<T> beanCLass);
+    <T> Function<T, T> getInvokeMethod(Class<T> beanCLass);
 }
