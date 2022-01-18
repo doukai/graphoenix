@@ -6,6 +6,7 @@ import io.graphoenix.java.generator.builder.ModuleContextBuilder;
 import io.graphoenix.java.generator.builder.TypeSpecBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
+import io.graphoenix.java.generator.implementer.QueryHandlerImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
@@ -55,5 +56,11 @@ public class JavaGeneratorModule {
     @Singleton
     public InvokeHandlerImplementer invokeHandlerImplementer() {
         return new InvokeHandlerImplementer(manager);
+    }
+
+    @Provides
+    @Singleton
+    public QueryHandlerImplementer queryHandlerImplementer() {
+        return new QueryHandlerImplementer(manager);
     }
 }

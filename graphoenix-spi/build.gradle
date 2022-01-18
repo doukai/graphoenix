@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     antlr "org.antlr:antlr4:4.9.2"
-    compile 'org.reactivestreams:reactive-streams:1.0.3'
+    compile "io.projectreactor:reactor-core:3.4.11"
     compile 'io.r2dbc:r2dbc-spi:0.8.5.RELEASE'
     compile "io.vavr:vavr:0.10.4"
     compile 'com.google.dagger:dagger-spi:2.40.5'

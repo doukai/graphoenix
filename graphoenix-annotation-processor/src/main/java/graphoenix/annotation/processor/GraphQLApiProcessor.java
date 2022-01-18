@@ -14,7 +14,9 @@ import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
+import io.graphoenix.java.generator.implementer.QueryHandlerImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.Enum;
@@ -67,6 +69,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private JavaElementToInputType javaElementToInputType;
     private GraphQLApiBuilder graphQLApiBuilder;
     private InvokeHandlerImplementer invokeHandlerImplementer;
+    private QueryHandlerImplementer queryHandlerImplementer;
     private GraphQLConfig graphQLConfig;
 
     @Override
@@ -82,6 +85,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
         this.invokeHandlerImplementer = BeanContext.get(InvokeHandlerImplementer.class);
+        this.queryHandlerImplementer = BeanContext.get(QueryHandlerImplementer.class);
         graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
 
         try {
@@ -166,28 +170,45 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .setInvokeMethods(
                             manager.getObjects()
                                     .collect(Collectors.toMap(
-                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                                    objectTypeDefinitionContext ->
-                                                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                                                    .collect(Collectors.toMap(
-                                                                                    element -> (TypeElement) element,
-                                                                                    element -> element.getEnclosedElements().stream()
-                                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
-                                                                                            .map(subElement -> (ExecutableElement) subElement)
-                                                                                            .filter(executableElement ->
-                                                                                                    executableElement.getAnnotation(Query.class) == null &&
-                                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
-                                                                                                            executableElement.getParameters().stream().anyMatch(
-                                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
-                                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
-                                                                                                            )
+                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                            objectTypeDefinitionContext ->
+                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                            .collect(Collectors.toMap(
+                                                                    element -> (TypeElement) element,
+                                                                    element -> element.getEnclosedElements().stream()
+                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                            .filter(executableElement ->
+                                                                                    executableElement.getAnnotation(Query.class) == null &&
+                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
+                                                                                            executableElement.getParameters().stream().anyMatch(
+                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
+                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
                                                                                             )
-                                                                                            .collect(Collectors.toList())
                                                                             )
+                                                                            .collect(Collectors.toList())
                                                                     )
+                                                            )
                                             )
                                     )
-                    ).writeToFiler(filer);
+                    )
+                    .writeToFiler(filer);
+
+            queryHandlerImplementer
+                    .setConfiguration(graphQLConfig)
+                    .setInvokeMethods(
+                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                    .map(element -> (TypeElement) element)
+                                    .flatMap(typeElement ->
+                                            typeElement.getEnclosedElements().stream()
+                                                    .filter(element -> element.getKind().equals(ElementKind.METHOD))
+                                                    .map(element -> (ExecutableElement) element)
+                                                    .filter(executableElement -> executableElement.getAnnotation(Query.class) != null)
+                                                    .map(executableElement -> Tuple.of(typeElement, executableElement))
+                                    )
+                                    .collect(Collectors.toList())
+                    )
+                    .writeToFiler(filer);
 
         } catch (IOException e) {
             e.printStackTrace();
