@@ -7,11 +7,14 @@ import io.graphoenix.core.manager.GraphQLConfigRegister;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
+import io.graphoenix.java.generator.builder.ModuleContextBuilder;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
 import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.handler.GeneratorHandler;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import io.vavr.control.Try;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -33,6 +36,7 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,6 +56,8 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
     private GeneratorHandler generatorHandler;
     private JavaElementToOperation javaElementToOperation;
     private OperationInterfaceImplementer operationInterfaceImplementer;
+    private ModuleContextBuilder moduleContextBuilder;
+    private GraphQLConfig graphQLConfig;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -65,8 +71,9 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         this.generatorHandler = BeanContext.get(GeneratorHandler.class);
         this.javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         this.operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
+        this.moduleContextBuilder = BeanContext.get(ModuleContextBuilder.class);
+        graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
 
-        GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
         try {
             manager.clearAll();
             configRegister.registerConfig(graphQLConfig, RESOURCES_PATH);
@@ -81,6 +88,10 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
+        if (annotations.isEmpty()) {
+            return true;
+        }
 
         final Elements elementUtils = processingEnv.getElementUtils();
         final Filer filer = processingEnv.getFiler();
@@ -140,6 +151,18 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                 }
             }
         }
+
+        List<Tuple2<PackageElement, TypeElement>> elementList = roundEnv.getElementsAnnotatedWith(GraphQLOperation.class).stream()
+                .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
+                .map(element -> Tuple.of(elementUtils.getPackageOf(element), (TypeElement) element))
+                .collect(Collectors.toList());
+
+        try {
+            moduleContextBuilder.buildModuleContext(graphQLConfig.getPackageName(), "GraphQLOperationContext", elementList, filer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return true;
     }
 }

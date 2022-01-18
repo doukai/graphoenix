@@ -3,7 +3,7 @@ package io.graphoenix.spi.handler;
 import java.util.Map;
 import java.util.function.Function;
 
-public class BaseInvokeHandler implements InvokeHandler {
+public abstract class BaseInvokeHandler implements InvokeHandler {
 
     private Map<Class<?>, Function<?, ?>> invokeFunctions;
 

@@ -88,7 +88,6 @@ public class BeanContext {
         }
     }
 
-
     private static <T> Optional<T> getAndCacheOptional(Class<T> beanClass) {
 
         Optional<Supplier<T>> supplierOptional = moduleContexts.stream()
@@ -100,9 +99,5 @@ public class BeanContext {
         supplierOptional.ifPresent(supplier -> contextCache.put(beanClass, supplier));
 
         return supplierOptional.map(Supplier::get);
-    }
-
-    public static void cache(Class<?> beanClass, Supplier<?> supplier) {
-        contextCache.put(beanClass, supplier);
     }
 }

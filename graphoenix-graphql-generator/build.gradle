@@ -13,12 +13,13 @@ repositories {
 }
 
 dependencies {
-    implementation project(":graphoenix-core")
+    compile project(":graphoenix-core")
     implementation 'org.antlr:ST4:4.3'
 
     annotationProcessor project(":graphoenix-dagger")
     annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-aop")
+    annotationProcessor project(":graphoenix-core")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

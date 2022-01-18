@@ -3,7 +3,7 @@ package io.graphoenix.spi.handler;
 import java.util.Map;
 import java.util.function.Function;
 
-public class BaseMutationHandler implements MutationHandler {
+public abstract class BaseMutationHandler implements MutationHandler {
 
     private Map<String, Function<Map<String, Object>, ?>> invokeFunctions;
 

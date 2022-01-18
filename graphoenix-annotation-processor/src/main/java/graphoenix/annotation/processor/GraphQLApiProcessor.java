@@ -13,13 +13,18 @@ import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
-import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple2;
 import jakarta.annotation.Generated;
-import org.eclipse.microprofile.graphql.*;
 import org.eclipse.microprofile.graphql.Enum;
+import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.Interface;
+import org.eclipse.microprofile.graphql.Mutation;
+import org.eclipse.microprofile.graphql.Query;
+import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.graphql.Type;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -62,6 +67,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private JavaElementToInputType javaElementToInputType;
     private GraphQLApiBuilder graphQLApiBuilder;
     private InvokeHandlerImplementer invokeHandlerImplementer;
+    private GraphQLConfig graphQLConfig;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -76,8 +82,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
         this.invokeHandlerImplementer = BeanContext.get(InvokeHandlerImplementer.class);
+        graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
 
-        GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
         try {
             manager.clearAll();
             configRegister.registerConfig(graphQLConfig, RESOURCES_PATH);
@@ -93,7 +99,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         if (annotations.isEmpty()) {
-            return false;
+            return true;
         }
 
         final Types typeUtils = processingEnv.getTypeUtils();
@@ -147,38 +153,38 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
-        JavaGeneratorConfig javaGeneratorConfig = RESOURCES_CONFIG_UTIL.getValue(JavaGeneratorConfig.class);
+        GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
 
         try {
-            FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "all.gql");
+            FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "schema.gql");
             Writer writer = fileObject.openWriter();
             writer.write(documentBuilder.getDocument().toString());
             writer.close();
 
             invokeHandlerImplementer
-                    .setConfiguration(javaGeneratorConfig)
+                    .setConfiguration(graphQLConfig)
                     .setInvokeMethods(
                             manager.getObjects()
                                     .collect(Collectors.toMap(
-                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                            objectTypeDefinitionContext ->
-                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                                            .collect(Collectors.toMap(
-                                                                    element -> (TypeElement) element,
-                                                                    element -> element.getEnclosedElements().stream()
-                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
-                                                                            .map(subElement -> (ExecutableElement) subElement)
-                                                                            .filter(executableElement ->
-                                                                                    executableElement.getAnnotation(Query.class) == null &&
-                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
-                                                                                            executableElement.getParameters().stream().anyMatch(
-                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
-                                                                                                            variableElement.asType().toString().equals(javaGeneratorConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                                    objectTypeDefinitionContext ->
+                                                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                                    .collect(Collectors.toMap(
+                                                                                    element -> (TypeElement) element,
+                                                                                    element -> element.getEnclosedElements().stream()
+                                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                                            .filter(executableElement ->
+                                                                                                    executableElement.getAnnotation(Query.class) == null &&
+                                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
+                                                                                                            executableElement.getParameters().stream().anyMatch(
+                                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
+                                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                                                                            )
                                                                                             )
+                                                                                            .collect(Collectors.toList())
                                                                             )
-                                                                            .collect(Collectors.toList())
                                                                     )
-                                                            )
                                             )
                                     )
                     ).writeToFiler(filer);
@@ -187,7 +193,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
             e.printStackTrace();
         }
 
-        return false;
+        return true;
     }
 
     private void registerGraphQLApiElement(Element element, Types typeUtils) {

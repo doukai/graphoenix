@@ -15,8 +15,6 @@ plugins {
 apply plugin: 'io.graphoenix'
 graphql {
     graphQLFileName = "auth.gql"
-}
-javaGenerator {
     packageName = "io.graphoenix.showcase.mysql.generated"
 }
 

@@ -9,7 +9,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import io.vavr.CheckedFunction0;
@@ -118,12 +117,6 @@ public class OperationInterfaceImplementer {
     private CodeBlock buildFileContentFieldInitializeCodeBlock(PackageElement packageElement, TypeElement typeElement, String suffix) {
         ClassName typeClassName = ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl");
         CodeBlock.Builder builder = CodeBlock.builder();
-        builder.addStatement(
-                "$T.cache($T.class, $T::get)",
-                TypeName.get(BeanContext.class),
-                ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString()),
-                typeClassName
-        );
         typeElement.getEnclosedElements().forEach(element ->
                 builder.addStatement(
                         "$L = fileToString($T.class,$S)",

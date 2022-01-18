@@ -2,7 +2,7 @@ package io.graphoenix.java.generator.builder;
 
 import com.google.common.collect.Streams;
 import com.squareup.javapoet.JavaFile;
-import io.graphoenix.java.generator.config.JavaGeneratorConfig;
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.control.Try;
 
@@ -15,12 +15,12 @@ public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeSpecBuilder typeSpecBuilder;
-    private final JavaGeneratorConfig configuration;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public JavaFileBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration, TypeSpecBuilder typeSpecBuilder) {
+    public JavaFileBuilder(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig, TypeSpecBuilder typeSpecBuilder) {
         this.manager = manager;
-        this.configuration = configuration;
+        this.graphQLConfig = graphQLConfig;
         this.typeSpecBuilder = typeSpecBuilder;
     }
 
@@ -28,15 +28,15 @@ public class JavaFileBuilder {
         this.buildJavaFileList().forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
     }
 
-    public void writeToPath(File path, JavaGeneratorConfig configuration) {
-        this.buildJavaFileList(configuration, typeSpecBuilder.setConfiguration(configuration)).forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
+    public void writeToPath(File path, GraphQLConfig graphQLConfig) {
+        this.buildJavaFileList(graphQLConfig, typeSpecBuilder.setConfiguration(graphQLConfig)).forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
     }
 
     public Stream<JavaFile> buildJavaFileList() {
-        return buildJavaFileList(configuration, typeSpecBuilder);
+        return buildJavaFileList(graphQLConfig, typeSpecBuilder);
     }
 
-    public Stream<JavaFile> buildJavaFileList(JavaGeneratorConfig configuration, TypeSpecBuilder typeSpecBuilder) {
+    public Stream<JavaFile> buildJavaFileList(GraphQLConfig configuration, TypeSpecBuilder typeSpecBuilder) {
 
         return Streams.concat(
                 manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),

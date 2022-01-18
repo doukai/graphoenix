@@ -1,16 +1,23 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
+import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.handler.BaseInvokeHandler;
+import io.graphoenix.spi.handler.BaseQueryHandler;
+import io.graphoenix.spi.handler.InvokeHandler;
+import io.graphoenix.spi.handler.OperationHandler;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
@@ -18,30 +25,26 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class InvokeHandlerImplementer {
+public class QueryHandlerImplementer {
 
     private final IGraphQLDocumentManager manager;
     private GraphQLConfig graphQLConfig;
-    private Map<String, Map<TypeElement, List<ExecutableElement>>> invokeMethods;
+    private List<Tuple2<TypeElement, ExecutableElement>> invokeMethods;
 
     @Inject
-    public InvokeHandlerImplementer(IGraphQLDocumentManager manager) {
+    public QueryHandlerImplementer(IGraphQLDocumentManager manager) {
         this.manager = manager;
     }
 
-    public InvokeHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
+    public QueryHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        return this;
-    }
-
-    public InvokeHandlerImplementer setInvokeMethods(Map<String, Map<TypeElement, List<ExecutableElement>>> invokeMethods) {
-        this.invokeMethods = invokeMethods;
         return this;
     }
 
@@ -55,8 +58,8 @@ public class InvokeHandlerImplementer {
     }
 
     public TypeSpec buildInvokeHandlerImpl() {
-        return TypeSpec.classBuilder("InvokeHandlerImpl")
-                .superclass(BaseInvokeHandler.class)
+        return TypeSpec.classBuilder("QueryHandlerImpl")
+                .superclass(BaseQueryHandler.class)
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeInvokeMethods())
@@ -64,50 +67,80 @@ public class InvokeHandlerImplementer {
     }
 
     public Set<FieldSpec> buildFields() {
-        return this.invokeMethods.values().stream()
-                .flatMap(typeElementListMap ->
-                        typeElementListMap.keySet().stream()
-                                .map(typeElement ->
-                                        FieldSpec.builder(ClassName.get(typeElement), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
-                                                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
-                                                .build()
-                                )
-                ).collect(Collectors.toSet());
+        return manager.getFields(manager.getQueryOperationTypeName().orElseThrow()).map(this::buildField).collect(Collectors.toSet());
+    }
+
+    public MethodSpec buildMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
+                .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, Object.class), "variables").build());
+
+        Optional<Tuple2<String, String>> invokeDirective = getInvokeDirective(fieldDefinitionContext);
+        boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
+        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        if (invokeDirective.isPresent()) {
+            builder.addStatement("return $L.$L()",
+                    ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName),
+                    invokeMethods.stream().filter(tuple -> tuple._2().getSimpleName().toString().equals(fieldDefinitionContext.name().getText()))
+                            .map(tuple -> tuple._1().getSimpleName().toString())
+                            .findFirst()
+                            .orElseThrow(),
+                    invokeMethods.stream()
+                            .filter(tuple -> tuple._2().getSimpleName().toString().equals(fieldDefinitionContext.name().getText()))
+                            .map(tuple -> tuple._2().getSimpleName().toString())
+                            .findFirst()
+                            .orElseThrow()
+            );
+        } else {
+            if (fieldTypeIsList) {
+                builder.returns(ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName)));
+                builder.addStatement("$T type = new $T<$T<$T>>() {}.getType()",
+                        ClassName.get(Type.class),
+                        ClassName.get(TypeToken.class),
+                        ClassName.get(List.class),
+                        ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName)
+                );
+                builder.addStatement("$T<$T> result = jsonBuilder.create().fromJson($L.query(graphQL, variables), type)",
+                        ClassName.get(List.class),
+                        ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName),
+                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, OperationHandler.class.getSimpleName()),
+                        ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName)
+                );
+                builder.addStatement("return result.stream().map(item-> invokeHandler.getInvokeMethod($T.class).apply(item)).collect($T.toList())",
+                        ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName),
+                        ClassName.get(Collectors.class)
+                );
+            } else {
+                builder.returns(ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName));
+                builder.addStatement("$T result = jsonBuilder.create().fromJson($L.query(graphQL, variables), $T.class)",
+                        ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName),
+                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, OperationHandler.class.getSimpleName()),
+                        ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName)
+                );
+                builder.addStatement("return invokeHandler.getInvokeMethod($T.class).apply(result)",
+                        ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName)
+                );
+            }
+        }
+        return builder.build();
     }
 
     public MethodSpec buildConstructor() {
-        MethodSpec.Builder builder = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
-
-        invokeMethods.values().stream()
-                .flatMap(value -> value.keySet().stream())
-                .collect(Collectors.toSet())
-                .forEach(typeElement ->
-                        builder.addStatement("this.$L = $T.get($T.class)",
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
-                                ClassName.get(BeanContext.class),
-                                ClassName.get(typeElement)
-                        )
-                );
-
-        manager.getObjects()
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                ).forEach(objectTypeDefinitionContext ->
-                builder.addStatement("$T<$T, $T> $L = this::$L",
-                        ClassName.get(Function.class),
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
-                ).addStatement("put($T.class, $L)",
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
+        return MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addStatement("this.$L = $T.get($T.class)",
+                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, OperationHandler.class.getSimpleName()),
+                        ClassName.get(BeanContext.class),
+                        ClassName.get(OperationHandler.class)
                 )
-        );
-
-        return builder.build();
+                .addStatement("this.$L = $T.get($T.class)",
+                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, InvokeHandler.class.getSimpleName()),
+                        ClassName.get(BeanContext.class),
+                        ClassName.get(InvokeHandler.class)
+                )
+                .build();
     }
 
     public List<MethodSpec> buildTypeInvokeMethods() {
@@ -205,5 +238,29 @@ public class InvokeHandlerImplementer {
 
     private String getFieldSetterMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(fieldDefinitionContext.name().getText())));
+    }
+
+    private Optional<Tuple2<String, String>> getInvokeDirective(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        if (fieldDefinitionContext.directives() == null) {
+            return Optional.empty();
+        }
+
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .map(directiveContext ->
+                        Tuple.of(directiveContext.arguments().argument().stream()
+                                        .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                                        .map(argumentContext -> argumentContext.valueWithVariable().StringValue())
+                                        .map(stringValue -> stringValue.toString().substring(1, stringValue.getText().length() - 1))
+                                        .findFirst()
+                                        .orElseThrow(),
+                                directiveContext.arguments().argument().stream()
+                                        .filter(argumentContext -> argumentContext.name().getText().equals("methodName"))
+                                        .map(argumentContext -> argumentContext.valueWithVariable().StringValue())
+                                        .map(stringValue -> stringValue.toString().substring(1, stringValue.getText().length() - 1))
+                                        .findFirst()
+                                        .orElseThrow()
+                        )
+                ).findFirst();
     }
 }

@@ -16,6 +16,7 @@ dependencies {
     implementation project(":graphoenix-core")
     implementation 'com.squareup:javapoet:1.13.0'
 
+    annotationProcessor project(":graphoenix-core")
     annotationProcessor project(":graphoenix-dagger")
     annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-aop")

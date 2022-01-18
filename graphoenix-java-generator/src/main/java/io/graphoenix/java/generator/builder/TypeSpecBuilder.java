@@ -1,20 +1,38 @@
 package io.graphoenix.java.generator.builder;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.annotation.TypeExpression;
 import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.annotation.TypeInput;
-import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.annotation.Generated;
-import org.eclipse.microprofile.graphql.*;
+import org.eclipse.microprofile.graphql.DefaultValue;
+import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Enum;
+import org.eclipse.microprofile.graphql.Id;
+import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.Interface;
+import org.eclipse.microprofile.graphql.NonNull;
+import org.eclipse.microprofile.graphql.Type;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,16 +43,16 @@ import java.util.stream.Stream;
 public class TypeSpecBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private JavaGeneratorConfig configuration;
+    private GraphQLConfig graphQLConfig;
 
     @Inject
-    public TypeSpecBuilder(IGraphQLDocumentManager manager, JavaGeneratorConfig configuration) {
+    public TypeSpecBuilder(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-        this.configuration = configuration;
+        this.graphQLConfig = graphQLConfig;
     }
 
-    public TypeSpecBuilder setConfiguration(JavaGeneratorConfig configuration) {
-        this.configuration = configuration;
+    public TypeSpecBuilder setConfiguration(GraphQLConfig graphQLConfig) {
+        this.graphQLConfig = graphQLConfig;
         return this;
     }
 
@@ -59,7 +77,7 @@ public class TypeSpecBuilder {
         if (objectTypeDefinitionContext.implementsInterfaces() != null) {
             objectTypeDefinitionContext.implementsInterfaces().typeName()
                     .forEach(typeNameContext -> {
-                                builder.addSuperinterface(ClassName.get(configuration.getInterfaceTypePackageName(), typeNameContext.name().getText()));
+                                builder.addSuperinterface(ClassName.get(graphQLConfig.getInterfaceTypePackageName(), typeNameContext.name().getText()));
                             }
                     );
         }
@@ -131,7 +149,7 @@ public class TypeSpecBuilder {
                 );
         if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
             interfaceTypeDefinitionContext.implementsInterfaces().typeName()
-                    .forEach(typeNameContext -> builder.addSuperinterface(ClassName.get(configuration.getInterfaceTypePackageName(), typeNameContext.name().getText())));
+                    .forEach(typeNameContext -> builder.addSuperinterface(ClassName.get(graphQLConfig.getInterfaceTypePackageName(), typeNameContext.name().getText())));
         }
         if (interfaceTypeDefinitionContext.description() != null) {
             builder.addJavadoc("$S", interfaceTypeDefinitionContext.description().getText());
@@ -333,7 +351,7 @@ public class TypeSpecBuilder {
         } else if (valueContext.BooleanValue() != null) {
             return CodeBlock.of("$L", valueContext.BooleanValue().getText());
         } else if (valueContext.enumValue() != null) {
-            return CodeBlock.of("$T.$L", ClassName.get(configuration.getEnumTypePackageName(), manager.getFieldTypeName(inputValueDefinitionContext.type())), valueContext.enumValue().getText());
+            return CodeBlock.of("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), manager.getFieldTypeName(inputValueDefinitionContext.type())), valueContext.enumValue().getText());
         } else if (valueContext.arrayValue() != null) {
             CodeBlock.Builder codeBuilder = CodeBlock.builder();
             codeBuilder.add("{");
@@ -393,28 +411,28 @@ public class TypeSpecBuilder {
             Optional<GraphqlParser.ObjectTypeDefinitionContext> object = manager.getObject(nameContext.getText());
             if (object.isPresent()) {
                 if (isAnnotation) {
-                    return ClassName.get(configuration.getAnnotationPackageName(), object.get().name().getText() + "InnerInput");
+                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + "InnerInput");
                 } else {
-                    return ClassName.get(configuration.getObjectTypePackageName(), object.get().name().getText());
+                    return ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText());
                 }
             }
         } else if (manager.isEnum(nameContext.getText())) {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
             if (enumType.isPresent()) {
-                return ClassName.get(configuration.getEnumTypePackageName(), enumType.get().name().getText());
+                return ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText());
             }
         } else if (manager.isInterface(nameContext.getText())) {
             Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(nameContext.getText());
             if (interfaceType.isPresent()) {
-                return ClassName.get(configuration.getInterfaceTypePackageName(), interfaceType.get().name().getText());
+                return ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText());
             }
         } else if (manager.isInputObject(nameContext.getText())) {
             Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(nameContext.getText());
             if (inputObject.isPresent()) {
                 if (isAnnotation) {
-                    return ClassName.get(configuration.getDirectivePackageName(), inputObject.get().name().getText());
+                    return ClassName.get(graphQLConfig.getDirectivePackageName(), inputObject.get().name().getText());
                 } else {
-                    return ClassName.get(configuration.getInputObjectTypePackageName(), inputObject.get().name().getText());
+                    return ClassName.get(graphQLConfig.getInputObjectTypePackageName(), inputObject.get().name().getText());
                 }
             }
         }
@@ -434,7 +452,7 @@ public class TypeSpecBuilder {
         } else if (manager.isEnum(nameContext.getText())) {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
             if (enumType.isPresent()) {
-                return ClassName.get(configuration.getEnumTypePackageName(), enumType.get().name().getText());
+                return ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText());
             }
         }
         return null;
@@ -494,7 +512,7 @@ public class TypeSpecBuilder {
             if (enumType.isPresent()) {
                 return CodeBlock.of(
                         "$T.$L",
-                        ClassName.get(configuration.getEnumTypePackageName(), enumType.get().name().getText()),
+                        ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()),
                         enumType.get().enumValueDefinitions().enumValueDefinition(0).enumValue().enumValueName().getText()
                 );
             }
@@ -503,7 +521,7 @@ public class TypeSpecBuilder {
             if (object.isPresent()) {
                 return CodeBlock.of(
                         "@$T",
-                        ClassName.get(configuration.getAnnotationPackageName(), object.get().name().getText() + "InnerInput")
+                        ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + "InnerInput")
                 );
             }
         }
@@ -616,8 +634,8 @@ public class TypeSpecBuilder {
                                 .addMethod(
                                         MethodSpec.methodBuilder("opr")
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                .returns(ClassName.get(configuration.getEnumTypePackageName(), "Operator"))
-                                                .defaultValue("$T.$L", ClassName.get(configuration.getEnumTypePackageName(), "Operator"), "EQ")
+                                                .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"))
+                                                .defaultValue("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"), "EQ")
                                                 .build()
                                 )
                                 .addMethods(
@@ -678,8 +696,8 @@ public class TypeSpecBuilder {
                                 .addMethod(
                                         MethodSpec.methodBuilder("cond")
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                .returns(ClassName.get(configuration.getEnumTypePackageName(), "Conditional"))
-                                                .defaultValue("$T.$L", ClassName.get(configuration.getEnumTypePackageName(), "Conditional"), "AND")
+                                                .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Conditional"))
+                                                .defaultValue("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), "Conditional"), "AND")
                                                 .build()
                                 )
                                 .addMethod(
@@ -695,7 +713,7 @@ public class TypeSpecBuilder {
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ArrayTypeName.of(ClassName.get(configuration.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Expression")))
+                                                                .returns(ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Expression")))
                                                                 .defaultValue("$L", "{}")
                                                                 .build()
                                                 )

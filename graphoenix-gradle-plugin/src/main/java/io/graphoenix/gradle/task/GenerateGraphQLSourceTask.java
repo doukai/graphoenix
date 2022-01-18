@@ -13,7 +13,6 @@ import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.ObjectType;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
-import io.graphoenix.java.generator.config.JavaGeneratorConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -45,9 +44,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
         final JavaFileBuilder javaFileBuilder = BeanContext.get(JavaFileBuilder.class);
 
         GraphQLConfig graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
-        JavaGeneratorConfig javaGeneratorConfig = getProject().getExtensions().findByType(JavaGeneratorConfig.class);
         assert graphQLConfig != null;
-        assert javaGeneratorConfig != null;
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String resourcesPath = sourceSet.getResources().getSourceDirectories().getAsPath();
         String javaPath = sourceSet.getJava().getSourceDirectories().getAsPath();
@@ -92,7 +89,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
                                 manager.registerGraphQL(objectType.toString());
                             }
                     );
-            javaFileBuilder.writeToPath(new File(javaPath), javaGeneratorConfig);
+            javaFileBuilder.writeToPath(new File(javaPath), graphQLConfig);
 
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
