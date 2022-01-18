@@ -1,19 +1,20 @@
 package io.graphoenix.spi.handler;
 
+import reactor.core.publisher.Mono;
+
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public abstract class BaseQueryHandler implements QueryHandler {
 
-    private Map<String, Function<Map<String, Object>, ?>> invokeFunctions;
+    private Map<String, BiFunction<String, Map<String, String>, Mono<String>>> invokeFunctions;
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> Function<Map<String, Object>, T> getInvokeMethod(String name) {
-        return (Function<Map<String, Object>, T>) invokeFunctions.get(name);
+    public BiFunction<String, Map<String, String>, Mono<String>> getInvokeMethod(String name) {
+        return invokeFunctions.get(name);
     }
 
-    protected void put(String name, Function<Map<String, Object>, ?> function) {
-        invokeFunctions.put(name, function);
+    protected void put(String name, BiFunction<String, Map<String, String>, Mono<String>> biFunction) {
+        invokeFunctions.put(name, biFunction);
     }
 }

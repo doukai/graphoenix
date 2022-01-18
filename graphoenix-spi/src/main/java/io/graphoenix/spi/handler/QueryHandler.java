@@ -1,9 +1,11 @@
 package io.graphoenix.spi.handler;
 
+import reactor.core.publisher.Mono;
+
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public interface QueryHandler {
 
-    <T> Function<Map<String, Object>, T> getInvokeMethod(String name);
+    BiFunction<String, Map<String, String>, Mono<String>> getInvokeMethod(String name);
 }
