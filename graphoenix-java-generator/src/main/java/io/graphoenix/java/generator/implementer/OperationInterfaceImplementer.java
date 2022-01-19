@@ -15,7 +15,6 @@ import io.vavr.CheckedFunction0;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -41,7 +40,6 @@ public class OperationInterfaceImplementer {
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(operationDAO)
                 .addSuperinterface(typeElement.asType())
-                .addMethod(buildGetInstanceMethod(packageElement, typeElement))
                 .addFields(buildFileContentFields(typeElement))
                 .addStaticBlock(buildFileContentFieldInitializeCodeBlock(packageElement, typeElement, suffix))
                 .addMethods(typeElement.getEnclosedElements()
@@ -50,11 +48,6 @@ public class OperationInterfaceImplementer {
                         .collect(Collectors.toList())
                 );
 
-        boolean isSingleton = typeElement.getAnnotationMirrors().stream()
-                .anyMatch(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(Singleton.class.getName()));
-        if (isSingleton) {
-            builder.addType(buildInstanceHolder(packageElement, typeElement));
-        }
         return JavaFile.builder(packageElement.getQualifiedName().toString(), builder.build()).build();
     }
 
@@ -62,46 +55,6 @@ public class OperationInterfaceImplementer {
         return typeElement.getEnclosedElements().stream()
                 .map(element -> buildFileContentField(typeElement, element))
                 .collect(Collectors.toList());
-    }
-
-
-    private TypeSpec buildInstanceHolder(PackageElement packageElement, TypeElement typeElement) {
-        ClassName typeClassName = ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl");
-        return TypeSpec.classBuilder("Holder")
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                .addField(
-                        FieldSpec.builder(typeClassName, "INSTANCE", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-                                .initializer("new $T()", typeClassName)
-                                .build()
-                )
-                .build();
-    }
-
-    private FieldSpec buildInstanceField(PackageElement packageElement, TypeElement typeElement) {
-        return FieldSpec.builder(
-                ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"),
-                "INSTANCE",
-                Modifier.PRIVATE,
-                Modifier.STATIC
-        ).build();
-    }
-
-    private MethodSpec buildGetInstanceMethod(PackageElement packageElement, TypeElement typeElement) {
-        ClassName typeClassName = ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl");
-
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("get")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(typeClassName);
-
-        boolean isSingleton = typeElement.getAnnotationMirrors().stream()
-                .anyMatch(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(Singleton.class.getName()));
-
-        if (isSingleton) {
-            builder.addStatement("return Holder.INSTANCE");
-        } else {
-            builder.addStatement("return new $T()", typeClassName);
-        }
-        return builder.build();
     }
 
     private FieldSpec buildFileContentField(TypeElement typeElement, Element element) {

@@ -13,6 +13,7 @@ import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
+import io.graphoenix.java.generator.builder.ModuleBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
 import io.graphoenix.java.generator.implementer.QueryHandlerImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -70,6 +71,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private GraphQLApiBuilder graphQLApiBuilder;
     private InvokeHandlerImplementer invokeHandlerImplementer;
     private QueryHandlerImplementer queryHandlerImplementer;
+    private ModuleBuilder moduleBuilder;
     private GraphQLConfig graphQLConfig;
 
     @Override
@@ -86,6 +88,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
         this.invokeHandlerImplementer = BeanContext.get(InvokeHandlerImplementer.class);
         this.queryHandlerImplementer = BeanContext.get(QueryHandlerImplementer.class);
+        this.moduleBuilder = BeanContext.get(ModuleBuilder.class);
         graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
 
         try {
@@ -209,6 +212,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                                     .collect(Collectors.toList())
                     )
                     .writeToFiler(filer);
+
+            moduleBuilder.buildModule(graphQLConfig.getPackageName(), "ApiModule", roundEnv.getElementsAnnotatedWith(GraphQLApi.class), filer);
 
         } catch (IOException e) {
             e.printStackTrace();

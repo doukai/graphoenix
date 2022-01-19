@@ -2,7 +2,7 @@ package io.graphoenix.java.generator.module;
 
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
-import io.graphoenix.java.generator.builder.ModuleContextBuilder;
+import io.graphoenix.java.generator.builder.ModuleBuilder;
 import io.graphoenix.java.generator.builder.TypeSpecBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
@@ -43,8 +43,8 @@ public class JavaGeneratorModule {
 
     @Provides
     @Singleton
-    public ModuleContextBuilder moduleContextBuilder() {
-        return new ModuleContextBuilder();
+    public ModuleBuilder moduleBuilder() {
+        return new ModuleBuilder();
     }
 
     @Provides
