@@ -45,6 +45,8 @@ public class User implements Meta {
 
   private Boolean isDeprecated;
 
+  private String userDetail2;
+
   public Integer getId() {
     return this.id;
   }
@@ -151,5 +153,13 @@ public class User implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String getUserDetail2() {
+    return this.userDetail2;
+  }
+
+  public void setUserDetail2(String userDetail2) {
+    this.userDetail2 = userDetail2;
   }
 }

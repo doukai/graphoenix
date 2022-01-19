@@ -17,6 +17,10 @@ public @interface OrganizationInnerInput {
 
   String name() default "";
 
+  int orgLevel2() default 0;
+
+  boolean roleDisable() default false;
+
   int id() default 0;
 
   int version() default 0;
@@ -26,6 +30,10 @@ public @interface OrganizationInnerInput {
   String $isDeprecated() default "";
 
   String $name() default "";
+
+  String $orgLevel2() default "";
+
+  String $roleDisable() default "";
 
   String $id() default "";
 

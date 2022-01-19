@@ -20,6 +20,10 @@ public @interface OrganizationExpression {
 
   String[] name() default {};
 
+  int[] orgLevel2() default {};
+
+  boolean[] roleDisable() default {};
+
   int[] id() default {};
 
   int[] version() default {};
@@ -29,6 +33,10 @@ public @interface OrganizationExpression {
   String[] $isDeprecated() default {};
 
   String[] $name() default {};
+
+  String[] $orgLevel2() default {};
+
+  String[] $roleDisable() default {};
 
   String[] $id() default {};
 

@@ -27,16 +27,19 @@ import java.util.stream.Collectors;
 public class InvokeHandlerImplementer {
 
     private final IGraphQLDocumentManager manager;
+    private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
     private Map<String, Map<TypeElement, List<ExecutableElement>>> invokeMethods;
 
     @Inject
-    public InvokeHandlerImplementer(IGraphQLDocumentManager manager) {
+    public InvokeHandlerImplementer(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
+        this.typeManager = typeManager;
     }
 
     public InvokeHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
+        this.typeManager.setManager(graphQLConfig);
         return this;
     }
 
@@ -95,17 +98,17 @@ public class InvokeHandlerImplementer {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 ).forEach(objectTypeDefinitionContext ->
-                builder.addStatement("$T<$T, $T> $L = this::$L",
-                        ClassName.get(Function.class),
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
-                ).addStatement("put($T.class, $L)",
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
-                )
-        );
+                        builder.addStatement("$T<$T, $T> $L = this::$L",
+                                ClassName.get(Function.class),
+                                ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
+                                ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
+                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()),
+                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
+                        ).addStatement("put($T.class, $L)",
+                                ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
+                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
+                        )
+                );
 
         return builder.build();
     }
@@ -132,7 +135,7 @@ public class InvokeHandlerImplementer {
                             value.forEach(executableElement ->
                                     builder.addStatement("$L.$L($L.$L($L))",
                                             getParameterName(objectTypeDefinitionContext),
-                                            getInvokeFieldSetterMethodName(executableElement.getSimpleName().toString()),
+                                            typeManager.getInvokeFieldSetterMethodName(executableElement.getSimpleName().toString()),
                                             CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key.getSimpleName().toString()),
                                             executableElement.getSimpleName().toString(),
                                             getParameterName(objectTypeDefinitionContext)
@@ -146,7 +149,7 @@ public class InvokeHandlerImplementer {
                             builder.addStatement("$L($L.$L())",
                                     getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                                     getParameterName(objectTypeDefinitionContext),
-                                    getFieldGetterMethodName(fieldDefinitionContext)
+                                    typeManager.getFieldGetterMethodName(fieldDefinitionContext)
                             )
                     );
 
@@ -156,10 +159,10 @@ public class InvokeHandlerImplementer {
                     .forEach(fieldDefinitionContext ->
                             builder.beginControlFlow("if ($L.$L() != null)",
                                     getParameterName(objectTypeDefinitionContext),
-                                    getFieldGetterMethodName(fieldDefinitionContext)
+                                    typeManager.getFieldGetterMethodName(fieldDefinitionContext)
                             ).addStatement("$L.$L().forEach(this::$L)",
                                     getParameterName(objectTypeDefinitionContext),
-                                    getFieldGetterMethodName(fieldDefinitionContext),
+                                    typeManager.getFieldGetterMethodName(fieldDefinitionContext),
                                     getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
                             ).endControlFlow().build()
                     );
@@ -177,33 +180,5 @@ public class InvokeHandlerImplementer {
 
     private String getObjectMethodName(String objectName) {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectName);
-    }
-
-    private String getInvokeFieldName(String methodName) {
-        if (methodName.startsWith("get")) {
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodName.replaceFirst("get", ""));
-        } else if (methodName.startsWith("set")) {
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodName.replaceFirst("set", ""));
-        } else if (methodName.startsWith("is")) {
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodName.replaceFirst("is", ""));
-        } else {
-            return methodName;
-        }
-    }
-
-    private String getInvokeFieldGetterMethodName(String methodName) {
-        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(methodName)));
-    }
-
-    private String getInvokeFieldSetterMethodName(String methodName) {
-        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(methodName)));
-    }
-
-    private String getFieldGetterMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(fieldDefinitionContext.name().getText())));
-    }
-
-    private String getFieldSetterMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(fieldDefinitionContext.name().getText())));
     }
 }

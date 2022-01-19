@@ -23,6 +23,8 @@ public @interface UserExpression {
 
   String[] login() default {};
 
+  String[] userDetail2() default {};
+
   int[] version() default {};
 
   int[] organizationId() default {};
@@ -44,6 +46,8 @@ public @interface UserExpression {
   String[] $phones() default {};
 
   String[] $login() default {};
+
+  String[] $userDetail2() default {};
 
   String[] $version() default {};
 

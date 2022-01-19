@@ -2,14 +2,11 @@ package io.graphoenix.showcase.mysql.generated.objectType;
 
 import io.graphoenix.showcase.mysql.generated.interfaceType.Meta;
 import jakarta.annotation.Generated;
-import java.lang.Boolean;
-import java.lang.Integer;
-import java.lang.Override;
-import java.lang.String;
-import java.util.Set;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
+
+import java.util.Set;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
@@ -30,7 +27,13 @@ public class Organization implements Meta {
 
   private Boolean isDeprecated;
 
-  private Set<User> organizationUsers;
+  private Integer orgLevel2;
+
+  private Boolean roleDisable;
+
+  private Set<User> userByOrg;
+
+  private Organization parent;
 
   public Integer getId() {
     return this.id;
@@ -92,11 +95,35 @@ public class Organization implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
-  public Set<User> getOrganizationUsers() {
-    return this.organizationUsers;
+  public Integer getOrgLevel2() {
+    return this.orgLevel2;
   }
 
-  public void setOrganizationUsers(Set<User> organizationUsers) {
-    this.organizationUsers = organizationUsers;
+  public void setOrgLevel2(Integer orgLevel2) {
+    this.orgLevel2 = orgLevel2;
+  }
+
+  public Boolean getRoleDisable() {
+    return this.roleDisable;
+  }
+
+  public void setRoleDisable(Boolean roleDisable) {
+    this.roleDisable = roleDisable;
+  }
+
+  public Set<User> getUserByOrg() {
+    return this.userByOrg;
+  }
+
+  public void setUserByOrg(Set<User> userByOrg) {
+    this.userByOrg = userByOrg;
+  }
+
+  public Organization getParent() {
+    return this.parent;
+  }
+
+  public void setParent(Organization parent) {
+    this.parent = parent;
   }
 }
