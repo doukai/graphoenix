@@ -46,13 +46,12 @@ public class SelectionFilterHandlerImplementer {
     }
 
     public JavaFile buildImplementClass() {
-        TypeSpec typeSpec = buildInvokeHandlerImpl();
+        TypeSpec typeSpec = buildSelectionFilterHandlerImpl();
         return JavaFile.builder(graphQLConfig.getPackageName(), typeSpec).build();
     }
 
-    public TypeSpec buildInvokeHandlerImpl() {
-        return TypeSpec.classBuilder("SelectionFilterHandlerImpl")
-                .superclass(BaseInvokeHandler.class)
+    public TypeSpec buildSelectionFilterHandlerImpl() {
+        return TypeSpec.classBuilder("SelectionFilter")
                 .addMethods(buildTypeMethods())
                 .addMethods(buildListTypeMethods())
                 .build();
