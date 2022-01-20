@@ -19,7 +19,6 @@ import io.netty.handler.codec.http.HttpUtil;
 import io.netty.util.AsciiString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
 import java.nio.charset.StandardCharsets;
@@ -71,10 +70,10 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             String jsonResult = null;
             switch (type) {
                 case QUERY:
-                    jsonResult = ((Mono<String>) operationHandler.query(requestBody.getQuery(), requestBody.getVariables())).block();
+                    jsonResult = operationHandler.query(requestBody.getQuery(), requestBody.getVariables()).block();
                     break;
                 case MUTATION:
-                    jsonResult = ((Mono<String>) operationHandler.mutation(requestBody.getQuery(), requestBody.getVariables())).block();
+                    jsonResult = operationHandler.mutation(requestBody.getQuery(), requestBody.getVariables()).block();
                     break;
             }
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));

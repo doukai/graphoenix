@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql;
 
+import io.graphoenix.showcase.mysql.generated.enumType.Sex;
 import io.graphoenix.showcase.mysql.generated.objectType.Organization;
 import io.graphoenix.showcase.mysql.generated.objectType.Role;
 import io.graphoenix.showcase.mysql.generated.objectType.User;
@@ -20,6 +21,7 @@ public class ApiTest {
 
     @Query
     public Integer getOrgLevel(@Source Organization organization) {
+        Sex.FEMALE.name();
         return 1;
     }
 

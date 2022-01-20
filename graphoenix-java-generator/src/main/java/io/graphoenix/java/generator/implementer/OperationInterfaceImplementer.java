@@ -88,7 +88,6 @@ public class OperationInterfaceImplementer {
     }
 
     private MethodSpec executableElementToMethodSpec(TypeElement typeElement, ExecutableElement executableElement) {
-
         return MethodSpec.methodBuilder(executableElement.getSimpleName().toString())
                 .addModifiers(Modifier.PUBLIC)
                 .addParameters(
@@ -129,7 +128,6 @@ public class OperationInterfaceImplementer {
     }
 
     private String getMethodName(ExecutableElement executableElement) {
-
         TypeName typeName0 = ClassName.get(executableElement.getReturnType());
         if (typeName0 instanceof ParameterizedTypeName) {
             Class<?> class0 = CheckedFunction0.of(() -> Class.forName(((ParameterizedTypeName) typeName0).rawType.toString())).unchecked().get();

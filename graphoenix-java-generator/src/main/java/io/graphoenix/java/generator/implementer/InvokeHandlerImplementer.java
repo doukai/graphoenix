@@ -10,7 +10,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.handler.BaseInvokeHandler;
+import io.graphoenix.core.handler.BaseInvokeHandler;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
@@ -75,7 +75,8 @@ public class InvokeHandlerImplementer {
                                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                                 .build()
                                 )
-                ).collect(Collectors.toSet());
+                )
+                .collect(Collectors.toSet());
     }
 
     public MethodSpec buildConstructor() {
@@ -119,7 +120,8 @@ public class InvokeHandlerImplementer {
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                ).map(this::buildTypeInvokeMethod).collect(Collectors.toList());
+                )
+                .map(this::buildTypeInvokeMethod).collect(Collectors.toList());
     }
 
     public MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

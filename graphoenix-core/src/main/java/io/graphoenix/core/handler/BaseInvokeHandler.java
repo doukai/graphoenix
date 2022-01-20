@@ -1,4 +1,6 @@
-package io.graphoenix.spi.handler;
+package io.graphoenix.core.handler;
+
+import io.graphoenix.spi.handler.InvokeHandler;
 
 import java.util.Map;
 import java.util.function.Function;

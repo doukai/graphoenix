@@ -5,6 +5,7 @@ import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.java.generator.builder.ModuleBuilder;
 import io.graphoenix.java.generator.builder.TypeSpecBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
+import io.graphoenix.java.generator.implementer.SelectionFilterHandlerImplementer;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
 import io.graphoenix.java.generator.implementer.QueryHandlerImplementer;
 import io.graphoenix.java.generator.implementer.TypeManager;
@@ -63,6 +64,12 @@ public class JavaGeneratorModule {
     @Singleton
     public InvokeHandlerImplementer invokeHandlerImplementer() {
         return new InvokeHandlerImplementer(manager, typeManager());
+    }
+
+    @Provides
+    @Singleton
+    public SelectionFilterHandlerImplementer invokeHandlerImplementer2() {
+        return new SelectionFilterHandlerImplementer(manager, typeManager());
     }
 
     @Provides

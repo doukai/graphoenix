@@ -15,7 +15,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.handler.BaseQueryHandler;
+import io.graphoenix.core.handler.BaseQueryHandler;
 import io.graphoenix.spi.handler.InvokeHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.vavr.Tuple2;
@@ -123,6 +123,8 @@ public class QueryHandlerImplementer {
         Optional<Tuple2<String, String>> invokeDirective = typeManager.getInvokeDirective(fieldDefinitionContext);
         boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        String operationHandlerParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, OperationHandler.class.getSimpleName());
+        String gsonBuilderParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GsonBuilder.class.getSimpleName());
 
         builder.addStatement("$T type = new $T<$T>() {}.getType()",
                 ClassName.get(Type.class),
@@ -131,6 +133,10 @@ public class QueryHandlerImplementer {
         );
 
         if (invokeDirective.isPresent()) {
+            builder.addStatement("$T selectionContext = getSelectionContext(graphQL, $S)",
+                    ClassName.get(GraphqlParser.SelectionContext.class),
+                    fieldDefinitionContext.name().getText()
+            );
 
             Tuple2<TypeElement, ExecutableElement> method = invokeMethods.stream()
                     .filter(tuple -> typeManager.getInvokeFieldName(tuple._2().getSimpleName().toString()).equals(fieldDefinitionContext.name().getText()))
@@ -143,8 +149,7 @@ public class QueryHandlerImplementer {
                         method._2().getSimpleName().toString(),
                         CodeBlock.join(method._2().getParameters().stream()
                                 .map(variableElement ->
-                                        CodeBlock.of("$L.create().fromJson(variables.get($S), $T.class)",
-                                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GsonBuilder.class.getSimpleName()),
+                                        CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
                                                 variableElement.getSimpleName().toString(),
                                                 ClassName.get(variableElement.asType())
                                         )
@@ -158,8 +163,7 @@ public class QueryHandlerImplementer {
                         method._2().getSimpleName().toString(),
                         CodeBlock.join(method._2().getParameters().stream()
                                 .map(variableElement ->
-                                        CodeBlock.of("$L.create().fromJson(variables.get($S), $T.class)",
-                                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GsonBuilder.class.getSimpleName()),
+                                        CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
                                                 variableElement.getSimpleName().toString(),
                                                 ClassName.get(variableElement.asType())
                                         )
@@ -172,8 +176,8 @@ public class QueryHandlerImplementer {
                 builder.addStatement("$T<$T> result = $L.query(graphQL, variables).map(jsonString-> $L.create().fromJson(jsonString, type))",
                         ClassName.get(Mono.class),
                         typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, OperationHandler.class.getSimpleName()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GsonBuilder.class.getSimpleName())
+                        operationHandlerParameterName,
+                        gsonBuilderParameterName
                 );
 
                 if (fieldTypeIsList) {
@@ -188,8 +192,8 @@ public class QueryHandlerImplementer {
                 }
             } else {
                 builder.addStatement("return $L.query(graphQL, variables).map(jsonString-> $L.create().fromJson(jsonString, type))",
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, OperationHandler.class.getSimpleName()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GsonBuilder.class.getSimpleName())
+                        operationHandlerParameterName,
+                        gsonBuilderParameterName
                 );
             }
         }

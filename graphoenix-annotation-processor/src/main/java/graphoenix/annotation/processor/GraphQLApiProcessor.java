@@ -15,6 +15,7 @@ import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.java.generator.builder.ModuleBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
+import io.graphoenix.java.generator.implementer.SelectionFilterHandlerImplementer;
 import io.graphoenix.java.generator.implementer.QueryHandlerImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
@@ -70,6 +71,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private JavaElementToInputType javaElementToInputType;
     private GraphQLApiBuilder graphQLApiBuilder;
     private InvokeHandlerImplementer invokeHandlerImplementer;
+    private SelectionFilterHandlerImplementer selectionFilterHandlerImplementer;
     private QueryHandlerImplementer queryHandlerImplementer;
     private ModuleBuilder moduleBuilder;
     private GraphQLConfig graphQLConfig;
@@ -87,6 +89,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
         this.invokeHandlerImplementer = BeanContext.get(InvokeHandlerImplementer.class);
+        this.selectionFilterHandlerImplementer = BeanContext.get(SelectionFilterHandlerImplementer.class);
         this.queryHandlerImplementer = BeanContext.get(QueryHandlerImplementer.class);
         this.moduleBuilder = BeanContext.get(ModuleBuilder.class);
         graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
@@ -211,6 +214,12 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                                     )
                                     .collect(Collectors.toList())
                     )
+                    .writeToFiler(filer);
+
+
+
+            selectionFilterHandlerImplementer
+                    .setConfiguration(graphQLConfig)
                     .writeToFiler(filer);
 
             moduleBuilder.buildModule(graphQLConfig.getPackageName(), "ApiModule", roundEnv.getElementsAnnotatedWith(GraphQLApi.class), filer);
