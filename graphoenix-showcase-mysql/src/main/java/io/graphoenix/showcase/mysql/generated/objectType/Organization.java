@@ -2,11 +2,14 @@ package io.graphoenix.showcase.mysql.generated.objectType;
 
 import io.graphoenix.showcase.mysql.generated.interfaceType.Meta;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
-
-import java.util.Set;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
@@ -18,7 +21,7 @@ public class Organization implements Meta {
 
   private Organization above;
 
-  private Set<User> users;
+  private Collection<User> users;
 
   @NonNull
   private String name;
@@ -29,9 +32,11 @@ public class Organization implements Meta {
 
   private Integer orgLevel2;
 
+  private Collection<Integer> orgLevel3;
+
   private Boolean roleDisable;
 
-  private Set<User> userByOrg;
+  private Collection<User> userByOrg;
 
   private Organization parent;
 
@@ -59,11 +64,11 @@ public class Organization implements Meta {
     this.above = above;
   }
 
-  public Set<User> getUsers() {
+  public Collection<User> getUsers() {
     return this.users;
   }
 
-  public void setUsers(Set<User> users) {
+  public void setUsers(Collection<User> users) {
     this.users = users;
   }
 
@@ -103,6 +108,14 @@ public class Organization implements Meta {
     this.orgLevel2 = orgLevel2;
   }
 
+  public Collection<Integer> getOrgLevel3() {
+    return this.orgLevel3;
+  }
+
+  public void setOrgLevel3(Collection<Integer> orgLevel3) {
+    this.orgLevel3 = orgLevel3;
+  }
+
   public Boolean getRoleDisable() {
     return this.roleDisable;
   }
@@ -111,11 +124,11 @@ public class Organization implements Meta {
     this.roleDisable = roleDisable;
   }
 
-  public Set<User> getUserByOrg() {
+  public Collection<User> getUserByOrg() {
     return this.userByOrg;
   }
 
-  public void setUserByOrg(Set<User> userByOrg) {
+  public void setUserByOrg(Collection<User> userByOrg) {
     this.userByOrg = userByOrg;
   }
 

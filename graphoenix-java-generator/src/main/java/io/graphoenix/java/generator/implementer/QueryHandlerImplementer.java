@@ -204,9 +204,11 @@ public class QueryHandlerImplementer {
             );
 
             if (manager.isObject(fieldTypeName)) {
-                builder.addStatement("return selectionFilter.$L(result, selectionContext.field().selectionSet())",
-                        fieldTypeParameterName.concat("List")
-                );
+                if (fieldTypeIsList) {
+                    builder.addStatement("return selectionFilter.$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName.concat("List"));
+                } else {
+                    builder.addStatement("return selectionFilter.$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName);
+                }
             } else {
                 if (fieldTypeIsList) {
                     builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class));
@@ -217,7 +219,7 @@ public class QueryHandlerImplementer {
                     );
                     builder.addStatement("$return jsonArray");
                 } else {
-                    builder.addStatement("return new $T(scalar)", ClassName.get(JsonPrimitive.class));
+                    builder.addStatement("return new $T(result)", ClassName.get(JsonPrimitive.class));
                 }
             }
         } else {
@@ -232,10 +234,10 @@ public class QueryHandlerImplementer {
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                             gsonBuilderParameterName
                     );
-                    builder.addStatement("return result.stream().map(item -> invokeHandler.$L(item)).collect($T.toList())).map(list -> selectionFilter.$L(list, selectionContext.field().selectionSet())",
+                    builder.addStatement("return selectionFilter.$L(result.stream().map(item -> invokeHandler.$L(item)).collect($T.toList()), selectionContext.field().selectionSet())",
+                            fieldTypeParameterName.concat("List"),
                             fieldTypeParameterName,
-                            ClassName.get(Collectors.class),
-                            fieldTypeParameterName.concat("List")
+                            ClassName.get(Collectors.class)
                     );
                 } else {
                     builder.addStatement("$T result = $L.create().fromJson(jsonElement, $T.class)",

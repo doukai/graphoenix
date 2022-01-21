@@ -6,7 +6,7 @@ import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
-import java.util.Set;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
@@ -20,7 +20,7 @@ public class Role implements Meta {
   @NonNull
   private String name;
 
-  private Set<User> users;
+  private Collection<User> users;
 
   private Integer version;
 
@@ -42,11 +42,11 @@ public class Role implements Meta {
     this.name = name;
   }
 
-  public Set<User> getUsers() {
+  public Collection<User> getUsers() {
     return this.users;
   }
 
-  public void setUsers(Set<User> users) {
+  public void setUsers(Collection<User> users) {
     this.users = users;
   }
 

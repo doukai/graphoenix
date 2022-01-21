@@ -33,10 +33,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -462,7 +459,7 @@ public class TypeSpecBuilder {
         if (isAnnotation) {
             return ArrayTypeName.of(buildType(listTypeContext.type(), true));
         } else {
-            return ParameterizedTypeName.get(ClassName.get(Set.class), buildType(listTypeContext.type()));
+            return ParameterizedTypeName.get(ClassName.get(Collection.class), buildType(listTypeContext.type()));
         }
     }
 

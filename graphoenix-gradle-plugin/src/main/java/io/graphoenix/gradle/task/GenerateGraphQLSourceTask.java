@@ -101,8 +101,6 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodName.replaceFirst("get", ""));
         } else if (methodName.startsWith("set")) {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodName.replaceFirst("set", ""));
-        } else if (methodName.startsWith("is")) {
-            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, methodName.replaceFirst("is", ""));
         } else {
             return methodName;
         }

@@ -90,25 +90,19 @@ public class SelectionFilterHandlerImplementer {
                                         fieldGetterMethodName
                                 );
                                 if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("$L.$L().forEach($L -> jsonArray.add($L))",
+                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item))",
                                             typeParameterName,
-                                            fieldGetterMethodName,
-                                            fieldParameterName,
-                                            fieldParameterName
+                                            fieldGetterMethodName
                                     );
                                 } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("$L.$L().forEach($L -> jsonArray.add($L.name()))",
+                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item.name()))",
                                             typeParameterName,
-                                            fieldGetterMethodName,
-                                            fieldParameterName,
-                                            fieldParameterName
+                                            fieldGetterMethodName
                                     );
                                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("$L.$L().forEach($L -> jsonArray.add($L($L,selectionContext.field().selectionSet())))",
+                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add($L(item,selectionContext.field().selectionSet())))",
                                             typeParameterName,
                                             fieldGetterMethodName,
-                                            fieldParameterName,
-                                            fieldParameterName,
                                             fieldParameterName
                                     );
                                 }
@@ -171,10 +165,8 @@ public class SelectionFilterHandlerImplementer {
 
         builder.beginControlFlow("if (selectionSet != null && $L != null)", listTypeParameterName);
         builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class));
-        builder.addStatement("$L.forEach($L -> jsonArray.add($L($L, selectionSet)))",
+        builder.addStatement("$L.forEach(item -> jsonArray.add($L(item, selectionSet)))",
                 listTypeParameterName,
-                typeParameterName,
-                typeParameterName,
                 typeParameterName
         );
         builder.addStatement("return jsonArray");

@@ -8,6 +8,8 @@ import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -38,11 +40,15 @@ public class ApiTest {
         return 1;
     }
 
+    public List<Integer> getOrgLevel3(@Source Organization organization) {
+        return null;
+    }
+
     public Boolean getRoleDisable(@Source Organization organization) {
         return false;
     }
 
-    public Set<User> getUserByOrg(@Source Organization organization) {
+    public Collection<User> getUserByOrg(@Source Organization organization) {
         return organization.getUsers();
     }
 
@@ -55,7 +61,7 @@ public class ApiTest {
     }
 
     @Query
-    public Set<User> getUserByOrg2(@Source Organization organization) {
+    public Collection<User> getUserByOrg2(@Source Organization organization) {
         return organization.getUsers();
     }
 

@@ -4,7 +4,7 @@ import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
-import java.util.Set;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
@@ -16,7 +16,7 @@ public class RoleInput {
   @NonNull
   private String name;
 
-  private Set<UserInput> users;
+  private Collection<UserInput> users;
 
   private Integer version;
 
@@ -38,11 +38,11 @@ public class RoleInput {
     this.name = name;
   }
 
-  public Set<UserInput> getUsers() {
+  public Collection<UserInput> getUsers() {
     return this.users;
   }
 
-  public void setUsers(Set<UserInput> users) {
+  public void setUsers(Collection<UserInput> users) {
     this.users = users;
   }
 

@@ -19,6 +19,8 @@ public @interface OrganizationInnerInput {
 
   int orgLevel2() default 0;
 
+  int[] orgLevel3() default {};
+
   boolean roleDisable() default false;
 
   int id() default 0;
@@ -32,6 +34,8 @@ public @interface OrganizationInnerInput {
   String $name() default "";
 
   String $orgLevel2() default "";
+
+  String $orgLevel3() default "";
 
   String $roleDisable() default "";
 

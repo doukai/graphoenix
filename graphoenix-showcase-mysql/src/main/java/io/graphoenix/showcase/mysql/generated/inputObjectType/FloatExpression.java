@@ -3,7 +3,7 @@ package io.graphoenix.showcase.mysql.generated.inputObjectType;
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import jakarta.annotation.Generated;
 import java.lang.Float;
-import java.util.Set;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -15,7 +15,7 @@ public class FloatExpression {
 
   private Float val;
 
-  private Set<Float> in;
+  private Collection<Float> in;
 
   public Operator getOpr() {
     return this.opr;
@@ -33,11 +33,11 @@ public class FloatExpression {
     this.val = val;
   }
 
-  public Set<Float> getIn() {
+  public Collection<Float> getIn() {
     return this.in;
   }
 
-  public void setIn(Set<Float> in) {
+  public void setIn(Collection<Float> in) {
     this.in = in;
   }
 }

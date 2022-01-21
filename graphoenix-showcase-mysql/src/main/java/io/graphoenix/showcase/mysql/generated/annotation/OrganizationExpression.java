@@ -22,6 +22,8 @@ public @interface OrganizationExpression {
 
   int[] orgLevel2() default {};
 
+  int[] orgLevel3() default {};
+
   boolean[] roleDisable() default {};
 
   int[] id() default {};
@@ -35,6 +37,8 @@ public @interface OrganizationExpression {
   String[] $name() default {};
 
   String[] $orgLevel2() default {};
+
+  String[] $orgLevel3() default {};
 
   String[] $roleDisable() default {};
 

@@ -3,7 +3,7 @@ package io.graphoenix.showcase.mysql.generated.inputObjectType;
 import io.graphoenix.showcase.mysql.generated.enumType.Operator;
 import jakarta.annotation.Generated;
 import java.lang.String;
-import java.util.Set;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -15,7 +15,7 @@ public class StringExpression {
 
   private String val;
 
-  private Set<String> in;
+  private Collection<String> in;
 
   public Operator getOpr() {
     return this.opr;
@@ -33,11 +33,11 @@ public class StringExpression {
     this.val = val;
   }
 
-  public Set<String> getIn() {
+  public Collection<String> getIn() {
     return this.in;
   }
 
-  public void setIn(Set<String> in) {
+  public void setIn(Collection<String> in) {
     this.in = in;
   }
 }

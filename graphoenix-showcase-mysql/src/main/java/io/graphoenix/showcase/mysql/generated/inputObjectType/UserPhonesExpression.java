@@ -3,7 +3,7 @@ package io.graphoenix.showcase.mysql.generated.inputObjectType;
 import io.graphoenix.showcase.mysql.generated.enumType.Conditional;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
-import java.util.Set;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -24,7 +24,7 @@ public class UserPhonesExpression {
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Set<UserPhonesExpression> exs;
+  private Collection<UserPhonesExpression> exs;
 
   public IDExpression getId() {
     return this.id;
@@ -74,11 +74,11 @@ public class UserPhonesExpression {
     this.cond = cond;
   }
 
-  public Set<UserPhonesExpression> getExs() {
+  public Collection<UserPhonesExpression> getExs() {
     return this.exs;
   }
 
-  public void setExs(Set<UserPhonesExpression> exs) {
+  public void setExs(Collection<UserPhonesExpression> exs) {
     this.exs = exs;
   }
 }
