@@ -1,28 +1,34 @@
 package io.graphoenix.core.handler;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.handler.QueryHandler;
-import reactor.core.publisher.Mono;
+import io.vavr.Function3;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 public abstract class BaseQueryHandler implements QueryHandler {
 
-    private final GsonBuilder gsonBuilder = new GsonBuilder();
+    private final GsonBuilder gsonBuilder;
 
-    private Map<String, BiFunction<String, Map<String, String>, Mono<String>>> invokeFunctions;
+    private final Map<String, Function3<JsonElement, String, Map<String, String>, JsonElement>> operationHandlers;
 
-    @Override
-    public BiFunction<String, Map<String, String>, Mono<String>> getInvokeMethod(String name) {
-        return invokeFunctions.get(name);
+    public BaseQueryHandler() {
+        this.gsonBuilder = new GsonBuilder();
+        this.operationHandlers = new HashMap<>();
     }
 
-    protected void put(String name, BiFunction<String, Map<String, String>, Mono<String>> biFunction) {
-        invokeFunctions.put(name, biFunction);
+    @Override
+    public Function3<JsonElement, String, Map<String, String>, JsonElement> getOperationHandler(String name) {
+        return operationHandlers.get(name);
+    }
+
+    protected void put(String name, Function3<JsonElement, String, Map<String, String>, JsonElement> function3) {
+        operationHandlers.put(name, function3);
     }
 
     protected GraphqlParser.SelectionContext getSelectionContext(String graphQL, String name) {

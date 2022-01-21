@@ -10,7 +10,6 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.core.handler.BaseInvokeHandler;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class InvokeHandlerImplementer {
@@ -58,8 +56,7 @@ public class InvokeHandlerImplementer {
     }
 
     public TypeSpec buildInvokeHandlerImpl() {
-        return TypeSpec.classBuilder("InvokeHandlerImpl")
-                .superclass(BaseInvokeHandler.class)
+        return TypeSpec.classBuilder("InvokeHandler")
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeInvokeMethods())
@@ -90,24 +87,6 @@ public class InvokeHandlerImplementer {
                                 CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
                                 ClassName.get(BeanContext.class),
                                 ClassName.get(typeElement)
-                        )
-                );
-
-        manager.getObjects()
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                ).forEach(objectTypeDefinitionContext ->
-                        builder.addStatement("$T<$T, $T> $L = this::$L",
-                                ClassName.get(Function.class),
-                                ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                                ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()),
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
-                        ).addStatement("put($T.class, $L)",
-                                ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()),
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText())
                         )
                 );
 

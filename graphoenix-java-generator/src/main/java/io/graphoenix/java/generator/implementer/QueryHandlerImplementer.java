@@ -17,9 +17,9 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.core.handler.BaseQueryHandler;
-import io.graphoenix.spi.handler.InvokeHandler;
+import io.graphoenix.core.manager.GraphQLVariablesProcessor;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.vavr.Tuple2;
 import reactor.core.publisher.Mono;
@@ -75,6 +75,22 @@ public class QueryHandlerImplementer {
                 .superclass(BaseQueryHandler.class)
                 .addField(
                         FieldSpec.builder(
+                                ClassName.get(IGraphQLDocumentManager.class),
+                                "manager",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(GraphQLVariablesProcessor.class),
+                                "graphQLVariablesProcessor",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
                                 ClassName.get(GsonBuilder.class),
                                 CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GsonBuilder.class.getSimpleName()),
                                 Modifier.PRIVATE,
@@ -91,8 +107,8 @@ public class QueryHandlerImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ClassName.get(InvokeHandler.class),
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, InvokeHandler.class.getSimpleName()),
+                                ClassName.get(graphQLConfig.getPackageName(), "InvokeHandler"),
+                                "invokeHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
@@ -105,6 +121,7 @@ public class QueryHandlerImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addMethod(buildQueryMethod())
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildMethods())
@@ -128,20 +145,38 @@ public class QueryHandlerImplementer {
                 .collect(Collectors.toSet());
     }
 
-    public MethodSpec buildMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+    public MethodSpec buildQueryMethod() {
+        return MethodSpec.methodBuilder("query")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
                 .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, String.class), "variables").build())
-                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonElement.class)));
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonElement.class)))
+                .addStatement("manager.registerFragment(graphQL)")
+                .addStatement("$T operationDefinitionContext = graphQLVariablesProcessor.buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                .addStatement("$T result = operationHandler.query(graphQL, variables).map(jsonString -> gsonBuilder.create().fromJson(jsonString, $T.class))",
+                        ParameterizedTypeName.get(Mono.class, JsonElement.class),
+                        ClassName.get(JsonElement.class)
+                )
+                .addStatement("return result.map(jsonElement -> jsonElement.getAsJsonObject().entrySet().stream().map(entry -> getOperationHandler(entry.getKey()).apply(entry.getValue(), graphQL, variables)))")
+                .build();
+    }
+
+    public MethodSpec buildMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get(JsonElement.class), "jsonElement")
+                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
+                .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, String.class), "variables").build())
+                .returns(ClassName.get(JsonElement.class));
 
         Optional<Tuple2<String, String>> invokeDirective = typeManager.getInvokeDirective(fieldDefinitionContext);
         boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         String operationHandlerParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, OperationHandler.class.getSimpleName());
         String gsonBuilderParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GsonBuilder.class.getSimpleName());
+        String fieldTypeParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, manager.getFieldTypeName(fieldDefinitionContext.type()));
 
+        builder.addStatement("manager.registerFragment(graphQL)");
         builder.addStatement("$T selectionContext = getSelectionContext(graphQL, $S)",
                 ClassName.get(GraphqlParser.SelectionContext.class),
                 fieldDefinitionContext.name().getText()
@@ -154,59 +189,35 @@ public class QueryHandlerImplementer {
                     .findFirst()
                     .orElseThrow();
 
-            if (method._2().getReturnType().toString().equals(Mono.class.getSimpleName())) {
-                builder.addStatement("$T<$T> result = $L.$L($L)",
-                        ClassName.get(Mono.class),
-                        typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, method._1().getSimpleName().toString()),
-                        method._2().getSimpleName().toString(),
-                        CodeBlock.join(method._2().getParameters().stream()
-                                .map(variableElement ->
-                                        CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
-                                                variableElement.getSimpleName().toString(),
-                                                ClassName.get(variableElement.asType())
-                                        )
-                                )
-                                .collect(Collectors.toList()), ",")
-                );
-            } else {
-                builder.addStatement("$T<$T> result = $T.just($L.$L($L))",
-                        ClassName.get(Mono.class),
-                        typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                        ClassName.get(Mono.class),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, method._1().getSimpleName().toString()),
-                        method._2().getSimpleName().toString(),
-                        CodeBlock.join(method._2().getParameters().stream()
-                                .map(variableElement ->
-                                        CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
-                                                variableElement.getSimpleName().toString(),
-                                                ClassName.get(variableElement.asType())
-                                        )
-                                )
-                                .collect(Collectors.toList()), ",")
-                );
-            }
+            builder.addStatement("$T result = $L.$L($L)",
+                    typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                    CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, method._1().getSimpleName().toString()),
+                    method._2().getSimpleName().toString(),
+                    CodeBlock.join(method._2().getParameters().stream()
+                            .map(variableElement ->
+                                    CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
+                                            variableElement.getSimpleName().toString(),
+                                            ClassName.get(variableElement.asType())
+                                    )
+                            )
+                            .collect(Collectors.toList()), ",")
+            );
+
             if (manager.isObject(fieldTypeName)) {
-                if (fieldTypeIsList) {
-                    builder.addStatement("return result.map(list -> selectionFilter.$L(list, selectionContext.field().selectionSet()))",
-                            CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, manager.getFieldTypeName(fieldDefinitionContext.type())).concat("List")
-                    );
-                } else {
-                    builder.addStatement("return result.map(object -> selectionFilter.$L(object, selectionContext.field().selectionSet()))",
-                            CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, manager.getFieldTypeName(fieldDefinitionContext.type()))
-                    );
-                }
+                builder.addStatement("return selectionFilter.$L(result, selectionContext.field().selectionSet())",
+                        fieldTypeParameterName.concat("List")
+                );
             } else {
                 if (fieldTypeIsList) {
                     builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class));
-                    builder.addStatement("result.forEach(scalar -> jsonArray.add(scalar))",
+                    builder.addStatement("result.stream().forEach(scalar -> jsonArray.add(scalar))",
                             operationHandlerParameterName,
                             gsonBuilderParameterName,
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
                     );
                     builder.addStatement("$return jsonArray");
                 } else {
-                    builder.addStatement("return result.map(scalar -> new $T(scalar))", ClassName.get(JsonPrimitive.class));
+                    builder.addStatement("return new $T(scalar)", ClassName.get(JsonPrimitive.class));
                 }
             }
         } else {
@@ -217,47 +228,28 @@ public class QueryHandlerImplementer {
                             ClassName.get(TypeToken.class),
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
                     );
-                    builder.addStatement("$T<$T> result = $L.query(graphQL, variables).map(jsonString-> $L.create().fromJson(jsonString, type))",
-                            ClassName.get(Mono.class),
+                    builder.addStatement("$T result = $L.create().fromJson(jsonElement, type)",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                            operationHandlerParameterName,
                             gsonBuilderParameterName
                     );
-                    builder.addStatement("return result.map(list-> list.stream().map(item -> invokeHandler.getInvokeMethod($T.class).apply(item)).collect($T.toList())).map(list -> selectionFilter.$L(list, selectionContext.field().selectionSet()))",
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName),
+                    builder.addStatement("return result.stream().map(item -> invokeHandler.$L(item)).collect($T.toList())).map(list -> selectionFilter.$L(list, selectionContext.field().selectionSet())",
+                            fieldTypeParameterName,
                             ClassName.get(Collectors.class),
-                            CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, manager.getFieldTypeName(fieldDefinitionContext.type())).concat("List")
+                            fieldTypeParameterName.concat("List")
                     );
                 } else {
-                    builder.addStatement("$T<$T> result = $L.query(graphQL, variables).map(jsonString-> $L.create().fromJson(jsonString, $T.class))",
-                            ClassName.get(Mono.class),
+                    builder.addStatement("$T result = $L.create().fromJson(jsonElement, $T.class)",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                            operationHandlerParameterName,
                             gsonBuilderParameterName,
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
                     );
-                    builder.addStatement("return result.map(object-> invokeHandler.getInvokeMethod($T.class).apply(object)).map(object -> selectionFilter.$L(object, selectionContext.field().selectionSet()))",
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName),
-                            CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, manager.getFieldTypeName(fieldDefinitionContext.type()))
+                    builder.addStatement("return selectionFilter.$L(invokeHandler.$L(result), selectionContext.field().selectionSet())",
+                            fieldTypeParameterName,
+                            fieldTypeParameterName
                     );
                 }
             } else {
-                if (fieldTypeIsList) {
-                    builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class));
-                    builder.addStatement("$L.query(graphQL, variables).map(jsonString-> $L.create().fromJson(jsonString, $T.class)).forEach(scalar -> jsonArray.add(scalar))",
-                            operationHandlerParameterName,
-                            gsonBuilderParameterName,
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    );
-                    builder.addStatement("$return jsonArray");
-                } else {
-                    builder.addStatement("return $L.query(graphQL, variables).map(jsonString-> $L.create().fromJson(jsonString, $T.class)).map(scalar -> new $T(scalar))",
-                            operationHandlerParameterName,
-                            gsonBuilderParameterName,
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                            ClassName.get(JsonPrimitive.class)
-                    );
-                }
+                builder.addStatement("return jsonElement");
             }
         }
         return builder.build();
@@ -266,6 +258,16 @@ public class QueryHandlerImplementer {
     public MethodSpec buildConstructor() {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
+                .addStatement("this.$L = $T.get($T.class)",
+                        "manager",
+                        ClassName.get(BeanContext.class),
+                        ClassName.get(IGraphQLDocumentManager.class)
+                )
+                .addStatement("this.$L = $T.get($T.class)",
+                        "graphQLVariablesProcessor",
+                        ClassName.get(BeanContext.class),
+                        ClassName.get(GraphQLVariablesProcessor.class)
+                )
                 .addStatement("this.$L = new $T()",
                         CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GsonBuilder.class.getSimpleName()),
                         ClassName.get(GsonBuilder.class)
@@ -276,9 +278,9 @@ public class QueryHandlerImplementer {
                         ClassName.get(OperationHandler.class)
                 )
                 .addStatement("this.$L = $T.get($T.class)",
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, InvokeHandler.class.getSimpleName()),
+                        "invokeHandler",
                         ClassName.get(BeanContext.class),
-                        ClassName.get(InvokeHandler.class)
+                        ClassName.get(graphQLConfig.getPackageName(), "InvokeHandler")
                 )
                 .addStatement("this.$L = $T.get($T.class)",
                         "selectionFilter",
@@ -286,7 +288,7 @@ public class QueryHandlerImplementer {
                         ClassName.get(graphQLConfig.getPackageName(), "SelectionFilter")
                 );
 
-        this.invokeMethods.stream()
+        invokeMethods.stream()
                 .map(Tuple2::_1)
                 .collect(Collectors.toSet())
                 .forEach(typeElement ->
@@ -294,6 +296,14 @@ public class QueryHandlerImplementer {
                                 CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
                                 ClassName.get(BeanContext.class),
                                 ClassName.get(typeElement)
+                        )
+                );
+
+        manager.getFields(manager.getQueryOperationTypeName().orElseThrow())
+                .forEach(fieldDefinitionContext ->
+                        builder.addStatement("put($S, this::$L)",
+                                fieldDefinitionContext.name().getText(),
+                                fieldDefinitionContext.name().getText()
                         )
                 );
 

@@ -12,7 +12,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.handler.BaseInvokeHandler;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.annotation.processing.Filer;

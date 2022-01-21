@@ -1,11 +1,11 @@
 package io.graphoenix.spi.handler;
 
-import reactor.core.publisher.Mono;
+import com.google.gson.JsonElement;
+import io.vavr.Function3;
 
 import java.util.Map;
-import java.util.function.BiFunction;
 
 public interface QueryHandler {
 
-    BiFunction<String, Map<String, String>, Mono<String>> getInvokeMethod(String name);
+    Function3<JsonElement, String, Map<String, String>, JsonElement> getOperationHandler(String name);
 }
