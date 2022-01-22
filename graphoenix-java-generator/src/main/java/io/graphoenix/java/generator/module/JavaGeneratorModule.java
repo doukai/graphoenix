@@ -4,11 +4,8 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.java.generator.builder.ModuleBuilder;
 import io.graphoenix.java.generator.builder.TypeSpecBuilder;
-import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
-import io.graphoenix.java.generator.implementer.SelectionFilterHandlerImplementer;
-import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
-import io.graphoenix.java.generator.implementer.QueryHandlerImplementer;
-import io.graphoenix.java.generator.implementer.TypeManager;
+import io.graphoenix.java.generator.implementer.*;
+import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
@@ -74,7 +71,7 @@ public class JavaGeneratorModule {
 
     @Provides
     @Singleton
-    public QueryHandlerImplementer queryHandlerImplementer() {
-        return new QueryHandlerImplementer(manager, typeManager());
+    public OperationHandlerImplementer queryHandlerImplementer() {
+        return new OperationHandlerImplementer(manager, typeManager());
     }
 }

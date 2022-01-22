@@ -1,9 +1,11 @@
 package io.graphoenix.spi.handler;
 
+import com.google.gson.JsonElement;
+import reactor.core.publisher.Mono;
+
 import java.util.Map;
-import java.util.function.Function;
 
 public interface MutationHandler {
 
-    <T> Function<Map<String, Object>, T> getInvokeMethod(String name);
+    Mono<JsonElement> mutation(String graphQL, Map<String, String> variables);
 }

@@ -44,6 +44,12 @@ public class GraphQLConfig {
     @Optional
     private String annotationPackageName;
 
+    @Optional
+    private String modulePackageName;
+
+    @Optional
+    private String handlerPackageName;
+
     public String getGraphQL() {
         return graphQL;
     }
@@ -93,7 +99,7 @@ public class GraphQLConfig {
     }
 
     public String getObjectTypePackageName() {
-        return objectTypePackageName != null ? objectTypePackageName : packageName + ".objectType";
+        return objectTypePackageName != null ? objectTypePackageName : packageName + ".dto.objectType";
     }
 
     public void setObjectTypePackageName(String objectTypePackageName) {
@@ -101,7 +107,7 @@ public class GraphQLConfig {
     }
 
     public String getInterfaceTypePackageName() {
-        return interfaceTypePackageName != null ? interfaceTypePackageName : packageName + ".interfaceType";
+        return interfaceTypePackageName != null ? interfaceTypePackageName : packageName + ".dto.interfaceType";
     }
 
     public void setInterfaceTypePackageName(String interfaceTypePackageName) {
@@ -109,7 +115,7 @@ public class GraphQLConfig {
     }
 
     public String getUnionTypePackageName() {
-        return unionTypePackageName != null ? unionTypePackageName : packageName + ".unionType";
+        return unionTypePackageName != null ? unionTypePackageName : packageName + ".dto.unionType";
     }
 
     public void setUnionTypePackageName(String unionTypePackageName) {
@@ -117,7 +123,7 @@ public class GraphQLConfig {
     }
 
     public String getEnumTypePackageName() {
-        return enumTypePackageName != null ? enumTypePackageName : packageName + ".enumType";
+        return enumTypePackageName != null ? enumTypePackageName : packageName + ".dto.enumType";
     }
 
     public void setEnumTypePackageName(String enumTypePackageName) {
@@ -125,7 +131,7 @@ public class GraphQLConfig {
     }
 
     public String getInputObjectTypePackageName() {
-        return inputObjectTypePackageName != null ? inputObjectTypePackageName : packageName + ".inputObjectType";
+        return inputObjectTypePackageName != null ? inputObjectTypePackageName : packageName + ".dto.inputObjectType";
     }
 
     public void setInputObjectTypePackageName(String inputObjectTypePackageName) {
@@ -133,7 +139,7 @@ public class GraphQLConfig {
     }
 
     public String getDirectivePackageName() {
-        return directivePackageName != null ? directivePackageName : packageName + ".directive";
+        return directivePackageName != null ? directivePackageName : packageName + ".dto.directive";
     }
 
     public void setDirectivePackageName(String directivePackageName) {
@@ -141,10 +147,26 @@ public class GraphQLConfig {
     }
 
     public String getAnnotationPackageName() {
-        return annotationPackageName != null ? annotationPackageName : packageName + ".annotation";
+        return annotationPackageName != null ? annotationPackageName : packageName + ".dto.annotation";
     }
 
     public void setAnnotationPackageName(String annotationPackageName) {
         this.annotationPackageName = annotationPackageName;
+    }
+
+    public String getModulePackageName() {
+        return modulePackageName != null ? modulePackageName : packageName + ".module";
+    }
+
+    public void setModulePackageName(String modulePackageName) {
+        this.modulePackageName = modulePackageName;
+    }
+
+    public String getHandlerPackageName() {
+        return handlerPackageName != null ? handlerPackageName : packageName + ".handler";
+    }
+
+    public void setHandlerPackageName(String handlerPackageName) {
+        this.handlerPackageName = handlerPackageName;
     }
 }

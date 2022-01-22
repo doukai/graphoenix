@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'io.graphoenix'
 graphql {
     graphQLFileName = "auth.gql"
-    packageName = "io.graphoenix.showcase.mysql.generated"
+    packageName = "io.graphoenix.showcase.mysql"
 }
 
 group 'io.graphoenix'

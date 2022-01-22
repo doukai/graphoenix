@@ -13,6 +13,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -50,20 +51,22 @@ public class InvokeHandlerImplementer {
         this.buildImplementClass().writeTo(filer);
     }
 
-    public JavaFile buildImplementClass() {
+    private JavaFile buildImplementClass() {
         TypeSpec typeSpec = buildInvokeHandlerImpl();
-        return JavaFile.builder(graphQLConfig.getPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    public TypeSpec buildInvokeHandlerImpl() {
+    private TypeSpec buildInvokeHandlerImpl() {
         return TypeSpec.classBuilder("InvokeHandler")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Singleton.class)
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeInvokeMethods())
                 .build();
     }
 
-    public Set<FieldSpec> buildFields() {
+    private Set<FieldSpec> buildFields() {
         return this.invokeMethods.values().stream()
                 .flatMap(typeElementListMap ->
                         typeElementListMap.keySet().stream()
@@ -76,7 +79,7 @@ public class InvokeHandlerImplementer {
                 .collect(Collectors.toSet());
     }
 
-    public MethodSpec buildConstructor() {
+    private MethodSpec buildConstructor() {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
 
         invokeMethods.values().stream()
@@ -93,7 +96,7 @@ public class InvokeHandlerImplementer {
         return builder.build();
     }
 
-    public List<MethodSpec> buildTypeInvokeMethods() {
+    private List<MethodSpec> buildTypeInvokeMethods() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -103,7 +106,7 @@ public class InvokeHandlerImplementer {
                 .map(this::buildTypeInvokeMethod).collect(Collectors.toList());
     }
 
-    public MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    private MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()))

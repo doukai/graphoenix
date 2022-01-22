@@ -1,6 +1,6 @@
 package io.graphoenix.mysql.module;
 
-import io.graphoenix.core.manager.GraphQLVariablesProcessor;
+import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.graphoenix.mysql.utils.DBNameUtil;
@@ -70,7 +70,7 @@ public class MySQLTranslatorModule {
     @Provides
     @Singleton
     public OperationToSQLConvertHandler operationToSQLConvertHandler() {
-        return new OperationToSQLConvertHandler(manager, graphQLVariablesProcessor, graphQLQueryToSelect(), graphQLMutationToStatements());
+        return new OperationToSQLConvertHandler(graphQLQueryToSelect(), graphQLMutationToStatements());
     }
 
     @Provides

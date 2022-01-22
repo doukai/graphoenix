@@ -3,7 +3,7 @@ package graphoenix.annotation.processor;
 import com.google.auto.service.AutoService;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.manager.GraphQLConfigRegister;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
@@ -152,7 +152,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
 
         try {
             moduleBuilder.buildInterfaceModule(
-                    graphQLConfig.getPackageName(),
+                    graphQLConfig.getModulePackageName(),
                     "OperationModule",
                     roundEnv.getElementsAnnotatedWith(GraphQLOperation.class).stream()
                             .map(element -> Tuple.of(element, elementUtils.getPackageOf(element), element.getSimpleName().toString().concat("Impl")))

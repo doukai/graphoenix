@@ -1,5 +1,8 @@
 package io.graphoenix.core.module;
 
+import io.graphoenix.core.handler.GraphQLConfigRegister;
+import io.graphoenix.core.handler.GraphQLDirectiveFilter;
+import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.core.manager.*;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
@@ -140,12 +143,12 @@ public class DocumentManagerModule {
     @Provides
     @Singleton
     GraphQLVariablesProcessor graphQLVariablesProcessor() {
-        return new GraphQLVariablesProcessor();
+        return new GraphQLVariablesProcessor(graphQLDocumentManager());
     }
 
     @Provides
     @Singleton
-    GraphQLSelectionFilter graphQLSelectionFilter() {
-        return new GraphQLSelectionFilter(graphQLDocumentManager());
+    GraphQLDirectiveFilter graphQLSelectionFilter() {
+        return new GraphQLDirectiveFilter(graphQLDocumentManager());
     }
 }

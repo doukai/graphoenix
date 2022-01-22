@@ -8,7 +8,7 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.manager.GraphQLConfigRegister;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.ObjectType;

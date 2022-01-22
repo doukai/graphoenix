@@ -3,7 +3,7 @@ package io.graphoenix.graphql.builder.schema;
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.manager.GraphQLConfigRegister;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.generator.document.*;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;

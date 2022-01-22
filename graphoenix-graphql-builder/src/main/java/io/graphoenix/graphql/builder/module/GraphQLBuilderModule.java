@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.builder.module;
 
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.manager.GraphQLConfigRegister;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;

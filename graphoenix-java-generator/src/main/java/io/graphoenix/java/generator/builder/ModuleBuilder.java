@@ -51,7 +51,6 @@ public class ModuleBuilder {
                                                 CodeBlock.of("$T.get($T.class)",
                                                         ClassName.get(BeanContext.class),
                                                         ClassName.get(variableElement.asType())
-
                                                 )
                                         )
                                         .collect(Collectors.toList()),

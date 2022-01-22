@@ -1,11 +1,11 @@
 package io.graphoenix.spi.handler;
 
 import com.google.gson.JsonElement;
-import io.vavr.Function3;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
 public interface QueryHandler {
 
-    Function3<JsonElement, String, Map<String, String>, JsonElement> getOperationHandler(String name);
+    Mono<JsonElement> query(String graphQL, Map<String, String> variables);
 }

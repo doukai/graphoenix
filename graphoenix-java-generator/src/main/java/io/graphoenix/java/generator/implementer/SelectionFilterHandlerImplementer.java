@@ -16,6 +16,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.Collection;
@@ -44,19 +45,21 @@ public class SelectionFilterHandlerImplementer {
         this.buildImplementClass().writeTo(filer);
     }
 
-    public JavaFile buildImplementClass() {
+    private JavaFile buildImplementClass() {
         TypeSpec typeSpec = buildSelectionFilterHandlerImpl();
-        return JavaFile.builder(graphQLConfig.getPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    public TypeSpec buildSelectionFilterHandlerImpl() {
+    private TypeSpec buildSelectionFilterHandlerImpl() {
         return TypeSpec.classBuilder("SelectionFilter")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Singleton.class)
                 .addMethods(buildTypeMethods())
                 .addMethods(buildListTypeMethods())
                 .build();
     }
 
-    public List<MethodSpec> buildTypeMethods() {
+    private List<MethodSpec> buildTypeMethods() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -67,7 +70,7 @@ public class SelectionFilterHandlerImplementer {
                 .collect(Collectors.toList());
     }
 
-    public MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText());
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
@@ -142,7 +145,7 @@ public class SelectionFilterHandlerImplementer {
         return builder.build();
     }
 
-    public List<MethodSpec> buildListTypeMethods() {
+    private List<MethodSpec> buildListTypeMethods() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -153,7 +156,7 @@ public class SelectionFilterHandlerImplementer {
                 .collect(Collectors.toList());
     }
 
-    public MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText());
         String listTypeParameterName = typeParameterName.concat("List");
 

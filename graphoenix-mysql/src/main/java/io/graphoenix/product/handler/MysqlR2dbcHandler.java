@@ -1,5 +1,6 @@
 package io.graphoenix.product.handler;
 
+import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;
 import io.graphoenix.r2dbc.connector.handler.OperationSQLExecuteHandler;
 import io.graphoenix.spi.handler.OperationHandler;
@@ -8,7 +9,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.inject.Inject;
-import java.util.Map;
 import java.util.stream.Stream;
 
 public class MysqlR2dbcHandler implements OperationHandler {
@@ -23,20 +23,20 @@ public class MysqlR2dbcHandler implements OperationHandler {
     }
 
     @Override
-    public Mono<String> query(String graphQL, Map<String, String> variables) {
-        String select = operationToSQLConvertHandler.queryToSelect(graphQL, variables);
+    public Mono<String> query(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        String select = operationToSQLConvertHandler.queryToSelect(operationDefinitionContext);
         return operationSQLExecuteHandler.query(select);
     }
 
     @Override
-    public Flux<Tuple2<String, String>> querySelections(String graphQL, Map<String, String> variables) {
-        Stream<Tuple2<String, String>> selects = operationToSQLConvertHandler.querySelectionsToSelects(graphQL, variables);
+    public Flux<Tuple2<String, String>> querySelections(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        Stream<Tuple2<String, String>> selects = operationToSQLConvertHandler.querySelectionsToSelects(operationDefinitionContext);
         return operationSQLExecuteHandler.querySelections(selects);
     }
 
     @Override
-    public Mono<String> mutation(String graphQL, Map<String, String> variables) {
-        Stream<String> statements = operationToSQLConvertHandler.mutationToStatements(graphQL, variables);
+    public Mono<String> mutation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        Stream<String> statements = operationToSQLConvertHandler.mutationToStatements(operationDefinitionContext);
         return operationSQLExecuteHandler.mutation(statements);
     }
 }

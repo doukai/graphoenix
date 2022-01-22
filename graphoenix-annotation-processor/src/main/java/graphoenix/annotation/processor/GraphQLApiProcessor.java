@@ -4,7 +4,7 @@ import com.google.auto.service.AutoService;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.manager.GraphQLConfigRegister;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.ObjectType;
@@ -15,8 +15,8 @@ import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.java.generator.builder.ModuleBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
+import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
 import io.graphoenix.java.generator.implementer.SelectionFilterHandlerImplementer;
-import io.graphoenix.java.generator.implementer.QueryHandlerImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -72,7 +72,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private GraphQLApiBuilder graphQLApiBuilder;
     private InvokeHandlerImplementer invokeHandlerImplementer;
     private SelectionFilterHandlerImplementer selectionFilterHandlerImplementer;
-    private QueryHandlerImplementer queryHandlerImplementer;
+    private OperationHandlerImplementer operationHandlerImplementer;
     private ModuleBuilder moduleBuilder;
     private GraphQLConfig graphQLConfig;
 
@@ -90,7 +90,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
         this.invokeHandlerImplementer = BeanContext.get(InvokeHandlerImplementer.class);
         this.selectionFilterHandlerImplementer = BeanContext.get(SelectionFilterHandlerImplementer.class);
-        this.queryHandlerImplementer = BeanContext.get(QueryHandlerImplementer.class);
+        this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
         this.moduleBuilder = BeanContext.get(ModuleBuilder.class);
         graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
 
@@ -166,7 +166,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
 
         try {
-            FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "schema.gql");
+            FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, graphQLConfig.getPackageName(), "schema.gql");
             Writer writer = fileObject.openWriter();
             writer.write(documentBuilder.getDocument().toString());
             writer.close();
@@ -200,7 +200,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     )
                     .writeToFiler(filer);
 
-            queryHandlerImplementer
+            operationHandlerImplementer
                     .setConfiguration(graphQLConfig)
                     .setInvokeMethods(
                             roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
@@ -209,7 +209,6 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                                             typeElement.getEnclosedElements().stream()
                                                     .filter(element -> element.getKind().equals(ElementKind.METHOD))
                                                     .map(element -> (ExecutableElement) element)
-                                                    .filter(executableElement -> executableElement.getAnnotation(Query.class) != null)
                                                     .map(executableElement -> Tuple.of(typeElement, executableElement))
                                     )
                                     .collect(Collectors.toList())
@@ -217,12 +216,11 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .writeToFiler(filer);
 
 
-
             selectionFilterHandlerImplementer
                     .setConfiguration(graphQLConfig)
                     .writeToFiler(filer);
 
-            moduleBuilder.buildModule(graphQLConfig.getPackageName(), "ApiModule", roundEnv.getElementsAnnotatedWith(GraphQLApi.class), filer);
+            moduleBuilder.buildModule(graphQLConfig.getModulePackageName(), "ApiModule", roundEnv.getElementsAnnotatedWith(GraphQLApi.class), filer);
 
         } catch (IOException e) {
             e.printStackTrace();
