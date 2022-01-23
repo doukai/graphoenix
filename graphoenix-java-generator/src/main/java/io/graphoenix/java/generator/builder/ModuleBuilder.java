@@ -18,27 +18,17 @@ import java.util.stream.Collectors;
 
 public class ModuleBuilder {
 
-    public void buildModule(String modulePackageName, String moduleClassName, Set<? extends Element> elementList, Filer filer) throws IOException {
+    public void buildApiModule(String modulePackageName, String moduleClassName, Set<? extends Element> elementList, Filer filer) throws IOException {
         TypeSpec typeSpec = TypeSpec.classBuilder(moduleClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Module.class)
-                .addMethods(elementList.stream().map(element -> (TypeElement) element).map(this::buildProvides).collect(Collectors.toList()))
+                .addMethods(elementList.stream().map(element -> (TypeElement) element).map(this::buildApiProvides).collect(Collectors.toList()))
                 .build();
 
         JavaFile.builder(modulePackageName, typeSpec).build().writeTo(filer);
     }
 
-    public void buildInterfaceModule(String modulePackageName, String moduleClassName, Set<Tuple3<? extends Element, PackageElement, String>> elementList, Filer filer) throws IOException {
-        TypeSpec typeSpec = TypeSpec.classBuilder(moduleClassName)
-                .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Module.class)
-                .addMethods(elementList.stream().map(tuple3 -> buildProvides((TypeElement) tuple3._1(), tuple3._2(), tuple3._3())).collect(Collectors.toList()))
-                .build();
-
-        JavaFile.builder(modulePackageName, typeSpec).build().writeTo(filer);
-    }
-
-    private MethodSpec buildProvides(TypeElement typeElement) {
+    private MethodSpec buildApiProvides(TypeElement typeElement) {
         Optional<CodeBlock> codeBlock = typeElement.getEnclosedElements().stream()
                 .filter(enclosedElement -> enclosedElement.getKind().equals(ElementKind.CONSTRUCTOR))
                 .filter(enclosedElement -> enclosedElement.getAnnotation(Inject.class) != null)
@@ -75,7 +65,17 @@ public class ModuleBuilder {
         return builder.build();
     }
 
-    private MethodSpec buildProvides(TypeElement typeElement, PackageElement packageElement, String implName) {
+    public void buildOperationModule(String modulePackageName, String moduleClassName, Set<Tuple3<? extends Element, PackageElement, String>> elementList, Filer filer) throws IOException {
+        TypeSpec typeSpec = TypeSpec.classBuilder(moduleClassName)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Module.class)
+                .addMethods(elementList.stream().map(tuple3 -> buildOperationProvides((TypeElement) tuple3._1(), tuple3._2(), tuple3._3())).collect(Collectors.toList()))
+                .build();
+
+        JavaFile.builder(modulePackageName, typeSpec).build().writeTo(filer);
+    }
+
+    private MethodSpec buildOperationProvides(TypeElement typeElement, PackageElement packageElement, String implName) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Provides.class)
@@ -85,7 +85,6 @@ public class ModuleBuilder {
         if (typeElement.getAnnotation(Singleton.class) != null) {
             builder.addAnnotation(Singleton.class);
         }
-
         return builder.build();
     }
 }

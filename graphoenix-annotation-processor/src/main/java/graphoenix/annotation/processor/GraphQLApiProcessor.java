@@ -49,7 +49,7 @@ import java.net.URISyntaxException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.config.ConfigUtil.RESOURCES_CONFIG_UTIL;
+import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 
 @SupportedAnnotationTypes({
@@ -79,7 +79,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        BeanContext.load(GraphQLOperationProcessor.class.getClassLoader());
+        BeanContext.load(GraphQLApiProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.documentBuilder = BeanContext.get(DocumentBuilder.class);
         this.configRegister = BeanContext.get(GraphQLConfigRegister.class);
@@ -92,7 +92,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.selectionFilterHandlerImplementer = BeanContext.get(SelectionFilterHandlerImplementer.class);
         this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
         this.moduleBuilder = BeanContext.get(ModuleBuilder.class);
-        graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
+        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+        graphQLConfig = CONFIG_UTIL.scanPath(RESOURCES_PATH).getValue(GraphQLConfig.class);
 
         try {
             manager.clearAll();
@@ -163,8 +164,6 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
-        GraphQLConfig graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
-
         try {
             FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, graphQLConfig.getPackageName(), "schema.gql");
             Writer writer = fileObject.openWriter();
@@ -220,7 +219,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .setConfiguration(graphQLConfig)
                     .writeToFiler(filer);
 
-            moduleBuilder.buildModule(graphQLConfig.getModulePackageName(), "ApiModule", roundEnv.getElementsAnnotatedWith(GraphQLApi.class), filer);
+            moduleBuilder.buildApiModule(graphQLConfig.getModulePackageName(), "ApiModule", roundEnv.getElementsAnnotatedWith(GraphQLApi.class), filer);
 
         } catch (IOException e) {
             e.printStackTrace();

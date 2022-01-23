@@ -6,17 +6,38 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVES;
 
 public class GraphQLVariablesProcessor {
 
-    private final IGraphQLDocumentManager manager;
+    private final Set<String> invokeQuerySelectionNames;
+
+    private final Set<String> invokeMutationSelectionNames;
 
     @Inject
     public GraphQLVariablesProcessor(IGraphQLDocumentManager manager) {
-        this.manager = manager;
+        invokeQuerySelectionNames = manager.getFields(manager.getQueryOperationTypeName().orElseThrow())
+                .filter(fieldDefinitionContext ->
+                        fieldDefinitionContext.directives().directive().stream()
+                                .anyMatch(directiveContext ->
+                                        Arrays.stream(INVOKE_DIRECTIVES)
+                                                .anyMatch(excludeDirectiveName -> excludeDirectiveName.equals(directiveContext.name().getText())))
+                )
+                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText())
+                .collect(Collectors.toSet());
+        invokeMutationSelectionNames = manager.getFields(manager.getMutationOperationTypeName().orElseThrow())
+                .filter(fieldDefinitionContext ->
+                        fieldDefinitionContext.directives().directive().stream()
+                                .anyMatch(directiveContext ->
+                                        Arrays.stream(INVOKE_DIRECTIVES)
+                                                .anyMatch(excludeDirectiveName -> excludeDirectiveName.equals(directiveContext.name().getText())))
+                )
+                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText())
+                .collect(Collectors.toSet());
     }
 
     public GraphqlParser.OperationDefinitionContext buildVariables(String graphQL, Map<String, String> variables) {
@@ -38,19 +59,15 @@ public class GraphQLVariablesProcessor {
         if (operationDefinitionContext.variableDefinitions() != null) {
             if (operationDefinitionContext.operationType().QUERY() != null) {
                 operationDefinitionContext.selectionSet().selection().stream()
-                        .filter(selectionContext -> isInvokeSelection(selectionContext, manager.getQueryOperationTypeName().orElseThrow()))
-                        .forEach(selectionContext -> {
-                                    selectionContext.field().arguments().argument()
-                                            .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
-                                }
+                        .filter(selectionContext -> invokeQuerySelectionNames.contains(selectionContext.field().name().getText()))
+                        .forEach(selectionContext -> selectionContext.field().arguments().argument()
+                                .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables))
                         );
             } else if (operationDefinitionContext.operationType().MUTATION() != null) {
                 operationDefinitionContext.selectionSet().selection().stream()
-                        .filter(selectionContext -> isInvokeSelection(selectionContext, manager.getMutationOperationTypeName().orElseThrow()))
-                        .forEach(selectionContext -> {
-                                    selectionContext.field().arguments().argument()
-                                            .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
-                                }
+                        .filter(selectionContext -> invokeMutationSelectionNames.contains(selectionContext.field().name().getText()))
+                        .forEach(selectionContext -> selectionContext.field().arguments().argument()
+                                .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables))
                         );
             }
         }
@@ -93,14 +110,5 @@ public class GraphQLVariablesProcessor {
             throw new RuntimeException();
         }
         return DOCUMENT_UTIL.getGraphqlParser(variable).value();
-    }
-
-    private boolean isInvokeSelection(GraphqlParser.SelectionContext selectionContext, String objectName) {
-        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(objectName, selectionContext.field().name().getText()).orElseThrow();
-        return fieldDefinitionContext.directives().directive().stream()
-                .anyMatch(directiveContext ->
-                        Arrays.stream(INVOKE_DIRECTIVES)
-                                .anyMatch(excludeDirectiveName -> excludeDirectiveName.equals(directiveContext.name().getText()))
-                );
     }
 }

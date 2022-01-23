@@ -20,6 +20,11 @@ public class ApiTest {
     }
 
     @Query
+    public List<String> getUserDetail6(@Source User user) {
+        return null;
+    }
+
+    @Query
     public Integer getOrgLevel(@Source Organization organization) {
         Sex.FEMALE.name();
         return 1;

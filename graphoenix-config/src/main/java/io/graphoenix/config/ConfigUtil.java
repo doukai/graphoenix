@@ -13,21 +13,22 @@ import java.util.Optional;
 import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 
 public enum ConfigUtil {
-    CONFIG_UTIL(),
-    RESOURCES_CONFIG_UTIL(RESOURCES_PATH);
+    CONFIG_UTIL;
+
     private final String[] configNames = {"application.conf", "application.json", "application.properties", "reference.conf"};
-    private final Config config;
+    private Config config;
 
     ConfigUtil() {
         this.config = ConfigFactory.load();
     }
 
-    ConfigUtil(String path) {
+    public ConfigUtil scanPath(String path) {
         this.config = Arrays.stream(Objects.requireNonNull(new File(path).listFiles()))
                 .filter(file -> Arrays.asList(configNames).contains(file.getName()))
                 .findFirst()
                 .map(ConfigFactory::parseFile)
                 .orElseThrow();
+        return this;
     }
 
     public <T> T getValue(Class<T> propertyType) {

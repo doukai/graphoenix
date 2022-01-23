@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.stream.Stream;
 
 public class MysqlBootstrapHandler implements BootstrapHandler {
@@ -56,14 +57,22 @@ public class MysqlBootstrapHandler implements BootstrapHandler {
     public void bootstrap() {
 
         try {
-            manager.registerFileByName("graphql/mysql/preset.gql");
-            manager.registerFileByName("graphql/mysql/introspectionTypes.gql");
-            documentBuilder.buildManager();
-
             if (mysqlConfig.getCrateTable()) {
+                manager.registerFileByName("graphql/mysql/preset.gql");
+                manager.registerFileByName("graphql/mysql/introspectionTypes.gql");
+                documentBuilder.buildManager();
                 Stream<String> createTablesSQLStream = graphqlTypeToTable.createTablesSQL();
                 tableCreator.createTables(createTablesSQLStream).block();
+                manager.clearAll();
             }
+
+            manager.registerFileByName("graphql/mysql/preset.gql");
+            manager.registerFileByName("graphql/mysql/introspectionTypes.gql");
+
+
+            URL fileURL = getClass().getResource("schema.gql");
+            assert fileURL != null;
+            manager.registerInputStream(fileURL.openStream());
 
             if (mysqlConfig.getCrateIntrospection()) {
                 Operation operation = introspectionMutationBuilder.buildIntrospectionSchemaMutation();

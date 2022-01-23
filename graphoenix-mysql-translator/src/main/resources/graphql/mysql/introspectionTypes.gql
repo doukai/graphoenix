@@ -3,11 +3,11 @@ type __Schema {
     queryTypeName: String
     mutationTypeName: String
     subscriptionTypeName: String
-    types: [__Type!]! @map(from: "id", to: "schemaId")
-    queryType: __Type! @map(from: "queryTypeName", to: "name")
-    mutationType: __Type @map(from: "mutationTypeName", to: "name")
-    subscriptionType: __Type @map(from: "subscriptionTypeName", to: "name")
-    directives: [__Directive!]! @map(from: "id", to: "schemaId")
+    types: [__Type!]! @map(from: "id" to: "schemaId")
+    queryType: __Type! @map(from: "queryTypeName" to: "name")
+    mutationType: __Type @map(from: "mutationTypeName" to: "name")
+    subscriptionType: __Type @map(from: "subscriptionTypeName" to: "name")
+    directives: [__Directive!]! @map(from: "id" to: "schemaId")
 }
 
 type __Type {
@@ -17,23 +17,23 @@ type __Type {
     description: String
 
     # OBJECT and INTERFACE only
-    fields: [__Field!] @map(from: "name", to: "ofTypeName")
+    fields: [__Field!] @map(from: "name" to: "ofTypeName")
 
     # OBJECT only
-    interfaces: [__Type!] @map(from: "name", with: {type: "__TypeInterfaces", from: "typeName", to: "interfaceName"}, to: "name")
+    interfaces: [__Type!] @map(from: "name" with: {type: "__TypeInterfaces", from: "typeName", to: "interfaceName"} to: "name")
 
     # INTERFACE and UNION only
-    possibleTypes: [__Type!] @map(from: "name", with: {type: "__TypePossibleTypes", from: "typeName", to: "possibleTypeName"}, to: "name")
+    possibleTypes: [__Type!] @map(from: "name" with: {type: "__TypePossibleTypes", from: "typeName", to: "possibleTypeName"} to: "name")
 
     # ENUM only
-    enumValues: [__EnumValue!] @map(from: "name", to: "ofTypeName")
+    enumValues: [__EnumValue!] @map(from: "name" to: "ofTypeName")
 
     # INPUT_OBJECT only
-    inputFields: [__InputValue!] @map(from: "name", to: "ofTypeName")
+    inputFields: [__InputValue!] @map(from: "name" to: "ofTypeName")
 
     # NON_NULL and LIST only
     ofTypeName: String
-    ofType: __Type @map(from: "ofTypeName", to: "name")
+    ofType: __Type @map(from: "ofTypeName" to: "name")
 }
 
 type __TypeInterfaces {
@@ -54,8 +54,8 @@ type __Field {
     typeName: String
     ofTypeName: String
     description: String
-    args: [__InputValue!]! @map(from: "id", to: "fieldId")
-    type: __Type! @map(from: "typeName", to: "name")
+    args: [__InputValue!]! @map(from: "id" to: "fieldId")
+    type: __Type! @map(from: "typeName" to: "name")
     deprecationReason: String
 }
 
@@ -67,7 +67,7 @@ type __InputValue {
     fieldId: Int
     directiveName: String
     description: String
-    type: __Type! @map(from: "typeName", to: "name")
+    type: __Type! @map(from: "typeName" to: "name")
     defaultValue: String
 }
 
@@ -94,8 +94,8 @@ type __Directive {
     name: ID! @dataType(type: "varchar")
     schemaId: Int
     description: String
-    locations: [__DirectiveLocation!]! @map(from: "name", with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
-    args: [__InputValue!]! @map(from: "name", to: "directiveName")
+    locations: [__DirectiveLocation!]! @map(from: "name" with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
+    args: [__InputValue!]! @map(from: "name" to: "directiveName")
     onOperation: Boolean
     onFragment: Boolean
     onField: Boolean

@@ -12,6 +12,8 @@ plugins {
     id 'java'
 }
 
+compileJava.options.sourcepath = files('src/main/resources')
+
 apply plugin: 'io.graphoenix'
 graphql {
     graphQLFileName = "auth.gql"

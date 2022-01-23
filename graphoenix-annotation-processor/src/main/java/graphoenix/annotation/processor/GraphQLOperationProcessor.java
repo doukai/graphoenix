@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.config.ConfigUtil.RESOURCES_CONFIG_UTIL;
+import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphQLOperation")
@@ -70,7 +70,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         this.javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         this.operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
         this.moduleBuilder = BeanContext.get(ModuleBuilder.class);
-        graphQLConfig = RESOURCES_CONFIG_UTIL.getValue(GraphQLConfig.class);
+        graphQLConfig = CONFIG_UTIL.scanPath(RESOURCES_PATH).getValue(GraphQLConfig.class);
 
         try {
             manager.clearAll();
@@ -151,7 +151,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         }
 
         try {
-            moduleBuilder.buildInterfaceModule(
+            moduleBuilder.buildOperationModule(
                     graphQLConfig.getModulePackageName(),
                     "OperationModule",
                     roundEnv.getElementsAnnotatedWith(GraphQLOperation.class).stream()
