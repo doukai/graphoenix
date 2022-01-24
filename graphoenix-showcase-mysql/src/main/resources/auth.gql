@@ -1,5 +1,5 @@
-type User @table(engine:"InnoDB") {
-    id: ID @column(autoIncrement:true)
+type User @table(engine: "InnoDB") {
+    id: ID @column(autoIncrement: true)
     login: String!
     password: String!
     name: String!
@@ -8,12 +8,12 @@ type User @table(engine:"InnoDB") {
     sex: Sex
     organizationId: Int
     organization: Organization @map(from: "organizationId", to: "id")
-    roles: [Role!] @map(from: "id", with:{type: "UserRole", from: "userId", to: "roleId"}, to: "id")
-    phones: [String] @map(from: "id", with:{type: "UserPhones", from: "userId", to: "phone"})
+    roles: [Role!] @map(from: "id" with: {type: "UserRole", from: "userId", to: "roleId"} to: "id")
+    phones: [String] @map(from: "id" with: {type: "UserPhones", from: "userId", to: "phone"})
 }
 
-type UserPhones @table(engine:"InnoDB") {
-    id: ID @column(autoIncrement:true)
+type UserPhones @table(engine: "InnoDB") {
+    id: ID @column(autoIncrement: true)
     userId: Int
     phone: String
 }
@@ -23,22 +23,22 @@ enum Sex {
     FEMALE
 }
 
-type UserRole @table(engine:"InnoDB") {
-    id: ID @column(autoIncrement:true)
+type UserRole @table(engine: "InnoDB") {
+    id: ID @column(autoIncrement: true)
     userId: Int
     roleId: Int
 }
 
-type Role @table(engine:"InnoDB") {
-    id: ID @column(autoIncrement:true)
+type Role @table(engine: "InnoDB") {
+    id: ID @column(autoIncrement: true)
     name: String!
-    users: [User!] @map(from: "id", with:{type: "UserRole", from: "roleId", to: "userId"}, to: "id")
+    users: [User!] @map(from: "id" with: {type: "UserRole", from: "roleId", to: "userId"} to: "id")
 }
 
-type Organization @table(engine:"InnoDB") {
-    id: ID @column(autoIncrement:true)
+type Organization @table(engine: "InnoDB") {
+    id: ID @column(autoIncrement: true)
     aboveId: Int
-    above: Organization @map(from: "aboveId", to: "id")
-    users: [User!] @map(from: "id", to: "organizationId")
+    above: Organization @map(from: "aboveId" to: "id")
+    users: [User!] @map(from: "id" to: "organizationId")
     name: String!
 }

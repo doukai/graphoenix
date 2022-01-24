@@ -74,6 +74,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
 
         try {
             manager.clearAll();
+            configRegister.registerPreset(GraphQLOperationProcessor.class.getClassLoader());
             configRegister.registerConfig(graphQLConfig, filer);
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());

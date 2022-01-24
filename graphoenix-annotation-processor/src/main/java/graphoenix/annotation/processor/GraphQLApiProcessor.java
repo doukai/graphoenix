@@ -46,7 +46,7 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
@@ -96,6 +96,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
 
         try {
             manager.clearAll();
+            configRegister.registerPreset(GraphQLApiProcessor.class.getClassLoader());
             configRegister.registerConfig(graphQLConfig, filer);
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
@@ -174,25 +175,25 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .setInvokeMethods(
                             manager.getObjects()
                                     .collect(Collectors.toMap(
-                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                                    objectTypeDefinitionContext ->
-                                                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                                                    .collect(Collectors.toMap(
-                                                                                    element -> (TypeElement) element,
-                                                                                    element -> element.getEnclosedElements().stream()
-                                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
-                                                                                            .map(subElement -> (ExecutableElement) subElement)
-                                                                                            .filter(executableElement ->
-                                                                                                    executableElement.getAnnotation(Query.class) == null &&
-                                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
-                                                                                                            executableElement.getParameters().stream().anyMatch(
-                                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
-                                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
-                                                                                                            )
+                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                            objectTypeDefinitionContext ->
+                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                            .collect(Collectors.toMap(
+                                                                    element -> (TypeElement) element,
+                                                                    element -> element.getEnclosedElements().stream()
+                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                            .filter(executableElement ->
+                                                                                    executableElement.getAnnotation(Query.class) == null &&
+                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
+                                                                                            executableElement.getParameters().stream().anyMatch(
+                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
+                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
                                                                                             )
-                                                                                            .collect(Collectors.toList())
                                                                             )
+                                                                            .collect(Collectors.toList())
                                                                     )
+                                                            )
                                             )
                                     )
                     )

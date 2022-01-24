@@ -106,7 +106,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
         }
     }
 
-    public String getInvokeFieldTypeName(Type type) {
+    private String getInvokeFieldTypeName(Type type) {
         String typeName;
         if (type.isClassOrInterfaceType()) {
             ClassOrInterfaceType classOrInterfaceType = type.asClassOrInterfaceType();

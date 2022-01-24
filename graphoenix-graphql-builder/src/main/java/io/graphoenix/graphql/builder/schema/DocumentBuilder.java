@@ -56,7 +56,6 @@ public class DocumentBuilder {
     }
 
     public Document buildDocument() throws IOException {
-        manager.registerFileByName("graphql/preset.gql");
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         ObjectType queryType;
         if (queryOperationTypeDefinition.isPresent()) {

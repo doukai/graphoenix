@@ -56,15 +56,11 @@ public class MysqlBootstrapHandler implements BootstrapHandler {
     public void bootstrap() {
 
         try {
-            manager.registerFileByName("graphql/mysql/preset.gql");
-            manager.registerFileByName("graphql/mysql/introspectionTypes.gql");
             documentBuilder.startupManager();
-
             if (mysqlConfig.getCrateTable()) {
                 Stream<String> createTablesSQLStream = graphqlTypeToTable.createTablesSQL();
                 tableCreator.createTables(createTablesSQLStream).block();
             }
-
             if (mysqlConfig.getCrateIntrospection()) {
                 Operation operation = introspectionMutationBuilder.buildIntrospectionSchemaMutation();
                 Stream<String> introspectionMutationSQLStream = mutationToStatements.createStatementsSQL(operation.toString());

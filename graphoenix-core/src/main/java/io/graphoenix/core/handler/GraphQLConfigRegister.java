@@ -2,13 +2,22 @@ package io.graphoenix.core.handler;
 
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.vavr.control.Try;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
 import javax.tools.StandardLocation;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class GraphQLConfigRegister {
 
@@ -56,7 +65,17 @@ public class GraphQLConfigRegister {
         } else if (config.getGraphQLFileName() != null) {
             manager.registerInputStream(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLFileName()).openInputStream());
         } else if (config.getGraphQLPath() != null) {
-            manager.registerPathByName(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLPath()).toUri().getPath());
+            manager.registerPath(Path.of(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLPath()).toUri()));
+        }
+    }
+
+    public void registerPreset(ClassLoader classLoader) throws IOException, URISyntaxException {
+        URI uri = Objects.requireNonNull(classLoader.getResource("META-INF/graphql")).toURI();
+        Map<String, String> env = new HashMap<>();
+        try (FileSystem fileSystem = FileSystems.newFileSystem(uri, env)) {
+            for (Path path : fileSystem.getRootDirectories()) {
+                Files.list(path.resolve("META-INF/graphql")).forEach(filePath -> Try.run(() -> manager.registerPath(filePath)));
+            }
         }
     }
 }

@@ -9,7 +9,8 @@ import io.graphoenix.http.server.GraphqlHttpServer;
 import io.graphoenix.http.server.GraphqlHttpServerHandler;
 import io.graphoenix.http.server.GraphqlHttpServerInitializer;
 import io.graphoenix.spi.handler.BootstrapHandler;
-import io.graphoenix.spi.handler.OperationHandler;
+import io.graphoenix.spi.handler.MutationHandler;
+import io.graphoenix.spi.handler.QueryHandler;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.netty.handler.codec.http.HttpMethod;
@@ -30,13 +31,15 @@ public class HttpServerModule {
 
     private final GraphQLOperationRouter graphQLOperationRouter;
     private final BootstrapHandler bootstrapHandler;
-    private final OperationHandler operationHandler;
+    private final QueryHandler queryHandler;
+    private final MutationHandler mutationHandler;
 
     @Inject
-    public HttpServerModule(GraphQLOperationRouter graphQLOperationRouter, BootstrapHandler bootstrapHandler, OperationHandler operationHandler) {
+    public HttpServerModule(GraphQLOperationRouter graphQLOperationRouter, BootstrapHandler bootstrapHandler, QueryHandler queryHandler, MutationHandler mutationHandler) {
         this.graphQLOperationRouter = graphQLOperationRouter;
         this.bootstrapHandler = bootstrapHandler;
-        this.operationHandler = operationHandler;
+        this.queryHandler = queryHandler;
+        this.mutationHandler = mutationHandler;
     }
 
     @Provides
@@ -59,7 +62,8 @@ public class HttpServerModule {
                         HttpMethod.POST, postRequestHandler()
                 ),
                 graphQLOperationRouter,
-                operationHandler
+                queryHandler,
+                mutationHandler
         );
     }
 

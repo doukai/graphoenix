@@ -6,7 +6,8 @@ import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.http.handler.RequestHandler;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.dto.type.OperationType;
-import io.graphoenix.spi.handler.OperationHandler;
+import io.graphoenix.spi.handler.MutationHandler;
+import io.graphoenix.spi.handler.QueryHandler;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -40,16 +41,19 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     private static final AsciiString CONTENT_LENGTH = AsciiString.cached("Content-Length");
 
     private final Map<HttpMethod, RequestHandler> requestHandlerMap;
-    private final OperationHandler operationHandler;
+    private final QueryHandler queryHandler;
+    private final MutationHandler mutationHandler;
     private final GraphQLOperationRouter graphQLOperationRouter;
 
     @Inject
     public GraphqlHttpServerHandler(Map<HttpMethod, RequestHandler> requestHandlerMap,
                                     GraphQLOperationRouter graphQLOperationRouter,
-                                    OperationHandler operationHandler) {
+                                    QueryHandler queryHandler,
+                                    MutationHandler mutationHandler) {
         this.requestHandlerMap = requestHandlerMap;
         this.graphQLOperationRouter = graphQLOperationRouter;
-        this.operationHandler = operationHandler;
+        this.queryHandler = queryHandler;
+        this.mutationHandler = mutationHandler;
     }
 
     @Override
@@ -70,10 +74,10 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             String jsonResult = null;
             switch (type) {
                 case QUERY:
-//                    jsonResult = operationHandler.query(requestBody.getQuery(), requestBody.getVariables()).block();
+                    jsonResult = queryHandler.query(requestBody.getQuery(), requestBody.getVariables()).block().getAsString();
                     break;
                 case MUTATION:
-//                    jsonResult = operationHandler.mutation(requestBody.getQuery(), requestBody.getVariables()).block();
+                    jsonResult = mutationHandler.mutation(requestBody.getQuery(), requestBody.getVariables()).block().getAsString();
                     break;
             }
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));
