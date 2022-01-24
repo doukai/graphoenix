@@ -40,7 +40,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphQLOperation")
 @AutoService(Processor.class)
@@ -70,11 +69,12 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         this.javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         this.operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
         this.moduleBuilder = BeanContext.get(ModuleBuilder.class);
-        graphQLConfig = CONFIG_UTIL.scanPath(RESOURCES_PATH).getValue(GraphQLConfig.class);
+        Filer filer = processingEnv.getFiler();
+        graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
 
         try {
             manager.clearAll();
-            configRegister.registerConfig(graphQLConfig, RESOURCES_PATH);
+            configRegister.registerConfig(graphQLConfig, filer);
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
@@ -131,7 +131,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                                 )
                                 .forEach((key, value) -> Try.run(() -> {
                                             FileObject fileObject = filer.createResource(
-                                                    StandardLocation.SOURCE_OUTPUT,
+                                                    StandardLocation.CLASS_OUTPUT,
                                                     packageElement.getQualifiedName(),
                                                     typeElement.getSimpleName().toString().concat("_").concat(key).concat(".").concat(generatorHandler.extension())
                                             );

@@ -3,14 +3,17 @@ package io.graphoenix.config;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigFactory;
+import io.vavr.CheckedFunction0;
+import io.vavr.CheckedFunction3;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
+import javax.annotation.processing.Filer;
+import javax.tools.StandardLocation;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-
-import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
+import java.util.stream.Stream;
 
 public enum ConfigUtil {
     CONFIG_UTIL;
@@ -22,11 +25,22 @@ public enum ConfigUtil {
         this.config = ConfigFactory.load();
     }
 
-    public ConfigUtil scanPath(String path) {
+    public ConfigUtil scan(String path) {
         this.config = Arrays.stream(Objects.requireNonNull(new File(path).listFiles()))
                 .filter(file -> Arrays.asList(configNames).contains(file.getName()))
                 .findFirst()
                 .map(ConfigFactory::parseFile)
+                .orElseThrow();
+        return this;
+    }
+
+    public ConfigUtil scan(Filer filer) {
+        this.config = Stream.of(configNames)
+                .map(configName -> CheckedFunction3.of(filer::getResource).unchecked().apply(StandardLocation.SOURCE_PATH, "", configName))
+                .filter(Objects::nonNull)
+                .map(fileObject -> CheckedFunction0.of(fileObject.toUri()::toURL).unchecked().get())
+                .map(ConfigFactory::parseURL)
+                .findFirst()
                 .orElseThrow();
         return this;
     }

@@ -3,7 +3,9 @@ package io.graphoenix.core.handler;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
+import javax.annotation.processing.Filer;
 import javax.inject.Inject;
+import javax.tools.StandardLocation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -45,6 +47,16 @@ public class GraphQLConfigRegister {
             manager.registerFileByName(path.concat(config.getGraphQLFileName()));
         } else if (config.getGraphQLPath() != null) {
             manager.registerPathByName(path.concat(config.getGraphQLPath()));
+        }
+    }
+
+    public void registerConfig(GraphQLConfig config, Filer filer) throws IOException, URISyntaxException {
+        if (config.getGraphQL() != null) {
+            manager.registerGraphQL(config.getGraphQL());
+        } else if (config.getGraphQLFileName() != null) {
+            manager.registerInputStream(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLFileName()).openInputStream());
+        } else if (config.getGraphQLPath() != null) {
+            manager.registerPathByName(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLPath()).toUri().getPath());
         }
     }
 }

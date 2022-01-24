@@ -1,12 +1,23 @@
 package io.graphoenix.core.module;
 
-import io.graphoenix.core.handler.GraphQLConfigRegister;
-import io.graphoenix.core.handler.GraphQLDirectiveFilter;
-import io.graphoenix.core.handler.GraphQLVariablesProcessor;
-import io.graphoenix.core.manager.*;
-import io.graphoenix.spi.module.Module;
-import io.graphoenix.spi.module.Provides;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
+import io.graphoenix.core.handler.GraphQLVariablesProcessor;
+import io.graphoenix.core.manager.GraphQLDirectiveManager;
+import io.graphoenix.core.manager.GraphQLDocumentManager;
+import io.graphoenix.core.manager.GraphQLEnumManager;
+import io.graphoenix.core.manager.GraphQLFieldManager;
+import io.graphoenix.core.manager.GraphQLFieldMapManager;
+import io.graphoenix.core.manager.GraphQLFragmentManager;
+import io.graphoenix.core.manager.GraphQLInputObjectManager;
+import io.graphoenix.core.manager.GraphQLInputValueManager;
+import io.graphoenix.core.manager.GraphQLInterfaceManager;
+import io.graphoenix.core.manager.GraphQLObjectManager;
+import io.graphoenix.core.manager.GraphQLOperationManager;
+import io.graphoenix.core.manager.GraphQLOperationRouter;
+import io.graphoenix.core.manager.GraphQLScalarManager;
+import io.graphoenix.core.manager.GraphQLSchemaManager;
+import io.graphoenix.core.manager.GraphQLUnionManager;
 import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLEnumManager;
@@ -21,6 +32,8 @@ import io.graphoenix.spi.antlr.IGraphQLOperationManager;
 import io.graphoenix.spi.antlr.IGraphQLScalarManager;
 import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
 import io.graphoenix.spi.antlr.IGraphQLUnionManager;
+import io.graphoenix.spi.module.Module;
+import io.graphoenix.spi.module.Provides;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import javax.inject.Singleton;
@@ -143,12 +156,6 @@ public class DocumentManagerModule {
     @Provides
     @Singleton
     GraphQLVariablesProcessor graphQLVariablesProcessor() {
-        return new GraphQLVariablesProcessor(graphQLDocumentManager());
-    }
-
-    @Provides
-    @Singleton
-    GraphQLDirectiveFilter graphQLSelectionFilter() {
-        return new GraphQLDirectiveFilter(graphQLDocumentManager());
+        return new GraphQLVariablesProcessor();
     }
 }

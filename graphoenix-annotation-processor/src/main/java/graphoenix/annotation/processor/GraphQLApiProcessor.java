@@ -50,7 +50,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.RESOURCES_PATH;
 
 @SupportedAnnotationTypes({
         "org.eclipse.microprofile.graphql.GraphQLApi",
@@ -92,12 +91,12 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.selectionFilterHandlerImplementer = BeanContext.get(SelectionFilterHandlerImplementer.class);
         this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
         this.moduleBuilder = BeanContext.get(ModuleBuilder.class);
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        graphQLConfig = CONFIG_UTIL.scanPath(RESOURCES_PATH).getValue(GraphQLConfig.class);
+        Filer filer = processingEnv.getFiler();
+        graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
 
         try {
             manager.clearAll();
-            configRegister.registerConfig(graphQLConfig, RESOURCES_PATH);
+            configRegister.registerConfig(graphQLConfig, filer);
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
@@ -165,7 +164,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
         try {
-            FileObject fileObject = filer.createResource(StandardLocation.SOURCE_OUTPUT, graphQLConfig.getPackageName(), "schema.gql");
+            FileObject fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT, graphQLConfig.getPackageName(), "schema.gql");
             Writer writer = fileObject.openWriter();
             writer.write(documentBuilder.getDocument().toString());
             writer.close();
@@ -175,25 +174,25 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .setInvokeMethods(
                             manager.getObjects()
                                     .collect(Collectors.toMap(
-                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                            objectTypeDefinitionContext ->
-                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                                            .collect(Collectors.toMap(
-                                                                    element -> (TypeElement) element,
-                                                                    element -> element.getEnclosedElements().stream()
-                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
-                                                                            .map(subElement -> (ExecutableElement) subElement)
-                                                                            .filter(executableElement ->
-                                                                                    executableElement.getAnnotation(Query.class) == null &&
-                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
-                                                                                            executableElement.getParameters().stream().anyMatch(
-                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
-                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                                    objectTypeDefinitionContext ->
+                                                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                                    .collect(Collectors.toMap(
+                                                                                    element -> (TypeElement) element,
+                                                                                    element -> element.getEnclosedElements().stream()
+                                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                                            .filter(executableElement ->
+                                                                                                    executableElement.getAnnotation(Query.class) == null &&
+                                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
+                                                                                                            executableElement.getParameters().stream().anyMatch(
+                                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
+                                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                                                                            )
                                                                                             )
+                                                                                            .collect(Collectors.toList())
                                                                             )
-                                                                            .collect(Collectors.toList())
                                                                     )
-                                                            )
                                             )
                                     )
                     )

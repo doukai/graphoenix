@@ -81,7 +81,19 @@ public class GraphQLTypeToTable {
         CreateTable createTable = new CreateTable();
         Table table = dbNameUtil.typeToTable(objectTypeDefinitionContext);
         createTable.setTable(table);
-        createTable.setColumnDefinitions(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::createColumn).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+        createTable.setColumnDefinitions(
+                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                        .filter(fieldDefinitionContext ->
+                                manager.isNotInvokeField(
+                                        objectTypeDefinitionContext.name().getText(),
+                                        fieldDefinitionContext.name().getText()
+                                )
+                        )
+                        .map(this::createColumn)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList())
+        );
         createTable.setIfNotExists(true);
         createTable.setTableOptionsStrings(createTableOption(objectTypeDefinitionContext));
         return createTable;

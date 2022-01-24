@@ -42,6 +42,11 @@ public class DocumentBuilder {
         this.graphQLConfigRegister = graphQLConfigRegister;
     }
 
+    public void startupManager() throws IOException, URISyntaxException {
+        manager.registerInputStream(getClass().getClassLoader().getResourceAsStream(graphQLConfig.getPackageName().replace(".", "/").concat("/schema.gql")));
+        mapper.registerFieldMaps();
+    }
+
     public void buildManager() throws IOException, URISyntaxException {
         graphQLConfigRegister.registerConfig();
         if (graphQLConfig.getBuild()) {

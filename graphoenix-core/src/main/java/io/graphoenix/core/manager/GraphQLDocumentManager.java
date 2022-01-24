@@ -224,6 +224,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean isInvokeField(String objectTypeName, String name) {
+        return graphQLFieldManager.isInvokeField(objectTypeName, name);
+    }
+
+    @Override
+    public boolean isNotInvokeField(String objectTypeName, String name) {
+        return graphQLFieldManager.isNotInvokeField(objectTypeName, name);
+    }
+
+    @Override
     public GraphqlParser.SchemaDefinitionContext getSchema() {
         return graphQLSchemaManager.getSchemaDefinitionContext();
     }

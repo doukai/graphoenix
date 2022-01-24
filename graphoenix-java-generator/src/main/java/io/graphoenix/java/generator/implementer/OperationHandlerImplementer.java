@@ -6,12 +6,19 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.handler.BaseOperationHandler;
-import io.graphoenix.core.handler.GraphQLDirectiveFilter;
 import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
@@ -121,14 +128,6 @@ public class OperationHandlerImplementer {
                         FieldSpec.builder(
                                 ClassName.get(GraphQLVariablesProcessor.class),
                                 "variablesProcessor",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(GraphQLDirectiveFilter.class),
-                                "directiveFilter",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
@@ -260,14 +259,13 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, String.class), "variables").build())
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonElement.class)))
                 .addStatement("manager.registerFragment(graphQL)")
-                .addStatement("$T operationDefinitionContext = variablesProcessor.buildVariables(directiveFilter.filterSelections(graphQL), variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                .addStatement("$T operationDefinitionContext = variablesProcessor.buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
                 .addStatement("$T result = operationHandler.$L(operationDefinitionContext).map(jsonString -> gsonBuilder.create().fromJson(jsonString, $T.class))",
                         ParameterizedTypeName.get(Mono.class, JsonElement.class),
                         operationName,
                         ClassName.get(JsonElement.class)
                 )
-                .addStatement("$T invokeOperationDefinitionContext = variablesProcessor.buildInvokeVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
-                .addStatement("return result.map(jsonElement -> invoke(jsonElement, invokeOperationDefinitionContext))")
+                .addStatement("return result.map(jsonElement -> invoke(jsonElement, operationDefinitionContext))")
                 .build();
     }
 
@@ -368,11 +366,6 @@ public class OperationHandlerImplementer {
                         "variablesProcessor",
                         ClassName.get(BeanContext.class),
                         ClassName.get(GraphQLVariablesProcessor.class)
-                )
-                .addStatement("this.$L = $T.get($T.class)",
-                        "directiveFilter",
-                        ClassName.get(BeanContext.class),
-                        ClassName.get(GraphQLDirectiveFilter.class)
                 )
                 .addStatement("this.$L = new $T()",
                         "gsonBuilder",

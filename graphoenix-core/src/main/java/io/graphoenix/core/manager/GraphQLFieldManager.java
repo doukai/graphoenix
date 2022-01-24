@@ -3,21 +3,39 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLFieldManager;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVES;
+
 public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> fieldDefinitionTree = new HashMap<>();
+
+    private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> invokeFieldDefinitionTree = new HashMap<>();
 
     @Override
     public Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         fieldDefinitionTree.put(objectTypeDefinitionContext.name().getText(),
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                         .collect(Collectors.toMap(fieldDefinitionContext -> fieldDefinitionContext.name().getText(), fieldDefinitionContext -> fieldDefinitionContext)));
+
+        invokeFieldDefinitionTree.put(objectTypeDefinitionContext.name().getText(),
+                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
+                        .filter(fieldDefinitionContext ->
+                                fieldDefinitionContext.directives().directive().stream()
+                                        .anyMatch(directiveContext ->
+                                                Arrays.stream(INVOKE_DIRECTIVES)
+                                                        .anyMatch(name -> directiveContext.name().getText().equals(name))
+                                        )
+                        )
+                        .collect(Collectors.toMap(fieldDefinitionContext -> fieldDefinitionContext.name().getText(), fieldDefinitionContext -> fieldDefinitionContext)));
+
         return fieldDefinitionTree;
     }
 
@@ -26,6 +44,19 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
         fieldDefinitionTree.put(interfaceTypeDefinitionContext.name().getText(),
                 interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                         .collect(Collectors.toMap(fieldDefinitionContext -> fieldDefinitionContext.name().getText(), fieldDefinitionContext -> fieldDefinitionContext)));
+
+        invokeFieldDefinitionTree.put(interfaceTypeDefinitionContext.name().getText(),
+                interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
+                        .filter(fieldDefinitionContext ->
+                                fieldDefinitionContext.directives().directive().stream()
+                                        .anyMatch(directiveContext ->
+                                                Arrays.stream(INVOKE_DIRECTIVES)
+                                                        .anyMatch(name -> directiveContext.name().getText().equals(name))
+                                        )
+                        )
+                        .collect(Collectors.toMap(fieldDefinitionContext -> fieldDefinitionContext.name().getText(), fieldDefinitionContext -> fieldDefinitionContext)));
+
         return fieldDefinitionTree;
     }
 
@@ -45,6 +76,16 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
                 .flatMap(fieldDefinitionMap -> fieldDefinitionMap.entrySet().stream()
                         .filter(entry -> entry.getKey().equals(fieldName))
                         .map(Map.Entry::getValue).findFirst());
+    }
+
+    @Override
+    public boolean isInvokeField(String objectTypeName, String fieldName) {
+        return invokeFieldDefinitionTree.get(objectTypeName).containsKey(fieldName);
+    }
+
+    @Override
+    public boolean isNotInvokeField(String objectTypeName, String fieldName) {
+        return !isInvokeField(objectTypeName, fieldName);
     }
 
     @Override
