@@ -487,11 +487,11 @@ public class TypeSpecBuilder {
     public TypeName buildType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
-            case "ID":
             case "Int":
                 return TypeName.get(Integer.class);
             case "Float":
                 return TypeName.get(Float.class);
+            case "ID":
             case "String":
                 return TypeName.get(String.class);
             case "Boolean":
@@ -503,11 +503,11 @@ public class TypeSpecBuilder {
     public TypeName buildAnnotationType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
-            case "ID":
             case "Int":
                 return TypeName.get(int.class);
             case "Float":
                 return TypeName.get(float.class);
+            case "ID":
             case "String":
                 return TypeName.get(String.class);
             case "Boolean":
@@ -549,11 +549,11 @@ public class TypeSpecBuilder {
     public CodeBlock buildAnnotationDefaultValue(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
-            case "ID":
             case "Int":
                 return CodeBlock.of("$L", 0);
             case "Float":
                 return CodeBlock.of("$L", 0.0f);
+            case "ID":
             case "String":
                 return CodeBlock.of("$S", "");
             case "Boolean":

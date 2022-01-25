@@ -15,7 +15,8 @@ import org.eclipse.microprofile.graphql.Type;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __Schema implements Meta {
   @Id
-  private Integer id;
+  @NonNull
+  private String id;
 
   private String queryTypeName;
 
@@ -40,11 +41,11 @@ public class __Schema implements Meta {
 
   private Boolean isDeprecated;
 
-  public Integer getId() {
+  public String getId() {
     return this.id;
   }
 
-  public void setId(Integer id) {
+  public void setId(String id) {
     this.id = id;
   }
 

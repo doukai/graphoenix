@@ -24,7 +24,7 @@ public @interface __FieldExpression {
 
   String[] description() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] version() default {};
 

@@ -22,7 +22,7 @@ public @interface __SchemaExpression {
 
   String[] queryTypeName() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] version() default {};
 

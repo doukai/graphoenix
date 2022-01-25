@@ -21,7 +21,7 @@ public @interface __DirectiveLocationsExpression {
 
   __DirectiveLocation[] directiveLocation() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] version() default {};
 

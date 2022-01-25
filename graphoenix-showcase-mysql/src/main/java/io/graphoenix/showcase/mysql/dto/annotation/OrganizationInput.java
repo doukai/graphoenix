@@ -29,7 +29,7 @@ public @interface OrganizationInput {
 
   boolean roleDisable() default false;
 
-  int id() default 0;
+  String id() default "";
 
   int version() default 0;
 

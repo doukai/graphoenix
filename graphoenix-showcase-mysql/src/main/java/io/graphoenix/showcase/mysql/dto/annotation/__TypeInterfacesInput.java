@@ -15,7 +15,7 @@ public @interface __TypeInterfacesInput {
 
   String typeName() default "";
 
-  int id() default 0;
+  String id() default "";
 
   String interfaceName() default "";
 

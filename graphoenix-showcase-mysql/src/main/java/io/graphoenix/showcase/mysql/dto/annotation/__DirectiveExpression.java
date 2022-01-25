@@ -21,7 +21,7 @@ public @interface __DirectiveExpression {
 
   int[] schemaId() default {};
 
-  int[] name() default {};
+  String[] name() default {};
 
   String[] description() default {};
 

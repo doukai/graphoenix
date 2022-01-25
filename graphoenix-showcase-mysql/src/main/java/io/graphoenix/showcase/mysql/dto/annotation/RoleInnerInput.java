@@ -15,7 +15,7 @@ public @interface RoleInnerInput {
 
   String name() default "";
 
-  int id() default 0;
+  String id() default "";
 
   int version() default 0;
 

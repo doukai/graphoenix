@@ -32,7 +32,7 @@ public @interface UserInnerInput {
 
   String name() default "";
 
-  int id() default 0;
+  String id() default "";
 
   int age() default 0;
 

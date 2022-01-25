@@ -35,7 +35,7 @@ public @interface UserExpression {
 
   String[] name() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] age() default {};
 

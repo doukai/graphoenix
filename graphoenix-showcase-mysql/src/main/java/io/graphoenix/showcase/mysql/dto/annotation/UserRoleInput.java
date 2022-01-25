@@ -15,7 +15,7 @@ public @interface UserRoleInput {
 
   int roleId() default 0;
 
-  int id() default 0;
+  String id() default "";
 
   int userId() default 0;
 

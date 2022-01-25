@@ -22,7 +22,7 @@ public @interface __EnumValueExpression {
 
   String[] description() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] version() default {};
 

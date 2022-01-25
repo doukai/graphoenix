@@ -23,7 +23,7 @@ public @interface __FieldInput {
 
   String description() default "";
 
-  int id() default 0;
+  String id() default "";
 
   __TypeInnerInput type() default @__TypeInnerInput;
 

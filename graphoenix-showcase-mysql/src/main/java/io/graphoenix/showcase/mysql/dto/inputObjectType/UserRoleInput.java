@@ -3,12 +3,15 @@ package io.graphoenix.showcase.mysql.dto.inputObjectType;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
+import java.lang.String;
 import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserRoleInput {
-  private Integer id;
+  @NonNull
+  private String id;
 
   private Integer userId;
 
@@ -18,11 +21,11 @@ public class UserRoleInput {
 
   private Boolean isDeprecated;
 
-  public Integer getId() {
+  public String getId() {
     return this.id;
   }
 
-  public void setId(Integer id) {
+  public void setId(String id) {
     this.id = id;
   }
 

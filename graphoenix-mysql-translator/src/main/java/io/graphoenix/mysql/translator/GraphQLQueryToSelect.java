@@ -162,8 +162,8 @@ public class GraphQLQueryToSelect {
                 fieldDefinitionContext,
                 new ExpressionList(
                         selectionContextList.stream()
-                                .filter(selectionContext -> manager.isNotInvokeField(typeName, selectionContext.field().name().getText()))
                                 .flatMap(selectionContext -> fragmentUnzip(typeName, selectionContext))
+                                .filter(selectionContext -> manager.isNotInvokeField(typeName, selectionContext.field().name().getText()))
                                 .map(selectionContext ->
                                         new ExpressionList(
                                                 selectionToStringValueKey(selectionContext), selectionToExpression(typeName, selectionContext, level)

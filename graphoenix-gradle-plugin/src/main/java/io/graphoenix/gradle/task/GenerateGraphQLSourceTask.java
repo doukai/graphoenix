@@ -15,10 +15,7 @@ import io.graphoenix.graphql.generator.document.ObjectType;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import org.eclipse.microprofile.graphql.GraphQLApi;
-import org.eclipse.microprofile.graphql.Mutation;
-import org.eclipse.microprofile.graphql.Query;
-import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.graphql.*;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
@@ -117,7 +114,9 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
         String typeName;
         if (type.isClassOrInterfaceType()) {
             ClassOrInterfaceType classOrInterfaceType = type.asClassOrInterfaceType();
-            if (classOrInterfaceType.getName().getIdentifier().equals(int.class.getSimpleName()) ||
+            if (classOrInterfaceType.isAnnotationPresent(Id.class)) {
+                return "ID";
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(int.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(short.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(byte.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(Integer.class.getSimpleName()) ||
@@ -141,6 +140,10 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
                 typeName = "[".concat(getInvokeFieldTypeName(classOrInterfaceType.getTypeArguments().orElseThrow().get(0))).concat("]");
             } else {
                 typeName = classOrInterfaceType.getName().getIdentifier();
+            }
+
+            if (classOrInterfaceType.isAnnotationPresent(NonNull.class)) {
+                typeName = typeName.concat("!");
             }
         } else if (type.isArrayType()) {
             typeName = "[".concat(getInvokeFieldTypeName(type.asArrayType().getElementType())).concat("]");

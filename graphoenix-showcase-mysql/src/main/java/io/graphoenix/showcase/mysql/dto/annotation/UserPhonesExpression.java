@@ -18,7 +18,7 @@ public @interface UserPhonesExpression {
 
   String[] phone() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] userId() default {};
 

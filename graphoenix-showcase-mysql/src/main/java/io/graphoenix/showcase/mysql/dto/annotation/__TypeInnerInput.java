@@ -22,7 +22,7 @@ public @interface __TypeInnerInput {
 
   int schemaId() default 0;
 
-  int name() default 0;
+  String name() default "";
 
   String ofTypeName() default "";
 

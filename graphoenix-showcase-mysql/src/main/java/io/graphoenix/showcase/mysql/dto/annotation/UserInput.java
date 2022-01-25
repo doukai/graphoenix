@@ -36,7 +36,7 @@ public @interface UserInput {
 
   String name() default "";
 
-  int id() default 0;
+  String id() default "";
 
   int age() default 0;
 

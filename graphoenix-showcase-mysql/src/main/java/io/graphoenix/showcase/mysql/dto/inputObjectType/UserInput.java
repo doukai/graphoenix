@@ -12,7 +12,8 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserInput {
-  private Integer id;
+  @NonNull
+  private String id;
 
   @NonNull
   private String login;
@@ -41,11 +42,11 @@ public class UserInput {
 
   private Boolean isDeprecated;
 
-  public Integer getId() {
+  public String getId() {
     return this.id;
   }
 
-  public void setId(Integer id) {
+  public void setId(String id) {
     this.id = id;
   }
 

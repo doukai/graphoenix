@@ -15,7 +15,8 @@ import org.eclipse.microprofile.graphql.Type;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class Organization implements Meta {
   @Id
-  private Integer id;
+  @NonNull
+  private String id;
 
   private Integer aboveId;
 
@@ -40,11 +41,11 @@ public class Organization implements Meta {
 
   private Organization parent;
 
-  public Integer getId() {
+  public String getId() {
     return this.id;
   }
 
-  public void setId(Integer id) {
+  public void setId(String id) {
     this.id = id;
   }
 

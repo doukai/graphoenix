@@ -18,7 +18,7 @@ public @interface __TypeInterfacesExpression {
 
   String[] typeName() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   String[] interfaceName() default {};
 

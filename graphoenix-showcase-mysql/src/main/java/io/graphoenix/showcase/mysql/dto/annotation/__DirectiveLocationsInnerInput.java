@@ -18,7 +18,7 @@ public @interface __DirectiveLocationsInnerInput {
 
   __DirectiveLocation directiveLocation() default __DirectiveLocation.QUERY;
 
-  int id() default 0;
+  String id() default "";
 
   int version() default 0;
 

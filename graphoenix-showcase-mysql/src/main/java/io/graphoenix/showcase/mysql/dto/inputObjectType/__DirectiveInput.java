@@ -13,7 +13,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveInput {
   @NonNull
-  private Integer name;
+  private String name;
 
   private Integer schemaId;
 
@@ -35,11 +35,11 @@ public class __DirectiveInput {
 
   private Boolean isDeprecated;
 
-  public Integer getName() {
+  public String getName() {
     return this.name;
   }
 
-  public void setName(Integer name) {
+  public void setName(String name) {
     this.name = name;
   }
 

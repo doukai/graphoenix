@@ -25,7 +25,7 @@ public @interface __TypeExpression {
 
   int[] schemaId() default {};
 
-  int[] name() default {};
+  String[] name() default {};
 
   String[] ofTypeName() default {};
 

@@ -16,7 +16,8 @@ import org.eclipse.microprofile.graphql.Type;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class User implements Meta {
   @Id
-  private Integer id;
+  @NonNull
+  private String id;
 
   @NonNull
   private String login;
@@ -47,11 +48,11 @@ public class User implements Meta {
 
   private String userDetail2;
 
-  public Integer getId() {
+  public String getId() {
     return this.id;
   }
 
-  public void setId(Integer id) {
+  public void setId(String id) {
     this.id = id;
   }
 

@@ -20,7 +20,7 @@ public @interface __TypePossibleTypesExpression {
 
   String[] possibleTypeName() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] version() default {};
 

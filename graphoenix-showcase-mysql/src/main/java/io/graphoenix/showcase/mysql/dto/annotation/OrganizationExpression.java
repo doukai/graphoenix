@@ -26,7 +26,7 @@ public @interface OrganizationExpression {
 
   boolean[] roleDisable() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] version() default {};
 

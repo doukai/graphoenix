@@ -18,7 +18,7 @@ public @interface UserRoleExpression {
 
   int[] roleId() default {};
 
-  int[] id() default {};
+  String[] id() default {};
 
   int[] userId() default {};
 

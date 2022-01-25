@@ -28,7 +28,7 @@ public @interface __TypeInput {
 
   int schemaId() default 0;
 
-  int name() default 0;
+  String name() default "";
 
   __FieldInnerInput[] fields() default {};
 

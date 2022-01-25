@@ -165,7 +165,6 @@ public class GraphQLTypeToTable {
         List<String> argumentsStringList = new ArrayList<>();
         ColDataType colDataType = new ColDataType();
         switch (typeNameContext.name().getText()) {
-            case "ID":
             case "Int":
                 colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
                 argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));
@@ -174,6 +173,7 @@ public class GraphQLTypeToTable {
                 colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
+            case "ID":
             case "String":
                 colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
                 argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));

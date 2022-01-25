@@ -17,7 +17,7 @@ import org.eclipse.microprofile.graphql.Type;
 public class __Directive implements Meta {
   @Id
   @NonNull
-  private Integer name;
+  private String name;
 
   private Integer schemaId;
 
@@ -39,11 +39,11 @@ public class __Directive implements Meta {
 
   private Boolean isDeprecated;
 
-  public Integer getName() {
+  public String getName() {
     return this.name;
   }
 
-  public void setName(Integer name) {
+  public void setName(String name) {
     this.name = name;
   }
 

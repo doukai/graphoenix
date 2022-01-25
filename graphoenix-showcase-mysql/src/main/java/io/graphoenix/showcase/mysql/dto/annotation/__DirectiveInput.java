@@ -20,7 +20,7 @@ public @interface __DirectiveInput {
 
   int schemaId() default 0;
 
-  int name() default 0;
+  String name() default "";
 
   String description() default "";
 
