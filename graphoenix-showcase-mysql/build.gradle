@@ -33,6 +33,7 @@ dependencies {
     implementation project(":graphoenix-http-server")
     implementation project(":graphoenix-mysql")
 
+    annotationProcessor project(":graphoenix-core")
     annotationProcessor project(":graphoenix-http-server")
     annotationProcessor project(":graphoenix-mysql")
 

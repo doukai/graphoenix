@@ -23,17 +23,22 @@ import org.eclipse.microprofile.graphql.Enum;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.Interface;
+import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 import javax.inject.Inject;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -262,7 +267,11 @@ public class TypeSpecBuilder {
     }
 
     public FieldSpec buildField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.PRIVATE);
+        boolean isKeyword = SourceVersion.isKeyword(fieldDefinitionContext.name().getText());
+        FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), isKeyword ? "_".concat(fieldDefinitionContext.name().getText()) : fieldDefinitionContext.name().getText(), Modifier.PRIVATE);
+        if (isKeyword) {
+            builder.addAnnotation(AnnotationSpec.builder(Name.class).addMember("value", "$S", fieldDefinitionContext.name().getText()).build());
+        }
         if (manager.getFieldTypeName(fieldDefinitionContext.type()).equals("ID")) {
             builder.addAnnotation(Id.class);
         }
@@ -281,7 +290,11 @@ public class TypeSpecBuilder {
     }
 
     public FieldSpec buildInterfaceField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText(), Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
+        boolean isKeyword = SourceVersion.isKeyword(fieldDefinitionContext.name().getText());
+        FieldSpec.Builder builder = FieldSpec.builder(buildType(fieldDefinitionContext.type()), isKeyword ? "_".concat(fieldDefinitionContext.name().getText()) : fieldDefinitionContext.name().getText(), Modifier.STATIC, Modifier.FINAL, Modifier.PUBLIC);
+        if (isKeyword) {
+            builder.addAnnotation(AnnotationSpec.builder(Name.class).addMember("value", "$S", fieldDefinitionContext.name().getText()).build());
+        }
         builder.initializer("$L", "null");
         if (fieldDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NonNull.class);
@@ -298,13 +311,17 @@ public class TypeSpecBuilder {
     }
 
     public FieldSpec buildField(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        FieldSpec.Builder builder = FieldSpec.builder(buildType(inputValueDefinitionContext.type()), inputValueDefinitionContext.name().getText(), Modifier.PRIVATE);
+        boolean isKeyword = SourceVersion.isKeyword(inputValueDefinitionContext.name().getText());
+        FieldSpec.Builder builder = FieldSpec.builder(buildType(inputValueDefinitionContext.type()), isKeyword ? "_".concat(inputValueDefinitionContext.name().getText()) : inputValueDefinitionContext.name().getText(), Modifier.PRIVATE);
         if (inputValueDefinitionContext.defaultValue() != null) {
             builder.addAnnotation(
                     AnnotationSpec.builder(DefaultValue.class)
                             .addMember("value", "$S", inputValueDefinitionContext.defaultValue().value().getText())
                             .build()
             );
+        }
+        if (isKeyword) {
+            builder.addAnnotation(AnnotationSpec.builder(Name.class).addMember("value", "$S", inputValueDefinitionContext.name().getText()).build());
         }
         if (inputValueDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NonNull.class);
@@ -321,9 +338,13 @@ public class TypeSpecBuilder {
     }
 
     public MethodSpec buildAnnotationMethod(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(inputValueDefinitionContext.name().getText())
+        boolean isKeyword = SourceVersion.isKeyword(inputValueDefinitionContext.name().getText());
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(isKeyword ? "_".concat(inputValueDefinitionContext.name().getText()) : inputValueDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT)
                 .returns(buildType(inputValueDefinitionContext.type(), true));
+        if (isKeyword) {
+            builder.addAnnotation(AnnotationSpec.builder(Name.class).addMember("value", "$S", inputValueDefinitionContext.name().getText()).build());
+        }
         if (inputValueDefinitionContext.defaultValue() != null) {
             builder.defaultValue(buildDefaultValue(inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value()));
         }

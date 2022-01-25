@@ -22,12 +22,18 @@ import org.eclipse.microprofile.graphql.Source;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.TaskExecutionException;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -50,6 +56,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
         String javaPath = sourceSet.getJava().getSourceDirectories().getAsPath();
 
         try {
+            configRegister.registerPreset(createClassLoader());
             configRegister.registerConfig(graphQLConfig, resourcesPath);
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
@@ -141,5 +148,24 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
             throw new RuntimeException();
         }
         return typeName;
+    }
+
+    protected final ClassLoader createClassLoader() throws TaskExecutionException {
+        List<URL> urls = new ArrayList<>();
+        SourceSetContainer sourceSets = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets();
+        try {
+            for (SourceSet sourceSet : sourceSets) {
+                for (File file : sourceSet.getCompileClasspath()) {
+                    urls.add(file.toURI().toURL());
+                }
+                for (File classesDir : sourceSet.getOutput().getClassesDirs()) {
+                    urls.add(classesDir.toURI().toURL());
+                }
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            throw new TaskExecutionException(this, e);
+        }
+        return new URLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
     }
 }

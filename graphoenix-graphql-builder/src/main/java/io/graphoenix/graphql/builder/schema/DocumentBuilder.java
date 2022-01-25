@@ -43,11 +43,12 @@ public class DocumentBuilder {
     }
 
     public void startupManager() throws IOException, URISyntaxException {
-        manager.registerInputStream(getClass().getClassLoader().getResourceAsStream(graphQLConfig.getPackageName().replace(".", "/").concat("/schema.gql")));
+        manager.registerInputStream(getClass().getClassLoader().getResourceAsStream("META-INF/graphql/main.gql"));
         mapper.registerFieldMaps();
     }
 
     public void buildManager() throws IOException, URISyntaxException {
+        graphQLConfigRegister.registerPreset();
         graphQLConfigRegister.registerConfig();
         if (graphQLConfig.getBuild()) {
             manager.registerGraphQL(buildDocument().toString());
