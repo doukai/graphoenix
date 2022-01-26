@@ -14,15 +14,15 @@ import java.lang.annotation.Target;
 public @interface UserInput {
   boolean isDeprecated() default false;
 
-  Sex sex() default Sex.MAN;
+  Sex sex() default Sex.FEMALE;
 
   RoleInnerInput[] roles() default {};
 
   String[] phones() default {};
 
-  String login() default "";
-
   String userDetail2() default "";
+
+  String login() default "";
 
   int version() default 0;
 
@@ -48,9 +48,9 @@ public @interface UserInput {
 
   String $phones() default "";
 
-  String $login() default "";
-
   String $userDetail2() default "";
+
+  String $login() default "";
 
   String $version() default "";
 

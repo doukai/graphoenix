@@ -3,15 +3,14 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
 import java.util.Set;
 
 public class InterfaceType {
 
     private String name;
     private Set<String> interfaces;
-    private List<String> directives;
-    private List<Field> fields;
+    private Set<String> directives;
+    private Set<Field> fields;
     private String description;
 
     public String getName() {
@@ -32,25 +31,25 @@ public class InterfaceType {
         return this;
     }
 
-    public List<String> getDirectives() {
+    public Set<String> getDirectives() {
         return directives;
     }
 
-    public InterfaceType setDirectives(List<String> directives) {
+    public InterfaceType setDirectives(Set<String> directives) {
         this.directives = directives;
         return this;
     }
 
-    public List<Field> getFields() {
+    public Set<Field> getFields() {
         return fields;
     }
 
-    public InterfaceType setFields(List<Field> fields) {
+    public InterfaceType setFields(Set<Field> fields) {
         this.fields = fields;
         return this;
     }
 
-    public InterfaceType addFields(List<Field> fields) {
+    public InterfaceType addFields(Set<Field> fields) {
         if (this.fields == null) {
             this.fields = fields;
         } else {
@@ -72,8 +71,11 @@ public class InterfaceType {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/InterfaceType.stg").getInstanceOf("interfaceTypeDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/InterfaceType.stg");
+        ST st = stGroupFile.getInstanceOf("interfaceTypeDefinition");
         st.add("interfaceType", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

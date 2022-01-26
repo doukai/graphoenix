@@ -5,49 +5,23 @@ import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __EnumValueInput {
-  @NonNull
-  private String id;
-
-  private String name;
-
-  private String ofTypeName;
-
   private String description;
 
   private String deprecationReason;
 
   private Integer version;
 
+  private String ofTypeName;
+
+  private String name;
+
+  private String id;
+
   private Boolean isDeprecated;
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
 
   public String getDescription() {
     return this.description;
@@ -71,6 +45,30 @@ public class __EnumValueInput {
 
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   public Boolean getIsDeprecated() {

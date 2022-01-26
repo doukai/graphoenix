@@ -3,11 +3,11 @@ package io.graphoenix.graphql.generator.introspection;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
+import java.util.Set;
 
 public class __Schema {
 
-    private List<__Type> types;
+    private Set<__Type> types;
 
     private __Type queryType;
 
@@ -15,15 +15,15 @@ public class __Schema {
 
     private __Type subscriptionType;
 
-    private List<__Directive> directives;
+    private Set<__Directive> directives;
 
     private String description;
 
-    public List<__Type> getTypes() {
+    public Set<__Type> getTypes() {
         return types;
     }
 
-    public void setTypes(List<__Type> types) {
+    public void setTypes(Set<__Type> types) {
         this.types = types;
     }
 
@@ -51,11 +51,11 @@ public class __Schema {
         this.subscriptionType = subscriptionType;
     }
 
-    public List<__Directive> getDirectives() {
+    public Set<__Directive> getDirectives() {
         return directives;
     }
 
-    public void setDirectives(List<__Directive> directives) {
+    public void setDirectives(Set<__Directive> directives) {
         this.directives = directives;
     }
 
@@ -69,8 +69,11 @@ public class __Schema {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/introspection/__Schema.stg").getInstanceOf("__schemaDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__Schema.stg");
+        ST st = stGroupFile.getInstanceOf("__schemaDefinition");
         st.add("__schema", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

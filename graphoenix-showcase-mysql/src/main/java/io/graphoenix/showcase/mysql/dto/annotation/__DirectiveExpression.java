@@ -27,9 +27,9 @@ public @interface __DirectiveExpression {
 
   __DirectiveLocation[] locations() default {};
 
-  boolean[] onOperation() default {};
-
   int[] version() default {};
+
+  boolean[] onOperation() default {};
 
   boolean[] onField() default {};
 
@@ -45,9 +45,9 @@ public @interface __DirectiveExpression {
 
   String[] $locations() default {};
 
-  String[] $onOperation() default {};
-
   String[] $version() default {};
+
+  String[] $onOperation() default {};
 
   String[] $onField() default {};
 }

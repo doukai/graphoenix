@@ -13,9 +13,9 @@ public class __DirectiveLocationExpression {
   @DefaultValue("EQ")
   private Operator opr;
 
-  private __DirectiveLocation val;
-
   private Collection<__DirectiveLocation> in;
+
+  private __DirectiveLocation val;
 
   public Operator getOpr() {
     return this.opr;
@@ -25,19 +25,19 @@ public class __DirectiveLocationExpression {
     this.opr = opr;
   }
 
-  public __DirectiveLocation getVal() {
-    return this.val;
-  }
-
-  public void setVal(__DirectiveLocation val) {
-    this.val = val;
-  }
-
   public Collection<__DirectiveLocation> getIn() {
     return this.in;
   }
 
   public void setIn(Collection<__DirectiveLocation> in) {
     this.in = in;
+  }
+
+  public __DirectiveLocation getVal() {
+    return this.val;
+  }
+
+  public void setVal(__DirectiveLocation val) {
+    this.val = val;
   }
 }

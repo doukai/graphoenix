@@ -75,9 +75,7 @@ public class GraphQLConfigRegister {
         while (urlIterator.hasNext()) {
             Map<String, String> env = new HashMap<>();
             try (FileSystem fileSystem = FileSystems.newFileSystem(urlIterator.next().toURI(), env)) {
-                for (Path path : fileSystem.getRootDirectories()) {
-                    Files.list(path.resolve("META-INF/graphql")).forEach(filePath -> Try.run(() -> manager.registerPath(filePath)));
-                }
+                Files.list(fileSystem.getPath("META-INF/graphql")).forEach(path -> Try.run(() -> manager.registerPath(path)));
             }
         }
     }

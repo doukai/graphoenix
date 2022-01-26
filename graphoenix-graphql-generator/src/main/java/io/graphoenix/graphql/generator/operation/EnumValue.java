@@ -32,8 +32,11 @@ public class EnumValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/EnumValue.stg").getInstanceOf("enumValueDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/EnumValue.stg");
+        ST st = stGroupFile.getInstanceOf("enumValueDefinition");
         st.add("enumValue", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

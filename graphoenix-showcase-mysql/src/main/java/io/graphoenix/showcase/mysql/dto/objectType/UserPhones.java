@@ -7,46 +7,30 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Id;
-import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserPhones implements Meta {
-  @Id
-  @NonNull
-  private String id;
-
-  private Integer userId;
-
-  private String phone;
+  private Boolean isDeprecated;
 
   private Integer version;
 
-  private Boolean isDeprecated;
+  @Id
+  private String id;
 
-  public String getId() {
-    return this.id;
+  private String phone;
+
+  private Integer userId;
+
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public Integer getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(Integer userId) {
-    this.userId = userId;
-  }
-
-  public String getPhone() {
-    return this.phone;
-  }
-
-  public void setPhone(String phone) {
-    this.phone = phone;
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 
   @Override
@@ -59,13 +43,27 @@ public class UserPhones implements Meta {
     this.version = version;
   }
 
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public String getId() {
+    return this.id;
   }
 
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getPhone() {
+    return this.phone;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
+
+  public Integer getUserId() {
+    return this.userId;
+  }
+
+  public void setUserId(Integer userId) {
+    this.userId = userId;
   }
 }

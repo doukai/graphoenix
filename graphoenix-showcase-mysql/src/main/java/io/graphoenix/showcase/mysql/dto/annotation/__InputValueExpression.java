@@ -30,9 +30,9 @@ public @interface __InputValueExpression {
 
   int[] version() default {};
 
-  String[] ofTypeName() default {};
-
   int[] fieldId() default {};
+
+  String[] ofTypeName() default {};
 
   String[] $directiveName() default {};
 
@@ -50,7 +50,7 @@ public @interface __InputValueExpression {
 
   String[] $version() default {};
 
-  String[] $ofTypeName() default {};
-
   String[] $fieldId() default {};
+
+  String[] $ofTypeName() default {};
 }

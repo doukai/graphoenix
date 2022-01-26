@@ -27,7 +27,7 @@ public class IntrospectionMutationBuilder {
 
     public Operation buildIntrospectionSchemaMutation() {
 
-        List<Argument> arguments = new ArrayList<>();
+        Set<Argument> arguments = new HashSet<>();
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
@@ -72,7 +72,7 @@ public class IntrospectionMutationBuilder {
         return new Operation()
                 .setOperationType("mutation")
                 .setName("introspection")
-                .setFields(Collections.singletonList(new Field().setName("__schema").setArguments(arguments).setFields(Collections.singletonList(new Field().setName("id")))));
+                .setFields(Collections.singleton(new Field().setName("__schema").setArguments(arguments).setFields(Collections.singleton(new Field().setName("id")))));
     }
 
     public __Schema buildIntrospectionSchema() {
@@ -86,7 +86,7 @@ public class IntrospectionMutationBuilder {
                                         manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
                                 )
                         )
-                ).collect(Collectors.toList()));
+                ).collect(Collectors.toSet()));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setQueryType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
@@ -97,7 +97,7 @@ public class IntrospectionMutationBuilder {
         Optional<GraphqlParser.ObjectTypeDefinitionContext> subscriptionTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject);
         subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setSubscriptionType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
 
-        schema.setDirectives(manager.getDirectives().map(this::directiveDefinitionContextToDirective).collect(Collectors.toList()));
+        schema.setDirectives(manager.getDirectives().map(this::directiveDefinitionContextToDirective).collect(Collectors.toSet()));
         return schema;
     }
 
@@ -122,19 +122,19 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toSet()));
         }
         return type;
     }
 
-    private List<__Type> getInterfaceTypes(GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext, int level) {
+    private Set<__Type> getInterfaceTypes(GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext, int level) {
 
         return implementsInterfacesContext.typeName().stream()
                 .map(typeNameContext -> manager.getInterface(typeNameContext.name().getText()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContextToType(interfaceTypeDefinitionContext, level))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     private __Type interfaceTypeDefinitionContextToType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext, int level) {
@@ -150,7 +150,7 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toList()));
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toSet()));
         }
         return type;
     }
@@ -163,7 +163,7 @@ public class IntrospectionMutationBuilder {
         }
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             field.setArgs(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toList()));
+                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toSet()));
         }
 
         field.setType(typeContextToType(fieldDefinitionContext.type(), level));
@@ -229,7 +229,7 @@ public class IntrospectionMutationBuilder {
                 type.setDescription(enumTypeDefinitionContext.description().getText());
             }
             type.setEnumValues(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream()
-                    .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toList()));
+                    .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toSet()));
         }
         return type;
     }
@@ -278,7 +278,8 @@ public class IntrospectionMutationBuilder {
                 type.setDescription(inputObjectTypeDefinitionContext.description().getText());
             }
             type.setInputFields(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
-                    .map(inputValueDefinitionContext -> inputValueDefinitionContextToInputValue(inputValueDefinitionContext, level + 1)).collect(Collectors.toList()));
+                    .map(inputValueDefinitionContext -> inputValueDefinitionContextToInputValue(inputValueDefinitionContext, level + 1))
+                    .collect(Collectors.toSet()));
         }
         return type;
     }
@@ -310,9 +311,9 @@ public class IntrospectionMutationBuilder {
         }
         if (directiveDefinitionContext.argumentsDefinition() != null) {
             directive.setArgs(directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toList()));
+                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toSet()));
         }
-        List<__DirectiveLocation> directiveLocationList = new ArrayList<>();
+        Set<__DirectiveLocation> directiveLocationList = new HashSet<>();
         addDirectiveDefinitionsContextToDirectiveLocationList(directiveDefinitionContext.directiveLocations(), directiveLocationList);
         directive.setLocations(directiveLocationList);
         directive.setOnField(directive.getLocations().contains(__DirectiveLocation.FIELD));
@@ -329,7 +330,7 @@ public class IntrospectionMutationBuilder {
         return directive;
     }
 
-    private void addDirectiveDefinitionsContextToDirectiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext, List<__DirectiveLocation> directiveLocationList) {
+    private void addDirectiveDefinitionsContextToDirectiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext, Set<__DirectiveLocation> directiveLocationList) {
         if (directiveLocationsContext.directiveLocation() != null) {
             directiveLocationList.add(__DirectiveLocation.valueOf(directiveLocationsContext.directiveLocation().name().getText()));
         }

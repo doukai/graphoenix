@@ -15,7 +15,12 @@ import io.graphoenix.graphql.generator.document.ObjectType;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import org.eclipse.microprofile.graphql.*;
+import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Id;
+import org.eclipse.microprofile.graphql.Mutation;
+import org.eclipse.microprofile.graphql.NonNull;
+import org.eclipse.microprofile.graphql.Query;
+import org.eclipse.microprofile.graphql.Source;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
@@ -85,7 +90,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
 
                                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(typeName).orElseThrow();
 
-                                ObjectType objectType = documentBuilder.getObject(objectTypeDefinitionContext)
+                                ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
                                         .addField(new Field()
                                                 .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
                                                 .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
@@ -161,9 +166,9 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
                 for (File file : sourceSet.getCompileClasspath()) {
                     urls.add(file.toURI().toURL());
                 }
-                for (File classesDir : sourceSet.getOutput().getClassesDirs()) {
-                    urls.add(classesDir.toURI().toURL());
-                }
+//                for (File classesDir : sourceSet.getOutput().getClassesDirs()) {
+//                    urls.add(classesDir.toURI().toURL());
+//                }
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();

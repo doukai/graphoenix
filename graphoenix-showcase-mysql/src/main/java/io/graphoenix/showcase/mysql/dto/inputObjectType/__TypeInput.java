@@ -12,88 +12,40 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeInput {
-  @NonNull
-  private String name;
+  private Collection<__InputValueInput> inputFields;
 
-  private Integer schemaId;
+  private Collection<__EnumValueInput> enumValues;
 
   @NonNull
   private __TypeKind kind;
 
-  private String description;
+  private Collection<__TypeInput> interfaces;
 
   private Collection<__FieldInput> fields;
 
-  private Collection<__TypeInput> interfaces;
-
-  private Collection<__TypeInput> possibleTypes;
-
-  private Collection<__EnumValueInput> enumValues;
-
-  private Collection<__InputValueInput> inputFields;
-
   private String ofTypeName;
 
-  private __TypeInput ofType;
+  private Integer schemaId;
 
-  private Integer version;
+  private String description;
 
   private Boolean isDeprecated;
 
-  public String getName() {
-    return this.name;
+  private __TypeInput ofType;
+
+  @NonNull
+  private String name;
+
+  private Collection<__TypeInput> possibleTypes;
+
+  private Integer version;
+
+  public Collection<__InputValueInput> getInputFields() {
+    return this.inputFields;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public __TypeKind getKind() {
-    return this.kind;
-  }
-
-  public void setKind(__TypeKind kind) {
-    this.kind = kind;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public Collection<__FieldInput> getFields() {
-    return this.fields;
-  }
-
-  public void setFields(Collection<__FieldInput> fields) {
-    this.fields = fields;
-  }
-
-  public Collection<__TypeInput> getInterfaces() {
-    return this.interfaces;
-  }
-
-  public void setInterfaces(Collection<__TypeInput> interfaces) {
-    this.interfaces = interfaces;
-  }
-
-  public Collection<__TypeInput> getPossibleTypes() {
-    return this.possibleTypes;
-  }
-
-  public void setPossibleTypes(Collection<__TypeInput> possibleTypes) {
-    this.possibleTypes = possibleTypes;
+  public void setInputFields(Collection<__InputValueInput> inputFields) {
+    this.inputFields = inputFields;
   }
 
   public Collection<__EnumValueInput> getEnumValues() {
@@ -104,12 +56,28 @@ public class __TypeInput {
     this.enumValues = enumValues;
   }
 
-  public Collection<__InputValueInput> getInputFields() {
-    return this.inputFields;
+  public __TypeKind getKind() {
+    return this.kind;
   }
 
-  public void setInputFields(Collection<__InputValueInput> inputFields) {
-    this.inputFields = inputFields;
+  public void setKind(__TypeKind kind) {
+    this.kind = kind;
+  }
+
+  public Collection<__TypeInput> getInterfaces() {
+    return this.interfaces;
+  }
+
+  public void setInterfaces(Collection<__TypeInput> interfaces) {
+    this.interfaces = interfaces;
+  }
+
+  public Collection<__FieldInput> getFields() {
+    return this.fields;
+  }
+
+  public void setFields(Collection<__FieldInput> fields) {
+    this.fields = fields;
   }
 
   public String getOfTypeName() {
@@ -120,20 +88,20 @@ public class __TypeInput {
     this.ofTypeName = ofTypeName;
   }
 
-  public __TypeInput getOfType() {
-    return this.ofType;
+  public Integer getSchemaId() {
+    return this.schemaId;
   }
 
-  public void setOfType(__TypeInput ofType) {
-    this.ofType = ofType;
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
   }
 
-  public Integer getVersion() {
-    return this.version;
+  public String getDescription() {
+    return this.description;
   }
 
-  public void setVersion(Integer version) {
-    this.version = version;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   public Boolean getIsDeprecated() {
@@ -142,5 +110,37 @@ public class __TypeInput {
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public __TypeInput getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__TypeInput ofType) {
+    this.ofType = ofType;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Collection<__TypeInput> getPossibleTypes() {
+    return this.possibleTypes;
+  }
+
+  public void setPossibleTypes(Collection<__TypeInput> possibleTypes) {
+    this.possibleTypes = possibleTypes;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
   }
 }

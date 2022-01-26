@@ -3,14 +3,14 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
+import java.util.Set;
 
 public class InputValue {
 
     private String name;
     private String typeName;
     private String defaultValue;
-    private List<String> directives;
+    private Set<String> directives;
     private String description;
 
     public String getName() {
@@ -46,11 +46,11 @@ public class InputValue {
         return this;
     }
 
-    public List<String> getDirectives() {
+    public Set<String> getDirectives() {
         return directives;
     }
 
-    public InputValue setDirectives(List<String> directives) {
+    public InputValue setDirectives(Set<String> directives) {
         this.directives = directives;
         return this;
     }
@@ -66,8 +66,11 @@ public class InputValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/InputValue.stg").getInstanceOf("inputValueDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/InputValue.stg");
+        ST st = stGroupFile.getInstanceOf("inputValueDefinition");
         st.add("inputValue", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

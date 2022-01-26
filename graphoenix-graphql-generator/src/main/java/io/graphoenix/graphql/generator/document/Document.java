@@ -4,33 +4,33 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Document {
 
     private Schema schema;
 
-    private List<String> definitions;
+    private Set<String> definitions;
 
-    public List<String> getDefinitions() {
+    public Set<String> getDefinitions() {
         return definitions;
     }
 
-    public Document setDefinitions(List<String> definitions) {
+    public Document setDefinitions(Set<String> definitions) {
         this.definitions = definitions;
         return this;
     }
 
     public Document addDefinition(String definition) {
         if (this.definitions == null) {
-            this.definitions = new ArrayList<>();
+            this.definitions = new HashSet<>();
         }
         this.definitions.add(definition);
         return this;
     }
 
-    public Document addDefinitions(List<String> definitions) {
+    public Document addDefinitions(Set<String> definitions) {
         if (this.definitions == null) {
             this.definitions = definitions;
         } else {
@@ -46,8 +46,11 @@ public class Document {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/Document.stg").getInstanceOf("documentDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/Document.stg");
+        ST st = stGroupFile.getInstanceOf("documentDefinition");
         st.add("document", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

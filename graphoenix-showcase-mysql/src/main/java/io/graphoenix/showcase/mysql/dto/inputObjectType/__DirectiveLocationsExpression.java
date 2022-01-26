@@ -12,19 +12,19 @@ import org.eclipse.microprofile.graphql.Input;
 public class __DirectiveLocationsExpression {
   private IDExpression id;
 
-  private StringExpression directiveName;
-
-  private __DirectiveLocationExpression directiveLocation;
-
-  private IntExpression version;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
+
+  private StringExpression directiveName;
 
   @DefaultValue("AND")
   private Conditional cond;
 
   private Collection<__DirectiveLocationsExpression> exs;
+
+  private IntExpression version;
+
+  private __DirectiveLocationExpression directiveLocation;
 
   public IDExpression getId() {
     return this.id;
@@ -34,36 +34,20 @@ public class __DirectiveLocationsExpression {
     this.id = id;
   }
 
-  public StringExpression getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(StringExpression directiveName) {
-    this.directiveName = directiveName;
-  }
-
-  public __DirectiveLocationExpression getDirectiveLocation() {
-    return this.directiveLocation;
-  }
-
-  public void setDirectiveLocation(__DirectiveLocationExpression directiveLocation) {
-    this.directiveLocation = directiveLocation;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
   }
 
   public void setIncludeDeprecated(Boolean includeDeprecated) {
     this.includeDeprecated = includeDeprecated;
+  }
+
+  public StringExpression getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(StringExpression directiveName) {
+    this.directiveName = directiveName;
   }
 
   public Conditional getCond() {
@@ -80,5 +64,21 @@ public class __DirectiveLocationsExpression {
 
   public void setExs(Collection<__DirectiveLocationsExpression> exs) {
     this.exs = exs;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public __DirectiveLocationExpression getDirectiveLocation() {
+    return this.directiveLocation;
+  }
+
+  public void setDirectiveLocation(__DirectiveLocationExpression directiveLocation) {
+    this.directiveLocation = directiveLocation;
   }
 }

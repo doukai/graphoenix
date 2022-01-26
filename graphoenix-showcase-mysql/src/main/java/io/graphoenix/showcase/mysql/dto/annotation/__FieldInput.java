@@ -11,9 +11,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __FieldInput {
-  __InputValueInnerInput[] args() default {};
-
   String deprecationReason() default "";
+
+  __InputValueInnerInput[] args() default {};
 
   boolean isDeprecated() default false;
 
@@ -31,9 +31,9 @@ public @interface __FieldInput {
 
   String ofTypeName() default "";
 
-  String $args() default "";
-
   String $deprecationReason() default "";
+
+  String $args() default "";
 
   String $isDeprecated() default "";
 

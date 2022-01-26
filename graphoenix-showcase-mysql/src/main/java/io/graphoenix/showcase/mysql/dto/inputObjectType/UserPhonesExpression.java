@@ -10,28 +10,36 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserPhonesExpression {
-  private IDExpression id;
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
+
+  private Collection<UserPhonesExpression> exs;
 
   private IntExpression userId;
 
-  private StringExpression phone;
-
-  private IntExpression version;
-
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
+  private IDExpression id;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<UserPhonesExpression> exs;
+  private IntExpression version;
 
-  public IDExpression getId() {
-    return this.id;
+  private StringExpression phone;
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public Collection<UserPhonesExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<UserPhonesExpression> exs) {
+    this.exs = exs;
   }
 
   public IntExpression getUserId() {
@@ -42,28 +50,12 @@ public class UserPhonesExpression {
     this.userId = userId;
   }
 
-  public StringExpression getPhone() {
-    return this.phone;
+  public IDExpression getId() {
+    return this.id;
   }
 
-  public void setPhone(StringExpression phone) {
-    this.phone = phone;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
+  public void setId(IDExpression id) {
+    this.id = id;
   }
 
   public Conditional getCond() {
@@ -74,11 +66,19 @@ public class UserPhonesExpression {
     this.cond = cond;
   }
 
-  public Collection<UserPhonesExpression> getExs() {
-    return this.exs;
+  public IntExpression getVersion() {
+    return this.version;
   }
 
-  public void setExs(Collection<UserPhonesExpression> exs) {
-    this.exs = exs;
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public StringExpression getPhone() {
+    return this.phone;
+  }
+
+  public void setPhone(StringExpression phone) {
+    this.phone = phone;
   }
 }

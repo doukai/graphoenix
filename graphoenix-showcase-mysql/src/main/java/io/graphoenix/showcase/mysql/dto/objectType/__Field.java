@@ -14,93 +14,28 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __Field implements Meta {
-  @Id
-  @NonNull
-  private String id;
+  private Integer version;
 
-  private String name;
-
-  private String typeName;
+  private String description;
 
   private String ofTypeName;
 
-  private String description;
+  private Boolean isDeprecated;
+
+  @Id
+  private String id;
+
+  private String typeName;
 
   @NonNull
   private Collection<__InputValue> args;
 
-  @NonNull
-  private __Type type;
-
   private String deprecationReason;
 
-  private Integer version;
+  private String name;
 
-  private Boolean isDeprecated;
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public Collection<__InputValue> getArgs() {
-    return this.args;
-  }
-
-  public void setArgs(Collection<__InputValue> args) {
-    this.args = args;
-  }
-
-  public __Type getType() {
-    return this.type;
-  }
-
-  public void setType(__Type type) {
-    this.type = type;
-  }
-
-  public String getDeprecationReason() {
-    return this.deprecationReason;
-  }
-
-  public void setDeprecationReason(String deprecationReason) {
-    this.deprecationReason = deprecationReason;
-  }
+  @NonNull
+  private __Type type;
 
   @Override
   public Integer getVersion() {
@@ -112,6 +47,22 @@ public class __Field implements Meta {
     this.version = version;
   }
 
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
   @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
@@ -120,5 +71,53 @@ public class __Field implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public Collection<__InputValue> getArgs() {
+    return this.args;
+  }
+
+  public void setArgs(Collection<__InputValue> args) {
+    this.args = args;
+  }
+
+  public String getDeprecationReason() {
+    return this.deprecationReason;
+  }
+
+  public void setDeprecationReason(String deprecationReason) {
+    this.deprecationReason = deprecationReason;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public __Type getType() {
+    return this.type;
+  }
+
+  public void setType(__Type type) {
+    this.type = type;
   }
 }

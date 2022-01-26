@@ -3,7 +3,7 @@ package io.graphoenix.graphql.generator.introspection;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
+import java.util.Set;
 
 public class __Field {
 
@@ -11,7 +11,7 @@ public class __Field {
 
     private String description;
 
-    private List<__InputValue> args;
+    private Set<__InputValue> args;
 
     private __Type type;
 
@@ -35,11 +35,11 @@ public class __Field {
         this.description = description;
     }
 
-    public List<__InputValue> getArgs() {
+    public Set<__InputValue> getArgs() {
         return args;
     }
 
-    public void setArgs(List<__InputValue> args) {
+    public void setArgs(Set<__InputValue> args) {
         this.args = args;
     }
 
@@ -69,8 +69,11 @@ public class __Field {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/introspection/__Field.stg").getInstanceOf("__fieldDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__Field.stg");
+        ST st = stGroupFile.getInstanceOf("__fieldDefinition");
         st.add("__field", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

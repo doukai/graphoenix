@@ -3,12 +3,12 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
+import java.util.Set;
 
 public class EnumValue {
 
     private String name;
-    private List<String> directives;
+    private Set<String> directives;
     private String description;
 
     public String getName() {
@@ -20,11 +20,11 @@ public class EnumValue {
         return this;
     }
 
-    public List<String> getDirectives() {
+    public Set<String> getDirectives() {
         return directives;
     }
 
-    public EnumValue setDirectives(List<String> directives) {
+    public EnumValue setDirectives(Set<String> directives) {
         this.directives = directives;
         return this;
     }
@@ -40,8 +40,11 @@ public class EnumValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/EnumValue.stg").getInstanceOf("enumValueDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/EnumValue.stg");
+        ST st = stGroupFile.getInstanceOf("enumValueDefinition");
         st.add("enumValue", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

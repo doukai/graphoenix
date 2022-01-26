@@ -7,27 +7,25 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Id;
-import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __EnumValue implements Meta {
   @Id
-  @NonNull
   private String id;
 
   private String name;
 
-  private String ofTypeName;
-
   private String description;
 
-  private String deprecationReason;
+  private Boolean isDeprecated;
+
+  private String ofTypeName;
 
   private Integer version;
 
-  private Boolean isDeprecated;
+  private String deprecationReason;
 
   public String getId() {
     return this.id;
@@ -45,14 +43,6 @@ public class __EnumValue implements Meta {
     this.name = name;
   }
 
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
   public String getDescription() {
     return this.description;
   }
@@ -61,12 +51,22 @@ public class __EnumValue implements Meta {
     this.description = description;
   }
 
-  public String getDeprecationReason() {
-    return this.deprecationReason;
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
   }
 
-  public void setDeprecationReason(String deprecationReason) {
-    this.deprecationReason = deprecationReason;
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   @Override
@@ -79,13 +79,11 @@ public class __EnumValue implements Meta {
     this.version = version;
   }
 
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public String getDeprecationReason() {
+    return this.deprecationReason;
   }
 
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setDeprecationReason(String deprecationReason) {
+    this.deprecationReason = deprecationReason;
   }
 }

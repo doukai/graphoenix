@@ -10,29 +10,21 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class RoleExpression {
-  private IDExpression id;
-
   private StringExpression name;
-
-  private UserExpression users;
-
-  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  @DefaultValue("AND")
-  private Conditional cond;
+  private UserExpression users;
 
   private Collection<RoleExpression> exs;
 
-  public IDExpression getId() {
-    return this.id;
-  }
+  private IDExpression id;
 
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
+  private IntExpression version;
+
+  @DefaultValue("AND")
+  private Conditional cond;
 
   public StringExpression getName() {
     return this.name;
@@ -40,22 +32,6 @@ public class RoleExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
-  }
-
-  public UserExpression getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(UserExpression users) {
-    this.users = users;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -66,12 +42,12 @@ public class RoleExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public Conditional getCond() {
-    return this.cond;
+  public UserExpression getUsers() {
+    return this.users;
   }
 
-  public void setCond(Conditional cond) {
-    this.cond = cond;
+  public void setUsers(UserExpression users) {
+    this.users = users;
   }
 
   public Collection<RoleExpression> getExs() {
@@ -80,5 +56,29 @@ public class RoleExpression {
 
   public void setExs(Collection<RoleExpression> exs) {
     this.exs = exs;
+  }
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 }

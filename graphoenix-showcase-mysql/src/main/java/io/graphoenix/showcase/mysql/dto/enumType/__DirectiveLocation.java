@@ -6,39 +6,39 @@ import org.eclipse.microprofile.graphql.Enum;
 @Enum
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public enum __DirectiveLocation {
-  QUERY,
-
-  MUTATION,
+  INPUT_FIELD_DEFINITION,
 
   SUBSCRIPTION,
 
-  FIELD,
-
-  FRAGMENT_DEFINITION,
-
-  FRAGMENT_SPREAD,
-
-  INLINE_FRAGMENT,
-
-  SCHEMA,
-
-  SCALAR,
-
-  OBJECT,
-
-  FIELD_DEFINITION,
-
   ARGUMENT_DEFINITION,
-
-  INTERFACE,
 
   UNION,
 
   ENUM,
 
+  SCHEMA,
+
+  FRAGMENT_SPREAD,
+
+  FIELD,
+
+  SCALAR,
+
   ENUM_VALUE,
+
+  MUTATION,
+
+  FRAGMENT_DEFINITION,
+
+  OBJECT,
 
   INPUT_OBJECT,
 
-  INPUT_FIELD_DEFINITION
+  INLINE_FRAGMENT,
+
+  FIELD_DEFINITION,
+
+  QUERY,
+
+  INTERFACE
 }

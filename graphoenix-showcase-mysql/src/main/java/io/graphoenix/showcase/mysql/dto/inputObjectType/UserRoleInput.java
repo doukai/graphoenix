@@ -5,21 +5,35 @@ import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserRoleInput {
-  @NonNull
+  private Integer version;
+
+  private Integer roleId;
+
   private String id;
 
   private Integer userId;
 
-  private Integer roleId;
-
-  private Integer version;
-
   private Boolean isDeprecated;
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Integer getRoleId() {
+    return this.roleId;
+  }
+
+  public void setRoleId(Integer roleId) {
+    this.roleId = roleId;
+  }
 
   public String getId() {
     return this.id;
@@ -35,22 +49,6 @@ public class UserRoleInput {
 
   public void setUserId(Integer userId) {
     this.userId = userId;
-  }
-
-  public Integer getRoleId() {
-    return this.roleId;
-  }
-
-  public void setRoleId(Integer roleId) {
-    this.roleId = roleId;
-  }
-
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
   }
 
   public Boolean getIsDeprecated() {

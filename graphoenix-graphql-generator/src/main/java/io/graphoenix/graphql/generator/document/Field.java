@@ -3,15 +3,15 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Field {
 
     private String name;
-    private List<InputValue> arguments;
+    private Set<InputValue> arguments;
     private String typeName;
-    private List<String> directives;
+    private Set<String> directives;
     private String description;
 
     public String getName() {
@@ -23,16 +23,16 @@ public class Field {
         return this;
     }
 
-    public List<InputValue> getArguments() {
+    public Set<InputValue> getArguments() {
         return arguments;
     }
 
-    public Field setArguments(List<InputValue> arguments) {
+    public Field setArguments(Set<InputValue> arguments) {
         this.arguments = arguments;
         return this;
     }
 
-    public Field addArguments(List<InputValue> arguments) {
+    public Field addArguments(Set<InputValue> arguments) {
         if (this.arguments == null) {
             this.arguments = arguments;
         } else {
@@ -43,7 +43,7 @@ public class Field {
 
     public Field addArgument(InputValue argument) {
         if (this.arguments == null) {
-            this.arguments = new ArrayList<>();
+            this.arguments = new HashSet<>();
         }
         this.arguments.add(argument);
         return this;
@@ -58,11 +58,11 @@ public class Field {
         return this;
     }
 
-    public List<String> getDirectives() {
+    public Set<String> getDirectives() {
         return directives;
     }
 
-    public Field setDirectives(List<String> directives) {
+    public Field setDirectives(Set<String> directives) {
         this.directives = directives;
         return this;
     }
@@ -78,8 +78,11 @@ public class Field {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/Field.stg").getInstanceOf("fieldDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/Field.stg");
+        ST st = stGroupFile.getInstanceOf("fieldDefinition");
         st.add("filed", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

@@ -32,7 +32,7 @@ public class ElementManager {
         this.manager = manager;
     }
 
-    public List<Field> buildFields(String typeName, int level, int layers) {
+    public Set<Field> buildFields(String typeName, int level, int layers) {
         return getFields(typeName, level, layers)
                 .map(fieldDefinitionContext ->
                         {
@@ -43,7 +43,7 @@ public class ElementManager {
                             return field;
                         }
                 )
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
     public Stream<GraphqlParser.FieldDefinitionContext> getFields(String typeName, int level, int layers) {

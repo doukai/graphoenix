@@ -38,7 +38,7 @@ public class GraphQLApiBuilder {
                                                 .setDefaultValue(elementManager.getDefaultValueFromElement(variableElement))
                                                 .setTypeName(elementManager.variableElementToInputTypeName(variableElement, typeUtils))
                                 )
-                                .collect(Collectors.toList())
+                                .collect(Collectors.toSet())
                 )
                 .setDirectives(
                         Stream.of(new Directive()
@@ -55,7 +55,7 @@ public class GraphQLApiBuilder {
                                         )
                                 )
                                 .map(Directive::toString).
-                                collect(Collectors.toList())
+                                collect(Collectors.toSet())
                 );
     }
 
@@ -87,7 +87,7 @@ public class GraphQLApiBuilder {
                                                 )
                                         )
                                         .map(Directive::toString).
-                                        collect(Collectors.toList())
+                                        collect(Collectors.toSet())
                         )
         );
     }

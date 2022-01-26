@@ -32,8 +32,11 @@ public class FloatValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/FloatValue.stg").getInstanceOf("floatValueDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/FloatValue.stg");
+        ST st = stGroupFile.getInstanceOf("floatValueDefinition");
         st.add("floatValue", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

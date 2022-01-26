@@ -21,8 +21,11 @@ public class Variable {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/Variable.stg").getInstanceOf("variableDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/Variable.stg");
+        ST st = stGroupFile.getInstanceOf("variableDefinition");
         st.add("variable", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

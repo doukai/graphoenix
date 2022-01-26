@@ -1,16 +1,15 @@
 package io.graphoenix.graphql.generator.document;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
+import java.util.Set;
 
 public class EnumType {
 
     private String name;
-    private List<String> directives;
-    private List<EnumValue> enumValues;
+    private Set<String> directives;
+    private Set<EnumValue> enumValues;
     private String description;
 
     public String getName() {
@@ -22,20 +21,20 @@ public class EnumType {
         return this;
     }
 
-    public List<String> getDirectives() {
+    public Set<String> getDirectives() {
         return directives;
     }
 
-    public EnumType setDirectives(List<String> directives) {
+    public EnumType setDirectives(Set<String> directives) {
         this.directives = directives;
         return this;
     }
 
-    public List<EnumValue> getEnumValues() {
+    public Set<EnumValue> getEnumValues() {
         return enumValues;
     }
 
-    public EnumType setEnumValues(List<EnumValue> enumValues) {
+    public EnumType setEnumValues(Set<EnumValue> enumValues) {
         this.enumValues = enumValues;
         return this;
     }
@@ -51,8 +50,11 @@ public class EnumType {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/EnumType.stg").getInstanceOf("enumTypeDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/EnumType.stg");
+        ST st = stGroupFile.getInstanceOf("enumTypeDefinition");
         st.add("enumType", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

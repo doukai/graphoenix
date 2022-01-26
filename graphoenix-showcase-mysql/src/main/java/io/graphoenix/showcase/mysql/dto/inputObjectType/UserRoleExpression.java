@@ -10,44 +10,28 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserRoleExpression {
-  private IDExpression id;
-
-  private IntExpression userId;
-
-  private IntExpression roleId;
+  @DefaultValue("AND")
+  private Conditional cond;
 
   private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  @DefaultValue("AND")
-  private Conditional cond;
-
   private Collection<UserRoleExpression> exs;
 
-  public IDExpression getId() {
-    return this.id;
+  private IntExpression userId;
+
+  private IDExpression id;
+
+  private IntExpression roleId;
+
+  public Conditional getCond() {
+    return this.cond;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
-
-  public IntExpression getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(IntExpression userId) {
-    this.userId = userId;
-  }
-
-  public IntExpression getRoleId() {
-    return this.roleId;
-  }
-
-  public void setRoleId(IntExpression roleId) {
-    this.roleId = roleId;
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 
   public IntExpression getVersion() {
@@ -66,19 +50,35 @@ public class UserRoleExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
   public Collection<UserRoleExpression> getExs() {
     return this.exs;
   }
 
   public void setExs(Collection<UserRoleExpression> exs) {
     this.exs = exs;
+  }
+
+  public IntExpression getUserId() {
+    return this.userId;
+  }
+
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
+  }
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
+
+  public IntExpression getRoleId() {
+    return this.roleId;
+  }
+
+  public void setRoleId(IntExpression roleId) {
+    this.roleId = roleId;
   }
 }

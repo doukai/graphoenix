@@ -24,9 +24,9 @@ public @interface __DirectiveInnerInput {
 
   __DirectiveLocation[] locations() default {};
 
-  boolean onOperation() default false;
-
   int version() default 0;
+
+  boolean onOperation() default false;
 
   boolean onField() default false;
 
@@ -42,9 +42,9 @@ public @interface __DirectiveInnerInput {
 
   String $locations() default "";
 
-  String $onOperation() default "";
-
   String $version() default "";
+
+  String $onOperation() default "";
 
   String $onField() default "";
 }

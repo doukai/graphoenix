@@ -36,8 +36,11 @@ public class StringValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/StringValue.stg").getInstanceOf("stringValueDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/StringValue.stg");
+        ST st = stGroupFile.getInstanceOf("stringValueDefinition");
         st.add("stringValue", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

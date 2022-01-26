@@ -4,13 +4,13 @@ import io.graphoenix.graphql.generator.operation.Argument;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Directive {
 
     private String name;
-    private List<Argument> arguments;
+    private Set<Argument> arguments;
 
     public String getName() {
         return name;
@@ -21,18 +21,18 @@ public class Directive {
         return this;
     }
 
-    public List<Argument> getArguments() {
+    public Set<Argument> getArguments() {
         return arguments;
     }
 
-    public Directive setArguments(List<Argument> arguments) {
+    public Directive setArguments(Set<Argument> arguments) {
         this.arguments = arguments;
         return this;
     }
 
     public Directive addArgument(Argument argument) {
         if (arguments == null) {
-            arguments = new ArrayList<>();
+            arguments = new HashSet<>();
         }
         this.arguments.add(argument);
         return this;
@@ -40,8 +40,11 @@ public class Directive {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/Directive.stg").getInstanceOf("directiveDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/Directive.stg");
+        ST st = stGroupFile.getInstanceOf("directiveDefinition");
         st.add("directive", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

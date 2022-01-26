@@ -16,7 +16,7 @@ public @interface __DirectiveLocationsInput {
 
   boolean isDeprecated() default false;
 
-  __DirectiveLocation directiveLocation() default __DirectiveLocation.QUERY;
+  __DirectiveLocation directiveLocation() default __DirectiveLocation.INPUT_FIELD_DEFINITION;
 
   String id() default "";
 

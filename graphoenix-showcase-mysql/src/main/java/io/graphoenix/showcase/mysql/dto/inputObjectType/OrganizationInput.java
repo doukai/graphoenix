@@ -12,27 +12,26 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class OrganizationInput {
   @NonNull
-  private String id;
+  private String name;
 
   private Integer aboveId;
 
-  private OrganizationInput above;
-
   private Collection<UserInput> users;
-
-  @NonNull
-  private String name;
 
   private Integer version;
 
+  private String id;
+
   private Boolean isDeprecated;
 
-  public String getId() {
-    return this.id;
+  private OrganizationInput above;
+
+  public String getName() {
+    return this.name;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setName(String name) {
+    this.name = name;
   }
 
   public Integer getAboveId() {
@@ -43,28 +42,12 @@ public class OrganizationInput {
     this.aboveId = aboveId;
   }
 
-  public OrganizationInput getAbove() {
-    return this.above;
-  }
-
-  public void setAbove(OrganizationInput above) {
-    this.above = above;
-  }
-
   public Collection<UserInput> getUsers() {
     return this.users;
   }
 
   public void setUsers(Collection<UserInput> users) {
     this.users = users;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public Integer getVersion() {
@@ -75,11 +58,27 @@ public class OrganizationInput {
     this.version = version;
   }
 
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public OrganizationInput getAbove() {
+    return this.above;
+  }
+
+  public void setAbove(OrganizationInput above) {
+    this.above = above;
   }
 }

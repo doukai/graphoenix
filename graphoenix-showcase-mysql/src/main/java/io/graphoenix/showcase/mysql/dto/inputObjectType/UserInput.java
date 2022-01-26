@@ -12,11 +12,21 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserInput {
-  @NonNull
-  private String id;
+  private OrganizationInput organization;
 
-  @NonNull
-  private String login;
+  private Integer organizationId;
+
+  private Collection<RoleInput> roles;
+
+  private Boolean isDeprecated;
+
+  private Sex sex;
+
+  private Integer age;
+
+  private Boolean disable;
+
+  private Collection<String> phones;
 
   @NonNull
   private String password;
@@ -24,54 +34,51 @@ public class UserInput {
   @NonNull
   private String name;
 
-  private Integer age;
-
-  private Boolean disable;
-
-  private Sex sex;
-
-  private Integer organizationId;
-
-  private OrganizationInput organization;
-
-  private Collection<RoleInput> roles;
-
-  private Collection<String> phones;
+  private String id;
 
   private Integer version;
 
-  private Boolean isDeprecated;
+  @NonNull
+  private String login;
 
-  public String getId() {
-    return this.id;
+  public OrganizationInput getOrganization() {
+    return this.organization;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setOrganization(OrganizationInput organization) {
+    this.organization = organization;
   }
 
-  public String getLogin() {
-    return this.login;
+  public Integer getOrganizationId() {
+    return this.organizationId;
   }
 
-  public void setLogin(String login) {
-    this.login = login;
+  public void setOrganizationId(Integer organizationId) {
+    this.organizationId = organizationId;
   }
 
-  public String getPassword() {
-    return this.password;
+  public Collection<RoleInput> getRoles() {
+    return this.roles;
   }
 
-  public void setPassword(String password) {
-    this.password = password;
+  public void setRoles(Collection<RoleInput> roles) {
+    this.roles = roles;
   }
 
-  public String getName() {
-    return this.name;
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public Sex getSex() {
+    return this.sex;
+  }
+
+  public void setSex(Sex sex) {
+    this.sex = sex;
   }
 
   public Integer getAge() {
@@ -90,44 +97,36 @@ public class UserInput {
     this.disable = disable;
   }
 
-  public Sex getSex() {
-    return this.sex;
-  }
-
-  public void setSex(Sex sex) {
-    this.sex = sex;
-  }
-
-  public Integer getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(Integer organizationId) {
-    this.organizationId = organizationId;
-  }
-
-  public OrganizationInput getOrganization() {
-    return this.organization;
-  }
-
-  public void setOrganization(OrganizationInput organization) {
-    this.organization = organization;
-  }
-
-  public Collection<RoleInput> getRoles() {
-    return this.roles;
-  }
-
-  public void setRoles(Collection<RoleInput> roles) {
-    this.roles = roles;
-  }
-
   public Collection<String> getPhones() {
     return this.phones;
   }
 
   public void setPhones(Collection<String> phones) {
     this.phones = phones;
+  }
+
+  public String getPassword() {
+    return this.password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   public Integer getVersion() {
@@ -138,11 +137,11 @@ public class UserInput {
     this.version = version;
   }
 
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public String getLogin() {
+    return this.login;
   }
 
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setLogin(String login) {
+    this.login = login;
   }
 }

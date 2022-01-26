@@ -43,8 +43,11 @@ public class ArrayValueWithVariable {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/ArrayValueWithVariable.stg").getInstanceOf("arrayValueWithVariableDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/ArrayValueWithVariable.stg");
+        ST st = stGroupFile.getInstanceOf("arrayValueWithVariableDefinition");
         st.add("valueWithVariables", valueWithVariables.stream().map(Object::toString).collect(Collectors.toList()));
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

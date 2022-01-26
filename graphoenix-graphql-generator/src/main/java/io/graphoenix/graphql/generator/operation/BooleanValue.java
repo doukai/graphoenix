@@ -32,8 +32,11 @@ public class BooleanValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/BooleanValue.stg").getInstanceOf("booleanValueDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/BooleanValue.stg");
+        ST st = stGroupFile.getInstanceOf("booleanValueDefinition");
         st.add("booleanValue", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

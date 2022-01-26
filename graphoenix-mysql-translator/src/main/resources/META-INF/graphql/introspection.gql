@@ -1,5 +1,5 @@
 type __Schema {
-    id: ID! @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
     queryTypeName: String
     mutationTypeName: String
     subscriptionTypeName: String
@@ -37,19 +37,19 @@ type __Type {
 }
 
 type __TypeInterfaces {
-    id: ID! @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
     typeName: String!
     interfaceName: String!
 }
 
 type __TypePossibleTypes {
-    id: ID! @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
     typeName: String!
     possibleTypeName: String!
 }
 
 type __Field {
-    id: ID! @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
     name: String
     typeName: String
     ofTypeName: String
@@ -60,7 +60,7 @@ type __Field {
 }
 
 type __InputValue {
-    id: ID! @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
     name: String
     typeName: String
     ofTypeName: String
@@ -72,7 +72,7 @@ type __InputValue {
 }
 
 type __EnumValue {
-    id: ID! @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
     name: String
     ofTypeName: String
     description: String
@@ -91,7 +91,7 @@ enum __TypeKind {
 }
 
 type __Directive {
-    name: ID! @dataType(type: "varchar")
+    name: ID @dataType(type: "varchar")
     schemaId: Int
     description: String
     locations: [__DirectiveLocation!]! @map(from: "name" with: {type: "__DirectiveLocations", from: "directiveName", to: "directiveLocation"})
@@ -102,7 +102,7 @@ type __Directive {
 }
 
 type __DirectiveLocations {
-    id: ID! @dataType(type: "int") @column(autoIncrement: true)
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
     directiveName: String!
     directiveLocation: __DirectiveLocation!
 }

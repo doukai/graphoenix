@@ -47,8 +47,11 @@ public class __EnumValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/introspection/__EnumValue.stg").getInstanceOf("__enumValueDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__EnumValue.stg");
+        ST st = stGroupFile.getInstanceOf("__enumValueDefinition");
         st.add("__enumValue", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

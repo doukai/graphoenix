@@ -47,8 +47,11 @@ public class __InputValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/introspection/__InputValue.stg").getInstanceOf("__inputValueDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__InputValue.stg");
+        ST st = stGroupFile.getInstanceOf("__inputValueDefinition");
         st.add("__inputValue", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

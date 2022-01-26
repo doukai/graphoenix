@@ -3,7 +3,6 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,8 +11,8 @@ public class ObjectType {
 
     private String name;
     private Set<String> interfaces;
-    private List<String> directives;
-    private List<Field> fields;
+    private Set<String> directives;
+    private Set<Field> fields;
     private String description;
 
     public String getName() {
@@ -42,27 +41,27 @@ public class ObjectType {
         return this;
     }
 
-    public List<String> getDirectives() {
+    public Set<String> getDirectives() {
         return directives;
     }
 
-    public ObjectType setDirectives(List<String> directives) {
+    public ObjectType setDirectives(Set<String> directives) {
         this.directives = directives;
         return this;
     }
 
-    public List<Field> getFields() {
+    public Set<Field> getFields() {
         return fields;
     }
 
-    public ObjectType setFields(List<Field> fields) {
+    public ObjectType setFields(Set<Field> fields) {
         this.fields = fields;
         return this;
     }
 
     public ObjectType addFields(List<Field> fields) {
         if (this.fields == null) {
-            this.fields = new ArrayList<>();
+            this.fields = new HashSet<>();
         }
         this.fields.addAll(fields);
         return this;
@@ -70,7 +69,7 @@ public class ObjectType {
 
     public ObjectType addField(Field field) {
         if (this.fields == null) {
-            this.fields = new ArrayList<>();
+            this.fields = new HashSet<>();
         }
         this.fields.add(field);
         return this;
@@ -87,8 +86,11 @@ public class ObjectType {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/ObjectType.stg").getInstanceOf("objectTypeDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/ObjectType.stg");
+        ST st = stGroupFile.getInstanceOf("objectTypeDefinition");
         st.add("objectType", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

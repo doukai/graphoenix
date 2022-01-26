@@ -10,20 +10,12 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class ConditionalExpression {
-  @DefaultValue("EQ")
-  private Operator opr;
-
   private Conditional val;
 
   private Collection<Conditional> in;
 
-  public Operator getOpr() {
-    return this.opr;
-  }
-
-  public void setOpr(Operator opr) {
-    this.opr = opr;
-  }
+  @DefaultValue("EQ")
+  private Operator opr;
 
   public Conditional getVal() {
     return this.val;
@@ -39,5 +31,13 @@ public class ConditionalExpression {
 
   public void setIn(Collection<Conditional> in) {
     this.in = in;
+  }
+
+  public Operator getOpr() {
+    return this.opr;
+  }
+
+  public void setOpr(Operator opr) {
+    this.opr = opr;
   }
 }

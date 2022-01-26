@@ -29,9 +29,9 @@ public @interface __InputValueInput {
 
   int version() default 0;
 
-  String ofTypeName() default "";
-
   int fieldId() default 0;
+
+  String ofTypeName() default "";
 
   String $directiveName() default "";
 
@@ -51,7 +51,7 @@ public @interface __InputValueInput {
 
   String $version() default "";
 
-  String $ofTypeName() default "";
-
   String $fieldId() default "";
+
+  String $ofTypeName() default "";
 }

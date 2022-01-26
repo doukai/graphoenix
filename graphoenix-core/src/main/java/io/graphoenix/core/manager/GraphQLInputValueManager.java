@@ -4,6 +4,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLInputValueManager;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ public class GraphQLInputValueManager implements IGraphQLInputValueManager {
     @Override
     public Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         inputValueDefinitionTree.put(inputObjectTypeDefinitionContext.name().getText(),
-                inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                new HashSet<>(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()).stream()
                         .collect(Collectors.toMap(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText(), inputValueDefinitionContext -> inputValueDefinitionContext)));
         return inputValueDefinitionTree;
     }

@@ -3,7 +3,7 @@ package io.graphoenix.graphql.generator.introspection;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
+import java.util.Set;
 
 public class __Directive {
 
@@ -11,9 +11,9 @@ public class __Directive {
 
     private String description;
 
-    private List<__DirectiveLocation> locations;
+    private Set<__DirectiveLocation> locations;
 
-    private List<__InputValue> args;
+    private Set<__InputValue> args;
 
     private Boolean onOperation;
 
@@ -37,19 +37,19 @@ public class __Directive {
         this.description = description;
     }
 
-    public List<__DirectiveLocation> getLocations() {
+    public Set<__DirectiveLocation> getLocations() {
         return locations;
     }
 
-    public void setLocations(List<__DirectiveLocation> locations) {
+    public void setLocations(Set<__DirectiveLocation> locations) {
         this.locations = locations;
     }
 
-    public List<__InputValue> getArgs() {
+    public Set<__InputValue> getArgs() {
         return args;
     }
 
-    public void setArgs(List<__InputValue> args) {
+    public void setArgs(Set<__InputValue> args) {
         this.args = args;
     }
 
@@ -79,8 +79,11 @@ public class __Directive {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/introspection/__Directive.stg").getInstanceOf("__directiveDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__Directive.stg");
+        ST st = stGroupFile.getInstanceOf("__directiveDefinition");
         st.add("__directive", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

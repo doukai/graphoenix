@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
 public @interface __TypeInnerInput {
   boolean isDeprecated() default false;
 
-  __TypeKind kind() default __TypeKind.SCALAR;
+  __TypeKind kind() default __TypeKind.LIST;
 
   String description() default "";
 

@@ -28,8 +28,11 @@ public class Schema {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/Schema.stg").getInstanceOf("schemaDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/Schema.stg");
+        ST st = stGroupFile.getInstanceOf("schemaDefinition");
         st.add("schema", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

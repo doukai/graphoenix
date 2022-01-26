@@ -10,31 +10,39 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveExpression {
+  private IntExpression version;
+
   private IDExpression name;
-
-  private IntExpression schemaId;
-
-  private StringExpression description;
 
   private __DirectiveLocationExpression locations;
 
   private __InputValueExpression args;
 
-  private Boolean onOperation;
-
   private Boolean onFragment;
 
-  private Boolean onField;
-
-  private IntExpression version;
-
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
+  private IntExpression schemaId;
 
   @DefaultValue("AND")
   private Conditional cond;
 
+  private Boolean onOperation;
+
+  private Boolean onField;
+
+  private StringExpression description;
+
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
+
   private Collection<__DirectiveExpression> exs;
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
 
   public IDExpression getName() {
     return this.name;
@@ -42,22 +50,6 @@ public class __DirectiveExpression {
 
   public void setName(IDExpression name) {
     this.name = name;
-  }
-
-  public IntExpression getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(IntExpression schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public StringExpression getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(StringExpression description) {
-    this.description = description;
   }
 
   public __DirectiveLocationExpression getLocations() {
@@ -76,20 +68,36 @@ public class __DirectiveExpression {
     this.args = args;
   }
 
-  public Boolean getOnOperation() {
-    return this.onOperation;
-  }
-
-  public void setOnOperation(Boolean onOperation) {
-    this.onOperation = onOperation;
-  }
-
   public Boolean getOnFragment() {
     return this.onFragment;
   }
 
   public void setOnFragment(Boolean onFragment) {
     this.onFragment = onFragment;
+  }
+
+  public IntExpression getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(IntExpression schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Boolean getOnOperation() {
+    return this.onOperation;
+  }
+
+  public void setOnOperation(Boolean onOperation) {
+    this.onOperation = onOperation;
   }
 
   public Boolean getOnField() {
@@ -100,12 +108,12 @@ public class __DirectiveExpression {
     this.onField = onField;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public StringExpression getDescription() {
+    return this.description;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setDescription(StringExpression description) {
+    this.description = description;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -114,14 +122,6 @@ public class __DirectiveExpression {
 
   public void setIncludeDeprecated(Boolean includeDeprecated) {
     this.includeDeprecated = includeDeprecated;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
   }
 
   public Collection<__DirectiveExpression> getExs() {

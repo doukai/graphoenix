@@ -35,7 +35,7 @@ public class JavaElementToInputType {
                                                 .setDefaultValue(elementManager.getDefaultValueFromElement(element))
                                                 .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                 )
-                                .collect(Collectors.toList())
+                                .collect(Collectors.toSet())
                 );
     }
 }

@@ -10,20 +10,12 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class FloatExpression {
-  @DefaultValue("EQ")
-  private Operator opr;
-
   private Float val;
 
   private Collection<Float> in;
 
-  public Operator getOpr() {
-    return this.opr;
-  }
-
-  public void setOpr(Operator opr) {
-    this.opr = opr;
-  }
+  @DefaultValue("EQ")
+  private Operator opr;
 
   public Float getVal() {
     return this.val;
@@ -39,5 +31,13 @@ public class FloatExpression {
 
   public void setIn(Collection<Float> in) {
     this.in = in;
+  }
+
+  public Operator getOpr() {
+    return this.opr;
+  }
+
+  public void setOpr(Operator opr) {
+    this.opr = opr;
   }
 }

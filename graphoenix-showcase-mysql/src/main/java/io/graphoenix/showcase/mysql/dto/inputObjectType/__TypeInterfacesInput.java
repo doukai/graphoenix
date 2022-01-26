@@ -11,25 +11,16 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeInterfacesInput {
   @NonNull
-  private String id;
-
-  @NonNull
   private String typeName;
+
+  private Boolean isDeprecated;
 
   @NonNull
   private String interfaceName;
 
   private Integer version;
 
-  private Boolean isDeprecated;
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
+  private String id;
 
   public String getTypeName() {
     return this.typeName;
@@ -37,6 +28,14 @@ public class __TypeInterfacesInput {
 
   public void setTypeName(String typeName) {
     this.typeName = typeName;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 
   public String getInterfaceName() {
@@ -55,11 +54,11 @@ public class __TypeInterfacesInput {
     this.version = version;
   }
 
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public String getId() {
+    return this.id;
   }
 
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setId(String id) {
+    this.id = id;
   }
 }

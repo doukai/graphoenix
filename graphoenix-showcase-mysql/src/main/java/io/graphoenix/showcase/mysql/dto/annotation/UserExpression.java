@@ -21,9 +21,9 @@ public @interface UserExpression {
 
   String[] phones() default {};
 
-  String[] login() default {};
-
   String[] userDetail2() default {};
+
+  String[] login() default {};
 
   int[] version() default {};
 
@@ -45,9 +45,9 @@ public @interface UserExpression {
 
   String[] $phones() default {};
 
-  String[] $login() default {};
-
   String[] $userDetail2() default {};
+
+  String[] $login() default {};
 
   String[] $version() default {};
 

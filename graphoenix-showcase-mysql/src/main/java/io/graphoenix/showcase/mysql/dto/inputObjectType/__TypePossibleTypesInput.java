@@ -11,25 +11,16 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypePossibleTypesInput {
   @NonNull
+  private String typeName;
+
   private String id;
 
-  @NonNull
-  private String typeName;
+  private Integer version;
 
   @NonNull
   private String possibleTypeName;
 
-  private Integer version;
-
   private Boolean isDeprecated;
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
 
   public String getTypeName() {
     return this.typeName;
@@ -39,12 +30,12 @@ public class __TypePossibleTypesInput {
     this.typeName = typeName;
   }
 
-  public String getPossibleTypeName() {
-    return this.possibleTypeName;
+  public String getId() {
+    return this.id;
   }
 
-  public void setPossibleTypeName(String possibleTypeName) {
-    this.possibleTypeName = possibleTypeName;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public Integer getVersion() {
@@ -53,6 +44,14 @@ public class __TypePossibleTypesInput {
 
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  public String getPossibleTypeName() {
+    return this.possibleTypeName;
+  }
+
+  public void setPossibleTypeName(String possibleTypeName) {
+    this.possibleTypeName = possibleTypeName;
   }
 
   public Boolean getIsDeprecated() {

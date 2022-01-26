@@ -12,19 +12,19 @@ import org.eclipse.microprofile.graphql.Input;
 public class __TypePossibleTypesExpression {
   private IDExpression id;
 
-  private StringExpression typeName;
-
-  private StringExpression possibleTypeName;
-
   private IntExpression version;
+
+  private Collection<__TypePossibleTypesExpression> exs;
+
+  private StringExpression typeName;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
+  private StringExpression possibleTypeName;
+
   @DefaultValue("AND")
   private Conditional cond;
-
-  private Collection<__TypePossibleTypesExpression> exs;
 
   public IDExpression getId() {
     return this.id;
@@ -32,22 +32,6 @@ public class __TypePossibleTypesExpression {
 
   public void setId(IDExpression id) {
     this.id = id;
-  }
-
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
-  }
-
-  public StringExpression getPossibleTypeName() {
-    return this.possibleTypeName;
-  }
-
-  public void setPossibleTypeName(StringExpression possibleTypeName) {
-    this.possibleTypeName = possibleTypeName;
   }
 
   public IntExpression getVersion() {
@@ -58,6 +42,22 @@ public class __TypePossibleTypesExpression {
     this.version = version;
   }
 
+  public Collection<__TypePossibleTypesExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
+    this.exs = exs;
+  }
+
+  public StringExpression getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
+  }
+
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
   }
@@ -66,19 +66,19 @@ public class __TypePossibleTypesExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
+  public StringExpression getPossibleTypeName() {
+    return this.possibleTypeName;
+  }
+
+  public void setPossibleTypeName(StringExpression possibleTypeName) {
+    this.possibleTypeName = possibleTypeName;
+  }
+
   public Conditional getCond() {
     return this.cond;
   }
 
   public void setCond(Conditional cond) {
     this.cond = cond;
-  }
-
-  public Collection<__TypePossibleTypesExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
-    this.exs = exs;
   }
 }

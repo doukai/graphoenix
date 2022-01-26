@@ -11,33 +11,24 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveLocationsInput {
-  @NonNull
-  private String id;
-
-  @NonNull
-  private String directiveName;
+  private Integer version;
 
   @NonNull
   private __DirectiveLocation directiveLocation;
 
-  private Integer version;
+  private String id;
 
   private Boolean isDeprecated;
 
-  public String getId() {
-    return this.id;
+  @NonNull
+  private String directiveName;
+
+  public Integer getVersion() {
+    return this.version;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
+  public void setVersion(Integer version) {
+    this.version = version;
   }
 
   public __DirectiveLocation getDirectiveLocation() {
@@ -48,12 +39,12 @@ public class __DirectiveLocationsInput {
     this.directiveLocation = directiveLocation;
   }
 
-  public Integer getVersion() {
-    return this.version;
+  public String getId() {
+    return this.id;
   }
 
-  public void setVersion(Integer version) {
-    this.version = version;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public Boolean getIsDeprecated() {
@@ -62,5 +53,13 @@ public class __DirectiveLocationsInput {
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
   }
 }

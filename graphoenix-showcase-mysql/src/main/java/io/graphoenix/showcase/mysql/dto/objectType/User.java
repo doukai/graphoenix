@@ -15,85 +15,44 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class User implements Meta {
-  @Id
-  @NonNull
-  private String id;
+  private Integer organizationId;
 
-  @NonNull
-  private String login;
+  private Sex sex;
+
+  private Collection<String> phones;
 
   @NonNull
   private String password;
 
-  @NonNull
-  private String name;
-
-  private Integer age;
-
-  private Boolean disable;
-
-  private Sex sex;
-
-  private Integer organizationId;
-
-  private Organization organization;
-
   private Collection<Role> roles;
 
-  private Collection<String> phones;
-
-  private Integer version;
-
-  private Boolean isDeprecated;
+  @NonNull
+  private String login;
 
   private String userDetail2;
 
-  public String getId() {
-    return this.id;
+  @Id
+  private String id;
+
+  private Integer version;
+
+  private Organization organization;
+
+  @NonNull
+  private String name;
+
+  private Boolean isDeprecated;
+
+  private Boolean disable;
+
+  private Integer age;
+
+  public Integer getOrganizationId() {
+    return this.organizationId;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getLogin() {
-    return this.login;
-  }
-
-  public void setLogin(String login) {
-    this.login = login;
-  }
-
-  public String getPassword() {
-    return this.password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public Integer getAge() {
-    return this.age;
-  }
-
-  public void setAge(Integer age) {
-    this.age = age;
-  }
-
-  public Boolean getDisable() {
-    return this.disable;
-  }
-
-  public void setDisable(Boolean disable) {
-    this.disable = disable;
+  public void setOrganizationId(Integer organizationId) {
+    this.organizationId = organizationId;
   }
 
   public Sex getSex() {
@@ -104,20 +63,20 @@ public class User implements Meta {
     this.sex = sex;
   }
 
-  public Integer getOrganizationId() {
-    return this.organizationId;
+  public Collection<String> getPhones() {
+    return this.phones;
   }
 
-  public void setOrganizationId(Integer organizationId) {
-    this.organizationId = organizationId;
+  public void setPhones(Collection<String> phones) {
+    this.phones = phones;
   }
 
-  public Organization getOrganization() {
-    return this.organization;
+  public String getPassword() {
+    return this.password;
   }
 
-  public void setOrganization(Organization organization) {
-    this.organization = organization;
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   public Collection<Role> getRoles() {
@@ -128,12 +87,28 @@ public class User implements Meta {
     this.roles = roles;
   }
 
-  public Collection<String> getPhones() {
-    return this.phones;
+  public String getLogin() {
+    return this.login;
   }
 
-  public void setPhones(Collection<String> phones) {
-    this.phones = phones;
+  public void setLogin(String login) {
+    this.login = login;
+  }
+
+  public String getUserDetail2() {
+    return this.userDetail2;
+  }
+
+  public void setUserDetail2(String userDetail2) {
+    this.userDetail2 = userDetail2;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   @Override
@@ -146,6 +121,22 @@ public class User implements Meta {
     this.version = version;
   }
 
+  public Organization getOrganization() {
+    return this.organization;
+  }
+
+  public void setOrganization(Organization organization) {
+    this.organization = organization;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
   @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
@@ -156,11 +147,19 @@ public class User implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
-  public String getUserDetail2() {
-    return this.userDetail2;
+  public Boolean getDisable() {
+    return this.disable;
   }
 
-  public void setUserDetail2(String userDetail2) {
-    this.userDetail2 = userDetail2;
+  public void setDisable(Boolean disable) {
+    this.disable = disable;
+  }
+
+  public Integer getAge() {
+    return this.age;
+  }
+
+  public void setAge(Integer age) {
+    this.age = age;
   }
 }

@@ -97,8 +97,11 @@ public class Argument {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/Argument.stg").getInstanceOf("argumentDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/Argument.stg");
+        ST st = stGroupFile.getInstanceOf("argumentDefinition");
         st.add("argument", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

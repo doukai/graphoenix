@@ -34,7 +34,7 @@ public class JavaElementToInterface {
                                                 .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                                 .setDescription(elementManager.getDescriptionFromElement(element))
                                 )
-                                .collect(Collectors.toList())
+                                .collect(Collectors.toSet())
                 )
                 .setInterfaces(
                         typeElement.getInterfaces().stream()

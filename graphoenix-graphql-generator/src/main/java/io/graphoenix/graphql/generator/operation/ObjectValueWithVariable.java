@@ -38,8 +38,11 @@ public class ObjectValueWithVariable {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/ObjectValueWithVariable.stg").getInstanceOf("objectValueWithVariableDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/ObjectValueWithVariable.stg");
+        ST st = stGroupFile.getInstanceOf("objectValueWithVariableDefinition");
         st.add("objectValueWithVariable", objectValueWithVariable.keySet().stream().collect(Collectors.toMap(key -> key, key -> objectValueWithVariable.get(key).toString())));
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

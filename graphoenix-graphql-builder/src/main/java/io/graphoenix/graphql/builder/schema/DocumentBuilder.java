@@ -4,18 +4,29 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
-import io.graphoenix.graphql.generator.document.*;
+import io.graphoenix.graphql.generator.document.Directive;
+import io.graphoenix.graphql.generator.document.DirectiveDefinition;
+import io.graphoenix.graphql.generator.document.Document;
+import io.graphoenix.graphql.generator.document.EnumType;
+import io.graphoenix.graphql.generator.document.EnumValue;
+import io.graphoenix.graphql.generator.document.Field;
+import io.graphoenix.graphql.generator.document.InputObjectType;
+import io.graphoenix.graphql.generator.document.InputValue;
+import io.graphoenix.graphql.generator.document.InterfaceType;
+import io.graphoenix.graphql.generator.document.ObjectType;
+import io.graphoenix.graphql.generator.document.ScalarType;
+import io.graphoenix.graphql.generator.document.Schema;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import org.antlr.v4.runtime.RuleContext;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,61 +58,30 @@ public class DocumentBuilder {
         mapper.registerFieldMaps();
     }
 
-    public void buildManager() throws IOException, URISyntaxException {
-        graphQLConfigRegister.registerPreset();
-        graphQLConfigRegister.registerConfig();
-        if (graphQLConfig.getBuild()) {
-            manager.registerGraphQL(buildDocument().toString());
-        }
-        mapper.registerFieldMaps();
-    }
-
     public Document buildDocument() throws IOException {
-        Optional<GraphqlParser.ObjectTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeName().flatMap(manager::getObject);
-        ObjectType queryType;
-        if (queryOperationTypeDefinition.isPresent()) {
-            queryType = new ObjectType().setName(queryOperationTypeDefinition.get().name().getText())
-                    .setDescription(queryOperationTypeDefinition.get().description() == null ? null : queryOperationTypeDefinition.get().description().getText())
-                    .setDirectives(queryOperationTypeDefinition.get().directives() == null ? null : queryOperationTypeDefinition.get().directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()))
-                    .setFields(queryOperationTypeDefinition.get().fieldsDefinition() == null ? null : queryOperationTypeDefinition.get().fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList()));
-        } else {
-            queryType = new ObjectType().setName("QueryType");
-        }
-        queryType.addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
 
-        Optional<GraphqlParser.ObjectTypeDefinitionContext> mutationOperationTypeDefinition = manager.getMutationOperationTypeName().flatMap(manager::getObject);
-        ObjectType mutationType;
-        if (mutationOperationTypeDefinition.isPresent()) {
-            mutationType = new ObjectType().setName(mutationOperationTypeDefinition.get().name().getText())
-                    .setDescription(mutationOperationTypeDefinition.get().description() == null ? null : mutationOperationTypeDefinition.get().description().getText())
-                    .setDirectives(mutationOperationTypeDefinition.get().directives() == null ? null : mutationOperationTypeDefinition.get().directives().directive().stream().map(RuleContext::getText).collect(Collectors.toList()))
-                    .setFields(mutationOperationTypeDefinition.get().fieldsDefinition() == null ? null : mutationOperationTypeDefinition.get().fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, true)).collect(Collectors.toList()));
-        } else {
-            mutationType = new ObjectType().setName("MutationType");
-        }
-        mutationType.addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+        manager.getObjects().map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true)).forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+        buildObjectExpressions().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
 
-        return new Document()
-                .addDefinition(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString())
-                .addDefinition(queryType.toString())
-                .addDefinition(mutationType.toString())
-                .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toList()))
-                .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toList()))
-                .addDefinitions(manager.getEnums().map(this::buildEnum).map(EnumType::toString).collect(Collectors.toList()))
-                .addDefinitions(buildObjectExpressions().stream().map(InputObjectType::toString).collect(Collectors.toList()))
-                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toList()));
+        ObjectType queryType = new ObjectType().setName("QueryType").addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+        ObjectType mutationType = new ObjectType().setName("MutationType").addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+        manager.registerGraphQL(queryType.toString());
+        manager.registerGraphQL(mutationType.toString());
+        manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
+
+        return getDocument();
     }
 
     public Document getDocument() {
         return new Document()
                 .addDefinition(buildSchema().toString())
-                .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toList()))
-                .addDefinitions(manager.getEnums().map(this::buildEnum).map(EnumType::toString).collect(Collectors.toList()))
-                .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toList()))
-                .addDefinitions(manager.getObjects().map(this::getObject).map(ObjectType::toString).collect(Collectors.toList()))
-                .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toList()))
+                .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toSet()))
+                .addDefinitions(manager.getEnums().map(this::buildEnum).map(EnumType::toString).collect(Collectors.toSet()))
+                .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toSet()))
+                .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toSet()))
+                .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toSet()))
                 //TODO union type
-                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toList()));
+                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toSet()));
     }
 
     public Schema buildSchema() {
@@ -115,29 +95,27 @@ public class DocumentBuilder {
         return new ScalarType()
                 .setName(scalarTypeDefinitionContext.name().getText())
                 .setDescription(scalarTypeDefinitionContext.description() == null ? null : scalarTypeDefinitionContext.description().getText())
-                .setDirectives(scalarTypeDefinitionContext.directives() == null ? null : scalarTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setDirectives(scalarTypeDefinitionContext.directives() == null ? null : scalarTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
+
 
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-
-        return new ObjectType()
-                .setName(objectTypeDefinitionContext.name().getText())
-                .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
-                .setInterfaces(objectTypeDefinitionContext.implementsInterfaces() == null ? null : objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toSet()))
-                .addInterface(META_INTERFACE_NAME)
-                .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))).collect(Collectors.toList()))
-                .addFields(getMetaInterfaceFields())
-                .setDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+        return buildObject(objectTypeDefinitionContext, false);
     }
 
-    public ObjectType getObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface) {
 
-        return new ObjectType()
+        ObjectType objectType = new ObjectType()
                 .setName(objectTypeDefinitionContext.name().getText())
                 .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
                 .setInterfaces(objectTypeDefinitionContext.implementsInterfaces() == null ? null : objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toSet()))
-                .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(this::getFiled).collect(Collectors.toList()))
-                .setDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))).collect(Collectors.toSet()))
+                .setDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
+
+        if (buildInterface) {
+            objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+        }
+        return objectType;
     }
 
     public InputObjectType buildInputObjectType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
@@ -145,8 +123,8 @@ public class DocumentBuilder {
         return new InputObjectType()
                 .setName(inputObjectTypeDefinitionContext.name().getText())
                 .setDescription(inputObjectTypeDefinitionContext.description() == null ? null : inputObjectTypeDefinitionContext.description().getText())
-                .setInputValues(inputObjectTypeDefinitionContext.inputObjectValueDefinitions() == null ? null : inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toList()))
-                .setDirectives(inputObjectTypeDefinitionContext.directives() == null ? null : inputObjectTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setInputValues(inputObjectTypeDefinitionContext.inputObjectValueDefinitions() == null ? null : inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toSet()))
+                .setDirectives(inputObjectTypeDefinitionContext.directives() == null ? null : inputObjectTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
 
     public InterfaceType buildInterface(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
@@ -155,8 +133,8 @@ public class DocumentBuilder {
                 .setName(interfaceTypeDefinitionContext.name().getText())
                 .setDescription(interfaceTypeDefinitionContext.description() == null ? null : interfaceTypeDefinitionContext.description().getText())
                 .setInterfaces(interfaceTypeDefinitionContext.implementsInterfaces() == null ? null : interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toSet()))
-                .setFields(interfaceTypeDefinitionContext.fieldsDefinition() == null ? null : interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toList()))
-                .setDirectives(interfaceTypeDefinitionContext.directives() == null ? null : interfaceTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setFields(interfaceTypeDefinitionContext.fieldsDefinition() == null ? null : interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toSet()))
+                .setDirectives(interfaceTypeDefinitionContext.directives() == null ? null : interfaceTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
 
     public List<Field> getMetaInterfaceFields() {
@@ -170,15 +148,15 @@ public class DocumentBuilder {
         return new EnumType()
                 .setName(enumTypeDefinitionContext.name().getText())
                 .setDescription(enumTypeDefinitionContext.description() == null ? null : enumTypeDefinitionContext.description().getText())
-                .setEnumValues(enumTypeDefinitionContext.enumValueDefinitions() == null ? null : enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream().map(this::buildEnumValue).collect(Collectors.toList()))
-                .setDirectives(enumTypeDefinitionContext.directives() == null ? null : enumTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setEnumValues(enumTypeDefinitionContext.enumValueDefinitions() == null ? null : enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream().map(this::buildEnumValue).collect(Collectors.toSet()))
+                .setDirectives(enumTypeDefinitionContext.directives() == null ? null : enumTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
 
     public Field buildFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean isMutationOperationType) {
         Field field = new Field().setName(fieldDefinitionContext.name().getText())
                 .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
                 .setTypeName(fieldDefinitionContext.type().getText())
-                .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> filedObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
         if (filedObjectTypeDefinitionContext.isPresent()) {
@@ -197,14 +175,14 @@ public class DocumentBuilder {
         return new Field().setName(fieldDefinitionContext.name().getText())
                 .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
                 .setTypeName(fieldDefinitionContext.type().getText())
-                .setArguments(fieldDefinitionContext.argumentsDefinition() == null ? null : fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toList()))
-                .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setArguments(fieldDefinitionContext.argumentsDefinition() == null ? null : fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toSet()))
+                .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
 
     public EnumValue buildEnumValue(GraphqlParser.EnumValueDefinitionContext enumValueDefinitionContext) {
         return new EnumValue().setName(enumValueDefinitionContext.enumValue().enumValueName().getText())
                 .setDescription(enumValueDefinitionContext.description() == null ? null : enumValueDefinitionContext.description().getText())
-                .setDirectives(enumValueDefinitionContext.directives() == null ? null : enumValueDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setDirectives(enumValueDefinitionContext.directives() == null ? null : enumValueDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
 
     public InputValue buildInputValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
@@ -212,18 +190,18 @@ public class DocumentBuilder {
                 .setDefaultValue(inputValueDefinitionContext.defaultValue() == null ? null : inputValueDefinitionContext.defaultValue().value().getText())
                 .setDescription(inputValueDefinitionContext.description() == null ? null : inputValueDefinitionContext.description().getText())
                 .setTypeName(inputValueDefinitionContext.type().getText())
-                .setDirectives(inputValueDefinitionContext.directives() == null ? null : inputValueDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toList()));
+                .setDirectives(inputValueDefinitionContext.directives() == null ? null : inputValueDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
 
     public DirectiveDefinition buildDirectiveDefinition(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
         return new DirectiveDefinition().setName(directiveDefinitionContext.name().getText())
                 .setDescription(directiveDefinitionContext.description() == null ? null : directiveDefinitionContext.description().getText())
-                .setArguments(directiveDefinitionContext.argumentsDefinition() == null ? null : directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toList()))
+                .setArguments(directiveDefinitionContext.argumentsDefinition() == null ? null : directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toSet()))
                 .setDirectiveLocations(directiveDefinitionContext.directiveLocations() == null ? null : directiveLocationList(directiveDefinitionContext.directiveLocations()));
     }
 
-    public List<String> directiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext) {
-        List<String> directiveLocationList = new ArrayList<>();
+    public Set<String> directiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext) {
+        Set<String> directiveLocationList = new HashSet<>();
         if (directiveLocationsContext.directiveLocation() != null) {
             directiveLocationList.add(directiveLocationsContext.directiveLocation().name().getText());
         } else if (directiveLocationsContext.directiveLocations() != null) {
@@ -269,24 +247,14 @@ public class DocumentBuilder {
         }
     }
 
-    public List<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        List<InputValue> inputValueList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+    public Set<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
+        return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .map(fieldDefinitionContext -> filedToArgument(fieldDefinitionContext, inputType))
-                .collect(Collectors.toList());
-        manager.getInterface(META_INTERFACE_NAME)
-                .ifPresent(interfaceTypeDefinitionContext -> {
-                    interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
-                            .forEach(fieldDefinitionContext ->
-                                    inputValueList.add(filedToArgument(fieldDefinitionContext, inputType))
-                            );
-                });
-        return inputValueList;
+                .collect(Collectors.toSet());
     }
 
     public InputValue filedToArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-
-
         if (inputType.equals(InputType.INPUT)) {
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldDefinitionContext.type().getText()
@@ -336,7 +304,7 @@ public class DocumentBuilder {
                 .setName(directiveContext.name().getText())
                 .setArguments(directiveContext.arguments().argument().stream()
                         .map(this::buildArgument)
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toSet()));
     }
 
     public Argument buildArgument(GraphqlParser.ArgumentContext argumentContext) {

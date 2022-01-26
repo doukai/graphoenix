@@ -10,15 +10,11 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class OrganizationExpression {
-  private IDExpression id;
-
-  private IntExpression aboveId;
+  private StringExpression name;
 
   private OrganizationExpression above;
 
-  private UserExpression users;
-
-  private StringExpression name;
+  private Collection<OrganizationExpression> exs;
 
   private IntExpression version;
 
@@ -28,22 +24,18 @@ public class OrganizationExpression {
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<OrganizationExpression> exs;
+  private UserExpression users;
 
-  public IDExpression getId() {
-    return this.id;
+  private IntExpression aboveId;
+
+  private IDExpression id;
+
+  public StringExpression getName() {
+    return this.name;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
-
-  public IntExpression getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(IntExpression aboveId) {
-    this.aboveId = aboveId;
+  public void setName(StringExpression name) {
+    this.name = name;
   }
 
   public OrganizationExpression getAbove() {
@@ -54,20 +46,12 @@ public class OrganizationExpression {
     this.above = above;
   }
 
-  public UserExpression getUsers() {
-    return this.users;
+  public Collection<OrganizationExpression> getExs() {
+    return this.exs;
   }
 
-  public void setUsers(UserExpression users) {
-    this.users = users;
-  }
-
-  public StringExpression getName() {
-    return this.name;
-  }
-
-  public void setName(StringExpression name) {
-    this.name = name;
+  public void setExs(Collection<OrganizationExpression> exs) {
+    this.exs = exs;
   }
 
   public IntExpression getVersion() {
@@ -94,11 +78,27 @@ public class OrganizationExpression {
     this.cond = cond;
   }
 
-  public Collection<OrganizationExpression> getExs() {
-    return this.exs;
+  public UserExpression getUsers() {
+    return this.users;
   }
 
-  public void setExs(Collection<OrganizationExpression> exs) {
-    this.exs = exs;
+  public void setUsers(UserExpression users) {
+    this.users = users;
+  }
+
+  public IntExpression getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(IntExpression aboveId) {
+    this.aboveId = aboveId;
+  }
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
   }
 }

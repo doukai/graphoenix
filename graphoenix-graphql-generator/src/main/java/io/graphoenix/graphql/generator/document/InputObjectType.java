@@ -3,14 +3,14 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class InputObjectType {
 
     private String name;
-    private List<String> directives;
-    private List<InputValue> inputValues;
+    private Set<String> directives;
+    private Set<InputValue> inputValues;
     private String description;
 
     public String getName() {
@@ -22,33 +22,33 @@ public class InputObjectType {
         return this;
     }
 
-    public List<String> getDirectives() {
+    public Set<String> getDirectives() {
         return directives;
     }
 
-    public InputObjectType setDirectives(List<String> directives) {
+    public InputObjectType setDirectives(Set<String> directives) {
         this.directives = directives;
         return this;
     }
 
-    public List<InputValue> getInputValues() {
+    public Set<InputValue> getInputValues() {
         return inputValues;
     }
 
-    public InputObjectType setInputValues(List<InputValue> inputValues) {
+    public InputObjectType setInputValues(Set<InputValue> inputValues) {
         this.inputValues = inputValues;
         return this;
     }
 
     public InputObjectType addInputValue(InputValue inputValue) {
         if (this.inputValues == null) {
-            this.inputValues = new ArrayList<>();
+            this.inputValues = new HashSet<>();
         }
         this.inputValues.add(inputValue);
         return this;
     }
 
-    public InputObjectType addInputValues(List<InputValue> inputValues) {
+    public InputObjectType addInputValues(Set<InputValue> inputValues) {
         if (this.inputValues == null) {
             this.inputValues = inputValues;
         } else {
@@ -68,8 +68,11 @@ public class InputObjectType {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/InputObjectType.stg").getInstanceOf("inputObjectTypeDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/InputObjectType.stg");
+        ST st = stGroupFile.getInstanceOf("inputObjectTypeDefinition");
         st.add("inputObjectType", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

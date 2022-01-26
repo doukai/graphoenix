@@ -1,10 +1,9 @@
 package io.graphoenix.graphql.generator.introspection;
 
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
+import java.util.Set;
 
 public class __Type {
 
@@ -14,15 +13,15 @@ public class __Type {
 
     private String description;
 
-    private List<__Field> fields;
+    private Set<__Field> fields;
 
-    private List<__Type> interfaces;
+    private Set<__Type> interfaces;
 
-    private List<__Type> possibleTypes;
+    private Set<__Type> possibleTypes;
 
-    private List<__EnumValue> enumValues;
+    private Set<__EnumValue> enumValues;
 
-    private List<__InputValue> inputFields;
+    private Set<__InputValue> inputFields;
 
     private __Type ofType;
 
@@ -50,43 +49,43 @@ public class __Type {
         this.description = description;
     }
 
-    public List<__Field> getFields() {
+    public Set<__Field> getFields() {
         return fields;
     }
 
-    public void setFields(List<__Field> fields) {
+    public void setFields(Set<__Field> fields) {
         this.fields = fields;
     }
 
-    public List<__Type> getInterfaces() {
+    public Set<__Type> getInterfaces() {
         return interfaces;
     }
 
-    public void setInterfaces(List<__Type> interfaces) {
+    public void setInterfaces(Set<__Type> interfaces) {
         this.interfaces = interfaces;
     }
 
-    public List<__Type> getPossibleTypes() {
+    public Set<__Type> getPossibleTypes() {
         return possibleTypes;
     }
 
-    public void setPossibleTypes(List<__Type> possibleTypes) {
+    public void setPossibleTypes(Set<__Type> possibleTypes) {
         this.possibleTypes = possibleTypes;
     }
 
-    public List<__EnumValue> getEnumValues() {
+    public Set<__EnumValue> getEnumValues() {
         return enumValues;
     }
 
-    public void setEnumValues(List<__EnumValue> enumValues) {
+    public void setEnumValues(Set<__EnumValue> enumValues) {
         this.enumValues = enumValues;
     }
 
-    public List<__InputValue> getInputFields() {
+    public Set<__InputValue> getInputFields() {
         return inputFields;
     }
 
-    public void setInputFields(List<__InputValue> inputFields) {
+    public void setInputFields(Set<__InputValue> inputFields) {
         this.inputFields = inputFields;
     }
 
@@ -100,8 +99,11 @@ public class __Type {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/introspection/__Type.stg").getInstanceOf("__typeDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__Type.stg");
+        ST st = stGroupFile.getInstanceOf("__typeDefinition");
         st.add("__type", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

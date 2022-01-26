@@ -12,35 +12,35 @@ import org.eclipse.microprofile.graphql.Input;
 public class __TypeExpression {
   private IDExpression name;
 
-  private IntExpression schemaId;
-
-  private __TypeKindExpression kind;
-
-  private StringExpression description;
-
-  private __FieldExpression fields;
-
-  private __TypeExpression interfaces;
-
-  private __TypeExpression possibleTypes;
-
   private __EnumValueExpression enumValues;
-
-  private __InputValueExpression inputFields;
-
-  private StringExpression ofTypeName;
 
   private __TypeExpression ofType;
 
-  private IntExpression version;
+  private __FieldExpression fields;
 
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
+  private StringExpression description;
+
+  private __TypeExpression possibleTypes;
+
+  private IntExpression schemaId;
+
+  private Collection<__TypeExpression> exs;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<__TypeExpression> exs;
+  private __TypeExpression interfaces;
+
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
+
+  private IntExpression version;
+
+  private StringExpression ofTypeName;
+
+  private __TypeKindExpression kind;
+
+  private __InputValueExpression inputFields;
 
   public IDExpression getName() {
     return this.name;
@@ -48,54 +48,6 @@ public class __TypeExpression {
 
   public void setName(IDExpression name) {
     this.name = name;
-  }
-
-  public IntExpression getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(IntExpression schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public __TypeKindExpression getKind() {
-    return this.kind;
-  }
-
-  public void setKind(__TypeKindExpression kind) {
-    this.kind = kind;
-  }
-
-  public StringExpression getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(StringExpression description) {
-    this.description = description;
-  }
-
-  public __FieldExpression getFields() {
-    return this.fields;
-  }
-
-  public void setFields(__FieldExpression fields) {
-    this.fields = fields;
-  }
-
-  public __TypeExpression getInterfaces() {
-    return this.interfaces;
-  }
-
-  public void setInterfaces(__TypeExpression interfaces) {
-    this.interfaces = interfaces;
-  }
-
-  public __TypeExpression getPossibleTypes() {
-    return this.possibleTypes;
-  }
-
-  public void setPossibleTypes(__TypeExpression possibleTypes) {
-    this.possibleTypes = possibleTypes;
   }
 
   public __EnumValueExpression getEnumValues() {
@@ -106,22 +58,6 @@ public class __TypeExpression {
     this.enumValues = enumValues;
   }
 
-  public __InputValueExpression getInputFields() {
-    return this.inputFields;
-  }
-
-  public void setInputFields(__InputValueExpression inputFields) {
-    this.inputFields = inputFields;
-  }
-
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
   public __TypeExpression getOfType() {
     return this.ofType;
   }
@@ -130,20 +66,44 @@ public class __TypeExpression {
     this.ofType = ofType;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public __FieldExpression getFields() {
+    return this.fields;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setFields(__FieldExpression fields) {
+    this.fields = fields;
   }
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
+  public StringExpression getDescription() {
+    return this.description;
   }
 
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
+  public void setDescription(StringExpression description) {
+    this.description = description;
+  }
+
+  public __TypeExpression getPossibleTypes() {
+    return this.possibleTypes;
+  }
+
+  public void setPossibleTypes(__TypeExpression possibleTypes) {
+    this.possibleTypes = possibleTypes;
+  }
+
+  public IntExpression getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(IntExpression schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Collection<__TypeExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__TypeExpression> exs) {
+    this.exs = exs;
   }
 
   public Conditional getCond() {
@@ -154,11 +114,51 @@ public class __TypeExpression {
     this.cond = cond;
   }
 
-  public Collection<__TypeExpression> getExs() {
-    return this.exs;
+  public __TypeExpression getInterfaces() {
+    return this.interfaces;
   }
 
-  public void setExs(Collection<__TypeExpression> exs) {
-    this.exs = exs;
+  public void setInterfaces(__TypeExpression interfaces) {
+    this.interfaces = interfaces;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeKindExpression getKind() {
+    return this.kind;
+  }
+
+  public void setKind(__TypeKindExpression kind) {
+    this.kind = kind;
+  }
+
+  public __InputValueExpression getInputFields() {
+    return this.inputFields;
+  }
+
+  public void setInputFields(__InputValueExpression inputFields) {
+    this.inputFields = inputFields;
   }
 }

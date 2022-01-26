@@ -11,47 +11,30 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __SchemaInput {
-  @NonNull
-  private String id;
-
-  private String queryTypeName;
-
   private String mutationTypeName;
 
-  private String subscriptionTypeName;
-
-  @NonNull
-  private Collection<__TypeInput> types;
-
-  @NonNull
-  private __TypeInput queryType;
-
   private __TypeInput mutationType;
+
+  private String subscriptionTypeName;
 
   private __TypeInput subscriptionType;
 
   @NonNull
-  private Collection<__DirectiveInput> directives;
+  private __TypeInput queryType;
 
-  private Integer version;
+  @NonNull
+  private Collection<__TypeInput> types;
 
   private Boolean isDeprecated;
 
-  public String getId() {
-    return this.id;
-  }
+  private String queryTypeName;
 
-  public void setId(String id) {
-    this.id = id;
-  }
+  @NonNull
+  private Collection<__DirectiveInput> directives;
 
-  public String getQueryTypeName() {
-    return this.queryTypeName;
-  }
+  private String id;
 
-  public void setQueryTypeName(String queryTypeName) {
-    this.queryTypeName = queryTypeName;
-  }
+  private Integer version;
 
   public String getMutationTypeName() {
     return this.mutationTypeName;
@@ -59,30 +42,6 @@ public class __SchemaInput {
 
   public void setMutationTypeName(String mutationTypeName) {
     this.mutationTypeName = mutationTypeName;
-  }
-
-  public String getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(String subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
-  }
-
-  public Collection<__TypeInput> getTypes() {
-    return this.types;
-  }
-
-  public void setTypes(Collection<__TypeInput> types) {
-    this.types = types;
-  }
-
-  public __TypeInput getQueryType() {
-    return this.queryType;
-  }
-
-  public void setQueryType(__TypeInput queryType) {
-    this.queryType = queryType;
   }
 
   public __TypeInput getMutationType() {
@@ -93,12 +52,52 @@ public class __SchemaInput {
     this.mutationType = mutationType;
   }
 
+  public String getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
+  }
+
+  public void setSubscriptionTypeName(String subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
+  }
+
   public __TypeInput getSubscriptionType() {
     return this.subscriptionType;
   }
 
   public void setSubscriptionType(__TypeInput subscriptionType) {
     this.subscriptionType = subscriptionType;
+  }
+
+  public __TypeInput getQueryType() {
+    return this.queryType;
+  }
+
+  public void setQueryType(__TypeInput queryType) {
+    this.queryType = queryType;
+  }
+
+  public Collection<__TypeInput> getTypes() {
+    return this.types;
+  }
+
+  public void setTypes(Collection<__TypeInput> types) {
+    this.types = types;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public String getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(String queryTypeName) {
+    this.queryTypeName = queryTypeName;
   }
 
   public Collection<__DirectiveInput> getDirectives() {
@@ -109,19 +108,19 @@ public class __SchemaInput {
     this.directives = directives;
   }
 
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
   public Integer getVersion() {
     return this.version;
   }
 
   public void setVersion(Integer version) {
     this.version = version;
-  }
-
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
   }
 }

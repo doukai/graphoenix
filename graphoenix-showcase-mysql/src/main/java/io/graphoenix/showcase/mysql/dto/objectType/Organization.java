@@ -15,29 +15,28 @@ import org.eclipse.microprofile.graphql.Type;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class Organization implements Meta {
   @Id
-  @NonNull
   private String id;
-
-  private Integer aboveId;
-
-  private Organization above;
-
-  private Collection<User> users;
 
   @NonNull
   private String name;
 
-  private Integer version;
+  private Integer orgLevel2;
+
+  private Organization above;
 
   private Boolean isDeprecated;
 
-  private Integer orgLevel2;
+  private Integer version;
+
+  private Collection<User> userByOrg;
+
+  private Integer aboveId;
 
   private Collection<Integer> orgLevel3;
 
-  private Boolean roleDisable;
+  private Collection<User> users;
 
-  private Collection<User> userByOrg;
+  private Boolean roleDisable;
 
   private Organization parent;
 
@@ -49,30 +48,6 @@ public class Organization implements Meta {
     this.id = id;
   }
 
-  public Integer getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(Integer aboveId) {
-    this.aboveId = aboveId;
-  }
-
-  public Organization getAbove() {
-    return this.above;
-  }
-
-  public void setAbove(Organization above) {
-    this.above = above;
-  }
-
-  public Collection<User> getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(Collection<User> users) {
-    this.users = users;
-  }
-
   public String getName() {
     return this.name;
   }
@@ -81,14 +56,20 @@ public class Organization implements Meta {
     this.name = name;
   }
 
-  @Override
-  public Integer getVersion() {
-    return this.version;
+  public Integer getOrgLevel2() {
+    return this.orgLevel2;
   }
 
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
+  public void setOrgLevel2(Integer orgLevel2) {
+    this.orgLevel2 = orgLevel2;
+  }
+
+  public Organization getAbove() {
+    return this.above;
+  }
+
+  public void setAbove(Organization above) {
+    this.above = above;
   }
 
   @Override
@@ -101,12 +82,30 @@ public class Organization implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
-  public Integer getOrgLevel2() {
-    return this.orgLevel2;
+  @Override
+  public Integer getVersion() {
+    return this.version;
   }
 
-  public void setOrgLevel2(Integer orgLevel2) {
-    this.orgLevel2 = orgLevel2;
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Collection<User> getUserByOrg() {
+    return this.userByOrg;
+  }
+
+  public void setUserByOrg(Collection<User> userByOrg) {
+    this.userByOrg = userByOrg;
+  }
+
+  public Integer getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(Integer aboveId) {
+    this.aboveId = aboveId;
   }
 
   public Collection<Integer> getOrgLevel3() {
@@ -117,20 +116,20 @@ public class Organization implements Meta {
     this.orgLevel3 = orgLevel3;
   }
 
+  public Collection<User> getUsers() {
+    return this.users;
+  }
+
+  public void setUsers(Collection<User> users) {
+    this.users = users;
+  }
+
   public Boolean getRoleDisable() {
     return this.roleDisable;
   }
 
   public void setRoleDisable(Boolean roleDisable) {
     this.roleDisable = roleDisable;
-  }
-
-  public Collection<User> getUserByOrg() {
-    return this.userByOrg;
-  }
-
-  public void setUserByOrg(Collection<User> userByOrg) {
-    this.userByOrg = userByOrg;
   }
 
   public Organization getParent() {

@@ -15,61 +15,28 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __Directive implements Meta {
-  @Id
   @NonNull
+  private Collection<__InputValue> args;
+
+  private Boolean onFragment;
+
+  @Id
   private String name;
-
-  private Integer schemaId;
-
-  private String description;
 
   @NonNull
   private Collection<__DirectiveLocation> locations;
 
-  @NonNull
-  private Collection<__InputValue> args;
+  private Integer version;
+
+  private Integer schemaId;
 
   private Boolean onOperation;
 
-  private Boolean onFragment;
-
   private Boolean onField;
 
-  private Integer version;
+  private String description;
 
   private Boolean isDeprecated;
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public Collection<__DirectiveLocation> getLocations() {
-    return this.locations;
-  }
-
-  public void setLocations(Collection<__DirectiveLocation> locations) {
-    this.locations = locations;
-  }
 
   public Collection<__InputValue> getArgs() {
     return this.args;
@@ -77,14 +44,6 @@ public class __Directive implements Meta {
 
   public void setArgs(Collection<__InputValue> args) {
     this.args = args;
-  }
-
-  public Boolean getOnOperation() {
-    return this.onOperation;
-  }
-
-  public void setOnOperation(Boolean onOperation) {
-    this.onOperation = onOperation;
   }
 
   public Boolean getOnFragment() {
@@ -95,12 +54,20 @@ public class __Directive implements Meta {
     this.onFragment = onFragment;
   }
 
-  public Boolean getOnField() {
-    return this.onField;
+  public String getName() {
+    return this.name;
   }
 
-  public void setOnField(Boolean onField) {
-    this.onField = onField;
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Collection<__DirectiveLocation> getLocations() {
+    return this.locations;
+  }
+
+  public void setLocations(Collection<__DirectiveLocation> locations) {
+    this.locations = locations;
   }
 
   @Override
@@ -111,6 +78,38 @@ public class __Directive implements Meta {
   @Override
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Boolean getOnOperation() {
+    return this.onOperation;
+  }
+
+  public void setOnOperation(Boolean onOperation) {
+    this.onOperation = onOperation;
+  }
+
+  public Boolean getOnField() {
+    return this.onField;
+  }
+
+  public void setOnField(Boolean onField) {
+    this.onField = onField;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   @Override

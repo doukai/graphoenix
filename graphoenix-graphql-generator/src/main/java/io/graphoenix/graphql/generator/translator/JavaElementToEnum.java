@@ -31,7 +31,7 @@ public class JavaElementToEnum {
                                                 .setName(elementManager.getNameFromElement(element))
                                                 .setDescription(elementManager.getDescriptionFromElement(element))
                                 )
-                                .collect(Collectors.toList())
+                                .collect(Collectors.toSet())
                 );
     }
 }

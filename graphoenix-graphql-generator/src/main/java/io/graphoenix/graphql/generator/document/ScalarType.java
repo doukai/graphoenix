@@ -3,12 +3,12 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.List;
+import java.util.Set;
 
 public class ScalarType {
 
     private String name;
-    private List<String> directives;
+    private Set<String> directives;
     private String description;
 
     public String getName() {
@@ -20,11 +20,11 @@ public class ScalarType {
         return this;
     }
 
-    public List<String> getDirectives() {
+    public Set<String> getDirectives() {
         return directives;
     }
 
-    public ScalarType setDirectives(List<String> directives) {
+    public ScalarType setDirectives(Set<String> directives) {
         this.directives = directives;
         return this;
     }
@@ -40,8 +40,11 @@ public class ScalarType {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/document/ScalarType.stg").getInstanceOf("scalarTypeDefinition");
+        STGroupFile stGroupFile = new STGroupFile("stg/document/ScalarType.stg");
+        ST st = stGroupFile.getInstanceOf("scalarTypeDefinition");
         st.add("scalarType", this);
-        return st.render();
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

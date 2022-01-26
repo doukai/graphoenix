@@ -10,8 +10,13 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __InputValueInput {
-  @NonNull
   private String id;
+
+  private String description;
+
+  private String directiveName;
+
+  private Boolean isDeprecated;
 
   private String name;
 
@@ -19,20 +24,14 @@ public class __InputValueInput {
 
   private String ofTypeName;
 
+  private Integer version;
+
   private Integer fieldId;
-
-  private String directiveName;
-
-  private String description;
 
   @NonNull
   private __TypeInput type;
 
   private String defaultValue;
-
-  private Integer version;
-
-  private Boolean isDeprecated;
 
   public String getId() {
     return this.id;
@@ -40,6 +39,30 @@ public class __InputValueInput {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 
   public String getName() {
@@ -66,28 +89,20 @@ public class __InputValueInput {
     this.ofTypeName = ofTypeName;
   }
 
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
   public Integer getFieldId() {
     return this.fieldId;
   }
 
   public void setFieldId(Integer fieldId) {
     this.fieldId = fieldId;
-  }
-
-  public String getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
   }
 
   public __TypeInput getType() {
@@ -104,21 +119,5 @@ public class __InputValueInput {
 
   public void setDefaultValue(String defaultValue) {
     this.defaultValue = defaultValue;
-  }
-
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
   }
 }

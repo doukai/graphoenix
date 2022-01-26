@@ -7,7 +7,10 @@ public class NullValue {
 
     @Override
     public String toString() {
-        ST st = new STGroupFile("stg/operation/NullValue.stg").getInstanceOf("nullValueDefinition");
-        return st.render();
+        STGroupFile stGroupFile = new STGroupFile("stg/operation/NullValue.stg");
+        ST st = stGroupFile.getInstanceOf("nullValueDefinition");
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }
