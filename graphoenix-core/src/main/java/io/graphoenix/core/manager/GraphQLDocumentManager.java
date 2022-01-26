@@ -189,7 +189,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean isScaLar(String name) {
+    public boolean isScalar(String name) {
         return graphQLScalarManager.isScalar(name);
     }
 

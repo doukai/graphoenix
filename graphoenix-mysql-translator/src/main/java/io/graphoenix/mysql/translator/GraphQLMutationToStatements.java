@@ -1402,7 +1402,7 @@ public class GraphQLMutationToStatements {
         String fieldTypeName = manager.getFieldTypeName(typeContext);
         if (manager.isEnum(fieldTypeName)) {
             colDataType.setDataType("INT");
-        } else if (manager.isScaLar(fieldTypeName)) {
+        } else if (manager.isScalar(fieldTypeName)) {
             switch (fieldTypeName) {
                 case "ID":
                 case "Int":
@@ -1486,7 +1486,7 @@ public class GraphQLMutationToStatements {
     }
 
     protected Expression argumentToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
-        if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+        if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.scalarValueWithVariableToDBValue(argumentContext.valueWithVariable());
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.enumValueWithVariableToDBValue(argumentContext.valueWithVariable());
@@ -1495,7 +1495,7 @@ public class GraphQLMutationToStatements {
     }
 
     protected Expression objectFieldWithVariableToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
-        if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+        if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.scalarValueWithVariableToDBValue(objectFieldWithVariableContext.valueWithVariable());
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.enumValueWithVariableToDBValue(objectFieldWithVariableContext.valueWithVariable());
@@ -1504,7 +1504,7 @@ public class GraphQLMutationToStatements {
     }
 
     protected Expression objectFieldToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
-        if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+        if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.scalarValueToDBValue(objectFieldContext.value());
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.enumValueToDBValue(objectFieldContext.value());
@@ -1515,7 +1515,7 @@ public class GraphQLMutationToStatements {
     protected Expression defaultValueToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         if (inputValueDefinitionContext.type().nonNullType() != null) {
             if (inputValueDefinitionContext.defaultValue() != null) {
-                if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                if (manager.isScalar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
                     return dbValueUtil.scalarValueToDBValue(inputValueDefinitionContext.defaultValue().value());
                 } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
                     return dbValueUtil.enumValueToDBValue(inputValueDefinitionContext.defaultValue().value());

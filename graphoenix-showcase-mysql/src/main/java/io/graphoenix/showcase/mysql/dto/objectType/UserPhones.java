@@ -19,9 +19,9 @@ public class UserPhones implements Meta {
   @Id
   private String id;
 
-  private String phone;
-
   private Integer userId;
+
+  private String phone;
 
   @Override
   public Boolean getIsDeprecated() {
@@ -51,19 +51,19 @@ public class UserPhones implements Meta {
     this.id = id;
   }
 
-  public String getPhone() {
-    return this.phone;
-  }
-
-  public void setPhone(String phone) {
-    this.phone = phone;
-  }
-
   public Integer getUserId() {
     return this.userId;
   }
 
   public void setUserId(Integer userId) {
     this.userId = userId;
+  }
+
+  public String getPhone() {
+    return this.phone;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
   }
 }

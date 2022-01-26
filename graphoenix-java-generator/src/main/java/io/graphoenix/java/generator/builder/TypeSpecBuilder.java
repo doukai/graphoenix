@@ -416,7 +416,7 @@ public class TypeSpecBuilder {
     }
 
     public TypeName buildType(GraphqlParser.NameContext nameContext, boolean isAnnotation) {
-        if (manager.isScaLar(nameContext.getText())) {
+        if (manager.isScalar(nameContext.getText())) {
             Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(nameContext.getText());
             if (scaLar.isPresent()) {
                 if (isAnnotation) {
@@ -458,7 +458,7 @@ public class TypeSpecBuilder {
     }
 
     public TypeName buildExpressionType(GraphqlParser.NameContext nameContext, boolean isAnnotation) {
-        if (manager.isScaLar(nameContext.getText())) {
+        if (manager.isScalar(nameContext.getText())) {
             Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(nameContext.getText());
             if (scaLar.isPresent()) {
                 if (isAnnotation) {
@@ -520,7 +520,7 @@ public class TypeSpecBuilder {
         if (manager.fieldTypeIsList(typeContext)) {
             return CodeBlock.of("$L", "{}");
         }
-        if (manager.isScaLar(manager.getFieldTypeName(typeContext))) {
+        if (manager.isScalar(manager.getFieldTypeName(typeContext))) {
             Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(manager.getFieldTypeName(typeContext));
             if (scaLar.isPresent()) {
                 return buildAnnotationDefaultValue(scaLar.get());
@@ -659,7 +659,7 @@ public class TypeSpecBuilder {
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext ->
-                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                                 manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                 )
                                                 .map(fieldDefinitionContext ->
@@ -674,7 +674,7 @@ public class TypeSpecBuilder {
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext ->
-                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                                 manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                 )
                                                 .map(fieldDefinitionContext ->
@@ -816,7 +816,7 @@ public class TypeSpecBuilder {
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext ->
-                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                                 manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                 )
                                                 .map(fieldDefinitionContext ->
@@ -831,7 +831,7 @@ public class TypeSpecBuilder {
                                 .addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext ->
-                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                                 manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                 )
                                                 .map(fieldDefinitionContext ->

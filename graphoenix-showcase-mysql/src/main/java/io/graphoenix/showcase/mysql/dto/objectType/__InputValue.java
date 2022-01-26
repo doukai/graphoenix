@@ -13,71 +13,29 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __InputValue implements Meta {
-  private String description;
-
-  private String ofTypeName;
-
-  private Integer version;
-
-  private String typeName;
-
-  private String directiveName;
-
   private String defaultValue;
 
-  private Boolean isDeprecated;
+  private String ofTypeName;
 
   @NonNull
   private __Type type;
 
   private Integer fieldId;
 
+  private String name;
+
+  private String description;
+
+  private String directiveName;
+
+  private Boolean isDeprecated;
+
+  private String typeName;
+
   @Id
   private String id;
 
-  private String name;
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  @Override
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public String getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
-  }
+  private Integer version;
 
   public String getDefaultValue() {
     return this.defaultValue;
@@ -87,14 +45,12 @@ public class __InputValue implements Meta {
     this.defaultValue = defaultValue;
   }
 
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public String getOfTypeName() {
+    return this.ofTypeName;
   }
 
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public __Type getType() {
@@ -113,6 +69,48 @@ public class __InputValue implements Meta {
     this.fieldId = fieldId;
   }
 
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
+  }
+
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
   public String getId() {
     return this.id;
   }
@@ -121,11 +119,13 @@ public class __InputValue implements Meta {
     this.id = id;
   }
 
-  public String getName() {
-    return this.name;
+  @Override
+  public Integer getVersion() {
+    return this.version;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
   }
 }

@@ -14,8 +14,4 @@ public @interface __FieldExpressions {
   Conditional cond() default Conditional.AND;
 
   __FieldExpression[] value() default {};
-
-  __InputValueExpression[] args() default {};
-
-  __TypeExpression[] type() default {};
 }

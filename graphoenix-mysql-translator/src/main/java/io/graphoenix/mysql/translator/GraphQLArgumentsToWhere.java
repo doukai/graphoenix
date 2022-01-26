@@ -333,14 +333,14 @@ public class GraphQLArgumentsToWhere {
                     } else {
                         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
-                } else if (manager.isScaLar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
+                } else if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
                         return operatorArgumentToExpression(argumentToColumn(typeContext, argumentContext, level), inputValueDefinitionContext, argumentContext);
                     } else if (fieldTypeName.equals("Boolean")) {
                         return isBooleanExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable(), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
                         return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable(), level);
-                    } else if (manager.isScaLar(fieldTypeName)) {
+                    } else if (manager.isScalar(fieldTypeName)) {
                         return Optional.of(scalarValueWithVariableToExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable()));
                     } else if (manager.isEnum(fieldTypeName)) {
                         return Optional.of(enumValueWithVariableToExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable()));
@@ -384,14 +384,14 @@ public class GraphQLArgumentsToWhere {
                     } else {
                         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
-                } else if (manager.isScaLar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
+                } else if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
                         return operatorObjectFieldWithVariableToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), inputValueDefinitionContext, objectFieldWithVariableContext);
                     } else if (fieldTypeName.equals("Boolean")) {
                         return isBooleanExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), objectFieldWithVariableContext.valueWithVariable(), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
                         return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(), level);
-                    } else if (manager.isScaLar(fieldTypeName)) {
+                    } else if (manager.isScalar(fieldTypeName)) {
                         return Optional.of(scalarValueWithVariableToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), objectFieldWithVariableContext.valueWithVariable()));
                     } else if (manager.isEnum(fieldTypeName)) {
                         return Optional.of(enumValueWithVariableToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), objectFieldWithVariableContext.valueWithVariable()));
@@ -434,14 +434,14 @@ public class GraphQLArgumentsToWhere {
                     } else {
                         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
-                } else if (manager.isScaLar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
+                } else if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
                         return operatorObjectFieldToExpression(objectFieldToColumn(typeContext, objectFieldContext, level), inputValueDefinitionContext, objectFieldContext);
                     } else if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean")) {
                         return isBooleanExpression(objectFieldToColumn(typeContext, objectFieldContext, level), objectFieldContext.value(), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
                         return objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue(), level);
-                    } else if (manager.isScaLar(fieldTypeName)) {
+                    } else if (manager.isScalar(fieldTypeName)) {
                         return Optional.of(scalarValueToExpression(objectFieldToColumn(typeContext, objectFieldContext, level), objectFieldContext.value()));
                     } else if (manager.isEnum(fieldTypeName)) {
                         return Optional.of(enumValueToExpression(objectFieldToColumn(typeContext, objectFieldContext, level), objectFieldContext.value().enumValue()));
@@ -483,14 +483,14 @@ public class GraphQLArgumentsToWhere {
                     } else {
                         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
-                } else if (manager.isScaLar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
+                } else if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
                         return operatorInputValueToExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level), inputValueDefinitionContext);
                     } else if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean")) {
                         return isBooleanExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level), inputValueDefinitionContext);
                     } else if (isConditionalObject(inputValueDefinitionContext)) {
                         return objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue(), level);
-                    } else if (manager.isScaLar(fieldTypeName)) {
+                    } else if (manager.isScalar(fieldTypeName)) {
                         return Optional.of(scalarValueToExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level), inputValueDefinitionContext.defaultValue().value()));
                     } else if (manager.isEnum(fieldTypeName)) {
                         return Optional.of(enumValueToExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level), inputValueDefinitionContext.defaultValue().value().enumValue()));
@@ -644,7 +644,7 @@ public class GraphQLArgumentsToWhere {
                                                                    GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                    GraphqlParser.ValueWithVariableContext valueWithVariableContext,
                                                                    int level) {
-        if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+        if (manager.isScalar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
             if (valueWithVariableContext.arrayValueWithVariable() != null) {
                 InExpression inExpression = new InExpression();
                 inExpression.setLeftExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level));
@@ -660,7 +660,7 @@ public class GraphQLArgumentsToWhere {
                                                        GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                        GraphqlParser.ValueContext valueContext,
                                                        int level) {
-        if (manager.isScaLar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+        if (manager.isScalar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
             if (valueContext.arrayValue() != null) {
                 InExpression inExpression = new InExpression();
                 inExpression.setLeftExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level));
@@ -1385,7 +1385,7 @@ public class GraphQLArgumentsToWhere {
         String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
         if (manager.isEnum(fieldTypeName)) {
             colDataType.setDataType("INT");
-        } else if (manager.isScaLar(fieldTypeName)) {
+        } else if (manager.isScalar(fieldTypeName)) {
             switch (fieldTypeName) {
                 case "ID":
                 case "Int":

@@ -10,61 +10,21 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class RoleExpression {
-  private StringExpression name;
-
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
-
-  private UserExpression users;
-
-  private Collection<RoleExpression> exs;
-
-  private IDExpression id;
-
   private IntExpression version;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  public StringExpression getName() {
-    return this.name;
-  }
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
 
-  public void setName(StringExpression name) {
-    this.name = name;
-  }
+  private IDExpression id;
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
+  private UserExpression users;
 
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
+  private StringExpression name;
 
-  public UserExpression getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(UserExpression users) {
-    this.users = users;
-  }
-
-  public Collection<RoleExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<RoleExpression> exs) {
-    this.exs = exs;
-  }
-
-  public IDExpression getId() {
-    return this.id;
-  }
-
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
+  private Collection<RoleExpression> exs;
 
   public IntExpression getVersion() {
     return this.version;
@@ -80,5 +40,45 @@ public class RoleExpression {
 
   public void setCond(Conditional cond) {
     this.cond = cond;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
+
+  public UserExpression getUsers() {
+    return this.users;
+  }
+
+  public void setUsers(UserExpression users) {
+    this.users = users;
+  }
+
+  public StringExpression getName() {
+    return this.name;
+  }
+
+  public void setName(StringExpression name) {
+    this.name = name;
+  }
+
+  public Collection<RoleExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<RoleExpression> exs) {
+    this.exs = exs;
   }
 }

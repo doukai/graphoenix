@@ -10,20 +10,12 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class IntExpression {
-  private Collection<Integer> in;
-
   @DefaultValue("EQ")
   private Operator opr;
 
+  private Collection<Integer> in;
+
   private Integer val;
-
-  public Collection<Integer> getIn() {
-    return this.in;
-  }
-
-  public void setIn(Collection<Integer> in) {
-    this.in = in;
-  }
 
   public Operator getOpr() {
     return this.opr;
@@ -31,6 +23,14 @@ public class IntExpression {
 
   public void setOpr(Operator opr) {
     this.opr = opr;
+  }
+
+  public Collection<Integer> getIn() {
+    return this.in;
+  }
+
+  public void setIn(Collection<Integer> in) {
+    this.in = in;
   }
 
   public Integer getVal() {

@@ -11,17 +11,17 @@ import org.eclipse.microprofile.graphql.Input;
 public class __EnumValueInput {
   private String description;
 
-  private String deprecationReason;
-
-  private Integer version;
+  private String id;
 
   private String ofTypeName;
 
-  private String name;
+  private Integer version;
 
-  private String id;
+  private String deprecationReason;
 
   private Boolean isDeprecated;
+
+  private String name;
 
   public String getDescription() {
     return this.description;
@@ -29,38 +29,6 @@ public class __EnumValueInput {
 
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  public String getDeprecationReason() {
-    return this.deprecationReason;
-  }
-
-  public void setDeprecationReason(String deprecationReason) {
-    this.deprecationReason = deprecationReason;
-  }
-
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public String getId() {
@@ -71,11 +39,43 @@ public class __EnumValueInput {
     this.id = id;
   }
 
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public String getDeprecationReason() {
+    return this.deprecationReason;
+  }
+
+  public void setDeprecationReason(String deprecationReason) {
+    this.deprecationReason = deprecationReason;
+  }
+
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 }

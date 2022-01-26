@@ -10,52 +10,28 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __InputValueInput {
-  private String id;
-
-  private String description;
-
-  private String directiveName;
-
   private Boolean isDeprecated;
-
-  private String name;
-
-  private String typeName;
-
-  private String ofTypeName;
 
   private Integer version;
 
-  private Integer fieldId;
+  private String ofTypeName;
+
+  private String directiveName;
+
+  private String description;
+
+  private String id;
 
   @NonNull
   private __TypeInput type;
 
+  private String name;
+
+  private Integer fieldId;
+
+  private String typeName;
+
   private String defaultValue;
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public String getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
-  }
 
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
@@ -63,30 +39,6 @@ public class __InputValueInput {
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public Integer getVersion() {
@@ -97,12 +49,36 @@ public class __InputValueInput {
     this.version = version;
   }
 
-  public Integer getFieldId() {
-    return this.fieldId;
+  public String getOfTypeName() {
+    return this.ofTypeName;
   }
 
-  public void setFieldId(Integer fieldId) {
-    this.fieldId = fieldId;
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public String getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   public __TypeInput getType() {
@@ -111,6 +87,30 @@ public class __InputValueInput {
 
   public void setType(__TypeInput type) {
     this.type = type;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Integer getFieldId() {
+    return this.fieldId;
+  }
+
+  public void setFieldId(Integer fieldId) {
+    this.fieldId = fieldId;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 
   public String getDefaultValue() {

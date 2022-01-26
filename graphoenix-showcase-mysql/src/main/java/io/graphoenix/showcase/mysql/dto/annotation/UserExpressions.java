@@ -14,8 +14,4 @@ public @interface UserExpressions {
   Conditional cond() default Conditional.AND;
 
   UserExpression[] value() default {};
-
-  RoleExpression[] roles() default {};
-
-  OrganizationExpression[] organization() default {};
 }

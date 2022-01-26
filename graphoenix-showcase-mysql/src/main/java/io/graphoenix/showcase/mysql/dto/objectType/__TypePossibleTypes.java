@@ -14,32 +14,24 @@ import org.eclipse.microprofile.graphql.Type;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypePossibleTypes implements Meta {
   @NonNull
-  private String typeName;
+  private String possibleTypeName;
+
+  private Boolean isDeprecated;
 
   @Id
   private String id;
 
-  private Boolean isDeprecated;
-
   private Integer version;
 
   @NonNull
-  private String possibleTypeName;
+  private String typeName;
 
-  public String getTypeName() {
-    return this.typeName;
+  public String getPossibleTypeName() {
+    return this.possibleTypeName;
   }
 
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
-  }
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
+  public void setPossibleTypeName(String possibleTypeName) {
+    this.possibleTypeName = possibleTypeName;
   }
 
   @Override
@@ -52,6 +44,14 @@ public class __TypePossibleTypes implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
   @Override
   public Integer getVersion() {
     return this.version;
@@ -62,11 +62,11 @@ public class __TypePossibleTypes implements Meta {
     this.version = version;
   }
 
-  public String getPossibleTypeName() {
-    return this.possibleTypeName;
+  public String getTypeName() {
+    return this.typeName;
   }
 
-  public void setPossibleTypeName(String possibleTypeName) {
-    this.possibleTypeName = possibleTypeName;
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 }

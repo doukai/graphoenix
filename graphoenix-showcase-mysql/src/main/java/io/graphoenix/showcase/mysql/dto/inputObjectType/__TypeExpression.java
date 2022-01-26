@@ -10,68 +10,52 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeExpression {
-  private IDExpression name;
-
-  private __EnumValueExpression enumValues;
-
-  private __TypeExpression ofType;
-
-  private __FieldExpression fields;
-
-  private StringExpression description;
-
-  private __TypeExpression possibleTypes;
-
-  private IntExpression schemaId;
-
-  private Collection<__TypeExpression> exs;
-
   @DefaultValue("AND")
   private Conditional cond;
 
-  private __TypeExpression interfaces;
+  private __TypeKindExpression kind;
 
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
+  private StringExpression description;
+
+  private Collection<__TypeExpression> exs;
+
+  private __TypeExpression ofType;
 
   private IntExpression version;
 
   private StringExpression ofTypeName;
 
-  private __TypeKindExpression kind;
+  private __EnumValueExpression enumValues;
+
+  private __TypeExpression possibleTypes;
+
+  private __TypeExpression interfaces;
 
   private __InputValueExpression inputFields;
 
-  public IDExpression getName() {
-    return this.name;
+  private __FieldExpression fields;
+
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
+
+  private IDExpression name;
+
+  private IntExpression schemaId;
+
+  public Conditional getCond() {
+    return this.cond;
   }
 
-  public void setName(IDExpression name) {
-    this.name = name;
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 
-  public __EnumValueExpression getEnumValues() {
-    return this.enumValues;
+  public __TypeKindExpression getKind() {
+    return this.kind;
   }
 
-  public void setEnumValues(__EnumValueExpression enumValues) {
-    this.enumValues = enumValues;
-  }
-
-  public __TypeExpression getOfType() {
-    return this.ofType;
-  }
-
-  public void setOfType(__TypeExpression ofType) {
-    this.ofType = ofType;
-  }
-
-  public __FieldExpression getFields() {
-    return this.fields;
-  }
-
-  public void setFields(__FieldExpression fields) {
-    this.fields = fields;
+  public void setKind(__TypeKindExpression kind) {
+    this.kind = kind;
   }
 
   public StringExpression getDescription() {
@@ -82,22 +66,6 @@ public class __TypeExpression {
     this.description = description;
   }
 
-  public __TypeExpression getPossibleTypes() {
-    return this.possibleTypes;
-  }
-
-  public void setPossibleTypes(__TypeExpression possibleTypes) {
-    this.possibleTypes = possibleTypes;
-  }
-
-  public IntExpression getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(IntExpression schemaId) {
-    this.schemaId = schemaId;
-  }
-
   public Collection<__TypeExpression> getExs() {
     return this.exs;
   }
@@ -106,28 +74,12 @@ public class __TypeExpression {
     this.exs = exs;
   }
 
-  public Conditional getCond() {
-    return this.cond;
+  public __TypeExpression getOfType() {
+    return this.ofType;
   }
 
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public __TypeExpression getInterfaces() {
-    return this.interfaces;
-  }
-
-  public void setInterfaces(__TypeExpression interfaces) {
-    this.interfaces = interfaces;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
+  public void setOfType(__TypeExpression ofType) {
+    this.ofType = ofType;
   }
 
   public IntExpression getVersion() {
@@ -146,12 +98,28 @@ public class __TypeExpression {
     this.ofTypeName = ofTypeName;
   }
 
-  public __TypeKindExpression getKind() {
-    return this.kind;
+  public __EnumValueExpression getEnumValues() {
+    return this.enumValues;
   }
 
-  public void setKind(__TypeKindExpression kind) {
-    this.kind = kind;
+  public void setEnumValues(__EnumValueExpression enumValues) {
+    this.enumValues = enumValues;
+  }
+
+  public __TypeExpression getPossibleTypes() {
+    return this.possibleTypes;
+  }
+
+  public void setPossibleTypes(__TypeExpression possibleTypes) {
+    this.possibleTypes = possibleTypes;
+  }
+
+  public __TypeExpression getInterfaces() {
+    return this.interfaces;
+  }
+
+  public void setInterfaces(__TypeExpression interfaces) {
+    this.interfaces = interfaces;
   }
 
   public __InputValueExpression getInputFields() {
@@ -160,5 +128,37 @@ public class __TypeExpression {
 
   public void setInputFields(__InputValueExpression inputFields) {
     this.inputFields = inputFields;
+  }
+
+  public __FieldExpression getFields() {
+    return this.fields;
+  }
+
+  public void setFields(__FieldExpression fields) {
+    this.fields = fields;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public IDExpression getName() {
+    return this.name;
+  }
+
+  public void setName(IDExpression name) {
+    this.name = name;
+  }
+
+  public IntExpression getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(IntExpression schemaId) {
+    this.schemaId = schemaId;
   }
 }

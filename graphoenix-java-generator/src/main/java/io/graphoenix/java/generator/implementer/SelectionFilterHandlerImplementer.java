@@ -92,7 +92,7 @@ public class SelectionFilterHandlerImplementer {
                                         typeParameterName,
                                         fieldGetterMethodName
                                 );
-                                if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                                     builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item))",
                                             typeParameterName,
                                             fieldGetterMethodName
@@ -112,7 +112,7 @@ public class SelectionFilterHandlerImplementer {
                                 builder.addStatement("jsonObject.add($S, jsonArray)", fieldDefinitionContext.name().getText());
                                 builder.endControlFlow();
                             } else {
-                                if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                                     builder.addStatement("jsonObject.addProperty($S,$L.$L())",
                                             fieldDefinitionContext.name().getText(),
                                             typeParameterName,

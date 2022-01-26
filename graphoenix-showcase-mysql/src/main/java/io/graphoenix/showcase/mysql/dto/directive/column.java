@@ -14,8 +14,8 @@ import org.eclipse.microprofile.graphql.Name;
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.FIELD})
 public @interface column {
+  boolean autoIncrement();
+
   @Name("default")
   String _default();
-
-  boolean autoIncrement();
 }

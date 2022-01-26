@@ -39,7 +39,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                 .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                 .forEach(fieldDefinitionContext -> {
                                             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
-                                                    (manager.fieldTypeIsList(fieldDefinitionContext.type()) && manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type()))) ||
+                                                    (manager.fieldTypeIsList(fieldDefinitionContext.type()) && manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) ||
                                                     (manager.fieldTypeIsList(fieldDefinitionContext.type()) && manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                             ) {
                                                 if (fieldDefinitionContext.directives() == null) {

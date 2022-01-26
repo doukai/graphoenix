@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.spi.annotation.TypeInput;
-import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,51 +10,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface OrganizationInput {
-  OrganizationInnerInput parent() default @OrganizationInnerInput;
-
-  int aboveId() default 0;
-
-  boolean isDeprecated() default false;
-
-  UserInnerInput[] userByOrg() default {};
-
-  String name() default "";
-
-  int orgLevel2() default 0;
-
-  OrganizationInnerInput above() default @OrganizationInnerInput;
-
-  boolean roleDisable() default false;
-
-  int[] orgLevel3() default {};
-
-  String id() default "";
-
-  int version() default 0;
-
-  UserInnerInput[] users() default {};
-
-  String $parent() default "";
-
-  String $aboveId() default "";
-
-  String $isDeprecated() default "";
-
-  String $userByOrg() default "";
-
-  String $name() default "";
-
-  String $orgLevel2() default "";
-
-  String $above() default "";
-
-  String $roleDisable() default "";
-
-  String $orgLevel3() default "";
-
-  String $id() default "";
-
-  String $version() default "";
-
-  String $users() default "";
 }

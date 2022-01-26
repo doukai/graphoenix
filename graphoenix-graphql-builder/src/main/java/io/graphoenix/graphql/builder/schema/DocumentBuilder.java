@@ -165,18 +165,10 @@ public class DocumentBuilder {
             } else {
                 field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.EXPRESSION));
             }
-        } else if (manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+        } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             field.addArgument(filedToArgument(fieldDefinitionContext, InputType.EXPRESSION));
         }
         return field;
-    }
-
-    public Field getFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return new Field().setName(fieldDefinitionContext.name().getText())
-                .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
-                .setTypeName(fieldDefinitionContext.type().getText())
-                .setArguments(fieldDefinitionContext.argumentsDefinition() == null ? null : fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toSet()))
-                .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
 
     public EnumValue buildEnumValue(GraphqlParser.EnumValueDefinitionContext enumValueDefinitionContext) {

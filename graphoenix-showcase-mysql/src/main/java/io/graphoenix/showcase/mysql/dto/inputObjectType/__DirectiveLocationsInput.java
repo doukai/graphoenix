@@ -14,14 +14,14 @@ public class __DirectiveLocationsInput {
   private Integer version;
 
   @NonNull
-  private __DirectiveLocation directiveLocation;
+  private String directiveName;
 
-  private String id;
+  @NonNull
+  private __DirectiveLocation directiveLocation;
 
   private Boolean isDeprecated;
 
-  @NonNull
-  private String directiveName;
+  private String id;
 
   public Integer getVersion() {
     return this.version;
@@ -29,6 +29,14 @@ public class __DirectiveLocationsInput {
 
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  public String getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
   }
 
   public __DirectiveLocation getDirectiveLocation() {
@@ -39,14 +47,6 @@ public class __DirectiveLocationsInput {
     this.directiveLocation = directiveLocation;
   }
 
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -55,11 +55,11 @@ public class __DirectiveLocationsInput {
     this.isDeprecated = isDeprecated;
   }
 
-  public String getDirectiveName() {
-    return this.directiveName;
+  public String getId() {
+    return this.id;
   }
 
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
+  public void setId(String id) {
+    this.id = id;
   }
 }

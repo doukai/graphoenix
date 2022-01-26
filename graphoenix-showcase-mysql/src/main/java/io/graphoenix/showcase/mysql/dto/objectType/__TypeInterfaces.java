@@ -13,25 +13,35 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeInterfaces implements Meta {
-  @NonNull
-  private String typeName;
-
-  private Integer version;
+  private Boolean isDeprecated;
 
   @NonNull
   private String interfaceName;
 
-  private Boolean isDeprecated;
+  private Integer version;
 
   @Id
   private String id;
 
-  public String getTypeName() {
-    return this.typeName;
+  @NonNull
+  private String typeName;
+
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
   }
 
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public String getInterfaceName() {
+    return this.interfaceName;
+  }
+
+  public void setInterfaceName(String interfaceName) {
+    this.interfaceName = interfaceName;
   }
 
   @Override
@@ -44,29 +54,19 @@ public class __TypeInterfaces implements Meta {
     this.version = version;
   }
 
-  public String getInterfaceName() {
-    return this.interfaceName;
-  }
-
-  public void setInterfaceName(String interfaceName) {
-    this.interfaceName = interfaceName;
-  }
-
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
   public String getId() {
     return this.id;
   }
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 }

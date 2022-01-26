@@ -10,28 +10,28 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeInterfacesExpression {
-  private Collection<__TypeInterfacesExpression> exs;
+  private StringExpression typeName;
 
   private IDExpression id;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  private StringExpression interfaceName;
+  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private IntExpression version;
+  private StringExpression interfaceName;
 
-  private StringExpression typeName;
+  private Collection<__TypeInterfacesExpression> exs;
 
-  public Collection<__TypeInterfacesExpression> getExs() {
-    return this.exs;
+  public StringExpression getTypeName() {
+    return this.typeName;
   }
 
-  public void setExs(Collection<__TypeInterfacesExpression> exs) {
-    this.exs = exs;
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
   }
 
   public IDExpression getId() {
@@ -50,12 +50,12 @@ public class __TypeInterfacesExpression {
     this.cond = cond;
   }
 
-  public StringExpression getInterfaceName() {
-    return this.interfaceName;
+  public IntExpression getVersion() {
+    return this.version;
   }
 
-  public void setInterfaceName(StringExpression interfaceName) {
-    this.interfaceName = interfaceName;
+  public void setVersion(IntExpression version) {
+    this.version = version;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -66,19 +66,19 @@ public class __TypeInterfacesExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public StringExpression getInterfaceName() {
+    return this.interfaceName;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setInterfaceName(StringExpression interfaceName) {
+    this.interfaceName = interfaceName;
   }
 
-  public StringExpression getTypeName() {
-    return this.typeName;
+  public Collection<__TypeInterfacesExpression> getExs() {
+    return this.exs;
   }
 
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
+  public void setExs(Collection<__TypeInterfacesExpression> exs) {
+    this.exs = exs;
   }
 }

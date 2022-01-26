@@ -7,18 +7,25 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class GraphQLInputValueManager implements IGraphQLInputValueManager {
 
-    private final Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> inputValueDefinitionTree = new HashMap<>();
+    private final Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> inputValueDefinitionTree = new ConcurrentHashMap<>();
 
     @Override
     public Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        inputValueDefinitionTree.put(inputObjectTypeDefinitionContext.name().getText(),
-                new HashSet<>(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()).stream()
-                        .collect(Collectors.toMap(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText(), inputValueDefinitionContext -> inputValueDefinitionContext)));
+        Map<String, GraphqlParser.InputValueDefinitionContext> inputValueMap;
+        if (inputValueDefinitionTree.get(inputObjectTypeDefinitionContext.name().getText()) == null) {
+            inputValueMap = new HashMap<>();
+        } else {
+            inputValueMap = inputValueDefinitionTree.get(inputObjectTypeDefinitionContext.name().getText());
+        }
+        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
+                .forEach(inputValueDefinitionContext -> inputValueMap.put(inputValueDefinitionContext.name().getText(), inputValueDefinitionContext));
+
         return inputValueDefinitionTree;
     }
 

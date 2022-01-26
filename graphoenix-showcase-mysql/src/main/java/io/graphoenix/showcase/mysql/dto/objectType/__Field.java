@@ -18,21 +18,21 @@ public class __Field implements Meta {
 
   private String description;
 
-  private String ofTypeName;
+  private String name;
 
   private Boolean isDeprecated;
 
-  @Id
-  private String id;
+  private String deprecationReason;
 
-  private String typeName;
+  private String ofTypeName;
 
   @NonNull
   private Collection<__InputValue> args;
 
-  private String deprecationReason;
+  private String typeName;
 
-  private String name;
+  @Id
+  private String id;
 
   @NonNull
   private __Type type;
@@ -55,12 +55,12 @@ public class __Field implements Meta {
     this.description = description;
   }
 
-  public String getOfTypeName() {
-    return this.ofTypeName;
+  public String getName() {
+    return this.name;
   }
 
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
+  public void setName(String name) {
+    this.name = name;
   }
 
   @Override
@@ -73,20 +73,20 @@ public class __Field implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
-  public String getId() {
-    return this.id;
+  public String getDeprecationReason() {
+    return this.deprecationReason;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setDeprecationReason(String deprecationReason) {
+    this.deprecationReason = deprecationReason;
   }
 
-  public String getTypeName() {
-    return this.typeName;
+  public String getOfTypeName() {
+    return this.ofTypeName;
   }
 
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public Collection<__InputValue> getArgs() {
@@ -97,20 +97,20 @@ public class __Field implements Meta {
     this.args = args;
   }
 
-  public String getDeprecationReason() {
-    return this.deprecationReason;
+  public String getTypeName() {
+    return this.typeName;
   }
 
-  public void setDeprecationReason(String deprecationReason) {
-    this.deprecationReason = deprecationReason;
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 
-  public String getName() {
-    return this.name;
+  public String getId() {
+    return this.id;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public __Type getType() {

@@ -9,19 +9,19 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class OperatorExpression {
-  @DefaultValue("EQ")
-  private Operator opr;
+  private Collection<Operator> in;
 
   private Operator val;
 
-  private Collection<Operator> in;
+  @DefaultValue("EQ")
+  private Operator opr;
 
-  public Operator getOpr() {
-    return this.opr;
+  public Collection<Operator> getIn() {
+    return this.in;
   }
 
-  public void setOpr(Operator opr) {
-    this.opr = opr;
+  public void setIn(Collection<Operator> in) {
+    this.in = in;
   }
 
   public Operator getVal() {
@@ -32,11 +32,11 @@ public class OperatorExpression {
     this.val = val;
   }
 
-  public Collection<Operator> getIn() {
-    return this.in;
+  public Operator getOpr() {
+    return this.opr;
   }
 
-  public void setIn(Collection<Operator> in) {
-    this.in = in;
+  public void setOpr(Operator opr) {
+    this.opr = opr;
   }
 }

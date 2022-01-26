@@ -11,34 +11,58 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __FieldInput {
-  @NonNull
-  private __TypeInput type;
+  private Boolean isDeprecated;
+
+  private String description;
+
+  private String typeName;
+
+  private String name;
 
   private String id;
 
   @NonNull
   private Collection<__InputValueInput> args;
 
+  @NonNull
+  private __TypeInput type;
+
   private String deprecationReason;
-
-  private String name;
-
-  private String description;
-
-  private Boolean isDeprecated;
-
-  private String typeName;
-
-  private Integer version;
 
   private String ofTypeName;
 
-  public __TypeInput getType() {
-    return this.type;
+  private Integer version;
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
   }
 
-  public void setType(__TypeInput type) {
-    this.type = type;
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public String getId() {
@@ -57,6 +81,14 @@ public class __FieldInput {
     this.args = args;
   }
 
+  public __TypeInput getType() {
+    return this.type;
+  }
+
+  public void setType(__TypeInput type) {
+    this.type = type;
+  }
+
   public String getDeprecationReason() {
     return this.deprecationReason;
   }
@@ -65,36 +97,12 @@ public class __FieldInput {
     this.deprecationReason = deprecationReason;
   }
 
-  public String getName() {
-    return this.name;
+  public String getOfTypeName() {
+    return this.ofTypeName;
   }
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public Integer getVersion() {
@@ -103,13 +111,5 @@ public class __FieldInput {
 
   public void setVersion(Integer version) {
     this.version = version;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 }

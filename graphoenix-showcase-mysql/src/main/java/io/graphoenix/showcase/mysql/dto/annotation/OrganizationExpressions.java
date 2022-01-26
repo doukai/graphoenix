@@ -14,12 +14,4 @@ public @interface OrganizationExpressions {
   Conditional cond() default Conditional.AND;
 
   OrganizationExpression[] value() default {};
-
-  OrganizationExpression[] parent() default {};
-
-  UserExpression[] userByOrg() default {};
-
-  OrganizationExpression[] above() default {};
-
-  UserExpression[] users() default {};
 }

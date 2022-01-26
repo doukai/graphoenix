@@ -11,31 +11,23 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class RoleInput {
-  private Integer version;
-
-  private Boolean isDeprecated;
+  @NonNull
+  private String name;
 
   private Collection<UserInput> users;
 
   private String id;
 
-  @NonNull
-  private String name;
+  private Integer version;
 
-  public Integer getVersion() {
-    return this.version;
+  private Boolean isDeprecated;
+
+  public String getName() {
+    return this.name;
   }
 
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setName(String name) {
+    this.name = name;
   }
 
   public Collection<UserInput> getUsers() {
@@ -54,11 +46,19 @@ public class RoleInput {
     this.id = id;
   }
 
-  public String getName() {
-    return this.name;
+  public Integer getVersion() {
+    return this.version;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

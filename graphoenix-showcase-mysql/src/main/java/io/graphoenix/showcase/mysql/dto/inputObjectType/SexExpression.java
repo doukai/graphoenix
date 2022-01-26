@@ -10,12 +10,20 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class SexExpression {
+  private Sex val;
+
   @DefaultValue("EQ")
   private Operator opr;
 
   private Collection<Sex> in;
 
-  private Sex val;
+  public Sex getVal() {
+    return this.val;
+  }
+
+  public void setVal(Sex val) {
+    this.val = val;
+  }
 
   public Operator getOpr() {
     return this.opr;
@@ -31,13 +39,5 @@ public class SexExpression {
 
   public void setIn(Collection<Sex> in) {
     this.in = in;
-  }
-
-  public Sex getVal() {
-    return this.val;
-  }
-
-  public void setVal(Sex val) {
-    this.val = val;
   }
 }

@@ -139,7 +139,7 @@ public class GraphQLTypeToTable {
     protected ColDataType createColDataType(GraphqlParser.TypeNameContext typeNameContext, GraphqlParser.DirectivesContext directivesContext) {
         if (manager.isEnum(typeNameContext.name().getText())) {
             return createEnumColDataType(typeNameContext);
-        } else if (manager.isScaLar(typeNameContext.name().getText())) {
+        } else if (manager.isScalar(typeNameContext.name().getText())) {
             return createScalarColDataType(typeNameContext, directivesContext);
         }
         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeNameContext.getText()));

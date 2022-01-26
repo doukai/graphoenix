@@ -12,19 +12,19 @@ import org.eclipse.microprofile.graphql.Input;
 public class __TypePossibleTypesExpression {
   private IDExpression id;
 
+  private StringExpression possibleTypeName;
+
   private IntExpression version;
 
-  private Collection<__TypePossibleTypesExpression> exs;
-
-  private StringExpression typeName;
+  @DefaultValue("AND")
+  private Conditional cond;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private StringExpression possibleTypeName;
+  private StringExpression typeName;
 
-  @DefaultValue("AND")
-  private Conditional cond;
+  private Collection<__TypePossibleTypesExpression> exs;
 
   public IDExpression getId() {
     return this.id;
@@ -32,38 +32,6 @@ public class __TypePossibleTypesExpression {
 
   public void setId(IDExpression id) {
     this.id = id;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public Collection<__TypePossibleTypesExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
-    this.exs = exs;
-  }
-
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
   }
 
   public StringExpression getPossibleTypeName() {
@@ -74,11 +42,43 @@ public class __TypePossibleTypesExpression {
     this.possibleTypeName = possibleTypeName;
   }
 
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
   public Conditional getCond() {
     return this.cond;
   }
 
   public void setCond(Conditional cond) {
     this.cond = cond;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public StringExpression getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
+  }
+
+  public Collection<__TypePossibleTypesExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
+    this.exs = exs;
   }
 }

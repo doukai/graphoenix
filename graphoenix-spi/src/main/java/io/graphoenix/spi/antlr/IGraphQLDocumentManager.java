@@ -36,7 +36,7 @@ public interface IGraphQLDocumentManager {
 
     void registerFragment(String graphql);
 
-    boolean isScaLar(String name);
+    boolean isScalar(String name);
 
     boolean isEnum(String name);
 

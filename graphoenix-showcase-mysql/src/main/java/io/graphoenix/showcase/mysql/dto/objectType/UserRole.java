@@ -12,16 +12,42 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserRole implements Meta {
+  private Integer userId;
+
+  private Boolean isDeprecated;
+
+  private Integer roleId;
+
   private Integer version;
 
   @Id
   private String id;
 
-  private Integer roleId;
+  public Integer getUserId() {
+    return this.userId;
+  }
 
-  private Boolean isDeprecated;
+  public void setUserId(Integer userId) {
+    this.userId = userId;
+  }
 
-  private Integer userId;
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public Integer getRoleId() {
+    return this.roleId;
+  }
+
+  public void setRoleId(Integer roleId) {
+    this.roleId = roleId;
+  }
 
   @Override
   public Integer getVersion() {
@@ -39,31 +65,5 @@ public class UserRole implements Meta {
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public Integer getRoleId() {
-    return this.roleId;
-  }
-
-  public void setRoleId(Integer roleId) {
-    this.roleId = roleId;
-  }
-
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
-  public Integer getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(Integer userId) {
-    this.userId = userId;
   }
 }

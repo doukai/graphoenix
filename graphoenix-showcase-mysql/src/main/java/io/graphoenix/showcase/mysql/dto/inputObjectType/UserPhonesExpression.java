@@ -10,29 +10,21 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserPhonesExpression {
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
-
   private Collection<UserPhonesExpression> exs;
 
-  private IntExpression userId;
-
   private IDExpression id;
+
+  private IntExpression userId;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  private IntExpression version;
-
   private StringExpression phone;
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
 
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
+  private IntExpression version;
 
   public Collection<UserPhonesExpression> getExs() {
     return this.exs;
@@ -40,14 +32,6 @@ public class UserPhonesExpression {
 
   public void setExs(Collection<UserPhonesExpression> exs) {
     this.exs = exs;
-  }
-
-  public IntExpression getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(IntExpression userId) {
-    this.userId = userId;
   }
 
   public IDExpression getId() {
@@ -58,6 +42,14 @@ public class UserPhonesExpression {
     this.id = id;
   }
 
+  public IntExpression getUserId() {
+    return this.userId;
+  }
+
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
+  }
+
   public Conditional getCond() {
     return this.cond;
   }
@@ -66,19 +58,27 @@ public class UserPhonesExpression {
     this.cond = cond;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
   public StringExpression getPhone() {
     return this.phone;
   }
 
   public void setPhone(StringExpression phone) {
     this.phone = phone;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
   }
 }

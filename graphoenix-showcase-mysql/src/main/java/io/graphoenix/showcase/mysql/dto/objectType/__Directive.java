@@ -15,28 +15,64 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __Directive implements Meta {
+  private Integer schemaId;
+
+  private Boolean isDeprecated;
+
+  private Boolean onField;
+
+  private Integer version;
+
   @NonNull
   private Collection<__InputValue> args;
+
+  @NonNull
+  private Collection<__DirectiveLocation> locations;
+
+  private String description;
+
+  private Boolean onOperation;
 
   private Boolean onFragment;
 
   @Id
   private String name;
 
-  @NonNull
-  private Collection<__DirectiveLocation> locations;
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
 
-  private Integer version;
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
 
-  private Integer schemaId;
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
 
-  private Boolean onOperation;
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
 
-  private Boolean onField;
+  public Boolean getOnField() {
+    return this.onField;
+  }
 
-  private String description;
+  public void setOnField(Boolean onField) {
+    this.onField = onField;
+  }
 
-  private Boolean isDeprecated;
+  @Override
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
 
   public Collection<__InputValue> getArgs() {
     return this.args;
@@ -44,6 +80,30 @@ public class __Directive implements Meta {
 
   public void setArgs(Collection<__InputValue> args) {
     this.args = args;
+  }
+
+  public Collection<__DirectiveLocation> getLocations() {
+    return this.locations;
+  }
+
+  public void setLocations(Collection<__DirectiveLocation> locations) {
+    this.locations = locations;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Boolean getOnOperation() {
+    return this.onOperation;
+  }
+
+  public void setOnOperation(Boolean onOperation) {
+    this.onOperation = onOperation;
   }
 
   public Boolean getOnFragment() {
@@ -60,65 +120,5 @@ public class __Directive implements Meta {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public Collection<__DirectiveLocation> getLocations() {
-    return this.locations;
-  }
-
-  public void setLocations(Collection<__DirectiveLocation> locations) {
-    this.locations = locations;
-  }
-
-  @Override
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public Boolean getOnOperation() {
-    return this.onOperation;
-  }
-
-  public void setOnOperation(Boolean onOperation) {
-    this.onOperation = onOperation;
-  }
-
-  public Boolean getOnField() {
-    return this.onField;
-  }
-
-  public void setOnField(Boolean onField) {
-    this.onField = onField;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
   }
 }

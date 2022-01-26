@@ -175,7 +175,7 @@ public class IntrospectionMutationBuilder {
             return null;
         }
         if (typeContext.typeName() != null) {
-            if (manager.isScaLar(typeContext.typeName().getText())) {
+            if (manager.isScalar(typeContext.typeName().getText())) {
                 return manager.getScaLar(typeContext.typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null);
             } else if (manager.isObject(typeContext.typeName().getText())) {
                 return manager.getObject(typeContext.typeName().getText()).map(objectTypeDefinitionContext -> objectTypeDefinitionContextToType(objectTypeDefinitionContext, level)).orElse(null);
@@ -194,7 +194,7 @@ public class IntrospectionMutationBuilder {
             __Type nonNullType = new __Type();
             nonNullType.setKind(__TypeKind.NON_NULL);
             if (typeContext.nonNullType().typeName() != null) {
-                if (manager.isScaLar(typeContext.nonNullType().typeName().getText())) {
+                if (manager.isScalar(typeContext.nonNullType().typeName().getText())) {
                     nonNullType.setOfType(manager.getScaLar(typeContext.nonNullType().typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null));
                 } else if (manager.isObject(typeContext.nonNullType().typeName().getText())) {
                     nonNullType.setOfType(manager.getObject(typeContext.nonNullType().typeName().getText()).map(objectTypeDefinitionContext -> objectTypeDefinitionContextToType(objectTypeDefinitionContext, level)).orElse(null));

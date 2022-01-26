@@ -15,51 +15,41 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __Type implements Meta {
-  private Integer version;
-
-  private String description;
+  private Collection<__EnumValue> enumValues;
 
   private Collection<__Type> interfaces;
 
-  private Collection<__EnumValue> enumValues;
+  private __Type ofType;
 
   @Id
   @NonNull
   private String name;
 
-  private __Type ofType;
+  private Boolean isDeprecated;
 
   private Collection<__InputValue> inputFields;
+
+  private Collection<__Field> fields;
+
+  private Integer version;
 
   private Integer schemaId;
 
   @NonNull
   private __TypeKind kind;
 
+  private String description;
+
   private String ofTypeName;
-
-  private Boolean isDeprecated;
-
-  private Collection<__Field> fields;
 
   private Collection<__Type> possibleTypes;
 
-  @Override
-  public Integer getVersion() {
-    return this.version;
+  public Collection<__EnumValue> getEnumValues() {
+    return this.enumValues;
   }
 
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
+  public void setEnumValues(Collection<__EnumValue> enumValues) {
+    this.enumValues = enumValues;
   }
 
   public Collection<__Type> getInterfaces() {
@@ -70,12 +60,12 @@ public class __Type implements Meta {
     this.interfaces = interfaces;
   }
 
-  public Collection<__EnumValue> getEnumValues() {
-    return this.enumValues;
+  public __Type getOfType() {
+    return this.ofType;
   }
 
-  public void setEnumValues(Collection<__EnumValue> enumValues) {
-    this.enumValues = enumValues;
+  public void setOfType(__Type ofType) {
+    this.ofType = ofType;
   }
 
   public String getName() {
@@ -86,12 +76,14 @@ public class __Type implements Meta {
     this.name = name;
   }
 
-  public __Type getOfType() {
-    return this.ofType;
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
   }
 
-  public void setOfType(__Type ofType) {
-    this.ofType = ofType;
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 
   public Collection<__InputValue> getInputFields() {
@@ -100,6 +92,24 @@ public class __Type implements Meta {
 
   public void setInputFields(Collection<__InputValue> inputFields) {
     this.inputFields = inputFields;
+  }
+
+  public Collection<__Field> getFields() {
+    return this.fields;
+  }
+
+  public void setFields(Collection<__Field> fields) {
+    this.fields = fields;
+  }
+
+  @Override
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
   }
 
   public Integer getSchemaId() {
@@ -118,30 +128,20 @@ public class __Type implements Meta {
     this.kind = kind;
   }
 
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
   public String getOfTypeName() {
     return this.ofTypeName;
   }
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
-  }
-
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
-  public Collection<__Field> getFields() {
-    return this.fields;
-  }
-
-  public void setFields(Collection<__Field> fields) {
-    this.fields = fields;
   }
 
   public Collection<__Type> getPossibleTypes() {

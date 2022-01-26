@@ -10,36 +10,28 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserRoleExpression {
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private IntExpression version;
+  private Collection<UserRoleExpression> exs;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private Collection<UserRoleExpression> exs;
-
-  private IntExpression userId;
+  @DefaultValue("AND")
+  private Conditional cond;
 
   private IDExpression id;
 
+  private IntExpression version;
+
   private IntExpression roleId;
 
-  public Conditional getCond() {
-    return this.cond;
+  private IntExpression userId;
+
+  public Collection<UserRoleExpression> getExs() {
+    return this.exs;
   }
 
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setExs(Collection<UserRoleExpression> exs) {
+    this.exs = exs;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -50,20 +42,12 @@ public class UserRoleExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public Collection<UserRoleExpression> getExs() {
-    return this.exs;
+  public Conditional getCond() {
+    return this.cond;
   }
 
-  public void setExs(Collection<UserRoleExpression> exs) {
-    this.exs = exs;
-  }
-
-  public IntExpression getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(IntExpression userId) {
-    this.userId = userId;
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 
   public IDExpression getId() {
@@ -74,11 +58,27 @@ public class UserRoleExpression {
     this.id = id;
   }
 
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
   public IntExpression getRoleId() {
     return this.roleId;
   }
 
   public void setRoleId(IntExpression roleId) {
     this.roleId = roleId;
+  }
+
+  public IntExpression getUserId() {
+    return this.userId;
+  }
+
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
   }
 }

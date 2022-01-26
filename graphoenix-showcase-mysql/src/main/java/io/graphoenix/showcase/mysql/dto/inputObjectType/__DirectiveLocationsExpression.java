@@ -10,28 +10,28 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveLocationsExpression {
-  private IDExpression id;
+  @DefaultValue("AND")
+  private Conditional cond;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private StringExpression directiveName;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
   private Collection<__DirectiveLocationsExpression> exs;
+
+  private IDExpression id;
 
   private IntExpression version;
 
+  private StringExpression directiveName;
+
   private __DirectiveLocationExpression directiveLocation;
 
-  public IDExpression getId() {
-    return this.id;
+  public Conditional getCond() {
+    return this.cond;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -42,22 +42,6 @@ public class __DirectiveLocationsExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public StringExpression getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(StringExpression directiveName) {
-    this.directiveName = directiveName;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
   public Collection<__DirectiveLocationsExpression> getExs() {
     return this.exs;
   }
@@ -66,12 +50,28 @@ public class __DirectiveLocationsExpression {
     this.exs = exs;
   }
 
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
+
   public IntExpression getVersion() {
     return this.version;
   }
 
   public void setVersion(IntExpression version) {
     this.version = version;
+  }
+
+  public StringExpression getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(StringExpression directiveName) {
+    this.directiveName = directiveName;
   }
 
   public __DirectiveLocationExpression getDirectiveLocation() {

@@ -12,59 +12,27 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveInput {
-  private String description;
-
-  private String name;
-
-  private Boolean isDeprecated;
-
-  private Integer version;
-
   private Boolean onFragment;
-
-  private Integer schemaId;
-
-  @NonNull
-  private Collection<__DirectiveLocation> locations;
 
   private Boolean onOperation;
 
-  private Boolean onField;
+  private String name;
 
   @NonNull
   private Collection<__InputValueInput> args;
 
-  public String getDescription() {
-    return this.description;
-  }
+  private Boolean onField;
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
+  private Integer version;
 
-  public String getName() {
-    return this.name;
-  }
+  private Integer schemaId;
 
-  public void setName(String name) {
-    this.name = name;
-  }
+  private Boolean isDeprecated;
 
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
+  @NonNull
+  private Collection<__DirectiveLocation> locations;
 
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
+  private String description;
 
   public Boolean getOnFragment() {
     return this.onFragment;
@@ -72,22 +40,6 @@ public class __DirectiveInput {
 
   public void setOnFragment(Boolean onFragment) {
     this.onFragment = onFragment;
-  }
-
-  public Integer getSchemaId() {
-    return this.schemaId;
-  }
-
-  public void setSchemaId(Integer schemaId) {
-    this.schemaId = schemaId;
-  }
-
-  public Collection<__DirectiveLocation> getLocations() {
-    return this.locations;
-  }
-
-  public void setLocations(Collection<__DirectiveLocation> locations) {
-    this.locations = locations;
   }
 
   public Boolean getOnOperation() {
@@ -98,12 +50,12 @@ public class __DirectiveInput {
     this.onOperation = onOperation;
   }
 
-  public Boolean getOnField() {
-    return this.onField;
+  public String getName() {
+    return this.name;
   }
 
-  public void setOnField(Boolean onField) {
-    this.onField = onField;
+  public void setName(String name) {
+    this.name = name;
   }
 
   public Collection<__InputValueInput> getArgs() {
@@ -112,5 +64,53 @@ public class __DirectiveInput {
 
   public void setArgs(Collection<__InputValueInput> args) {
     this.args = args;
+  }
+
+  public Boolean getOnField() {
+    return this.onField;
+  }
+
+  public void setOnField(Boolean onField) {
+    this.onField = onField;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Integer getSchemaId() {
+    return this.schemaId;
+  }
+
+  public void setSchemaId(Integer schemaId) {
+    this.schemaId = schemaId;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
+  }
+
+  public Collection<__DirectiveLocation> getLocations() {
+    return this.locations;
+  }
+
+  public void setLocations(Collection<__DirectiveLocation> locations) {
+    this.locations = locations;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 }

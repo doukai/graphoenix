@@ -14,14 +14,4 @@ public @interface __SchemaExpressions {
   Conditional cond() default Conditional.AND;
 
   __SchemaExpression[] value() default {};
-
-  __TypeExpression[] types() default {};
-
-  __TypeExpression[] subscriptionType() default {};
-
-  __DirectiveExpression[] directives() default {};
-
-  __TypeExpression[] mutationType() default {};
-
-  __TypeExpression[] queryType() default {};
 }
