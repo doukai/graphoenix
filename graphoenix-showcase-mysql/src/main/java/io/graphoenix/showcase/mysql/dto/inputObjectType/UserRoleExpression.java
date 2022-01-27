@@ -10,44 +10,28 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserRoleExpression {
+  private IntExpression userId;
+
+  private IDExpression id;
+
   private Collection<UserRoleExpression> exs;
 
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
+  private IntExpression version;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  private IDExpression id;
-
-  private IntExpression version;
-
   private IntExpression roleId;
 
-  private IntExpression userId;
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
 
-  public Collection<UserRoleExpression> getExs() {
-    return this.exs;
+  public IntExpression getUserId() {
+    return this.userId;
   }
 
-  public void setExs(Collection<UserRoleExpression> exs) {
-    this.exs = exs;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
   }
 
   public IDExpression getId() {
@@ -58,12 +42,28 @@ public class UserRoleExpression {
     this.id = id;
   }
 
+  public Collection<UserRoleExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<UserRoleExpression> exs) {
+    this.exs = exs;
+  }
+
   public IntExpression getVersion() {
     return this.version;
   }
 
   public void setVersion(IntExpression version) {
     this.version = version;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 
   public IntExpression getRoleId() {
@@ -74,11 +74,11 @@ public class UserRoleExpression {
     this.roleId = roleId;
   }
 
-  public IntExpression getUserId() {
-    return this.userId;
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
   }
 
-  public void setUserId(IntExpression userId) {
-    this.userId = userId;
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
   }
 }

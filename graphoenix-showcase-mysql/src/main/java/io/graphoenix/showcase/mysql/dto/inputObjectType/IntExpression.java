@@ -13,9 +13,9 @@ public class IntExpression {
   @DefaultValue("EQ")
   private Operator opr;
 
-  private Collection<Integer> in;
-
   private Integer val;
+
+  private Collection<Integer> in;
 
   public Operator getOpr() {
     return this.opr;
@@ -25,19 +25,19 @@ public class IntExpression {
     this.opr = opr;
   }
 
-  public Collection<Integer> getIn() {
-    return this.in;
-  }
-
-  public void setIn(Collection<Integer> in) {
-    this.in = in;
-  }
-
   public Integer getVal() {
     return this.val;
   }
 
   public void setVal(Integer val) {
     this.val = val;
+  }
+
+  public Collection<Integer> getIn() {
+    return this.in;
+  }
+
+  public void setIn(Collection<Integer> in) {
+    this.in = in;
   }
 }

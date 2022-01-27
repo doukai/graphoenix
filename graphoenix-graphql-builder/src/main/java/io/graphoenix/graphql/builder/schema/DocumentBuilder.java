@@ -58,9 +58,19 @@ public class DocumentBuilder {
         mapper.registerFieldMaps();
     }
 
-    public Document buildDocument() throws IOException {
+    public void buildManager() throws IOException, URISyntaxException {
+        graphQLConfigRegister.registerPreset();
+        graphQLConfigRegister.registerConfig();
+        if (graphQLConfig.getBuild()) {
+            manager.registerGraphQL(buildDocument().toString());
+        }
+        mapper.registerFieldMaps();
+    }
 
-        manager.getObjects().map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true)).forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+    public Document buildDocument() throws IOException {
+        manager.getObjects()
+                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true))
+                .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
         buildObjectExpressions().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
 
         ObjectType queryType = new ObjectType().setName("QueryType").addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
@@ -91,20 +101,17 @@ public class DocumentBuilder {
     }
 
     public ScalarType buildScalarType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
-
         return new ScalarType()
                 .setName(scalarTypeDefinitionContext.name().getText())
                 .setDescription(scalarTypeDefinitionContext.description() == null ? null : scalarTypeDefinitionContext.description().getText())
                 .setDirectives(scalarTypeDefinitionContext.directives() == null ? null : scalarTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toSet()));
     }
 
-
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return buildObject(objectTypeDefinitionContext, false);
     }
 
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface) {
-
         ObjectType objectType = new ObjectType()
                 .setName(objectTypeDefinitionContext.name().getText())
                 .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
@@ -119,7 +126,6 @@ public class DocumentBuilder {
     }
 
     public InputObjectType buildInputObjectType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-
         return new InputObjectType()
                 .setName(inputObjectTypeDefinitionContext.name().getText())
                 .setDescription(inputObjectTypeDefinitionContext.description() == null ? null : inputObjectTypeDefinitionContext.description().getText())
@@ -128,7 +134,6 @@ public class DocumentBuilder {
     }
 
     public InterfaceType buildInterface(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-
         return new InterfaceType()
                 .setName(interfaceTypeDefinitionContext.name().getText())
                 .setDescription(interfaceTypeDefinitionContext.description() == null ? null : interfaceTypeDefinitionContext.description().getText())
@@ -166,7 +171,9 @@ public class DocumentBuilder {
                 field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.EXPRESSION));
             }
         } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-            field.addArgument(filedToArgument(fieldDefinitionContext, InputType.EXPRESSION));
+            field.addArgument(new InputValue().setName("opr").setTypeName("Operator").setDefaultValue("EQ"))
+                    .addArgument(new InputValue().setName("val").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                    .addArgument(new InputValue().setName("in").setTypeName("[".concat(manager.getFieldTypeName(fieldDefinitionContext.type())).concat("]")));
         }
         return field;
     }
@@ -253,9 +260,7 @@ public class DocumentBuilder {
                             .replace(fieldTypeName, fieldTypeName.concat(manager.isObject(fieldTypeName) ? InputType.INPUT.toString() : "")));
         } else {
             if (fieldDefinitionContext.name().getText().equals("isDeprecated")) {
-                return new InputValue().setName("includeDeprecated")
-                        .setTypeName("Boolean")
-                        .setDefaultValue("false");
+                return new InputValue().setName("includeDeprecated").setTypeName("Boolean").setDefaultValue("false");
             }
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldTypeName.concat(fieldTypeName.equals("Boolean") ? "" : InputType.EXPRESSION.toString()));
@@ -265,8 +270,20 @@ public class DocumentBuilder {
     public List<InputObjectType> buildObjectExpressions() {
         return Stream.concat(
                 Stream.concat(
-                        manager.getObjects().map(this::objectToInput),
-                        manager.getObjects().map(this::objectToExpression)
+                        manager.getObjects()
+                                .filter(objectTypeDefinitionContext ->
+                                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                                )
+                                .map(this::objectToInput),
+                        manager.getObjects()
+                                .filter(objectTypeDefinitionContext ->
+                                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                                )
+                                .map(this::objectToExpression)
                 ),
                 manager.getEnums().map(this::enumToExpression)
         ).collect(Collectors.toList());

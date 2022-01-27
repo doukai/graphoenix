@@ -12,10 +12,10 @@ import org.eclipse.microprofile.graphql.Input;
 public class IDExpression {
   private String val;
 
+  private Collection<String> in;
+
   @DefaultValue("EQ")
   private Operator opr;
-
-  private Collection<String> in;
 
   public String getVal() {
     return this.val;
@@ -25,19 +25,19 @@ public class IDExpression {
     this.val = val;
   }
 
-  public Operator getOpr() {
-    return this.opr;
-  }
-
-  public void setOpr(Operator opr) {
-    this.opr = opr;
-  }
-
   public Collection<String> getIn() {
     return this.in;
   }
 
   public void setIn(Collection<String> in) {
     this.in = in;
+  }
+
+  public Operator getOpr() {
+    return this.opr;
+  }
+
+  public void setOpr(Operator opr) {
+    this.opr = opr;
   }
 }

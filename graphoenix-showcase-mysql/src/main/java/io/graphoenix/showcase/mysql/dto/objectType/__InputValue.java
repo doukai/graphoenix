@@ -13,36 +13,60 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __InputValue implements Meta {
-  private String defaultValue;
-
-  private String ofTypeName;
-
   @NonNull
   private __Type type;
 
-  private Integer fieldId;
-
-  private String name;
-
-  private String description;
-
   private String directiveName;
-
-  private Boolean isDeprecated;
-
-  private String typeName;
 
   @Id
   private String id;
 
+  private String typeName;
+
+  private String ofTypeName;
+
+  private String defaultValue;
+
+  private Boolean isDeprecated;
+
+  private String description;
+
+  private Integer fieldId;
+
   private Integer version;
 
-  public String getDefaultValue() {
-    return this.defaultValue;
+  private String name;
+
+  public __Type getType() {
+    return this.type;
   }
 
-  public void setDefaultValue(String defaultValue) {
-    this.defaultValue = defaultValue;
+  public void setType(__Type type) {
+    this.type = type;
+  }
+
+  public String getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 
   public String getOfTypeName() {
@@ -53,44 +77,12 @@ public class __InputValue implements Meta {
     this.ofTypeName = ofTypeName;
   }
 
-  public __Type getType() {
-    return this.type;
+  public String getDefaultValue() {
+    return this.defaultValue;
   }
 
-  public void setType(__Type type) {
-    this.type = type;
-  }
-
-  public Integer getFieldId() {
-    return this.fieldId;
-  }
-
-  public void setFieldId(Integer fieldId) {
-    this.fieldId = fieldId;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public String getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
   }
 
   @Override
@@ -103,20 +95,20 @@ public class __InputValue implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
-  public String getTypeName() {
-    return this.typeName;
+  public String getDescription() {
+    return this.description;
   }
 
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
-  public String getId() {
-    return this.id;
+  public Integer getFieldId() {
+    return this.fieldId;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setFieldId(Integer fieldId) {
+    this.fieldId = fieldId;
   }
 
   @Override
@@ -127,5 +119,13 @@ public class __InputValue implements Meta {
   @Override
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 }

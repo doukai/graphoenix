@@ -13,9 +13,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.FIELD})
 public @interface map {
-  String from();
-
   MapWith with();
 
   String to();
+
+  String from();
 }

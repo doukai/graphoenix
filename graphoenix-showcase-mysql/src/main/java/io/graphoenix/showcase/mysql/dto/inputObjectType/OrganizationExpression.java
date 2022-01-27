@@ -12,23 +12,23 @@ import org.eclipse.microprofile.graphql.Input;
 public class OrganizationExpression {
   private Collection<OrganizationExpression> exs;
 
-  private IntExpression aboveId;
-
   @DefaultValue("AND")
   private Conditional cond;
-
-  private IntExpression version;
-
-  private OrganizationExpression above;
-
-  private UserExpression users;
-
-  private IDExpression id;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
+  private OrganizationExpression above;
+
+  private IDExpression id;
+
+  private IntExpression version;
+
+  private UserExpression users;
+
   private StringExpression name;
+
+  private IntExpression aboveId;
 
   public Collection<OrganizationExpression> getExs() {
     return this.exs;
@@ -36,14 +36,6 @@ public class OrganizationExpression {
 
   public void setExs(Collection<OrganizationExpression> exs) {
     this.exs = exs;
-  }
-
-  public IntExpression getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(IntExpression aboveId) {
-    this.aboveId = aboveId;
   }
 
   public Conditional getCond() {
@@ -54,12 +46,12 @@ public class OrganizationExpression {
     this.cond = cond;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
   }
 
   public OrganizationExpression getAbove() {
@@ -70,14 +62,6 @@ public class OrganizationExpression {
     this.above = above;
   }
 
-  public UserExpression getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(UserExpression users) {
-    this.users = users;
-  }
-
   public IDExpression getId() {
     return this.id;
   }
@@ -86,12 +70,20 @@ public class OrganizationExpression {
     this.id = id;
   }
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
+  public IntExpression getVersion() {
+    return this.version;
   }
 
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public UserExpression getUsers() {
+    return this.users;
+  }
+
+  public void setUsers(UserExpression users) {
+    this.users = users;
   }
 
   public StringExpression getName() {
@@ -100,5 +92,13 @@ public class OrganizationExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
+  }
+
+  public IntExpression getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(IntExpression aboveId) {
+    this.aboveId = aboveId;
   }
 }

@@ -166,9 +166,9 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
                 for (File file : sourceSet.getCompileClasspath()) {
                     urls.add(file.toURI().toURL());
                 }
-//                for (File classesDir : sourceSet.getOutput().getClassesDirs()) {
-//                    urls.add(classesDir.toURI().toURL());
-//                }
+                for (File classesDir : sourceSet.getOutput().getClassesDirs()) {
+                    urls.add(classesDir.toURI().toURL());
+                }
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();

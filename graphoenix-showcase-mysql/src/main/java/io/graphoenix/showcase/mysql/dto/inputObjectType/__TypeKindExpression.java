@@ -10,20 +10,12 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeKindExpression {
-  private __TypeKind val;
-
   private Collection<__TypeKind> in;
 
   @DefaultValue("EQ")
   private Operator opr;
 
-  public __TypeKind getVal() {
-    return this.val;
-  }
-
-  public void setVal(__TypeKind val) {
-    this.val = val;
-  }
+  private __TypeKind val;
 
   public Collection<__TypeKind> getIn() {
     return this.in;
@@ -39,5 +31,13 @@ public class __TypeKindExpression {
 
   public void setOpr(Operator opr) {
     this.opr = opr;
+  }
+
+  public __TypeKind getVal() {
+    return this.val;
+  }
+
+  public void setVal(__TypeKind val) {
+    this.val = val;
   }
 }

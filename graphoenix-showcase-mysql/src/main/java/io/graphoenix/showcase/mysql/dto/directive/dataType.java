@@ -13,9 +13,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.FIELD})
 public @interface dataType {
-  int length();
+  int decimals();
 
   String type();
 
-  int decimals();
+  int length();
 }

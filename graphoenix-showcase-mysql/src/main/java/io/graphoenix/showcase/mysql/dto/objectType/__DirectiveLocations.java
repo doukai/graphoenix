@@ -14,26 +14,18 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveLocations implements Meta {
-  @NonNull
-  private String directiveName;
-
   private Boolean isDeprecated;
-
-  private Integer version;
 
   @Id
   private String id;
 
   @NonNull
+  private String directiveName;
+
+  private Integer version;
+
+  @NonNull
   private __DirectiveLocation directiveLocation;
-
-  public String getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
-  }
 
   @Override
   public Boolean getIsDeprecated() {
@@ -45,6 +37,22 @@ public class __DirectiveLocations implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
+  }
+
   @Override
   public Integer getVersion() {
     return this.version;
@@ -53,14 +61,6 @@ public class __DirectiveLocations implements Meta {
   @Override
   public void setVersion(Integer version) {
     this.version = version;
-  }
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
   }
 
   public __DirectiveLocation getDirectiveLocation() {

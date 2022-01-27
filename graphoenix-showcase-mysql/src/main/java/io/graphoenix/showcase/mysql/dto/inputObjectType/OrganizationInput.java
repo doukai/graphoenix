@@ -11,36 +11,20 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class OrganizationInput {
-  private String id;
-
-  private Integer version;
-
   private OrganizationInput above;
-
-  private Integer aboveId;
-
-  private Collection<UserInput> users;
 
   @NonNull
   private String name;
 
   private Boolean isDeprecated;
 
-  public String getId() {
-    return this.id;
-  }
+  private Integer aboveId;
 
-  public void setId(String id) {
-    this.id = id;
-  }
+  private Integer version;
 
-  public Integer getVersion() {
-    return this.version;
-  }
+  private String id;
 
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
+  private Collection<UserInput> users;
 
   public OrganizationInput getAbove() {
     return this.above;
@@ -48,22 +32,6 @@ public class OrganizationInput {
 
   public void setAbove(OrganizationInput above) {
     this.above = above;
-  }
-
-  public Integer getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(Integer aboveId) {
-    this.aboveId = aboveId;
-  }
-
-  public Collection<UserInput> getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(Collection<UserInput> users) {
-    this.users = users;
   }
 
   public String getName() {
@@ -80,5 +48,37 @@ public class OrganizationInput {
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public Integer getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(Integer aboveId) {
+    this.aboveId = aboveId;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public Collection<UserInput> getUsers() {
+    return this.users;
+  }
+
+  public void setUsers(Collection<UserInput> users) {
+    this.users = users;
   }
 }

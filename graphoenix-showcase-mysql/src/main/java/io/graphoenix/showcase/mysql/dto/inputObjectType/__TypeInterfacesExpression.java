@@ -12,19 +12,19 @@ import org.eclipse.microprofile.graphql.Input;
 public class __TypeInterfacesExpression {
   private StringExpression typeName;
 
-  private IDExpression id;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private IntExpression version;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
   private StringExpression interfaceName;
 
+  @DefaultValue("AND")
+  private Conditional cond;
+
   private Collection<__TypeInterfacesExpression> exs;
+
+  private IntExpression version;
+
+  private IDExpression id;
 
   public StringExpression getTypeName() {
     return this.typeName;
@@ -32,30 +32,6 @@ public class __TypeInterfacesExpression {
 
   public void setTypeName(StringExpression typeName) {
     this.typeName = typeName;
-  }
-
-  public IDExpression getId() {
-    return this.id;
-  }
-
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -74,11 +50,35 @@ public class __TypeInterfacesExpression {
     this.interfaceName = interfaceName;
   }
 
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
   public Collection<__TypeInterfacesExpression> getExs() {
     return this.exs;
   }
 
   public void setExs(Collection<__TypeInterfacesExpression> exs) {
     this.exs = exs;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
   }
 }

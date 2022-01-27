@@ -10,40 +10,40 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __InputValueExpression {
-  private Collection<__InputValueExpression> exs;
+  private StringExpression description;
 
   private StringExpression directiveName;
+
+  private IntExpression fieldId;
+
+  private Collection<__InputValueExpression> exs;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  private IntExpression fieldId;
+  private StringExpression name;
 
   private StringExpression defaultValue;
 
-  private IntExpression version;
+  private __TypeExpression type;
 
-  private StringExpression typeName;
+  private IDExpression id;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private StringExpression description;
+  private StringExpression typeName;
 
-  private IDExpression id;
+  private IntExpression version;
 
   private StringExpression ofTypeName;
 
-  private __TypeExpression type;
-
-  private StringExpression name;
-
-  public Collection<__InputValueExpression> getExs() {
-    return this.exs;
+  public StringExpression getDescription() {
+    return this.description;
   }
 
-  public void setExs(Collection<__InputValueExpression> exs) {
-    this.exs = exs;
+  public void setDescription(StringExpression description) {
+    this.description = description;
   }
 
   public StringExpression getDirectiveName() {
@@ -54,6 +54,22 @@ public class __InputValueExpression {
     this.directiveName = directiveName;
   }
 
+  public IntExpression getFieldId() {
+    return this.fieldId;
+  }
+
+  public void setFieldId(IntExpression fieldId) {
+    this.fieldId = fieldId;
+  }
+
+  public Collection<__InputValueExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__InputValueExpression> exs) {
+    this.exs = exs;
+  }
+
   public Conditional getCond() {
     return this.cond;
   }
@@ -62,12 +78,12 @@ public class __InputValueExpression {
     this.cond = cond;
   }
 
-  public IntExpression getFieldId() {
-    return this.fieldId;
+  public StringExpression getName() {
+    return this.name;
   }
 
-  public void setFieldId(IntExpression fieldId) {
-    this.fieldId = fieldId;
+  public void setName(StringExpression name) {
+    this.name = name;
   }
 
   public StringExpression getDefaultValue() {
@@ -78,36 +94,12 @@ public class __InputValueExpression {
     this.defaultValue = defaultValue;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public __TypeExpression getType() {
+    return this.type;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
-  public StringExpression getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(StringExpression description) {
-    this.description = description;
+  public void setType(__TypeExpression type) {
+    this.type = type;
   }
 
   public IDExpression getId() {
@@ -118,27 +110,35 @@ public class __InputValueExpression {
     this.id = id;
   }
 
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public StringExpression getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
   public StringExpression getOfTypeName() {
     return this.ofTypeName;
   }
 
   public void setOfTypeName(StringExpression ofTypeName) {
     this.ofTypeName = ofTypeName;
-  }
-
-  public __TypeExpression getType() {
-    return this.type;
-  }
-
-  public void setType(__TypeExpression type) {
-    this.type = type;
-  }
-
-  public StringExpression getName() {
-    return this.name;
-  }
-
-  public void setName(StringExpression name) {
-    this.name = name;
   }
 }

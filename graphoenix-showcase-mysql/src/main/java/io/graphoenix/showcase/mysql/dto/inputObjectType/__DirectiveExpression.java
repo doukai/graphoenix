@@ -10,87 +10,31 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveExpression {
-  private Boolean onFragment;
-
-  private StringExpression description;
-
-  private Boolean onOperation;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private __DirectiveLocationExpression locations;
-
-  private IntExpression version;
-
-  private Collection<__DirectiveExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
   private __InputValueExpression args;
 
-  private IDExpression name;
+  private Collection<__DirectiveExpression> exs;
+
+  private IntExpression version;
+
+  private StringExpression description;
 
   private Boolean onField;
 
   private IntExpression schemaId;
 
-  public Boolean getOnFragment() {
-    return this.onFragment;
-  }
+  private IDExpression name;
 
-  public void setOnFragment(Boolean onFragment) {
-    this.onFragment = onFragment;
-  }
+  private __DirectiveLocationExpression locations;
 
-  public StringExpression getDescription() {
-    return this.description;
-  }
+  private Boolean onFragment;
 
-  public void setDescription(StringExpression description) {
-    this.description = description;
-  }
+  private Boolean onOperation;
 
-  public Boolean getOnOperation() {
-    return this.onOperation;
-  }
-
-  public void setOnOperation(Boolean onOperation) {
-    this.onOperation = onOperation;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public __DirectiveLocationExpression getLocations() {
-    return this.locations;
-  }
-
-  public void setLocations(__DirectiveLocationExpression locations) {
-    this.locations = locations;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public Collection<__DirectiveExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__DirectiveExpression> exs) {
-    this.exs = exs;
-  }
+  @DefaultValue("AND")
+  private Conditional cond;
 
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
@@ -108,12 +52,28 @@ public class __DirectiveExpression {
     this.args = args;
   }
 
-  public IDExpression getName() {
-    return this.name;
+  public Collection<__DirectiveExpression> getExs() {
+    return this.exs;
   }
 
-  public void setName(IDExpression name) {
-    this.name = name;
+  public void setExs(Collection<__DirectiveExpression> exs) {
+    this.exs = exs;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public StringExpression getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(StringExpression description) {
+    this.description = description;
   }
 
   public Boolean getOnField() {
@@ -130,5 +90,45 @@ public class __DirectiveExpression {
 
   public void setSchemaId(IntExpression schemaId) {
     this.schemaId = schemaId;
+  }
+
+  public IDExpression getName() {
+    return this.name;
+  }
+
+  public void setName(IDExpression name) {
+    this.name = name;
+  }
+
+  public __DirectiveLocationExpression getLocations() {
+    return this.locations;
+  }
+
+  public void setLocations(__DirectiveLocationExpression locations) {
+    this.locations = locations;
+  }
+
+  public Boolean getOnFragment() {
+    return this.onFragment;
+  }
+
+  public void setOnFragment(Boolean onFragment) {
+    this.onFragment = onFragment;
+  }
+
+  public Boolean getOnOperation() {
+    return this.onOperation;
+  }
+
+  public void setOnOperation(Boolean onOperation) {
+    this.onOperation = onOperation;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 }

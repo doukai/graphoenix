@@ -11,32 +11,16 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class RoleInput {
+  private String id;
+
+  private Integer version;
+
   @NonNull
   private String name;
 
   private Collection<UserInput> users;
 
-  private String id;
-
-  private Integer version;
-
   private Boolean isDeprecated;
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public Collection<UserInput> getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(Collection<UserInput> users) {
-    this.users = users;
-  }
 
   public String getId() {
     return this.id;
@@ -52,6 +36,22 @@ public class RoleInput {
 
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Collection<UserInput> getUsers() {
+    return this.users;
+  }
+
+  public void setUsers(Collection<UserInput> users) {
+    this.users = users;
   }
 
   public Boolean getIsDeprecated() {

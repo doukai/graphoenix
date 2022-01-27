@@ -11,15 +11,15 @@ import org.eclipse.microprofile.graphql.Input;
 public class __EnumValueInput {
   private String description;
 
-  private String id;
-
   private String ofTypeName;
+
+  private Boolean isDeprecated;
 
   private Integer version;
 
   private String deprecationReason;
 
-  private Boolean isDeprecated;
+  private String id;
 
   private String name;
 
@@ -31,20 +31,20 @@ public class __EnumValueInput {
     this.description = description;
   }
 
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
   public String getOfTypeName() {
     return this.ofTypeName;
   }
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 
   public Integer getVersion() {
@@ -63,12 +63,12 @@ public class __EnumValueInput {
     this.deprecationReason = deprecationReason;
   }
 
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public String getId() {
+    return this.id;
   }
 
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getName() {

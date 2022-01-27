@@ -10,44 +10,36 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserPhonesExpression {
-  private Collection<UserPhonesExpression> exs;
+  private StringExpression phone;
 
-  private IDExpression id;
-
-  private IntExpression userId;
+  private IntExpression version;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  private StringExpression phone;
+  private IDExpression id;
+
+  private Collection<UserPhonesExpression> exs;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private IntExpression version;
+  private IntExpression userId;
 
-  public Collection<UserPhonesExpression> getExs() {
-    return this.exs;
+  public StringExpression getPhone() {
+    return this.phone;
   }
 
-  public void setExs(Collection<UserPhonesExpression> exs) {
-    this.exs = exs;
+  public void setPhone(StringExpression phone) {
+    this.phone = phone;
   }
 
-  public IDExpression getId() {
-    return this.id;
+  public IntExpression getVersion() {
+    return this.version;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
-
-  public IntExpression getUserId() {
-    return this.userId;
-  }
-
-  public void setUserId(IntExpression userId) {
-    this.userId = userId;
+  public void setVersion(IntExpression version) {
+    this.version = version;
   }
 
   public Conditional getCond() {
@@ -58,12 +50,20 @@ public class UserPhonesExpression {
     this.cond = cond;
   }
 
-  public StringExpression getPhone() {
-    return this.phone;
+  public IDExpression getId() {
+    return this.id;
   }
 
-  public void setPhone(StringExpression phone) {
-    this.phone = phone;
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
+
+  public Collection<UserPhonesExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<UserPhonesExpression> exs) {
+    this.exs = exs;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -74,11 +74,11 @@ public class UserPhonesExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public IntExpression getUserId() {
+    return this.userId;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
   }
 }

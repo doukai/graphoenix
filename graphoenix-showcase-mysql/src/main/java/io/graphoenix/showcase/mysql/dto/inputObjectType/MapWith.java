@@ -9,9 +9,9 @@ import org.eclipse.microprofile.graphql.Input;
 public class MapWith {
   private String from;
 
-  private String type;
-
   private String to;
+
+  private String type;
 
   public String getFrom() {
     return this.from;
@@ -21,19 +21,19 @@ public class MapWith {
     this.from = from;
   }
 
-  public String getType() {
-    return this.type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
   public String getTo() {
     return this.to;
   }
 
   public void setTo(String to) {
     this.to = to;
+  }
+
+  public String getType() {
+    return this.type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 }

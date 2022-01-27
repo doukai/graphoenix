@@ -10,11 +10,15 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypePossibleTypesExpression {
-  private IDExpression id;
+  private StringExpression typeName;
 
   private StringExpression possibleTypeName;
 
   private IntExpression version;
+
+  private IDExpression id;
+
+  private Collection<__TypePossibleTypesExpression> exs;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -22,16 +26,12 @@ public class __TypePossibleTypesExpression {
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private StringExpression typeName;
-
-  private Collection<__TypePossibleTypesExpression> exs;
-
-  public IDExpression getId() {
-    return this.id;
+  public StringExpression getTypeName() {
+    return this.typeName;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
   }
 
   public StringExpression getPossibleTypeName() {
@@ -50,6 +50,22 @@ public class __TypePossibleTypesExpression {
     this.version = version;
   }
 
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
+
+  public Collection<__TypePossibleTypesExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
+    this.exs = exs;
+  }
+
   public Conditional getCond() {
     return this.cond;
   }
@@ -64,21 +80,5 @@ public class __TypePossibleTypesExpression {
 
   public void setIncludeDeprecated(Boolean includeDeprecated) {
     this.includeDeprecated = includeDeprecated;
-  }
-
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
-  }
-
-  public Collection<__TypePossibleTypesExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
-    this.exs = exs;
   }
 }

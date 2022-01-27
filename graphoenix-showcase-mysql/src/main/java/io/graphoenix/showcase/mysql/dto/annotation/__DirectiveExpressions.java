@@ -14,4 +14,6 @@ public @interface __DirectiveExpressions {
   Conditional cond() default Conditional.AND;
 
   __DirectiveExpression[] value() default {};
+
+  __InputValueExpression[] args() default {};
 }

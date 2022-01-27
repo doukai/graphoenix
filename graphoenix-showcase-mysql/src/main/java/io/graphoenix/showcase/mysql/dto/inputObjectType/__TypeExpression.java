@@ -10,30 +10,28 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeExpression {
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private __TypeKindExpression kind;
-
-  private StringExpression description;
-
-  private Collection<__TypeExpression> exs;
+  private __TypeExpression possibleTypes;
 
   private __TypeExpression ofType;
 
-  private IntExpression version;
+  private __TypeExpression interfaces;
 
-  private StringExpression ofTypeName;
+  private __FieldExpression fields;
+
+  private Collection<__TypeExpression> exs;
+
+  @DefaultValue("AND")
+  private Conditional cond;
 
   private __EnumValueExpression enumValues;
 
-  private __TypeExpression possibleTypes;
+  private StringExpression description;
 
-  private __TypeExpression interfaces;
+  private __TypeKindExpression kind;
 
   private __InputValueExpression inputFields;
 
-  private __FieldExpression fields;
+  private StringExpression ofTypeName;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -42,36 +40,14 @@ public class __TypeExpression {
 
   private IntExpression schemaId;
 
-  public Conditional getCond() {
-    return this.cond;
+  private IntExpression version;
+
+  public __TypeExpression getPossibleTypes() {
+    return this.possibleTypes;
   }
 
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public __TypeKindExpression getKind() {
-    return this.kind;
-  }
-
-  public void setKind(__TypeKindExpression kind) {
-    this.kind = kind;
-  }
-
-  public StringExpression getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(StringExpression description) {
-    this.description = description;
-  }
-
-  public Collection<__TypeExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__TypeExpression> exs) {
-    this.exs = exs;
+  public void setPossibleTypes(__TypeExpression possibleTypes) {
+    this.possibleTypes = possibleTypes;
   }
 
   public __TypeExpression getOfType() {
@@ -82,20 +58,36 @@ public class __TypeExpression {
     this.ofType = ofType;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public __TypeExpression getInterfaces() {
+    return this.interfaces;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setInterfaces(__TypeExpression interfaces) {
+    this.interfaces = interfaces;
   }
 
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
+  public __FieldExpression getFields() {
+    return this.fields;
   }
 
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
+  public void setFields(__FieldExpression fields) {
+    this.fields = fields;
+  }
+
+  public Collection<__TypeExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__TypeExpression> exs) {
+    this.exs = exs;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 
   public __EnumValueExpression getEnumValues() {
@@ -106,20 +98,20 @@ public class __TypeExpression {
     this.enumValues = enumValues;
   }
 
-  public __TypeExpression getPossibleTypes() {
-    return this.possibleTypes;
+  public StringExpression getDescription() {
+    return this.description;
   }
 
-  public void setPossibleTypes(__TypeExpression possibleTypes) {
-    this.possibleTypes = possibleTypes;
+  public void setDescription(StringExpression description) {
+    this.description = description;
   }
 
-  public __TypeExpression getInterfaces() {
-    return this.interfaces;
+  public __TypeKindExpression getKind() {
+    return this.kind;
   }
 
-  public void setInterfaces(__TypeExpression interfaces) {
-    this.interfaces = interfaces;
+  public void setKind(__TypeKindExpression kind) {
+    this.kind = kind;
   }
 
   public __InputValueExpression getInputFields() {
@@ -130,12 +122,12 @@ public class __TypeExpression {
     this.inputFields = inputFields;
   }
 
-  public __FieldExpression getFields() {
-    return this.fields;
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
   }
 
-  public void setFields(__FieldExpression fields) {
-    this.fields = fields;
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -160,5 +152,13 @@ public class __TypeExpression {
 
   public void setSchemaId(IntExpression schemaId) {
     this.schemaId = schemaId;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
   }
 }

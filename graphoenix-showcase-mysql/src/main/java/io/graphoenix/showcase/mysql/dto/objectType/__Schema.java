@@ -14,40 +14,46 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __Schema implements Meta {
-  private Integer version;
-
-  private Boolean isDeprecated;
-
-  private __Type subscriptionType;
+  private __Type mutationType;
 
   @Id
   private String id;
 
-  private __Type mutationType;
+  private Boolean isDeprecated;
+
+  @NonNull
+  private Collection<__Directive> directives;
 
   private String subscriptionTypeName;
 
-  @NonNull
-  private Collection<__Type> types;
+  private String queryTypeName;
 
   private String mutationTypeName;
 
   @NonNull
   private __Type queryType;
 
-  private String queryTypeName;
-
   @NonNull
-  private Collection<__Directive> directives;
+  private Collection<__Type> types;
 
-  @Override
-  public Integer getVersion() {
-    return this.version;
+  private Integer version;
+
+  private __Type subscriptionType;
+
+  public __Type getMutationType() {
+    return this.mutationType;
   }
 
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
+  public void setMutationType(__Type mutationType) {
+    this.mutationType = mutationType;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   @Override
@@ -60,28 +66,12 @@ public class __Schema implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
-  public __Type getSubscriptionType() {
-    return this.subscriptionType;
+  public Collection<__Directive> getDirectives() {
+    return this.directives;
   }
 
-  public void setSubscriptionType(__Type subscriptionType) {
-    this.subscriptionType = subscriptionType;
-  }
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public __Type getMutationType() {
-    return this.mutationType;
-  }
-
-  public void setMutationType(__Type mutationType) {
-    this.mutationType = mutationType;
+  public void setDirectives(Collection<__Directive> directives) {
+    this.directives = directives;
   }
 
   public String getSubscriptionTypeName() {
@@ -92,12 +82,12 @@ public class __Schema implements Meta {
     this.subscriptionTypeName = subscriptionTypeName;
   }
 
-  public Collection<__Type> getTypes() {
-    return this.types;
+  public String getQueryTypeName() {
+    return this.queryTypeName;
   }
 
-  public void setTypes(Collection<__Type> types) {
-    this.types = types;
+  public void setQueryTypeName(String queryTypeName) {
+    this.queryTypeName = queryTypeName;
   }
 
   public String getMutationTypeName() {
@@ -116,19 +106,29 @@ public class __Schema implements Meta {
     this.queryType = queryType;
   }
 
-  public String getQueryTypeName() {
-    return this.queryTypeName;
+  public Collection<__Type> getTypes() {
+    return this.types;
   }
 
-  public void setQueryTypeName(String queryTypeName) {
-    this.queryTypeName = queryTypeName;
+  public void setTypes(Collection<__Type> types) {
+    this.types = types;
   }
 
-  public Collection<__Directive> getDirectives() {
-    return this.directives;
+  @Override
+  public Integer getVersion() {
+    return this.version;
   }
 
-  public void setDirectives(Collection<__Directive> directives) {
-    this.directives = directives;
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public __Type getSubscriptionType() {
+    return this.subscriptionType;
+  }
+
+  public void setSubscriptionType(__Type subscriptionType) {
+    this.subscriptionType = subscriptionType;
   }
 }

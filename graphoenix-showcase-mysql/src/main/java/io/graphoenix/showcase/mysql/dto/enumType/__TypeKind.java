@@ -6,19 +6,19 @@ import org.eclipse.microprofile.graphql.Enum;
 @Enum
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public enum __TypeKind {
-  UNION,
-
-  SCALAR,
-
-  INPUT_OBJECT,
+  INTERFACE,
 
   LIST,
-
-  INTERFACE,
 
   ENUM,
 
   NON_NULL,
+
+  SCALAR,
+
+  UNION,
+
+  INPUT_OBJECT,
 
   OBJECT
 }

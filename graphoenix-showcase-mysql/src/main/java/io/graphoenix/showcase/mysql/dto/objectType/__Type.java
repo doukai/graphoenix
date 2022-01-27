@@ -15,50 +15,34 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __Type implements Meta {
-  private Collection<__EnumValue> enumValues;
-
-  private Collection<__Type> interfaces;
-
   private __Type ofType;
 
-  @Id
-  @NonNull
-  private String name;
+  private Integer version;
 
   private Boolean isDeprecated;
 
+  private Collection<__Type> interfaces;
+
+  private String description;
+
+  private Collection<__Type> possibleTypes;
+
   private Collection<__InputValue> inputFields;
 
-  private Collection<__Field> fields;
+  private String ofTypeName;
 
-  private Integer version;
+  private Collection<__EnumValue> enumValues;
+
+  private Collection<__Field> fields;
 
   private Integer schemaId;
 
   @NonNull
   private __TypeKind kind;
 
-  private String description;
-
-  private String ofTypeName;
-
-  private Collection<__Type> possibleTypes;
-
-  public Collection<__EnumValue> getEnumValues() {
-    return this.enumValues;
-  }
-
-  public void setEnumValues(Collection<__EnumValue> enumValues) {
-    this.enumValues = enumValues;
-  }
-
-  public Collection<__Type> getInterfaces() {
-    return this.interfaces;
-  }
-
-  public void setInterfaces(Collection<__Type> interfaces) {
-    this.interfaces = interfaces;
-  }
+  @Id
+  @NonNull
+  private String name;
 
   public __Type getOfType() {
     return this.ofType;
@@ -68,12 +52,14 @@ public class __Type implements Meta {
     this.ofType = ofType;
   }
 
-  public String getName() {
-    return this.name;
+  @Override
+  public Integer getVersion() {
+    return this.version;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
   }
 
   @Override
@@ -86,6 +72,30 @@ public class __Type implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
+  public Collection<__Type> getInterfaces() {
+    return this.interfaces;
+  }
+
+  public void setInterfaces(Collection<__Type> interfaces) {
+    this.interfaces = interfaces;
+  }
+
+  public String getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public Collection<__Type> getPossibleTypes() {
+    return this.possibleTypes;
+  }
+
+  public void setPossibleTypes(Collection<__Type> possibleTypes) {
+    this.possibleTypes = possibleTypes;
+  }
+
   public Collection<__InputValue> getInputFields() {
     return this.inputFields;
   }
@@ -94,22 +104,28 @@ public class __Type implements Meta {
     this.inputFields = inputFields;
   }
 
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public Collection<__EnumValue> getEnumValues() {
+    return this.enumValues;
+  }
+
+  public void setEnumValues(Collection<__EnumValue> enumValues) {
+    this.enumValues = enumValues;
+  }
+
   public Collection<__Field> getFields() {
     return this.fields;
   }
 
   public void setFields(Collection<__Field> fields) {
     this.fields = fields;
-  }
-
-  @Override
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
   }
 
   public Integer getSchemaId() {
@@ -128,27 +144,11 @@ public class __Type implements Meta {
     this.kind = kind;
   }
 
-  public String getDescription() {
-    return this.description;
+  public String getName() {
+    return this.name;
   }
 
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public Collection<__Type> getPossibleTypes() {
-    return this.possibleTypes;
-  }
-
-  public void setPossibleTypes(Collection<__Type> possibleTypes) {
-    this.possibleTypes = possibleTypes;
+  public void setName(String name) {
+    this.name = name;
   }
 }

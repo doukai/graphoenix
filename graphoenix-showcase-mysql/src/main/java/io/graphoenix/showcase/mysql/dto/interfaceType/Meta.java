@@ -8,15 +8,15 @@ import org.eclipse.microprofile.graphql.Interface;
 @Interface
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public interface Meta {
-  Integer version = null;
-
   Boolean isDeprecated = null;
 
-  Integer getVersion();
-
-  void setVersion(Integer version);
+  Integer version = null;
 
   Boolean getIsDeprecated();
 
   void setIsDeprecated(Boolean isDeprecated);
+
+  Integer getVersion();
+
+  void setVersion(Integer version);
 }

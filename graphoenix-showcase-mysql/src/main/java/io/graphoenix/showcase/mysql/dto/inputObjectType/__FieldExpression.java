@@ -10,39 +10,31 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __FieldExpression {
-  private StringExpression typeName;
-
   private StringExpression name;
 
-  private __InputValueExpression args;
+  private StringExpression ofTypeName;
+
+  private StringExpression description;
 
   private Collection<__FieldExpression> exs;
 
-  @DefaultValue("AND")
-  private Conditional cond;
+  private StringExpression deprecationReason;
 
-  private StringExpression description;
+  private IntExpression version;
+
+  private IDExpression id;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private StringExpression deprecationReason;
-
-  private IDExpression id;
+  private StringExpression typeName;
 
   private __TypeExpression type;
 
-  private IntExpression version;
+  private __InputValueExpression args;
 
-  private StringExpression ofTypeName;
-
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
-  }
+  @DefaultValue("AND")
+  private Conditional cond;
 
   public StringExpression getName() {
     return this.name;
@@ -52,28 +44,12 @@ public class __FieldExpression {
     this.name = name;
   }
 
-  public __InputValueExpression getArgs() {
-    return this.args;
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
   }
 
-  public void setArgs(__InputValueExpression args) {
-    this.args = args;
-  }
-
-  public Collection<__FieldExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__FieldExpression> exs) {
-    this.exs = exs;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public StringExpression getDescription() {
@@ -84,12 +60,12 @@ public class __FieldExpression {
     this.description = description;
   }
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
+  public Collection<__FieldExpression> getExs() {
+    return this.exs;
   }
 
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
+  public void setExs(Collection<__FieldExpression> exs) {
+    this.exs = exs;
   }
 
   public StringExpression getDeprecationReason() {
@@ -100,12 +76,36 @@ public class __FieldExpression {
     this.deprecationReason = deprecationReason;
   }
 
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
   public IDExpression getId() {
     return this.id;
   }
 
   public void setId(IDExpression id) {
     this.id = id;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public StringExpression getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
   }
 
   public __TypeExpression getType() {
@@ -116,19 +116,19 @@ public class __FieldExpression {
     this.type = type;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public __InputValueExpression getArgs() {
+    return this.args;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setArgs(__InputValueExpression args) {
+    this.args = args;
   }
 
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
+  public Conditional getCond() {
+    return this.cond;
   }
 
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 }

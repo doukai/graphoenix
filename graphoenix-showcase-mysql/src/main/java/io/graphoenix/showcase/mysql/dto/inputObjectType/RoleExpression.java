@@ -10,29 +10,21 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class RoleExpression {
-  private IntExpression version;
-
   @DefaultValue("AND")
   private Conditional cond;
-
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
-
-  private IDExpression id;
 
   private UserExpression users;
 
   private StringExpression name;
 
+  private IDExpression id;
+
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
+
+  private IntExpression version;
+
   private Collection<RoleExpression> exs;
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
 
   public Conditional getCond() {
     return this.cond;
@@ -40,22 +32,6 @@ public class RoleExpression {
 
   public void setCond(Conditional cond) {
     this.cond = cond;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
-  public IDExpression getId() {
-    return this.id;
-  }
-
-  public void setId(IDExpression id) {
-    this.id = id;
   }
 
   public UserExpression getUsers() {
@@ -72,6 +48,30 @@ public class RoleExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
+  }
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
   }
 
   public Collection<RoleExpression> getExs() {

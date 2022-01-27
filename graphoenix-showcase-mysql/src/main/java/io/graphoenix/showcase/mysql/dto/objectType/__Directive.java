@@ -15,28 +15,46 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __Directive implements Meta {
+  @NonNull
+  private Collection<__DirectiveLocation> locations;
+
+  private Integer version;
+
   private Integer schemaId;
 
   private Boolean isDeprecated;
 
+  private String description;
+
+  @Id
+  private String name;
+
   private Boolean onField;
 
-  private Integer version;
+  private Boolean onFragment;
+
+  private Boolean onOperation;
 
   @NonNull
   private Collection<__InputValue> args;
 
-  @NonNull
-  private Collection<__DirectiveLocation> locations;
+  public Collection<__DirectiveLocation> getLocations() {
+    return this.locations;
+  }
 
-  private String description;
+  public void setLocations(Collection<__DirectiveLocation> locations) {
+    this.locations = locations;
+  }
 
-  private Boolean onOperation;
+  @Override
+  public Integer getVersion() {
+    return this.version;
+  }
 
-  private Boolean onFragment;
-
-  @Id
-  private String name;
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
 
   public Integer getSchemaId() {
     return this.schemaId;
@@ -56,40 +74,6 @@ public class __Directive implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
-  public Boolean getOnField() {
-    return this.onField;
-  }
-
-  public void setOnField(Boolean onField) {
-    this.onField = onField;
-  }
-
-  @Override
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public Collection<__InputValue> getArgs() {
-    return this.args;
-  }
-
-  public void setArgs(Collection<__InputValue> args) {
-    this.args = args;
-  }
-
-  public Collection<__DirectiveLocation> getLocations() {
-    return this.locations;
-  }
-
-  public void setLocations(Collection<__DirectiveLocation> locations) {
-    this.locations = locations;
-  }
-
   public String getDescription() {
     return this.description;
   }
@@ -98,12 +82,20 @@ public class __Directive implements Meta {
     this.description = description;
   }
 
-  public Boolean getOnOperation() {
-    return this.onOperation;
+  public String getName() {
+    return this.name;
   }
 
-  public void setOnOperation(Boolean onOperation) {
-    this.onOperation = onOperation;
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Boolean getOnField() {
+    return this.onField;
+  }
+
+  public void setOnField(Boolean onField) {
+    this.onField = onField;
   }
 
   public Boolean getOnFragment() {
@@ -114,11 +106,19 @@ public class __Directive implements Meta {
     this.onFragment = onFragment;
   }
 
-  public String getName() {
-    return this.name;
+  public Boolean getOnOperation() {
+    return this.onOperation;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setOnOperation(Boolean onOperation) {
+    this.onOperation = onOperation;
+  }
+
+  public Collection<__InputValue> getArgs() {
+    return this.args;
+  }
+
+  public void setArgs(Collection<__InputValue> args) {
+    this.args = args;
   }
 }

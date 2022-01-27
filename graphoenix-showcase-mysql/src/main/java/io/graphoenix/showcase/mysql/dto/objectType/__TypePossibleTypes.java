@@ -13,44 +13,18 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypePossibleTypes implements Meta {
-  @NonNull
-  private String possibleTypeName;
-
-  private Boolean isDeprecated;
-
-  @Id
-  private String id;
-
   private Integer version;
 
   @NonNull
   private String typeName;
 
-  public String getPossibleTypeName() {
-    return this.possibleTypeName;
-  }
+  @Id
+  private String id;
 
-  public void setPossibleTypeName(String possibleTypeName) {
-    this.possibleTypeName = possibleTypeName;
-  }
+  @NonNull
+  private String possibleTypeName;
 
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
+  private Boolean isDeprecated;
 
   @Override
   public Integer getVersion() {
@@ -68,5 +42,31 @@ public class __TypePossibleTypes implements Meta {
 
   public void setTypeName(String typeName) {
     this.typeName = typeName;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getPossibleTypeName() {
+    return this.possibleTypeName;
+  }
+
+  public void setPossibleTypeName(String possibleTypeName) {
+    this.possibleTypeName = possibleTypeName;
+  }
+
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

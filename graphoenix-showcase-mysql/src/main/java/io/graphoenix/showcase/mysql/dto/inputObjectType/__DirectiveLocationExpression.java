@@ -10,19 +10,19 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveLocationExpression {
-  private __DirectiveLocation val;
-
-  private Collection<__DirectiveLocation> in;
-
   @DefaultValue("EQ")
   private Operator opr;
 
-  public __DirectiveLocation getVal() {
-    return this.val;
+  private Collection<__DirectiveLocation> in;
+
+  private __DirectiveLocation val;
+
+  public Operator getOpr() {
+    return this.opr;
   }
 
-  public void setVal(__DirectiveLocation val) {
-    this.val = val;
+  public void setOpr(Operator opr) {
+    this.opr = opr;
   }
 
   public Collection<__DirectiveLocation> getIn() {
@@ -33,11 +33,11 @@ public class __DirectiveLocationExpression {
     this.in = in;
   }
 
-  public Operator getOpr() {
-    return this.opr;
+  public __DirectiveLocation getVal() {
+    return this.val;
   }
 
-  public void setOpr(Operator opr) {
-    this.opr = opr;
+  public void setVal(__DirectiveLocation val) {
+    this.val = val;
   }
 }

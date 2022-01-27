@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 public @interface MapWith {
   String from();
 
-  String type();
-
   String to();
+
+  String type();
 }

@@ -14,33 +14,17 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class Role implements Meta {
-  @Id
-  private String id;
-
-  private Collection<User> users;
-
   @NonNull
   private String name;
+
+  @Id
+  private String id;
 
   private Integer version;
 
   private Boolean isDeprecated;
 
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public Collection<User> getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(Collection<User> users) {
-    this.users = users;
-  }
+  private Collection<User> users;
 
   public String getName() {
     return this.name;
@@ -48,6 +32,14 @@ public class Role implements Meta {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public String getId() {
+    return this.id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   @Override
@@ -68,5 +60,13 @@ public class Role implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public Collection<User> getUsers() {
+    return this.users;
+  }
+
+  public void setUsers(Collection<User> users) {
+    this.users = users;
   }
 }
