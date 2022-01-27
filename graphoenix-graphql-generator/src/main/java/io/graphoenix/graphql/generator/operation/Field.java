@@ -3,7 +3,7 @@ package io.graphoenix.graphql.generator.operation;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +45,7 @@ public class Field {
 
     public Field addArgument(Argument argument) {
         if (this.arguments == null) {
-            this.arguments = new HashSet<>();
+            this.arguments = new LinkedHashSet<>();
         }
         this.arguments.add(argument);
         return this;
@@ -53,7 +53,7 @@ public class Field {
 
     public Field addArguments(Stream<Argument> argumentStream) {
         if (this.arguments == null) {
-            this.arguments = new HashSet<>();
+            this.arguments = new LinkedHashSet<>();
         }
         this.arguments.addAll(argumentStream.collect(Collectors.toList()));
         return this;

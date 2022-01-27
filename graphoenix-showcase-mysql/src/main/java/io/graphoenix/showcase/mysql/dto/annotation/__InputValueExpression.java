@@ -20,9 +20,9 @@ public @interface __InputValueExpression {
 
   String[] defaultValue() default {};
 
-  String[] typeName() default {};
-
   String[] name() default {};
+
+  String[] typeName() default {};
 
   String[] description() default {};
 
@@ -40,9 +40,9 @@ public @interface __InputValueExpression {
 
   String[] $defaultValue() default {};
 
-  String[] $typeName() default {};
-
   String[] $name() default {};
+
+  String[] $typeName() default {};
 
   String[] $description() default {};
 

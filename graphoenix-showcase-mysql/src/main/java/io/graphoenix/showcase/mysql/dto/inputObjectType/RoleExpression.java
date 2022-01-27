@@ -10,36 +10,28 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class RoleExpression {
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private UserExpression users;
+  private IDExpression id;
 
   private StringExpression name;
 
-  private IDExpression id;
+  private UserExpression users;
+
+  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private IntExpression version;
+  @DefaultValue("AND")
+  private Conditional cond;
 
   private Collection<RoleExpression> exs;
 
-  public Conditional getCond() {
-    return this.cond;
+  public IDExpression getId() {
+    return this.id;
   }
 
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public UserExpression getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(UserExpression users) {
-    this.users = users;
+  public void setId(IDExpression id) {
+    this.id = id;
   }
 
   public StringExpression getName() {
@@ -50,12 +42,20 @@ public class RoleExpression {
     this.name = name;
   }
 
-  public IDExpression getId() {
-    return this.id;
+  public UserExpression getUsers() {
+    return this.users;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
+  public void setUsers(UserExpression users) {
+    this.users = users;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -66,12 +66,12 @@ public class RoleExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public Conditional getCond() {
+    return this.cond;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 
   public Collection<RoleExpression> getExs() {

@@ -20,9 +20,9 @@ public @interface UserRoleExpression {
 
   String[] id() default {};
 
-  int[] version() default {};
-
   int[] userId() default {};
+
+  int[] version() default {};
 
   String[] $isDeprecated() default {};
 
@@ -30,7 +30,7 @@ public @interface UserRoleExpression {
 
   String[] $id() default {};
 
-  String[] $version() default {};
-
   String[] $userId() default {};
+
+  String[] $version() default {};
 }

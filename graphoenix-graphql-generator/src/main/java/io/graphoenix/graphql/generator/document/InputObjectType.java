@@ -3,7 +3,7 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class InputObjectType {
@@ -42,7 +42,7 @@ public class InputObjectType {
 
     public InputObjectType addInputValue(InputValue inputValue) {
         if (this.inputValues == null) {
-            this.inputValues = new HashSet<>();
+            this.inputValues = new LinkedHashSet<>();
         }
         this.inputValues.add(inputValue);
         return this;

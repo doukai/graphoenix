@@ -13,45 +13,29 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __InputValue implements Meta {
-  @NonNull
-  private __Type type;
-
-  private String directiveName;
-
   @Id
   private String id;
+
+  private String name;
 
   private String typeName;
 
   private String ofTypeName;
 
-  private String defaultValue;
+  private Integer fieldId;
 
-  private Boolean isDeprecated;
+  private String directiveName;
 
   private String description;
 
-  private Integer fieldId;
+  @NonNull
+  private __Type type;
+
+  private String defaultValue;
 
   private Integer version;
 
-  private String name;
-
-  public __Type getType() {
-    return this.type;
-  }
-
-  public void setType(__Type type) {
-    this.type = type;
-  }
-
-  public String getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
-  }
+  private Boolean isDeprecated;
 
   public String getId() {
     return this.id;
@@ -59,6 +43,14 @@ public class __InputValue implements Meta {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public String getTypeName() {
@@ -77,22 +69,20 @@ public class __InputValue implements Meta {
     this.ofTypeName = ofTypeName;
   }
 
-  public String getDefaultValue() {
-    return this.defaultValue;
+  public Integer getFieldId() {
+    return this.fieldId;
   }
 
-  public void setDefaultValue(String defaultValue) {
-    this.defaultValue = defaultValue;
+  public void setFieldId(Integer fieldId) {
+    this.fieldId = fieldId;
   }
 
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public String getDirectiveName() {
+    return this.directiveName;
   }
 
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
   }
 
   public String getDescription() {
@@ -103,12 +93,20 @@ public class __InputValue implements Meta {
     this.description = description;
   }
 
-  public Integer getFieldId() {
-    return this.fieldId;
+  public __Type getType() {
+    return this.type;
   }
 
-  public void setFieldId(Integer fieldId) {
-    this.fieldId = fieldId;
+  public void setType(__Type type) {
+    this.type = type;
+  }
+
+  public String getDefaultValue() {
+    return this.defaultValue;
+  }
+
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
   }
 
   @Override
@@ -121,11 +119,13 @@ public class __InputValue implements Meta {
     this.version = version;
   }
 
-  public String getName() {
-    return this.name;
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

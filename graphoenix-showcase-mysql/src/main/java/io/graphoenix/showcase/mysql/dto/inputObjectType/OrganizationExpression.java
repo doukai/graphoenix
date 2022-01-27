@@ -10,57 +10,25 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class OrganizationExpression {
-  private Collection<OrganizationExpression> exs;
-
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
-
-  private OrganizationExpression above;
-
   private IDExpression id;
 
-  private IntExpression version;
+  private IntExpression aboveId;
+
+  private OrganizationExpression above;
 
   private UserExpression users;
 
   private StringExpression name;
 
-  private IntExpression aboveId;
+  private IntExpression version;
 
-  public Collection<OrganizationExpression> getExs() {
-    return this.exs;
-  }
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
 
-  public void setExs(Collection<OrganizationExpression> exs) {
-    this.exs = exs;
-  }
+  @DefaultValue("AND")
+  private Conditional cond;
 
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
-  public OrganizationExpression getAbove() {
-    return this.above;
-  }
-
-  public void setAbove(OrganizationExpression above) {
-    this.above = above;
-  }
+  private Collection<OrganizationExpression> exs;
 
   public IDExpression getId() {
     return this.id;
@@ -70,12 +38,20 @@ public class OrganizationExpression {
     this.id = id;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public IntExpression getAboveId() {
+    return this.aboveId;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setAboveId(IntExpression aboveId) {
+    this.aboveId = aboveId;
+  }
+
+  public OrganizationExpression getAbove() {
+    return this.above;
+  }
+
+  public void setAbove(OrganizationExpression above) {
+    this.above = above;
   }
 
   public UserExpression getUsers() {
@@ -94,11 +70,35 @@ public class OrganizationExpression {
     this.name = name;
   }
 
-  public IntExpression getAboveId() {
-    return this.aboveId;
+  public IntExpression getVersion() {
+    return this.version;
   }
 
-  public void setAboveId(IntExpression aboveId) {
-    this.aboveId = aboveId;
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<OrganizationExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<OrganizationExpression> exs) {
+    this.exs = exs;
   }
 }

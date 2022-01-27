@@ -12,13 +12,13 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __TypeInput {
-  boolean isDeprecated() default false;
-
   __TypeInnerInput[] interfaces() default {};
+
+  boolean isDeprecated() default false;
 
   __TypeInnerInput[] possibleTypes() default {};
 
-  __TypeKind kind() default __TypeKind.INTERFACE;
+  __TypeKind kind() default __TypeKind.SCALAR;
 
   String description() default "";
 
@@ -34,13 +34,13 @@ public @interface __TypeInput {
 
   __TypeInnerInput ofType() default @__TypeInnerInput;
 
-  String ofTypeName() default "";
-
   __EnumValueInnerInput[] enumValues() default {};
 
-  String $isDeprecated() default "";
+  String ofTypeName() default "";
 
   String $interfaces() default "";
+
+  String $isDeprecated() default "";
 
   String $possibleTypes() default "";
 
@@ -60,7 +60,7 @@ public @interface __TypeInput {
 
   String $ofType() default "";
 
-  String $ofTypeName() default "";
-
   String $enumValues() default "";
+
+  String $ofTypeName() default "";
 }

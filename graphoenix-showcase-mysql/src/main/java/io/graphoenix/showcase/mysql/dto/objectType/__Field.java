@@ -17,25 +17,25 @@ public class __Field implements Meta {
   @Id
   private String id;
 
-  private String deprecationReason;
-
-  @NonNull
-  private __Type type;
-
   private String name;
 
   private String typeName;
 
-  private String description;
+  private String ofTypeName;
 
-  private Integer version;
+  private String description;
 
   @NonNull
   private Collection<__InputValue> args;
 
-  private Boolean isDeprecated;
+  @NonNull
+  private __Type type;
 
-  private String ofTypeName;
+  private String deprecationReason;
+
+  private Integer version;
+
+  private Boolean isDeprecated;
 
   public String getId() {
     return this.id;
@@ -43,22 +43,6 @@ public class __Field implements Meta {
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public String getDeprecationReason() {
-    return this.deprecationReason;
-  }
-
-  public void setDeprecationReason(String deprecationReason) {
-    this.deprecationReason = deprecationReason;
-  }
-
-  public __Type getType() {
-    return this.type;
-  }
-
-  public void setType(__Type type) {
-    this.type = type;
   }
 
   public String getName() {
@@ -77,12 +61,44 @@ public class __Field implements Meta {
     this.typeName = typeName;
   }
 
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
   public String getDescription() {
     return this.description;
   }
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public Collection<__InputValue> getArgs() {
+    return this.args;
+  }
+
+  public void setArgs(Collection<__InputValue> args) {
+    this.args = args;
+  }
+
+  public __Type getType() {
+    return this.type;
+  }
+
+  public void setType(__Type type) {
+    this.type = type;
+  }
+
+  public String getDeprecationReason() {
+    return this.deprecationReason;
+  }
+
+  public void setDeprecationReason(String deprecationReason) {
+    this.deprecationReason = deprecationReason;
   }
 
   @Override
@@ -95,14 +111,6 @@ public class __Field implements Meta {
     this.version = version;
   }
 
-  public Collection<__InputValue> getArgs() {
-    return this.args;
-  }
-
-  public void setArgs(Collection<__InputValue> args) {
-    this.args = args;
-  }
-
   @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
@@ -111,13 +119,5 @@ public class __Field implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 }

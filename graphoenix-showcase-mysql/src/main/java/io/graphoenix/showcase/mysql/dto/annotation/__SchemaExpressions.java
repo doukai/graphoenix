@@ -17,9 +17,9 @@ public @interface __SchemaExpressions {
 
   __TypeExpression[] types() default {};
 
-  __DirectiveExpression[] directives() default {};
-
   __TypeExpression[] subscriptionType() default {};
+
+  __DirectiveExpression[] directives() default {};
 
   __TypeExpression[] mutationType() default {};
 

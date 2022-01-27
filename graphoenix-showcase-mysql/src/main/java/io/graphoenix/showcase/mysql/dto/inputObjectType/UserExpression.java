@@ -10,37 +10,45 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserExpression {
+  private IDExpression id;
+
   private StringExpression login;
 
-  private SexExpression sex;
+  private StringExpression password;
+
+  private StringExpression name;
+
+  private IntExpression age;
 
   private Boolean disable;
 
-  @DefaultValue("AND")
-  private Conditional cond;
+  private SexExpression sex;
 
-  private IntExpression age;
+  private IntExpression organizationId;
+
+  private OrganizationExpression organization;
+
+  private RoleExpression roles;
+
+  private StringExpression phones;
+
+  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private IntExpression version;
-
-  private StringExpression name;
+  @DefaultValue("AND")
+  private Conditional cond;
 
   private Collection<UserExpression> exs;
 
-  private IntExpression organizationId;
+  public IDExpression getId() {
+    return this.id;
+  }
 
-  private StringExpression phones;
-
-  private IDExpression id;
-
-  private RoleExpression roles;
-
-  private OrganizationExpression organization;
-
-  private StringExpression password;
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
 
   public StringExpression getLogin() {
     return this.login;
@@ -50,52 +58,12 @@ public class UserExpression {
     this.login = login;
   }
 
-  public SexExpression getSex() {
-    return this.sex;
+  public StringExpression getPassword() {
+    return this.password;
   }
 
-  public void setSex(SexExpression sex) {
-    this.sex = sex;
-  }
-
-  public Boolean getDisable() {
-    return this.disable;
-  }
-
-  public void setDisable(Boolean disable) {
-    this.disable = disable;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public IntExpression getAge() {
-    return this.age;
-  }
-
-  public void setAge(IntExpression age) {
-    this.age = age;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setPassword(StringExpression password) {
+    this.password = password;
   }
 
   public StringExpression getName() {
@@ -106,12 +74,28 @@ public class UserExpression {
     this.name = name;
   }
 
-  public Collection<UserExpression> getExs() {
-    return this.exs;
+  public IntExpression getAge() {
+    return this.age;
   }
 
-  public void setExs(Collection<UserExpression> exs) {
-    this.exs = exs;
+  public void setAge(IntExpression age) {
+    this.age = age;
+  }
+
+  public Boolean getDisable() {
+    return this.disable;
+  }
+
+  public void setDisable(Boolean disable) {
+    this.disable = disable;
+  }
+
+  public SexExpression getSex() {
+    return this.sex;
+  }
+
+  public void setSex(SexExpression sex) {
+    this.sex = sex;
   }
 
   public IntExpression getOrganizationId() {
@@ -122,20 +106,12 @@ public class UserExpression {
     this.organizationId = organizationId;
   }
 
-  public StringExpression getPhones() {
-    return this.phones;
+  public OrganizationExpression getOrganization() {
+    return this.organization;
   }
 
-  public void setPhones(StringExpression phones) {
-    this.phones = phones;
-  }
-
-  public IDExpression getId() {
-    return this.id;
-  }
-
-  public void setId(IDExpression id) {
-    this.id = id;
+  public void setOrganization(OrganizationExpression organization) {
+    this.organization = organization;
   }
 
   public RoleExpression getRoles() {
@@ -146,19 +122,43 @@ public class UserExpression {
     this.roles = roles;
   }
 
-  public OrganizationExpression getOrganization() {
-    return this.organization;
+  public StringExpression getPhones() {
+    return this.phones;
   }
 
-  public void setOrganization(OrganizationExpression organization) {
-    this.organization = organization;
+  public void setPhones(StringExpression phones) {
+    this.phones = phones;
   }
 
-  public StringExpression getPassword() {
-    return this.password;
+  public IntExpression getVersion() {
+    return this.version;
   }
 
-  public void setPassword(StringExpression password) {
-    this.password = password;
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<UserExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<UserExpression> exs) {
+    this.exs = exs;
   }
 }

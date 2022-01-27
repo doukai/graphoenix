@@ -11,43 +11,27 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class OrganizationInput {
+  private String id;
+
+  private Integer aboveId;
+
   private OrganizationInput above;
+
+  private Collection<UserInput> users;
 
   @NonNull
   private String name;
 
-  private Boolean isDeprecated;
-
-  private Integer aboveId;
-
   private Integer version;
 
-  private String id;
+  private Boolean isDeprecated;
 
-  private Collection<UserInput> users;
-
-  public OrganizationInput getAbove() {
-    return this.above;
+  public String getId() {
+    return this.id;
   }
 
-  public void setAbove(OrganizationInput above) {
-    this.above = above;
-  }
-
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public Integer getAboveId() {
@@ -58,20 +42,12 @@ public class OrganizationInput {
     this.aboveId = aboveId;
   }
 
-  public Integer getVersion() {
-    return this.version;
+  public OrganizationInput getAbove() {
+    return this.above;
   }
 
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
+  public void setAbove(OrganizationInput above) {
+    this.above = above;
   }
 
   public Collection<UserInput> getUsers() {
@@ -80,5 +56,29 @@ public class OrganizationInput {
 
   public void setUsers(Collection<UserInput> users) {
     this.users = users;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

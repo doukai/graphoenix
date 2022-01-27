@@ -10,31 +10,39 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __FieldExpression {
+  private IDExpression id;
+
   private StringExpression name;
+
+  private StringExpression typeName;
 
   private StringExpression ofTypeName;
 
   private StringExpression description;
 
-  private Collection<__FieldExpression> exs;
+  private __InputValueExpression args;
+
+  private __TypeExpression type;
 
   private StringExpression deprecationReason;
 
   private IntExpression version;
 
-  private IDExpression id;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private StringExpression typeName;
-
-  private __TypeExpression type;
-
-  private __InputValueExpression args;
-
   @DefaultValue("AND")
   private Conditional cond;
+
+  private Collection<__FieldExpression> exs;
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
 
   public StringExpression getName() {
     return this.name;
@@ -42,6 +50,14 @@ public class __FieldExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
+  }
+
+  public StringExpression getTypeName() {
+    return this.typeName;
+  }
+
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
   }
 
   public StringExpression getOfTypeName() {
@@ -60,12 +76,20 @@ public class __FieldExpression {
     this.description = description;
   }
 
-  public Collection<__FieldExpression> getExs() {
-    return this.exs;
+  public __InputValueExpression getArgs() {
+    return this.args;
   }
 
-  public void setExs(Collection<__FieldExpression> exs) {
-    this.exs = exs;
+  public void setArgs(__InputValueExpression args) {
+    this.args = args;
+  }
+
+  public __TypeExpression getType() {
+    return this.type;
+  }
+
+  public void setType(__TypeExpression type) {
+    this.type = type;
   }
 
   public StringExpression getDeprecationReason() {
@@ -84,14 +108,6 @@ public class __FieldExpression {
     this.version = version;
   }
 
-  public IDExpression getId() {
-    return this.id;
-  }
-
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
-
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
   }
@@ -100,35 +116,19 @@ public class __FieldExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
-  }
-
-  public __TypeExpression getType() {
-    return this.type;
-  }
-
-  public void setType(__TypeExpression type) {
-    this.type = type;
-  }
-
-  public __InputValueExpression getArgs() {
-    return this.args;
-  }
-
-  public void setArgs(__InputValueExpression args) {
-    this.args = args;
-  }
-
   public Conditional getCond() {
     return this.cond;
   }
 
   public void setCond(Conditional cond) {
     this.cond = cond;
+  }
+
+  public Collection<__FieldExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__FieldExpression> exs) {
+    this.exs = exs;
   }
 }

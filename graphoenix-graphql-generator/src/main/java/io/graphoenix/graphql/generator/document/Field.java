@@ -3,7 +3,7 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Field {
@@ -43,7 +43,7 @@ public class Field {
 
     public Field addArgument(InputValue argument) {
         if (this.arguments == null) {
-            this.arguments = new HashSet<>();
+            this.arguments = new LinkedHashSet<>();
         }
         this.arguments.add(argument);
         return this;

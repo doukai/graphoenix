@@ -9,6 +9,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Types;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 public class JavaElementToInputType {
@@ -35,7 +36,7 @@ public class JavaElementToInputType {
                                                 .setDefaultValue(elementManager.getDefaultValueFromElement(element))
                                                 .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                 )
-                                .collect(Collectors.toSet())
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
                 );
     }
 }

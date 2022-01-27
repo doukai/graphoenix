@@ -3,7 +3,7 @@ package io.graphoenix.graphql.generator.operation;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +45,7 @@ public class Operation {
 
     public Operation addVariableDefinition(VariableDefinition variableDefinition) {
         if (this.variableDefinitions == null) {
-            this.variableDefinitions = new HashSet<>();
+            this.variableDefinitions = new LinkedHashSet<>();
         }
         this.variableDefinitions.add(variableDefinition);
         return this;
@@ -53,7 +53,7 @@ public class Operation {
 
     public Operation addVariableDefinitions(Stream<VariableDefinition> variableDefinitionStream) {
         if (this.variableDefinitions == null) {
-            this.variableDefinitions = new HashSet<>();
+            this.variableDefinitions = new LinkedHashSet<>();
         }
         this.variableDefinitions.addAll(variableDefinitionStream.collect(Collectors.toList()));
         return this;
@@ -79,7 +79,7 @@ public class Operation {
 
     public Operation addField(Field field) {
         if (this.fields == null) {
-            this.fields = new HashSet<>();
+            this.fields = new LinkedHashSet<>();
         }
         this.fields.add(field);
         return this;

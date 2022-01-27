@@ -10,21 +10,37 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserPhonesExpression {
+  private IDExpression id;
+
+  private IntExpression userId;
+
   private StringExpression phone;
 
   private IntExpression version;
 
-  @DefaultValue("AND")
-  private Conditional cond;
-
-  private IDExpression id;
-
-  private Collection<UserPhonesExpression> exs;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private IntExpression userId;
+  @DefaultValue("AND")
+  private Conditional cond;
+
+  private Collection<UserPhonesExpression> exs;
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
+
+  public IntExpression getUserId() {
+    return this.userId;
+  }
+
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
+  }
 
   public StringExpression getPhone() {
     return this.phone;
@@ -42,30 +58,6 @@ public class UserPhonesExpression {
     this.version = version;
   }
 
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
-  }
-
-  public IDExpression getId() {
-    return this.id;
-  }
-
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
-
-  public Collection<UserPhonesExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<UserPhonesExpression> exs) {
-    this.exs = exs;
-  }
-
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
   }
@@ -74,11 +66,19 @@ public class UserPhonesExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public IntExpression getUserId() {
-    return this.userId;
+  public Conditional getCond() {
+    return this.cond;
   }
 
-  public void setUserId(IntExpression userId) {
-    this.userId = userId;
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<UserPhonesExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<UserPhonesExpression> exs) {
+    this.exs = exs;
   }
 }

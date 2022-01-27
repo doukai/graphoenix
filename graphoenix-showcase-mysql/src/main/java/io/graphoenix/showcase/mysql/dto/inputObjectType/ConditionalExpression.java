@@ -13,9 +13,9 @@ public class ConditionalExpression {
   @DefaultValue("EQ")
   private Operator opr;
 
-  private Collection<Conditional> in;
-
   private Conditional val;
+
+  private Collection<Conditional> in;
 
   public Operator getOpr() {
     return this.opr;
@@ -25,19 +25,19 @@ public class ConditionalExpression {
     this.opr = opr;
   }
 
-  public Collection<Conditional> getIn() {
-    return this.in;
-  }
-
-  public void setIn(Collection<Conditional> in) {
-    this.in = in;
-  }
-
   public Conditional getVal() {
     return this.val;
   }
 
   public void setVal(Conditional val) {
     this.val = val;
+  }
+
+  public Collection<Conditional> getIn() {
+    return this.in;
+  }
+
+  public void setIn(Collection<Conditional> in) {
+    this.in = in;
   }
 }

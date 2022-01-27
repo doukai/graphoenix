@@ -13,12 +13,12 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class RoleInput {
   private String id;
 
-  private Integer version;
-
   @NonNull
   private String name;
 
   private Collection<UserInput> users;
+
+  private Integer version;
 
   private Boolean isDeprecated;
 
@@ -28,14 +28,6 @@ public class RoleInput {
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
   }
 
   public String getName() {
@@ -52,6 +44,14 @@ public class RoleInput {
 
   public void setUsers(Collection<UserInput> users) {
     this.users = users;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
   }
 
   public Boolean getIsDeprecated() {

@@ -14,47 +14,31 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class Organization implements Meta {
-  private Collection<User> userByOrg;
-
-  private Boolean roleDisable;
-
   @Id
   private String id;
 
-  private Integer version;
+  private Integer aboveId;
+
+  private Organization above;
+
+  private Collection<User> users;
 
   @NonNull
   private String name;
 
-  private Integer orgLevel2;
-
-  private Integer aboveId;
+  private Integer version;
 
   private Boolean isDeprecated;
 
+  private Integer orgLevel2;
+
   private Collection<Integer> orgLevel3;
 
-  private Organization above;
+  private Boolean roleDisable;
+
+  private Collection<User> userByOrg;
 
   private Organization parent;
-
-  private Collection<User> users;
-
-  public Collection<User> getUserByOrg() {
-    return this.userByOrg;
-  }
-
-  public void setUserByOrg(Collection<User> userByOrg) {
-    this.userByOrg = userByOrg;
-  }
-
-  public Boolean getRoleDisable() {
-    return this.roleDisable;
-  }
-
-  public void setRoleDisable(Boolean roleDisable) {
-    this.roleDisable = roleDisable;
-  }
 
   public String getId() {
     return this.id;
@@ -62,6 +46,38 @@ public class Organization implements Meta {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public Integer getAboveId() {
+    return this.aboveId;
+  }
+
+  public void setAboveId(Integer aboveId) {
+    this.aboveId = aboveId;
+  }
+
+  public Organization getAbove() {
+    return this.above;
+  }
+
+  public void setAbove(Organization above) {
+    this.above = above;
+  }
+
+  public Collection<User> getUsers() {
+    return this.users;
+  }
+
+  public void setUsers(Collection<User> users) {
+    this.users = users;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   @Override
@@ -74,30 +90,6 @@ public class Organization implements Meta {
     this.version = version;
   }
 
-  public String getName() {
-    return this.name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public Integer getOrgLevel2() {
-    return this.orgLevel2;
-  }
-
-  public void setOrgLevel2(Integer orgLevel2) {
-    this.orgLevel2 = orgLevel2;
-  }
-
-  public Integer getAboveId() {
-    return this.aboveId;
-  }
-
-  public void setAboveId(Integer aboveId) {
-    this.aboveId = aboveId;
-  }
-
   @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
@@ -108,6 +100,14 @@ public class Organization implements Meta {
     this.isDeprecated = isDeprecated;
   }
 
+  public Integer getOrgLevel2() {
+    return this.orgLevel2;
+  }
+
+  public void setOrgLevel2(Integer orgLevel2) {
+    this.orgLevel2 = orgLevel2;
+  }
+
   public Collection<Integer> getOrgLevel3() {
     return this.orgLevel3;
   }
@@ -116,12 +116,20 @@ public class Organization implements Meta {
     this.orgLevel3 = orgLevel3;
   }
 
-  public Organization getAbove() {
-    return this.above;
+  public Boolean getRoleDisable() {
+    return this.roleDisable;
   }
 
-  public void setAbove(Organization above) {
-    this.above = above;
+  public void setRoleDisable(Boolean roleDisable) {
+    this.roleDisable = roleDisable;
+  }
+
+  public Collection<User> getUserByOrg() {
+    return this.userByOrg;
+  }
+
+  public void setUserByOrg(Collection<User> userByOrg) {
+    this.userByOrg = userByOrg;
   }
 
   public Organization getParent() {
@@ -130,13 +138,5 @@ public class Organization implements Meta {
 
   public void setParent(Organization parent) {
     this.parent = parent;
-  }
-
-  public Collection<User> getUsers() {
-    return this.users;
-  }
-
-  public void setUsers(Collection<User> users) {
-    this.users = users;
   }
 }

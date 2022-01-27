@@ -3,7 +3,7 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -35,7 +35,7 @@ public class ObjectType {
 
     public ObjectType addInterface(String interfaceType) {
         if (this.interfaces == null) {
-            this.interfaces = new HashSet<>();
+            this.interfaces = new LinkedHashSet<>();
         }
         this.interfaces.add(interfaceType);
         return this;
@@ -61,7 +61,7 @@ public class ObjectType {
 
     public ObjectType addFields(List<Field> fields) {
         if (this.fields == null) {
-            this.fields = new HashSet<>();
+            this.fields = new LinkedHashSet<>();
         }
         this.fields.addAll(fields);
         return this;
@@ -69,7 +69,7 @@ public class ObjectType {
 
     public ObjectType addField(Field field) {
         if (this.fields == null) {
-            this.fields = new HashSet<>();
+            this.fields = new LinkedHashSet<>();
         }
         this.fields.add(field);
         return this;

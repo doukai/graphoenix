@@ -41,10 +41,7 @@ import javax.lang.model.element.TypeElement;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
@@ -215,11 +212,11 @@ public class OperationHandlerImplementer {
             case QUERY:
                 return manager.getFields(manager.getQueryOperationTypeName().orElseThrow())
                         .map(fieldDefinitionContext -> buildMethod(fieldDefinitionContext, type))
-                        .collect(Collectors.toSet());
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
             case MUTATION:
                 return manager.getFields(manager.getMutationOperationTypeName().orElseThrow())
                         .map(fieldDefinitionContext -> buildMethod(fieldDefinitionContext, type))
-                        .collect(Collectors.toSet());
+                        .collect(Collectors.toCollection(LinkedHashSet::new));
         }
         throw new RuntimeException();
     }
@@ -228,14 +225,14 @@ public class OperationHandlerImplementer {
         return this.invokeMethods.stream()
                 .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
                 .map(Tuple2::_1)
-                .collect(Collectors.toSet())
+                .collect(Collectors.toCollection(LinkedHashSet::new))
                 .stream()
                 .map(typeElement ->
                         FieldSpec.builder(ClassName.get(typeElement), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private MethodSpec buildOperationMethod(OperationType type) {
@@ -390,7 +387,7 @@ public class OperationHandlerImplementer {
         invokeMethods.stream()
                 .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
                 .map(Tuple2::_1)
-                .collect(Collectors.toSet())
+                .collect(Collectors.toCollection(LinkedHashSet::new))
                 .forEach(typeElement ->
                         builder.addStatement("this.$L = $T.get($T.class)",
                                 CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),

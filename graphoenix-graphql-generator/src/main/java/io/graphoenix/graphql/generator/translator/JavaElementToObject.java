@@ -9,6 +9,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Types;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 public class JavaElementToObject {
@@ -34,12 +35,12 @@ public class JavaElementToObject {
                                                 .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                                 .setDescription(elementManager.getDescriptionFromElement(element))
                                 )
-                                .collect(Collectors.toSet())
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
                 .setInterfaces(
                         typeElement.getInterfaces().stream()
                                 .map(typeMirror -> typeUtils.asElement(typeMirror).getSimpleName().toString())
-                                .collect(Collectors.toSet())
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
                 );
     }
 }

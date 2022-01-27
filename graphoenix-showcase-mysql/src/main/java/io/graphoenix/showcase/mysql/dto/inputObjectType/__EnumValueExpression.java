@@ -12,7 +12,15 @@ import org.eclipse.microprofile.graphql.Input;
 public class __EnumValueExpression {
   private IDExpression id;
 
-  private Collection<__EnumValueExpression> exs;
+  private StringExpression name;
+
+  private StringExpression ofTypeName;
+
+  private StringExpression description;
+
+  private StringExpression deprecationReason;
+
+  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -20,15 +28,7 @@ public class __EnumValueExpression {
   @DefaultValue("AND")
   private Conditional cond;
 
-  private IntExpression version;
-
-  private StringExpression description;
-
-  private StringExpression ofTypeName;
-
-  private StringExpression deprecationReason;
-
-  private StringExpression name;
+  private Collection<__EnumValueExpression> exs;
 
   public IDExpression getId() {
     return this.id;
@@ -38,12 +38,44 @@ public class __EnumValueExpression {
     this.id = id;
   }
 
-  public Collection<__EnumValueExpression> getExs() {
-    return this.exs;
+  public StringExpression getName() {
+    return this.name;
   }
 
-  public void setExs(Collection<__EnumValueExpression> exs) {
-    this.exs = exs;
+  public void setName(StringExpression name) {
+    this.name = name;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public StringExpression getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(StringExpression description) {
+    this.description = description;
+  }
+
+  public StringExpression getDeprecationReason() {
+    return this.deprecationReason;
+  }
+
+  public void setDeprecationReason(StringExpression deprecationReason) {
+    this.deprecationReason = deprecationReason;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -62,43 +94,11 @@ public class __EnumValueExpression {
     this.cond = cond;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public Collection<__EnumValueExpression> getExs() {
+    return this.exs;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public StringExpression getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(StringExpression description) {
-    this.description = description;
-  }
-
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
-  }
-
-  public StringExpression getDeprecationReason() {
-    return this.deprecationReason;
-  }
-
-  public void setDeprecationReason(StringExpression deprecationReason) {
-    this.deprecationReason = deprecationReason;
-  }
-
-  public StringExpression getName() {
-    return this.name;
-  }
-
-  public void setName(StringExpression name) {
-    this.name = name;
+  public void setExs(Collection<__EnumValueExpression> exs) {
+    this.exs = exs;
   }
 }

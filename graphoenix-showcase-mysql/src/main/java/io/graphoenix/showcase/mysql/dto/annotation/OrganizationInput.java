@@ -19,15 +19,15 @@ public @interface OrganizationInput {
 
   UserInnerInput[] userByOrg() default {};
 
+  OrganizationInnerInput above() default @OrganizationInnerInput;
+
   String name() default "";
 
   int orgLevel2() default 0;
 
-  OrganizationInnerInput above() default @OrganizationInnerInput;
+  int[] orgLevel3() default {};
 
   boolean roleDisable() default false;
-
-  int[] orgLevel3() default {};
 
   String id() default "";
 
@@ -43,15 +43,15 @@ public @interface OrganizationInput {
 
   String $userByOrg() default "";
 
+  String $above() default "";
+
   String $name() default "";
 
   String $orgLevel2() default "";
 
-  String $above() default "";
+  String $orgLevel3() default "";
 
   String $roleDisable() default "";
-
-  String $orgLevel3() default "";
 
   String $id() default "";
 

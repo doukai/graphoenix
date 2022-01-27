@@ -10,21 +10,29 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeInterfacesExpression {
+  private IDExpression id;
+
   private StringExpression typeName;
+
+  private StringExpression interfaceName;
+
+  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
-
-  private StringExpression interfaceName;
 
   @DefaultValue("AND")
   private Conditional cond;
 
   private Collection<__TypeInterfacesExpression> exs;
 
-  private IntExpression version;
+  public IDExpression getId() {
+    return this.id;
+  }
 
-  private IDExpression id;
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
 
   public StringExpression getTypeName() {
     return this.typeName;
@@ -34,20 +42,28 @@ public class __TypeInterfacesExpression {
     this.typeName = typeName;
   }
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
   public StringExpression getInterfaceName() {
     return this.interfaceName;
   }
 
   public void setInterfaceName(StringExpression interfaceName) {
     this.interfaceName = interfaceName;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
   }
 
   public Conditional getCond() {
@@ -64,21 +80,5 @@ public class __TypeInterfacesExpression {
 
   public void setExs(Collection<__TypeInterfacesExpression> exs) {
     this.exs = exs;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public IDExpression getId() {
-    return this.id;
-  }
-
-  public void setId(IDExpression id) {
-    this.id = id;
   }
 }

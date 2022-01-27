@@ -10,29 +10,21 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserRoleExpression {
-  private IntExpression userId;
-
   private IDExpression id;
 
-  private Collection<UserRoleExpression> exs;
-
-  private IntExpression version;
-
-  @DefaultValue("AND")
-  private Conditional cond;
+  private IntExpression userId;
 
   private IntExpression roleId;
+
+  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  public IntExpression getUserId() {
-    return this.userId;
-  }
+  @DefaultValue("AND")
+  private Conditional cond;
 
-  public void setUserId(IntExpression userId) {
-    this.userId = userId;
-  }
+  private Collection<UserRoleExpression> exs;
 
   public IDExpression getId() {
     return this.id;
@@ -42,28 +34,12 @@ public class UserRoleExpression {
     this.id = id;
   }
 
-  public Collection<UserRoleExpression> getExs() {
-    return this.exs;
+  public IntExpression getUserId() {
+    return this.userId;
   }
 
-  public void setExs(Collection<UserRoleExpression> exs) {
-    this.exs = exs;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
+  public void setUserId(IntExpression userId) {
+    this.userId = userId;
   }
 
   public IntExpression getRoleId() {
@@ -74,11 +50,35 @@ public class UserRoleExpression {
     this.roleId = roleId;
   }
 
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
   }
 
   public void setIncludeDeprecated(Boolean includeDeprecated) {
     this.includeDeprecated = includeDeprecated;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<UserRoleExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<UserRoleExpression> exs) {
+    this.exs = exs;
   }
 }

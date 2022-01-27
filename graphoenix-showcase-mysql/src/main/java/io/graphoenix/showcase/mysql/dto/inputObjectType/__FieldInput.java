@@ -13,25 +13,25 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class __FieldInput {
   private String id;
 
-  private String typeName;
-
   private String name;
 
-  private Boolean isDeprecated;
+  private String typeName;
 
-  @NonNull
-  private __TypeInput type;
+  private String ofTypeName;
 
   private String description;
-
-  private Integer version;
 
   @NonNull
   private Collection<__InputValueInput> args;
 
+  @NonNull
+  private __TypeInput type;
+
   private String deprecationReason;
 
-  private String ofTypeName;
+  private Integer version;
+
+  private Boolean isDeprecated;
 
   public String getId() {
     return this.id;
@@ -39,14 +39,6 @@ public class __FieldInput {
 
   public void setId(String id) {
     this.id = id;
-  }
-
-  public String getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
   }
 
   public String getName() {
@@ -57,20 +49,20 @@ public class __FieldInput {
     this.name = name;
   }
 
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public String getTypeName() {
+    return this.typeName;
   }
 
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setTypeName(String typeName) {
+    this.typeName = typeName;
   }
 
-  public __TypeInput getType() {
-    return this.type;
+  public String getOfTypeName() {
+    return this.ofTypeName;
   }
 
-  public void setType(__TypeInput type) {
-    this.type = type;
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
   }
 
   public String getDescription() {
@@ -81,20 +73,20 @@ public class __FieldInput {
     this.description = description;
   }
 
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
   public Collection<__InputValueInput> getArgs() {
     return this.args;
   }
 
   public void setArgs(Collection<__InputValueInput> args) {
     this.args = args;
+  }
+
+  public __TypeInput getType() {
+    return this.type;
+  }
+
+  public void setType(__TypeInput type) {
+    this.type = type;
   }
 
   public String getDeprecationReason() {
@@ -105,11 +97,19 @@ public class __FieldInput {
     this.deprecationReason = deprecationReason;
   }
 
-  public String getOfTypeName() {
-    return this.ofTypeName;
+  public Integer getVersion() {
+    return this.version;
   }
 
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

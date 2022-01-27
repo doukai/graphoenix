@@ -7,6 +7,7 @@ import org.eclipse.microprofile.graphql.Ignore;
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 public class JavaElementToEnum {
@@ -31,7 +32,7 @@ public class JavaElementToEnum {
                                                 .setName(elementManager.getNameFromElement(element))
                                                 .setDescription(elementManager.getDescriptionFromElement(element))
                                 )
-                                .collect(Collectors.toSet())
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
                 );
     }
 }

@@ -11,15 +11,15 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __SchemaInput {
-  boolean isDeprecated() default false;
-
   __TypeInnerInput[] types() default {};
 
-  __DirectiveInnerInput[] directives() default {};
+  boolean isDeprecated() default false;
 
   String mutationTypeName() default "";
 
   __TypeInnerInput subscriptionType() default @__TypeInnerInput;
+
+  __DirectiveInnerInput[] directives() default {};
 
   __TypeInnerInput mutationType() default @__TypeInnerInput;
 
@@ -33,15 +33,15 @@ public @interface __SchemaInput {
 
   __TypeInnerInput queryType() default @__TypeInnerInput;
 
-  String $isDeprecated() default "";
-
   String $types() default "";
 
-  String $directives() default "";
+  String $isDeprecated() default "";
 
   String $mutationTypeName() default "";
 
   String $subscriptionType() default "";
+
+  String $directives() default "";
 
   String $mutationType() default "";
 

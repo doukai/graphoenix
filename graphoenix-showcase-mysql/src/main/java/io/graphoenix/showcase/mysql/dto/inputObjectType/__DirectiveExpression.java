@@ -10,78 +10,38 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __DirectiveExpression {
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
-
-  private __InputValueExpression args;
-
-  private Collection<__DirectiveExpression> exs;
-
-  private IntExpression version;
-
-  private StringExpression description;
-
-  private Boolean onField;
+  private IDExpression name;
 
   private IntExpression schemaId;
 
-  private IDExpression name;
+  private StringExpression description;
 
   private __DirectiveLocationExpression locations;
 
-  private Boolean onFragment;
+  private __InputValueExpression args;
 
   private Boolean onOperation;
+
+  private Boolean onFragment;
+
+  private Boolean onField;
+
+  private IntExpression version;
+
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
+  private Collection<__DirectiveExpression> exs;
+
+  public IDExpression getName() {
+    return this.name;
   }
 
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
-  public __InputValueExpression getArgs() {
-    return this.args;
-  }
-
-  public void setArgs(__InputValueExpression args) {
-    this.args = args;
-  }
-
-  public Collection<__DirectiveExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__DirectiveExpression> exs) {
-    this.exs = exs;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public StringExpression getDescription() {
-    return this.description;
-  }
-
-  public void setDescription(StringExpression description) {
-    this.description = description;
-  }
-
-  public Boolean getOnField() {
-    return this.onField;
-  }
-
-  public void setOnField(Boolean onField) {
-    this.onField = onField;
+  public void setName(IDExpression name) {
+    this.name = name;
   }
 
   public IntExpression getSchemaId() {
@@ -92,12 +52,12 @@ public class __DirectiveExpression {
     this.schemaId = schemaId;
   }
 
-  public IDExpression getName() {
-    return this.name;
+  public StringExpression getDescription() {
+    return this.description;
   }
 
-  public void setName(IDExpression name) {
-    this.name = name;
+  public void setDescription(StringExpression description) {
+    this.description = description;
   }
 
   public __DirectiveLocationExpression getLocations() {
@@ -108,12 +68,12 @@ public class __DirectiveExpression {
     this.locations = locations;
   }
 
-  public Boolean getOnFragment() {
-    return this.onFragment;
+  public __InputValueExpression getArgs() {
+    return this.args;
   }
 
-  public void setOnFragment(Boolean onFragment) {
-    this.onFragment = onFragment;
+  public void setArgs(__InputValueExpression args) {
+    this.args = args;
   }
 
   public Boolean getOnOperation() {
@@ -124,11 +84,51 @@ public class __DirectiveExpression {
     this.onOperation = onOperation;
   }
 
+  public Boolean getOnFragment() {
+    return this.onFragment;
+  }
+
+  public void setOnFragment(Boolean onFragment) {
+    this.onFragment = onFragment;
+  }
+
+  public Boolean getOnField() {
+    return this.onField;
+  }
+
+  public void setOnField(Boolean onField) {
+    this.onField = onField;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
   public Conditional getCond() {
     return this.cond;
   }
 
   public void setCond(Conditional cond) {
     this.cond = cond;
+  }
+
+  public Collection<__DirectiveExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__DirectiveExpression> exs) {
+    this.exs = exs;
   }
 }

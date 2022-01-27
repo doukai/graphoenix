@@ -14,9 +14,9 @@ import java.lang.annotation.Target;
 public @interface __DirectiveInput {
   __InputValueInnerInput[] args() default {};
 
-  boolean isDeprecated() default false;
-
   boolean onFragment() default false;
+
+  boolean isDeprecated() default false;
 
   int schemaId() default 0;
 
@@ -26,17 +26,17 @@ public @interface __DirectiveInput {
 
   __DirectiveLocation[] locations() default {};
 
-  int version() default 0;
-
   boolean onOperation() default false;
+
+  int version() default 0;
 
   boolean onField() default false;
 
   String $args() default "";
 
-  String $isDeprecated() default "";
-
   String $onFragment() default "";
+
+  String $isDeprecated() default "";
 
   String $schemaId() default "";
 
@@ -46,9 +46,9 @@ public @interface __DirectiveInput {
 
   String $locations() default "";
 
-  String $version() default "";
-
   String $onOperation() default "";
+
+  String $version() default "";
 
   String $onField() default "";
 }

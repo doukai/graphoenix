@@ -6,7 +6,7 @@ import org.eclipse.microprofile.graphql.Enum;
 @Enum
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public enum Conditional {
-  OR,
+  AND,
 
-  AND
+  OR
 }

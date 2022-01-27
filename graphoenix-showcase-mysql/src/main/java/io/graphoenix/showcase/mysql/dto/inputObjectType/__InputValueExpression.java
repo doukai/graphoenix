@@ -10,72 +10,40 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __InputValueExpression {
-  private StringExpression description;
-
-  private StringExpression directiveName;
-
-  private IntExpression fieldId;
-
-  private Collection<__InputValueExpression> exs;
-
-  @DefaultValue("AND")
-  private Conditional cond;
+  private IDExpression id;
 
   private StringExpression name;
 
-  private StringExpression defaultValue;
+  private StringExpression typeName;
+
+  private StringExpression ofTypeName;
+
+  private IntExpression fieldId;
+
+  private StringExpression directiveName;
+
+  private StringExpression description;
 
   private __TypeExpression type;
 
-  private IDExpression id;
+  private StringExpression defaultValue;
+
+  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private StringExpression typeName;
+  @DefaultValue("AND")
+  private Conditional cond;
 
-  private IntExpression version;
+  private Collection<__InputValueExpression> exs;
 
-  private StringExpression ofTypeName;
-
-  public StringExpression getDescription() {
-    return this.description;
+  public IDExpression getId() {
+    return this.id;
   }
 
-  public void setDescription(StringExpression description) {
-    this.description = description;
-  }
-
-  public StringExpression getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(StringExpression directiveName) {
-    this.directiveName = directiveName;
-  }
-
-  public IntExpression getFieldId() {
-    return this.fieldId;
-  }
-
-  public void setFieldId(IntExpression fieldId) {
-    this.fieldId = fieldId;
-  }
-
-  public Collection<__InputValueExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__InputValueExpression> exs) {
-    this.exs = exs;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
+  public void setId(IDExpression id) {
+    this.id = id;
   }
 
   public StringExpression getName() {
@@ -86,12 +54,44 @@ public class __InputValueExpression {
     this.name = name;
   }
 
-  public StringExpression getDefaultValue() {
-    return this.defaultValue;
+  public StringExpression getTypeName() {
+    return this.typeName;
   }
 
-  public void setDefaultValue(StringExpression defaultValue) {
-    this.defaultValue = defaultValue;
+  public void setTypeName(StringExpression typeName) {
+    this.typeName = typeName;
+  }
+
+  public StringExpression getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(StringExpression ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public IntExpression getFieldId() {
+    return this.fieldId;
+  }
+
+  public void setFieldId(IntExpression fieldId) {
+    this.fieldId = fieldId;
+  }
+
+  public StringExpression getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(StringExpression directiveName) {
+    this.directiveName = directiveName;
+  }
+
+  public StringExpression getDescription() {
+    return this.description;
+  }
+
+  public void setDescription(StringExpression description) {
+    this.description = description;
   }
 
   public __TypeExpression getType() {
@@ -102,28 +102,12 @@ public class __InputValueExpression {
     this.type = type;
   }
 
-  public IDExpression getId() {
-    return this.id;
+  public StringExpression getDefaultValue() {
+    return this.defaultValue;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
-  }
-
-  public StringExpression getTypeName() {
-    return this.typeName;
-  }
-
-  public void setTypeName(StringExpression typeName) {
-    this.typeName = typeName;
+  public void setDefaultValue(StringExpression defaultValue) {
+    this.defaultValue = defaultValue;
   }
 
   public IntExpression getVersion() {
@@ -134,11 +118,27 @@ public class __InputValueExpression {
     this.version = version;
   }
 
-  public StringExpression getOfTypeName() {
-    return this.ofTypeName;
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
   }
 
-  public void setOfTypeName(StringExpression ofTypeName) {
-    this.ofTypeName = ofTypeName;
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
+  }
+
+  public Collection<__InputValueExpression> getExs() {
+    return this.exs;
+  }
+
+  public void setExs(Collection<__InputValueExpression> exs) {
+    this.exs = exs;
   }
 }

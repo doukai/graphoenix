@@ -10,65 +10,33 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __SchemaExpression {
-  private __TypeExpression queryType;
-
-  private IntExpression version;
-
-  private StringExpression subscriptionTypeName;
-
-  private __TypeExpression subscriptionType;
-
   private IDExpression id;
+
+  private StringExpression queryTypeName;
 
   private StringExpression mutationTypeName;
 
-  private __DirectiveExpression directives;
-
-  @DefaultValue("AND")
-  private Conditional cond;
+  private StringExpression subscriptionTypeName;
 
   private __TypeExpression types;
+
+  private __TypeExpression queryType;
+
+  private __TypeExpression mutationType;
+
+  private __TypeExpression subscriptionType;
+
+  private __DirectiveExpression directives;
+
+  private IntExpression version;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
-  private __TypeExpression mutationType;
-
-  private StringExpression queryTypeName;
+  @DefaultValue("AND")
+  private Conditional cond;
 
   private Collection<__SchemaExpression> exs;
-
-  public __TypeExpression getQueryType() {
-    return this.queryType;
-  }
-
-  public void setQueryType(__TypeExpression queryType) {
-    this.queryType = queryType;
-  }
-
-  public IntExpression getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(IntExpression version) {
-    this.version = version;
-  }
-
-  public StringExpression getSubscriptionTypeName() {
-    return this.subscriptionTypeName;
-  }
-
-  public void setSubscriptionTypeName(StringExpression subscriptionTypeName) {
-    this.subscriptionTypeName = subscriptionTypeName;
-  }
-
-  public __TypeExpression getSubscriptionType() {
-    return this.subscriptionType;
-  }
-
-  public void setSubscriptionType(__TypeExpression subscriptionType) {
-    this.subscriptionType = subscriptionType;
-  }
 
   public IDExpression getId() {
     return this.id;
@@ -76,6 +44,14 @@ public class __SchemaExpression {
 
   public void setId(IDExpression id) {
     this.id = id;
+  }
+
+  public StringExpression getQueryTypeName() {
+    return this.queryTypeName;
+  }
+
+  public void setQueryTypeName(StringExpression queryTypeName) {
+    this.queryTypeName = queryTypeName;
   }
 
   public StringExpression getMutationTypeName() {
@@ -86,20 +62,12 @@ public class __SchemaExpression {
     this.mutationTypeName = mutationTypeName;
   }
 
-  public __DirectiveExpression getDirectives() {
-    return this.directives;
+  public StringExpression getSubscriptionTypeName() {
+    return this.subscriptionTypeName;
   }
 
-  public void setDirectives(__DirectiveExpression directives) {
-    this.directives = directives;
-  }
-
-  public Conditional getCond() {
-    return this.cond;
-  }
-
-  public void setCond(Conditional cond) {
-    this.cond = cond;
+  public void setSubscriptionTypeName(StringExpression subscriptionTypeName) {
+    this.subscriptionTypeName = subscriptionTypeName;
   }
 
   public __TypeExpression getTypes() {
@@ -110,12 +78,12 @@ public class __SchemaExpression {
     this.types = types;
   }
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
+  public __TypeExpression getQueryType() {
+    return this.queryType;
   }
 
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
+  public void setQueryType(__TypeExpression queryType) {
+    this.queryType = queryType;
   }
 
   public __TypeExpression getMutationType() {
@@ -126,12 +94,44 @@ public class __SchemaExpression {
     this.mutationType = mutationType;
   }
 
-  public StringExpression getQueryTypeName() {
-    return this.queryTypeName;
+  public __TypeExpression getSubscriptionType() {
+    return this.subscriptionType;
   }
 
-  public void setQueryTypeName(StringExpression queryTypeName) {
-    this.queryTypeName = queryTypeName;
+  public void setSubscriptionType(__TypeExpression subscriptionType) {
+    this.subscriptionType = subscriptionType;
+  }
+
+  public __DirectiveExpression getDirectives() {
+    return this.directives;
+  }
+
+  public void setDirectives(__DirectiveExpression directives) {
+    this.directives = directives;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
+  }
+
+  public Conditional getCond() {
+    return this.cond;
+  }
+
+  public void setCond(Conditional cond) {
+    this.cond = cond;
   }
 
   public Collection<__SchemaExpression> getExs() {

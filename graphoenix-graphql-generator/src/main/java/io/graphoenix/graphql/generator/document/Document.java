@@ -4,7 +4,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Document {
@@ -24,7 +24,7 @@ public class Document {
 
     public Document addDefinition(String definition) {
         if (this.definitions == null) {
-            this.definitions = new HashSet<>();
+            this.definitions = new LinkedHashSet<>();
         }
         this.definitions.add(definition);
         return this;

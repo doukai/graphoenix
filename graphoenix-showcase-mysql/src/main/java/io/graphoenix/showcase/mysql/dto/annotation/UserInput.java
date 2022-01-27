@@ -20,9 +20,9 @@ public @interface UserInput {
 
   String[] phones() default {};
 
-  String userDetail2() default "";
-
   String login() default "";
+
+  String userDetail2() default "";
 
   int version() default 0;
 
@@ -48,9 +48,9 @@ public @interface UserInput {
 
   String $phones() default "";
 
-  String $userDetail2() default "";
-
   String $login() default "";
+
+  String $userDetail2() default "";
 
   String $version() default "";
 

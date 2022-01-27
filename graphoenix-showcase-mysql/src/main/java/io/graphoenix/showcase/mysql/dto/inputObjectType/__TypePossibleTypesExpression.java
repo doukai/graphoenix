@@ -10,21 +10,29 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypePossibleTypesExpression {
+  private IDExpression id;
+
   private StringExpression typeName;
 
   private StringExpression possibleTypeName;
 
   private IntExpression version;
 
-  private IDExpression id;
-
-  private Collection<__TypePossibleTypesExpression> exs;
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
+  private Collection<__TypePossibleTypesExpression> exs;
+
+  public IDExpression getId() {
+    return this.id;
+  }
+
+  public void setId(IDExpression id) {
+    this.id = id;
+  }
 
   public StringExpression getTypeName() {
     return this.typeName;
@@ -50,20 +58,12 @@ public class __TypePossibleTypesExpression {
     this.version = version;
   }
 
-  public IDExpression getId() {
-    return this.id;
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
   }
 
-  public void setId(IDExpression id) {
-    this.id = id;
-  }
-
-  public Collection<__TypePossibleTypesExpression> getExs() {
-    return this.exs;
-  }
-
-  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
-    this.exs = exs;
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
   }
 
   public Conditional getCond() {
@@ -74,11 +74,11 @@ public class __TypePossibleTypesExpression {
     this.cond = cond;
   }
 
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
+  public Collection<__TypePossibleTypesExpression> getExs() {
+    return this.exs;
   }
 
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
+  public void setExs(Collection<__TypePossibleTypesExpression> exs) {
+    this.exs = exs;
   }
 }

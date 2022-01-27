@@ -12,19 +12,19 @@ import org.eclipse.microprofile.graphql.Input;
 public class __DirectiveLocationsExpression {
   private IDExpression id;
 
-  @DefaultValue("false")
-  private Boolean includeDeprecated;
-
   private StringExpression directiveName;
 
   private __DirectiveLocationExpression directiveLocation;
 
-  private Collection<__DirectiveLocationsExpression> exs;
+  private IntExpression version;
+
+  @DefaultValue("false")
+  private Boolean includeDeprecated;
 
   @DefaultValue("AND")
   private Conditional cond;
 
-  private IntExpression version;
+  private Collection<__DirectiveLocationsExpression> exs;
 
   public IDExpression getId() {
     return this.id;
@@ -32,14 +32,6 @@ public class __DirectiveLocationsExpression {
 
   public void setId(IDExpression id) {
     this.id = id;
-  }
-
-  public Boolean getIncludeDeprecated() {
-    return this.includeDeprecated;
-  }
-
-  public void setIncludeDeprecated(Boolean includeDeprecated) {
-    this.includeDeprecated = includeDeprecated;
   }
 
   public StringExpression getDirectiveName() {
@@ -58,12 +50,20 @@ public class __DirectiveLocationsExpression {
     this.directiveLocation = directiveLocation;
   }
 
-  public Collection<__DirectiveLocationsExpression> getExs() {
-    return this.exs;
+  public IntExpression getVersion() {
+    return this.version;
   }
 
-  public void setExs(Collection<__DirectiveLocationsExpression> exs) {
-    this.exs = exs;
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public Boolean getIncludeDeprecated() {
+    return this.includeDeprecated;
+  }
+
+  public void setIncludeDeprecated(Boolean includeDeprecated) {
+    this.includeDeprecated = includeDeprecated;
   }
 
   public Conditional getCond() {
@@ -74,11 +74,11 @@ public class __DirectiveLocationsExpression {
     this.cond = cond;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public Collection<__DirectiveLocationsExpression> getExs() {
+    return this.exs;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setExs(Collection<__DirectiveLocationsExpression> exs) {
+    this.exs = exs;
   }
 }

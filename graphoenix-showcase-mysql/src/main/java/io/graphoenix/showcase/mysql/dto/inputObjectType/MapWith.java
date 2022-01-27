@@ -7,11 +7,19 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class MapWith {
+  private String type;
+
   private String from;
 
   private String to;
 
-  private String type;
+  public String getType() {
+    return this.type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
 
   public String getFrom() {
     return this.from;
@@ -27,13 +35,5 @@ public class MapWith {
 
   public void setTo(String to) {
     this.to = to;
-  }
-
-  public String getType() {
-    return this.type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
   }
 }

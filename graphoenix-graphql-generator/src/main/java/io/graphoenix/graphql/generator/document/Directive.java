@@ -4,7 +4,7 @@ import io.graphoenix.graphql.generator.operation.Argument;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Directive {
@@ -32,7 +32,7 @@ public class Directive {
 
     public Directive addArgument(Argument argument) {
         if (arguments == null) {
-            arguments = new HashSet<>();
+            arguments = new LinkedHashSet<>();
         }
         this.arguments.add(argument);
         return this;

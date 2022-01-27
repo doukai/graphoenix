@@ -17,9 +17,9 @@ public @interface __InputValueInnerInput {
 
   String defaultValue() default "";
 
-  String typeName() default "";
-
   String name() default "";
+
+  String typeName() default "";
 
   String description() default "";
 
@@ -37,9 +37,9 @@ public @interface __InputValueInnerInput {
 
   String $defaultValue() default "";
 
-  String $typeName() default "";
-
   String $name() default "";
+
+  String $typeName() default "";
 
   String $description() default "";
 

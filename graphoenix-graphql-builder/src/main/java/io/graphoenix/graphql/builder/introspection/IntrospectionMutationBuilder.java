@@ -27,7 +27,7 @@ public class IntrospectionMutationBuilder {
 
     public Operation buildIntrospectionSchemaMutation() {
 
-        Set<Argument> arguments = new HashSet<>();
+        Set<Argument> arguments = new LinkedHashSet<>();
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
@@ -86,7 +86,7 @@ public class IntrospectionMutationBuilder {
                                         manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
                                 )
                         )
-                ).collect(Collectors.toSet()));
+                ).collect(Collectors.toCollection(LinkedHashSet::new)));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setQueryType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
@@ -97,7 +97,7 @@ public class IntrospectionMutationBuilder {
         Optional<GraphqlParser.ObjectTypeDefinitionContext> subscriptionTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject);
         subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setSubscriptionType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
 
-        schema.setDirectives(manager.getDirectives().map(this::directiveDefinitionContextToDirective).collect(Collectors.toSet()));
+        schema.setDirectives(manager.getDirectives().map(this::directiveDefinitionContextToDirective).collect(Collectors.toCollection(LinkedHashSet::new)));
         return schema;
     }
 
@@ -122,7 +122,7 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toSet()));
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toCollection(LinkedHashSet::new)));
         }
         return type;
     }
@@ -134,7 +134,7 @@ public class IntrospectionMutationBuilder {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContextToType(interfaceTypeDefinitionContext, level))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private __Type interfaceTypeDefinitionContextToType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext, int level) {
@@ -150,7 +150,7 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toSet()));
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toCollection(LinkedHashSet::new)));
         }
         return type;
     }
@@ -163,7 +163,7 @@ public class IntrospectionMutationBuilder {
         }
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             field.setArgs(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toSet()));
+                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toCollection(LinkedHashSet::new)));
         }
 
         field.setType(typeContextToType(fieldDefinitionContext.type(), level));
@@ -229,7 +229,7 @@ public class IntrospectionMutationBuilder {
                 type.setDescription(enumTypeDefinitionContext.description().getText());
             }
             type.setEnumValues(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream()
-                    .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toSet()));
+                    .map(this::enumValueDefinitionContextToEnumValue).collect(Collectors.toCollection(LinkedHashSet::new)));
         }
         return type;
     }
@@ -279,7 +279,7 @@ public class IntrospectionMutationBuilder {
             }
             type.setInputFields(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                     .map(inputValueDefinitionContext -> inputValueDefinitionContextToInputValue(inputValueDefinitionContext, level + 1))
-                    .collect(Collectors.toSet()));
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
         }
         return type;
     }
@@ -311,9 +311,9 @@ public class IntrospectionMutationBuilder {
         }
         if (directiveDefinitionContext.argumentsDefinition() != null) {
             directive.setArgs(directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toSet()));
+                    .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toCollection(LinkedHashSet::new)));
         }
-        Set<__DirectiveLocation> directiveLocationList = new HashSet<>();
+        Set<__DirectiveLocation> directiveLocationList = new LinkedHashSet<>();
         addDirectiveDefinitionsContextToDirectiveLocationList(directiveDefinitionContext.directiveLocations(), directiveLocationList);
         directive.setLocations(directiveLocationList);
         directive.setOnField(directive.getLocations().contains(__DirectiveLocation.FIELD));

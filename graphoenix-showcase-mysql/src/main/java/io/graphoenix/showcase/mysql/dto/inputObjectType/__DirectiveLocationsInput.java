@@ -13,15 +13,15 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class __DirectiveLocationsInput {
   private String id;
 
-  private Integer version;
-
-  private Boolean isDeprecated;
+  @NonNull
+  private String directiveName;
 
   @NonNull
   private __DirectiveLocation directiveLocation;
 
-  @NonNull
-  private String directiveName;
+  private Integer version;
+
+  private Boolean isDeprecated;
 
   public String getId() {
     return this.id;
@@ -29,6 +29,22 @@ public class __DirectiveLocationsInput {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public String getDirectiveName() {
+    return this.directiveName;
+  }
+
+  public void setDirectiveName(String directiveName) {
+    this.directiveName = directiveName;
+  }
+
+  public __DirectiveLocation getDirectiveLocation() {
+    return this.directiveLocation;
+  }
+
+  public void setDirectiveLocation(__DirectiveLocation directiveLocation) {
+    this.directiveLocation = directiveLocation;
   }
 
   public Integer getVersion() {
@@ -45,21 +61,5 @@ public class __DirectiveLocationsInput {
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
-  }
-
-  public __DirectiveLocation getDirectiveLocation() {
-    return this.directiveLocation;
-  }
-
-  public void setDirectiveLocation(__DirectiveLocation directiveLocation) {
-    this.directiveLocation = directiveLocation;
-  }
-
-  public String getDirectiveName() {
-    return this.directiveName;
-  }
-
-  public void setDirectiveName(String directiveName) {
-    this.directiveName = directiveName;
   }
 }

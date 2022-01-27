@@ -12,38 +12,20 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __EnumValue implements Meta {
-  private Integer version;
-
-  private String deprecationReason;
-
   @Id
   private String id;
 
   private String name;
 
-  private Boolean isDeprecated;
-
   private String ofTypeName;
 
   private String description;
 
-  @Override
-  public Integer getVersion() {
-    return this.version;
-  }
+  private String deprecationReason;
 
-  @Override
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
+  private Integer version;
 
-  public String getDeprecationReason() {
-    return this.deprecationReason;
-  }
-
-  public void setDeprecationReason(String deprecationReason) {
-    this.deprecationReason = deprecationReason;
-  }
+  private Boolean isDeprecated;
 
   public String getId() {
     return this.id;
@@ -61,16 +43,6 @@ public class __EnumValue implements Meta {
     this.name = name;
   }
 
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
   public String getOfTypeName() {
     return this.ofTypeName;
   }
@@ -85,5 +57,33 @@ public class __EnumValue implements Meta {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getDeprecationReason() {
+    return this.deprecationReason;
+  }
+
+  public void setDeprecationReason(String deprecationReason) {
+    this.deprecationReason = deprecationReason;
+  }
+
+  @Override
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

@@ -13,18 +13,26 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class __TypeInterfaces implements Meta {
+  @Id
+  private String id;
+
   @NonNull
   private String typeName;
+
+  @NonNull
+  private String interfaceName;
 
   private Integer version;
 
   private Boolean isDeprecated;
 
-  @Id
-  private String id;
+  public String getId() {
+    return this.id;
+  }
 
-  @NonNull
-  private String interfaceName;
+  public void setId(String id) {
+    this.id = id;
+  }
 
   public String getTypeName() {
     return this.typeName;
@@ -32,6 +40,14 @@ public class __TypeInterfaces implements Meta {
 
   public void setTypeName(String typeName) {
     this.typeName = typeName;
+  }
+
+  public String getInterfaceName() {
+    return this.interfaceName;
+  }
+
+  public void setInterfaceName(String interfaceName) {
+    this.interfaceName = interfaceName;
   }
 
   @Override
@@ -52,21 +68,5 @@ public class __TypeInterfaces implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
-  }
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getInterfaceName() {
-    return this.interfaceName;
-  }
-
-  public void setInterfaceName(String interfaceName) {
-    this.interfaceName = interfaceName;
   }
 }

@@ -12,16 +12,24 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserPhones implements Meta {
+  @Id
+  private String id;
+
   private Integer userId;
 
   private String phone;
 
+  private Integer version;
+
   private Boolean isDeprecated;
 
-  @Id
-  private String id;
+  public String getId() {
+    return this.id;
+  }
 
-  private Integer version;
+  public void setId(String id) {
+    this.id = id;
+  }
 
   public Integer getUserId() {
     return this.userId;
@@ -40,24 +48,6 @@ public class UserPhones implements Meta {
   }
 
   @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  @Override
   public Integer getVersion() {
     return this.version;
   }
@@ -65,5 +55,15 @@ public class UserPhones implements Meta {
   @Override
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

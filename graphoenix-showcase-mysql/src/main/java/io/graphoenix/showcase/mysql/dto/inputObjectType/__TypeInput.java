@@ -15,30 +15,30 @@ public class __TypeInput {
   @NonNull
   private String name;
 
-  private Collection<__FieldInput> fields;
-
-  private String ofTypeName;
-
   private Integer schemaId;
-
-  private Integer version;
-
-  private Collection<__EnumValueInput> enumValues;
-
-  private String description;
-
-  private Collection<__TypeInput> possibleTypes;
 
   @NonNull
   private __TypeKind kind;
 
-  private __TypeInput ofType;
+  private String description;
 
-  private Boolean isDeprecated;
+  private Collection<__FieldInput> fields;
 
   private Collection<__TypeInput> interfaces;
 
+  private Collection<__TypeInput> possibleTypes;
+
+  private Collection<__EnumValueInput> enumValues;
+
   private Collection<__InputValueInput> inputFields;
+
+  private String ofTypeName;
+
+  private __TypeInput ofType;
+
+  private Integer version;
+
+  private Boolean isDeprecated;
 
   public String getName() {
     return this.name;
@@ -46,22 +46,6 @@ public class __TypeInput {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public Collection<__FieldInput> getFields() {
-    return this.fields;
-  }
-
-  public void setFields(Collection<__FieldInput> fields) {
-    this.fields = fields;
-  }
-
-  public String getOfTypeName() {
-    return this.ofTypeName;
-  }
-
-  public void setOfTypeName(String ofTypeName) {
-    this.ofTypeName = ofTypeName;
   }
 
   public Integer getSchemaId() {
@@ -72,20 +56,12 @@ public class __TypeInput {
     this.schemaId = schemaId;
   }
 
-  public Integer getVersion() {
-    return this.version;
+  public __TypeKind getKind() {
+    return this.kind;
   }
 
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
-
-  public Collection<__EnumValueInput> getEnumValues() {
-    return this.enumValues;
-  }
-
-  public void setEnumValues(Collection<__EnumValueInput> enumValues) {
-    this.enumValues = enumValues;
+  public void setKind(__TypeKind kind) {
+    this.kind = kind;
   }
 
   public String getDescription() {
@@ -96,36 +72,12 @@ public class __TypeInput {
     this.description = description;
   }
 
-  public Collection<__TypeInput> getPossibleTypes() {
-    return this.possibleTypes;
+  public Collection<__FieldInput> getFields() {
+    return this.fields;
   }
 
-  public void setPossibleTypes(Collection<__TypeInput> possibleTypes) {
-    this.possibleTypes = possibleTypes;
-  }
-
-  public __TypeKind getKind() {
-    return this.kind;
-  }
-
-  public void setKind(__TypeKind kind) {
-    this.kind = kind;
-  }
-
-  public __TypeInput getOfType() {
-    return this.ofType;
-  }
-
-  public void setOfType(__TypeInput ofType) {
-    this.ofType = ofType;
-  }
-
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
-
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setFields(Collection<__FieldInput> fields) {
+    this.fields = fields;
   }
 
   public Collection<__TypeInput> getInterfaces() {
@@ -136,11 +88,59 @@ public class __TypeInput {
     this.interfaces = interfaces;
   }
 
+  public Collection<__TypeInput> getPossibleTypes() {
+    return this.possibleTypes;
+  }
+
+  public void setPossibleTypes(Collection<__TypeInput> possibleTypes) {
+    this.possibleTypes = possibleTypes;
+  }
+
+  public Collection<__EnumValueInput> getEnumValues() {
+    return this.enumValues;
+  }
+
+  public void setEnumValues(Collection<__EnumValueInput> enumValues) {
+    this.enumValues = enumValues;
+  }
+
   public Collection<__InputValueInput> getInputFields() {
     return this.inputFields;
   }
 
   public void setInputFields(Collection<__InputValueInput> inputFields) {
     this.inputFields = inputFields;
+  }
+
+  public String getOfTypeName() {
+    return this.ofTypeName;
+  }
+
+  public void setOfTypeName(String ofTypeName) {
+    this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeInput getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__TypeInput ofType) {
+    this.ofType = ofType;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

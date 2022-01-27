@@ -15,37 +15,61 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class User implements Meta {
+  @Id
+  private String id;
+
+  @NonNull
+  private String login;
+
+  @NonNull
+  private String password;
+
   @NonNull
   private String name;
 
-  private Sex sex;
-
-  private Organization organization;
+  private Integer age;
 
   private Boolean disable;
 
-  private String userDetail2;
+  private Sex sex;
 
-  private Boolean isDeprecated;
+  private Integer organizationId;
+
+  private Organization organization;
+
+  private Collection<Role> roles;
 
   private Collection<String> phones;
 
   private Integer version;
 
-  @NonNull
-  private String password;
+  private Boolean isDeprecated;
 
-  private Integer age;
+  private String userDetail2;
 
-  @NonNull
-  private String login;
+  public String getId() {
+    return this.id;
+  }
 
-  @Id
-  private String id;
+  public void setId(String id) {
+    this.id = id;
+  }
 
-  private Integer organizationId;
+  public String getLogin() {
+    return this.login;
+  }
 
-  private Collection<Role> roles;
+  public void setLogin(String login) {
+    this.login = login;
+  }
+
+  public String getPassword() {
+    return this.password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
 
   public String getName() {
     return this.name;
@@ -55,20 +79,12 @@ public class User implements Meta {
     this.name = name;
   }
 
-  public Sex getSex() {
-    return this.sex;
+  public Integer getAge() {
+    return this.age;
   }
 
-  public void setSex(Sex sex) {
-    this.sex = sex;
-  }
-
-  public Organization getOrganization() {
-    return this.organization;
-  }
-
-  public void setOrganization(Organization organization) {
-    this.organization = organization;
+  public void setAge(Integer age) {
+    this.age = age;
   }
 
   public Boolean getDisable() {
@@ -79,22 +95,36 @@ public class User implements Meta {
     this.disable = disable;
   }
 
-  public String getUserDetail2() {
-    return this.userDetail2;
+  public Sex getSex() {
+    return this.sex;
   }
 
-  public void setUserDetail2(String userDetail2) {
-    this.userDetail2 = userDetail2;
+  public void setSex(Sex sex) {
+    this.sex = sex;
   }
 
-  @Override
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
+  public Integer getOrganizationId() {
+    return this.organizationId;
   }
 
-  @Override
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
+  public void setOrganizationId(Integer organizationId) {
+    this.organizationId = organizationId;
+  }
+
+  public Organization getOrganization() {
+    return this.organization;
+  }
+
+  public void setOrganization(Organization organization) {
+    this.organization = organization;
+  }
+
+  public Collection<Role> getRoles() {
+    return this.roles;
+  }
+
+  public void setRoles(Collection<Role> roles) {
+    this.roles = roles;
   }
 
   public Collection<String> getPhones() {
@@ -115,51 +145,21 @@ public class User implements Meta {
     this.version = version;
   }
 
-  public String getPassword() {
-    return this.password;
+  @Override
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
   }
 
-  public void setPassword(String password) {
-    this.password = password;
+  @Override
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 
-  public Integer getAge() {
-    return this.age;
+  public String getUserDetail2() {
+    return this.userDetail2;
   }
 
-  public void setAge(Integer age) {
-    this.age = age;
-  }
-
-  public String getLogin() {
-    return this.login;
-  }
-
-  public void setLogin(String login) {
-    this.login = login;
-  }
-
-  public String getId() {
-    return this.id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public Integer getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(Integer organizationId) {
-    this.organizationId = organizationId;
-  }
-
-  public Collection<Role> getRoles() {
-    return this.roles;
-  }
-
-  public void setRoles(Collection<Role> roles) {
-    this.roles = roles;
+  public void setUserDetail2(String userDetail2) {
+    this.userDetail2 = userDetail2;
   }
 }

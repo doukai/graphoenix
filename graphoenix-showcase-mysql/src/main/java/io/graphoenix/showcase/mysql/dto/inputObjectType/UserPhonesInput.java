@@ -9,31 +9,15 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 public class UserPhonesInput {
-  private Boolean isDeprecated;
-
-  private Integer version;
-
   private String id;
-
-  private String phone;
 
   private Integer userId;
 
-  public Boolean getIsDeprecated() {
-    return this.isDeprecated;
-  }
+  private String phone;
 
-  public void setIsDeprecated(Boolean isDeprecated) {
-    this.isDeprecated = isDeprecated;
-  }
+  private Integer version;
 
-  public Integer getVersion() {
-    return this.version;
-  }
-
-  public void setVersion(Integer version) {
-    this.version = version;
-  }
+  private Boolean isDeprecated;
 
   public String getId() {
     return this.id;
@@ -41,6 +25,14 @@ public class UserPhonesInput {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public Integer getUserId() {
+    return this.userId;
+  }
+
+  public void setUserId(Integer userId) {
+    this.userId = userId;
   }
 
   public String getPhone() {
@@ -51,11 +43,19 @@ public class UserPhonesInput {
     this.phone = phone;
   }
 
-  public Integer getUserId() {
-    return this.userId;
+  public Integer getVersion() {
+    return this.version;
   }
 
-  public void setUserId(Integer userId) {
-    this.userId = userId;
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public Boolean getIsDeprecated() {
+    return this.isDeprecated;
+  }
+
+  public void setIsDeprecated(Boolean isDeprecated) {
+    this.isDeprecated = isDeprecated;
   }
 }

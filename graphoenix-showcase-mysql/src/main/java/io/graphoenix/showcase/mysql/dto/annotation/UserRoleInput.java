@@ -17,9 +17,9 @@ public @interface UserRoleInput {
 
   String id() default "";
 
-  int version() default 0;
-
   int userId() default 0;
+
+  int version() default 0;
 
   String $isDeprecated() default "";
 
@@ -27,7 +27,7 @@ public @interface UserRoleInput {
 
   String $id() default "";
 
-  String $version() default "";
-
   String $userId() default "";
+
+  String $version() default "";
 }
