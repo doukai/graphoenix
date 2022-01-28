@@ -136,19 +136,6 @@ public class GraphQLQueryToSelect {
         return select;
     }
 
-    protected Stream<GraphqlParser.SelectionContext> fragmentUnzip(String typeName, GraphqlParser.SelectionContext selectionContext) {
-        if (selectionContext.fragmentSpread() != null) {
-            Optional<GraphqlParser.FragmentDefinitionContext> fragmentDefinitionContext = manager.getObjectFragmentDefinition(typeName, selectionContext.fragmentSpread().fragmentName().getText());
-            if (fragmentDefinitionContext.isPresent()) {
-                return fragmentDefinitionContext.get().selectionSet().selection().stream();
-            } else {
-                throw new GraphQLProblem().push(FRAGMENT_NOT_EXIST.bind(selectionContext.fragmentSpread().fragmentName().getText()));
-            }
-        } else {
-            return Stream.of(selectionContext);
-        }
-    }
-
     protected PlainSelect objectSelectionToPlainSelect(String typeName, List<GraphqlParser.SelectionContext> selectionContextList) {
         return objectSelectionToPlainSelect(null, typeName, null, selectionContextList, 0);
     }
@@ -162,7 +149,7 @@ public class GraphQLQueryToSelect {
                 fieldDefinitionContext,
                 new ExpressionList(
                         selectionContextList.stream()
-                                .flatMap(selectionContext -> fragmentUnzip(typeName, selectionContext))
+                                .flatMap(selectionContext -> manager.fragmentUnzip(typeName, selectionContext))
                                 .filter(selectionContext -> manager.isNotInvokeField(typeName, selectionContext.field().name().getText()))
                                 .map(selectionContext ->
                                         new ExpressionList(

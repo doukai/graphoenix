@@ -33,15 +33,14 @@ public abstract class BaseOperationHandler {
 
     protected JsonElement invoke(JsonElement jsonElement, GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         JsonObject jsonObject = new JsonObject();
-        List<AbstractMap.SimpleEntry<String, JsonElement>> entries = operationDefinitionContext.selectionSet().selection().stream()
-                .map(selectionContext ->
-                        new AbstractMap.SimpleEntry<>(
+        operationDefinitionContext.selectionSet().selection()
+                .forEach(selectionContext ->
+                        jsonObject.add(
                                 selectionContext.field().name().getText(),
                                 getOperationHandler(selectionContext.field().name().getText())
-                                        .apply(jsonElement.getAsJsonObject().get(selectionContext.field().name().getText()), selectionContext))
-                ).collect(Collectors.toList());
-
-        jsonObject.entrySet().addAll(entries);
+                                        .apply(jsonElement.getAsJsonObject().get(selectionContext.field().name().getText()), selectionContext)
+                        )
+                );
         return jsonObject;
     }
 

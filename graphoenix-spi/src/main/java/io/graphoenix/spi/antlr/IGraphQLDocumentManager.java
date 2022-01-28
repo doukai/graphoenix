@@ -100,6 +100,8 @@ public interface IGraphQLDocumentManager {
 
     Optional<GraphqlParser.FragmentDefinitionContext> getObjectFragmentDefinition(String typeName, String fragmentName);
 
+    Stream<GraphqlParser.SelectionContext> fragmentUnzip(String typeName, GraphqlParser.SelectionContext selectionContext);
+
     Optional<String> getQueryOperationTypeName();
 
     boolean isQueryOperationType(String typeName);

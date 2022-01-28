@@ -1,6 +1,7 @@
 package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.*;
 
 import java.io.File;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.spi.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
@@ -349,6 +351,20 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public Optional<GraphqlParser.FragmentDefinitionContext> getObjectFragmentDefinition(String typeName, String fragmentName) {
         return graphQLFragmentManager.getFragmentDefinition(typeName, fragmentName);
+    }
+
+    @Override
+    public Stream<GraphqlParser.SelectionContext> fragmentUnzip(String typeName, GraphqlParser.SelectionContext selectionContext) {
+        if (selectionContext.fragmentSpread() != null) {
+            Optional<GraphqlParser.FragmentDefinitionContext> fragmentDefinitionContext = getObjectFragmentDefinition(typeName, selectionContext.fragmentSpread().fragmentName().getText());
+            if (fragmentDefinitionContext.isPresent()) {
+                return fragmentDefinitionContext.get().selectionSet().selection().stream();
+            } else {
+                throw new GraphQLProblem().push(FRAGMENT_NOT_EXIST.bind(selectionContext.fragmentSpread().fragmentName().getText()));
+            }
+        } else {
+            return Stream.of(selectionContext);
+        }
     }
 
     @Override

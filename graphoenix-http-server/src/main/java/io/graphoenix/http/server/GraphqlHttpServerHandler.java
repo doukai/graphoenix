@@ -74,10 +74,10 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             String jsonResult = null;
             switch (type) {
                 case QUERY:
-                    jsonResult = queryHandler.query(requestBody.getQuery(), requestBody.getVariables()).block().getAsString();
+                    jsonResult = queryHandler.query(requestBody.getQuery(), requestBody.getVariables()).block().toString();
                     break;
                 case MUTATION:
-                    jsonResult = mutationHandler.mutation(requestBody.getQuery(), requestBody.getVariables()).block().getAsString();
+                    jsonResult = mutationHandler.mutation(requestBody.getQuery(), requestBody.getVariables()).block().toString();
                     break;
             }
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));
