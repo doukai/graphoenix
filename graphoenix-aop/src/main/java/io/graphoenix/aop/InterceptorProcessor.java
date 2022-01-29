@@ -66,23 +66,37 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
 
         interceptorBeanMethodDeclarations.forEach(interceptorBeanMethodDeclaration -> componentProxyClassDeclaration.addField(interceptorBeanMethodDeclaration.getType(), interceptorBeanMethodDeclaration.getNameAsString(), Modifier.Keyword.PRIVATE));
 
-        componentClassDeclaration.getConstructors().forEach(
-                constructorDeclaration -> componentProxyClassDeclaration.getConstructors()
-                        .forEach(componentProxyClassConstructor -> {
-                                    interceptorBeanMethodDeclarations
-                                            .forEach(interceptorBeanMethodDeclaration -> {
-                                                        componentProxyClassConstructor.addParameter(interceptorBeanMethodDeclaration.getType(), interceptorBeanMethodDeclaration.getNameAsString());
-                                                        componentProxyClassConstructor.getBody().addStatement(
-                                                                new AssignExpr()
-                                                                        .setTarget(new FieldAccessExpr().setName(interceptorBeanMethodDeclaration.getName()).setScope(new ThisExpr()))
-                                                                        .setOperator(ASSIGN)
-                                                                        .setValue(interceptorBeanMethodDeclaration.getNameAsExpression())
-                                                        );
-                                                    }
-                                            );
-                                }
-                        )
-        );
+        componentProxyCompilationUnit.addImport("io.graphoenix.core.aop.InterceptorBeanContext");
+
+        componentClassDeclaration.getConstructors()
+                .forEach(constructorDeclaration ->
+                        componentProxyClassDeclaration.getConstructors()
+                                .forEach(componentProxyClassConstructor -> {
+                                            interceptorBeanMethodDeclarations
+                                                    .forEach(interceptorBeanMethodDeclaration ->
+                                                            componentProxyClassConstructor.getBody()
+                                                                    .addStatement(new AssignExpr()
+                                                                            .setTarget(new FieldAccessExpr().setName(interceptorBeanMethodDeclaration.getName()).setScope(new ThisExpr()))
+                                                                            .setOperator(ASSIGN)
+                                                                            .setValue(new MethodCallExpr()
+                                                                                    .setName("get")
+                                                                                    .addArgument(interceptorBeanMethodDeclaration
+                                                                                            .getAnnotationByClass(InterceptorBean.class)
+                                                                                            .orElseThrow()
+                                                                                            .asNormalAnnotationExpr()
+                                                                                            .getPairs().stream()
+                                                                                            .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
+                                                                                            .map(memberValuePair -> memberValuePair.getValue().asClassExpr())
+                                                                                            .findFirst()
+                                                                                            .orElseThrow()
+                                                                                    )
+                                                                                    .setScope(new NameExpr().setName("InterceptorBeanContext"))
+                                                                            )
+                                                                    )
+                                                    );
+                                        }
+                                )
+                );
 
         componentClassDeclaration.getMembers().stream()
                 .filter(BodyDeclaration::isMethodDeclaration)
@@ -218,7 +232,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(declaration -> declaration.getType().isClassOrInterfaceType())
-                                                    .filter(declaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(declaration).anyMatch(type-> type.getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString())))
+                                                    .filter(declaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(declaration).anyMatch(type -> type.getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString())))
                                                     .findFirst()
                                                     .orElseThrow();
 
