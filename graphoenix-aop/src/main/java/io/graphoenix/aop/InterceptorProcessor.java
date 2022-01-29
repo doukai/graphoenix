@@ -14,8 +14,10 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.MethodReferenceExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.SuperExpr;
 import com.github.javaparser.ast.expr.ThisExpr;
@@ -26,23 +28,29 @@ import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
 import io.graphoenix.dagger.ProcessorTools;
+import io.graphoenix.spi.aop.BaseInterceptorBeanModuleContext;
 import io.graphoenix.spi.aop.InterceptorBean;
+import io.graphoenix.spi.aop.InterceptorBeanModuleContext;
 import io.graphoenix.spi.aop.InvocationContext;
 
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.github.javaparser.ast.expr.AssignExpr.Operator.ASSIGN;
-import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
 
 @AutoService(DaggerProxyProcessor.class)
 public class InterceptorProcessor implements DaggerProxyProcessor {
 
+    private ProcessorTools processorTools;
+
     @Override
     public void init(ProcessorTools processorTools) {
+        this.processorTools = processorTools;
+        interceptorAnnotations = new HashMap<>();
     }
 
     @Override
@@ -64,25 +72,36 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                 )
                 .collect(Collectors.toList());
 
+        interceptorBeanMethodDeclarations
+                .forEach(interceptorBeanMethodDeclaration ->
+                        interceptorAnnotations.put(
+                                getInterceptorAnnotationClassName(moduleCompilationUnit, interceptorBeanMethodDeclaration),
+                                getInterceptorAnnotationClassName(moduleCompilationUnit, interceptorBeanMethodDeclaration)
+                        )
+                );
+
         interceptorBeanMethodDeclarations.forEach(interceptorBeanMethodDeclaration -> componentProxyClassDeclaration.addField(interceptorBeanMethodDeclaration.getType(), interceptorBeanMethodDeclaration.getNameAsString(), Modifier.Keyword.PRIVATE));
 
-        componentClassDeclaration.getConstructors().forEach(
-                constructorDeclaration -> componentProxyClassDeclaration.getConstructors()
-                        .forEach(componentProxyClassConstructor -> {
-                                    interceptorBeanMethodDeclarations
-                                            .forEach(interceptorBeanMethodDeclaration -> {
-                                                        componentProxyClassConstructor.addParameter(interceptorBeanMethodDeclaration.getType(), interceptorBeanMethodDeclaration.getNameAsString());
-                                                        componentProxyClassConstructor.getBody().addStatement(
-                                                                new AssignExpr()
-                                                                        .setTarget(new FieldAccessExpr().setName(interceptorBeanMethodDeclaration.getName()).setScope(new ThisExpr()))
-                                                                        .setOperator(ASSIGN)
-                                                                        .setValue(interceptorBeanMethodDeclaration.getNameAsExpression())
-                                                        );
-                                                    }
-                                            );
-                                }
-                        )
-        );
+        componentClassDeclaration.getConstructors()
+                .forEach(constructorDeclaration ->
+                        componentProxyClassDeclaration.getConstructors()
+                                .forEach(componentProxyClassConstructor -> {
+                                            interceptorBeanMethodDeclarations
+                                                    .forEach(interceptorBeanMethodDeclaration ->
+                                                            componentProxyClassConstructor.getBody()
+                                                                    .addStatement(new AssignExpr()
+                                                                            .setTarget(new FieldAccessExpr().setName(interceptorBeanMethodDeclaration.getName()).setScope(new ThisExpr()))
+                                                                            .setOperator(ASSIGN)
+                                                                            .setValue(new MethodCallExpr()
+                                                                                    .setName("get")
+                                                                                    .addArgument(getInterceptorAnnotationClassExpr(interceptorBeanMethodDeclaration))
+                                                                                    .setScope(new NameExpr().setName("InterceptorBeanContext"))
+                                                                            )
+                                                                    )
+                                                    );
+                                        }
+                                )
+                );
 
         componentClassDeclaration.getMembers().stream()
                 .filter(BodyDeclaration::isMethodDeclaration)
@@ -180,7 +199,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                     }
                 });
 
-        componentProxyCompilationUnit.addImport(InvocationContext.class);
+        componentProxyCompilationUnit.addImport(InvocationContext.class).addImport("io.graphoenix.core.aop.InterceptorBeanContext");
     }
 
     @Override
@@ -202,74 +221,15 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                     .addMethod(methodDeclaration.getNameAsString(), methodDeclaration.getModifiers().stream().map(Modifier::getKeyword).toArray(Modifier.Keyword[]::new))
                                     .setParameters(methodDeclaration.getParameters())
                                     .setType(methodDeclaration.getType())
-                                    .setAnnotations(methodDeclaration.getAnnotations())
+                                    .setAnnotations(methodDeclaration.getAnnotations().stream().filter(annotationExpr -> !annotationExpr.getNameAsString().equals(InterceptorBean.class.getSimpleName())).collect(Collectors.toCollection(NodeList::new)))
                                     .setBody(methodDeclaration.getBody().orElseThrow());
+
+                            processorTools.getGetCompilationUnitByClassOrInterfaceType().apply(moduleCompilationUnit, methodDeclaration.getType().asClassOrInterfaceType())
+                                    .ifPresent(componentProxyCompilationUnits::add);
                         }
                 );
 
-        componentProxyCompilationUnits
-                .forEach(componentProxyCompilationUnit ->
-                        componentProxyCompilationUnit.getTypes().stream()
-                                .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
-                                .map(BodyDeclaration::asClassOrInterfaceDeclaration)
-                                .forEach(componentProxyClassDeclaration -> {
-
-                                            MethodDeclaration superTypeMethodDeclaration = moduleClassDeclaration.getMembers().stream()
-                                                    .filter(BodyDeclaration::isMethodDeclaration)
-                                                    .map(BodyDeclaration::asMethodDeclaration)
-                                                    .filter(declaration -> declaration.getType().isClassOrInterfaceType())
-                                                    .filter(declaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(declaration).anyMatch(type-> type.getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString())))
-                                                    .findFirst()
-                                                    .orElseThrow();
-
-                                            MethodDeclaration proxyMethodDeclaration = moduleProxyClassDeclaration.getMembers().stream()
-                                                    .filter(BodyDeclaration::isMethodDeclaration)
-                                                    .map(BodyDeclaration::asMethodDeclaration)
-                                                    .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(superTypeMethodDeclaration.getNameAsString()))
-                                                    .filter(methodDeclaration -> DAGGER_PROCESSOR_UTIL.hasSameParameters(methodDeclaration.getParameters(), superTypeMethodDeclaration.getParameters()))
-                                                    .findFirst()
-                                                    .orElseThrow();
-
-                                            if (componentProxyClassDeclaration.getConstructors().size() == 0) {
-                                                componentProxyClassDeclaration.addConstructor(Modifier.Keyword.PUBLIC);
-                                            }
-
-                                            componentProxyClassDeclaration.getConstructors()
-                                                    .forEach(constructorDeclaration ->
-                                                            proxyMethodDeclaration.getBody()
-                                                                    .orElseThrow()
-                                                                    .getStatements()
-                                                                    .forEach(statement -> {
-                                                                                if (statement.isReturnStmt()) {
-                                                                                    Expression expression = statement.asReturnStmt().getExpression().orElseThrow();
-                                                                                    if (expression.isObjectCreationExpr()) {
-                                                                                        ObjectCreationExpr objectCreationExpr = expression.asObjectCreationExpr();
-                                                                                        objectCreationExpr.setType(componentProxyClassDeclaration.getNameAsString());
-
-                                                                                        constructorDeclaration.getParameters().stream().skip(objectCreationExpr.getArguments().size())
-                                                                                                .forEach(parameter -> {
-                                                                                                            MethodDeclaration interceptorBeanMethodDeclaration = interceptorBeanMethodDeclarations.stream()
-                                                                                                                    .filter(methodDeclaration -> methodDeclaration.getType().asClassOrInterfaceType().getNameAsString().equals(parameter.getType().asClassOrInterfaceType().getNameAsString()))
-                                                                                                                    .findFirst()
-                                                                                                                    .orElseThrow();
-
-                                                                                                            MethodCallExpr methodCallExpr = new MethodCallExpr().setName(interceptorBeanMethodDeclaration.getNameAsString());
-                                                                                                            interceptorBeanMethodDeclaration.getParameters()
-                                                                                                                    .forEach(interceptorBeanMethodParameter -> {
-                                                                                                                                proxyMethodDeclaration.addParameter(interceptorBeanMethodParameter);
-                                                                                                                                methodCallExpr.addArgument(interceptorBeanMethodParameter.getNameAsExpression());
-                                                                                                                            }
-                                                                                                                    );
-                                                                                                            objectCreationExpr.addArgument(methodCallExpr);
-                                                                                                        }
-                                                                                                );
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                    ));
-                                        }
-                                )
-                );
+        processorTools.getWriteToFiler().accept(buildModuleContext(moduleCompilationUnit, interceptorBeanMethodDeclarations, moduleProxyCompilationUnit, moduleProxyClassDeclaration));
     }
 
     @Override
@@ -280,6 +240,69 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                              CompilationUnit componentProxyComponentCompilationUnit,
                                              ClassOrInterfaceDeclaration componentProxyComponentInterfaceDeclaration) {
     }
+
+    protected CompilationUnit buildModuleContext(CompilationUnit moduleCompilationUnit, List<MethodDeclaration> interceptorBeanMethodDeclarations, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+
+        ClassOrInterfaceDeclaration moduleContextInterfaceDeclaration = new ClassOrInterfaceDeclaration()
+                .setPublic(true)
+                .setName(moduleProxyClassDeclaration.getNameAsString().concat("InterceptorBeanContext"))
+                .addAnnotation(
+                        new SingleMemberAnnotationExpr()
+                                .setMemberValue(new ClassExpr().setType(InterceptorBeanModuleContext.class))
+                                .setName(AutoService.class.getSimpleName())
+                )
+                .addExtendedType(BaseInterceptorBeanModuleContext.class);
+
+        CompilationUnit moduleContextComponentCompilationUnit = new CompilationUnit()
+                .addType(moduleContextInterfaceDeclaration)
+                .addImport(AutoService.class)
+                .addImport(InterceptorBeanModuleContext.class)
+                .addImport(BaseInterceptorBeanModuleContext.class);
+
+        moduleProxyCompilationUnit.getPackageDeclaration().ifPresent(moduleContextComponentCompilationUnit::setPackageDeclaration);
+
+        BlockStmt blockStmt = moduleContextInterfaceDeclaration.addStaticInitializer();
+
+        interceptorBeanMethodDeclarations.forEach(
+                interceptorBeanMethodDeclaration -> {
+                    String beanClassName = interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType().getNameAsString();
+                    String componentClassName = beanClassName.concat("Component");
+                    String daggerClassName = "Dagger".concat(componentClassName);
+                    String daggerVariableName = "dagger".concat(componentClassName);
+
+                    moduleContextComponentCompilationUnit.addImport(processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow());
+
+                    blockStmt.addStatement(new VariableDeclarationExpr()
+                            .addVariable(
+                                    new VariableDeclarator()
+                                            .setType(componentClassName)
+                                            .setName(daggerVariableName)
+                                            .setInitializer(
+                                                    new MethodCallExpr()
+                                                            .setName("create")
+                                                            .setScope(new NameExpr().setName(daggerClassName))
+                                            )
+                            )
+                    );
+
+                    ClassExpr interceptorAnnotationClassExpr = getInterceptorAnnotationClassExpr(interceptorBeanMethodDeclaration);
+                    blockStmt.addStatement(
+                            new MethodCallExpr()
+                                    .setName("put")
+                                    .addArgument(interceptorAnnotationClassExpr)
+                                    .addArgument(new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName)))
+                    );
+
+                    moduleContextComponentCompilationUnit.addImport(processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, interceptorAnnotationClassExpr.getType().asClassOrInterfaceType()).orElseThrow());
+                    String interceptorBeanName = processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow();
+                    moduleContextComponentCompilationUnit.addImport(interceptorBeanName.replace(beanClassName, componentClassName));
+                    moduleContextComponentCompilationUnit.addImport(interceptorBeanName.replace(beanClassName, daggerClassName));
+                }
+        );
+
+        return moduleContextComponentCompilationUnit;
+    }
+
 
     @Override
     public Class<? extends Annotation> support() {
@@ -308,5 +331,21 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                 .map(bodyDeclaration -> (MethodDeclaration) bodyDeclaration)
                 .filter(bodyDeclaration -> bodyDeclaration.getType().isClassOrInterfaceType())
                 .collect(Collectors.toList());
+    }
+
+    private ClassExpr getInterceptorAnnotationClassExpr(MethodDeclaration interceptorBeanMethodDeclaration) {
+        return interceptorBeanMethodDeclaration
+                .getAnnotationByClass(InterceptorBean.class)
+                .orElseThrow()
+                .asNormalAnnotationExpr()
+                .getPairs().stream()
+                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
+                .map(memberValuePair -> memberValuePair.getValue().asClassExpr())
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private String getInterceptorAnnotationClassName(CompilationUnit moduleCompilationUnit, MethodDeclaration interceptorBeanMethodDeclaration) {
+        return processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, getInterceptorAnnotationClassExpr(interceptorBeanMethodDeclaration).getType().asClassOrInterfaceType()).orElseThrow();
     }
 }

@@ -8,6 +8,7 @@ import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class ApiTest {
     }
 
     @Query
+    @NotNull(message = "test")
     public Boolean getRoleDisable2(@Source Organization organization) {
         return false;
     }

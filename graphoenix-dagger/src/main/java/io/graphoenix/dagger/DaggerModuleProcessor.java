@@ -101,6 +101,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                             .setImportAllTypesFromSource(this::importAllTypesFromSource)
                             .setGetTypeNameByClassOrInterfaceType(this::getTypeNameByClassOrInterfaceType)
                             .setGetCompilationUnitByClassOrInterfaceType(this::getCompilationUnitByClassOrInterfaceType)
+                            .setWriteToFiler(this::writeToFiler)
             );
         }
     }
@@ -125,7 +126,6 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                             Optional<ClassOrInterfaceDeclaration> moduleClassOrInterfaceDeclaration = DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit);
                             List<CompilationUnit> componentProxyCompilationUnits = moduleClassOrInterfaceDeclaration.stream()
                                     .flatMap(moduleClassDeclaration ->
-
                                             moduleClassDeclaration.getMembers().stream()
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .filter(bodyDeclaration ->
@@ -165,7 +165,8 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                     componentProxyCompilationUnit,
                                                     moduleProxyCompilationUnit
                                             )
-                                    ).collect(Collectors.toList());
+                                    )
+                                    .collect(Collectors.toList());
 
                             componentProxyComponentCompilationUnits.forEach(this::writeToFiler);
 
