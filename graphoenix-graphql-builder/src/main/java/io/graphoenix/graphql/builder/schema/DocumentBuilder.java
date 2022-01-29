@@ -69,7 +69,7 @@ public class DocumentBuilder {
 
     public Document buildDocument() throws IOException {
         manager.getObjects()
-                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true))
+                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
         buildObjectExpressions().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
 
@@ -108,15 +108,25 @@ public class DocumentBuilder {
     }
 
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return buildObject(objectTypeDefinitionContext, false);
+        return buildObject(objectTypeDefinitionContext, false, false);
     }
 
-    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface) {
+    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface, boolean buildArgument) {
         ObjectType objectType = new ObjectType()
                 .setName(objectTypeDefinitionContext.name().getText())
                 .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
                 .setInterfaces(objectTypeDefinitionContext.implementsInterfaces() == null ? null : objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .setFields(objectTypeDefinitionContext.fieldsDefinition() == null ? null : objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .setFields(
+                        objectTypeDefinitionContext.fieldsDefinition() == null ?
+                                null :
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .map(fieldDefinitionContext ->
+                                                buildArgument ?
+                                                        buildFiled(fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText())) :
+                                                        buildFiled(fieldDefinitionContext)
+                                        )
+                                        .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
                 .setDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
 
         if (buildInterface) {
@@ -155,6 +165,14 @@ public class DocumentBuilder {
                 .setDescription(enumTypeDefinitionContext.description() == null ? null : enumTypeDefinitionContext.description().getText())
                 .setEnumValues(enumTypeDefinitionContext.enumValueDefinitions() == null ? null : enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream().map(this::buildEnumValue).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .setDirectives(enumTypeDefinitionContext.directives() == null ? null : enumTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    public Field buildFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return new Field().setName(fieldDefinitionContext.name().getText())
+                .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
+                .setTypeName(fieldDefinitionContext.type().getText())
+                .setArguments(fieldDefinitionContext.argumentsDefinition() == null ? null : fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     public Field buildFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean isMutationOperationType) {
