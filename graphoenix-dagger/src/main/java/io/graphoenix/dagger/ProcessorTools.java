@@ -13,6 +13,7 @@ public class ProcessorTools {
     private BiConsumer<CompilationUnit, CompilationUnit> importAllTypesFromSource;
     private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<String>> getTypeNameByClassOrInterfaceType;
     private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType;
+    private BiFunction<CompilationUnit, String, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceTypeName;
     private Consumer<CompilationUnit> writeToFiler;
 
     public BiConsumer<CompilationUnit, CompilationUnit> getImportAllTypesFromSource() {
@@ -39,6 +40,15 @@ public class ProcessorTools {
 
     public ProcessorTools setGetCompilationUnitByClassOrInterfaceType(BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType) {
         this.getCompilationUnitByClassOrInterfaceType = getCompilationUnitByClassOrInterfaceType;
+        return this;
+    }
+
+    public BiFunction<CompilationUnit, String, Optional<CompilationUnit>> getGetCompilationUnitByClassOrInterfaceTypeName() {
+        return getCompilationUnitByClassOrInterfaceTypeName;
+    }
+
+    public ProcessorTools setGetCompilationUnitByClassOrInterfaceTypeName(BiFunction<CompilationUnit, String, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceTypeName) {
+        this.getCompilationUnitByClassOrInterfaceTypeName = getCompilationUnitByClassOrInterfaceTypeName;
         return this;
     }
 

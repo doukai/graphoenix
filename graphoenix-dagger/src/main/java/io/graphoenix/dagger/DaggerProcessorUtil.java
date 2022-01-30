@@ -3,10 +3,7 @@ package io.graphoenix.dagger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
@@ -48,6 +45,14 @@ public enum DaggerProcessorUtil {
                 .filter(typeDeclaration -> typeDeclaration.hasModifier(Modifier.Keyword.PUBLIC))
                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
                 .map(BodyDeclaration::asClassOrInterfaceDeclaration)
+                .findFirst();
+    }
+
+    public Optional<AnnotationDeclaration> getPublicAnnotationDeclaration(CompilationUnit compilationUnit) {
+        return compilationUnit.getTypes().stream()
+                .filter(typeDeclaration -> typeDeclaration.hasModifier(Modifier.Keyword.PUBLIC))
+                .filter(BodyDeclaration::isAnnotationDeclaration)
+                .map(BodyDeclaration::asAnnotationDeclaration)
                 .findFirst();
     }
 }

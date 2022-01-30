@@ -1,10 +1,10 @@
 package io.graphoenix.showcase.mysql.bean;
 
-import javax.validation.constraints.NotNull;
+import io.graphoenix.showcase.mysql.annotation.Aspect;
 
 public class TestClass {
 
-    @NotNull(message = "test")
+    @Aspect(value = "test")
     public String getName(int id) {
         return "1";
     }

@@ -101,6 +101,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                             .setImportAllTypesFromSource(this::importAllTypesFromSource)
                             .setGetTypeNameByClassOrInterfaceType(this::getTypeNameByClassOrInterfaceType)
                             .setGetCompilationUnitByClassOrInterfaceType(this::getCompilationUnitByClassOrInterfaceType)
+                            .setGetCompilationUnitByClassOrInterfaceTypeName(this::getCompilationUnitByClassOrInterfaceTypeName)
                             .setWriteToFiler(this::writeToFiler)
             );
         }
@@ -878,28 +879,36 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .ifPresent(target::addImport);
     }
 
-    protected String getNameByType(CompilationUnit compilationUnit, SimpleName name) {
+    protected String getNameByType(CompilationUnit compilationUnit, String name) {
         return compilationUnit.getImports().stream()
-                .filter(importDeclaration -> importDeclaration.getName().getIdentifier().equals(name.getIdentifier()))
+                .filter(importDeclaration -> importDeclaration.getName().getIdentifier().equals(name))
                 .map(NodeWithName::getNameAsString)
                 .findFirst()
                 .orElseGet(() -> compilationUnit.getImports().stream()
                         .filter(ImportDeclaration::isAsterisk)
-                        .filter(importDeclaration -> classExist(importDeclaration.getNameAsString().concat(".").concat(name.getIdentifier())))
-                        .map(importDeclaration -> importDeclaration.getNameAsString().concat(".").concat(name.getIdentifier()))
+                        .filter(importDeclaration -> classExist(importDeclaration.getNameAsString().concat(".").concat(name)))
+                        .map(importDeclaration -> importDeclaration.getNameAsString().concat(".").concat(name))
                         .findFirst()
                         .orElseGet(() -> compilationUnit.getPackageDeclaration()
-                                .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(name.getIdentifier()))
-                                .orElseGet(name::asString))
+                                .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(name))
+                                .orElse(name))
                 );
     }
 
+    protected String getNameByType(CompilationUnit compilationUnit, SimpleName name) {
+        return getNameByType(compilationUnit, name.getIdentifier());
+    }
+
     protected String getNameByType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
-        return getNameByType(compilationUnit, type.getName());
+        return getNameByType(compilationUnit, type.getName().getIdentifier());
     }
 
     protected TypeElement getElementByType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
         return elements.getTypeElement(getNameByType(compilationUnit, type));
+    }
+
+    protected TypeElement getElementByType(CompilationUnit compilationUnit, String typeName) {
+        return elements.getTypeElement(getNameByType(compilationUnit, typeName));
     }
 
     protected boolean classExist(String className) {
@@ -914,8 +923,15 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         return Optional.empty();
     }
 
+    public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceTypeName(CompilationUnit compilationUnit, String typeName) {
+        return getCompilationUnitByClassOrInterfaceType(getElementByType(compilationUnit, typeName));
+    }
+
     public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
-        TypeElement elementByType = getElementByType(compilationUnit, type);
+        return getCompilationUnitByClassOrInterfaceType(getElementByType(compilationUnit, type));
+    }
+
+    public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(TypeElement elementByType) {
         if (elementByType != null) {
             TreePath treePath = trees.getPath(elementByType);
             if (treePath != null) {

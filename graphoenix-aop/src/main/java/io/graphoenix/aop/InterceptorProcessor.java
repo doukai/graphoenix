@@ -26,21 +26,18 @@ import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.google.auto.service.AutoService;
+import com.google.common.base.CaseFormat;
 import io.graphoenix.dagger.DaggerProxyProcessor;
 import io.graphoenix.dagger.ProcessorTools;
-import io.graphoenix.spi.aop.BaseInterceptorBeanModuleContext;
-import io.graphoenix.spi.aop.InterceptorBean;
-import io.graphoenix.spi.aop.InterceptorBeanModuleContext;
-import io.graphoenix.spi.aop.InvocationContext;
+import io.graphoenix.spi.aop.*;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.javaparser.ast.expr.AssignExpr.Operator.ASSIGN;
+import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
 
 @AutoService(DaggerProxyProcessor.class)
 public class InterceptorProcessor implements DaggerProxyProcessor {
@@ -50,7 +47,6 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
     @Override
     public void init(ProcessorTools processorTools) {
         this.processorTools = processorTools;
-        interceptorAnnotations = new HashMap<>();
     }
 
     @Override
@@ -61,143 +57,127 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                     CompilationUnit componentProxyCompilationUnit,
                                     ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
 
-        List<MethodDeclaration> interceptorBeanMethodDeclarations = componentClassDeclaration.getMembers().stream()
+        componentClassDeclaration.getMembers().stream()
                 .filter(bodyDeclaration -> !bodyDeclaration.isConstructorDeclaration())
                 .filter(BodyDeclaration::isMethodDeclaration)
-                .map(bodyDeclaration -> (MethodDeclaration) bodyDeclaration)
-                .flatMap(moduleMethodDeclaration -> moduleMethodDeclaration.getAnnotations().stream()
-                        .map(annotationExpr -> getInterceptorBeanMethodDeclaration(moduleClassDeclaration, annotationExpr))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                )
-                .collect(Collectors.toList());
-
-        interceptorBeanMethodDeclarations
-                .forEach(interceptorBeanMethodDeclaration ->
-                        interceptorAnnotations.put(
-                                getInterceptorAnnotationClassName(moduleCompilationUnit, interceptorBeanMethodDeclaration),
-                                getInterceptorAnnotationClassName(moduleCompilationUnit, interceptorBeanMethodDeclaration)
-                        )
-                );
-
-        interceptorBeanMethodDeclarations.forEach(interceptorBeanMethodDeclaration -> componentProxyClassDeclaration.addField(interceptorBeanMethodDeclaration.getType(), interceptorBeanMethodDeclaration.getNameAsString(), Modifier.Keyword.PRIVATE));
-
-        componentClassDeclaration.getConstructors()
-                .forEach(constructorDeclaration ->
-                        componentProxyClassDeclaration.getConstructors()
-                                .forEach(componentProxyClassConstructor -> {
-                                            interceptorBeanMethodDeclarations
-                                                    .forEach(interceptorBeanMethodDeclaration ->
-                                                            componentProxyClassConstructor.getBody()
-                                                                    .addStatement(new AssignExpr()
-                                                                            .setTarget(new FieldAccessExpr().setName(interceptorBeanMethodDeclaration.getName()).setScope(new ThisExpr()))
-                                                                            .setOperator(ASSIGN)
-                                                                            .setValue(new MethodCallExpr()
-                                                                                    .setName("get")
-                                                                                    .addArgument(getInterceptorAnnotationClassExpr(interceptorBeanMethodDeclaration))
-                                                                                    .setScope(new NameExpr().setName("InterceptorBeanContext"))
-                                                                            )
-                                                                    )
-                                                    );
-                                        }
-                                )
-                );
-
-        componentClassDeclaration.getMembers().stream()
-                .filter(BodyDeclaration::isMethodDeclaration)
                 .map(BodyDeclaration::asMethodDeclaration)
-                .forEach(componentMethodDeclaration -> {
+                .forEach(methodDeclaration -> {
+                            List<AnnotationExpr> interceptorAnnotationExprList = getMethodDeclarationInterceptorAnnotationExprList(componentCompilationUnit, methodDeclaration);
+                            if (interceptorAnnotationExprList.size() > 0) {
+                                BlockStmt blockStmt = componentProxyClassDeclaration.addMethod(methodDeclaration.getNameAsString(), methodDeclaration.getModifiers().stream().map(Modifier::getKeyword).toArray(Modifier.Keyword[]::new))
+                                        .setParameters(methodDeclaration.getParameters())
+                                        .setType(methodDeclaration.getType())
+                                        .addAnnotation(Override.class)
+                                        .createBody();
 
-                    Map<AnnotationExpr, MethodDeclaration> interceptorBeanMethodMap = componentMethodDeclaration.getAnnotations().stream()
-                            .collect(Collectors.toMap(annotationExpr -> annotationExpr, annotationExpr -> getInterceptorBeanMethodDeclaration(moduleClassDeclaration, annotationExpr)))
-                            .entrySet().stream()
-                            .filter(entry -> entry.getValue().isPresent())
-                            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
+                                interceptorAnnotationExprList
+                                        .forEach(annotationExpr -> {
+                                                    String interceptorFieldName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, annotationExpr.getNameAsString()).concat("Interceptor");
+                                                    if (componentProxyClassDeclaration.getFieldByName(interceptorFieldName).isEmpty()) {
+                                                        componentProxyClassDeclaration.addField(Interceptor.class, interceptorFieldName, Modifier.Keyword.PRIVATE);
 
-                    if (interceptorBeanMethodMap.keySet().size() > 0) {
-                        BlockStmt blockStmt = componentProxyClassDeclaration.addMethod(componentMethodDeclaration.getNameAsString(), componentMethodDeclaration.getModifiers().stream().map(Modifier::getKeyword).toArray(Modifier.Keyword[]::new))
-                                .setParameters(componentMethodDeclaration.getParameters())
-                                .setType(componentMethodDeclaration.getType())
-                                .addAnnotation(Override.class)
-                                .createBody();
+                                                        componentClassDeclaration.getConstructors()
+                                                                .forEach(constructorDeclaration ->
+                                                                        componentProxyClassDeclaration.getConstructors()
+                                                                                .forEach(componentProxyClassConstructor -> {
+                                                                                            componentProxyClassConstructor.getBody()
+                                                                                                    .addStatement(new AssignExpr()
+                                                                                                            .setTarget(new FieldAccessExpr().setName(interceptorFieldName).setScope(new ThisExpr()))
+                                                                                                            .setOperator(ASSIGN)
+                                                                                                            .setValue(new MethodCallExpr()
+                                                                                                                    .setName("get")
+                                                                                                                    .addArgument(new ClassExpr().setType(annotationExpr.getNameAsString()))
+                                                                                                                    .setScope(new NameExpr().setName("InterceptorBeanContext"))
+                                                                                                            )
+                                                                                                    );
+                                                                                        }
+                                                                                )
+                                                                );
+                                                    }
+                                                }
+                                        );
 
-                        interceptorBeanMethodMap.forEach((key, value) -> {
-                            Expression createContextExpr = new MethodCallExpr()
-                                    .setName("setOwner")
-                                    .addArgument(new ClassExpr().setType(key.getName().getIdentifier()))
-                                    .setScope(
-                                            new MethodCallExpr()
-                                                    .setName("setTarget")
-                                                    .addArgument(new ThisExpr())
-                                                    .setScope(
+                                interceptorAnnotationExprList
+                                        .forEach(annotationExpr -> {
+                                                    String interceptorFieldName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, annotationExpr.getNameAsString()).concat("Interceptor");
+                                                    Expression createContextExpr = new MethodCallExpr()
+                                                            .setName("setOwner")
+                                                            .addArgument(new ClassExpr().setType(annotationExpr.getName().getIdentifier()))
+                                                            .setScope(
+                                                                    new MethodCallExpr()
+                                                                            .setName("setTarget")
+                                                                            .addArgument(new ThisExpr())
+                                                                            .setScope(
+                                                                                    new MethodCallExpr()
+                                                                                            .setName("setName")
+                                                                                            .addArgument(new StringLiteralExpr(methodDeclaration.getNameAsString()))
+                                                                                            .setScope(new ObjectCreationExpr().setType(InvocationContext.class))
+                                                                            )
+                                                            );
+
+                                                    Expression addParameterValueExpr = methodDeclaration.getParameters().stream()
+                                                            .map(parameter -> (Expression) parameter.getNameAsExpression())
+                                                            .reduce(createContextExpr, (pre, current) ->
+                                                                    new MethodCallExpr().setName("addParameterValue")
+                                                                            .addArgument(new StringLiteralExpr(current.asNameExpr().getNameAsString()))
+                                                                            .addArgument(current)
+                                                                            .setScope(pre)
+                                                            );
+
+                                                    Expression addOwnerValueExpr = annotationExpr.asNormalAnnotationExpr().getPairs().stream()
+                                                            .reduce(new MemberValuePair().setValue(addParameterValueExpr), (pre, current) ->
+                                                                    new MemberValuePair().setValue(
+                                                                            new MethodCallExpr().setName("addOwnerValue")
+                                                                                    .addArgument(new StringLiteralExpr(current.getNameAsString()))
+                                                                                    .addArgument(current.getValue())
+                                                                                    .setScope(pre.getValue()))
+                                                            )
+                                                            .getValue();
+
+                                                    VariableDeclarationExpr variableDeclarationExpr = new VariableDeclarationExpr()
+                                                            .addVariable(new VariableDeclarator()
+                                                                    .setType(InvocationContext.class)
+                                                                    .setName(interceptorFieldName.concat("Context"))
+                                                                    .setInitializer(addOwnerValueExpr)
+                                                            );
+
+                                                    blockStmt.addStatement(variableDeclarationExpr);
+                                                    blockStmt.addStatement(new MethodCallExpr().setName("before").addArgument(interceptorFieldName.concat("Context")).setScope(new NameExpr().setName(interceptorFieldName)));
+                                                }
+                                        );
+
+                                if (!methodDeclaration.getType().isVoidType()) {
+                                    VariableDeclarationExpr variableDeclarationExpr = new VariableDeclarationExpr().addVariable(
+                                            new VariableDeclarator()
+                                                    .setName("result")
+                                                    .setType(methodDeclaration.getType())
+                                                    .setInitializer(
                                                             new MethodCallExpr()
-                                                                    .setName("setName")
-                                                                    .addArgument(new StringLiteralExpr(componentMethodDeclaration.getNameAsString()))
-                                                                    .setScope(
-                                                                            new ObjectCreationExpr()
-                                                                                    .setType(InvocationContext.class)
-                                                                    )
-                                                    )
-                                    );
+                                                                    .setName(methodDeclaration.getName())
+                                                                    .setArguments(methodDeclaration.getParameters().stream().map(NodeWithSimpleName::getNameAsExpression).collect(Collectors.toCollection(NodeList::new)))
+                                                                    .setScope(new SuperExpr())
+                                                    ));
 
-                            Expression addParameterValueExpr = componentMethodDeclaration.getParameters().stream()
-                                    .map(parameter -> (Expression) parameter.getNameAsExpression())
-                                    .reduce(createContextExpr, (pre, current) ->
-                                            new MethodCallExpr().setName("addParameterValue")
-                                                    .addArgument(new StringLiteralExpr(current.asNameExpr().getNameAsString()))
-                                                    .addArgument(current)
-                                                    .setScope(pre)
-                                    );
+                                    blockStmt.addStatement(variableDeclarationExpr);
+                                }
 
-                            Expression addOwnerValueExpr = key.asNormalAnnotationExpr().getPairs().stream()
-                                    .reduce(new MemberValuePair().setValue(addParameterValueExpr), (pre, current) ->
-                                            new MemberValuePair().setValue(
-                                                    new MethodCallExpr().setName("addOwnerValue")
-                                                            .addArgument(new StringLiteralExpr(current.getNameAsString()))
-                                                            .addArgument(current.getValue())
-                                                            .setScope(pre.getValue()))
-                                    )
-                                    .getValue();
+                                interceptorAnnotationExprList
+                                        .forEach(annotationExpr -> {
+                                                    String interceptorFieldName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, annotationExpr.getNameAsString()).concat("Interceptor");
+                                                    if (!methodDeclaration.getType().isVoidType()) {
+                                                        blockStmt.addStatement(new MethodCallExpr().setName("setReturnValue").addArgument("result").setScope(new NameExpr(interceptorFieldName.concat("Context"))));
+                                                    }
 
-                            VariableDeclarationExpr variableDeclarationExpr = new VariableDeclarationExpr()
-                                    .addVariable(new VariableDeclarator()
-                                            .setType(InvocationContext.class)
-                                            .setName(value.getName().getIdentifier().concat("Context"))
-                                            .setInitializer(addOwnerValueExpr)
-                                    );
+                                                    blockStmt.addStatement(new MethodCallExpr().setName("after").addArgument(interceptorFieldName.concat("Context")).setScope(new NameExpr().setName(interceptorFieldName)));
 
-                            blockStmt.addStatement(variableDeclarationExpr);
-                            blockStmt.addStatement(new MethodCallExpr().setName("before").addArgument(value.getName().getIdentifier().concat("Context")).setScope(value.getNameAsExpression()));
-                        });
-
-                        if (!componentMethodDeclaration.getType().isVoidType()) {
-                            VariableDeclarationExpr variableDeclarationExpr = new VariableDeclarationExpr().addVariable(
-                                    new VariableDeclarator()
-                                            .setName("result")
-                                            .setType(componentMethodDeclaration.getType())
-                                            .setInitializer(
-                                                    new MethodCallExpr()
-                                                            .setName(componentMethodDeclaration.getName())
-                                                            .setArguments(new NodeList<>(componentMethodDeclaration.getParameters().stream().map(NodeWithSimpleName::getNameAsExpression).collect(Collectors.toList())))
-                                                            .setScope(new SuperExpr())
-                                            ));
-
-                            blockStmt.addStatement(variableDeclarationExpr);
+                                                    if (!methodDeclaration.getType().isVoidType()) {
+                                                        blockStmt.addStatement(new ReturnStmt().setExpression(new NameExpr("result")));
+                                                    }
+                                                }
+                                        );
+                            }
                         }
-
-                        interceptorBeanMethodMap.forEach((key, value) -> {
-                            if (!componentMethodDeclaration.getType().isVoidType()) {
-                                blockStmt.addStatement(new MethodCallExpr().setName("setReturnValue").addArgument("result").setScope(new NameExpr(value.getName().getIdentifier().concat("Context"))));
-                            }
-
-                            blockStmt.addStatement(new MethodCallExpr().setName("after").addArgument(value.getName().getIdentifier().concat("Context")).setScope(value.getNameAsExpression()));
-
-                            if (!componentMethodDeclaration.getType().isVoidType()) {
-                                blockStmt.addStatement(new ReturnStmt().setExpression(new NameExpr("result")));
-                            }
-                        });
-                    }
-                });
+                );
 
         componentProxyCompilationUnit.addImport(InvocationContext.class).addImport("io.graphoenix.core.aop.InterceptorBeanContext");
     }
@@ -285,15 +265,18 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                             )
                     );
 
-                    ClassExpr interceptorAnnotationClassExpr = getInterceptorAnnotationClassExpr(interceptorBeanMethodDeclaration);
-                    blockStmt.addStatement(
-                            new MethodCallExpr()
-                                    .setName("put")
-                                    .addArgument(interceptorAnnotationClassExpr)
-                                    .addArgument(new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName)))
-                    );
+                    getInterceptorAnnotationClassExprList(interceptorBeanMethodDeclaration)
+                            .forEach(classExpr -> {
+                                        blockStmt.addStatement(
+                                                new MethodCallExpr()
+                                                        .setName("put")
+                                                        .addArgument(classExpr)
+                                                        .addArgument(new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName)))
+                                        );
+                                        moduleContextComponentCompilationUnit.addImport(processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, classExpr.getType().asClassOrInterfaceType()).orElseThrow());
+                                    }
+                            );
 
-                    moduleContextComponentCompilationUnit.addImport(processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, interceptorAnnotationClassExpr.getType().asClassOrInterfaceType()).orElseThrow());
                     String interceptorBeanName = processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow();
                     moduleContextComponentCompilationUnit.addImport(interceptorBeanName.replace(beanClassName, componentClassName));
                     moduleContextComponentCompilationUnit.addImport(interceptorBeanName.replace(beanClassName, daggerClassName));
@@ -309,19 +292,17 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
         return InterceptorBean.class;
     }
 
-    protected Optional<MethodDeclaration> getInterceptorBeanMethodDeclaration(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, AnnotationExpr annotationExpr) {
-        return getInterceptorBeanMethodDeclarations(classOrInterfaceDeclaration).stream()
-                .filter(methodDeclaration ->
-                        methodDeclaration.getAnnotationByClass(InterceptorBean.class)
-                                .flatMap(methodAnnotationExpr ->
-                                        methodAnnotationExpr.asNormalAnnotationExpr().getPairs().stream()
-                                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
-                                                .findFirst()
-                                )
-                                .filter(memberValuePair -> memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType().getNameAsString().equals(annotationExpr.getNameAsString()))
-                                .isPresent()
-                )
-                .findFirst();
+    protected List<AnnotationExpr> getMethodDeclarationInterceptorAnnotationExprList(CompilationUnit compilationUnit, MethodDeclaration methodDeclaration) {
+        return methodDeclaration.getAnnotations().stream()
+                .filter(annotationExpr -> isInterceptorAnnotation(compilationUnit, annotationExpr))
+                .collect(Collectors.toList());
+    }
+
+    protected boolean isInterceptorAnnotation(CompilationUnit compilationUnit, AnnotationExpr annotationExpr) {
+        return processorTools.getGetCompilationUnitByClassOrInterfaceTypeName().apply(compilationUnit, annotationExpr.getNameAsString())
+                .flatMap(DAGGER_PROCESSOR_UTIL::getPublicAnnotationDeclaration)
+                .filter(annotationDeclaration -> annotationDeclaration.isAnnotationPresent(InterceptorAnnotation.class))
+                .isPresent();
     }
 
     protected List<MethodDeclaration> getInterceptorBeanMethodDeclarations(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
@@ -333,19 +314,21 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                 .collect(Collectors.toList());
     }
 
-    private ClassExpr getInterceptorAnnotationClassExpr(MethodDeclaration interceptorBeanMethodDeclaration) {
+    private List<ClassExpr> getInterceptorAnnotationClassExprList(MethodDeclaration interceptorBeanMethodDeclaration) {
         return interceptorBeanMethodDeclaration
                 .getAnnotationByClass(InterceptorBean.class)
                 .orElseThrow()
                 .asNormalAnnotationExpr()
                 .getPairs().stream()
                 .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
-                .map(memberValuePair -> memberValuePair.getValue().asClassExpr())
-                .findFirst()
-                .orElseThrow();
-    }
-
-    private String getInterceptorAnnotationClassName(CompilationUnit moduleCompilationUnit, MethodDeclaration interceptorBeanMethodDeclaration) {
-        return processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, getInterceptorAnnotationClassExpr(interceptorBeanMethodDeclaration).getType().asClassOrInterfaceType()).orElseThrow();
+                .flatMap(memberValuePair -> {
+                            if (memberValuePair.getValue().isArrayInitializerExpr()) {
+                                return memberValuePair.getValue().asArrayInitializerExpr().getValues().stream().map(Expression::asClassExpr);
+                            } else {
+                                return Stream.of(memberValuePair.getValue().asClassExpr());
+                            }
+                        }
+                )
+                .collect(Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.api;
 
+import io.graphoenix.showcase.mysql.annotation.Aspect;
 import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.objectType.Organization;
 import io.graphoenix.showcase.mysql.dto.objectType.Role;
@@ -32,7 +33,7 @@ public class ApiTest {
     }
 
     @Query
-    @NotNull(message = "test")
+    @Aspect(value = "test")
     public Boolean getRoleDisable2(@Source Organization organization) {
         return false;
     }

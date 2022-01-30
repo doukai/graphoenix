@@ -6,7 +6,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Documented
 @Retention(RUNTIME)
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD})
-public @interface InterceptorBean {
-    Class<? extends Annotation>[] value();
+@Target({ElementType.ANNOTATION_TYPE})
+public @interface InterceptorAnnotation {
+    Class<? extends Annotation>[] value() default {};
 }
