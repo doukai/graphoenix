@@ -14,6 +14,7 @@ import io.vavr.Tuple2;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
@@ -55,7 +56,7 @@ public class SelectionFilterHandlerImplementer {
                 .addAnnotation(Singleton.class)
                 .addField(
                         FieldSpec.builder(
-                                ClassName.get(IGraphQLDocumentManager.class),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
                                 "manager",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -70,7 +71,7 @@ public class SelectionFilterHandlerImplementer {
     private MethodSpec buildConstructor() {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addStatement("this.$L = $T.get($T.class)",
+                .addStatement("this.$L = $T.getProvider($T.class)",
                         "manager",
                         ClassName.get(BeanContext.class),
                         ClassName.get(IGraphQLDocumentManager.class)
@@ -99,7 +100,7 @@ public class SelectionFilterHandlerImplementer {
 
         builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName);
         builder.addStatement("$T jsonObject = new $T()", ClassName.get(JsonObject.class), ClassName.get(JsonObject.class));
-        builder.beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
+        builder.beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
                 ClassName.get(GraphqlParser.SelectionContext.class),
                 objectTypeDefinitionContext.name().getText(),
                 ClassName.get(Collectors.class)

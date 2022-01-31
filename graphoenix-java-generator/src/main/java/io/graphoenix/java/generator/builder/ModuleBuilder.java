@@ -9,8 +9,12 @@ import io.vavr.Tuple3;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.Types;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
@@ -18,17 +22,17 @@ import java.util.stream.Collectors;
 
 public class ModuleBuilder {
 
-    public void buildApiModule(String modulePackageName, String moduleClassName, Set<? extends Element> elementList, Filer filer) throws IOException {
+    public void buildApiModule(String modulePackageName, String moduleClassName, Set<? extends Element> elementList, Types typeUtils, Filer filer) throws IOException {
         TypeSpec typeSpec = TypeSpec.classBuilder(moduleClassName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Module.class)
-                .addMethods(elementList.stream().map(element -> (TypeElement) element).map(this::buildApiProvides).collect(Collectors.toList()))
+                .addMethods(elementList.stream().map(element -> (TypeElement) element).map(typeElement -> buildApiProvides(typeElement, typeUtils)).collect(Collectors.toList()))
                 .build();
 
         JavaFile.builder(modulePackageName, typeSpec).build().writeTo(filer);
     }
 
-    private MethodSpec buildApiProvides(TypeElement typeElement) {
+    private MethodSpec buildApiProvides(TypeElement typeElement, Types typeUtils) {
         Optional<CodeBlock> codeBlock = typeElement.getEnclosedElements().stream()
                 .filter(enclosedElement -> enclosedElement.getKind().equals(ElementKind.CONSTRUCTOR))
                 .filter(enclosedElement -> enclosedElement.getAnnotation(Inject.class) != null)
@@ -37,11 +41,20 @@ public class ModuleBuilder {
                 .map(executableElement ->
                         CodeBlock.join(
                                 executableElement.getParameters().stream()
-                                        .map(variableElement ->
-                                                CodeBlock.of("$T.get($T.class)",
-                                                        ClassName.get(BeanContext.class),
-                                                        ClassName.get(variableElement.asType())
-                                                )
+                                        .map(variableElement -> {
+                                                    if (variableElement.asType().getKind().equals(TypeKind.DECLARED) &&
+                                                            ((TypeElement) ((DeclaredType) variableElement.asType()).asElement()).getQualifiedName().toString().equals(Provider.class.getName())) {
+                                                        return CodeBlock.of("$T.getProvider($T.class)",
+                                                                ClassName.get(BeanContext.class),
+                                                                ClassName.get(((DeclaredType) variableElement.asType()).getTypeArguments().get(0))
+                                                        );
+                                                    } else {
+                                                        return CodeBlock.of("$T.get($T.class)",
+                                                                ClassName.get(BeanContext.class),
+                                                                ClassName.get(variableElement.asType())
+                                                        );
+                                                    }
+                                                }
                                         )
                                         .collect(Collectors.toList()),
                                 ","

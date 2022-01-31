@@ -219,7 +219,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .setConfiguration(graphQLConfig)
                     .writeToFiler(filer);
 
-            moduleBuilder.buildApiModule(graphQLConfig.getModulePackageName(), "ApiModule", roundEnv.getElementsAnnotatedWith(GraphQLApi.class), filer);
+            moduleBuilder.buildApiModule(graphQLConfig.getModulePackageName(), "ApiModule", roundEnv.getElementsAnnotatedWith(GraphQLApi.class),typeUtils, filer);
 
         } catch (IOException e) {
             e.printStackTrace();

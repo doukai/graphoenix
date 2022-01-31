@@ -5,16 +5,26 @@ import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.objectType.Organization;
 import io.graphoenix.showcase.mysql.dto.objectType.Role;
 import io.graphoenix.showcase.mysql.dto.objectType.User;
+import io.graphoenix.showcase.mysql.spi.OperationTest;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
 
 @GraphQLApi
 public class ApiTest {
+
+    private Provider<OperationTest> operationTest;
+
+    @Inject
+    public ApiTest(Provider<OperationTest> operationTest) {
+        this.operationTest = operationTest;
+    }
 
     @Query
     public String getUserDetail(@Source User user) {

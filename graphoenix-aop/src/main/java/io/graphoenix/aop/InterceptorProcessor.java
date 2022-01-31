@@ -25,12 +25,14 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import io.graphoenix.dagger.DaggerProxyProcessor;
 import io.graphoenix.dagger.ProcessorTools;
 import io.graphoenix.spi.aop.*;
 
+import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -74,7 +76,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                         .forEach(annotationExpr -> {
                                                     String interceptorFieldName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, annotationExpr.getNameAsString()).concat("Interceptor");
                                                     if (componentProxyClassDeclaration.getFieldByName(interceptorFieldName).isEmpty()) {
-                                                        componentProxyClassDeclaration.addField(Interceptor.class, interceptorFieldName, Modifier.Keyword.PRIVATE);
+                                                        componentProxyClassDeclaration.addField(new ClassOrInterfaceType().setName("Provider").setTypeArguments(new ClassOrInterfaceType().setName("Interceptor")), interceptorFieldName, Modifier.Keyword.PRIVATE);
 
                                                         componentClassDeclaration.getConstructors()
                                                                 .forEach(constructorDeclaration ->
@@ -85,7 +87,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                                                                             .setTarget(new FieldAccessExpr().setName(interceptorFieldName).setScope(new ThisExpr()))
                                                                                                             .setOperator(ASSIGN)
                                                                                                             .setValue(new MethodCallExpr()
-                                                                                                                    .setName("get")
+                                                                                                                    .setName("getProvider")
                                                                                                                     .addArgument(new ClassExpr().setType(annotationExpr.getNameAsString()))
                                                                                                                     .setScope(new NameExpr().setName("InterceptorBeanContext"))
                                                                                                             )
@@ -142,7 +144,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                             );
 
                                                     blockStmt.addStatement(variableDeclarationExpr);
-                                                    blockStmt.addStatement(new MethodCallExpr().setName("before").addArgument(interceptorFieldName.concat("Context")).setScope(new NameExpr().setName(interceptorFieldName)));
+                                                    blockStmt.addStatement(new MethodCallExpr().setName("before").addArgument(interceptorFieldName.concat("Context")).setScope(new MethodCallExpr().setName("get").setScope(new NameExpr().setName(interceptorFieldName))));
                                                 }
                                         );
 
@@ -168,7 +170,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                         blockStmt.addStatement(new MethodCallExpr().setName("setReturnValue").addArgument("result").setScope(new NameExpr(interceptorFieldName.concat("Context"))));
                                                     }
 
-                                                    blockStmt.addStatement(new MethodCallExpr().setName("after").addArgument(interceptorFieldName.concat("Context")).setScope(new NameExpr().setName(interceptorFieldName)));
+                                                    blockStmt.addStatement(new MethodCallExpr().setName("after").addArgument(interceptorFieldName.concat("Context")).setScope(new MethodCallExpr().setName("get").setScope(new NameExpr().setName(interceptorFieldName))));
 
                                                     if (!methodDeclaration.getType().isVoidType()) {
                                                         blockStmt.addStatement(new ReturnStmt().setExpression(new NameExpr("result")));
@@ -179,7 +181,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                         }
                 );
 
-        componentProxyCompilationUnit.addImport(InvocationContext.class).addImport("io.graphoenix.core.aop.InterceptorBeanContext");
+        componentProxyCompilationUnit.addImport(Provider.class).addImport(Interceptor.class).addImport(InvocationContext.class).addImport(InvocationContext.class).addImport("io.graphoenix.core.aop.InterceptorBeanContext");
     }
 
     @Override

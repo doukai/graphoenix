@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -94,15 +95,15 @@ public class OperationHandlerImplementer {
 
     private TypeSpec buildOperationHandlerImpl(OperationType type) {
         String className;
-        TypeName typeName;
+        TypeName superinterface;
         switch (type) {
             case QUERY:
                 className = "QueryHandlerImpl";
-                typeName = ClassName.get(QueryHandler.class);
+                superinterface = ClassName.get(QueryHandler.class);
                 break;
             case MUTATION:
                 className = "MutationHandlerImpl";
-                typeName = ClassName.get(MutationHandler.class);
+                superinterface = ClassName.get(MutationHandler.class);
                 break;
             default:
                 throw new RuntimeException();
@@ -112,23 +113,7 @@ public class OperationHandlerImplementer {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Singleton.class)
                 .superclass(BaseOperationHandler.class)
-                .addSuperinterface(typeName)
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(IGraphQLDocumentManager.class),
-                                "manager",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(GraphQLVariablesProcessor.class),
-                                "variablesProcessor",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
+                .addSuperinterface(superinterface)
                 .addField(
                         FieldSpec.builder(
                                 ClassName.get(GsonBuilder.class),
@@ -139,7 +124,23 @@ public class OperationHandlerImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ClassName.get(OperationHandler.class),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
+                                "manager",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLVariablesProcessor.class)),
+                                "variablesProcessor",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)),
                                 "operationHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -147,7 +148,7 @@ public class OperationHandlerImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler"),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")),
                                 "invokeHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -155,7 +156,7 @@ public class OperationHandlerImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter"),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")),
                                 "selectionFilter",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -228,7 +229,7 @@ public class OperationHandlerImplementer {
                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 .stream()
                 .map(typeElement ->
-                        FieldSpec.builder(ClassName.get(typeElement), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -255,9 +256,9 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
                 .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, String.class), "variables").build())
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonElement.class)))
-                .addStatement("manager.registerFragment(graphQL)")
-                .addStatement("$T operationDefinitionContext = variablesProcessor.buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
-                .addStatement("$T result = operationHandler.$L(operationDefinitionContext).map(jsonString -> gsonBuilder.create().fromJson(jsonString, $T.class))",
+                .addStatement("manager.get().registerFragment(graphQL)")
+                .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
+                .addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> gsonBuilder.create().fromJson(jsonString, $T.class))",
                         ParameterizedTypeName.get(Mono.class, JsonElement.class),
                         operationName,
                         ClassName.get(JsonElement.class)
@@ -287,7 +288,7 @@ public class OperationHandlerImplementer {
                     .findFirst()
                     .orElseThrow();
 
-            builder.addStatement("$T result = $L.$L($L)",
+            builder.addStatement("$T result = $L.get().$L($L)",
                     typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                     CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, method._1().getSimpleName().toString()),
                     method._2().getSimpleName().toString(),
@@ -303,9 +304,9 @@ public class OperationHandlerImplementer {
 
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
-                    builder.addStatement("return selectionFilter.$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName.concat("List"));
+                    builder.addStatement("return selectionFilter.get().$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName.concat("List"));
                 } else {
-                    builder.addStatement("return selectionFilter.$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName);
+                    builder.addStatement("return selectionFilter.get().$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName);
                 }
             } else {
                 if (fieldTypeIsList) {
@@ -328,7 +329,7 @@ public class OperationHandlerImplementer {
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                             "gsonBuilder"
                     );
-                    builder.addStatement("return selectionFilter.$L(result.stream().map(item -> invokeHandler.$L(item)).collect($T.toList()), selectionContext.field().selectionSet())",
+                    builder.addStatement("return selectionFilter.get().$L(result.stream().map(item -> invokeHandler.get().$L(item)).collect($T.toList()), selectionContext.field().selectionSet())",
                             fieldTypeParameterName.concat("List"),
                             fieldTypeParameterName,
                             ClassName.get(Collectors.class)
@@ -339,7 +340,7 @@ public class OperationHandlerImplementer {
                             "gsonBuilder",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
                     );
-                    builder.addStatement("return selectionFilter.$L(invokeHandler.$L(result), selectionContext.field().selectionSet())",
+                    builder.addStatement("return selectionFilter.get().$L(invokeHandler.get().$L(result), selectionContext.field().selectionSet())",
                             fieldTypeParameterName,
                             fieldTypeParameterName
                     );
@@ -354,31 +355,31 @@ public class OperationHandlerImplementer {
     private MethodSpec buildConstructor(OperationType type) {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addStatement("this.$L = $T.get($T.class)",
-                        "manager",
-                        ClassName.get(BeanContext.class),
-                        ClassName.get(IGraphQLDocumentManager.class)
-                )
-                .addStatement("this.$L = $T.get($T.class)",
-                        "variablesProcessor",
-                        ClassName.get(BeanContext.class),
-                        ClassName.get(GraphQLVariablesProcessor.class)
-                )
                 .addStatement("this.$L = new $T()",
                         "gsonBuilder",
                         ClassName.get(GsonBuilder.class)
                 )
-                .addStatement("this.$L = $T.get($T.class)",
+                .addStatement("this.$L = $T.getProvider($T.class)",
+                        "manager",
+                        ClassName.get(BeanContext.class),
+                        ClassName.get(IGraphQLDocumentManager.class)
+                )
+                .addStatement("this.$L = $T.getProvider($T.class)",
+                        "variablesProcessor",
+                        ClassName.get(BeanContext.class),
+                        ClassName.get(GraphQLVariablesProcessor.class)
+                )
+                .addStatement("this.$L = $T.getProvider($T.class)",
                         "operationHandler",
                         ClassName.get(BeanContext.class),
                         ClassName.get(OperationHandler.class)
                 )
-                .addStatement("this.$L = $T.get($T.class)",
+                .addStatement("this.$L = $T.getProvider($T.class)",
                         "invokeHandler",
                         ClassName.get(BeanContext.class),
                         ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")
                 )
-                .addStatement("this.$L = $T.get($T.class)",
+                .addStatement("this.$L = $T.getProvider($T.class)",
                         "selectionFilter",
                         ClassName.get(BeanContext.class),
                         ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")
@@ -389,7 +390,7 @@ public class OperationHandlerImplementer {
                 .map(Tuple2::_1)
                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 .forEach(typeElement ->
-                        builder.addStatement("this.$L = $T.get($T.class)",
+                        builder.addStatement("this.$L = $T.getProvider($T.class)",
                                 CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
                                 ClassName.get(BeanContext.class),
                                 ClassName.get(typeElement)

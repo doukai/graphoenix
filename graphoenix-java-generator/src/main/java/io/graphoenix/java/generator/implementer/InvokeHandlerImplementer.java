@@ -1,11 +1,7 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
@@ -13,6 +9,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -71,7 +68,7 @@ public class InvokeHandlerImplementer {
                 .flatMap(typeElementListMap ->
                         typeElementListMap.keySet().stream()
                                 .map(typeElement ->
-                                        FieldSpec.builder(ClassName.get(typeElement), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
+                                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
                                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                                 .build()
                                 )
@@ -86,7 +83,7 @@ public class InvokeHandlerImplementer {
                 .flatMap(value -> value.keySet().stream())
                 .collect(Collectors.toSet())
                 .forEach(typeElement ->
-                        builder.addStatement("this.$L = $T.get($T.class)",
+                        builder.addStatement("this.$L = $T.getProvider($T.class)",
                                 CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
                                 ClassName.get(BeanContext.class),
                                 ClassName.get(typeElement)
@@ -117,7 +114,7 @@ public class InvokeHandlerImplementer {
             invokeMethods.get(objectTypeDefinitionContext.name().getText())
                     .forEach((key, value) ->
                             value.forEach(executableElement ->
-                                    builder.addStatement("$L.$L($L.$L($L))",
+                                    builder.addStatement("$L.$L($L.get().$L($L))",
                                             getParameterName(objectTypeDefinitionContext),
                                             typeManager.getInvokeFieldSetterMethodName(executableElement.getSimpleName().toString()),
                                             CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key.getSimpleName().toString()),
