@@ -1,8 +1,6 @@
 package io.graphoenix.showcase.mysql.annotation;
 
-import io.graphoenix.spi.aop.InterceptorAnnotation;
-
-@InterceptorAnnotation
+@io.graphoenix.spi.aop.Aspect
 public @interface Aspect {
     String value();
 }

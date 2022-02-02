@@ -57,6 +57,8 @@ import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
@@ -103,6 +105,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                             .setGetCompilationUnitByClassOrInterfaceType(this::getCompilationUnitByClassOrInterfaceType)
                             .setGetCompilationUnitByClassOrInterfaceTypeName(this::getCompilationUnitByClassOrInterfaceTypeName)
                             .setWriteToFiler(this::writeToFiler)
+                            .setGetResource(this::getResource)
             );
         }
     }
@@ -712,7 +715,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 );
     }
 
-    protected void importAllTypesFromSource(CompilationUnit target, CompilationUnit source) {
+    public void importAllTypesFromSource(CompilationUnit target, CompilationUnit source) {
         DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(target).ifPresent(classOrInterfaceDeclaration -> importAllTypesFromSource(classOrInterfaceDeclaration, target, source));
     }
 
@@ -948,6 +951,15 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                     e.printStackTrace();
                 }
             }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<FileObject> getResource(String fileName) {
+        try {
+            return Optional.of(processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return Optional.empty();
     }

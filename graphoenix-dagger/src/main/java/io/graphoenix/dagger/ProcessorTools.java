@@ -3,10 +3,12 @@ package io.graphoenix.dagger;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 
+import javax.tools.FileObject;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ProcessorTools {
 
@@ -15,6 +17,7 @@ public class ProcessorTools {
     private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType;
     private BiFunction<CompilationUnit, String, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceTypeName;
     private Consumer<CompilationUnit> writeToFiler;
+    private Function<String, Optional<FileObject>> getResource;
 
     public BiConsumer<CompilationUnit, CompilationUnit> getImportAllTypesFromSource() {
         return importAllTypesFromSource;
@@ -58,6 +61,15 @@ public class ProcessorTools {
 
     public ProcessorTools setWriteToFiler(Consumer<CompilationUnit> writeToFiler) {
         this.writeToFiler = writeToFiler;
+        return this;
+    }
+
+    public Function<String, Optional<FileObject>> getGetResource() {
+        return getResource;
+    }
+
+    public ProcessorTools setGetResource(Function<String, Optional<FileObject>> getResource) {
+        this.getResource = getResource;
         return this;
     }
 }

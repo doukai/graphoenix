@@ -7,6 +7,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Retention(RUNTIME)
 @Target({ElementType.ANNOTATION_TYPE})
-public @interface InterceptorAnnotation {
+public @interface Aspect {
     Class<? extends Annotation>[] value() default {};
 }

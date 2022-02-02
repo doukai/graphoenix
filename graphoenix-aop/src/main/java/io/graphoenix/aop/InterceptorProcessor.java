@@ -33,8 +33,13 @@ import io.graphoenix.dagger.ProcessorTools;
 import io.graphoenix.spi.aop.*;
 
 import javax.inject.Provider;
+import javax.tools.FileObject;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.annotation.Annotation;
-import java.util.List;
+import java.net.URL;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,9 +51,35 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
 
     private ProcessorTools processorTools;
 
+    private static Set<String> aspectNames;
+
     @Override
     public void init(ProcessorTools processorTools) {
         this.processorTools = processorTools;
+        aspectNames = new HashSet<>();
+        try {
+            Iterator<URL> urlIterator = Objects.requireNonNull(InterceptorProcessor.class.getClassLoader().getResources("META-INF/aspect/annotations.txt")).asIterator();
+            while (urlIterator.hasNext()) {
+                URL url = urlIterator.next();
+                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(url.openStream()))) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        aspectNames.add(line);
+                    }
+                }
+            }
+            Optional<FileObject> fileObject = this.processorTools.getGetResource().apply("META-INF/aspect/annotations.txt");
+            if (fileObject.isPresent()) {
+                try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileObject.get().openInputStream()))) {
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        aspectNames.add(line);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -303,7 +334,10 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
     protected boolean isInterceptorAnnotation(CompilationUnit compilationUnit, AnnotationExpr annotationExpr) {
         return processorTools.getGetCompilationUnitByClassOrInterfaceTypeName().apply(compilationUnit, annotationExpr.getNameAsString())
                 .flatMap(DAGGER_PROCESSOR_UTIL::getPublicAnnotationDeclaration)
-                .filter(annotationDeclaration -> annotationDeclaration.isAnnotationPresent(InterceptorAnnotation.class))
+                .filter(annotationDeclaration ->
+                        aspectNames.contains(annotationDeclaration.getFullyQualifiedName().orElse(annotationDeclaration.getNameAsString())) ||
+                                annotationDeclaration.isAnnotationPresent(Aspect.class)
+                )
                 .isPresent();
     }
 
