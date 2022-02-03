@@ -158,7 +158,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
         return typeName;
     }
 
-    protected final ClassLoader createClassLoader() throws TaskExecutionException {
+    private final ClassLoader createClassLoader() throws TaskExecutionException {
         List<URL> urls = new ArrayList<>();
         SourceSetContainer sourceSets = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets();
         try {

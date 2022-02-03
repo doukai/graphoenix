@@ -2,7 +2,6 @@ package io.graphoenix.dagger;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -11,30 +10,25 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.ClassExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.MethodReferenceExpr;
-import com.github.javaparser.ast.expr.Name;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.NormalAnnotationExpr;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.SuperExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.google.auto.service.AutoService;
-import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import dagger.Component;
 import dagger.Module;
@@ -43,10 +37,8 @@ import io.graphoenix.spi.context.BaseModuleContext;
 import io.graphoenix.spi.context.ModuleContext;
 import io.vavr.Tuple2;
 import jakarta.annotation.Generated;
-import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 
 import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
@@ -56,11 +48,6 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
-import javax.tools.FileObject;
-import javax.tools.StandardLocation;
-import java.io.IOException;
-import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,7 +59,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
+import static io.graphoenix.dagger.JavaParserUtil.JAVA_PARSER_UTIL;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.module.Module")
 @AutoService(Processor.class)
@@ -80,33 +67,23 @@ public class DaggerModuleProcessor extends AbstractProcessor {
 
     private Trees trees;
     private JavaParser javaParser;
-    private Filer filer;
-    private Elements elements;
     private Set<DaggerProxyProcessor> daggerProxyProcessors;
     private Set<Class<? extends Annotation>> supports;
+    private ProcessorManager processorManager;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.trees = Trees.instance(processingEnv);
         this.javaParser = new JavaParser();
-        this.filer = this.processingEnv.getFiler();
-        this.elements = this.processingEnv.getElementUtils();
         this.daggerProxyProcessors = ServiceLoader.load(DaggerProxyProcessor.class, DaggerModuleProcessor.class.getClassLoader()).stream()
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toSet());
         this.supports = new HashSet<>();
+        this.processorManager = new ProcessorManager(processingEnv);
         for (DaggerProxyProcessor daggerProxyProcessor : this.daggerProxyProcessors) {
             this.supports.add(daggerProxyProcessor.support());
-            daggerProxyProcessor.init(
-                    new ProcessorTools()
-                            .setImportAllTypesFromSource(this::importAllTypesFromSource)
-                            .setGetTypeNameByClassOrInterfaceType(this::getTypeNameByClassOrInterfaceType)
-                            .setGetCompilationUnitByClassOrInterfaceType(this::getCompilationUnitByClassOrInterfaceType)
-                            .setGetCompilationUnitByClassOrInterfaceTypeName(this::getCompilationUnitByClassOrInterfaceTypeName)
-                            .setWriteToFiler(this::writeToFiler)
-                            .setGetResource(this::getResource)
-            );
+            daggerProxyProcessor.init(processorManager);
         }
     }
 
@@ -127,7 +104,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         javaParser.parse(sourceCode)
                 .ifSuccessful(moduleCompilationUnit -> {
 
-                            Optional<ClassOrInterfaceDeclaration> moduleClassOrInterfaceDeclaration = DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit);
+                            Optional<ClassOrInterfaceDeclaration> moduleClassOrInterfaceDeclaration = JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit);
                             List<CompilationUnit> componentProxyCompilationUnits = moduleClassOrInterfaceDeclaration.stream()
                                     .flatMap(moduleClassDeclaration ->
                                             moduleClassDeclaration.getMembers().stream()
@@ -140,11 +117,11 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                                     )
                                                     .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(methodDeclaration -> methodDeclaration.getType().isClassOrInterfaceType())
-                                                    .map(DAGGER_PROCESSOR_UTIL::getMethodReturnType)
+                                                    .map(JAVA_PARSER_UTIL::getMethodReturnType)
                                                     .flatMap(typeStream ->
                                                             typeStream.map(componentType ->
-                                                                    getCompilationUnitByClassOrInterfaceType(moduleCompilationUnit, componentType)
-                                                                            .filter(compilationUnit -> !DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow().isInterface())
+                                                                    processorManager.getCompilationUnitByClassOrInterfaceType(moduleCompilationUnit, componentType)
+                                                                            .filter(compilationUnit -> !JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow().isInterface())
                                                                             .map(compilationUnit ->
                                                                                     buildComponentProxy(
                                                                                             moduleCompilationUnit,
@@ -158,10 +135,10 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                     )
                                     .collect(Collectors.toList());
 
-                            componentProxyCompilationUnits.forEach(this::writeToFiler);
+                            componentProxyCompilationUnits.forEach(processorManager::writeToFiler);
 
                             CompilationUnit moduleProxyCompilationUnit = buildModuleProxy(componentProxyCompilationUnits, moduleCompilationUnit);
-                            writeToFiler(moduleProxyCompilationUnit);
+                            processorManager.writeToFiler(moduleProxyCompilationUnit);
 
                             List<CompilationUnit> componentProxyComponentCompilationUnits = componentProxyCompilationUnits.stream()
                                     .map(componentProxyCompilationUnit ->
@@ -172,12 +149,12 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                     )
                                     .collect(Collectors.toList());
 
-                            componentProxyComponentCompilationUnits.forEach(this::writeToFiler);
+                            componentProxyComponentCompilationUnits.forEach(processorManager::writeToFiler);
 
-                            DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleProxyCompilationUnit)
+                            JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(moduleProxyCompilationUnit)
                                     .ifPresent(moduleProxyClassDeclaration -> {
                                                 CompilationUnit moduleContextCompilationUnit = buildModuleContext(componentProxyComponentCompilationUnits, moduleProxyCompilationUnit, moduleProxyClassDeclaration);
-                                                writeToFiler(moduleContextCompilationUnit);
+                                                processorManager.writeToFiler(moduleContextCompilationUnit);
                                             }
                                     );
                         }
@@ -187,9 +164,9 @@ public class DaggerModuleProcessor extends AbstractProcessor {
     protected CompilationUnit buildComponentProxy(CompilationUnit moduleCompilationUnit, CompilationUnit componentCompilationUnit) {
         return buildComponentProxy(
                 moduleCompilationUnit,
-                DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit).orElseThrow(),
+                JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit).orElseThrow(),
                 componentCompilationUnit,
-                DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).orElseThrow()
+                JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).orElseThrow()
         );
     }
 
@@ -226,8 +203,8 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         CompilationUnit componentProxyCompilationUnit = new CompilationUnit().addType(componentProxyClassDeclaration);
         componentCompilationUnit.getPackageDeclaration().ifPresent(componentProxyCompilationUnit::setPackageDeclaration);
         daggerProxyProcessors.forEach(daggerProxyProcessor -> daggerProxyProcessor.buildComponentProxy(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration));
-        importAllTypesFromSource(componentProxyClassDeclaration, componentProxyCompilationUnit, moduleCompilationUnit);
-        importAllTypesFromSource(componentProxyClassDeclaration, componentProxyCompilationUnit, componentCompilationUnit);
+        processorManager.importAllTypesFromSource(componentProxyClassDeclaration, componentProxyCompilationUnit, moduleCompilationUnit);
+        processorManager.importAllTypesFromSource(componentProxyClassDeclaration, componentProxyCompilationUnit, componentCompilationUnit);
         return componentProxyCompilationUnit;
     }
 
@@ -235,7 +212,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         return buildModuleProxy(
                 componentProxyCompilationUnits,
                 moduleCompilationUnit,
-                DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit).orElseThrow()
+                JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(moduleCompilationUnit).orElseThrow()
         );
     }
 
@@ -267,18 +244,19 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                 .noneMatch(annotationExpr ->
                                         supports.stream().map(Class::getSimpleName).anyMatch(name -> name.equals(annotationExpr.getNameAsString()))
                                 )
-                ).forEach(bodyDeclaration -> moduleProxyClassDeclaration.addMember(bodyDeclaration.clone()));
+                )
+                .forEach(bodyDeclaration -> moduleProxyClassDeclaration.addMember(bodyDeclaration.clone()));
 
         componentProxyCompilationUnits
                 .forEach(componentProxyCompilationUnit ->
-                        DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit)
+                        JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit)
                                 .ifPresent(componentProxyClassDeclaration -> {
 
                                             MethodDeclaration componentMethodDeclaration = moduleProxyClassDeclaration.getMembers().stream()
                                                     .filter(BodyDeclaration::isMethodDeclaration)
                                                     .map(BodyDeclaration::asMethodDeclaration)
                                                     .filter(declaration -> declaration.getType().isClassOrInterfaceType())
-                                                    .filter(declaration -> DAGGER_PROCESSOR_UTIL.getMethodReturnType(declaration).anyMatch(type -> type.getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString())))
+                                                    .filter(declaration -> JAVA_PARSER_UTIL.getMethodReturnType(declaration).anyMatch(type -> type.getNameAsString().equals(componentProxyClassDeclaration.getExtendedTypes(0).getNameAsString())))
                                                     .findFirst()
                                                     .orElseThrow();
 
@@ -321,7 +299,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .forEach(memberValuePair -> {
                     if (memberValuePair.getValue().isClassExpr()) {
                         memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType();
-                        moduleProxyCompilationUnit.addImport(getNameByType(moduleCompilationUnit, memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType().getName()) + "Proxy");
+                        moduleProxyCompilationUnit.addImport(processorManager.getNameByType(moduleCompilationUnit, memberValuePair.getValue().asClassExpr().getType().asClassOrInterfaceType().getName()) + "Proxy");
                         memberValuePair.getValue().asClassExpr().setType(memberValuePair.getValue().asClassExpr().getTypeAsString() + "Proxy");
 
                     } else if (memberValuePair.getValue().isArrayInitializerExpr()) {
@@ -330,7 +308,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                 .map(Expression::asClassExpr)
                                 .forEach(classExpr -> {
                                     classExpr.getType().asClassOrInterfaceType();
-                                    moduleProxyCompilationUnit.addImport(getNameByType(moduleCompilationUnit, classExpr.getType().asClassOrInterfaceType().getName()) + "Proxy");
+                                    moduleProxyCompilationUnit.addImport(processorManager.getNameByType(moduleCompilationUnit, classExpr.getType().asClassOrInterfaceType().getName()) + "Proxy");
                                     classExpr.setType(classExpr.getTypeAsString() + "Proxy");
                                 });
                     }
@@ -345,7 +323,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         daggerProxyProcessors.forEach(daggerProxyProcessor -> daggerProxyProcessor.buildModuleProxy(moduleCompilationUnit, moduleClassDeclaration, componentProxyCompilationUnits, moduleProxyCompilationUnit, moduleProxyClassDeclaration));
 
         componentProxyCompilationUnits.forEach(
-                componentProxyCompilationUnit -> DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit)
+                componentProxyCompilationUnit -> JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit)
                         .ifPresent(componentProxyClassDeclaration ->
                                 moduleProxyCompilationUnit.addImport(
                                         componentProxyCompilationUnit.getPackageDeclaration()
@@ -424,7 +402,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                         )
                 );
 
-        importAllTypesFromSource(moduleProxyCompilationUnit, moduleCompilationUnit);
+        processorManager.importAllTypesFromSource(moduleProxyCompilationUnit, moduleCompilationUnit);
         return moduleProxyCompilationUnit;
     }
 
@@ -471,7 +449,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         }
     }
 
-    protected void buildModuleProxyInjectField(Stream<Tuple2<String, Type>> injectFieldList, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+    private void buildModuleProxyInjectField(Stream<Tuple2<String, Type>> injectFieldList, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
 
         injectFieldList.forEach(field -> {
                     moduleProxyClassDeclaration.getMethods().stream()
@@ -506,7 +484,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         );
     }
 
-    protected void replaceInjectArguments(Expression expression, List<String> parameterNameList, Tuple2<String, Type> field) {
+    private void replaceInjectArguments(Expression expression, List<String> parameterNameList, Tuple2<String, Type> field) {
         List<Expression> arguments = Collections.emptyList();
 
         if (expression.isObjectCreationExpr()) {
@@ -569,16 +547,16 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 );
     }
 
-    protected CompilationUnit buildComponentProxyComponent(CompilationUnit componentProxyCompilationUnit, CompilationUnit moduleProxyCompilationUnit) {
+    private CompilationUnit buildComponentProxyComponent(CompilationUnit componentProxyCompilationUnit, CompilationUnit moduleProxyCompilationUnit) {
         return buildComponentProxyComponent(
                 componentProxyCompilationUnit,
-                DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit).orElseThrow(),
+                JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit).orElseThrow(),
                 moduleProxyCompilationUnit,
-                DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(moduleProxyCompilationUnit).orElseThrow()
+                JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(moduleProxyCompilationUnit).orElseThrow()
         );
     }
 
-    protected CompilationUnit buildComponentProxyComponent(CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+    private CompilationUnit buildComponentProxyComponent(CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
 
         ArrayInitializerExpr modules = new ArrayInitializerExpr();
         modules.getValues().add(new ClassExpr().setType(moduleProxyClassDeclaration.getNameAsString()));
@@ -597,7 +575,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                                 .filter(BodyDeclaration::isMethodDeclaration)
                                 .map(BodyDeclaration::asMethodDeclaration)
                                 .filter(methodDeclaration ->
-                                        DAGGER_PROCESSOR_UTIL.getMethodReturnType(methodDeclaration)
+                                        JAVA_PARSER_UTIL.getMethodReturnType(methodDeclaration)
                                                 .anyMatch(type ->
                                                         type.getNameAsString().equals(componentProxyClassDeclaration.getNameAsString()) ||
                                                                 componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> extendType.getNameAsString().equals(type.getNameAsString())))
@@ -613,7 +591,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .addImport(Component.class);
 
         componentProxyCompilationUnit.getPackageDeclaration().ifPresent(componentProxyComponentCompilationUnit::setPackageDeclaration);
-        importAllTypesFromSource(componentProxyComponentInterfaceDeclaration, componentProxyComponentCompilationUnit, componentProxyCompilationUnit);
+        processorManager.importAllTypesFromSource(componentProxyComponentInterfaceDeclaration, componentProxyComponentCompilationUnit, componentProxyCompilationUnit);
         componentProxyComponentCompilationUnit.addImport(
                 moduleProxyCompilationUnit.getPackageDeclaration()
                         .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(moduleProxyClassDeclaration.getNameAsString()))
@@ -621,12 +599,12 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         );
 
         daggerProxyProcessors.forEach(daggerProxyProcessor -> daggerProxyProcessor.buildComponentProxyComponent(moduleProxyCompilationUnit, moduleProxyClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration, componentProxyComponentCompilationUnit, componentProxyComponentInterfaceDeclaration));
-        importAllTypesFromSource(componentProxyComponentInterfaceDeclaration, componentProxyComponentCompilationUnit, moduleProxyCompilationUnit);
+        processorManager.importAllTypesFromSource(componentProxyComponentInterfaceDeclaration, componentProxyComponentCompilationUnit, moduleProxyCompilationUnit);
         return componentProxyComponentCompilationUnit;
     }
 
 
-    protected CompilationUnit buildModuleContext(List<CompilationUnit> componentProxyComponentCompilationUnits, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
+    private CompilationUnit buildModuleContext(List<CompilationUnit> componentProxyComponentCompilationUnits, CompilationUnit moduleProxyCompilationUnit, ClassOrInterfaceDeclaration moduleProxyClassDeclaration) {
 
         ClassOrInterfaceDeclaration moduleContextInterfaceDeclaration = new ClassOrInterfaceDeclaration()
                 .setPublic(true)
@@ -651,7 +629,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         componentProxyComponentCompilationUnits.forEach(
                 componentProxyComponentCompilationUnit -> {
 
-                    ClassOrInterfaceDeclaration componentProxyComponentClassDeclaration = DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyComponentCompilationUnit).orElseThrow();
+                    ClassOrInterfaceDeclaration componentProxyComponentClassDeclaration = JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(componentProxyComponentCompilationUnit).orElseThrow();
 
                     String daggerClassName = "Dagger".concat(componentProxyComponentClassDeclaration.getNameAsString());
                     String daggerVariableName = "dagger".concat(componentProxyComponentClassDeclaration.getNameAsString());
@@ -666,7 +644,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                             .findFirst()
                             .orElseThrow();
 
-                    moduleContextComponentCompilationUnit.addImport(getNameByType(componentProxyComponentCompilationUnit, componentType));
+                    moduleContextComponentCompilationUnit.addImport(processorManager.getNameByType(componentProxyComponentCompilationUnit, componentType));
 
                     blockStmt.addStatement(new VariableDeclarationExpr()
                             .addVariable(
@@ -698,269 +676,5 @@ public class DaggerModuleProcessor extends AbstractProcessor {
         );
 
         return moduleContextComponentCompilationUnit;
-    }
-
-
-    protected void writeToFiler(CompilationUnit compilationUnit) {
-        DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(compilationUnit)
-                .ifPresent(classOrInterfaceDeclaration -> {
-                            try {
-                                Writer writer = filer.createSourceFile(classOrInterfaceDeclaration.getFullyQualifiedName().orElseGet(classOrInterfaceDeclaration::getNameAsString)).openWriter();
-                                writer.write(compilationUnit.toString());
-                                writer.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                );
-    }
-
-    public void importAllTypesFromSource(CompilationUnit target, CompilationUnit source) {
-        DAGGER_PROCESSOR_UTIL.getPublicClassOrInterfaceDeclaration(target).ifPresent(classOrInterfaceDeclaration -> importAllTypesFromSource(classOrInterfaceDeclaration, target, source));
-    }
-
-    protected void importAllTypesFromSource(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, CompilationUnit target, CompilationUnit source) {
-        NodeList<BodyDeclaration<?>> members = classOrInterfaceDeclaration.getMembers();
-
-        addImport(classOrInterfaceDeclaration.getAnnotations(), target, source);
-
-        classOrInterfaceDeclaration.getImplementedTypes()
-                .forEach(classOrInterfaceType -> addImport(classOrInterfaceType, target, source));
-
-        classOrInterfaceDeclaration.getExtendedTypes()
-                .forEach(classOrInterfaceType -> addImport(classOrInterfaceType, target, source));
-
-        members.stream()
-                .filter(BodyDeclaration::isFieldDeclaration)
-                .map(BodyDeclaration::asFieldDeclaration)
-                .forEach(fieldDeclaration -> {
-                            addImport(fieldDeclaration.getElementType(), target, source);
-                            addImport(fieldDeclaration.getAnnotations(), target, source);
-                        }
-                );
-
-        members.stream()
-                .filter(BodyDeclaration::isMethodDeclaration)
-                .map(BodyDeclaration::asMethodDeclaration)
-                .forEach(methodDeclaration -> {
-                            addImport(methodDeclaration.getType(), target, source);
-                            addImport(methodDeclaration.getAnnotations(), target, source);
-                            methodDeclaration.getParameters()
-                                    .forEach(parameter -> {
-                                                addImport(parameter.getType(), target, source);
-                                                addImport(parameter.getAnnotations(), target, source);
-                                            }
-                                    );
-                            methodDeclaration.getBody().ifPresent(blockStmt -> addImport(blockStmt, target, source));
-                        }
-                );
-
-        members.stream()
-                .filter(BodyDeclaration::isConstructorDeclaration)
-                .map(BodyDeclaration::asConstructorDeclaration)
-                .forEach(
-                        constructorDeclaration -> {
-                            addImport(constructorDeclaration.getAnnotations(), target, source);
-                            constructorDeclaration.getParameters()
-                                    .forEach(
-                                            parameter -> {
-                                                addImport(parameter.getType(), target, source);
-                                                addImport(parameter.getAnnotations(), target, source);
-                                            }
-                                    );
-                            addImport(constructorDeclaration.getBody(), target, source);
-                        }
-                );
-    }
-
-    protected void addImport(BlockStmt blockStmt, CompilationUnit target, CompilationUnit source) {
-        blockStmt.getStatements().forEach(statement -> addImport(statement, target, source));
-    }
-
-    protected void addImport(Statement statement, CompilationUnit target, CompilationUnit source) {
-        if (statement.isExpressionStmt()) {
-            addImport(statement.asExpressionStmt().getExpression(), target, source);
-        } else if (statement.isReturnStmt()) {
-            statement.asReturnStmt().getExpression().ifPresent(expression -> addImport(expression, target, source));
-        }
-    }
-
-    protected void addImport(List<AnnotationExpr> annotations, CompilationUnit target, CompilationUnit source) {
-        for (AnnotationExpr annotation : annotations) {
-            addImport(annotation, target, source);
-        }
-    }
-
-    protected void addImport(AnnotationExpr annotationExpr, CompilationUnit target, CompilationUnit source) {
-        addImport(annotationExpr.getName(), target, source);
-        if (annotationExpr.isNormalAnnotationExpr()) {
-            annotationExpr.asNormalAnnotationExpr().getPairs()
-                    .forEach(memberValuePair -> addImport(memberValuePair.getValue(), target, source));
-        } else if (annotationExpr.isSingleMemberAnnotationExpr()) {
-            addImport(annotationExpr.asSingleMemberAnnotationExpr().getMemberValue(), target, source);
-        }
-    }
-
-    protected void addImport(Expression expression, CompilationUnit target, CompilationUnit source) {
-        if (expression.isClassExpr()) {
-            addImport(expression.asClassExpr().getType(), target, source);
-        } else if (expression.isAnnotationExpr()) {
-            addImport(expression.asAnnotationExpr(), target, source);
-        } else if (expression.isNameExpr()) {
-            addImport(expression.asNameExpr().getName(), target, source);
-        } else if (expression.isObjectCreationExpr()) {
-            addImport(expression.asObjectCreationExpr().getType(), target, source);
-            expression.asObjectCreationExpr().getArguments().forEach(argExpr -> addImport(argExpr, target, source));
-            expression.asObjectCreationExpr().getTypeArguments().ifPresent(args -> args.forEach(arg -> addImport(arg.getElementType(), target, source)));
-            expression.asObjectCreationExpr().getScope().ifPresent(scopeExpr -> addImport(scopeExpr, target, source));
-        } else if (expression.isTypeExpr()) {
-            addImport(expression.asTypeExpr().getType(), target, source);
-        } else if (expression.isArrayInitializerExpr()) {
-            expression.asArrayInitializerExpr().getValues().forEach(itemExpr -> addImport(itemExpr, target, source));
-        } else if (expression.isVariableDeclarationExpr()) {
-            addImport(expression.asVariableDeclarationExpr().getAnnotations(), target, source);
-            expression.asVariableDeclarationExpr().getVariables()
-                    .forEach(variableDeclarator -> {
-                        addImport(variableDeclarator.getType(), target, source);
-                        variableDeclarator.getInitializer().ifPresent(initExpression -> addImport(initExpression, target, source));
-                    });
-        } else if (expression.isMethodCallExpr()) {
-            expression.asMethodCallExpr().getArguments().forEach(argExpr -> addImport(argExpr, target, source));
-            expression.asMethodCallExpr().getTypeArguments().ifPresent(args -> args.forEach(arg -> addImport(arg.getElementType(), target, source)));
-            expression.asMethodCallExpr().getScope().ifPresent(scopeExpr -> addImport(scopeExpr, target, source));
-        } else if (expression.isFieldAccessExpr()) {
-            addImport(expression.asFieldAccessExpr().getScope(), target, source);
-            expression.asFieldAccessExpr().getTypeArguments().ifPresent(args -> args.forEach(arg -> addImport(arg.getElementType(), target, source)));
-        }
-    }
-
-    protected void addImport(Type type, CompilationUnit target, CompilationUnit source) {
-        if (type.isClassOrInterfaceType()) {
-            addImport(type.asClassOrInterfaceType().getName(), target, source);
-            type.asClassOrInterfaceType().getTypeArguments().ifPresent(types -> types.forEach(subType -> addImport(subType, target, source)));
-        } else if (type.isTypeParameter()) {
-            addImport(type.asTypeParameter().getElementType(), target, source);
-            type.asTypeParameter().getTypeBound()
-                    .forEach(classOrInterfaceType -> addImport(classOrInterfaceType, target, source));
-        } else if (type.isArrayType()) {
-            addImport(type.asArrayType().getElementType(), target, source);
-            addImport(type.asArrayType().getComponentType(), target, source);
-        }
-    }
-
-    protected void addImport(Name name, CompilationUnit target, CompilationUnit source) {
-        addImport(name.getIdentifier(), target, source);
-    }
-
-    protected void addImport(SimpleName name, CompilationUnit target, CompilationUnit source) {
-        addImport(name.getIdentifier(), target, source);
-    }
-
-    protected void addImport(String name, CompilationUnit target, CompilationUnit source) {
-        Optional<ImportDeclaration> sourceImport = source.getImports().stream()
-                .filter(importDeclaration -> importDeclaration.getName().getIdentifier().equals(name))
-                .findFirst();
-
-        if (sourceImport.isPresent()) {
-            target.addImport(sourceImport.get());
-            return;
-        }
-
-        Optional<ImportDeclaration> classImportInAsterisk = source.getImports().stream()
-                .filter(ImportDeclaration::isAsterisk)
-                .filter(importDeclaration -> classExist(importDeclaration.getNameAsString().concat(".").concat(name)))
-                .findFirst();
-
-        if (classImportInAsterisk.isPresent()) {
-            target.addImport(classImportInAsterisk.get());
-            return;
-        }
-
-        source.getPackageDeclaration()
-                .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(name))
-                .filter(this::classExist)
-                .ifPresent(target::addImport);
-    }
-
-    protected String getNameByType(CompilationUnit compilationUnit, String name) {
-        return compilationUnit.getImports().stream()
-                .filter(importDeclaration -> importDeclaration.getName().getIdentifier().equals(name))
-                .map(NodeWithName::getNameAsString)
-                .findFirst()
-                .orElseGet(() -> compilationUnit.getImports().stream()
-                        .filter(ImportDeclaration::isAsterisk)
-                        .filter(importDeclaration -> classExist(importDeclaration.getNameAsString().concat(".").concat(name)))
-                        .map(importDeclaration -> importDeclaration.getNameAsString().concat(".").concat(name))
-                        .findFirst()
-                        .orElseGet(() -> compilationUnit.getPackageDeclaration()
-                                .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(name))
-                                .orElse(name))
-                );
-    }
-
-    protected String getNameByType(CompilationUnit compilationUnit, SimpleName name) {
-        return getNameByType(compilationUnit, name.getIdentifier());
-    }
-
-    protected String getNameByType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
-        return getNameByType(compilationUnit, type.getName().getIdentifier());
-    }
-
-    protected TypeElement getElementByType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
-        return elements.getTypeElement(getNameByType(compilationUnit, type));
-    }
-
-    protected TypeElement getElementByType(CompilationUnit compilationUnit, String typeName) {
-        return elements.getTypeElement(getNameByType(compilationUnit, typeName));
-    }
-
-    protected boolean classExist(String className) {
-        return elements.getTypeElement(className) != null;
-    }
-
-    public Optional<String> getTypeNameByClassOrInterfaceType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
-        TypeElement elementByType = getElementByType(compilationUnit, type);
-        if (elementByType != null && elementByType.getQualifiedName() != null) {
-            return Optional.of(elementByType.getQualifiedName().toString());
-        }
-        return Optional.empty();
-    }
-
-    public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceTypeName(CompilationUnit compilationUnit, String typeName) {
-        return getCompilationUnitByClassOrInterfaceType(getElementByType(compilationUnit, typeName));
-    }
-
-    public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(CompilationUnit compilationUnit, ClassOrInterfaceType type) {
-        return getCompilationUnitByClassOrInterfaceType(getElementByType(compilationUnit, type));
-    }
-
-    public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(TypeElement elementByType) {
-        if (elementByType != null) {
-            TreePath treePath = trees.getPath(elementByType);
-            if (treePath != null) {
-                return javaParser.parse(treePath.getCompilationUnit().toString()).getResult();
-            } else {
-                ClassFileToJavaSourceDecompiler decompiler = new ClassFileToJavaSourceDecompiler();
-                DecompilerLoader decompilerLoader = new DecompilerLoader();
-                DecompilerPrinter decompilerPrinter = new DecompilerPrinter();
-                try {
-                    decompiler.decompile(decompilerLoader, decompilerPrinter, elementByType.asType().toString());
-                    String source = decompilerPrinter.toString();
-                    return javaParser.parse(source).getResult();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    public Optional<FileObject> getResource(String fileName) {
-        try {
-            return Optional.of(processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", fileName));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Optional.empty();
     }
 }

@@ -29,7 +29,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import io.graphoenix.dagger.DaggerProxyProcessor;
-import io.graphoenix.dagger.ProcessorTools;
+import io.graphoenix.dagger.ProcessorManager;
 import io.graphoenix.spi.aop.*;
 
 import javax.inject.Provider;
@@ -44,18 +44,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.javaparser.ast.expr.AssignExpr.Operator.ASSIGN;
-import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
+import static io.graphoenix.dagger.JavaParserUtil.JAVA_PARSER_UTIL;
 
 @AutoService(DaggerProxyProcessor.class)
 public class InterceptorProcessor implements DaggerProxyProcessor {
 
-    private ProcessorTools processorTools;
+    private ProcessorManager processorManager;
 
     private static Set<String> aspectNames;
 
     @Override
-    public void init(ProcessorTools processorTools) {
-        this.processorTools = processorTools;
+    public void init(ProcessorManager processorManager) {
+        this.processorManager = processorManager;
         aspectNames = new HashSet<>();
         try {
             Iterator<URL> urlIterator = Objects.requireNonNull(InterceptorProcessor.class.getClassLoader().getResources("META-INF/aspect/annotations.txt")).asIterator();
@@ -68,7 +68,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                     }
                 }
             }
-            Optional<FileObject> fileObject = this.processorTools.getGetResource().apply("META-INF/aspect/annotations.txt");
+            Optional<FileObject> fileObject = processorManager.getResource("META-INF/aspect/annotations.txt");
             if (fileObject.isPresent()) {
                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileObject.get().openInputStream()))) {
                     String line;
@@ -97,12 +97,6 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                 .forEach(methodDeclaration -> {
                             List<AnnotationExpr> interceptorAnnotationExprList = getMethodDeclarationInterceptorAnnotationExprList(componentCompilationUnit, methodDeclaration);
                             if (interceptorAnnotationExprList.size() > 0) {
-                                BlockStmt blockStmt = componentProxyClassDeclaration.addMethod(methodDeclaration.getNameAsString(), methodDeclaration.getModifiers().stream().map(Modifier::getKeyword).toArray(Modifier.Keyword[]::new))
-                                        .setParameters(methodDeclaration.getParameters())
-                                        .setType(methodDeclaration.getType())
-                                        .addAnnotation(Override.class)
-                                        .createBody();
-
                                 interceptorAnnotationExprList
                                         .forEach(annotationExpr -> {
                                                     String interceptorFieldName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, annotationExpr.getNameAsString()).concat("Interceptor");
@@ -129,6 +123,12 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                     }
                                                 }
                                         );
+
+                                BlockStmt blockStmt = componentProxyClassDeclaration.addMethod(methodDeclaration.getNameAsString(), methodDeclaration.getModifiers().stream().map(Modifier::getKeyword).toArray(Modifier.Keyword[]::new))
+                                        .setParameters(methodDeclaration.getParameters())
+                                        .setType(methodDeclaration.getType())
+                                        .addAnnotation(Override.class)
+                                        .createBody();
 
                                 interceptorAnnotationExprList
                                         .forEach(annotationExpr -> {
@@ -237,12 +237,12 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                     .setAnnotations(methodDeclaration.getAnnotations().stream().filter(annotationExpr -> !annotationExpr.getNameAsString().equals(InterceptorBean.class.getSimpleName())).collect(Collectors.toCollection(NodeList::new)))
                                     .setBody(methodDeclaration.getBody().orElseThrow());
 
-                            processorTools.getGetCompilationUnitByClassOrInterfaceType().apply(moduleCompilationUnit, methodDeclaration.getType().asClassOrInterfaceType())
+                            processorManager.getCompilationUnitByClassOrInterfaceType(moduleCompilationUnit, methodDeclaration.getType().asClassOrInterfaceType())
                                     .ifPresent(componentProxyCompilationUnits::add);
                         }
                 );
 
-        processorTools.getWriteToFiler().accept(buildModuleContext(moduleCompilationUnit, interceptorBeanMethodDeclarations, moduleProxyCompilationUnit, moduleProxyClassDeclaration));
+        processorManager.writeToFiler(buildModuleContext(moduleCompilationUnit, interceptorBeanMethodDeclarations, moduleProxyCompilationUnit, moduleProxyClassDeclaration));
     }
 
     @Override
@@ -283,7 +283,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                     String daggerClassName = "Dagger".concat(componentClassName);
                     String daggerVariableName = "dagger".concat(componentClassName);
 
-                    moduleContextComponentCompilationUnit.addImport(processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow());
+                    moduleContextComponentCompilationUnit.addImport(processorManager.getTypeNameByClassOrInterfaceType(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow());
 
                     blockStmt.addStatement(new VariableDeclarationExpr()
                             .addVariable(
@@ -306,11 +306,11 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                         .addArgument(classExpr)
                                                         .addArgument(new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName)))
                                         );
-                                        moduleContextComponentCompilationUnit.addImport(processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, classExpr.getType().asClassOrInterfaceType()).orElseThrow());
+                                        moduleContextComponentCompilationUnit.addImport(processorManager.getTypeNameByClassOrInterfaceType(moduleCompilationUnit, classExpr.getType().asClassOrInterfaceType()).orElseThrow());
                                     }
                             );
 
-                    String interceptorBeanName = processorTools.getGetTypeNameByClassOrInterfaceType().apply(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow();
+                    String interceptorBeanName = processorManager.getTypeNameByClassOrInterfaceType(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow();
                     moduleContextComponentCompilationUnit.addImport(interceptorBeanName.replace(beanClassName, componentClassName));
                     moduleContextComponentCompilationUnit.addImport(interceptorBeanName.replace(beanClassName, daggerClassName));
                 }
@@ -332,8 +332,8 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
     }
 
     protected boolean isInterceptorAnnotation(CompilationUnit compilationUnit, AnnotationExpr annotationExpr) {
-        return processorTools.getGetCompilationUnitByClassOrInterfaceTypeName().apply(compilationUnit, annotationExpr.getNameAsString())
-                .flatMap(DAGGER_PROCESSOR_UTIL::getPublicAnnotationDeclaration)
+        return processorManager.getCompilationUnitByClassOrInterfaceTypeName(compilationUnit, annotationExpr.getNameAsString())
+                .flatMap(JAVA_PARSER_UTIL::getPublicAnnotationDeclaration)
                 .filter(annotationDeclaration ->
                         aspectNames.contains(annotationDeclaration.getFullyQualifiedName().orElse(annotationDeclaration.getNameAsString())) ||
                                 annotationDeclaration.isAnnotationPresent(Aspect.class)

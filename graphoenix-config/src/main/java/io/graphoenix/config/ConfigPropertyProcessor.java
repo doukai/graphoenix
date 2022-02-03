@@ -7,10 +7,9 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.auto.service.AutoService;
 import io.graphoenix.dagger.DaggerProxyProcessor;
-import io.graphoenix.dagger.ProcessorTools;
+import io.graphoenix.dagger.ProcessorManager;
 import io.vavr.control.Try;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -20,19 +19,18 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.dagger.DaggerProcessorUtil.DAGGER_PROCESSOR_UTIL;
+import static io.graphoenix.dagger.JavaParserUtil.JAVA_PARSER_UTIL;
 
 @AutoService(DaggerProxyProcessor.class)
 public class ConfigPropertyProcessor implements DaggerProxyProcessor {
 
-    private BiFunction<CompilationUnit, ClassOrInterfaceType, Optional<CompilationUnit>> getCompilationUnitByClassOrInterfaceType;
+    private ProcessorManager processorManager;
 
     @Override
-    public void init(ProcessorTools processorTools) {
-        this.getCompilationUnitByClassOrInterfaceType = processorTools.getGetCompilationUnitByClassOrInterfaceType();
+    public void init(ProcessorManager processorManager) {
+        this.processorManager = processorManager;
     }
 
     @Override
@@ -100,8 +98,8 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                                                         .asNormalAnnotationExpr().getPairs().stream()
                                                                         .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
                                                                         .findFirst()
-                                                                        .orElseGet(() -> getCompilationUnitByClassOrInterfaceType.apply(moduleCompilationUnit, fieldDeclaration.getElementType().asClassOrInterfaceType())
-                                                                                .map(DAGGER_PROCESSOR_UTIL::getPublicClassOrInterfaceDeclaration)
+                                                                        .orElseGet(() -> processorManager.getCompilationUnitByClassOrInterfaceType(moduleCompilationUnit, fieldDeclaration.getElementType().asClassOrInterfaceType())
+                                                                                .map(JAVA_PARSER_UTIL::getPublicClassOrInterfaceDeclaration)
                                                                                 .filter(Optional::isPresent)
                                                                                 .map(Optional::get)
                                                                                 .map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getAnnotationByClass(ConfigProperties.class))

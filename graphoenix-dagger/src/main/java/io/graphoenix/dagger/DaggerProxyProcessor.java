@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface DaggerProxyProcessor {
 
-    void init(ProcessorTools processorTools);
+    void init(ProcessorManager processorManager);
 
     void buildComponentProxy(CompilationUnit moduleCompilationUnit,
                              ClassOrInterfaceDeclaration moduleClassDeclaration,

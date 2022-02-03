@@ -14,8 +14,8 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public enum DaggerProcessorUtil {
-    DAGGER_PROCESSOR_UTIL;
+public enum JavaParserUtil {
+    JAVA_PARSER_UTIL;
 
     public Stream<ClassOrInterfaceType> getMethodReturnType(MethodDeclaration methodDeclaration) {
         return methodDeclaration.getBody()
