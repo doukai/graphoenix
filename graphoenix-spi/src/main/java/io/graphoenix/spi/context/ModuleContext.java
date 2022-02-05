@@ -7,5 +7,9 @@ public interface ModuleContext {
 
     <T> Supplier<T> get(Class<T> beanClass);
 
+    <T> Supplier<T> get(Class<T> beanClass, String name);
+
     <T> Optional<Supplier<T>> getOptional(Class<T> beanClass);
+
+    <T> Optional<Supplier<T>> getOptional(Class<T> beanClass, String name);
 }

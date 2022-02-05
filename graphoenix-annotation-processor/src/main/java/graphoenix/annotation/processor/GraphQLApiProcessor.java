@@ -110,7 +110,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         if (annotations.isEmpty()) {
-            return true;
+            return false;
         }
 
         final Types typeUtils = processingEnv.getTypeUtils();
@@ -225,7 +225,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
             e.printStackTrace();
         }
 
-        return true;
+        return false;
     }
 
     private void registerGraphQLApiElement(Element element, Types typeUtils) {

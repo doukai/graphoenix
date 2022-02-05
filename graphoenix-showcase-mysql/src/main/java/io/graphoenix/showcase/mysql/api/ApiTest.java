@@ -12,14 +12,13 @@ import org.eclipse.microprofile.graphql.Source;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.List;
 
 @GraphQLApi
 public class ApiTest {
 
-    private Provider<OperationTest> operationTest;
+    protected Provider<OperationTest> operationTest;
 
     @Inject
     public ApiTest(Provider<OperationTest> operationTest) {

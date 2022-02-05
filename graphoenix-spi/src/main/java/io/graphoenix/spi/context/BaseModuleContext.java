@@ -7,28 +7,43 @@ import java.util.function.Supplier;
 
 public abstract class BaseModuleContext implements ModuleContext {
 
-    private static final Map<Class<?>, Supplier<?>> contextMap = new HashMap<>();
+    private static final Map<Class<?>, Map<String, Supplier<?>>> contextMap = new HashMap<>();
 
     protected static void put(Class<?> beanClass, Supplier<?> supplier) {
-        contextMap.put(beanClass, supplier);
+        put(beanClass, beanClass.getName(), supplier);
     }
 
-    @SuppressWarnings("unchecked")
+    protected static void put(Class<?> beanClass, String name, Supplier<?> supplier) {
+        Map<String, Supplier<?>> supplierMap = contextMap.get(beanClass);
+        if (supplierMap == null) {
+            supplierMap = new HashMap<>();
+        }
+        supplierMap.put(name, supplier);
+        contextMap.put(beanClass, supplierMap);
+    }
+
     @Override
     public <T> Supplier<T> get(Class<T> beanClass) {
-        return (Supplier<T>) contextMap.get(beanClass);
+        return get(beanClass, beanClass.getName());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> Optional<Supplier<T>> getOptional(Class<T> beanClass) {
-        if (contextMap.get(beanClass) != null) {
-            return Optional.of((Supplier<T>) contextMap.get(beanClass));
-        }
-        Optional<Map.Entry<Class<?>, Supplier<?>>> subType = contextMap.entrySet().stream()
-                .filter(classSupplierEntry -> classSupplierEntry.getKey().isAssignableFrom(beanClass))
-                .findFirst();
+    public <T> Supplier<T> get(Class<T> beanClass, String name) {
+        return (Supplier<T>) contextMap.get(beanClass).get(name);
+    }
 
-        return subType.map(classSupplierEntry -> (Supplier<T>) classSupplierEntry.getValue());
+    @Override
+    public <T> Optional<Supplier<T>> getOptional(Class<T> beanClass) {
+        return getOptional(beanClass, beanClass.getName());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> Optional<Supplier<T>> getOptional(Class<T> beanClass, String name) {
+        if (contextMap.get(beanClass) != null && contextMap.get(beanClass).get(name) != null) {
+            return Optional.of((Supplier<T>) contextMap.get(beanClass).get(name));
+        }
+        return Optional.empty();
     }
 }

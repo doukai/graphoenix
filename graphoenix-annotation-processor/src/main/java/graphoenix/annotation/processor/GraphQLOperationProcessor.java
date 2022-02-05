@@ -89,7 +89,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
         if (annotations.isEmpty()) {
-            return true;
+            return false;
         }
 
         final Elements elementUtils = processingEnv.getElementUtils();
@@ -164,6 +164,6 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
             e.printStackTrace();
         }
 
-        return true;
+        return false;
     }
 }

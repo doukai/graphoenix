@@ -305,9 +305,19 @@ public class ProcessorManager {
             return;
         }
 
-        source.getPackageDeclaration()
+        Optional<String> sourceSamePackageClassName = source.getPackageDeclaration()
                 .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(name))
-                .filter(this::classExist)
-                .ifPresent(target::addImport);
+                .filter(this::classExist);
+
+        if (sourceSamePackageClassName.isPresent()) {
+            target.addImport(sourceSamePackageClassName.get());
+            return;
+        }
+
+        Optional<String> sourceClassName = JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(source)
+                .filter(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getNameAsString().equals(name))
+                .map(classOrInterfaceDeclaration -> classOrInterfaceDeclaration.getFullyQualifiedName().orElse(classOrInterfaceDeclaration.getNameAsString()));
+
+        sourceClassName.ifPresent(target::addImport);
     }
 }
