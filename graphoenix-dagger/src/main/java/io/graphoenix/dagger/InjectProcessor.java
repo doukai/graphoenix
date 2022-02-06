@@ -404,27 +404,26 @@ public class InjectProcessor extends AbstractProcessor {
 
                             moduleClassDeclaration.getConstructors().stream()
                                     .filter(constructorDeclaration -> constructorDeclaration.isAnnotationPresent(Inject.class))
-                                    .forEach(constructorDeclaration -> {
-                                                constructorDeclaration.getBody().getStatements().stream()
-                                                        .filter(Statement::isExpressionStmt)
-                                                        .map(statement -> statement.asExpressionStmt().getExpression())
-                                                        .filter(Expression::isAssignExpr)
-                                                        .map(Expression::asAssignExpr)
-                                                        .filter(assignExpr -> assignExpr.getTarget().isFieldAccessExpr())
-                                                        .filter(assignExpr ->
-                                                                assignExpr.getTarget().asFieldAccessExpr().getScope() == null ||
-                                                                        assignExpr.getTarget().asFieldAccessExpr().getScope().isThisExpr()
-                                                        )
-                                                        .filter(assignExpr -> assignExpr.getValue().isNameExpr())
-                                                        .forEach(assignExpr -> {
-                                                                    constructorDeclaration.getParameters().stream()
-                                                                            .filter(parameter -> parameter.getNameAsString().equals(assignExpr.getValue().asNameExpr().getNameAsString()))
-                                                                            .forEach(parameter -> assignExpr.setValue(getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, compilationUnit, parameter.getType().asClassOrInterfaceType())));
-                                                                    constructorDeclaration.getParameters().clear();
-                                                                    constructorDeclaration.getAnnotationByClass(Inject.class).ifPresent(Node::remove);
-                                                                }
-                                                        );
-                                            }
+                                    .forEach(constructorDeclaration ->
+                                            constructorDeclaration.getBody().getStatements().stream()
+                                                    .filter(Statement::isExpressionStmt)
+                                                    .map(statement -> statement.asExpressionStmt().getExpression())
+                                                    .filter(Expression::isAssignExpr)
+                                                    .map(Expression::asAssignExpr)
+                                                    .filter(assignExpr -> assignExpr.getTarget().isFieldAccessExpr())
+                                                    .filter(assignExpr ->
+                                                            assignExpr.getTarget().asFieldAccessExpr().getScope() == null ||
+                                                                    assignExpr.getTarget().asFieldAccessExpr().getScope().isThisExpr()
+                                                    )
+                                                    .filter(assignExpr -> assignExpr.getValue().isNameExpr())
+                                                    .forEach(assignExpr -> {
+                                                                constructorDeclaration.getParameters().stream()
+                                                                        .filter(parameter -> parameter.getNameAsString().equals(assignExpr.getValue().asNameExpr().getNameAsString()))
+                                                                        .forEach(parameter -> assignExpr.setValue(getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, compilationUnit, parameter.getType().asClassOrInterfaceType())));
+                                                                constructorDeclaration.getParameters().clear();
+                                                                constructorDeclaration.getAnnotationByClass(Inject.class).ifPresent(Node::remove);
+                                                            }
+                                                    )
                                     );
 
                             moduleClassDeclaration.getMethods().stream()
