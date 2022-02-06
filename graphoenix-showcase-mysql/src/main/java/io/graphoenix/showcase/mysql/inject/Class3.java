@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.inject.Provider;
 
 @ApplicationScoped
@@ -21,6 +22,7 @@ public class Class3 {
 
     @Produces
     @ApplicationScoped
+    @Named("no")
     public Class6 class6() {
         return new Class6();
     }

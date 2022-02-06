@@ -1,13 +1,13 @@
 package io.graphoenix.spi.context;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public abstract class BaseModuleContext implements ModuleContext {
 
-    private static final Map<Class<?>, Map<String, Supplier<?>>> contextMap = new HashMap<>();
+    private static final Map<Class<?>, Map<String, Supplier<?>>> contextMap = new ConcurrentHashMap<>();
 
     protected static void put(Class<?> beanClass, Supplier<?> supplier) {
         put(beanClass, beanClass.getName(), supplier);
@@ -16,7 +16,7 @@ public abstract class BaseModuleContext implements ModuleContext {
     protected static void put(Class<?> beanClass, String name, Supplier<?> supplier) {
         Map<String, Supplier<?>> supplierMap = contextMap.get(beanClass);
         if (supplierMap == null) {
-            supplierMap = new HashMap<>();
+            supplierMap = new ConcurrentHashMap<>();
         }
         supplierMap.put(name, supplier);
         contextMap.put(beanClass, supplierMap);

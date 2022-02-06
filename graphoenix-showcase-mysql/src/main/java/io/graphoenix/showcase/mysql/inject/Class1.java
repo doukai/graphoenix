@@ -2,9 +2,11 @@ package io.graphoenix.showcase.mysql.inject;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 @ApplicationScoped
-public class Class1 {
+@Named("yes")
+public class Class1 extends AClass1 implements IClass1 {
 
     private Class2 class2;
     private Class3 class3;
