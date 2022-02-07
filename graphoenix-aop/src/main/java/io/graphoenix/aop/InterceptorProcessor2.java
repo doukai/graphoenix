@@ -2,40 +2,25 @@ package io.graphoenix.aop;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.CastExpr;
-import com.github.javaparser.ast.expr.ClassExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MemberValuePair;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.MethodReferenceExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.expr.SuperExpr;
-import com.github.javaparser.ast.expr.ThisExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.body.*;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.google.auto.service.AutoService;
 import com.google.common.base.CaseFormat;
 import io.graphoenix.dagger.ComponentProxyProcessor;
 import io.graphoenix.dagger.ProcessorManager;
-import io.graphoenix.spi.aop.InvocationContext;
 import io.graphoenix.spi.interceptor.InvocationContextProxy;
 import io.vavr.Tuple;
 import io.vavr.Tuple3;
 import jakarta.annotation.Priority;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
 import jakarta.interceptor.Interceptor;
+import jakarta.interceptor.InterceptorBinding;
+import jakarta.interceptor.InvocationContext;
 
-import javax.inject.Singleton;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.dagger.JavaParserUtil.JAVA_PARSER_UTIL;
 
@@ -68,7 +53,9 @@ public class InterceptorProcessor2 implements ComponentProxyProcessor {
                                     .map(annotationExpr -> processorManager.getNameByType(componentCompilationUnit, annotationExpr.getNameAsString()))
                                     .anyMatch(annotationNameList::contains)
                             ) {
+                                componentProxyCompilationUnit.addImport(InvocationContext.class);
                                 componentProxyCompilationUnit.addImport(InvocationContextProxy.class);
+                                componentProxyCompilationUnit.addImport("io.graphoenix.core.context.BeanContext");
 
                                 MethodDeclaration overrideMethodDeclaration = componentProxyClassDeclaration.addMethod(methodDeclaration.getNameAsString())
                                         .setModifiers(methodDeclaration.getModifiers())
@@ -78,8 +65,18 @@ public class InterceptorProcessor2 implements ComponentProxyProcessor {
 
                                 MethodDeclaration proxyMethodDeclaration = componentProxyClassDeclaration.addMethod(methodDeclaration.getNameAsString().concat("Proxy"))
                                         .setModifiers(methodDeclaration.getModifiers())
-                                        .addParameter(InvocationContextProxy.class, "invocationContextProxy")
-                                        .addAnnotation(Override.class);
+                                        .addParameter(InvocationContext.class, "invocationContext")
+                                        .addThrownException(Exception.class);
+
+                                VariableDeclarationExpr invocationContextProxyVariable = new VariableDeclarationExpr()
+                                        .addVariable(new VariableDeclarator()
+                                                .setType(InvocationContextProxy.class)
+                                                .setName("invocationContextProxy")
+                                                .setInitializer(new CastExpr()
+                                                        .setType(InvocationContextProxy.class)
+                                                        .setExpression(new NameExpr("invocationContext"))
+                                                )
+                                        );
 
                                 MethodCallExpr superMethodCallExpr = new MethodCallExpr()
                                         .setName(methodDeclaration.getName())
@@ -101,87 +98,158 @@ public class InterceptorProcessor2 implements ComponentProxyProcessor {
 
                                 if (methodDeclaration.getType().isVoidType()) {
                                     proxyMethodDeclaration.setType(methodDeclaration.getType());
-                                    proxyMethodDeclaration.createBody().addStatement(superMethodCallExpr);
+                                    proxyMethodDeclaration.createBody().addStatement(invocationContextProxyVariable).addStatement(superMethodCallExpr);
                                 } else {
                                     proxyMethodDeclaration.setType(Object.class);
-                                    proxyMethodDeclaration.createBody().addStatement(new ReturnStmt(superMethodCallExpr));
+                                    proxyMethodDeclaration.createBody().addStatement(invocationContextProxyVariable).addStatement(new ReturnStmt(superMethodCallExpr));
                                 }
 
-                                methodDeclaration.getAnnotations().stream()
+                                String nextContextName = null;
+                                Tuple3<CompilationUnit, ClassOrInterfaceDeclaration, MethodDeclaration> nextTuple3 = null;
+
+                                List<AnnotationExpr> annotationExprList = methodDeclaration.getAnnotations().stream()
                                         .filter(annotationExpr -> annotationNameList.contains(processorManager.getNameByType(componentCompilationUnit, annotationExpr.getNameAsString())))
-                                        .forEachOrdered(annotationExpr -> {
-                                                    getAroundInvokeMethodList(processorManager.getNameByType(componentCompilationUnit, annotationExpr.getNameAsString()))
-                                                            .stream().sorted(Collections.reverseOrder())
-                                                            .collect(Collectors.toList())
-                                                            .forEach(tuple3 -> {
-                                                                        CompilationUnit invokeCompilationUnit = tuple3._1();
-                                                                        ClassOrInterfaceDeclaration invokeClassOrInterfaceDeclaration = tuple3._2();
-                                                                        MethodDeclaration invokeMethodDeclaration = tuple3._3();
+                                        .collect(Collectors.toList());
 
-                                                                        String interceptorFieldName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, annotationExpr.getNameAsString().concat("_").concat(invokeClassOrInterfaceDeclaration.getNameAsString()));
+                                for (AnnotationExpr annotationExpr : annotationExprList) {
+                                    String annotationName = processorManager.getNameByType(componentCompilationUnit, annotationExpr.getNameAsString());
+                                    for (Tuple3<CompilationUnit, ClassOrInterfaceDeclaration, MethodDeclaration> tuple3 : getAroundInvokeMethodList(annotationName)) {
 
-                                                                        Expression createContextExpr = new MethodCallExpr()
-                                                                                .setName("setOwner")
-                                                                                .addArgument(new ClassExpr().setType(annotationExpr.getName().getIdentifier()))
-                                                                                .setScope(
-                                                                                        new MethodCallExpr()
-                                                                                                .setName("setTarget")
-                                                                                                .addArgument(new ThisExpr())
-                                                                                                .setScope(new ObjectCreationExpr().setType(InvocationContextProxy.class))
-                                                                                );
+                                        componentProxyCompilationUnit.addImport(annotationName);
+                                        CompilationUnit invokeCompilationUnit = tuple3._1();
+                                        ClassOrInterfaceDeclaration invokeClassOrInterfaceDeclaration = tuple3._2();
+                                        MethodDeclaration invokeMethodDeclaration = tuple3._3();
 
-                                                                        MethodCallExpr proxyMethodCallExpr;
-                                                                        if (methodDeclaration.getType().isVoidType()) {
-                                                                            proxyMethodCallExpr = new MethodCallExpr()
-                                                                                    .setName("setConsumer")
-                                                                                    .addArgument(
-                                                                                            new MethodReferenceExpr()
-                                                                                                    .setIdentifier(methodDeclaration.getNameAsString().concat("Proxy"))
-                                                                                                    .setScope(new ThisExpr())
-                                                                                    );
-                                                                        } else {
-                                                                            proxyMethodCallExpr = new MethodCallExpr()
-                                                                                    .setName("setFunction")
-                                                                                    .addArgument(
-                                                                                            new MethodReferenceExpr()
-                                                                                                    .setIdentifier(methodDeclaration.getNameAsString().concat("Proxy"))
-                                                                                                    .setScope(new ThisExpr())
-                                                                                    );
-                                                                        }
-                                                                        proxyMethodCallExpr.setScope(createContextExpr);
+                                        String interceptorFieldName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL,
+                                                annotationExpr.getNameAsString().concat("_").concat(invokeClassOrInterfaceDeclaration.getNameAsString()).concat("_").concat(invokeMethodDeclaration.getNameAsString()));
+                                        String contextName = interceptorFieldName.concat("Context");
 
-                                                                        Expression addParameterValueExpr = methodDeclaration.getParameters().stream()
-                                                                                .map(parameter -> (Expression) parameter.getNameAsExpression())
-                                                                                .reduce(proxyMethodCallExpr, (left, right) ->
-                                                                                        new MethodCallExpr().setName("addParameterValue")
-                                                                                                .addArgument(new StringLiteralExpr(right.asNameExpr().getNameAsString()))
-                                                                                                .addArgument(right)
-                                                                                                .setScope(left)
-                                                                                );
+                                        Expression createContextExpr = new MethodCallExpr()
+                                                .setName("setOwner")
+                                                .addArgument(new ClassExpr().setType(annotationExpr.getName().getIdentifier()))
+                                                .setScope(
+                                                        new MethodCallExpr()
+                                                                .setName("setTarget")
+                                                                .addArgument(new ThisExpr())
+                                                                .setScope(new ObjectCreationExpr().setType(InvocationContextProxy.class))
+                                                );
 
-                                                                        Expression addOwnerValueExpr = annotationExpr.asNormalAnnotationExpr().getPairs().stream()
-                                                                                .reduce(new MemberValuePair().setValue(addParameterValueExpr), (left, right) ->
-                                                                                        new MemberValuePair().setValue(
-                                                                                                new MethodCallExpr().setName("addOwnerValue")
-                                                                                                        .addArgument(new StringLiteralExpr(right.getNameAsString()))
-                                                                                                        .addArgument(right.getValue())
-                                                                                                        .setScope(left.getValue()))
+                                        MethodCallExpr proxyMethodCallExpr;
+                                        MethodCallExpr addParameterValueExpr;
+                                        if (nextContextName == null) {
+                                            if (methodDeclaration.getType().isVoidType()) {
+                                                proxyMethodCallExpr = new MethodCallExpr()
+                                                        .setName("setConsumer")
+                                                        .addArgument(
+                                                                new MethodReferenceExpr()
+                                                                        .setIdentifier(methodDeclaration.getNameAsString().concat("Proxy"))
+                                                                        .setScope(new ThisExpr())
+                                                        );
+                                            } else {
+                                                proxyMethodCallExpr = new MethodCallExpr()
+                                                        .setName("setFunction")
+                                                        .addArgument(
+                                                                new MethodReferenceExpr()
+                                                                        .setIdentifier(methodDeclaration.getNameAsString().concat("Proxy"))
+                                                                        .setScope(new ThisExpr())
+                                                        )
+                                                        .setScope(createContextExpr);
+                                            }
+
+                                            addParameterValueExpr = methodDeclaration.getParameters().stream()
+                                                    .map(parameter -> (Expression) parameter.getNameAsExpression())
+                                                    .reduce(proxyMethodCallExpr, (left, right) ->
+                                                            new MethodCallExpr().setName("addParameterValue")
+                                                                    .addArgument(new StringLiteralExpr(right.asNameExpr().getNameAsString()))
+                                                                    .addArgument(right)
+                                                                    .setScope(left)
+                                                    )
+                                                    .asMethodCallExpr();
+                                        } else {
+                                            proxyMethodCallExpr = new MethodCallExpr()
+                                                    .setName("setNextInvocationContext")
+                                                    .addArgument(new NameExpr(nextContextName))
+                                                    .setScope(
+                                                            new MethodCallExpr()
+                                                                    .setName("setNextProceed")
+                                                                    .addArgument(
+                                                                            new MethodReferenceExpr()
+                                                                                    .setIdentifier(nextTuple3._3().getNameAsString())
+                                                                                    .setScope(
+                                                                                            new MethodCallExpr("get")
+                                                                                                    .setScope(
+                                                                                                            new MethodCallExpr("getProvider")
+                                                                                                                    .setScope(new NameExpr("BeanContext"))
+                                                                                                                    .addArgument(new ClassExpr().setType(nextTuple3._2().getNameAsString()))
+                                                                                                    )
+                                                                                    )
+                                                                    )
+                                                                    .setScope(createContextExpr)
+                                                    );
+
+
+                                            addParameterValueExpr = proxyMethodCallExpr;
+                                            for (Parameter parameter : methodDeclaration.getParameters()) {
+                                                addParameterValueExpr = new MethodCallExpr().setName("addParameterValue")
+                                                        .addArgument(new StringLiteralExpr(parameter.getNameAsExpression().asNameExpr().getNameAsString()))
+                                                        .addArgument(
+                                                                new MethodCallExpr("getParameterValue")
+                                                                        .addArgument(new StringLiteralExpr(parameter.getNameAsExpression().asNameExpr().getNameAsString()))
+                                                                        .setScope(
+                                                                                new EnclosedExpr().setInner(
+                                                                                        new CastExpr().setType(InvocationContextProxy.class).setExpression(new NameExpr(nextContextName))
                                                                                 )
-                                                                                .getValue();
+                                                                        )
+                                                        )
+                                                        .setScope(addParameterValueExpr);
+                                            }
+                                        }
 
+                                        Expression addOwnerValueExpr = annotationExpr.asNormalAnnotationExpr().getPairs().stream()
+                                                .reduce(new MemberValuePair().setValue(addParameterValueExpr), (left, right) ->
+                                                        new MemberValuePair().setValue(
+                                                                new MethodCallExpr().setName("addOwnerValue")
+                                                                        .addArgument(new StringLiteralExpr(right.getNameAsString()))
+                                                                        .addArgument(right.getValue())
+                                                                        .setScope(left.getValue()))
+                                                )
+                                                .getValue();
 
-                                                                        VariableDeclarationExpr variableDeclarationExpr = new VariableDeclarationExpr()
-                                                                                .addVariable(new VariableDeclarator()
-                                                                                        .setType(InvocationContext.class)
-                                                                                        .setName(interceptorFieldName.concat("Context"))
-                                                                                        .setInitializer(addOwnerValueExpr)
-                                                                                );
-                                                                    }
-                                                            );
-                                                }
+                                        VariableDeclarationExpr variableDeclarationExpr = new VariableDeclarationExpr()
+                                                .addVariable(new VariableDeclarator()
+                                                        .setType(InvocationContext.class)
+                                                        .setName(contextName)
+                                                        .setInitializer(addOwnerValueExpr)
+                                                );
+
+                                        overrideMethodDeclaration.getBody().orElseGet(overrideMethodDeclaration::createBody).addStatement(variableDeclarationExpr);
+
+                                        nextContextName = contextName;
+                                        nextTuple3 = tuple3;
+                                    }
+                                }
+
+                                assert nextTuple3 != null;
+                                overrideMethodDeclaration.getBody().orElseGet(overrideMethodDeclaration::createBody)
+                                        .addStatement(
+                                                new ReturnStmt(
+                                                        new CastExpr()
+                                                                .setType(methodDeclaration.getType())
+                                                                .setExpression(
+                                                                        new MethodCallExpr()
+                                                                                .setName(nextTuple3._3().getNameAsString())
+                                                                                .addArgument(new NameExpr(nextContextName))
+                                                                                .setScope(
+                                                                                        new MethodCallExpr("get")
+                                                                                                .setScope(
+                                                                                                        new MethodCallExpr("getProvider")
+                                                                                                                .setScope(new NameExpr("BeanContext"))
+                                                                                                                .addArgument(new ClassExpr().setType(nextTuple3._2().getNameAsString()))
+                                                                                                )
+                                                                                )
+                                                                )
+                                                )
                                         );
-
-
                             }
                         }
                 );
@@ -190,14 +258,30 @@ public class InterceptorProcessor2 implements ComponentProxyProcessor {
     private List<String> getAspectAnnotationNameList(CompilationUnit compilationUnit) {
         ClassOrInterfaceDeclaration classOrInterfaceDeclaration = JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow();
 
-        return classOrInterfaceDeclaration.getAnnotations().stream()
-                .filter(annotationExpr -> !processorManager.getNameByType(compilationUnit, annotationExpr.getNameAsString()).equals(Interceptor.class.getName()))
-                .filter(annotationExpr -> !processorManager.getNameByType(compilationUnit, annotationExpr.getNameAsString()).equals(Priority.class.getName()))
-                .filter(annotationExpr -> !processorManager.getNameByType(compilationUnit, annotationExpr.getNameAsString()).equals(Singleton.class.getName()))
-                .filter(annotationExpr -> !processorManager.getNameByType(compilationUnit, annotationExpr.getNameAsString()).equals(Dependent.class.getName()))
-                .filter(annotationExpr -> !processorManager.getNameByType(compilationUnit, annotationExpr.getNameAsString()).equals(ApplicationScoped.class.getName()))
+        List<String> annotationExprList = classOrInterfaceDeclaration.getAnnotations().stream()
+                .filter(annotationExpr -> {
+                            CompilationUnit annotationCompilationUnit = processorManager.getCompilationUnitByClassOrInterfaceTypeName(compilationUnit, annotationExpr.getNameAsString()).orElseThrow();
+                            AnnotationDeclaration annotationDeclaration = JAVA_PARSER_UTIL.getPublicAnnotationDeclaration(annotationCompilationUnit).orElseThrow();
+                            return annotationDeclaration.getAnnotations().stream()
+                                    .anyMatch(subAnnotationExpr -> processorManager.getNameByType(annotationCompilationUnit, subAnnotationExpr.getNameAsString()).equals(InterceptorBinding.class.getName()));
+                        }
+                )
                 .map(annotationExpr -> processorManager.getNameByType(compilationUnit, annotationExpr.getNameAsString()))
                 .collect(Collectors.toList());
+
+
+        List<String> subAnnotationExprList = classOrInterfaceDeclaration.getAnnotations().stream()
+                .filter(annotationExpr -> {
+                            CompilationUnit annotationCompilationUnit = processorManager.getCompilationUnitByClassOrInterfaceTypeName(compilationUnit, annotationExpr.getNameAsString()).orElseThrow();
+                            AnnotationDeclaration annotationDeclaration = JAVA_PARSER_UTIL.getPublicAnnotationDeclaration(annotationCompilationUnit).orElseThrow();
+                            return annotationDeclaration.getAnnotations().stream()
+                                    .anyMatch(subAnnotationExpr -> annotationExprList.contains(processorManager.getNameByType(annotationCompilationUnit, subAnnotationExpr.getNameAsString())));
+                        }
+                )
+                .map(annotationExpr -> processorManager.getNameByType(compilationUnit, annotationExpr.getNameAsString()))
+                .collect(Collectors.toList());
+
+        return Stream.concat(annotationExprList.stream(), subAnnotationExprList.stream()).collect(Collectors.toList());
     }
 
     private List<Tuple3<CompilationUnit, ClassOrInterfaceDeclaration, MethodDeclaration>> getAroundInvokeMethodList(String annotationName) {
@@ -213,7 +297,7 @@ public class InterceptorProcessor2 implements ComponentProxyProcessor {
                         tuple3._2().getAnnotations().stream().map(annotationExpr -> processorManager.getNameByType(tuple3._1(), annotationExpr.getNameAsString()))
                                 .anyMatch(name -> name.equals(annotationName))
                 )
-                .sorted(Comparator.comparing(tuple3 -> getPriorityFromInterceptor(tuple3._2())))
+                .sorted(Comparator.comparing(tuple3 -> getPriorityFromInterceptor(tuple3._2()), Comparator.reverseOrder()))
                 .collect(Collectors.toList());
     }
 

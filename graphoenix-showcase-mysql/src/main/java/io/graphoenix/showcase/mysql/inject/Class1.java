@@ -21,7 +21,7 @@ public class Class1 extends AClass1 implements IClass1 {
 
     @Test
     @Test2
-    public String test(String a, int b) {
+    public String test(String a, int b) throws Exception{
         return "hello";
     }
 }

@@ -1,5 +1,7 @@
 package io.graphoenix.spi.interceptor;
 
+import io.vavr.CheckedConsumer;
+import io.vavr.CheckedFunction1;
 import jakarta.interceptor.InvocationContext;
 
 import java.lang.reflect.Constructor;
@@ -8,8 +10,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.IntStream;
 
 public class InvocationContextProxy implements InvocationContext {
@@ -30,9 +30,13 @@ public class InvocationContextProxy implements InvocationContext {
 
     private Map<String, Object> contextData;
 
-    private Function<InvocationContextProxy, Object> function;
+    private CheckedFunction1<InvocationContext, Object> function;
 
-    private Consumer<InvocationContextProxy> consumer;
+    private CheckedConsumer<InvocationContext> consumer;
+
+    private CheckedFunction1<InvocationContext, Object> nextProceed;
+
+    private InvocationContext nextInvocationContext;
 
     public Class<?> getOwner() {
         return owner;
@@ -124,13 +128,23 @@ public class InvocationContextProxy implements InvocationContext {
         return this;
     }
 
-    public InvocationContextProxy setFunction(Function<InvocationContextProxy, Object> function) {
+    public InvocationContextProxy setFunction(CheckedFunction1<InvocationContext, Object> function) {
         this.function = function;
         return this;
     }
 
-    public InvocationContextProxy setConsumer(Consumer<InvocationContextProxy> consumer) {
+    public InvocationContextProxy setConsumer(CheckedConsumer<InvocationContext> consumer) {
         this.consumer = consumer;
+        return this;
+    }
+
+    public InvocationContextProxy setNextProceed(CheckedFunction1<InvocationContext, Object> nextProceed) {
+        this.nextProceed = nextProceed;
+        return this;
+    }
+
+    public InvocationContextProxy setNextInvocationContext(InvocationContext nextInvocationContext) {
+        this.nextInvocationContext = nextInvocationContext;
         return this;
     }
 
@@ -176,11 +190,17 @@ public class InvocationContextProxy implements InvocationContext {
 
     @Override
     public Object proceed() throws Exception {
-        if (function != null) {
-            return function.apply(this);
-        } else {
-            consumer.accept(this);
-            return null;
+        try {
+            if (function != null) {
+                return function.apply(this);
+            } else if (consumer != null) {
+                consumer.accept(this);
+                return null;
+            } else {
+                return nextProceed.apply(nextInvocationContext);
+            }
+        } catch (Throwable throwable) {
+            throw new Exception(throwable);
         }
     }
 }
