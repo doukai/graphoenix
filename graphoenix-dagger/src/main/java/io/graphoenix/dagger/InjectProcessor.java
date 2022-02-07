@@ -5,8 +5,24 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.*;
-import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.ArrayInitializerExpr;
+import com.github.javaparser.ast.expr.ClassExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.MethodReferenceExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.SuperExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -32,13 +48,19 @@ import jakarta.inject.Named;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,8 +76,7 @@ public class InjectProcessor extends AbstractProcessor {
 
     private Trees trees;
     private JavaParser javaParser;
-    private Set<DaggerProxyProcessor> daggerProxyProcessors;
-    private Set<Class<? extends Annotation>> supports;
+    private Set<ComponentProxyProcessor> componentProxyProcessors;
     private ProcessorManager processorManager;
     private RoundEnvironment roundEnv;
 
@@ -64,14 +85,12 @@ public class InjectProcessor extends AbstractProcessor {
         super.init(processingEnv);
         this.trees = Trees.instance(processingEnv);
         this.javaParser = new JavaParser();
-        this.daggerProxyProcessors = ServiceLoader.load(DaggerProxyProcessor.class, DaggerModuleProcessor.class.getClassLoader()).stream()
+        this.componentProxyProcessors = ServiceLoader.load(ComponentProxyProcessor.class, InjectProcessor.class.getClassLoader()).stream()
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toSet());
-        this.supports = new HashSet<>();
         this.processorManager = new ProcessorManager(processingEnv);
-        for (DaggerProxyProcessor daggerProxyProcessor : this.daggerProxyProcessors) {
-            this.supports.add(daggerProxyProcessor.support());
-            daggerProxyProcessor.init(processorManager);
+        for (ComponentProxyProcessor componentProxyProcessor : this.componentProxyProcessors) {
+            componentProxyProcessor.init(processorManager);
         }
     }
 
@@ -94,6 +113,8 @@ public class InjectProcessor extends AbstractProcessor {
         }
 
         this.roundEnv = roundEnv;
+        processorManager.setRoundEnv(roundEnv);
+        componentProxyProcessors.forEach(ComponentProxyProcessor::inProcess);
 
         List<CompilationUnit> componentProxyCompilationUnits = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
@@ -150,10 +171,6 @@ public class InjectProcessor extends AbstractProcessor {
                         }
                 );
         return false;
-    }
-
-    private CompilationUnit getCompilationUnit(String sourceCode) {
-        return javaParser.parse(sourceCode).getResult().orElseThrow();
     }
 
     private CompilationUnit buildComponentProxy(String sourceCode) {
@@ -217,6 +234,8 @@ public class InjectProcessor extends AbstractProcessor {
         }
         componentCompilationUnit.getPackageDeclaration().ifPresent(componentProxyCompilationUnit::setPackageDeclaration);
         processorManager.importAllTypesFromSource(componentProxyCompilationUnit, componentCompilationUnit);
+
+        componentProxyProcessors.forEach(componentProxyProcessor -> componentProxyProcessor.processComponentProxy(componentCompilationUnit, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration));
         return componentProxyCompilationUnit;
     }
 
@@ -269,14 +288,14 @@ public class InjectProcessor extends AbstractProcessor {
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
-                .map(typeElement -> getCompilationUnit(trees.getPath(typeElement).getCompilationUnit().toString()))
+                .map(typeElement -> processorManager.getCompilationUnit(trees.getPath(typeElement).getCompilationUnit().toString()))
                 .forEach(componentCompilationUnit -> buildProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, true, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
 
         dependentSet.stream()
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
-                .map(typeElement -> getCompilationUnit(trees.getPath(typeElement).getCompilationUnit().toString()))
+                .map(typeElement -> processorManager.getCompilationUnit(trees.getPath(typeElement).getCompilationUnit().toString()))
                 .forEach(componentCompilationUnit -> buildProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, false, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
 
         return moduleCompilationUnit;
@@ -362,7 +381,7 @@ public class InjectProcessor extends AbstractProcessor {
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
-                .map(typeElement -> getCompilationUnit(trees.getPath(typeElement).getCompilationUnit().toString()))
+                .map(typeElement -> processorManager.getCompilationUnit(trees.getPath(typeElement).getCompilationUnit().toString()))
                 .filter(compilationUnit ->
                         JAVA_PARSER_UTIL.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow().getMethods().stream()
                                 .anyMatch(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))

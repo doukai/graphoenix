@@ -21,14 +21,17 @@ import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static io.graphoenix.dagger.JavaParserUtil.JAVA_PARSER_UTIL;
 
@@ -39,6 +42,7 @@ public class ProcessorManager {
     private final Filer filer;
     private final Elements elements;
     private final JavaParser javaParser;
+    private RoundEnvironment roundEnv;
 
     public ProcessorManager(ProcessingEnvironment processingEnv) {
         this.processingEnv = processingEnv;
@@ -46,6 +50,10 @@ public class ProcessorManager {
         this.elements = processingEnv.getElementUtils();
         this.trees = Trees.instance(processingEnv);
         this.javaParser = new JavaParser();
+    }
+
+    public void setRoundEnv(RoundEnvironment roundEnv) {
+        this.roundEnv = roundEnv;
     }
 
     public void writeToFiler(CompilationUnit compilationUnit) {
@@ -69,6 +77,17 @@ public class ProcessorManager {
             e.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    public List<CompilationUnit> getCompilationUnitListWithAnnotationClass(Class<? extends Annotation> annotationClass) {
+        return roundEnv.getElementsAnnotatedWith(annotationClass).stream()
+                .map(element -> trees.getPath(element).getCompilationUnit().toString())
+                .map(this::getCompilationUnit)
+                .collect(Collectors.toList());
+    }
+
+    public CompilationUnit getCompilationUnit(String sourceCode) {
+        return javaParser.parse(sourceCode).getResult().orElseThrow();
     }
 
     public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceTypeName(CompilationUnit compilationUnit, String typeName) {
