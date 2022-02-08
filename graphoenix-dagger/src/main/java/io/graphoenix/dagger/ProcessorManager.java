@@ -70,13 +70,26 @@ public class ProcessorManager {
                 );
     }
 
-    public Optional<FileObject> getResource(String fileName) {
+    public void createResource(String name, String content) {
         try {
-            return Optional.of(processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", fileName));
+            Writer writer = filer.createResource(StandardLocation.CLASS_OUTPUT, "", name).openWriter();
+            writer.write(content);
+            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Optional.empty();
+    }
+
+    public Optional<FileObject> getResource(String fileName) {
+        try {
+            FileObject resource = processingEnv.getFiler().getResource(StandardLocation.SOURCE_PATH, "", fileName);
+            if (resource != null) {
+                return Optional.of(resource);
+            }
+            return Optional.empty();
+        } catch (IOException e) {
+            return Optional.empty();
+        }
     }
 
     public List<CompilationUnit> getCompilationUnitListWithAnnotationClass(Class<? extends Annotation> annotationClass) {
@@ -119,6 +132,25 @@ public class ProcessorManager {
         return Optional.empty();
     }
 
+    public Optional<CompilationUnit> getCompilationUnitByName(String name) {
+        TreePath treePath = trees.getPath(elements.getTypeElement(name));
+        if (treePath != null) {
+            return javaParser.parse(treePath.getCompilationUnit().toString()).getResult();
+        } else {
+            ClassFileToJavaSourceDecompiler decompiler = new ClassFileToJavaSourceDecompiler();
+            DecompilerLoader decompilerLoader = new DecompilerLoader();
+            DecompilerPrinter decompilerPrinter = new DecompilerPrinter();
+            try {
+                decompiler.decompile(decompilerLoader, decompilerPrinter, name);
+                String source = decompilerPrinter.toString();
+                return javaParser.parse(source).getResult();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return Optional.empty();
+    }
+
     public String getNameByType(CompilationUnit compilationUnit, String name) {
         return compilationUnit.getImports().stream()
                 .filter(importDeclaration -> importDeclaration.getName().getIdentifier().equals(name))
@@ -129,9 +161,12 @@ public class ProcessorManager {
                         .filter(importDeclaration -> classExist(importDeclaration.getNameAsString().concat(".").concat(name)))
                         .map(importDeclaration -> importDeclaration.getNameAsString().concat(".").concat(name))
                         .findFirst()
-                        .orElseGet(() -> compilationUnit.getPackageDeclaration()
-                                .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(name))
-                                .orElse(name))
+                        .orElseGet(() -> classExist("java.lang.".concat(name)) ?
+                                "java.lang.".concat(name) :
+                                compilationUnit.getPackageDeclaration()
+                                        .map(packageDeclaration -> packageDeclaration.getNameAsString().concat(".").concat(name))
+                                        .orElse(name)
+                        )
                 );
     }
 

@@ -14,6 +14,8 @@ public class Class1 extends AClass1 implements IClass1 {
     private Class3 class3;
 
     @Inject
+    @Test
+    @Test2
     public Class1(Class2 class2, Class3 class3) {
         this.class2 = class2;
         this.class3 = class3;
@@ -21,7 +23,7 @@ public class Class1 extends AClass1 implements IClass1 {
 
     @Test
     @Test2
-    public String test(String a, int b) throws Exception{
+    public String test(String a, int b) throws Exception {
         return "hello";
     }
 }

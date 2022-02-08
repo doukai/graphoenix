@@ -8,7 +8,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -16,7 +15,7 @@ public class InvocationContextProxy implements InvocationContext {
 
     private Class<?> owner;
 
-    private Map<String, Object> ownerValues;
+    private Map<String, Object> ownerValues = new HashMap<>();
 
     private Object target;
 
@@ -26,9 +25,9 @@ public class InvocationContextProxy implements InvocationContext {
 
     private Constructor<?> constructor;
 
-    private Map<String, Object> parameterMap;
+    private Map<String, Object> parameterMap = new HashMap<>();
 
-    private Map<String, Object> contextData;
+    private Map<String, Object> contextData = new HashMap<>();
 
     private CheckedFunction1<InvocationContext, Object> function;
 
@@ -61,9 +60,6 @@ public class InvocationContextProxy implements InvocationContext {
     }
 
     public InvocationContextProxy addOwnerValue(String name, Object value) {
-        if (this.ownerValues == null) {
-            this.ownerValues = new HashMap<>();
-        }
         ownerValues.put(name, value);
         return this;
     }
@@ -78,15 +74,26 @@ public class InvocationContextProxy implements InvocationContext {
         return this;
     }
 
-    public InvocationContextProxy setMethod(String methodName, int parameterCount, List<String> parameterNameList, List<String> parameterTypeNameList) {
-        this.method = Arrays.stream(getTarget().getClass().getMethods())
+    public InvocationContextProxy setMethod(Method method) {
+        this.method = method;
+        return this;
+    }
+
+    public InvocationContextProxy setMethod(String methodName, int parameterCount, String[] parameterNames, String[] parameterTypeNames) {
+        Class<?> targetClass;
+        if (target instanceof Class<?>) {
+            targetClass = (Class<?>) target;
+        } else {
+            targetClass = target.getClass();
+        }
+        this.method = Arrays.stream(targetClass.getMethods())
                 .filter(method -> method.getName().equals(methodName))
                 .filter(method -> method.getParameterCount() == parameterCount)
                 .filter(method ->
                         IntStream.range(0, method.getParameterCount() - 1)
                                 .allMatch(index ->
-                                        method.getParameters()[index].getName().equals(parameterNameList.get(index)) &&
-                                                method.getParameters()[index].getType().getName().equals(parameterTypeNameList.get(index))
+                                        method.getParameters()[index].getName().equals(parameterNames[index]) &&
+                                                method.getParameters()[index].getType().getName().equals(parameterTypeNames[index])
                                 )
                 )
                 .findFirst()
@@ -95,14 +102,25 @@ public class InvocationContextProxy implements InvocationContext {
         return this;
     }
 
-    public InvocationContextProxy setConstructor(int parameterCount, List<String> parameterNameList, List<String> parameterTypeNameList) {
-        this.constructor = Arrays.stream(getTarget().getClass().getConstructors())
+    public InvocationContextProxy setConstructor(Constructor<?> constructor) {
+        this.constructor = constructor;
+        return this;
+    }
+
+    public InvocationContextProxy setConstructor(int parameterCount, String[] parameterNames, String[] parameterTypeNames) {
+        Class<?> targetClass;
+        if (target instanceof Class<?>) {
+            targetClass = (Class<?>) target;
+        } else {
+            targetClass = target.getClass();
+        }
+        this.constructor = Arrays.stream(targetClass.getConstructors())
                 .filter(constructor -> constructor.getParameterCount() == parameterCount)
                 .filter(constructor ->
                         IntStream.range(0, constructor.getParameterCount() - 1)
                                 .allMatch(index ->
-                                        constructor.getParameters()[index].getName().equals(parameterNameList.get(index)) &&
-                                                constructor.getParameters()[index].getType().getName().equals(parameterTypeNameList.get(index))
+                                        constructor.getParameters()[index].getName().equals(parameterNames[index]) &&
+                                                constructor.getParameters()[index].getType().getName().equals(parameterTypeNames[index])
                                 )
                 )
                 .findFirst()
@@ -120,10 +138,12 @@ public class InvocationContextProxy implements InvocationContext {
         return parameterMap.get(parameterName);
     }
 
+    public InvocationContextProxy setParameterMap(Map<String, Object> parameterMap) {
+        this.parameterMap = parameterMap;
+        return this;
+    }
+
     public InvocationContextProxy addParameterValue(String parameterName, Object parameterValue) {
-        if (parameterMap == null) {
-            parameterMap = new HashMap<>();
-        }
         parameterMap.put(parameterName, parameterValue);
         return this;
     }
@@ -176,9 +196,6 @@ public class InvocationContextProxy implements InvocationContext {
     @Override
     public void setParameters(Object[] params) {
         if (params != null) {
-            if (parameterMap == null) {
-                parameterMap = new HashMap<>();
-            }
             IntStream.range(0, method.getParameterCount() - 1).forEach(index -> parameterMap.put(method.getParameters()[index].getName(), params[index]));
         }
     }
@@ -197,6 +214,7 @@ public class InvocationContextProxy implements InvocationContext {
                 consumer.accept(this);
                 return null;
             } else {
+                ((InvocationContextProxy) nextInvocationContext).setParameterMap(parameterMap).setContextData(contextData).setMethod(method).setConstructor(constructor);
                 return nextProceed.apply(nextInvocationContext);
             }
         } catch (Throwable throwable) {

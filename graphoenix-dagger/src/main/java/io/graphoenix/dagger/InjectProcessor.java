@@ -314,13 +314,45 @@ public class InjectProcessor extends AbstractProcessor {
             methodDeclaration.addAnnotation(Singleton.class);
         }
 
-        methodDeclaration.createBody()
-                .addStatement(
-                        new ReturnStmt(
+        methodDeclaration.createBody().addStatement(buildProvidesMethodReturnStmt(moduleCompilationUnit, componentCompilationUnit, componentClassDeclaration, componentProxyClassDeclaration));
+        processorManager.importAllTypesFromSource(moduleCompilationUnit, componentCompilationUnit);
+        processorManager.importAllTypesFromSource(moduleCompilationUnit, componentProxyCompilationUnit);
+    }
+
+    private ReturnStmt buildProvidesMethodReturnStmt(CompilationUnit moduleCompilationUnit, CompilationUnit componentCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
+        return new ReturnStmt(
+                componentProxyClassDeclaration.getMembers().stream()
+                        .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
+                        .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
+                        .findFirst()
+                        .map(bodyDeclaration -> {
+                                    if (bodyDeclaration.isConstructorDeclaration()) {
+                                        return new ObjectCreationExpr()
+                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                .setArguments(
+                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
+                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, componentCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                );
+                                    } else {
+                                        return new MethodCallExpr()
+                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
+                                                .setArguments(
+                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
+                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, componentCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                )
+                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()));
+                                    }
+                                }
+                        )
+                        .orElseGet(() ->
                                 new ObjectCreationExpr()
                                         .setType(componentProxyClassDeclaration.getNameAsString())
                                         .setArguments(
-                                                componentClassDeclaration.getConstructors().stream()
+                                                componentProxyClassDeclaration.getConstructors().stream()
                                                         .findFirst()
                                                         .map(constructorDeclaration ->
                                                                 constructorDeclaration.getParameters().stream()
@@ -331,9 +363,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                         .orElseThrow()
                                         )
                         )
-                );
-        processorManager.importAllTypesFromSource(moduleCompilationUnit, componentCompilationUnit);
-        processorManager.importAllTypesFromSource(moduleCompilationUnit, componentProxyCompilationUnit);
+        );
     }
 
     private MethodCallExpr getBeanGetMethodCallExpr(NodeWithAnnotations<?> nodeWithAnnotations, CompilationUnit belongCompilationUnit, CompilationUnit compilationUnit, ClassOrInterfaceType classOrInterfaceType) {
