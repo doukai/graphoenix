@@ -3,9 +3,12 @@ package io.graphoenix.dagger;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
@@ -41,23 +44,23 @@ public class ProcessorManager {
     private final Filer filer;
     private final Elements elements;
     private final JavaParser javaParser;
+    private final CombinedTypeSolver combinedTypeSolver;
     private RoundEnvironment roundEnv;
 
-    public ProcessorManager(ProcessingEnvironment processingEnv, JavaParser javaParser) {
+    public ProcessorManager(ProcessingEnvironment processingEnv, ClassLoader classLoader) {
         this.processingEnv = processingEnv;
         this.filer = processingEnv.getFiler();
         this.elements = processingEnv.getElementUtils();
         this.trees = Trees.instance(processingEnv);
-        this.javaParser = javaParser;
-        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        combinedTypeSolver = new CombinedTypeSolver();
         JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(getSourcePath());
-        ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(DaggerModuleProcessor.class.getClassLoader());
+        ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(classLoader);
         ReflectionTypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
         combinedTypeSolver.add(javaParserTypeSolver);
-        combinedTypeSolver.add(reflectionTypeSolver);
         combinedTypeSolver.add(classLoaderTypeSolver);
-        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
-        this.javaParser.getParserConfiguration().setSymbolResolver(symbolSolver);
+        JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(combinedTypeSolver);
+        this.javaParser = new JavaParser();
+        this.javaParser.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
     }
 
     public void setRoundEnv(RoundEnvironment roundEnv) {
@@ -76,6 +79,14 @@ public class ProcessorManager {
         }
 
         return null;
+    }
+
+    public Optional<CompilationUnit> parse(TypeElement typeElement) {
+        return parse(trees.getPath(typeElement).getCompilationUnit().toString());
+    }
+
+    private Optional<CompilationUnit> parse(String sourceCode) {
+        return javaParser.parse(sourceCode).getResult();
     }
 
     public void writeToFiler(CompilationUnit compilationUnit) {
@@ -117,12 +128,20 @@ public class ProcessorManager {
     public List<CompilationUnit> getCompilationUnitListWithAnnotationClass(Class<? extends Annotation> annotationClass) {
         return roundEnv.getElementsAnnotatedWith(annotationClass).stream()
                 .map(element -> trees.getPath(element).getCompilationUnit().toString())
-                .map(this::getCompilationUnit)
+                .map(sourceCode -> getCompilationUnitBySourceCode(sourceCode).orElseThrow())
                 .collect(Collectors.toList());
     }
 
-    public CompilationUnit getCompilationUnit(String sourceCode) {
-        return javaParser.parse(sourceCode).getResult().orElseThrow();
+    public Optional<CompilationUnit> getCompilationUnitBySourceCode(TypeElement typeElement) {
+        return javaParser.parse(trees.getPath(typeElement).getCompilationUnit().toString()).getResult();
+    }
+
+    private Optional<CompilationUnit> getCompilationUnitBySourceCode(String sourceCode) {
+        return javaParser.parse(sourceCode).getResult();
+    }
+
+    public Optional<CompilationUnit> getCompilationUnitByQualifiedName(String qualifiedName) {
+        return getCompilationUnitByClassOrInterfaceType(elements.getTypeElement(qualifiedName));
     }
 
     public Optional<CompilationUnit> getCompilationUnitByResolvedReferenceType(ResolvedReferenceType resolvedReferenceType) {
@@ -131,6 +150,10 @@ public class ProcessorManager {
 
     public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(ClassOrInterfaceType type) {
         return getCompilationUnitByClassOrInterfaceType(getElementByType(type));
+    }
+
+    public Optional<CompilationUnit> getCompilationUnitByAnnotationExpr(AnnotationExpr annotationExpr) {
+        return getCompilationUnitByClassOrInterfaceType(getElementByType(annotationExpr));
     }
 
     private Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(TypeElement elementByType) {
@@ -192,20 +215,27 @@ public class ProcessorManager {
 //                );
 //    }
 
+    public String getNameByType(AnnotationExpr annotationExpr) {
+        return annotationExpr.resolve().getQualifiedName();
+    }
 
     public String getNameByType(ClassOrInterfaceType type) {
         return type.resolve().getQualifiedName();
     }
 
-    public TypeElement getElementByType(ClassOrInterfaceType type) {
+    private TypeElement getElementByType(ClassOrInterfaceType type) {
         return elements.getTypeElement(type.resolve().getQualifiedName());
+    }
+
+    private TypeElement getElementByType(AnnotationExpr annotationExpr) {
+        return elements.getTypeElement(annotationExpr.resolve().getQualifiedName());
     }
 
     public String getNameByDeclaration(ClassOrInterfaceDeclaration declaration) {
         return declaration.resolve().getQualifiedName();
     }
 
-    public TypeElement getElementByDeclaration(ClassOrInterfaceDeclaration declaration) {
+    private TypeElement getElementByDeclaration(ClassOrInterfaceDeclaration declaration) {
         return elements.getTypeElement(declaration.resolve().getQualifiedName());
     }
 
@@ -218,10 +248,19 @@ public class ProcessorManager {
 //    }
 
 
-    public void importAllClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+    public void importAllClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration) {
+
         classOrInterfaceDeclaration.findAll(ClassOrInterfaceType.class)
-                .forEach(classOrInterfaceType ->
-                        classOrInterfaceType.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(classOrInterfaceType.resolve().getQualifiedName()))
+                .forEach(classOrInterfaceType -> {
+//                            ResolvedType resolvedType = JavaParserFacade.get(combinedTypeSolver).convertToUsage(classOrInterfaceType);
+                            sourceClassOrInterfaceDeclaration.findAll(ClassOrInterfaceType.class).stream()
+                                    .filter(sourceClassOrInterfaceType -> sourceClassOrInterfaceType.getNameAsString().equals(classOrInterfaceType.getNameAsString()))
+                                    .findFirst()
+                                    .ifPresent(sourceClassOrInterfaceType ->
+                                            classOrInterfaceDeclaration.findCompilationUnit()
+                                                    .ifPresent(compilationUnit -> compilationUnit.addImport(sourceClassOrInterfaceType.resolve().getQualifiedName()))
+                                    );
+                        }
                 );
     }
 

@@ -237,7 +237,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                     .setAnnotations(methodDeclaration.getAnnotations().stream().filter(annotationExpr -> !annotationExpr.getNameAsString().equals(InterceptorBean.class.getSimpleName())).collect(Collectors.toCollection(NodeList::new)))
                                     .setBody(methodDeclaration.getBody().orElseThrow());
 
-                            processorManager.getCompilationUnitByClassOrInterfaceType(moduleCompilationUnit, methodDeclaration.getType().asClassOrInterfaceType())
+                            processorManager.getCompilationUnitByClassOrInterfaceType(methodDeclaration.getType().asClassOrInterfaceType())
                                     .ifPresent(componentProxyCompilationUnits::add);
                         }
                 );
@@ -283,7 +283,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                     String daggerClassName = "Dagger".concat(componentClassName);
                     String daggerVariableName = "dagger".concat(componentClassName);
 
-                    moduleContextComponentCompilationUnit.addImport(processorManager.getTypeNameByClassOrInterfaceType(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow());
+                    moduleContextComponentCompilationUnit.addImport(processorManager.getNameByType(interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()));
 
                     blockStmt.addStatement(new VariableDeclarationExpr()
                             .addVariable(
@@ -306,11 +306,11 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
                                                         .addArgument(classExpr)
                                                         .addArgument(new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName)))
                                         );
-                                        moduleContextComponentCompilationUnit.addImport(processorManager.getTypeNameByClassOrInterfaceType(moduleCompilationUnit, classExpr.getType().asClassOrInterfaceType()).orElseThrow());
+                                        moduleContextComponentCompilationUnit.addImport(processorManager.getNameByType(classExpr.getType().asClassOrInterfaceType()));
                                     }
                             );
 
-                    String interceptorBeanName = processorManager.getTypeNameByClassOrInterfaceType(moduleCompilationUnit, interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType()).orElseThrow();
+                    String interceptorBeanName = processorManager.getNameByType(interceptorBeanMethodDeclaration.getType().asClassOrInterfaceType());
                     moduleContextComponentCompilationUnit.addImport(interceptorBeanName.replace(beanClassName, componentClassName));
                     moduleContextComponentCompilationUnit.addImport(interceptorBeanName.replace(beanClassName, daggerClassName));
                 }
@@ -332,7 +332,7 @@ public class InterceptorProcessor implements DaggerProxyProcessor {
     }
 
     protected boolean isInterceptorAnnotation(CompilationUnit compilationUnit, AnnotationExpr annotationExpr) {
-        return processorManager.getCompilationUnitByClassOrInterfaceTypeName(compilationUnit, annotationExpr.getNameAsString())
+        return processorManager.getCompilationUnitByAnnotationExpr(annotationExpr)
                 .flatMap(JAVA_PARSER_UTIL::getPublicAnnotationDeclaration)
                 .filter(annotationDeclaration ->
                         aspectNames.contains(annotationDeclaration.getFullyQualifiedName().orElse(annotationDeclaration.getNameAsString())) ||

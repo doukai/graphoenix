@@ -98,7 +98,7 @@ public class ConfigPropertyProcessor implements DaggerProxyProcessor {
                                                                         .asNormalAnnotationExpr().getPairs().stream()
                                                                         .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
                                                                         .findFirst()
-                                                                        .orElseGet(() -> processorManager.getCompilationUnitByClassOrInterfaceType(moduleCompilationUnit, fieldDeclaration.getElementType().asClassOrInterfaceType())
+                                                                        .orElseGet(() -> processorManager.getCompilationUnitByClassOrInterfaceType(fieldDeclaration.getElementType().asClassOrInterfaceType())
                                                                                 .map(JAVA_PARSER_UTIL::getPublicClassOrInterfaceDeclaration)
                                                                                 .filter(Optional::isPresent)
                                                                                 .map(Optional::get)
