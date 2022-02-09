@@ -80,7 +80,7 @@ public class DaggerModuleProcessor extends AbstractProcessor {
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toSet());
         this.supports = new HashSet<>();
-        this.processorManager = new ProcessorManager(processingEnv);
+        this.processorManager = new ProcessorManager(processingEnv, this.javaParser);
         for (DaggerProxyProcessor daggerProxyProcessor : this.daggerProxyProcessors) {
             this.supports.add(daggerProxyProcessor.support());
             daggerProxyProcessor.init(processorManager);
