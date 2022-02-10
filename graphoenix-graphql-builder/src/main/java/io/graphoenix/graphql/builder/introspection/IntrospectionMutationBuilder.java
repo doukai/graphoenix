@@ -1,18 +1,30 @@
 package io.graphoenix.graphql.builder.introspection;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.graphql.generator.introspection.*;
+import io.graphoenix.graphql.generator.introspection.__Directive;
+import io.graphoenix.graphql.generator.introspection.__DirectiveLocation;
+import io.graphoenix.graphql.generator.introspection.__EnumValue;
+import io.graphoenix.graphql.generator.introspection.__Field;
+import io.graphoenix.graphql.generator.introspection.__InputValue;
+import io.graphoenix.graphql.generator.introspection.__Schema;
+import io.graphoenix.graphql.generator.introspection.__Type;
+import io.graphoenix.graphql.generator.introspection.__TypeKind;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.ArrayValueWithVariable;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class IntrospectionMutationBuilder {
 
     private final IGraphQLDocumentManager manager;

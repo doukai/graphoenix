@@ -3,12 +3,14 @@ package io.graphoenix.mysql.translator;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
-import io.graphoenix.mysql.utils.DBNameUtil;
-import io.graphoenix.mysql.utils.DBValueUtil;
 import io.graphoenix.mysql.expression.IsExpression;
 import io.graphoenix.mysql.expression.JsonTable;
-import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import io.graphoenix.mysql.utils.DBNameUtil;
+import io.graphoenix.mysql.utils.DBValueUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -39,15 +41,22 @@ import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import net.sf.jsqlparser.util.cnfexpression.MultiOrExpression;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import javax.inject.Inject;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_INPUT_NAME;
-import static io.graphoenix.spi.error.GraphQLErrorType.*;
+import static io.graphoenix.spi.error.GraphQLErrorType.FIELD_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.TYPE_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_VALUE;
 
+@ApplicationScoped
 public class GraphQLArgumentsToWhere {
 
     private final IGraphQLDocumentManager manager;

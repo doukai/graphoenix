@@ -3,10 +3,12 @@ package io.graphoenix.product.handler;
 import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;
 import io.graphoenix.mysql.handler.SQLFormatHandler;
 import io.graphoenix.spi.handler.GeneratorHandler;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class MysqlGeneratorHandler implements GeneratorHandler {
 
     private final OperationToSQLConvertHandler operationToSQLConvertHandler;

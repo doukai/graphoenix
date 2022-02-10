@@ -4,15 +4,17 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
 import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class OperationToSQLConvertHandler {
 
     private final GraphQLQueryToSelect graphqlQueryToSelect;
-    private final GraphQLMutationToStatements graphqlMutationToStatements;
 
+    private final GraphQLMutationToStatements graphqlMutationToStatements;
 
     @Inject
     public OperationToSQLConvertHandler(GraphQLQueryToSelect graphqlQueryToSelect,

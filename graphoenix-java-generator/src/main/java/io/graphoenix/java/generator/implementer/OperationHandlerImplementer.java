@@ -28,12 +28,13 @@ import io.graphoenix.spi.handler.QueryHandler;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Query;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
@@ -42,12 +43,17 @@ import javax.lang.model.element.TypeElement;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
+@ApplicationScoped
 public class OperationHandlerImplementer {
 
     private final IGraphQLDocumentManager manager;

@@ -2,12 +2,17 @@ package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
-import javax.lang.model.element.*;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class JavaElementToOperation {
 
     private final MethodToQueryOperation methodToQueryOperation;

@@ -7,8 +7,9 @@ import io.graphoenix.graphql.generator.operation.VariableDefinition;
 import io.graphoenix.spi.annotation.TypeExpression;
 import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class MethodToQueryOperation {
 
     private final String conditionalName;

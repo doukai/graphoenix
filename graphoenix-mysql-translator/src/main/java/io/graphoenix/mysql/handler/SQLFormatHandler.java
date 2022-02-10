@@ -2,10 +2,12 @@ package io.graphoenix.mysql.handler;
 
 import com.github.vertical_blank.sqlformatter.SqlFormatter;
 import com.github.vertical_blank.sqlformatter.languages.Dialect;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class SQLFormatHandler {
 
     private final SqlFormatter.Formatter formatter = SqlFormatter.of(Dialect.MariaDb).extend(cfg -> cfg.plusNamedPlaceholderTypes(":"));

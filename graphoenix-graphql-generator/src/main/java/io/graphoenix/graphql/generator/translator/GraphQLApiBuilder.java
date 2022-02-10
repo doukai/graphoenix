@@ -7,15 +7,17 @@ import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.StringValue;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Source;
 
-import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class GraphQLApiBuilder {
 
     private final ElementManager elementManager;
@@ -43,18 +45,18 @@ public class GraphQLApiBuilder {
                 )
                 .setDirectives(
                         Stream.of(new Directive()
-                                .setName("invoke")
-                                .addArgument(
-                                        new Argument()
-                                                .setName("className")
-                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                        .setName("invoke")
+                                        .addArgument(
+                                                new Argument()
+                                                        .setName("className")
+                                                        .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                        )
+                                        .addArgument(
+                                                new Argument()
+                                                        .setName("methodName")
+                                                        .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                        )
                                 )
-                                .addArgument(
-                                        new Argument()
-                                                .setName("methodName")
-                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
-                                )
-                        )
                                 .map(Directive::toString).
                                 collect(Collectors.toCollection(LinkedHashSet::new))
                 );
@@ -75,18 +77,18 @@ public class GraphQLApiBuilder {
                         .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
                         .setDirectives(
                                 Stream.of(new Directive()
-                                        .setName("invoke")
-                                        .addArgument(
-                                                new Argument()
-                                                        .setName("className")
-                                                        .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                                .setName("invoke")
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName("className")
+                                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                                )
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName("methodName")
+                                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                                )
                                         )
-                                        .addArgument(
-                                                new Argument()
-                                                        .setName("methodName")
-                                                        .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
-                                        )
-                                )
                                         .map(Directive::toString).
                                         collect(Collectors.toCollection(LinkedHashSet::new))
                         )

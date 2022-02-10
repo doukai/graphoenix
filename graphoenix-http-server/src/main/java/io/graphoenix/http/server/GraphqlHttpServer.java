@@ -1,7 +1,7 @@
 package io.graphoenix.http.server;
 
-import io.graphoenix.http.config.NettyConfig;
 import io.graphoenix.http.config.HttpServerConfig;
+import io.graphoenix.http.config.NettyConfig;
 import io.graphoenix.spi.handler.BootstrapHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -14,11 +14,12 @@ import io.netty.channel.socket.ServerSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-
+@ApplicationScoped
 public class GraphqlHttpServer {
 
     private static final Logger log = LoggerFactory.getLogger(GraphqlHttpServer.class);

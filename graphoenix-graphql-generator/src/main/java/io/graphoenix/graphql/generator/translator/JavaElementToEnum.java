@@ -2,14 +2,16 @@ package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.graphql.generator.document.EnumType;
 import io.graphoenix.graphql.generator.document.EnumValue;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Ignore;
 
-import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class JavaElementToEnum {
 
     private final ElementManager elementManager;

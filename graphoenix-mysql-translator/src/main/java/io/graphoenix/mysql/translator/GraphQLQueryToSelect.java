@@ -8,6 +8,8 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -24,7 +26,6 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
-import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,7 +36,6 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.FIELD_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.spi.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
 import static io.graphoenix.spi.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
 import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
@@ -46,6 +46,7 @@ import static io.graphoenix.spi.error.GraphQLErrorType.QUERY_NOT_EXIST;
 import static io.graphoenix.spi.error.GraphQLErrorType.SELECTION_NOT_EXIST;
 import static io.graphoenix.spi.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 
+@ApplicationScoped
 public class GraphQLQueryToSelect {
 
     private final IGraphQLDocumentManager manager;

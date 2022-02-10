@@ -2,10 +2,11 @@ package io.graphoenix.r2dbc.connector.connection;
 
 import io.graphoenix.r2dbc.connector.config.R2DBCConfig;
 import io.r2dbc.spi.Connection;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import reactor.core.publisher.Mono;
 
-import javax.inject.Inject;
-
+@ApplicationScoped
 public class ConnectionCreator {
 
     private final ConnectionFactoryCreator connectionFactoryCreator;

@@ -1,17 +1,27 @@
 package io.graphoenix.java.generator.builder;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.module.Module;
 import io.graphoenix.spi.module.Provides;
 import io.vavr.Tuple3;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.Types;
@@ -20,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class ModuleBuilder {
 
     public void buildApiModule(String modulePackageName, String moduleClassName, Set<? extends Element> elementList, Types typeUtils, Filer filer) throws IOException {

@@ -1,10 +1,12 @@
 package io.graphoenix.r2dbc.connector.parameter;
 
 import com.google.gson.GsonBuilder;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class R2dbcParameterProcessor {
 
     private final GsonBuilder jsonBuilder = new GsonBuilder();

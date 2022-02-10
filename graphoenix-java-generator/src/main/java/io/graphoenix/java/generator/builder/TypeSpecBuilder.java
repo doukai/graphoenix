@@ -17,6 +17,8 @@ import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.annotation.TypeInput;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.annotation.Generated;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Enum;
@@ -27,7 +29,6 @@ import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
-import javax.inject.Inject;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import java.lang.annotation.Documented;
@@ -42,6 +43,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class TypeSpecBuilder {
 
     private final IGraphQLDocumentManager manager;

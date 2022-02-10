@@ -29,18 +29,16 @@ repositories {
 }
 
 dependencies {
-    compile project(":graphoenix-core")
+    implementation project(":graphoenix-core")
     implementation project(":graphoenix-http-server")
     implementation project(":graphoenix-mysql")
 
-    annotationProcessor project(":graphoenix-core")
+    annotationProcessor project(":graphoenix-annotation-processor")
+    annotationProcessor project(":graphoenix-inject")
+    annotationProcessor project(":graphoenix-interceptor")
+//    annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-http-server")
     annotationProcessor project(":graphoenix-mysql")
-
-    annotationProcessor project(":graphoenix-annotation-processor")
-    annotationProcessor project(":graphoenix-dagger")
-    annotationProcessor project(":graphoenix-config")
-    annotationProcessor project(":graphoenix-aop")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

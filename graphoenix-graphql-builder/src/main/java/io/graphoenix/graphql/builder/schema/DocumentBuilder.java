@@ -19,8 +19,9 @@ import io.graphoenix.graphql.generator.document.Schema;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.LinkedHashSet;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
 
+@ApplicationScoped
 public class DocumentBuilder {
 
     private final GraphQLConfig graphQLConfig;

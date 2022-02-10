@@ -9,11 +9,13 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Optional;
 
+@ApplicationScoped
 public class TypeManager {
 
     private final IGraphQLDocumentManager manager;

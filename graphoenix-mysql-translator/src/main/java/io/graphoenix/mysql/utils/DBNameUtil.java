@@ -3,10 +3,12 @@ package io.graphoenix.mysql.utils;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
+import jakarta.enterprise.context.ApplicationScoped;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
+@ApplicationScoped
 public class DBNameUtil {
 
     public String graphqlTypeNameToTableName(String graphqlTypeName) {

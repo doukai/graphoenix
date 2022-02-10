@@ -16,12 +16,14 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
 
+@ApplicationScoped
 public class GraphqlHttpServerInitializer extends ChannelInitializer<SocketChannel> {
 
     private SslContext sslCtx;

@@ -23,10 +23,9 @@ dependencies {
     compile "org.apache.logging.log4j:log4j-core:2.14.1"
     compile "org.apache.logging.log4j:log4j-slf4j-impl:2.14.1"
 
-    annotationProcessor project(":graphoenix-spi")
-    annotationProcessor project(":graphoenix-dagger")
-    annotationProcessor project(":graphoenix-config")
-    annotationProcessor project(":graphoenix-aop")
+    annotationProcessor project(":graphoenix-inject")
+    annotationProcessor project(":graphoenix-interceptor")
+//    annotationProcessor project(":graphoenix-config")
 
     testCompile "io.projectreactor:reactor-test:3.4.11"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'

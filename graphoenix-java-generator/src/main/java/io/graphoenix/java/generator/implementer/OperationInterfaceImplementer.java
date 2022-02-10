@@ -12,6 +12,7 @@ import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import io.vavr.CheckedFunction0;
+import jakarta.enterprise.context.ApplicationScoped;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class OperationInterfaceImplementer {
 
     public void writeToFiler(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix, Filer filer) throws IOException {

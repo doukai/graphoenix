@@ -1,28 +1,33 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.google.gson.*;
-import com.squareup.javapoet.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.dto.type.OperationType;
-import io.graphoenix.spi.handler.OperationHandler;
-import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class SelectionFilterHandlerImplementer {
 
     private final IGraphQLDocumentManager manager;

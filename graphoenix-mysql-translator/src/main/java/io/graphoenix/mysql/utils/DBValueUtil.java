@@ -2,14 +2,23 @@ package io.graphoenix.mysql.utils;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
-import net.sf.jsqlparser.expression.*;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.JdbcNamedParameter;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.NullValue;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.statement.SetStatement;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import javax.inject.Inject;
 import java.util.Arrays;
 
+@ApplicationScoped
 public class DBValueUtil {
 
     private final DBNameUtil dbNameUtil;

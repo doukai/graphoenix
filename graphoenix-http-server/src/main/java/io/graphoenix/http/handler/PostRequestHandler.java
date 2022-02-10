@@ -3,6 +3,7 @@ package io.graphoenix.http.handler;
 import com.google.gson.Gson;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.nio.charset.StandardCharsets;
 
@@ -10,6 +11,7 @@ import static io.graphoenix.http.codec.HttpHeaderValues.APPLICATION_GRAPHQL;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 
+@ApplicationScoped
 public class PostRequestHandler implements RequestHandler {
 
     @Override

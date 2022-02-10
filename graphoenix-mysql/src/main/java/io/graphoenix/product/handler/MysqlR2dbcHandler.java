@@ -5,12 +5,14 @@ import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;
 import io.graphoenix.r2dbc.connector.handler.OperationSQLExecuteHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.inject.Inject;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class MysqlR2dbcHandler implements OperationHandler {
 
     private final OperationToSQLConvertHandler operationToSQLConvertHandler;

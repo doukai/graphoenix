@@ -4,12 +4,13 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +18,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.error.GraphQLErrorType.*;
+import static io.graphoenix.spi.error.GraphQLErrorType.DEFINITION_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.TYPE_DEFINITION_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 
+@ApplicationScoped
 public class GraphQLTypeToTable {
 
     private final IGraphQLDocumentManager manager;

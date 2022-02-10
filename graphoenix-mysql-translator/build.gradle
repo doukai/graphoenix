@@ -15,9 +15,9 @@ dependencies {
     implementation 'com.github.jsqlparser:jsqlparser:3.2'
     implementation 'com.github.vertical-blank:sql-formatter:2.0.3'
 
-    annotationProcessor project(":graphoenix-dagger")
-    annotationProcessor project(":graphoenix-config")
-    annotationProcessor project(":graphoenix-aop")
+    annotationProcessor project(":graphoenix-inject")
+    annotationProcessor project(":graphoenix-interceptor")
+//    annotationProcessor project(":graphoenix-config")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'

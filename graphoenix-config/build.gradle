@@ -15,10 +15,10 @@ repositories {
 
 dependencies {
     compile project(":graphoenix-spi")
-    implementation project(":graphoenix-dagger")
+    implementation project(":graphoenix-inject")
     compile "com.typesafe:config:1.4.1"
-
     implementation "com.google.auto.service:auto-service:1.0.1"
+
     annotationProcessor "com.google.auto.service:auto-service:1.0.1"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'

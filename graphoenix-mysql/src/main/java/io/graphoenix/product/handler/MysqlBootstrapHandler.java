@@ -10,6 +10,8 @@ import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.TableCreator;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.BootstrapHandler;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class MysqlBootstrapHandler implements BootstrapHandler {
 
     private static final Logger log = LoggerFactory.getLogger(MysqlBootstrapHandler.class);
@@ -34,6 +37,7 @@ public class MysqlBootstrapHandler implements BootstrapHandler {
     private final TableCreator tableCreator;
     private final MutationExecutor mutationExecutor;
 
+    @Inject
     public MysqlBootstrapHandler(MysqlConfig mysqlConfig,
                                  IGraphQLDocumentManager manager,
                                  DocumentBuilder documentBuilder,

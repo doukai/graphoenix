@@ -5,13 +5,15 @@ import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.inject.Inject;
 import java.util.Map;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class QueryExecutor {
 
     private final ConnectionCreator connectionCreator;

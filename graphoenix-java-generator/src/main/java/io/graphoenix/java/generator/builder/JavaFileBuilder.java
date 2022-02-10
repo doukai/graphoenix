@@ -5,12 +5,14 @@ import com.squareup.javapoet.JavaFile;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.control.Try;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;

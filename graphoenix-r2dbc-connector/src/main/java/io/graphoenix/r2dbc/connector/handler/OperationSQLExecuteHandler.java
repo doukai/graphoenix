@@ -4,13 +4,15 @@ import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
 import io.vavr.Tuple2;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.inject.Inject;
 import java.util.Map;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class OperationSQLExecuteHandler {
 
     private final QueryExecutor queryExecutor;

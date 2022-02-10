@@ -5,12 +5,14 @@ import com.google.gson.reflect.TypeToken;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+@ApplicationScoped
 public class GetRequestHandler implements RequestHandler {
 
     @Override

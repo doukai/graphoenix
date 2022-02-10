@@ -4,7 +4,9 @@ import io.graphoenix.r2dbc.connector.config.R2DBCConfig;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
+import jakarta.enterprise.context.ApplicationScoped;
 
+@ApplicationScoped
 public class ConnectionFactoryCreator {
 
     private final R2DBCConfig r2DBCConfig;

@@ -2,9 +2,10 @@ package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.InterfaceType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Ignore;
 
-import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -12,6 +13,7 @@ import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
+@ApplicationScoped
 public class JavaElementToInterface {
 
     private final ElementManager elementManager;
