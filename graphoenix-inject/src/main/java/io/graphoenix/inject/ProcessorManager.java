@@ -26,6 +26,8 @@ import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
@@ -42,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -80,13 +83,13 @@ public class ProcessorManager {
 
     private Path getGeneratedSourcePath() {
         try {
-            FileObject tmp = filer.createResource(StandardLocation.SOURCE_OUTPUT, "", "tmp");
+            FileObject tmp = filer.createResource(StandardLocation.SOURCE_OUTPUT, "", UUID.randomUUID().toString());
             Writer writer = tmp.openWriter();
             writer.write("");
             writer.close();
             return Paths.get(tmp.toUri()).getParent();
         } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Unable to determine source file path.");
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Unable to determine generated source file path.");
         }
         return null;
     }
@@ -97,12 +100,31 @@ public class ProcessorManager {
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
             DiagnosticCollector diagnostics = new DiagnosticCollector();
             StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
-            FileObject tmp = fileManager.getFileForOutput(StandardLocation.SOURCE_OUTPUT, "", "tmp", null);
+            FileObject tmp = fileManager.getFileForOutput(StandardLocation.SOURCE_OUTPUT, "", UUID.randomUUID().toString(), null);
             return Paths.get(tmp.toUri()).getParent().resolve("src/main/java");
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Unable to determine source file path.");
         }
         return null;
+    }
+
+    public String getRootPackageName() {
+        return roundEnv.getRootElements().stream()
+                .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
+                .map(element -> (PackageElement) element)
+                .reduce((left, right) -> left.getQualifiedName().toString().length() < right.getQualifiedName().length() ? left : right)
+                .map(packageElement -> packageElement.getQualifiedName().toString())
+                .orElseGet(() ->
+                        roundEnv.getRootElements().stream()
+                                .filter(element -> element.getKind().equals(ElementKind.ENUM) ||
+                                        element.getKind().equals(ElementKind.CLASS) ||
+                                        element.getKind().equals(ElementKind.INTERFACE) ||
+                                        element.getKind().equals(ElementKind.ANNOTATION_TYPE))
+                                .map(elements::getPackageOf)
+                                .reduce((left, right) -> left.getQualifiedName().toString().length() < right.getQualifiedName().length() ? left : right)
+                                .map(packageElement -> packageElement.getQualifiedName().toString())
+                                .orElseThrow()
+                );
     }
 
     public Optional<CompilationUnit> parse(TypeElement typeElement) {

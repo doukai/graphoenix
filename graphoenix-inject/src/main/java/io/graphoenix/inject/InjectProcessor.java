@@ -53,8 +53,6 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
@@ -73,7 +71,6 @@ public class InjectProcessor extends AbstractProcessor {
 
     private Set<ComponentProxyProcessor> componentProxyProcessors;
     private ProcessorManager processorManager;
-    private RoundEnvironment roundEnv;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -105,7 +102,6 @@ public class InjectProcessor extends AbstractProcessor {
             return false;
         }
 
-        this.roundEnv = roundEnv;
         processorManager.setRoundEnv(roundEnv);
         componentProxyProcessors.forEach(ComponentProxyProcessor::inProcess);
 
@@ -113,7 +109,7 @@ public class InjectProcessor extends AbstractProcessor {
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
-                .map(typeElement -> buildComponentProxy(typeElement))
+                .map(this::buildComponentProxy)
                 .collect(Collectors.toList());
         componentProxyCompilationUnits.forEach(compilationUnit -> processorManager.writeToFiler(compilationUnit));
 
@@ -127,7 +123,6 @@ public class InjectProcessor extends AbstractProcessor {
 
         CompilationUnit moduleContextCompilationUnit = buildModuleContext(componentProxyComponentCompilationUnits, moduleCompilationUnit);
         processorManager.writeToFiler(moduleContextCompilationUnit);
-
 
         List<CompilationUnit> producesComponentProxyCompilationUnits = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
@@ -271,17 +266,12 @@ public class InjectProcessor extends AbstractProcessor {
                 .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr(getClass().getName())).setName(Generated.class.getSimpleName()));
 
         CompilationUnit moduleCompilationUnit = new CompilationUnit().addType(moduleClassDeclaration)
+                .setPackageDeclaration(processorManager.getRootPackageName())
                 .addImport(Module.class)
                 .addImport(Provides.class)
                 .addImport(Singleton.class)
                 .addImport(Generated.class)
                 .addImport("io.graphoenix.core.context.BeanContext");
-
-        roundEnv.getRootElements().stream()
-                .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
-                .map(element -> (PackageElement) element)
-                .findFirst()
-                .ifPresent(packageElement -> moduleCompilationUnit.setPackageDeclaration(packageElement.getQualifiedName().toString()));
 
         Streams.concat(singletonSet.stream(), applicationScopedSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
@@ -297,6 +287,7 @@ public class InjectProcessor extends AbstractProcessor {
                 .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement).orElseThrow())
                 .forEach(componentCompilationUnit -> buildProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, false, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
 
+        componentProxyProcessors.forEach(componentProxyProcessor -> componentProxyProcessor.processModule(moduleCompilationUnit, moduleClassDeclaration));
         return moduleCompilationUnit;
     }
 
@@ -304,7 +295,7 @@ public class InjectProcessor extends AbstractProcessor {
         ClassOrInterfaceDeclaration componentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).orElseThrow();
         ClassOrInterfaceDeclaration componentProxyClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit).orElseThrow();
 
-        moduleCompilationUnit.addImport(componentProxyClassDeclaration.getFullyQualifiedName().orElse(componentProxyClassDeclaration.getNameAsString()));
+        moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
 
         MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
                 .addAnnotation(Provides.class)

@@ -13,4 +13,6 @@ public interface ComponentProxyProcessor {
                                ClassOrInterfaceDeclaration componentClassDeclaration,
                                CompilationUnit componentProxyCompilationUnit,
                                ClassOrInterfaceDeclaration componentProxyClassDeclaration);
+
+    void processModule(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration);
 }
