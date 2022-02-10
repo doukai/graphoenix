@@ -2,12 +2,14 @@ package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLFragmentManager;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class GraphQLFragmentManager implements IGraphQLFragmentManager {
 
     private final Map<String, Map<String, GraphqlParser.FragmentDefinitionContext>> fragmentDefinitionTree = new ConcurrentHashMap<>();

@@ -2,12 +2,14 @@ package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLOperationManager;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@ApplicationScoped
 public class GraphQLOperationManager implements IGraphQLOperationManager {
 
     private final Map<String, GraphqlParser.OperationTypeDefinitionContext> operationTypeDefinitionMap = new HashMap<>();

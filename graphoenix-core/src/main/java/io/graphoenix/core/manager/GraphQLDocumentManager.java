@@ -3,6 +3,8 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.*;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 
+@ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     private final IGraphQLOperationManager graphQLOperationManager;
@@ -43,6 +46,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     private final IGraphQLFragmentManager graphQLFragmentManager;
 
+    @Inject
     public GraphQLDocumentManager(IGraphQLOperationManager graphQLOperationManager,
                                   IGraphQLSchemaManager graphQLSchemaManager,
                                   IGraphQLDirectiveManager graphQLDirectiveManager,

@@ -3,9 +3,10 @@ package io.graphoenix.core.handler;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.control.Try;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Inject;
 import javax.tools.StandardLocation;
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
+@ApplicationScoped
 public class GraphQLConfigRegister {
 
     private final GraphQLConfig graphQLConfig;

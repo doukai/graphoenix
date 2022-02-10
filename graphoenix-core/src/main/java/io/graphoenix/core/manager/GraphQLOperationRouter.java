@@ -3,9 +3,10 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
-
+@ApplicationScoped
 public class GraphQLOperationRouter {
 
     private final IGraphQLDocumentManager manager;

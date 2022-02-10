@@ -33,8 +33,8 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.dagger.JavaParserUtil.JAVA_PARSER_UTIL;
 
-@SupportedAnnotationTypes("io.graphoenix.spi.module.Module")
-@AutoService(Processor.class)
+//@SupportedAnnotationTypes("io.graphoenix.spi.module.Module")
+//@AutoService(Processor.class)
 public class DaggerModuleProcessor extends AbstractProcessor {
 
     private Set<DaggerProxyProcessor> daggerProxyProcessors;

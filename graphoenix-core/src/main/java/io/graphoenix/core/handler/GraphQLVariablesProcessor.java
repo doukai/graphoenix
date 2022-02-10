@@ -1,11 +1,13 @@
 package io.graphoenix.core.handler;
 
 import graphql.parser.antlr.GraphqlParser;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Map;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
+@ApplicationScoped
 public class GraphQLVariablesProcessor {
 
     public GraphqlParser.OperationDefinitionContext buildVariables(String graphQL, Map<String, String> variables) {

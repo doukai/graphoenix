@@ -2,12 +2,14 @@ package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLFieldManager;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.*;
 import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVES;
 
+@ApplicationScoped
 public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> fieldDefinitionTree = new HashMap<>();

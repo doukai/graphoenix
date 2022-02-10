@@ -2,7 +2,9 @@ package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
+import jakarta.enterprise.context.ApplicationScoped;
 
+@ApplicationScoped
 public class GraphQLSchemaManager implements IGraphQLSchemaManager {
 
     private GraphqlParser.SchemaDefinitionContext schemaDefinitionContext;

@@ -5,12 +5,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import graphql.parser.antlr.GraphqlParser;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 public abstract class BaseOperationHandler {
 

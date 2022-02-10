@@ -6,8 +6,9 @@ import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.map.FieldMap;
 import io.graphoenix.spi.dto.map.FieldMapWith;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,6 +17,7 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.*;
 import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
 
+@ApplicationScoped
 public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
 
     private final IGraphQLDocumentManager manager;
