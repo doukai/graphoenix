@@ -108,11 +108,6 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
         buildConstructor(annotationNameList, componentCompilationUnit, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
     }
 
-    @Override
-    public void processModule(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-
-    }
-
     private void buildMethod(List<String> annotationNameList, CompilationUnit componentCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
         componentClassDeclaration.getMethods()
                 .forEach(methodDeclaration -> {

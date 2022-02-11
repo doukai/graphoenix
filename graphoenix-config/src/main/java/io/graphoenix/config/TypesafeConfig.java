@@ -48,7 +48,7 @@ public class TypesafeConfig implements Config {
 
     @Override
     public <T> Optional<Converter<T>> getConverter(Class<T> forType) {
-        return Optional.empty();
+        return Optional.of(new TypesafeConverter<>(forType));
     }
 
     @Override

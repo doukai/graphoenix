@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.declarations.ResolvedAnnotationDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
@@ -31,12 +32,8 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
 import javax.tools.FileObject;
-import javax.tools.JavaCompiler;
-import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
@@ -64,8 +61,9 @@ public class ProcessorManager {
         this.elements = processingEnv.getElementUtils();
         this.trees = Trees.instance(processingEnv);
         CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-        JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(getSourcePath());
-        JavaParserTypeSolver generatedJavaParserTypeSolver = new JavaParserTypeSolver(getGeneratedSourcePath());
+        Path generatedSourcePath = getGeneratedSourcePath();
+        JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(getSourcePath(generatedSourcePath));
+        JavaParserTypeSolver generatedJavaParserTypeSolver = new JavaParserTypeSolver(generatedSourcePath);
         ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(classLoader);
         ReflectionTypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
         combinedTypeSolver.add(javaParserTypeSolver);
@@ -94,18 +92,8 @@ public class ProcessorManager {
         return null;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private Path getSourcePath() {
-        try {
-            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-            DiagnosticCollector diagnostics = new DiagnosticCollector();
-            StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, null);
-            FileObject tmp = fileManager.getFileForOutput(StandardLocation.SOURCE_OUTPUT, "", UUID.randomUUID().toString(), null);
-            return Paths.get(tmp.toUri()).getParent().resolve("src/main/java");
-        } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Unable to determine source file path.");
-        }
-        return null;
+    private Path getSourcePath(Path generatedSourcePath) {
+        return generatedSourcePath.getParent().getParent().getParent().getParent().getParent().getParent().resolve("src/main/java");
     }
 
     public String getRootPackageName() {
@@ -194,6 +182,10 @@ public class ProcessorManager {
         return getCompilationUnitByClassOrInterfaceType(elements.getTypeElement(resolvedReferenceType.getQualifiedName()));
     }
 
+    public Optional<CompilationUnit> getCompilationUnitByType(Type type) {
+        return getCompilationUnitByClassOrInterfaceType(getElementByType(type));
+    }
+
     public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(ClassOrInterfaceType type) {
         return getCompilationUnitByClassOrInterfaceType(getElementByType(type));
     }
@@ -233,9 +225,18 @@ public class ProcessorManager {
         return resolvedAnnotationDeclaration.getName();
     }
 
+    public String getQualifiedNameByType(Type type) {
+        ResolvedReferenceType resolvedReferenceType = javaSymbolSolver.toResolvedType(type, ResolvedReferenceType.class);
+        return resolvedReferenceType.getQualifiedName();
+    }
+
     public String getQualifiedNameByType(ClassOrInterfaceType type) {
         ResolvedReferenceType resolvedReferenceType = javaSymbolSolver.toResolvedType(type, ResolvedReferenceType.class);
         return resolvedReferenceType.getQualifiedName();
+    }
+
+    private TypeElement getElementByType(Type type) {
+        return elements.getTypeElement(getQualifiedNameByType(type));
     }
 
     private TypeElement getElementByType(ClassOrInterfaceType type) {

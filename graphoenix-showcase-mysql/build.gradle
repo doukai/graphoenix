@@ -36,7 +36,7 @@ dependencies {
     annotationProcessor project(":graphoenix-annotation-processor")
     annotationProcessor project(":graphoenix-inject")
     annotationProcessor project(":graphoenix-interceptor")
-//    annotationProcessor project(":graphoenix-config")
+    annotationProcessor project(":graphoenix-config")
     annotationProcessor project(":graphoenix-http-server")
     annotationProcessor project(":graphoenix-mysql")
 

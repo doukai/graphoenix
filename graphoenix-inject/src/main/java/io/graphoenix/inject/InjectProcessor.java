@@ -535,6 +535,7 @@ public class InjectProcessor extends AbstractProcessor {
                                             }
                                     );
                             processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, classOrInterfaceDeclaration);
+                            componentProxyProcessors.forEach(componentProxyProcessor -> componentProxyProcessor.processComponentModule(moduleCompilationUnit, moduleClassDeclaration));
                             return moduleCompilationUnit;
                         }
                 );
@@ -682,13 +683,13 @@ public class InjectProcessor extends AbstractProcessor {
                 )
                 .addExtendedType(BaseModuleContext.class);
 
-        CompilationUnit moduleContextComponentCompilationUnit = new CompilationUnit()
+        CompilationUnit moduleContextCompilationUnit = new CompilationUnit()
                 .addType(moduleContextInterfaceDeclaration)
                 .addImport(AutoService.class)
                 .addImport(ModuleContext.class)
                 .addImport(BaseModuleContext.class);
 
-        moduleCompilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleContextComponentCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
+        moduleCompilationUnit.getPackageDeclaration().ifPresent(packageDeclaration -> moduleContextCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
 
         BlockStmt blockStmt = moduleContextInterfaceDeclaration.addStaticInitializer();
 
@@ -710,7 +711,7 @@ public class InjectProcessor extends AbstractProcessor {
                             .findFirst()
                             .orElseThrow();
 
-                    moduleContextComponentCompilationUnit.addImport(processorManager.getQualifiedNameByType(componentType));
+                    moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(componentType));
 
                     blockStmt.addStatement(new VariableDeclarationExpr()
                             .addVariable(
@@ -737,8 +738,8 @@ public class InjectProcessor extends AbstractProcessor {
 
                     componentProxyComponentCompilationUnit.getPackageDeclaration()
                             .ifPresent(packageDeclaration -> {
-                                        moduleContextComponentCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(componentProxyComponentClassDeclaration.getNameAsString()));
-                                        moduleContextComponentCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(daggerClassName));
+                                        moduleContextCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(componentProxyComponentClassDeclaration.getNameAsString()));
+                                        moduleContextCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(daggerClassName));
                                     }
                             );
 
@@ -747,18 +748,19 @@ public class InjectProcessor extends AbstractProcessor {
                     componentDeclaration.getExtendedTypes()
                             .forEach(extendedType -> {
                                         addPutTypeStatement(blockStmt, extendedType, nameStringExpr.orElse(null), daggerVariableName);
-                                        moduleContextComponentCompilationUnit.addImport(processorManager.getQualifiedNameByType(extendedType));
+                                        moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(extendedType));
                                     }
                             );
                     componentDeclaration.getImplementedTypes()
                             .forEach(implementedType -> {
                                         addPutTypeStatement(blockStmt, implementedType, nameStringExpr.orElse(null), daggerVariableName);
-                                        moduleContextComponentCompilationUnit.addImport(processorManager.getQualifiedNameByType(implementedType));
+                                        moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(implementedType));
                                     }
                             );
                 }
         );
-        return moduleContextComponentCompilationUnit;
+        componentProxyProcessors.forEach(componentProxyProcessor -> componentProxyProcessor.processModuleContext(moduleContextCompilationUnit, blockStmt));
+        return moduleContextCompilationUnit;
     }
 
     private void addPutTypeStatement(BlockStmt blockStmt, ClassOrInterfaceType classOrInterfaceType, StringLiteralExpr nameStringExpr, String daggerVariableName) {
