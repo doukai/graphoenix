@@ -6,12 +6,12 @@ import io.graphoenix.showcase.mysql.dto.objectType.Organization;
 import io.graphoenix.showcase.mysql.dto.objectType.Role;
 import io.graphoenix.showcase.mysql.dto.objectType.User;
 import io.graphoenix.showcase.mysql.spi.OperationTest;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.util.Collection;
 import java.util.List;
 

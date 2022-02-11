@@ -9,22 +9,22 @@ import io.graphoenix.spi.handler.QueryHandler;
 import io.netty.handler.codec.http.HttpMethod;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
-import javax.inject.Inject;
 import java.util.Map;
 
 @ApplicationScoped
 public class HttpServerProduces {
 
-    public GetRequestHandler getRequestHandler;
+    private final GetRequestHandler getRequestHandler;
 
-    public PostRequestHandler postRequestHandler;
+    private final PostRequestHandler postRequestHandler;
 
-    public GraphQLOperationRouter graphQLOperationRouter;
+    private final GraphQLOperationRouter graphQLOperationRouter;
 
-    public QueryHandler queryHandler;
+    private final QueryHandler queryHandler;
 
-    public MutationHandler mutationHandler;
+    private final MutationHandler mutationHandler;
 
     @Inject
     public HttpServerProduces(GetRequestHandler getRequestHandler,
@@ -44,7 +44,7 @@ public class HttpServerProduces {
         return new GraphqlHttpServerHandler(
                 Map.of(
                         HttpMethod.GET, getRequestHandler,
-                        HttpMethod.POST, getRequestHandler
+                        HttpMethod.POST, postRequestHandler
                 ),
                 graphQLOperationRouter,
                 queryHandler,

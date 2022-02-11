@@ -1,8 +1,8 @@
 package io.graphoenix.core.context;
 
 import io.graphoenix.spi.context.ModuleContext;
+import jakarta.inject.Provider;
 
-import javax.inject.Provider;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;

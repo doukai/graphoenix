@@ -37,6 +37,7 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -62,6 +63,7 @@ public class ProcessorManager {
         this.trees = Trees.instance(processingEnv);
         CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
         Path generatedSourcePath = getGeneratedSourcePath();
+        assert generatedSourcePath != null;
         JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(getSourcePath(generatedSourcePath));
         JavaParserTypeSolver generatedJavaParserTypeSolver = new JavaParserTypeSolver(generatedSourcePath);
         ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(classLoader);
@@ -85,7 +87,9 @@ public class ProcessorManager {
             Writer writer = tmp.openWriter();
             writer.write("");
             writer.close();
-            return Paths.get(tmp.toUri()).getParent();
+            Path path = Paths.get(tmp.toUri());
+            Files.deleteIfExists(path);
+            return path.getParent();
         } catch (IOException e) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Unable to determine generated source file path.");
         }
@@ -262,7 +266,9 @@ public class ProcessorManager {
     }
 
     public void importAllClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration) {
-        classOrInterfaceDeclaration.findAll(ClassOrInterfaceType.class)
+
+        classOrInterfaceDeclaration.getMembers().stream()
+                .flatMap(bodyDeclaration -> bodyDeclaration.findAll(ClassOrInterfaceType.class).stream())
                 .forEach(classOrInterfaceType -> {
                             if (sourceClassOrInterfaceDeclaration.getNameAsString().equals(classOrInterfaceType.getNameAsString())) {
                                 classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByDeclaration(sourceClassOrInterfaceDeclaration)));

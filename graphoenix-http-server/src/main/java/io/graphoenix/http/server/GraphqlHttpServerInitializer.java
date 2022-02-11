@@ -18,8 +18,8 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 
-import javax.inject.Provider;
 import javax.net.ssl.SSLException;
 import java.security.cert.CertificateException;
 
