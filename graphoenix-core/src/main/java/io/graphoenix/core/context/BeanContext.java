@@ -23,6 +23,9 @@ public class BeanContext {
                 .collect(Collectors.toSet());
     }
 
+    private BeanContext() {
+    }
+
     public static void load(ClassLoader classLoader) {
         moduleContexts = ServiceLoader.load(ModuleContext.class, classLoader).stream()
                 .map(ServiceLoader.Provider::get)
@@ -54,16 +57,6 @@ public class BeanContext {
         return getAndCacheProvider(beanClass, name);
     }
 
-    private static <T> T getAndCache(Class<T> beanClass, String name) {
-        Supplier<T> cachedSupplier = getAndCacheSupplier(beanClass, name).orElseThrow();
-        return beanClass.cast(cachedSupplier.get());
-    }
-
-    private static <T> Provider<T> getAndCacheProvider(Class<T> beanClass, String name) {
-        Supplier<T> cachedSupplier = getAndCacheSupplier(beanClass, name).orElseThrow();
-        return cachedSupplier::get;
-    }
-
     public static <T> Optional<T> getOptional(Class<T> beanClass) {
         return getOptional(beanClass, beanClass.getName());
     }
@@ -87,6 +80,16 @@ public class BeanContext {
             return Optional.of(((Supplier<T>) supplier)::get);
         }
         return getAndCacheProviderOptional(beanClass, name);
+    }
+
+    private static <T> T getAndCache(Class<T> beanClass, String name) {
+        Supplier<T> cachedSupplier = getAndCacheSupplier(beanClass, name).orElseThrow();
+        return beanClass.cast(cachedSupplier.get());
+    }
+
+    private static <T> Provider<T> getAndCacheProvider(Class<T> beanClass, String name) {
+        Supplier<T> cachedSupplier = getAndCacheSupplier(beanClass, name).orElseThrow();
+        return cachedSupplier::get;
     }
 
     private static <T> Optional<T> getAndCacheOptional(Class<T> beanClass, String name) {
