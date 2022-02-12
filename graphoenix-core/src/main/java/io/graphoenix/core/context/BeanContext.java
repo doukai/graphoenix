@@ -37,24 +37,15 @@ public class BeanContext {
     }
 
     public static <T> T get(Class<T> beanClass, String name) {
-        Supplier<?> supplier = CONTEXT_CACHE.get(beanClass).get(name);
-        if (supplier != null) {
-            return beanClass.cast(supplier.get());
-        }
-        return getAndCache(beanClass, name);
+        return getSupplier(beanClass, name).get();
     }
 
     public static <T> Provider<T> getProvider(Class<T> beanClass) {
         return getProvider(beanClass, beanClass.getName());
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> Provider<T> getProvider(Class<T> beanClass, String name) {
-        Supplier<?> supplier = CONTEXT_CACHE.get(beanClass).get(name);
-        if (supplier != null) {
-            return ((Supplier<T>) supplier)::get;
-        }
-        return getAndCacheProvider(beanClass, name);
+        return getSupplier(beanClass, name)::get;
     }
 
     public static <T> Optional<T> getOptional(Class<T> beanClass) {
@@ -62,42 +53,32 @@ public class BeanContext {
     }
 
     public static <T> Optional<T> getOptional(Class<T> beanClass, String name) {
-        Supplier<?> supplier = CONTEXT_CACHE.get(beanClass).get(name);
-        if (supplier != null) {
-            return Optional.of(beanClass.cast(supplier.get()));
-        }
-        return getAndCacheOptional(beanClass, name);
+        return getSupplierOptional(beanClass, name).map(Supplier::get);
     }
 
     public static <T> Optional<Provider<T>> getProviderOptional(Class<T> beanClass) {
         return getProviderOptional(beanClass, beanClass.getName());
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> Optional<Provider<T>> getProviderOptional(Class<T> beanClass, String name) {
+        return getSupplierOptional(beanClass, name).map(supplier -> supplier::get);
+    }
+
+    private static <T> Supplier<T> getSupplier(Class<T> beanClass, String name) {
+        return getSupplierOptional(beanClass, name)
+                .orElseGet(() ->
+                        getAndCacheSupplier(beanClass, name)
+                                .orElseThrow()
+                );
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Optional<Supplier<T>> getSupplierOptional(Class<T> beanClass, String name) {
         Supplier<?> supplier = CONTEXT_CACHE.get(beanClass).get(name);
         if (supplier != null) {
-            return Optional.of(((Supplier<T>) supplier)::get);
+            return Optional.of((Supplier<T>) supplier);
         }
-        return getAndCacheProviderOptional(beanClass, name);
-    }
-
-    private static <T> T getAndCache(Class<T> beanClass, String name) {
-        Supplier<T> cachedSupplier = getAndCacheSupplier(beanClass, name).orElseThrow();
-        return beanClass.cast(cachedSupplier.get());
-    }
-
-    private static <T> Provider<T> getAndCacheProvider(Class<T> beanClass, String name) {
-        Supplier<T> cachedSupplier = getAndCacheSupplier(beanClass, name).orElseThrow();
-        return cachedSupplier::get;
-    }
-
-    private static <T> Optional<T> getAndCacheOptional(Class<T> beanClass, String name) {
-        return getAndCacheSupplier(beanClass, name).map(Supplier::get);
-    }
-
-    private static <T> Optional<Provider<T>> getAndCacheProviderOptional(Class<T> beanClass, String name) {
-        return getAndCacheSupplier(beanClass, name).map(supplier -> ((Supplier<T>) supplier)::get);
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")

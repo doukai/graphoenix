@@ -21,10 +21,9 @@ public abstract class BaseModuleContext implements ModuleContext {
         return get(beanClass, beanClass.getName());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public <T> Supplier<T> get(Class<T> beanClass, String name) {
-        return (Supplier<T>) CONTEXT.get(beanClass).get(name);
+        return getOptional(beanClass, name).orElseThrow();
     }
 
     @Override

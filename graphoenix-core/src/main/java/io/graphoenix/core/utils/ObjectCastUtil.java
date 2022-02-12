@@ -3,8 +3,11 @@ package io.graphoenix.core.utils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,6 +34,18 @@ public enum ObjectCastUtil {
         List<?> list = (List<?>) object;
         assert list != null;
         return list.stream().map(objectClass::cast).collect(Collectors.toList());
+    }
+
+    public <T> Set<T> castToSet(Object object, Class<T> objectClass) throws ClassCastException {
+        Set<?> set = (Set<?>) object;
+        assert set != null;
+        return set.stream().map(objectClass::cast).collect(Collectors.toSet());
+    }
+
+    public <T, C extends Collection<T>> Collection<T> castToCollection(Object object, Class<T> objectClass, Supplier<C> collectionFactory) throws ClassCastException {
+        Collection<?> collection = (Collection<?>) object;
+        assert collection != null;
+        return collection.stream().map(objectClass::cast).collect(Collectors.toCollection(collectionFactory));
     }
 
     public <T> Stream<T> castToStream(Object object, Class<T> objectClass) throws ClassCastException {

@@ -19,6 +19,8 @@ public class InvocationContextProxy implements InvocationContext {
 
     private Object target;
 
+    private Class<?> targetClass;
+
     private Object timer;
 
     private Method method;
@@ -66,6 +68,11 @@ public class InvocationContextProxy implements InvocationContext {
 
     public InvocationContextProxy setTarget(Object target) {
         this.target = target;
+        if (target instanceof Class<?>) {
+            targetClass = (Class<?>) target;
+        } else {
+            targetClass = target.getClass();
+        }
         return this;
     }
 
@@ -79,22 +86,13 @@ public class InvocationContextProxy implements InvocationContext {
         return this;
     }
 
-    public InvocationContextProxy setMethod(String methodName, int parameterCount, String[] parameterNames, String[] parameterTypeNames) {
-        Class<?> targetClass;
-        if (target instanceof Class<?>) {
-            targetClass = (Class<?>) target;
-        } else {
-            targetClass = target.getClass();
-        }
+    public InvocationContextProxy setMethod(String methodName, int parameterCount, String[] parameterTypeNames) {
         this.method = Arrays.stream(targetClass.getMethods())
                 .filter(method -> method.getName().equals(methodName))
                 .filter(method -> method.getParameterCount() == parameterCount)
                 .filter(method ->
                         IntStream.range(0, method.getParameterCount() - 1)
-                                .allMatch(index ->
-                                        method.getParameters()[index].getName().equals(parameterNames[index]) &&
-                                                method.getParameters()[index].getType().getName().equals(parameterTypeNames[index])
-                                )
+                                .allMatch(index -> method.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
                 )
                 .findFirst()
                 .orElseThrow();
@@ -107,21 +105,12 @@ public class InvocationContextProxy implements InvocationContext {
         return this;
     }
 
-    public InvocationContextProxy setConstructor(int parameterCount, String[] parameterNames, String[] parameterTypeNames) {
-        Class<?> targetClass;
-        if (target instanceof Class<?>) {
-            targetClass = (Class<?>) target;
-        } else {
-            targetClass = target.getClass();
-        }
+    public InvocationContextProxy setConstructor(int parameterCount, String[] parameterTypeNames) {
         this.constructor = Arrays.stream(targetClass.getConstructors())
                 .filter(constructor -> constructor.getParameterCount() == parameterCount)
                 .filter(constructor ->
                         IntStream.range(0, constructor.getParameterCount() - 1)
-                                .allMatch(index ->
-                                        constructor.getParameters()[index].getName().equals(parameterNames[index]) &&
-                                                constructor.getParameters()[index].getType().getName().equals(parameterTypeNames[index])
-                                )
+                                .allMatch(index -> constructor.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
                 )
                 .findFirst()
                 .orElseThrow();

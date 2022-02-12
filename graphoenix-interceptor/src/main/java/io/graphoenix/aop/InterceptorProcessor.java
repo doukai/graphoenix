@@ -269,26 +269,17 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                         .ifPresent(statement -> {
                                                     StringLiteralExpr methodName = new StringLiteralExpr(methodDeclaration.getNameAsString());
                                                     IntegerLiteralExpr methodParameterCount = new IntegerLiteralExpr(String.valueOf(methodDeclaration.getParameters().size()));
-                                                    ArrayCreationExpr methodParameterNames = new ArrayCreationExpr().setElementType(String[].class)
-                                                            .setInitializer(
-                                                                    new ArrayInitializerExpr(
-                                                                            methodDeclaration.getParameters().stream()
-                                                                                    .map(parameter -> new StringLiteralExpr(parameter.getNameAsString()))
-                                                                                    .collect(Collectors.toCollection(NodeList::new))
-                                                                    )
-                                                            );
-
                                                     ArrayCreationExpr methodParameterTypeNames = new ArrayCreationExpr().setElementType(String[].class)
                                                             .setInitializer(
                                                                     new ArrayInitializerExpr(
                                                                             methodDeclaration.getParameters().stream().map(parameter -> {
-                                                                                                if (parameter.getType().isClassOrInterfaceType()) {
-                                                                                                    return processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType());
-                                                                                                } else {
-                                                                                                    return parameter.getType().asString();
-                                                                                                }
-                                                                                            }
-                                                                                    )
+                                                                                        if (parameter.getType().isClassOrInterfaceType()) {
+                                                                                            return processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType());
+                                                                                        } else {
+                                                                                            return parameter.getType().asString();
+                                                                                        }
+                                                                                    }
+                                                                            )
                                                                                     .map(StringLiteralExpr::new)
                                                                                     .collect(Collectors.toCollection(NodeList::new))
                                                                     )
@@ -301,7 +292,6 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                                             .setName("setMethod")
                                                                             .addArgument(methodName)
                                                                             .addArgument(methodParameterCount)
-                                                                            .addArgument(methodParameterNames)
                                                                             .addArgument(methodParameterTypeNames)
                                                                             .setScope(
                                                                                     methodDeclaration.getParameters().stream()
@@ -490,26 +480,17 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                 blockStmt.getStatements().getLast()
                                         .ifPresent(statement -> {
                                                     IntegerLiteralExpr constructorParameterCount = new IntegerLiteralExpr(String.valueOf(constructorDeclaration.getParameters().size()));
-                                                    ArrayCreationExpr constructorParameterNames = new ArrayCreationExpr().setElementType(String[].class)
-                                                            .setInitializer(
-                                                                    new ArrayInitializerExpr(
-                                                                            constructorDeclaration.getParameters().stream()
-                                                                                    .map(parameter -> new StringLiteralExpr(parameter.getNameAsString()))
-                                                                                    .collect(Collectors.toCollection(NodeList::new))
-                                                                    )
-                                                            );
-
                                                     ArrayCreationExpr constructorParameterTypeNames = new ArrayCreationExpr().setElementType(String[].class)
                                                             .setInitializer(
                                                                     new ArrayInitializerExpr(
                                                                             constructorDeclaration.getParameters().stream().map(parameter -> {
-                                                                                                if (parameter.getType().isClassOrInterfaceType()) {
-                                                                                                    return processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType());
-                                                                                                } else {
-                                                                                                    return parameter.getType().asString();
-                                                                                                }
-                                                                                            }
-                                                                                    )
+                                                                                        if (parameter.getType().isClassOrInterfaceType()) {
+                                                                                            return processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType());
+                                                                                        } else {
+                                                                                            return parameter.getType().asString();
+                                                                                        }
+                                                                                    }
+                                                                            )
                                                                                     .map(StringLiteralExpr::new)
                                                                                     .collect(Collectors.toCollection(NodeList::new))
                                                                     )
@@ -521,7 +502,6 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                                     new MethodCallExpr()
                                                                             .setName("setConstructor")
                                                                             .addArgument(constructorParameterCount)
-                                                                            .addArgument(constructorParameterNames)
                                                                             .addArgument(constructorParameterTypeNames)
                                                                             .setScope(
                                                                                     constructorDeclaration.getParameters().stream()
@@ -614,9 +594,9 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
         }
 
         return Streams.concat(
-                        interceptorClassName.stream().flatMap(className -> processorManager.getCompilationUnitByQualifiedName(className).stream()),
-                        interceptorCompilationUnitList.stream()
-                )
+                interceptorClassName.stream().flatMap(className -> processorManager.getCompilationUnitByQualifiedName(className).stream()),
+                interceptorCompilationUnitList.stream()
+        )
                 .flatMap(compilationUnit -> {
                             ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow();
                             return classOrInterfaceDeclaration.getMethods().stream().map(methodDeclaration -> Tuple.of(compilationUnit, classOrInterfaceDeclaration, methodDeclaration));
