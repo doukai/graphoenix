@@ -40,6 +40,7 @@ public class OperationInterfaceImplementer {
     public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl"))
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(ApplicationScoped.class)
                 .superclass(operationDAO)
                 .addSuperinterface(typeElement.asType())
                 .addFields(buildFileContentFields(typeElement))

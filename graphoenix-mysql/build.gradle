@@ -12,16 +12,16 @@ repositories {
 
 dependencies {
     implementation project(":graphoenix-core")
-    compile project(":graphoenix-graphql-builder")
-    compile project(":graphoenix-mysql-translator")
+    implementation project(":graphoenix-graphql-builder")
+    implementation project(":graphoenix-mysql-translator")
     compile project(":graphoenix-r2dbc-connector")
 
     annotationProcessor project(":graphoenix-inject")
     annotationProcessor project(":graphoenix-interceptor")
     annotationProcessor project(":graphoenix-config")
-//    annotationProcessor project(":graphoenix-graphql-builder")
-//    annotationProcessor project(":graphoenix-mysql-translator")
-//    annotationProcessor project(":graphoenix-r2dbc-connector")
+    annotationProcessor project(":graphoenix-graphql-builder")
+    annotationProcessor project(":graphoenix-mysql-translator")
+    annotationProcessor project(":graphoenix-r2dbc-connector")
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'

@@ -7,13 +7,11 @@ import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
-import io.graphoenix.java.generator.builder.ModuleBuilder;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
 import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.handler.GeneratorHandler;
-import io.vavr.Tuple;
 import io.vavr.control.Try;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -53,7 +51,6 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
     private GeneratorHandler generatorHandler;
     private JavaElementToOperation javaElementToOperation;
     private OperationInterfaceImplementer operationInterfaceImplementer;
-    private ModuleBuilder moduleBuilder;
     private GraphQLConfig graphQLConfig;
 
     @Override
@@ -68,7 +65,6 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         this.generatorHandler = BeanContext.get(GeneratorHandler.class);
         this.javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         this.operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
-        this.moduleBuilder = BeanContext.get(ModuleBuilder.class);
         Filer filer = processingEnv.getFiler();
         graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
 
@@ -149,19 +145,6 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                     }
                 }
             }
-        }
-
-        try {
-            moduleBuilder.buildOperationModule(
-                    graphQLConfig.getModulePackageName(),
-                    "OperationModule",
-                    roundEnv.getElementsAnnotatedWith(GraphQLOperation.class).stream()
-                            .map(element -> Tuple.of(element, elementUtils.getPackageOf(element), element.getSimpleName().toString().concat("Impl")))
-                            .collect(Collectors.toSet()),
-                    filer
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         return false;

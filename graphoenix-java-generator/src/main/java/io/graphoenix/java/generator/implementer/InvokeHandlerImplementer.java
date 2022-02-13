@@ -1,22 +1,15 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -63,7 +56,7 @@ public class InvokeHandlerImplementer {
     private TypeSpec buildInvokeHandlerImpl() {
         return TypeSpec.classBuilder("InvokeHandler")
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Singleton.class)
+                .addAnnotation(ApplicationScoped.class)
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeInvokeMethods())
@@ -84,18 +77,29 @@ public class InvokeHandlerImplementer {
     }
 
     private MethodSpec buildConstructor() {
-        MethodSpec.Builder builder = MethodSpec.constructorBuilder().addModifiers(Modifier.PUBLIC);
-
-        invokeMethods.values().stream()
+        Set<TypeElement> invokeElement = invokeMethods.values().stream()
                 .flatMap(value -> value.keySet().stream())
-                .collect(Collectors.toSet())
-                .forEach(typeElement ->
-                        builder.addStatement("this.$L = $T.getProvider($T.class)",
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
-                                ClassName.get(BeanContext.class),
-                                ClassName.get(typeElement)
+                .collect(Collectors.toSet());
+
+        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Inject.class)
+                .addParameters(invokeElement.stream()
+                        .map(typeElement ->
+                                ParameterSpec.builder(
+                                        ClassName.get(typeElement),
+                                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString())
+                                ).build()
                         )
+                        .collect(Collectors.toList())
                 );
+
+        invokeElement.forEach(typeElement ->
+                builder.addStatement("this.$L = $L",
+                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
+                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString())
+                )
+        );
 
         return builder.build();
     }

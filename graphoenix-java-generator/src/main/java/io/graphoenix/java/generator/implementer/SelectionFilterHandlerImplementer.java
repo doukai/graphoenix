@@ -13,14 +13,12 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import javax.annotation.processing.Filer;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.Collection;
@@ -58,7 +56,7 @@ public class SelectionFilterHandlerImplementer {
     private TypeSpec buildSelectionFilterHandlerImpl() {
         return TypeSpec.classBuilder("SelectionFilter")
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Singleton.class)
+                .addAnnotation(ApplicationScoped.class)
                 .addField(
                         FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
@@ -76,10 +74,11 @@ public class SelectionFilterHandlerImplementer {
     private MethodSpec buildConstructor() {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addStatement("this.$L = $T.getProvider($T.class)",
+                .addAnnotation(Inject.class)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),"manager")
+                .addStatement("this.$L = $L",
                         "manager",
-                        ClassName.get(BeanContext.class),
-                        ClassName.get(IGraphQLDocumentManager.class)
+                        "manager"
                 ).build();
     }
 

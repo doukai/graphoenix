@@ -12,10 +12,8 @@ import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import reactor.core.publisher.Mono;
 
-import javax.inject.Singleton;
 import java.util.List;
 
-@Singleton
 @GraphQLOperation(operationDAO = R2DBCOperationDAO.class)
 public interface OperationTest {
 

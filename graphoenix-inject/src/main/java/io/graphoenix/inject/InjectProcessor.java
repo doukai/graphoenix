@@ -9,19 +9,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.AnnotationExpr;
-import com.github.javaparser.ast.expr.ArrayInitializerExpr;
-import com.github.javaparser.ast.expr.ClassExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.MethodReferenceExpr;
-import com.github.javaparser.ast.expr.NameExpr;
-import com.github.javaparser.ast.expr.NormalAnnotationExpr;
-import com.github.javaparser.ast.expr.ObjectCreationExpr;
-import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.expr.SuperExpr;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -462,11 +450,39 @@ public class InjectProcessor extends AbstractProcessor {
                                                 fieldDeclaration.getVariables()
                                                         .forEach(variableDeclarator -> {
                                                                     if (variableDeclarator.getType().isClassOrInterfaceType()) {
-                                                                        variableDeclarator.setInitializer(getBeanGetMethodCallExpr(fieldDeclaration, moduleCompilationUnit, variableDeclarator.getType().asClassOrInterfaceType()));
+                                                                        moduleClassDeclaration.getMethods().stream()
+                                                                                .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
+                                                                                .forEach(methodDeclaration -> {
+                                                                                            methodDeclaration.findAll(FieldAccessExpr.class).stream()
+                                                                                                    .filter(fieldAccessExpr -> fieldAccessExpr.getScope().isThisExpr() || fieldAccessExpr.getScope() == null)
+                                                                                                    .filter(fieldAccessExpr -> fieldAccessExpr.getNameAsString().equals(variableDeclarator.getNameAsString()))
+                                                                                                    .forEach(fieldAccessExpr -> {
+                                                                                                                fieldAccessExpr.getParentNode().orElseThrow().replace(
+                                                                                                                        fieldAccessExpr,
+                                                                                                                        getBeanGetMethodCallExpr(fieldDeclaration, moduleCompilationUnit, variableDeclarator.getType().asClassOrInterfaceType())
+                                                                                                                );
+                                                                                                                variableDeclarator.remove();
+                                                                                                            }
+                                                                                                    );
+                                                                                            methodDeclaration.findAll(NameExpr.class).stream()
+                                                                                                    .filter(nameExpr -> nameExpr.getNameAsString().equals(variableDeclarator.getNameAsString()))
+                                                                                                    .forEach(nameExpr -> {
+                                                                                                                nameExpr.getParentNode().orElseThrow().replace(
+                                                                                                                        nameExpr,
+                                                                                                                        getBeanGetMethodCallExpr(fieldDeclaration, moduleCompilationUnit, variableDeclarator.getType().asClassOrInterfaceType())
+                                                                                                                );
+                                                                                                                variableDeclarator.remove();
+                                                                                                            }
+                                                                                                    );
+                                                                                        }
+                                                                                );
                                                                     }
                                                                 }
                                                         );
                                                 fieldDeclaration.getAnnotationByClass(Inject.class).ifPresent(Node::remove);
+                                                if (fieldDeclaration.getVariables().size() == 0) {
+                                                    fieldDeclaration.remove();
+                                                }
                                             }
                                     );
 
@@ -488,11 +504,49 @@ public class InjectProcessor extends AbstractProcessor {
                                                                     constructorDeclaration.getParameters().stream()
                                                                             .filter(parameter -> assignExpr.getValue().isNameExpr())
                                                                             .filter(parameter -> parameter.getNameAsString().equals(assignExpr.getValue().asNameExpr().getNameAsString()))
-                                                                            .forEach(parameter -> assignExpr.setValue(getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType())));
+                                                                            .forEach(parameter ->
+                                                                                    moduleClassDeclaration.getMethods().stream()
+                                                                                            .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
+                                                                                            .forEach(methodDeclaration -> {
+                                                                                                        methodDeclaration.findAll(FieldAccessExpr.class).stream()
+                                                                                                                .filter(fieldAccessExpr -> fieldAccessExpr.getScope().isThisExpr() || fieldAccessExpr.getScope() == null)
+                                                                                                                .filter(fieldAccessExpr -> fieldAccessExpr.getNameAsString().equals(assignExpr.getTarget().asFieldAccessExpr().getNameAsString()))
+                                                                                                                .forEach(fieldAccessExpr -> {
+                                                                                                                            fieldAccessExpr.getParentNode().orElseThrow().replace(
+                                                                                                                                    fieldAccessExpr,
+                                                                                                                                    getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType())
+                                                                                                                            );
+                                                                                                                            moduleClassDeclaration.getFields().stream().flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
+                                                                                                                                    .filter(variableDeclarator -> assignExpr.getTarget().asFieldAccessExpr().getNameAsString().equals(variableDeclarator.getNameAsString()))
+                                                                                                                                    .findFirst()
+                                                                                                                                    .ifPresent(Node::remove);
+                                                                                                                        }
+                                                                                                                );
+                                                                                                        methodDeclaration.findAll(NameExpr.class).stream()
+                                                                                                                .filter(nameExpr -> nameExpr.getNameAsString().equals(assignExpr.getTarget().asFieldAccessExpr().getNameAsString()))
+                                                                                                                .forEach(nameExpr -> {
+                                                                                                                            nameExpr.getParentNode().orElseThrow().replace(
+                                                                                                                                    nameExpr,
+                                                                                                                                    getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType())
+                                                                                                                            );
+                                                                                                                            moduleClassDeclaration.getFields().stream().flatMap(fieldDeclaration -> fieldDeclaration.getVariables().stream())
+                                                                                                                                    .filter(variableDeclarator -> assignExpr.getTarget().asFieldAccessExpr().getNameAsString().equals(variableDeclarator.getNameAsString()))
+                                                                                                                                    .findFirst()
+                                                                                                                                    .ifPresent(Node::remove);
+                                                                                                                        }
+                                                                                                                );
+                                                                                                    }
+                                                                                            )
+
+                                                                            );
                                                                     constructorDeclaration.getAnnotationByClass(Inject.class).ifPresent(Node::remove);
                                                                 }
                                                         );
                                                 constructorDeclaration.getParameters().clear();
+                                                constructorDeclaration.getBody().getStatements().clear();
+                                                moduleClassDeclaration.getFields().stream()
+                                                        .filter(fieldDeclaration -> fieldDeclaration.getVariables().size() == 0)
+                                                        .forEach(Node::remove);
                                             }
                                     );
 

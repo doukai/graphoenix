@@ -31,7 +31,7 @@ repositories {
 dependencies {
     implementation project(":graphoenix-core")
     implementation project(":graphoenix-http-server")
-    implementation project(":graphoenix-mysql")
+    compile project(":graphoenix-mysql")
 
     annotationProcessor project(":graphoenix-annotation-processor")
     annotationProcessor project(":graphoenix-inject")
