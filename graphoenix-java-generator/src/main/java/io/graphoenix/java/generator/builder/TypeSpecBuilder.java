@@ -385,19 +385,23 @@ public class TypeSpecBuilder {
     }
 
     public TypeName buildType(GraphqlParser.TypeContext typeContext) {
-        return buildType(typeContext, false);
+        return buildType(typeContext, false, 0);
     }
 
     public TypeName buildType(GraphqlParser.TypeContext typeContext, boolean isAnnotation) {
+        return buildType(typeContext, isAnnotation, 0);
+    }
+
+    public TypeName buildType(GraphqlParser.TypeContext typeContext, boolean isAnnotation, int layer) {
         if (typeContext.typeName() != null) {
-            return buildType(typeContext.typeName().name(), isAnnotation);
+            return buildType(typeContext.typeName().name(), isAnnotation, layer);
         } else if (typeContext.listType() != null) {
-            return buildType(typeContext.listType(), isAnnotation);
+            return buildType(typeContext.listType(), isAnnotation, layer);
         } else if (typeContext.nonNullType() != null) {
             if (typeContext.nonNullType().typeName() != null) {
-                return buildType(typeContext.nonNullType().typeName().name(), isAnnotation);
+                return buildType(typeContext.nonNullType().typeName().name(), isAnnotation, layer);
             } else if (typeContext.nonNullType().listType() != null) {
-                return buildType(typeContext.nonNullType().listType(), isAnnotation);
+                return buildType(typeContext.nonNullType().listType(), isAnnotation, layer);
             }
         }
         return null;
@@ -418,7 +422,7 @@ public class TypeSpecBuilder {
         return null;
     }
 
-    public TypeName buildType(GraphqlParser.NameContext nameContext, boolean isAnnotation) {
+    public TypeName buildType(GraphqlParser.NameContext nameContext, boolean isAnnotation, int layer) {
         if (manager.isScalar(nameContext.getText())) {
             Optional<GraphqlParser.ScalarTypeDefinitionContext> scaLar = manager.getScaLar(nameContext.getText());
             if (scaLar.isPresent()) {
@@ -432,7 +436,7 @@ public class TypeSpecBuilder {
             Optional<GraphqlParser.ObjectTypeDefinitionContext> object = manager.getObject(nameContext.getText());
             if (object.isPresent()) {
                 if (isAnnotation) {
-                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + "InnerInput");
+                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + layer);
                 } else {
                     return ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText());
                 }
@@ -479,9 +483,9 @@ public class TypeSpecBuilder {
         return null;
     }
 
-    public TypeName buildType(GraphqlParser.ListTypeContext listTypeContext, boolean isAnnotation) {
+    public TypeName buildType(GraphqlParser.ListTypeContext listTypeContext, boolean isAnnotation, int layer) {
         if (isAnnotation) {
-            return ArrayTypeName.of(buildType(listTypeContext.type(), true));
+            return ArrayTypeName.of(buildType(listTypeContext.type(), true, layer));
         } else {
             return ParameterizedTypeName.get(ClassName.get(Collection.class), buildType(listTypeContext.type()));
         }
@@ -519,7 +523,7 @@ public class TypeSpecBuilder {
         return null;
     }
 
-    public CodeBlock buildAnnotationDefaultValue(GraphqlParser.TypeContext typeContext) {
+    public CodeBlock buildAnnotationDefaultValue(GraphqlParser.TypeContext typeContext, int layer) {
         if (manager.fieldTypeIsList(typeContext)) {
             return CodeBlock.of("$L", "{}");
         }
@@ -542,7 +546,7 @@ public class TypeSpecBuilder {
             if (object.isPresent()) {
                 return CodeBlock.of(
                         "@$T",
-                        ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + "InnerInput")
+                        ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + "Input" + layer)
                 );
             }
         }
@@ -633,7 +637,7 @@ public class TypeSpecBuilder {
 
 
     public Stream<TypeSpec> buildObjectTypeExpressionAnnotations() {
-        return IntStream.range(0, graphQLConfig.getInputLayers() - 1)
+        return IntStream.range(0, graphQLConfig.getInputLayers())
                 .mapToObj(this::buildObjectTypeExpressionAnnotations)
                 .flatMap(typeSpecStream -> typeSpecStream);
     }
@@ -702,7 +706,7 @@ public class TypeSpecBuilder {
                                 .collect(Collectors.toList())
                 );
 
-        if (layer < graphQLConfig.getInputLayers()) {
+        if (layer < graphQLConfig.getInputLayers() - 1) {
             builder.addMethods(
                     manager.getFields(objectTypeDefinitionContext.name().getText())
                             .filter(fieldDefinitionContext ->
@@ -722,7 +726,7 @@ public class TypeSpecBuilder {
     }
 
     public Stream<TypeSpec> buildObjectTypeExpressionsAnnotations() {
-        return IntStream.range(0, graphQLConfig.getInputLayers() - 1)
+        return IntStream.range(0, graphQLConfig.getInputLayers())
                 .mapToObj(this::buildObjectTypeExpressionsAnnotations)
                 .flatMap(typeSpecStream -> typeSpecStream);
     }
@@ -767,108 +771,85 @@ public class TypeSpecBuilder {
     }
 
     public Stream<TypeSpec> buildObjectTypeInputAnnotations() {
-        return manager.getObjects()
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                )
-                .map(objectTypeDefinitionContext ->
-                                TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Input")
-                                        .addModifiers(Modifier.PUBLIC)
-                                        .addAnnotation(
-                                                AnnotationSpec.builder(Retention.class)
-                                                        .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
-                                                        .build()
-                                        )
-                                        .addAnnotation(
-                                                AnnotationSpec.builder(Target.class)
-                                                        .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
-                                                        .build()
-                                        )
-                                        .addAnnotation(TypeInput.class)
-                                        .addMethods(
-                                                manager.getFields(objectTypeDefinitionContext.name().getText())
-//                                                .filter(fieldDefinitionContext ->
-//                                                        manager.isScaLar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
-//                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
-//                                                )
-                                                        .map(fieldDefinitionContext ->
-                                                                MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                        .returns(buildType(fieldDefinitionContext.type(), true))
-                                                                        .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type()))
-                                                                        .build()
-                                                        )
-                                                        .collect(Collectors.toList())
-                                        )
-                                        .addMethods(
-                                                manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                        .map(fieldDefinitionContext ->
-                                                                MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
-                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                        .returns(String.class)
-                                                                        .defaultValue("$S", "")
-                                                                        .build()
-                                                        )
-                                                        .collect(Collectors.toList())
-                                        )
-                                        .build()
-                );
+        return IntStream.range(0, graphQLConfig.getInputLayers())
+                .mapToObj(this::buildObjectTypeInputAnnotations)
+                .flatMap(typeSpecStream -> typeSpecStream);
     }
 
-    public Stream<TypeSpec> buildObjectTypeInnerInputAnnotations() {
+    public Stream<TypeSpec> buildObjectTypeInputAnnotations(int layer) {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .map(objectTypeDefinitionContext ->
-                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "InnerInput")
-                                .addModifiers(Modifier.PUBLIC)
-                                .addAnnotation(
-                                        AnnotationSpec.builder(Retention.class)
-                                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
-                                                .build()
-                                )
-                                .addAnnotation(
-                                        AnnotationSpec.builder(Target.class)
-                                                .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
-                                                .build()
-                                )
-                                .addAnnotation(TypeInput.class)
-                                .addMethods(
+                .map(objectTypeDefinitionContext -> {
+                            TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Input" + layer)
+                                    .addModifiers(Modifier.PUBLIC)
+                                    .addAnnotation(
+                                            AnnotationSpec.builder(Name.class)
+                                                    .addMember("value", "$S", objectTypeDefinitionContext.name().getText() + "Input")
+                                                    .build()
+                                    )
+                                    .addAnnotation(
+                                            AnnotationSpec.builder(Retention.class)
+                                                    .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                                    .build()
+                                    )
+                                    .addAnnotation(
+                                            AnnotationSpec.builder(Target.class)
+                                                    .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
+                                                    .build()
+                                    )
+                                    .addAnnotation(TypeInput.class)
+                                    .addMethods(
+                                            manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                    .filter(fieldDefinitionContext ->
+                                                            manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                                    manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                    )
+                                                    .map(fieldDefinitionContext ->
+                                                            MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                    .returns(buildType(fieldDefinitionContext.type(), true, layer))
+                                                                    .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer))
+                                                                    .build()
+                                                    )
+                                                    .collect(Collectors.toList())
+                                    )
+                                    .addMethods(
+                                            manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                    .map(fieldDefinitionContext ->
+                                                            MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
+                                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                    .returns(String.class)
+                                                                    .defaultValue("$S", "")
+                                                                    .build()
+                                                    )
+                                                    .collect(Collectors.toList())
+                                    );
+                            if (layer < graphQLConfig.getInputLayers() - 1) {
+                                builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext ->
-                                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
-                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                        manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                 )
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(buildType(fieldDefinitionContext.type(), true))
-                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type()))
+                                                                .returns(
+                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
+                                                                                ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input" + (layer + 1))) :
+                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input" + (layer + 1))
+                                                                )
+                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
                                                                 .build()
                                                 )
                                                 .collect(Collectors.toList())
-                                )
-                                .addMethods(
-                                        manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext ->
-                                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
-                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                                )
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(String.class)
-                                                                .defaultValue("$S", "")
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
-                                )
-                                .build()
+                                );
+                            }
+                            return builder.build();
+                        }
                 );
     }
 }
