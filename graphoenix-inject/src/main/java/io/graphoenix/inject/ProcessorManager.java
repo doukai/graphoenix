@@ -3,11 +3,13 @@ package io.graphoenix.inject;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -135,6 +137,7 @@ public class ProcessorManager {
                                 writer.write(compilationUnit.toString());
                                 writer.close();
                             } catch (IOException e) {
+
                                 e.printStackTrace();
                             }
                         }
@@ -251,6 +254,11 @@ public class ProcessorManager {
         return elements.getTypeElement(getQualifiedNameByAnnotationExpr(annotationExpr));
     }
 
+    public String getTypeNameByExpression(Expression expression) {
+        ResolvedType resolvedType = javaSymbolSolver.calculateType(expression);
+        return resolvedType.toString();
+    }
+
     public String getQualifiedNameByDeclaration(ClassOrInterfaceDeclaration declaration) {
         ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = javaSymbolSolver.resolveDeclaration(declaration, ResolvedReferenceTypeDeclaration.class);
         return resolvedReferenceTypeDeclaration.getQualifiedName();
@@ -282,7 +290,8 @@ public class ProcessorManager {
                         }
                 );
 
-        classOrInterfaceDeclaration.findAll(AnnotationExpr.class)
+        classOrInterfaceDeclaration.findAll(AnnotationExpr.class).stream()
+                .filter(annotationExpr -> !tryResolve(annotationExpr))
                 .forEach(annotationExpr -> {
                             if (sourceClassOrInterfaceDeclaration.getNameAsString().equals(annotationExpr.getNameAsString())) {
                                 classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByDeclaration(sourceClassOrInterfaceDeclaration)));
@@ -295,6 +304,15 @@ public class ProcessorManager {
                                     );
                         }
                 );
+    }
+
+    private boolean tryResolve(Node node) {
+        try {
+            javaSymbolSolver.resolveDeclaration(node, ResolvedAnnotationDeclaration.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public Stream<ResolvedType> getMethodReturnType(MethodDeclaration methodDeclaration) {

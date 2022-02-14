@@ -30,7 +30,6 @@ import dagger.Provides;
 import io.graphoenix.inject.ComponentProxyProcessor;
 import io.graphoenix.inject.ProcessorManager;
 import io.vavr.control.Try;
-import jakarta.inject.Singleton;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
@@ -116,7 +115,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
 
                             MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, configClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
                                     .addAnnotation(Provides.class)
-                                    .addAnnotation(Singleton.class)
+                                    .addAnnotation(javax.inject.Singleton.class)
                                     .setType(configClassDeclaration.getNameAsString());
 
                             StringLiteralExpr propertyName = configClassDeclaration.getAnnotationByClass(ConfigProperties.class)
@@ -335,6 +334,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                 .setPublic(true)
                 .setInterface(true)
                 .setName(configClassDeclaration.getNameAsString() + "_Component")
+                .addAnnotation(javax.inject.Singleton.class)
                 .addAnnotation(new NormalAnnotationExpr().addPair("modules", modules).setName(Component.class.getSimpleName()));
 
         componentProxyComponentInterfaceDeclaration

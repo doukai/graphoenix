@@ -16,9 +16,9 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 
 import javax.annotation.processing.Filer;
-import javax.inject.Provider;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.Collection;
@@ -75,7 +75,7 @@ public class SelectionFilterHandlerImplementer {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),"manager")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addStatement("this.$L = $L",
                         "manager",
                         "manager"

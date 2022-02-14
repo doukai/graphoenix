@@ -9,7 +9,20 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.*;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.ArrayInitializerExpr;
+import com.github.javaparser.ast.expr.ClassExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.MethodReferenceExpr;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.NormalAnnotationExpr;
+import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.expr.SuperExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -46,6 +59,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,10 +74,14 @@ public class InjectProcessor extends AbstractProcessor {
 
     private Set<ComponentProxyProcessor> componentProxyProcessors;
     private ProcessorManager processorManager;
+    private List<String> processed;
+    private AtomicInteger round;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
+        processed = new CopyOnWriteArrayList<>();
+        round = new AtomicInteger(0);
         this.componentProxyProcessors = ServiceLoader.load(ComponentProxyProcessor.class, InjectProcessor.class.getClassLoader()).stream()
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toSet());
@@ -74,29 +93,31 @@ public class InjectProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        round.incrementAndGet();
         if (annotations.isEmpty()) {
             return false;
         }
-
         Set<? extends Element> singletonSet = roundEnv.getElementsAnnotatedWith(Singleton.class);
         Set<? extends Element> dependentSet = roundEnv.getElementsAnnotatedWith(Dependent.class);
         Set<? extends Element> applicationScopedSet = roundEnv.getElementsAnnotatedWith(ApplicationScoped.class);
 
-        boolean anyMatch = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream())
+        List<TypeElement> typeElements = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
-                .anyMatch(element -> element.getKind().isClass());
+                .filter(element -> element.getKind().isClass())
+                .map(element -> (TypeElement) element)
+                .filter(typeElement -> !processed.contains(typeElement.getQualifiedName().toString()))
+                .collect(Collectors.toList());
 
-        if (!anyMatch) {
+        if (typeElements.size() == 0) {
             return false;
+        } else {
+            processed.addAll(typeElements.stream().map(typeElement -> typeElement.getQualifiedName().toString()).collect(Collectors.toList()));
         }
 
         processorManager.setRoundEnv(roundEnv);
         componentProxyProcessors.forEach(ComponentProxyProcessor::inProcess);
 
-        List<CompilationUnit> componentProxyCompilationUnits = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream())
-                .filter(element -> element.getAnnotation(Generated.class) == null)
-                .filter(element -> element.getKind().isClass())
-                .map(element -> (TypeElement) element)
+        List<CompilationUnit> componentProxyCompilationUnits = typeElements.stream()
                 .map(this::buildComponentProxy)
                 .collect(Collectors.toList());
         componentProxyCompilationUnits.forEach(compilationUnit -> processorManager.writeToFiler(compilationUnit));
@@ -249,7 +270,7 @@ public class InjectProcessor extends AbstractProcessor {
 
         ClassOrInterfaceDeclaration moduleClassDeclaration = new ClassOrInterfaceDeclaration()
                 .setPublic(true)
-                .setName("PackageModule")
+                .setName("PackageModule" + round.get())
                 .addAnnotation(Module.class)
                 .addAnnotation(new NormalAnnotationExpr().addPair("value", new StringLiteralExpr(getClass().getName())).setName(Generated.class.getSimpleName()));
 
@@ -257,7 +278,7 @@ public class InjectProcessor extends AbstractProcessor {
                 .setPackageDeclaration(processorManager.getRootPackageName())
                 .addImport(Module.class)
                 .addImport(Provides.class)
-                .addImport(Singleton.class)
+                .addImport(javax.inject.Singleton.class)
                 .addImport(Generated.class)
                 .addImport("io.graphoenix.core.context.BeanContext");
 
@@ -289,7 +310,7 @@ public class InjectProcessor extends AbstractProcessor {
                 .addAnnotation(Provides.class)
                 .setType(componentClassDeclaration.getNameAsString());
         if (isSingleton) {
-            methodDeclaration.addAnnotation(Singleton.class);
+            methodDeclaration.addAnnotation(javax.inject.Singleton.class);
         }
 
         methodDeclaration.createBody().addStatement(buildProvidesMethodReturnStmt(moduleCompilationUnit, componentProxyClassDeclaration));
@@ -314,6 +335,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                 .collect(Collectors.toCollection(NodeList::new))
                                                 );
                                     } else {
+                                        moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
                                         return new MethodCallExpr()
                                                 .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
                                                 .setArguments(
@@ -405,7 +427,7 @@ public class InjectProcessor extends AbstractProcessor {
                             CompilationUnit moduleCompilationUnit = new CompilationUnit().addType(moduleClassDeclaration)
                                     .addImport(Module.class)
                                     .addImport(Provides.class)
-                                    .addImport(Singleton.class)
+                                    .addImport(javax.inject.Singleton.class)
                                     .addImport(Generated.class)
                                     .addImport("io.graphoenix.core.context.BeanContext");
 
@@ -555,10 +577,14 @@ public class InjectProcessor extends AbstractProcessor {
                                     .forEach(producesMethodDeclaration -> {
                                                 producesMethodDeclaration.addAnnotation(Provides.class);
                                                 if (producesMethodDeclaration.isAnnotationPresent(ApplicationScoped.class)) {
-                                                    producesMethodDeclaration.addAnnotation(Singleton.class);
+                                                    producesMethodDeclaration.addAnnotation(javax.inject.Singleton.class);
+                                                }
+                                                if (producesMethodDeclaration.isAnnotationPresent(Singleton.class)) {
+                                                    producesMethodDeclaration.addAnnotation(javax.inject.Singleton.class);
                                                 }
                                                 producesMethodDeclaration.getAnnotationByClass(Produces.class).ifPresent(Node::remove);
                                                 producesMethodDeclaration.getAnnotationByClass(ApplicationScoped.class).ifPresent(Node::remove);
+                                                producesMethodDeclaration.getAnnotationByClass(Singleton.class).ifPresent(Node::remove);
                                                 producesMethodDeclaration.getAnnotationByClass(Dependent.class).ifPresent(Node::remove);
 
                                                 producesMethodDeclaration.getBody()
@@ -680,7 +706,7 @@ public class InjectProcessor extends AbstractProcessor {
                 .setName(componentProxyClassDeclaration.getNameAsString() + "_Component")
                 .addAnnotation(new NormalAnnotationExpr().addPair("modules", modules).setName(Component.class.getSimpleName()));
 
-        Type typeClone = moduleClassDeclaration.getMembers().stream()
+        MethodDeclaration providesMethodDeclaration = moduleClassDeclaration.getMembers().stream()
                 .filter(BodyDeclaration::isMethodDeclaration)
                 .map(BodyDeclaration::asMethodDeclaration)
                 .filter(methodDeclaration ->
@@ -690,16 +716,17 @@ public class InjectProcessor extends AbstractProcessor {
                                                 componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> processorManager.getQualifiedNameByType(extendType).equals(resolvedReferenceType.getQualifiedName())))
                 )
                 .findFirst()
-                .orElseThrow()
-                .getType()
-                .clone();
+                .orElseThrow();
+
+        Type typeClone = providesMethodDeclaration.getType().clone();
+
+        if (providesMethodDeclaration.isAnnotationPresent(javax.inject.Singleton.class)) {
+            componentProxyComponentInterfaceDeclaration.addAnnotation(javax.inject.Singleton.class);
+        }
 
         typeClone.setParentNode(componentProxyComponentInterfaceDeclaration);
 
-        componentProxyComponentInterfaceDeclaration
-                .addMethod("get")
-                .setType(typeClone)
-                .removeBody();
+        componentProxyComponentInterfaceDeclaration.addMethod("get").setType(typeClone).removeBody();
 
         CompilationUnit componentProxyComponentCompilationUnit = new CompilationUnit()
                 .addType(componentProxyComponentInterfaceDeclaration)
