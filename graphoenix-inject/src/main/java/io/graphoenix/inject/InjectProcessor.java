@@ -93,7 +93,6 @@ public class InjectProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        round.incrementAndGet();
         if (annotations.isEmpty()) {
             return false;
         }
@@ -168,6 +167,7 @@ public class InjectProcessor extends AbstractProcessor {
                             processorManager.writeToFiler(producesModuleContextCompilationUnit);
                         }
                 );
+        round.incrementAndGet();
         return false;
     }
 

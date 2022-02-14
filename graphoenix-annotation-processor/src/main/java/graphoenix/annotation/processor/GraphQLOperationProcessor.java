@@ -52,10 +52,14 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
     private JavaElementToOperation javaElementToOperation;
     private OperationInterfaceImplementer operationInterfaceImplementer;
     private GraphQLConfig graphQLConfig;
+    private Elements elementUtils;
+    private Filer filer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
+        elementUtils = processingEnv.getElementUtils();
+        filer = processingEnv.getFiler();
         BeanContext.load(GraphQLOperationProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.mapper = BeanContext.get(IGraphQLFieldMapManager.class);
@@ -65,7 +69,6 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         this.generatorHandler = BeanContext.get(GeneratorHandler.class);
         this.javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         this.operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
-        Filer filer = processingEnv.getFiler();
         graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
 
         try {
@@ -87,9 +90,6 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
-
-        final Elements elementUtils = processingEnv.getElementUtils();
-        final Filer filer = processingEnv.getFiler();
 
         for (TypeElement annotation : annotations) {
             Set<? extends Element> bundleClasses = roundEnv.getElementsAnnotatedWith(annotation);
@@ -114,16 +114,16 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors.toMap(
-                                        Map.Entry::getKey,
-                                        entry -> {
-                                            switch (operationRouter.getType(entry.getValue())) {
-                                                case QUERY:
-                                                    return generatorHandler.query(entry.getValue());
-                                                case MUTATION:
-                                                    return generatorHandler.mutation(entry.getValue());
-                                            }
-                                            return "";
-                                        }
+                                                Map.Entry::getKey,
+                                                entry -> {
+                                                    switch (operationRouter.getType(entry.getValue())) {
+                                                        case QUERY:
+                                                            return generatorHandler.query(entry.getValue());
+                                                        case MUTATION:
+                                                            return generatorHandler.mutation(entry.getValue());
+                                                    }
+                                                    return "";
+                                                }
                                         )
                                 )
                                 .forEach((key, value) -> Try.run(() -> {

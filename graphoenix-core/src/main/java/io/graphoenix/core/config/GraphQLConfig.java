@@ -50,6 +50,9 @@ public class GraphQLConfig {
     @Optional
     private String handlerPackageName;
 
+    @Optional
+    private int inputLayers = 1;
+
     public String getGraphQL() {
         return graphQL;
     }
@@ -168,5 +171,13 @@ public class GraphQLConfig {
 
     public void setHandlerPackageName(String handlerPackageName) {
         this.handlerPackageName = handlerPackageName;
+    }
+
+    public int getInputLayers() {
+        return inputLayers;
+    }
+
+    public void setInputLayers(int inputLayers) {
+        this.inputLayers = inputLayers;
     }
 }

@@ -41,6 +41,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @ApplicationScoped
@@ -630,69 +631,103 @@ public class TypeSpecBuilder {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
     }
 
+
     public Stream<TypeSpec> buildObjectTypeExpressionAnnotations() {
+        return IntStream.range(0, graphQLConfig.getInputLayers() - 1)
+                .mapToObj(this::buildObjectTypeExpressionAnnotations)
+                .flatMap(typeSpecStream -> typeSpecStream);
+    }
+
+    public Stream<TypeSpec> buildObjectTypeExpressionAnnotations(int layer) {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .map(objectTypeDefinitionContext ->
-                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expression")
-                                .addModifiers(Modifier.PUBLIC)
-                                .addAnnotation(
-                                        AnnotationSpec.builder(Retention.class)
-                                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
-                                                .build()
-                                )
-                                .addAnnotation(
-                                        AnnotationSpec.builder(Target.class)
-                                                .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
-                                                .build()
-                                )
-                                .addAnnotation(TypeExpression.class)
-                                .addMethod(
-                                        MethodSpec.methodBuilder("opr")
-                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"))
-                                                .defaultValue("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"), "EQ")
-                                                .build()
-                                )
-                                .addMethods(
-                                        manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext ->
-                                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
-                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                                )
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ArrayTypeName.of(buildExpressionType(fieldDefinitionContext.type(), true)))
-                                                                .defaultValue(CodeBlock.of("$L", "{}"))
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
-                                )
-                                .addMethods(
-                                        manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext ->
-                                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
-                                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                                )
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ArrayTypeName.of(String.class))
-                                                                .defaultValue(CodeBlock.of("$L", "{}"))
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
-                                )
+                .map(objectTypeDefinitionContext -> ObjectTypeToInputExpressionAnnotation(objectTypeDefinitionContext, layer));
+    }
+
+    public TypeSpec ObjectTypeToInputExpressionAnnotation(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, int layer) {
+
+        TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expression" + layer)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(
+                        AnnotationSpec.builder(Name.class)
+                                .addMember("value", "$S", objectTypeDefinitionContext.name().getText() + "Expression")
                                 .build()
+                )
+                .addAnnotation(
+                        AnnotationSpec.builder(Retention.class)
+                                .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                .build()
+                )
+                .addAnnotation(
+                        AnnotationSpec.builder(Target.class)
+                                .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
+                                .build()
+                )
+                .addAnnotation(TypeExpression.class)
+                .addMethod(
+                        MethodSpec.methodBuilder("opr")
+                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"))
+                                .defaultValue("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"), "EQ")
+                                .build()
+                )
+                .addMethods(
+                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                .filter(fieldDefinitionContext ->
+                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                )
+                                .map(fieldDefinitionContext ->
+                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                .returns(ArrayTypeName.of(buildExpressionType(fieldDefinitionContext.type(), true)))
+                                                .defaultValue(CodeBlock.of("$L", "{}"))
+                                                .build()
+                                )
+                                .collect(Collectors.toList())
+                )
+                .addMethods(
+                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                .map(fieldDefinitionContext ->
+                                        MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
+                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                .returns(ArrayTypeName.of(String.class))
+                                                .defaultValue(CodeBlock.of("$L", "{}"))
+                                                .build()
+                                )
+                                .collect(Collectors.toList())
                 );
+
+        if (layer < graphQLConfig.getInputLayers()) {
+            builder.addMethods(
+                    manager.getFields(objectTypeDefinitionContext.name().getText())
+                            .filter(fieldDefinitionContext ->
+                                    manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                            )
+                            .map(fieldDefinitionContext ->
+                                    MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                            .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                            .returns(ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Expressions" + (layer + 1))))
+                                            .defaultValue(CodeBlock.of("$L", "{}"))
+                                            .build()
+                            )
+                            .collect(Collectors.toList())
+            );
+        }
+        return builder.build();
     }
 
     public Stream<TypeSpec> buildObjectTypeExpressionsAnnotations() {
+        return IntStream.range(0, graphQLConfig.getInputLayers() - 1)
+                .mapToObj(this::buildObjectTypeExpressionsAnnotations)
+                .flatMap(typeSpecStream -> typeSpecStream);
+    }
+
+    public Stream<TypeSpec> buildObjectTypeExpressionsAnnotations(int layer) {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -700,7 +735,7 @@ public class TypeSpecBuilder {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .map(objectTypeDefinitionContext ->
-                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expressions")
+                        TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expressions" + layer)
                                 .addModifiers(Modifier.PUBLIC)
                                 .addAnnotation(
                                         AnnotationSpec.builder(Retention.class)
@@ -723,21 +758,9 @@ public class TypeSpecBuilder {
                                 .addMethod(
                                         MethodSpec.methodBuilder("value")
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Expression")))
+                                                .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Expression" + layer)))
                                                 .defaultValue("$L", "{}")
                                                 .build()
-                                )
-                                .addMethods(
-                                        manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Expression")))
-                                                                .defaultValue("$L", "{}")
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
                                 )
                                 .build()
                 );

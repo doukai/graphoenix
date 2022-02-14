@@ -91,9 +91,10 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
                                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(typeName).orElseThrow();
 
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
-                                        .addField(new Field()
-                                                .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
-                                                .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                        .addField(
+                                                new Field()
+                                                        .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
+                                                        .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
                                         );
                                 manager.registerGraphQL(objectType.toString());
                             }
@@ -158,7 +159,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
         return typeName;
     }
 
-    private final ClassLoader createClassLoader() throws TaskExecutionException {
+    private ClassLoader createClassLoader() throws TaskExecutionException {
         List<URL> urls = new ArrayList<>();
         SourceSetContainer sourceSets = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets();
         try {
@@ -171,7 +172,6 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
                 }
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
             throw new TaskExecutionException(this, e);
         }
         return new URLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
