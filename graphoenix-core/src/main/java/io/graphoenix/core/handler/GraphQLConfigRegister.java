@@ -10,6 +10,7 @@ import javax.annotation.processing.Filer;
 import javax.tools.StandardLocation;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.FileSystem;
@@ -75,9 +76,12 @@ public class GraphQLConfigRegister {
     public void registerPreset(ClassLoader classLoader) throws IOException, URISyntaxException {
         Iterator<URL> urlIterator = Objects.requireNonNull(classLoader.getResources("META-INF/graphql")).asIterator();
         while (urlIterator.hasNext()) {
+            URI uri = urlIterator.next().toURI();
             Map<String, String> env = new HashMap<>();
-            try (FileSystem fileSystem = FileSystems.newFileSystem(urlIterator.next().toURI(), env)) {
+            try (FileSystem fileSystem = FileSystems.newFileSystem(uri, env)) {
                 Files.list(fileSystem.getPath("META-INF/graphql")).forEach(path -> Try.run(() -> manager.registerPath(path)));
+            } catch (IllegalArgumentException e) {
+                //TODO
             }
         }
     }

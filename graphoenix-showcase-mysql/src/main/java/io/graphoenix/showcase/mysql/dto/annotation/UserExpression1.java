@@ -8,9 +8,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.eclipse.microprofile.graphql.Name;
 
-@Name("UserExpression")
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 @TypeExpression
@@ -45,8 +43,6 @@ public @interface UserExpression1 {
 
   String[] $sex() default {};
 
-  String[] $roles() default {};
-
   String[] $phones() default {};
 
   String[] $login() default {};
@@ -60,8 +56,6 @@ public @interface UserExpression1 {
   String[] $password() default {};
 
   String[] $disable() default {};
-
-  String[] $organization() default {};
 
   String[] $name() default {};
 

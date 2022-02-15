@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,12 +18,20 @@ public class JavaElementToOperation {
 
     private final MethodToQueryOperation methodToQueryOperation;
     private final MethodToMutationOperation methodToMutationOperation;
+    private GraphQLConfig graphQLConfig;
 
     @Inject
     public JavaElementToOperation(MethodToQueryOperation methodToQueryOperation,
-                                  MethodToMutationOperation methodToMutationOperation) {
+                                  MethodToMutationOperation methodToMutationOperation,
+                                  GraphQLConfig graphQLConfig) {
         this.methodToQueryOperation = methodToQueryOperation;
         this.methodToMutationOperation = methodToMutationOperation;
+        this.graphQLConfig = graphQLConfig;
+    }
+
+    public void setGraphQLConfig(GraphQLConfig graphQLConfig) {
+        this.graphQLConfig = graphQLConfig;
+        this.methodToQueryOperation.setGraphQLConfig(graphQLConfig);
     }
 
     public Map<String, String> buildOperationResources(PackageElement packageElement, TypeElement typeElement) {

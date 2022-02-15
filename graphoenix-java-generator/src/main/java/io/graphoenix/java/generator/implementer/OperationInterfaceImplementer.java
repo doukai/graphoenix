@@ -74,20 +74,21 @@ public class OperationInterfaceImplementer {
     private CodeBlock buildFileContentFieldInitializeCodeBlock(PackageElement packageElement, TypeElement typeElement, String suffix) {
         ClassName typeClassName = ClassName.get(packageElement.getQualifiedName().toString(), typeElement.getSimpleName().toString() + "Impl");
         CodeBlock.Builder builder = CodeBlock.builder();
-        typeElement.getEnclosedElements().forEach(element ->
-                builder.addStatement(
-                        "$L = fileToString($T.class,$S)",
-                        element.getSimpleName().toString()
-                                .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
-                        typeClassName,
-                        typeElement.getSimpleName().toString()
-                                .concat("_")
-                                .concat(element.getSimpleName().toString())
-                                .concat("_" + typeElement.getEnclosedElements().indexOf(element))
-                                .concat(".")
-                                .concat(suffix)
-                )
-        );
+        typeElement.getEnclosedElements()
+                .forEach(element ->
+                        builder.addStatement(
+                                "$L = fileToString($T.class,$S)",
+                                element.getSimpleName().toString()
+                                        .concat("_" + typeElement.getEnclosedElements().indexOf(element)),
+                                typeClassName,
+                                typeElement.getSimpleName().toString()
+                                        .concat("_")
+                                        .concat(element.getSimpleName().toString())
+                                        .concat("_" + typeElement.getEnclosedElements().indexOf(element))
+                                        .concat(".")
+                                        .concat(suffix)
+                        )
+                );
         return builder.build();
     }
 

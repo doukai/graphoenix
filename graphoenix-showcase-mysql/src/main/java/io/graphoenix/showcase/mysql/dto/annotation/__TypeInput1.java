@@ -1,0 +1,66 @@
+package io.graphoenix.showcase.mysql.dto.annotation;
+
+import io.graphoenix.showcase.mysql.dto.enumType.__TypeKind;
+import io.graphoenix.spi.annotation.TypeInput;
+import java.lang.String;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.METHOD)
+@TypeInput
+public @interface __TypeInput1 {
+  boolean isDeprecated() default false;
+
+  __TypeKind kind() default __TypeKind.SCALAR;
+
+  String description() default "";
+
+  int version() default 0;
+
+  int schemaId() default 0;
+
+  String name() default "";
+
+  String ofTypeName() default "";
+
+  String $interfaces() default "";
+
+  String $isDeprecated() default "";
+
+  String $possibleTypes() default "";
+
+  String $kind() default "";
+
+  String $description() default "";
+
+  String $version() default "";
+
+  String $inputFields() default "";
+
+  String $schemaId() default "";
+
+  String $name() default "";
+
+  String $fields() default "";
+
+  String $ofType() default "";
+
+  String $enumValues() default "";
+
+  String $ofTypeName() default "";
+
+  __TypeInput2[] interfaces() default {};
+
+  __TypeInput2[] possibleTypes() default {};
+
+  __InputValueInput2[] inputFields() default {};
+
+  __FieldInput2[] fields() default {};
+
+  __TypeInput2 ofType() default @__TypeInput2;
+
+  __EnumValueInput2[] enumValues() default {};
+}

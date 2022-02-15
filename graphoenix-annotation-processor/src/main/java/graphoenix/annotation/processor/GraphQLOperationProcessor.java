@@ -70,6 +70,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         this.javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         this.operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
+        this.javaElementToOperation.setGraphQLConfig(graphQLConfig);
 
         try {
             manager.clearAll();
@@ -126,17 +127,19 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                                                 }
                                         )
                                 )
-                                .forEach((key, value) -> Try.run(() -> {
-                                            FileObject fileObject = filer.createResource(
-                                                    StandardLocation.CLASS_OUTPUT,
-                                                    packageElement.getQualifiedName(),
-                                                    typeElement.getSimpleName().toString().concat("_").concat(key).concat(".").concat(generatorHandler.extension())
-                                            );
-                                            Writer writer = fileObject.openWriter();
-                                            writer.write(value);
-                                            writer.close();
-                                        }
-                                ));
+                                .forEach((key, value) ->
+                                        Try.run(() -> {
+                                                    FileObject fileObject = filer.createResource(
+                                                            StandardLocation.CLASS_OUTPUT,
+                                                            packageElement.getQualifiedName(),
+                                                            typeElement.getSimpleName().toString().concat("_").concat(key).concat(".").concat(generatorHandler.extension())
+                                                    );
+                                                    Writer writer = fileObject.openWriter();
+                                                    writer.write(value);
+                                                    writer.close();
+                                                }
+                                        )
+                                );
 
                         operationInterfaceImplementer.writeToFiler(packageElement, typeElement, operationDAO, generatorHandler.extension(), filer);
 

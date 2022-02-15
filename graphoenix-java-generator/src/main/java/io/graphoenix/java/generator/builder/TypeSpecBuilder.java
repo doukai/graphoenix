@@ -657,11 +657,6 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expression" + layer)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(
-                        AnnotationSpec.builder(Name.class)
-                                .addMember("value", "$S", objectTypeDefinitionContext.name().getText() + "Expression")
-                                .build()
-                )
-                .addAnnotation(
                         AnnotationSpec.builder(Retention.class)
                                 .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
                                 .build()
@@ -696,6 +691,10 @@ public class TypeSpecBuilder {
                 )
                 .addMethods(
                         manager.getFields(objectTypeDefinitionContext.name().getText())
+                                .filter(fieldDefinitionContext ->
+                                        manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                )
                                 .map(fieldDefinitionContext ->
                                         MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -787,11 +786,6 @@ public class TypeSpecBuilder {
                             TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Input" + layer)
                                     .addModifiers(Modifier.PUBLIC)
                                     .addAnnotation(
-                                            AnnotationSpec.builder(Name.class)
-                                                    .addMember("value", "$S", objectTypeDefinitionContext.name().getText() + "Input")
-                                                    .build()
-                                    )
-                                    .addAnnotation(
                                             AnnotationSpec.builder(Retention.class)
                                                     .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
                                                     .build()
@@ -819,10 +813,6 @@ public class TypeSpecBuilder {
                                     )
                                     .addMethods(
                                             manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                    .filter(fieldDefinitionContext ->
-                                                            manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
-                                                                    manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                                    )
                                                     .map(fieldDefinitionContext ->
                                                             MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)

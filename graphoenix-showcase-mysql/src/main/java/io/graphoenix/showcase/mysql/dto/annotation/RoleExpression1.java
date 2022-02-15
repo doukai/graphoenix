@@ -7,9 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.eclipse.microprofile.graphql.Name;
 
-@Name("RoleExpression")
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 @TypeExpression
@@ -31,8 +29,6 @@ public @interface RoleExpression1 {
   String[] $id() default {};
 
   String[] $version() default {};
-
-  String[] $users() default {};
 
   UserExpressions2[] users() default {};
 }

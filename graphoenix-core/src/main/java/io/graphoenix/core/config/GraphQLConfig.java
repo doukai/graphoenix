@@ -51,6 +51,12 @@ public class GraphQLConfig {
     private String handlerPackageName;
 
     @Optional
+    private String conditionalInputName;
+
+    @Optional
+    private String operatorInputName;
+
+    @Optional
     private int inputLayers = 1;
 
     public String getGraphQL() {
@@ -171,6 +177,22 @@ public class GraphQLConfig {
 
     public void setHandlerPackageName(String handlerPackageName) {
         this.handlerPackageName = handlerPackageName;
+    }
+
+    public String getConditionalInputName() {
+        return conditionalInputName != null ? conditionalInputName : getEnumTypePackageName() + ".Conditional";
+    }
+
+    public void setConditionalInputName(String conditionalInputName) {
+        this.conditionalInputName = conditionalInputName;
+    }
+
+    public String getOperatorInputName() {
+        return operatorInputName != null ? operatorInputName : getEnumTypePackageName() + ".Operator";
+    }
+
+    public void setOperatorInputName(String operatorInputName) {
+        this.operatorInputName = operatorInputName;
     }
 
     public int getInputLayers() {

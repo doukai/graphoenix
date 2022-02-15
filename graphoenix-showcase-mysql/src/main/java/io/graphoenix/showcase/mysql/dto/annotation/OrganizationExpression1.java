@@ -7,9 +7,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.eclipse.microprofile.graphql.Name;
 
-@Name("OrganizationExpression")
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
 @TypeExpression
@@ -32,15 +30,9 @@ public @interface OrganizationExpression1 {
 
   int[] version() default {};
 
-  String[] $parent() default {};
-
   String[] $aboveId() default {};
 
   String[] $isDeprecated() default {};
-
-  String[] $userByOrg() default {};
-
-  String[] $above() default {};
 
   String[] $name() default {};
 
@@ -53,8 +45,6 @@ public @interface OrganizationExpression1 {
   String[] $id() default {};
 
   String[] $version() default {};
-
-  String[] $users() default {};
 
   OrganizationExpressions2[] parent() default {};
 
