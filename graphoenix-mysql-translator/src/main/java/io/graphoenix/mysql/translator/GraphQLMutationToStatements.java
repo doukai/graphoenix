@@ -1360,18 +1360,7 @@ public class GraphQLMutationToStatements {
                         .map(inputValueDefinitionContext -> dbValueUtil.objectFieldVariableToDBValue(inputValueDefinitionContext, valueWithVariableContext))
                         .collect(Collectors.toList())
         );
-
-        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
-                .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
-                .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                .map(inputValueDefinitionContext -> manager.getFieldDefinitionFromInputValueDefinition())
-
         return Stream.of(insertExpression(table, columnList, expressionList, true));
-    }
-
-    protected Stream<Insert> subObjectVariableToInsert(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, Expression parentVariableExpression) {
-
-
     }
 
     protected Stream<Insert> arrayObjectVariableToInsert(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
