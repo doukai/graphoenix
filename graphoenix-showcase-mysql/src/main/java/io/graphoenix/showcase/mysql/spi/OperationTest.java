@@ -1,10 +1,8 @@
 package io.graphoenix.showcase.mysql.spi;
 
 import io.graphoenix.r2dbc.connector.dao.R2DBCOperationDAO;
-import io.graphoenix.showcase.mysql.dto.annotation.OrganizationInput1;
 import io.graphoenix.showcase.mysql.dto.annotation.RoleExpression1;
 import io.graphoenix.showcase.mysql.dto.annotation.RoleExpressions1;
-import io.graphoenix.showcase.mysql.dto.annotation.RoleInput1;
 import io.graphoenix.showcase.mysql.dto.annotation.UserExpression0;
 import io.graphoenix.showcase.mysql.dto.annotation.UserExpressions0;
 import io.graphoenix.showcase.mysql.dto.annotation.UserInput0;
@@ -60,8 +58,8 @@ public interface OperationTest {
             $sex = "sex",
             login = "login1",
             password = "password1",
-            organization = @OrganizationInput1(name = "org1"),
-            roles = {@RoleInput1(name = "role1"), @RoleInput1(name = "role2")},
+            $organization = "organization",
+            $roles = "roles",
             $phones = "phones"
     )
     User mutationUser(Sex sex, String name, String orgName, List<RoleInput> roles, OrganizationInput organization, List<String> phones) throws Exception;
