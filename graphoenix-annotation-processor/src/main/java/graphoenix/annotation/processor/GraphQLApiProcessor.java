@@ -62,7 +62,6 @@ public class GraphQLApiProcessor extends AbstractProcessor {
 
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
-    private GraphQLConfigRegister configRegister;
     private JavaElementToEnum javaElementToEnum;
     private JavaElementToObject javaElementToObject;
     private JavaElementToInterface javaElementToInterface;
@@ -78,12 +77,11 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        typeUtils = processingEnv.getTypeUtils();
-        filer = processingEnv.getFiler();
+        this.typeUtils = processingEnv.getTypeUtils();
+        this.filer = processingEnv.getFiler();
         BeanContext.load(GraphQLApiProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.documentBuilder = BeanContext.get(DocumentBuilder.class);
-        this.configRegister = BeanContext.get(GraphQLConfigRegister.class);
         this.javaElementToEnum = BeanContext.get(JavaElementToEnum.class);
         this.javaElementToObject = BeanContext.get(JavaElementToObject.class);
         this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
@@ -92,6 +90,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.invokeHandlerImplementer = BeanContext.get(InvokeHandlerImplementer.class);
         this.selectionFilterHandlerImplementer = BeanContext.get(SelectionFilterHandlerImplementer.class);
         this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
+        GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
 
         try {
@@ -172,25 +171,25 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .setInvokeMethods(
                             manager.getObjects()
                                     .collect(Collectors.toMap(
-                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                                    objectTypeDefinitionContext ->
-                                                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                                                    .collect(Collectors.toMap(
-                                                                                    element -> (TypeElement) element,
-                                                                                    element -> element.getEnclosedElements().stream()
-                                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
-                                                                                            .map(subElement -> (ExecutableElement) subElement)
-                                                                                            .filter(executableElement ->
-                                                                                                    executableElement.getAnnotation(Query.class) == null &&
-                                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
-                                                                                                            executableElement.getParameters().stream().anyMatch(
-                                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
-                                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
-                                                                                                            )
+                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                            objectTypeDefinitionContext ->
+                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                            .collect(Collectors.toMap(
+                                                                    element -> (TypeElement) element,
+                                                                    element -> element.getEnclosedElements().stream()
+                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                            .filter(executableElement ->
+                                                                                    executableElement.getAnnotation(Query.class) == null &&
+                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
+                                                                                            executableElement.getParameters().stream().anyMatch(
+                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
+                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
                                                                                             )
-                                                                                            .collect(Collectors.toList())
                                                                             )
+                                                                            .collect(Collectors.toList())
                                                                     )
+                                                            )
                                             )
                                     )
                     )

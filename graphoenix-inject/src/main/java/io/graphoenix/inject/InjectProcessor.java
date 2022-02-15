@@ -433,27 +433,27 @@ public class InjectProcessor extends AbstractProcessor {
 
                             NodeList<ClassOrInterfaceType> extendedTypes = classOrInterfaceDeclaration.getExtendedTypes().stream()
                                     .map(classOrInterfaceType -> {
-                                                ClassOrInterfaceType clone = classOrInterfaceType.clone();
-                                                clone.setParentNode(moduleClassDeclaration);
-                                                return clone;
+                                                ClassOrInterfaceType classOrInterfaceTypeClone = classOrInterfaceType.clone();
+                                                classOrInterfaceTypeClone.setParentNode(moduleClassDeclaration);
+                                                return classOrInterfaceTypeClone;
                                             }
                                     )
                                     .collect(Collectors.toCollection(NodeList::new));
 
                             NodeList<ClassOrInterfaceType> implementedTypes = classOrInterfaceDeclaration.getImplementedTypes().stream()
                                     .map(classOrInterfaceType -> {
-                                                ClassOrInterfaceType clone = classOrInterfaceType.clone();
-                                                clone.setParentNode(moduleClassDeclaration);
-                                                return clone;
+                                                ClassOrInterfaceType classOrInterfaceTypeClone = classOrInterfaceType.clone();
+                                                classOrInterfaceTypeClone.setParentNode(moduleClassDeclaration);
+                                                return classOrInterfaceTypeClone;
                                             }
                                     )
                                     .collect(Collectors.toCollection(NodeList::new));
 
                             NodeList<BodyDeclaration<?>> members = classOrInterfaceDeclaration.getMembers().stream()
                                     .map(bodyDeclaration -> {
-                                                BodyDeclaration<?> clone = bodyDeclaration.clone();
-                                                clone.setParentNode(moduleClassDeclaration);
-                                                return clone;
+                                                BodyDeclaration<?> BodyDeclarationClone = bodyDeclaration.clone();
+                                                BodyDeclarationClone.setParentNode(moduleClassDeclaration);
+                                                return BodyDeclarationClone;
                                             }
                                     )
                                     .collect(Collectors.toCollection(NodeList::new));
@@ -734,9 +734,9 @@ public class InjectProcessor extends AbstractProcessor {
 
         componentProxyClassDeclaration.getAnnotationByClass(Named.class)
                 .ifPresent(annotationExpr -> {
-                            AnnotationExpr clone = annotationExpr.clone();
-                            clone.setParentNode(componentProxyClassDeclaration);
-                            componentProxyComponentInterfaceDeclaration.addAnnotation(clone);
+                            AnnotationExpr AnnotationExprClone = annotationExpr.clone();
+                            AnnotationExprClone.setParentNode(componentProxyClassDeclaration);
+                            componentProxyComponentInterfaceDeclaration.addAnnotation(AnnotationExprClone);
                             componentProxyComponentCompilationUnit.addImport(Named.class);
                         }
                 );

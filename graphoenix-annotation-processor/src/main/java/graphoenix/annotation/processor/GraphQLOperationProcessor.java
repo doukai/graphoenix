@@ -43,33 +43,28 @@ import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 @AutoService(Processor.class)
 public class GraphQLOperationProcessor extends AbstractProcessor {
 
-    private IGraphQLDocumentManager manager;
-    private IGraphQLFieldMapManager mapper;
     private GraphQLOperationRouter operationRouter;
-    private GraphQLConfigRegister configRegister;
-    private DocumentBuilder documentBuilder;
     private GeneratorHandler generatorHandler;
     private JavaElementToOperation javaElementToOperation;
     private OperationInterfaceImplementer operationInterfaceImplementer;
-    private GraphQLConfig graphQLConfig;
     private Elements elementUtils;
     private Filer filer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        elementUtils = processingEnv.getElementUtils();
-        filer = processingEnv.getFiler();
+        this.elementUtils = processingEnv.getElementUtils();
+        this.filer = processingEnv.getFiler();
         BeanContext.load(GraphQLOperationProcessor.class.getClassLoader());
-        this.manager = BeanContext.get(IGraphQLDocumentManager.class);
-        this.mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         this.operationRouter = BeanContext.get(GraphQLOperationRouter.class);
-        this.configRegister = BeanContext.get(GraphQLConfigRegister.class);
-        this.documentBuilder = BeanContext.get(DocumentBuilder.class);
         this.generatorHandler = BeanContext.get(GeneratorHandler.class);
         this.javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         this.operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
-        graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
+        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
+        GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+        DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
+        GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
         this.javaElementToOperation.setGraphQLConfig(graphQLConfig);
 
         try {
