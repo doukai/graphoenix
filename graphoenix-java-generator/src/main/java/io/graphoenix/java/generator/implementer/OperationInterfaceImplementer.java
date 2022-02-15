@@ -46,7 +46,8 @@ public class OperationInterfaceImplementer {
                 .addFields(buildFileContentFields(typeElement))
                 .addStaticBlock(buildFileContentFieldInitializeCodeBlock(packageElement, typeElement, suffix))
                 .addMethods(typeElement.getEnclosedElements()
-                        .stream().filter(element -> element.getKind().equals(ElementKind.METHOD))
+                        .stream()
+                        .filter(element -> element.getKind().equals(ElementKind.METHOD))
                         .map(element -> executableElementToMethodSpec(typeElement, (ExecutableElement) element))
                         .collect(Collectors.toList())
                 );

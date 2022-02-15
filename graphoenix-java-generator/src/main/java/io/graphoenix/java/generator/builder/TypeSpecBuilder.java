@@ -819,6 +819,10 @@ public class TypeSpecBuilder {
                                     )
                                     .addMethods(
                                             manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                    .filter(fieldDefinitionContext ->
+                                                            manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                                    manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                    )
                                                     .map(fieldDefinitionContext ->
                                                             MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
