@@ -1,6 +1,8 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
@@ -10,6 +12,7 @@ import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -22,6 +25,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.spi.error.ElementErrorType.*;
+import static io.graphoenix.spi.error.GraphQLErrorType.*;
 
 @ApplicationScoped
 public class MethodToQueryOperation {
@@ -74,8 +80,9 @@ public class MethodToQueryOperation {
                     );
         }
         field.setFields(elementManager.buildFields(getQueryTypeName(queryFieldName), 0, layers));
-        operation.addField(field);
-        return operation.toString();
+        String query = operation.addField(field).toString();
+        Logger.info("build query success:\r\n{}", query);
+        return query;
     }
 
     private Optional<? extends AnnotationMirror> getExpressionAnnotation(ExecutableElement executableElement) {
@@ -92,20 +99,38 @@ public class MethodToQueryOperation {
 
     private Argument expressionAnnotationToArgument(ExecutableElement executableElement, AnnotationMirror expression) {
         return new Argument()
-                .setName(getValueArgumentName(expression).orElseGet(() -> getVariableArgumentName(expression).map(argumentName -> argumentName.substring(1)).orElseThrow()))
+                .setName(getValueArgumentName(expression)
+                        .orElseGet(() ->
+                                getVariableArgumentName(expression)
+                                        .map(argumentName -> argumentName.substring(1))
+                                        .orElseThrow(() -> new ElementProblem(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                        )
+                )
                 .setValueWithVariable(expressionAnnotationToMap(executableElement, expression));
     }
 
     private Map<String, Object> expressionAnnotationToMap(ExecutableElement executableElement, AnnotationMirror expression) {
-
         if (valueIsExpressions(expression)) {
-            return getExpressionsValue(executableElement, expression).orElseThrow();
+            return getExpressionsValue(executableElement, expression)
+                    .orElseThrow(() -> new ElementProblem(EXPRESSION_EXPRESSIONS_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())));
         } else {
             return Map.of(
                     getOperatorArgumentName(expression),
-                    getOperator(expression).orElseGet(() -> getDefaultOperator(expression).orElseThrow()),
-                    getValueName(expression).orElseGet(() -> getVariableName(expression, executableElement).orElseThrow()),
-                    getValue(expression).orElseGet(() -> getVariable(expression, executableElement).orElseThrow())
+                    getOperator(expression)
+                            .orElseGet(() ->
+                                    getDefaultOperator(expression)
+                                            .orElseThrow(() -> new ElementProblem(EXPRESSION_OPERATOR_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                            ),
+                    getValueName(expression)
+                            .orElseGet(() ->
+                                    getVariableName(expression, executableElement)
+                                            .orElseThrow(() -> new ElementProblem(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                            ),
+                    getValue(expression)
+                            .orElseGet(() ->
+                                    getVariable(expression, executableElement)
+                                            .orElseThrow(() -> new ElementProblem(EXPRESSION_VALUE_OR_VARIABLE_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                            )
             );
         }
     }
@@ -113,7 +138,13 @@ public class MethodToQueryOperation {
     private Stream<Argument> expressionsAnnotationArguments(ExecutableElement executableElement, AnnotationMirror expressions) {
         Argument conditionalArgument = new Argument()
                 .setName(getConditionalArgumentName(expressions))
-                .setValueWithVariable(getConditional(expressions).orElseGet(() -> getDefaultConditional(expressions).orElseThrow()));
+                .setValueWithVariable(
+                        getConditional(expressions)
+                                .orElseGet(() ->
+                                        getDefaultConditional(expressions)
+                                                .orElseThrow(() -> new ElementProblem(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())))
+                                )
+                );
 
         Stream<Argument> argumentStream = getValueArguments(executableElement, expressions);
 
@@ -125,10 +156,23 @@ public class MethodToQueryOperation {
 
     private Map<String, Object> expressionsAnnotationMap(ExecutableElement executableElement, AnnotationMirror expressions) {
         Map<String, Object> expressionsMap = new HashMap<>();
-        expressionsMap.put(getConditionalArgumentName(expressions), getConditional(expressions).orElseGet(() -> getDefaultConditional(expressions).orElseThrow()));
-        getValueExpression(expressions).forEach(expression ->
-                expressionsMap.put(getValueArgumentName(expression).orElseThrow(), expressionAnnotationToMap(executableElement, expression))
+        expressionsMap.put(
+                getConditionalArgumentName(expressions),
+                getConditional(expressions)
+                        .orElseGet(() ->
+                                getDefaultConditional(expressions)
+                                        .orElseThrow(() -> new ElementProblem(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())))
+                        )
         );
+
+        getValueExpression(expressions)
+                .forEach(expression ->
+                        expressionsMap.put(
+                                getValueArgumentName(expression)
+                                        .orElseThrow(() -> new ElementProblem(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName()))),
+                                expressionAnnotationToMap(executableElement, expression)
+                        )
+                );
         return expressionsMap;
     }
 
@@ -154,7 +198,7 @@ public class MethodToQueryOperation {
                 .filter(element -> ((ExecutableElement) element).getReturnType().toString().equals(conditionalName))
                 .findFirst()
                 .map(element -> element.getSimpleName().toString())
-                .orElseThrow();
+                .orElseThrow(() -> new ElementProblem(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())));
     }
 
     private Optional<AnnotationValue> getConditional(AnnotationMirror expressions) {
@@ -176,7 +220,7 @@ public class MethodToQueryOperation {
                 .filter(element -> ((ExecutableElement) element).getReturnType().toString().equals(operatorName))
                 .findFirst()
                 .map(element -> element.getSimpleName().toString())
-                .orElseThrow();
+                .orElseThrow(() -> new ElementProblem(EXPRESSION_OPERATOR_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())));
     }
 
     private Optional<AnnotationValue> getOperator(AnnotationMirror expression) {
@@ -316,7 +360,8 @@ public class MethodToQueryOperation {
     }
 
     private String getTypeName(String queryFieldName, String argumentName) {
-        return manager.getField(getQueryTypeName(queryFieldName), argumentName)
+        String queryTypeName = getQueryTypeName(queryFieldName);
+        return manager.getField(queryTypeName, argumentName)
                 .map(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
@@ -326,13 +371,13 @@ public class MethodToQueryOperation {
                             }
                         }
                 )
-                .orElseThrow();
+                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(queryTypeName, argumentName)));
     }
 
     private String getQueryTypeName(String queryFieldName) {
         return manager.getQueryOperationTypeName()
                 .flatMap(queryTypeName -> manager.getField(queryTypeName, queryFieldName))
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
-                .orElseThrow();
+                .orElseThrow(() -> new GraphQLProblem(QUERY_TYPE_NOT_EXIST));
     }
 }

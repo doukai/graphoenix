@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
+import io.graphoenix.core.error.ElementProblem;
 import io.graphoenix.graphql.generator.document.Directive;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.InputValue;
@@ -16,6 +17,8 @@ import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.spi.error.ElementErrorType.SOURCE_ANNOTATION_NOT_EXIST;
 
 @ApplicationScoped
 public class GraphQLApiBuilder {
@@ -45,6 +48,38 @@ public class GraphQLApiBuilder {
                 )
                 .setDirectives(
                         Stream.of(new Directive()
+                                .setName("invoke")
+                                .addArgument(
+                                        new Argument()
+                                                .setName("className")
+                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                )
+                                .addArgument(
+                                        new Argument()
+                                                .setName("methodName")
+                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                )
+                        )
+                                .map(Directive::toString).
+                                collect(Collectors.toCollection(LinkedHashSet::new))
+                );
+    }
+
+    public Tuple2<String, Field> variableElementToObjectField(ExecutableElement executableElement, Types typeUtils) {
+        return Tuple.of(
+                elementManager.variableElementToTypeName(
+                        executableElement.getParameters().stream()
+                                .filter(variableElement -> variableElement.getAnnotation(Source.class) != null)
+                                .findFirst()
+                                .orElseThrow(() -> new ElementProblem(SOURCE_ANNOTATION_NOT_EXIST.bind(executableElement.getSimpleName()))),
+                        typeUtils
+                ),
+                new Field()
+                        .setName(elementManager.getNameFromElement(executableElement))
+                        .setDescription(elementManager.getDescriptionFromElement(executableElement))
+                        .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
+                        .setDirectives(
+                                Stream.of(new Directive()
                                         .setName("invoke")
                                         .addArgument(
                                                 new Argument()
@@ -57,38 +92,6 @@ public class GraphQLApiBuilder {
                                                         .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
                                         )
                                 )
-                                .map(Directive::toString).
-                                collect(Collectors.toCollection(LinkedHashSet::new))
-                );
-    }
-
-    public Tuple2<String, Field> variableElementToObjectField(ExecutableElement executableElement, Types typeUtils) {
-        return Tuple.of(
-                elementManager.variableElementToTypeName(
-                        executableElement.getParameters().stream()
-                                .filter(variableElement -> variableElement.getAnnotation(Source.class) != null)
-                                .findFirst()
-                                .orElseThrow(),
-                        typeUtils
-                ),
-                new Field()
-                        .setName(elementManager.getNameFromElement(executableElement))
-                        .setDescription(elementManager.getDescriptionFromElement(executableElement))
-                        .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
-                        .setDirectives(
-                                Stream.of(new Directive()
-                                                .setName("invoke")
-                                                .addArgument(
-                                                        new Argument()
-                                                                .setName("className")
-                                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
-                                                )
-                                                .addArgument(
-                                                        new Argument()
-                                                                .setName("methodName")
-                                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
-                                                )
-                                        )
                                         .map(Directive::toString).
                                         collect(Collectors.toCollection(LinkedHashSet::new))
                         )

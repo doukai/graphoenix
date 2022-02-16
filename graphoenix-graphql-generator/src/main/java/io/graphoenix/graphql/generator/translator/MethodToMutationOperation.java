@@ -55,7 +55,7 @@ public class MethodToMutationOperation {
         field.setFields(elementManager.buildFields(getMutationTypeName(mutationFieldName), 0, layers));
         String mutation = operation.addField(field).toString();
         Logger.info("build mutation success:\r\n{}", mutation);
-        return operation.toString();
+        return mutation;
     }
 
     private Optional<? extends AnnotationMirror> getInputAnnotation(ExecutableElement executableElement) {
@@ -112,14 +112,16 @@ public class MethodToMutationOperation {
 
     private Object rebuildAnnotationMirror(ExecutableElement executableElement, AnnotationMirror value) {
         return value.getElementValues().entrySet().stream()
-                .collect(Collectors.toMap(entry -> {
+                .collect(Collectors
+                        .toMap(entry -> {
                                     String fieldName = entry.getKey().getSimpleName().toString();
                                     if (fieldName.startsWith("$")) {
                                         return fieldName.substring(1);
                                     } else {
                                         return fieldName;
                                     }
-                                }, entry -> {
+                                },
+                                entry -> {
                                     String fieldName = entry.getKey().getSimpleName().toString();
                                     if (fieldName.startsWith("$")) {
                                         return rebuildVariable(executableElement, entry.getValue().getValue());

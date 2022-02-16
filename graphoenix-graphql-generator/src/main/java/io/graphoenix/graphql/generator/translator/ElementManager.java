@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.error.ElementErrorType.METHOD_PARAMETER_NOT_EXIST;
+import static io.graphoenix.spi.error.ElementErrorType.EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST;
 
 @ApplicationScoped
 public class ElementManager {
@@ -63,7 +63,7 @@ public class ElementManager {
         return executableElement.getParameters().stream()
                 .filter(parameter -> parameter.getSimpleName().toString().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new ElementProblem(METHOD_PARAMETER_NOT_EXIST.bind(executableElement.getSimpleName(), name)));
+                .orElseThrow(() -> new ElementProblem(EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST.bind(executableElement.getSimpleName(), name)));
     }
 
     public String getNameFromElement(Element element) {
