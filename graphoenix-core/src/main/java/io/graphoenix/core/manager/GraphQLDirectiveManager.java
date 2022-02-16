@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class GraphQLDirectiveManager implements IGraphQLDirectiveManager {
     @Override
     public Map<String, GraphqlParser.DirectiveDefinitionContext> register(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
         directiveDefinitionMap.put(directiveDefinitionContext.name().getText(), directiveDefinitionContext);
+        Logger.info("registered directive {}", directiveDefinitionContext.name().getText());
         return directiveDefinitionMap;
     }
 
@@ -33,5 +35,6 @@ public class GraphQLDirectiveManager implements IGraphQLDirectiveManager {
     @Override
     public void clear() {
         directiveDefinitionMap.clear();
+        Logger.debug("clear all directive");
     }
 }

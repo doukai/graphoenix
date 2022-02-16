@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLEnumManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class GraphQLEnumManager implements IGraphQLEnumManager {
     @Override
     public Map<String, GraphqlParser.EnumTypeDefinitionContext> register(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
         enumTypeDefinitionMap.put(enumTypeDefinitionContext.name().getText(), enumTypeDefinitionContext);
+        Logger.info("registered enum {}", enumTypeDefinitionContext.name().getText());
         return enumTypeDefinitionMap;
     }
 
@@ -38,5 +40,6 @@ public class GraphQLEnumManager implements IGraphQLEnumManager {
     @Override
     public void clear() {
         enumTypeDefinitionMap.clear();
+        Logger.debug("clear all enum");
     }
 }

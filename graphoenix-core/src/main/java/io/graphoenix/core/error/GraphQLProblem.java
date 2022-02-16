@@ -1,7 +1,7 @@
 package io.graphoenix.core.error;
 
 import com.google.gson.GsonBuilder;
-import io.graphoenix.spi.dto.GraphQLError;
+import io.graphoenix.spi.error.GraphQLError;
 import io.graphoenix.spi.dto.GraphQLLocation;
 import io.graphoenix.spi.dto.GraphQLPath;
 import io.graphoenix.spi.error.GraphQLErrorType;
@@ -11,6 +11,7 @@ import org.zalando.problem.gson.ProblemAdapterFactory;
 import javax.annotation.concurrent.Immutable;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.zalando.problem.Status.BAD_REQUEST;
@@ -34,6 +35,13 @@ public class GraphQLProblem extends AbstractThrowableProblem {
         this.push(graphQLErrorType);
     }
 
+
+    public GraphQLProblem(GraphQLErrorType graphQLErrorType, int line, int column) {
+        super(TYPE, "graphQL errors", BAD_REQUEST);
+        this.errors = new ArrayList<>();
+        this.push(graphQLErrorType, line, column);
+    }
+
     public GraphQLProblem push(GraphQLErrorType graphQLErrorType) {
         return this.push(graphQLErrorType, null, null);
     }
@@ -47,10 +55,20 @@ public class GraphQLProblem extends AbstractThrowableProblem {
         return this;
     }
 
+    public GraphQLProblem push(GraphQLErrorType graphQLErrorType, int line, int column) {
+        GraphQLError error = new GraphQLError();
+        error.setMessage(graphQLErrorType.toString());
+        error.setLocations(Collections.singletonList(new GraphQLLocation(line, column)));
+        this.errors.add(error);
+        return this;
+    }
+
     @Override
     public String toString() {
         return new GsonBuilder()
                 .registerTypeAdapterFactory(new ProblemAdapterFactory().registerSubtype(TYPE, this.getClass()))
-                .setPrettyPrinting().create().toJson(this);
+                .setPrettyPrinting()
+                .create()
+                .toJson(this);
     }
 }

@@ -2,7 +2,19 @@ package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
-import io.graphoenix.spi.antlr.*;
+import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLEnumManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldManager;
+import io.graphoenix.spi.antlr.IGraphQLFragmentManager;
+import io.graphoenix.spi.antlr.IGraphQLInputObjectManager;
+import io.graphoenix.spi.antlr.IGraphQLInputValueManager;
+import io.graphoenix.spi.antlr.IGraphQLInterfaceManager;
+import io.graphoenix.spi.antlr.IGraphQLObjectManager;
+import io.graphoenix.spi.antlr.IGraphQLOperationManager;
+import io.graphoenix.spi.antlr.IGraphQLScalarManager;
+import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
+import io.graphoenix.spi.antlr.IGraphQLUnionManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -18,6 +30,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 
 @ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
@@ -497,7 +510,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeContext.listType() != null) {
             return getFieldTypeName(typeContext.listType().type());
         }
-        return null;
+        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     @Override
@@ -507,8 +520,13 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeContext.nonNullType() != null) {
             if (typeContext.nonNullType().typeName() != null) {
                 return false;
-            } else return typeContext.nonNullType().listType() != null;
-        } else return typeContext.listType() != null;
+            } else if (typeContext.nonNullType().listType() != null) {
+                return true;
+            }
+        } else if (typeContext.listType() != null) {
+            return true;
+        }
+        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     @Override

@@ -5,6 +5,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
 import javax.tools.StandardLocation;
@@ -37,12 +38,15 @@ public class GraphQLConfigRegister {
     public void registerConfig() throws IOException, URISyntaxException {
         if (graphQLConfig.getGraphQL() != null) {
             manager.registerGraphQL(graphQLConfig.getGraphQL());
+            Logger.info("registered graphql {}", graphQLConfig.getGraphQL());
         }
         if (graphQLConfig.getGraphQLFileName() != null) {
             manager.registerFileByName(graphQLConfig.getGraphQLFileName());
+            Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
         }
         if (graphQLConfig.getGraphQLPath() != null) {
             manager.registerPathByName(graphQLConfig.getGraphQLPath());
+            Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
         }
     }
 
@@ -56,20 +60,26 @@ public class GraphQLConfigRegister {
         }
         if (config.getGraphQL() != null) {
             manager.registerGraphQL(config.getGraphQL());
+            Logger.info("registered graphql {}", graphQLConfig.getGraphQL());
         } else if (config.getGraphQLFileName() != null) {
             manager.registerFileByName(path.concat(config.getGraphQLFileName()));
+            Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
         } else if (config.getGraphQLPath() != null) {
             manager.registerPathByName(path.concat(config.getGraphQLPath()));
+            Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
         }
     }
 
     public void registerConfig(GraphQLConfig config, Filer filer) throws IOException, URISyntaxException {
         if (config.getGraphQL() != null) {
             manager.registerGraphQL(config.getGraphQL());
+            Logger.info("registered graphql {}", graphQLConfig.getGraphQL());
         } else if (config.getGraphQLFileName() != null) {
             manager.registerInputStream(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLFileName()).openInputStream());
+            Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
         } else if (config.getGraphQLPath() != null) {
             manager.registerPath(Path.of(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLPath()).toUri()));
+            Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
         }
     }
 
@@ -79,9 +89,14 @@ public class GraphQLConfigRegister {
             URI uri = urlIterator.next().toURI();
             Map<String, String> env = new HashMap<>();
             try (FileSystem fileSystem = FileSystems.newFileSystem(uri, env)) {
-                Files.list(fileSystem.getPath("META-INF/graphql")).forEach(path -> Try.run(() -> manager.registerPath(path)));
+                Files.list(fileSystem.getPath("META-INF/graphql"))
+                        .forEach(path -> {
+                                    Try.run(() -> manager.registerPath(path));
+                                    Logger.info("registered preset path {} from {}", path, classLoader.getName());
+                                }
+                        );
             } catch (IllegalArgumentException e) {
-                //TODO
+                Logger.warn(e);
             }
         }
     }

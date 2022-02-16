@@ -2,6 +2,7 @@ package io.graphoenix.core.utils;
 
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.GraphQLProblem;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -11,11 +12,14 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+
+import static io.graphoenix.spi.error.GraphQLErrorType.SYNTAX_ERROR;
 
 public enum DocumentUtil {
     DOCUMENT_UTIL;
@@ -90,6 +94,8 @@ public enum DocumentUtil {
         lexer.addErrorListener(new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                Logger.error(e);
+                throw new GraphQLProblem(SYNTAX_ERROR.bind(offendingSymbol, line, charPositionInLine), line, charPositionInLine);
             }
         });
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -98,6 +104,8 @@ public enum DocumentUtil {
         parser.addErrorListener(new BaseErrorListener() {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                Logger.error(e);
+                throw new GraphQLProblem(SYNTAX_ERROR.bind(offendingSymbol, line, charPositionInLine), line, charPositionInLine);
             }
         });
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);

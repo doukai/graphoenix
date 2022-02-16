@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLInterfaceManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class GraphQLInterfaceManager implements IGraphQLInterfaceManager {
     @Override
     public Map<String, GraphqlParser.InterfaceTypeDefinitionContext> register(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
         interfaceTypeDefinitionMap.put(interfaceTypeDefinitionContext.name().getText(), interfaceTypeDefinitionContext);
+        Logger.info("registered interfaceType {}", interfaceTypeDefinitionContext.name().getText());
         return interfaceTypeDefinitionMap;
     }
 
@@ -38,5 +40,6 @@ public class GraphQLInterfaceManager implements IGraphQLInterfaceManager {
     @Override
     public void clear() {
         interfaceTypeDefinitionMap.clear();
+        Logger.debug("clear all interfaceType");
     }
 }

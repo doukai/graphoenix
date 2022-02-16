@@ -1,6 +1,7 @@
 package io.graphoenix.graphql.builder.introspection;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.graphql.generator.introspection.__Directive;
 import io.graphoenix.graphql.generator.introspection.__DirectiveLocation;
 import io.graphoenix.graphql.generator.introspection.__EnumValue;
@@ -16,6 +17,7 @@ import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -23,6 +25,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 
 @ApplicationScoped
 public class IntrospectionMutationBuilder {
@@ -38,7 +42,6 @@ public class IntrospectionMutationBuilder {
     }
 
     public Operation buildIntrospectionSchemaMutation() {
-
         Set<Argument> arguments = new LinkedHashSet<>();
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
@@ -81,14 +84,15 @@ public class IntrospectionMutationBuilder {
                         )
         );
 
-        return new Operation()
+        Operation operation = new Operation()
                 .setOperationType("mutation")
                 .setName("introspection")
                 .setFields(Collections.singleton(new Field().setName("__schema").setArguments(arguments).setFields(Collections.singleton(new Field().setName("id")))));
+        Logger.debug("introspection schema mutation:\r\n{}", operation.toString());
+        return operation;
     }
 
     public __Schema buildIntrospectionSchema() {
-
         __Schema schema = new __Schema();
         schema.setTypes(
                 Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType),
@@ -110,6 +114,7 @@ public class IntrospectionMutationBuilder {
         subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setSubscriptionType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
 
         schema.setDirectives(manager.getDirectives().map(this::directiveDefinitionContextToDirective).collect(Collectors.toCollection(LinkedHashSet::new)));
+        Logger.debug("introspection schema:\r\n{}", schema.toString());
         return schema;
     }
 
@@ -125,10 +130,12 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.OBJECT);
         type.setName(objectTypeDefinitionContext.name().getText());
+
         if (level == 0) {
             if (objectTypeDefinitionContext.implementsInterfaces() != null) {
                 type.setInterfaces(getInterfaceTypes(objectTypeDefinitionContext.implementsInterfaces(), level));
             }
+
             if (objectTypeDefinitionContext.description() != null) {
                 type.setDescription(objectTypeDefinitionContext.description().getText());
             }
@@ -153,6 +160,7 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.INTERFACE);
         type.setName(interfaceTypeDefinitionContext.name().getText());
+
         if (level == 0) {
             if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
                 type.setInterfaces(getInterfaceTypes(interfaceTypeDefinitionContext.implementsInterfaces(), level));
@@ -170,14 +178,15 @@ public class IntrospectionMutationBuilder {
     private __Field fieldDefinitionContextToField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
         __Field field = new __Field();
         field.setName(fieldDefinitionContext.name().getText());
+
         if (fieldDefinitionContext.description() != null) {
             field.setDescription(fieldDefinitionContext.description().getText());
         }
+
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             field.setArgs(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                     .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toCollection(LinkedHashSet::new)));
         }
-
         field.setType(typeContextToType(fieldDefinitionContext.type(), level));
         return field;
     }
@@ -186,6 +195,7 @@ public class IntrospectionMutationBuilder {
         if (level > levelThreshold) {
             return null;
         }
+
         if (typeContext.typeName() != null) {
             if (manager.isScalar(typeContext.typeName().getText())) {
                 return manager.getScaLar(typeContext.typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null);
@@ -225,7 +235,7 @@ public class IntrospectionMutationBuilder {
             nonNullType.setName(nonNullType.getOfType().getName() + "!");
             return nonNullType;
         }
-        return null;
+        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     private __Type enumTypeDefinitionContextToType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
@@ -236,6 +246,7 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.ENUM);
         type.setName(enumTypeDefinitionContext.name().getText());
+
         if (level == 0) {
             if (enumTypeDefinitionContext.description() != null) {
                 type.setDescription(enumTypeDefinitionContext.description().getText());
@@ -249,6 +260,7 @@ public class IntrospectionMutationBuilder {
     private __EnumValue enumValueDefinitionContextToEnumValue(GraphqlParser.EnumValueDefinitionContext enumValueDefinitionContext) {
         __EnumValue enumValue = new __EnumValue();
         enumValue.setName(enumValueDefinitionContext.enumValue().enumValueName().getText());
+
         if (enumValueDefinitionContext.description() != null) {
             enumValue.setDescription(enumValueDefinitionContext.description().getText());
         }
@@ -262,9 +274,11 @@ public class IntrospectionMutationBuilder {
     private __InputValue inputValueDefinitionContextToInputValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, int level) {
         __InputValue inputValue = new __InputValue();
         inputValue.setName(inputValueDefinitionContext.name().getText());
+
         if (inputValueDefinitionContext.description() != null) {
             inputValue.setDescription(inputValueDefinitionContext.description().getText());
         }
+
         if (inputValueDefinitionContext.defaultValue() != null) {
             if (inputValueDefinitionContext.defaultValue().value().StringValue() != null) {
                 String stringValue = inputValueDefinitionContext.defaultValue().value().StringValue().getText();
@@ -285,6 +299,7 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.INPUT_OBJECT);
         type.setName(inputObjectTypeDefinitionContext.name().getText());
+
         if (level == 0) {
             if (inputObjectTypeDefinitionContext.description() != null) {
                 type.setDescription(inputObjectTypeDefinitionContext.description().getText());
@@ -300,6 +315,7 @@ public class IntrospectionMutationBuilder {
         __Type type = new __Type();
         type.setKind(__TypeKind.SCALAR);
         type.setName(scalarTypeDefinitionContext.name().getText());
+
         if (level == 0) {
             if (scalarTypeDefinitionContext.description() != null) {
                 type.setDescription(scalarTypeDefinitionContext.description().getText());
@@ -318,13 +334,16 @@ public class IntrospectionMutationBuilder {
     private __Directive directiveDefinitionContextToDirective(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
         __Directive directive = new __Directive();
         directive.setName(directiveDefinitionContext.name().getText());
+
         if (directiveDefinitionContext.description() != null) {
             directive.setDescription(directiveDefinitionContext.description().getText());
         }
+
         if (directiveDefinitionContext.argumentsDefinition() != null) {
             directive.setArgs(directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                     .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toCollection(LinkedHashSet::new)));
         }
+
         Set<__DirectiveLocation> directiveLocationList = new LinkedHashSet<>();
         addDirectiveDefinitionsContextToDirectiveLocationList(directiveDefinitionContext.directiveLocations(), directiveLocationList);
         directive.setLocations(directiveLocationList);

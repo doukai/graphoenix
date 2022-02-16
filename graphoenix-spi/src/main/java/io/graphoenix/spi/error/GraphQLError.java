@@ -1,4 +1,7 @@
-package io.graphoenix.spi.dto;
+package io.graphoenix.spi.error;
+
+import io.graphoenix.spi.dto.GraphQLLocation;
+import io.graphoenix.spi.dto.GraphQLPath;
 
 import java.util.List;
 

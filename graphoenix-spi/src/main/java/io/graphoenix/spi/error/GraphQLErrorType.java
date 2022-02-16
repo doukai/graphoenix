@@ -3,18 +3,26 @@ package io.graphoenix.spi.error;
 public enum GraphQLErrorType {
     DEFINITION_NOT_EXIST(-1, "definition not exist"),
     TYPE_DEFINITION_NOT_EXIST(-2, "type definition not exist"),
+    FRAGMENT_NOT_EXIST(-7, "fragment not exist: %s"),
+    QUERY_TYPE_NOT_EXIST(-2, "query type definition not exist"),
+    MUTATION_TYPE_NOT_EXIST(-2, "mutation type definition not exist"),
+    SUBSCRIBE_TYPE_NOT_EXIST(-2, "subscribe type definition not exist"),
+    TYPE_NOT_EXIST(-8, "type definition not exist: %s"),
+    META_INTERFACE_NOT_EXIST(-8, "meta interface definition not exist"),
+    TYPE_ID_FIELD_NOT_EXIST(-9, "input object definition not exist: %s"),
+    FIELD_NOT_EXIST(-10, "field definition not exist in type %s: %s"),
+    SELECTION_NOT_EXIST(-11, "selection definition not exist: %s"),
+    SELECTION_ARGUMENT_NOT_EXIST(-11, "argument: %s definition not exist in selection: %s"),
+    INPUT_OBJECT_NOT_EXIST(-12, "input object definition not exist: %s"),
+
     OPERATION_NOT_EXIST(-3, "operation not exist"),
+    OPERATION_VARIABLE_NOT_EXIST(-3, "variable: %s not exist in operation: %s"),
     QUERY_NOT_EXIST(-4, "query not exist in operation"),
     MUTATION_NOT_EXIST(-5, "mutation not exist in operation"),
     SUBSCRIBE_NOT_EXIST(-6, "subscribe not exist in operation"),
-    FRAGMENT_NOT_EXIST(-7, "fragment not exist: %s"),
-    TYPE_NOT_EXIST(-8, "field not exist: %s"),
-    TYPE_ID_FIELD_NOT_EXIST(-9, "input object not exist: %s"),
-    FIELD_NOT_EXIST(-10, "field not exist in type %s: %s"),
-    SELECTION_NOT_EXIST(-11, "selection not exist: %s"),
-    INPUT_OBJECT_NOT_EXIST(-12, "input object not exist: %s"),
     NON_NULL_VALUE_NOT_EXIST(-13, "non null value not exist: %s"),
 
+    UNSUPPORTED_OPERATION_TYPE(-15, "unsupported operation type"),
     UNSUPPORTED_FIELD_TYPE(-14, "unsupported field type: %s"),
     UNSUPPORTED_VALUE(-15, "unsupported field value: %s"),
 
@@ -31,7 +39,9 @@ public enum GraphQLErrorType {
     MAP_WITH_FROM_FIELD_NOT_EXIST(-26, "map with type from field not exist: %s"),
     MAP_WITH_TO_FIELD_NOT_EXIST(-27, "map with type to field not exist: %s"),
 
-    UNKNOWN(-999, "unknown error");
+    SYNTAX_ERROR(-27, "graphql syntax error: %s line: %s column %s"),
+
+    UNKNOWN(-99, "unknown graphql error");
 
     private final int code;
     private final String description;

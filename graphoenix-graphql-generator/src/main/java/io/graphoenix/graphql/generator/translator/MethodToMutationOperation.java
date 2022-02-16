@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
@@ -8,6 +9,7 @@ import io.graphoenix.spi.annotation.TypeInput;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -17,6 +19,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.spi.error.GraphQLErrorType.FIELD_NOT_EXIST;
+import static io.graphoenix.spi.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 
 @ApplicationScoped
 public class MethodToMutationOperation {
@@ -48,7 +53,8 @@ public class MethodToMutationOperation {
             );
         }
         field.setFields(elementManager.buildFields(getMutationTypeName(mutationFieldName), 0, layers));
-        operation.addField(field);
+        String mutation = operation.addField(field).toString();
+        Logger.info("build mutation success:\r\n{}", mutation);
         return operation.toString();
     }
 
@@ -61,18 +67,19 @@ public class MethodToMutationOperation {
     private Stream<Argument> inputAnnotationToArgument(ExecutableElement executableElement, AnnotationMirror input) {
         return input.getElementValues().entrySet().stream()
                 .map(entry -> {
-                    String fieldName = entry.getKey().getSimpleName().toString();
-                    Object value = entry.getValue().getValue();
-                    Argument argument = new Argument();
-                    if (fieldName.startsWith("$")) {
-                        argument.setName(fieldName.substring(1));
-                        argument.setValueWithVariable(rebuildVariable(executableElement, value));
-                    } else {
-                        argument.setName(fieldName);
-                        argument.setValueWithVariable(rebuildValue(executableElement, value));
-                    }
-                    return argument;
-                });
+                            String fieldName = entry.getKey().getSimpleName().toString();
+                            Object value = entry.getValue().getValue();
+                            Argument argument = new Argument();
+                            if (fieldName.startsWith("$")) {
+                                argument.setName(fieldName.substring(1));
+                                argument.setValueWithVariable(rebuildVariable(executableElement, value));
+                            } else {
+                                argument.setName(fieldName);
+                                argument.setValueWithVariable(rebuildValue(executableElement, value));
+                            }
+                            return argument;
+                        }
+                );
     }
 
     private Object rebuildValue(ExecutableElement executableElement, Object value) {
@@ -133,15 +140,15 @@ public class MethodToMutationOperation {
     private Stream<String> getInputVariableNamesByArgumentName(AnnotationMirror input, String variableArgumentName) {
         return input.getElementValues().entrySet().stream()
                 .filter(entry -> entry.getKey().getSimpleName().toString().equals(variableArgumentName))
-                .findFirst()
                 .map(entry -> entry.getValue().getValue())
-                .map(value -> {
-                    if (value instanceof List<?>) {
-                        return ((List<?>) value).stream().map(item -> ((AnnotationValue) item).getValue().toString());
-                    } else {
-                        return Stream.of(value.toString());
-                    }
-                }).orElseGet(Stream::empty);
+                .flatMap(value -> {
+                            if (value instanceof List<?>) {
+                                return ((List<?>) value).stream().map(item -> ((AnnotationValue) item).getValue().toString());
+                            } else {
+                                return Stream.of(value.toString());
+                            }
+                        }
+                );
     }
 
     private VariableDefinition buildVariableDefinition(String mutationFieldName, String argumentName, String variableName) {
@@ -151,22 +158,24 @@ public class MethodToMutationOperation {
     }
 
     private String getTypeName(String mutationFieldName, String argumentName) {
-        return manager.getField(getMutationTypeName(mutationFieldName), argumentName)
+        String mutationTypeName = getMutationTypeName(mutationFieldName);
+        return manager.getField(mutationTypeName, argumentName)
                 .map(fieldDefinitionContext -> {
-                    String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    if (manager.isObject(fieldTypeName)) {
-                        return fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + "Input");
-                    } else {
-                        return fieldDefinitionContext.type().getText();
-                    }
-                })
-                .orElseThrow();
+                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                            if (manager.isObject(fieldTypeName)) {
+                                return fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + "Input");
+                            } else {
+                                return fieldDefinitionContext.type().getText();
+                            }
+                        }
+                )
+                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(mutationTypeName, argumentName)));
     }
 
     private String getMutationTypeName(String mutationFieldName) {
         return manager.getMutationOperationTypeName()
                 .flatMap(mutationTypeName -> manager.getField(mutationTypeName, mutationFieldName))
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
-                .orElseThrow();
+                .orElseThrow(() -> new GraphQLProblem(MUTATION_TYPE_NOT_EXIST));
     }
 }

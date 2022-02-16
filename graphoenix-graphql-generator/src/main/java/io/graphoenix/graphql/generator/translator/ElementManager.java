@@ -2,6 +2,7 @@ package io.graphoenix.graphql.generator.translator;
 
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.ElementProblem;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,6 +27,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.spi.error.ElementErrorType.METHOD_PARAMETER_NOT_EXIST;
+
 @ApplicationScoped
 public class ElementManager {
     private final IGraphQLDocumentManager manager;
@@ -46,7 +49,7 @@ public class ElementManager {
                             return field;
                         }
                 )
-                .collect(Collectors.toCollection( LinkedHashSet::new ));
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Stream<GraphqlParser.FieldDefinitionContext> getFields(String typeName, int level, int layers) {
@@ -60,7 +63,7 @@ public class ElementManager {
         return executableElement.getParameters().stream()
                 .filter(parameter -> parameter.getSimpleName().toString().equals(name))
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new ElementProblem(METHOD_PARAMETER_NOT_EXIST.bind(executableElement.getSimpleName(), name)));
     }
 
     public String getNameFromElement(Element element) {
@@ -72,8 +75,6 @@ public class ElementManager {
                 return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, element.getSimpleName().toString().replaceFirst("get", ""));
             } else if (element.getSimpleName().toString().startsWith("set")) {
                 return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, element.getSimpleName().toString().replaceFirst("set", ""));
-            } else if (element.getSimpleName().toString().startsWith("is")) {
-                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, element.getSimpleName().toString().replaceFirst("is", ""));
             } else {
                 return element.getSimpleName().toString();
             }

@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLInputObjectManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,8 @@ public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
     @Override
     public Map<String, GraphqlParser.InputObjectTypeDefinitionContext> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         inputObjectTypeDefinitionMap.put(inputObjectTypeDefinitionContext.name().getText(), inputObjectTypeDefinitionContext);
+        Logger.info("registered inputObject {}", inputObjectTypeDefinitionContext.name().getText());
+
         return inputObjectTypeDefinitionMap;
     }
 
@@ -38,5 +41,6 @@ public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
     @Override
     public void clear() {
         inputObjectTypeDefinitionMap.clear();
+        Logger.debug("clear all inputObject");
     }
 }

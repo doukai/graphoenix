@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLOperationManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class GraphQLOperationManager implements IGraphQLOperationManager {
     @Override
     public Map<String, GraphqlParser.OperationTypeDefinitionContext> register(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
         operationTypeDefinitionMap.put(operationTypeDefinitionContext.typeName().name().getText(), operationTypeDefinitionContext);
+        Logger.info("registered operationType {}", operationTypeDefinitionContext.typeName().name().getText());
         return operationTypeDefinitionMap;
     }
 
@@ -38,5 +40,6 @@ public class GraphQLOperationManager implements IGraphQLOperationManager {
     @Override
     public void clear() {
         operationTypeDefinitionMap.clear();
+        Logger.debug("clear all operationType");
     }
 }

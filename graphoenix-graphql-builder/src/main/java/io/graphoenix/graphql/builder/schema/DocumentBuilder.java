@@ -3,6 +3,7 @@ package io.graphoenix.graphql.builder.schema;
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.generator.document.Directive;
 import io.graphoenix.graphql.generator.document.DirectiveDefinition;
@@ -19,8 +20,10 @@ import io.graphoenix.graphql.generator.document.Schema;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import io.graphoenix.spi.error.GraphQLErrorType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -32,6 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
+import static io.graphoenix.spi.error.GraphQLErrorType.META_INTERFACE_NOT_EXIST;
 
 @ApplicationScoped
 public class DocumentBuilder {
@@ -81,7 +85,9 @@ public class DocumentBuilder {
         manager.registerGraphQL(mutationType.toString());
         manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
 
-        return getDocument();
+        Document document = getDocument();
+        Logger.debug("document build success:\r\n{}", document.toString());
+        return document;
     }
 
     public Document getDocument() {
@@ -98,8 +104,8 @@ public class DocumentBuilder {
 
     public Schema buildSchema() {
         return new Schema()
-                .setQuery(manager.getQueryOperationTypeName().orElseThrow())
-                .setMutation(manager.getMutationOperationTypeName().orElseThrow());
+                .setQuery(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.QUERY_TYPE_NOT_EXIST)))
+                .setMutation(manager.getMutationOperationTypeName().orElse(null));
     }
 
     public ScalarType buildScalarType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
@@ -155,7 +161,7 @@ public class DocumentBuilder {
     }
 
     public List<Field> getMetaInterfaceFields() {
-        return manager.getInterface(META_INTERFACE_NAME).orElseThrow()
+        return manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLProblem(META_INTERFACE_NOT_EXIST))
                 .fieldsDefinition().fieldDefinition().stream()
                 .map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false))
                 .collect(Collectors.toList());

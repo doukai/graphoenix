@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLInputValueManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +18,12 @@ public class GraphQLInputValueManager implements IGraphQLInputValueManager {
     @Override
     public Map<String, Map<String, GraphqlParser.InputValueDefinitionContext>> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         Map<String, GraphqlParser.InputValueDefinitionContext> inputValueMap = new HashMap<>();
-        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().forEach(inputValueDefinitionContext -> inputValueMap.put(inputValueDefinitionContext.name().getText(), inputValueDefinitionContext));
+        inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
+                .forEach(inputValueDefinitionContext -> {
+                            inputValueMap.put(inputValueDefinitionContext.name().getText(), inputValueDefinitionContext);
+                            Logger.info("registered inputObject {} inputValue {}", inputObjectTypeDefinitionContext.name().getText(), inputValueDefinitionContext.name().getText());
+                        }
+                );
         inputValueDefinitionTree.put(inputObjectTypeDefinitionContext.name().getText(), inputValueMap);
         return inputValueDefinitionTree;
     }
@@ -32,13 +38,17 @@ public class GraphQLInputValueManager implements IGraphQLInputValueManager {
     public Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitions(String inputObjectTypeName, String inputValueName) {
         return inputValueDefinitionTree.entrySet().stream().filter(entry -> entry.getKey().equals(inputObjectTypeName))
                 .map(Map.Entry::getValue).findFirst()
-                .flatMap(inputValueDefinitionMap -> inputValueDefinitionMap.entrySet().stream()
-                        .filter(entry -> entry.getKey().equals(inputValueName))
-                        .map(Map.Entry::getValue).findFirst());
+                .flatMap(inputValueDefinitionMap ->
+                        inputValueDefinitionMap.entrySet().stream()
+                                .filter(entry -> entry.getKey().equals(inputValueName))
+                                .map(Map.Entry::getValue)
+                                .findFirst()
+                );
     }
 
     @Override
     public void clear() {
         inputValueDefinitionTree.clear();
+        Logger.debug("clear all inputValue");
     }
 }

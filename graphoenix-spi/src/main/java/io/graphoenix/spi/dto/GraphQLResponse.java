@@ -1,5 +1,7 @@
 package io.graphoenix.spi.dto;
 
+import io.graphoenix.spi.error.GraphQLError;
+
 import java.util.List;
 
 public class GraphQLResponse {

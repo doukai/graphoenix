@@ -1,7 +1,10 @@
 package io.graphoenix.core.utils;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,9 +13,11 @@ public enum GraphQLResponseUtil {
 
     private final GsonBuilder gsonBuilder = new GsonBuilder().serializeNulls();
 
-    public String fromJson(String json) {
+    public String fromJson(JsonElement jsonElement) {
         Map<String, Object> graphQLResponse = new HashMap<>();
-        graphQLResponse.put("data", gsonBuilder.create().fromJson(json, Map.class));
+        Type type = new TypeToken<Map<String, Object>>() {
+        }.getType();
+        graphQLResponse.put("data", gsonBuilder.create().fromJson(jsonElement, type));
         return gsonBuilder.create().toJson(graphQLResponse);
     }
 }

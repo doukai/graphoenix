@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLScalarManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class GraphQLScalarManager implements IGraphQLScalarManager {
     @Override
     public Map<String, GraphqlParser.ScalarTypeDefinitionContext> register(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         scalarTypeDefinitionMap.put(scalarTypeDefinitionContext.name().getText(), scalarTypeDefinitionContext);
+        Logger.info("registered scalarType {}", scalarTypeDefinitionContext.name().getText());
         return scalarTypeDefinitionMap;
     }
 
@@ -38,5 +40,6 @@ public class GraphQLScalarManager implements IGraphQLScalarManager {
     @Override
     public void clear() {
         scalarTypeDefinitionMap.clear();
+        Logger.debug("clear all scalarType");
     }
 }

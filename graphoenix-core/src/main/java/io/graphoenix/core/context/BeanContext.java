@@ -1,8 +1,10 @@
 package io.graphoenix.core.context;
 
+import io.graphoenix.core.error.InjectionProblem;
 import io.graphoenix.spi.context.BeanProviders;
 import io.graphoenix.spi.context.ModuleContext;
 import jakarta.inject.Provider;
+import org.tinylog.Logger;
 
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +13,8 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.spi.error.InjectionErrorType.BEAN_NOT_EXIST;
+
 public class BeanContext {
 
     private static Set<ModuleContext> moduleContexts;
@@ -18,18 +22,22 @@ public class BeanContext {
     private static final ClassValue<Map<String, Supplier<?>>> CONTEXT_CACHE = new BeanProviders();
 
     static {
+        Logger.info("load ModuleContext from {}", BeanContext.class.getClassLoader().getName());
         moduleContexts = ServiceLoader.load(ModuleContext.class, BeanContext.class.getClassLoader()).stream()
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toSet());
+        Logger.info(moduleContexts.size() + " ModuleContext loaded");
     }
 
     private BeanContext() {
     }
 
     public static void load(ClassLoader classLoader) {
+        Logger.info("load ModuleContext from {}", classLoader.getName());
         moduleContexts = ServiceLoader.load(ModuleContext.class, classLoader).stream()
                 .map(ServiceLoader.Provider::get)
                 .collect(Collectors.toSet());
+        Logger.info(moduleContexts.size() + " ModuleContext loaded");
     }
 
     public static <T> T get(Class<T> beanClass) {
@@ -68,7 +76,7 @@ public class BeanContext {
         return getSupplierOptional(beanClass, name)
                 .orElseGet(() ->
                         getAndCacheSupplier(beanClass, name)
-                                .orElseThrow()
+                                .orElseThrow(() -> new InjectionProblem(BEAN_NOT_EXIST.bind(beanClass, name)))
                 );
     }
 
@@ -83,6 +91,7 @@ public class BeanContext {
 
     @SuppressWarnings("unchecked")
     private static <T> Optional<Supplier<T>> getAndCacheSupplier(Class<T> beanClass, String name) {
+        Logger.debug("search bean instance for class {} name {}", beanClass.getName(), name);
         return moduleContexts.stream()
                 .map(moduleContext -> moduleContext.getOptional(beanClass, name))
                 .filter(Optional::isPresent)

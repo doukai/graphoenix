@@ -8,6 +8,7 @@ import io.graphoenix.spi.dto.map.FieldMap;
 import io.graphoenix.spi.dto.map.FieldMapWith;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,67 +51,82 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                 Optional<GraphqlParser.DirectiveContext> mapDirective = fieldDefinitionContext.directives().directive().stream()
                                                         .filter(directiveContext -> directiveContext.name().getText().equals("map"))
                                                         .findFirst();
+
                                                 if (mapDirective.isEmpty()) {
                                                     throw new GraphQLProblem(MAP_DIRECTIVE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                 } else {
-                                                    Optional<GraphqlParser.ArgumentContext> fromArgument = mapDirective.get().arguments().argument()
-                                                            .stream().filter(argumentContext -> argumentContext.name().getText().equals("from")).findFirst();
+                                                    Optional<GraphqlParser.ArgumentContext> fromArgument = mapDirective.get().arguments().argument().stream()
+                                                            .filter(argumentContext -> argumentContext.name().getText().equals("from"))
+                                                            .findFirst();
+
                                                     if (fromArgument.isEmpty()) {
                                                         throw new GraphQLProblem(MAP_FROM_ARGUMENT_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                     }
+
                                                     Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getField(
                                                             objectTypeDefinitionContext.name().getText(),
                                                             DOCUMENT_UTIL.getStringValue(fromArgument.get().valueWithVariable().StringValue())
                                                     );
+
                                                     if (fromFieldDefinition.isEmpty()) {
                                                         throw new GraphQLProblem(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                     }
 
                                                     Optional<GraphqlParser.ArgumentContext> withArgument = mapDirective.get().arguments().argument()
-                                                            .stream().filter(argumentContext -> argumentContext.name().getText().equals("with")).findFirst();
+                                                            .stream()
+                                                            .filter(argumentContext -> argumentContext.name().getText().equals("with"))
+                                                            .findFirst();
 
                                                     if (withArgument.isPresent()) {
+
                                                         Optional<GraphqlParser.ObjectFieldWithVariableContext> withTypeArgument = withArgument.get().valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                                                                .filter(
-                                                                        objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("type")
-                                                                ).findFirst();
+                                                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("type"))
+                                                                .findFirst();
+
                                                         if (withTypeArgument.isEmpty()) {
                                                             throw new GraphQLProblem(MAP_WITH_TYPE_ARGUMENT_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                         }
+
                                                         Optional<GraphqlParser.ObjectFieldWithVariableContext> withFromArgument = withArgument.get().valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                                                                .filter(
-                                                                        objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("from")
-                                                                ).findFirst();
+                                                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("from"))
+                                                                .findFirst();
+
                                                         if (withFromArgument.isEmpty()) {
                                                             throw new GraphQLProblem(MAP_WITH_FROM_ARGUMENT_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                         }
+
                                                         Optional<GraphqlParser.ObjectFieldWithVariableContext> withToArgument = withArgument.get().valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                                                                .filter(
-                                                                        objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("to")
-                                                                ).findFirst();
+                                                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("to"))
+                                                                .findFirst();
+
                                                         if (withToArgument.isEmpty()) {
                                                             throw new GraphQLProblem(MAP_WITH_TO_ARGUMENT_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                         }
-                                                        Optional<GraphqlParser.ObjectTypeDefinitionContext> withObjectTypeDefinition = manager.getObject(
-                                                                DOCUMENT_UTIL.getStringValue(withTypeArgument.get().valueWithVariable().StringValue())
-                                                        );
+
+                                                        Optional<GraphqlParser.ObjectTypeDefinitionContext> withObjectTypeDefinition = manager.getObject(DOCUMENT_UTIL.getStringValue(withTypeArgument.get().valueWithVariable().StringValue()));
+
                                                         if (withObjectTypeDefinition.isEmpty()) {
                                                             throw new GraphQLProblem(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                         }
+
                                                         Optional<GraphqlParser.FieldDefinitionContext> withFromFieldDefinition = manager.getField(
                                                                 DOCUMENT_UTIL.getStringValue(withTypeArgument.get().valueWithVariable().StringValue()),
                                                                 DOCUMENT_UTIL.getStringValue(withFromArgument.get().valueWithVariable().StringValue())
                                                         );
+
                                                         if (withFromFieldDefinition.isEmpty()) {
                                                             throw new GraphQLProblem(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                         }
+
                                                         Optional<GraphqlParser.FieldDefinitionContext> withToFieldDefinition = manager.getField(
                                                                 DOCUMENT_UTIL.getStringValue(withTypeArgument.get().valueWithVariable().StringValue()),
                                                                 DOCUMENT_UTIL.getStringValue(withToArgument.get().valueWithVariable().StringValue())
                                                         );
+
                                                         if (withToFieldDefinition.isEmpty()) {
                                                             throw new GraphQLProblem(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                         }
+
                                                         registerMap(objectTypeDefinitionContext.name().getText(),
                                                                 fieldDefinitionContext.name().getText(),
                                                                 fromFieldDefinition.get(),
@@ -120,6 +136,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                                 getToFieldDefinition(mapDirective.get(), fieldDefinitionContext));
 
                                                     } else {
+
                                                         registerMap(objectTypeDefinitionContext.name().getText(),
                                                                 fieldDefinitionContext.name().getText(),
                                                                 fromFieldDefinition.get(),
@@ -164,6 +181,14 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         }
         fieldMap.put(fieldName, new FieldMap(from, to));
         fieldMapTree.put(objectTypeName, fieldMap);
+        Logger.info("map {}.{} from {}.{} to {}.{}",
+                objectTypeName,
+                fieldName,
+                objectTypeName,
+                from.name().getText(),
+                manager.getFieldTypeName(to.type()),
+                to.name().getText()
+        );
     }
 
     @Override
@@ -180,6 +205,18 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         }
         fieldMap.put(fieldName, new FieldMap(from, new FieldMapWith(withType, withFrom, withTo), to));
         fieldMapTree.put(objectTypeName, fieldMap);
+        Logger.info("map {}.{} from {}.{} with {}.{} and {}.{} to {}.{}",
+                objectTypeName,
+                fieldName,
+                objectTypeName,
+                from.name().getText(),
+                withType.name().getText(),
+                withFrom.name().getText(),
+                withType.name().getText(),
+                withTo.name().getText(),
+                manager.getFieldTypeName(to.type()),
+                to.name().getText()
+        );
     }
 
     private Optional<FieldMap> getFieldMap(String objectTypeName, String fieldName) {
@@ -293,5 +330,6 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     @Override
     public void clear() {
         fieldMapTree.clear();
+        Logger.debug("clear field map");
     }
 }

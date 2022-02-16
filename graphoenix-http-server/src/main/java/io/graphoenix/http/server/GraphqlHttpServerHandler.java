@@ -1,6 +1,7 @@
 package io.graphoenix.http.server;
 
 import com.google.common.net.MediaType;
+import com.google.gson.JsonElement;
 import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.http.handler.RequestHandler;
@@ -18,8 +19,7 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.util.AsciiString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.tinylog.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -30,8 +30,6 @@ import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
-
-    private static final Logger log = LoggerFactory.getLogger(GraphqlHttpServer.class);
 
     private static final String FAVICON_ICO = "/favicon.ico";
     private static final AsciiString CONNECTION = AsciiString.cached("Connection");
@@ -57,7 +55,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) {
 
-        log.info("Handle http request:{}", request);
+        Logger.info("Handle http request:{}", request);
         String uri = request.uri();
         if (uri.equals(FAVICON_ICO)) {
             return;
@@ -67,15 +65,15 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
         try {
             GraphQLRequest requestBody = requestHandler.handle(request);
-            log.info("Handle http query:{}", requestBody.getQuery());
+            Logger.info("Handle http query:{}", requestBody.getQuery());
             OperationType type = graphQLOperationRouter.getType(requestBody.getQuery());
-            String jsonResult = null;
+            JsonElement jsonResult = null;
             switch (type) {
                 case QUERY:
-                    jsonResult = queryHandler.query(requestBody.getQuery(), requestBody.getVariables()).block().toString();
+                    jsonResult = queryHandler.query(requestBody.getQuery(), requestBody.getVariables()).block();
                     break;
                 case MUTATION:
-                    jsonResult = mutationHandler.mutation(requestBody.getQuery(), requestBody.getVariables()).block().toString();
+                    jsonResult = mutationHandler.mutation(requestBody.getQuery(), requestBody.getVariables()).block();
                     break;
             }
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));
@@ -101,7 +99,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        Logger.error(cause);
         ctx.close();
     }
 

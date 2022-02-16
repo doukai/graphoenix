@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLFieldManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -32,7 +33,11 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
                                                 .anyMatch(name -> directiveContext.name().getText().equals(name))
                                 )
                 )
-                .forEach(fieldDefinitionContext -> invokeFieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext));
+                .forEach(fieldDefinitionContext -> {
+                            invokeFieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext);
+                            Logger.info("registered object {} field {}", objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
+                        }
+                );
         invokeFieldDefinitionTree.put(objectTypeDefinitionContext.name().getText(), invokeFieldMap);
         return fieldDefinitionTree;
     }
@@ -53,7 +58,11 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
                                                 .anyMatch(name -> directiveContext.name().getText().equals(name))
                                 )
                 )
-                .forEach(fieldDefinitionContext -> invokeFieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext));
+                .forEach(fieldDefinitionContext -> {
+                            invokeFieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext);
+                            Logger.info("registered interface {} field {}", interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
+                        }
+                );
         invokeFieldDefinitionTree.put(interfaceTypeDefinitionContext.name().getText(), invokeFieldMap);
         return fieldDefinitionTree;
     }
@@ -71,9 +80,12 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
         return fieldDefinitionTree.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(objectTypeName))
                 .map(Map.Entry::getValue).findFirst()
-                .flatMap(fieldDefinitionMap -> fieldDefinitionMap.entrySet().stream()
-                        .filter(entry -> entry.getKey().equals(fieldName))
-                        .map(Map.Entry::getValue).findFirst());
+                .flatMap(fieldDefinitionMap ->
+                        fieldDefinitionMap.entrySet().stream()
+                                .filter(entry -> entry.getKey().equals(fieldName))
+                                .map(Map.Entry::getValue)
+                                .findFirst()
+                );
     }
 
     @Override
@@ -90,5 +102,6 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     public void clear() {
         fieldDefinitionTree.clear();
         invokeFieldDefinitionTree.clear();
+        Logger.debug("clear all field");
     }
 }

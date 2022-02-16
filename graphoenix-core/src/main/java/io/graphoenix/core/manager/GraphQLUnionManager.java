@@ -3,6 +3,7 @@ package io.graphoenix.core.manager;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.antlr.IGraphQLUnionManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import org.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class GraphQLUnionManager implements IGraphQLUnionManager {
     @Override
     public Map<String, GraphqlParser.UnionTypeDefinitionContext> register(GraphqlParser.UnionTypeDefinitionContext unionTypeDefinitionContext) {
         unionTypeDefinitionContextMap.put(unionTypeDefinitionContext.name().getText(), unionTypeDefinitionContext);
+        Logger.info("registered unionType {}", unionTypeDefinitionContext.name().getText());
         return unionTypeDefinitionContextMap;
     }
 
@@ -38,5 +40,6 @@ public class GraphQLUnionManager implements IGraphQLUnionManager {
     @Override
     public void clear() {
         unionTypeDefinitionContextMap.clear();
+        Logger.debug("clear all unionType");
     }
 }
