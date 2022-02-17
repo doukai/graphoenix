@@ -2,6 +2,7 @@ package io.graphoenix.inject;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
+import org.tinylog.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -17,11 +18,18 @@ public class DecompilerLoader implements Loader {
 
     private final HashMap<String, byte[]> classBytesCache = new HashMap<>();
 
+    private final ClassLoader classLoader;
+
+    public DecompilerLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
     @Override
     public boolean canLoad(String className) {
         try {
             return classBytesCache.containsKey(className + ".class") || loadAndCache(className);
         } catch (LoaderException e) {
+            Logger.warn(e);
             return false;
         }
     }
@@ -34,12 +42,24 @@ public class DecompilerLoader implements Loader {
         throw new LoaderException(className.concat(" not find"));
     }
 
+    public boolean classExists(String className) {
+        try {
+            Class.forName(className, false, classLoader);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     private boolean loadAndCache(String className) throws LoaderException {
+        if (!classExists(className)) {
+            return false;
+        }
 
         byte[] buffer = new byte[1024 * 2];
 
         try {
-            InputStream inputStream = new FileInputStream(Paths.get(Class.forName(className, false, getClass().getClassLoader()).getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
+            InputStream inputStream = new FileInputStream(Paths.get(Class.forName(className, false, classLoader).getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
             ZipInputStream zipInputStream = new ZipInputStream(inputStream);
             ZipEntry zipEntry = zipInputStream.getNextEntry();
 
@@ -61,6 +81,7 @@ public class DecompilerLoader implements Loader {
                 return true;
             }
         } catch (IOException | ClassNotFoundException | URISyntaxException e) {
+            Logger.warn(e);
             throw new LoaderException(e);
         }
         return false;

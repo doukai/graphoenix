@@ -59,15 +59,20 @@ import static io.graphoenix.inject.error.InjectionErrorType.PUBLIC_CLASS_NOT_EXI
 public class ProcessorManager {
 
     private final ProcessingEnvironment processingEnv;
+    private final ClassLoader classLoader;
     private final Trees trees;
     private final Filer filer;
     private final Elements elements;
     private final JavaParser javaParser;
     private final JavaSymbolSolver javaSymbolSolver;
     private RoundEnvironment roundEnv;
+    private final ClassFileToJavaSourceDecompiler decompiler;
+    private final DecompilerLoader decompilerLoader;
+    private final DecompilerPrinter decompilerPrinter;
 
     public ProcessorManager(ProcessingEnvironment processingEnv, ClassLoader classLoader) {
         this.processingEnv = processingEnv;
+        this.classLoader = classLoader;
         this.filer = processingEnv.getFiler();
         this.elements = processingEnv.getElementUtils();
         this.trees = Trees.instance(processingEnv);
@@ -85,6 +90,9 @@ public class ProcessorManager {
         this.javaSymbolSolver = new JavaSymbolSolver(combinedTypeSolver);
         this.javaParser = new JavaParser();
         this.javaParser.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
+        this.decompiler = new ClassFileToJavaSourceDecompiler();
+        this.decompilerLoader = new DecompilerLoader(classLoader);
+        this.decompilerPrinter = new DecompilerPrinter();
     }
 
     public void setRoundEnv(RoundEnvironment roundEnv) {
@@ -104,7 +112,7 @@ public class ProcessorManager {
             return generatedSourcePath;
         } catch (IOException e) {
             Logger.error(e);
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Unable to determine generated source path.");
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "unable to determine generated source path.");
             return null;
         }
     }
@@ -142,6 +150,15 @@ public class ProcessorManager {
 
     private Optional<CompilationUnit> parse(String sourceCode) {
         return javaParser.parse(sourceCode).getResult();
+    }
+
+    public boolean classExists(String className) {
+        try {
+            Class.forName(className, false, classLoader);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     public void writeToFiler(CompilationUnit compilationUnit) {
@@ -249,14 +266,12 @@ public class ProcessorManager {
             if (treePath != null) {
                 return javaParser.parse(treePath.getCompilationUnit().toString()).getResult();
             } else {
-                ClassFileToJavaSourceDecompiler decompiler = new ClassFileToJavaSourceDecompiler();
-                DecompilerLoader decompilerLoader = new DecompilerLoader();
-                DecompilerPrinter decompilerPrinter = new DecompilerPrinter();
                 try {
                     decompiler.decompile(decompilerLoader, decompilerPrinter, elementByType.asType().toString());
                     String source = decompilerPrinter.toString();
                     return javaParser.parse(source).getResult();
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    Logger.warn(e);
                 }
             }
         }
