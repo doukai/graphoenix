@@ -11,6 +11,8 @@ public enum InjectionErrorType {
     PUBLIC_CLASS_NOT_EXIST(-101, "public class not exist in: %s"),
     PROVIDER_TYPE_NOT_EXIST(-101, "can't find type argument of provider"),
     PUBLIC_ANNOTATION_NOT_EXIST(-101, "public annotation not exist in: %s"),
+    CONFIG_PROPERTIES_PREFIX_NOT_EXIST(-101, "prefix not exist in @ConfigProperties in: %s"),
+    CONFIG_PROPERTY_NOT_EXIST(-101, "@ConfigProperty not exist on: %s"),
 
     UNKNOWN(-199, "unknown error");
 

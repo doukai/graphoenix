@@ -42,6 +42,7 @@ import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InterceptorBinding;
 import jakarta.interceptor.InvocationContext;
+import org.tinylog.Logger;
 
 import javax.tools.FileObject;
 import java.io.BufferedReader;
@@ -86,13 +87,15 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                 try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileObject.get().openInputStream()))) {
                                     String line;
                                     while ((line = bufferedReader.readLine()) != null) {
+                                        Logger.info("add interceptor {} to annotation {}", line, key);
                                         value.add(line);
                                     }
                                 } catch (IOException e) {
-                                    e.printStackTrace();
+                                    Logger.warn(e);
                                 }
                             }
                             processorManager.createResource("META-INF/interceptor/".concat(key), String.join(System.lineSeparator(), value));
+                            Logger.info("annotation interceptor resource build success: {}", key);
                         }
                 );
     }
@@ -104,11 +107,11 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                 .flatMap(compilationUnit -> getAspectAnnotationNameList(compilationUnit).stream())
                 .collect(Collectors.toList());
 
-        buildMethod(annotationNameList, componentCompilationUnit, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
-        buildConstructor(annotationNameList, componentCompilationUnit, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
+        buildMethod(annotationNameList, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
+        buildConstructor(annotationNameList, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
     }
 
-    private void buildMethod(List<String> annotationNameList, CompilationUnit componentCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
+    private void buildMethod(List<String> annotationNameList, ClassOrInterfaceDeclaration componentClassDeclaration, CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
         componentClassDeclaration.getMethods()
                 .forEach(methodDeclaration -> {
                             if (methodDeclaration.getAnnotations().stream()
@@ -260,6 +263,14 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
 
                                         nextContextName = contextName;
                                         nextTuple3 = tuple3;
+
+                                        Logger.info("{}.{} add interceptor {}.{} for annotation {}",
+                                                processorManager.getQualifiedNameByDeclaration(componentClassDeclaration),
+                                                methodDeclaration.getNameAsString(),
+                                                processorManager.getQualifiedNameByDeclaration(invokeClassOrInterfaceDeclaration),
+                                                invokeMethodDeclaration,
+                                                annotationName
+                                        );
                                     }
                                 }
 
@@ -335,7 +346,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                 );
     }
 
-    private void buildConstructor(List<String> annotationNameList, CompilationUnit componentCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
+    private void buildConstructor(List<String> annotationNameList, ClassOrInterfaceDeclaration componentClassDeclaration, CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
         componentClassDeclaration.getConstructors()
                 .forEach(constructorDeclaration -> {
                             if (constructorDeclaration.getAnnotations().stream()
@@ -472,6 +483,14 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
 
                                         nextContextName = contextName;
                                         nextTuple3 = tuple3;
+
+                                        Logger.info("{}.{} add interceptor {}.{} for annotation {}",
+                                                processorManager.getQualifiedNameByDeclaration(componentClassDeclaration),
+                                                constructorDeclaration.getNameAsString(),
+                                                processorManager.getQualifiedNameByDeclaration(invokeClassOrInterfaceDeclaration),
+                                                invokeMethodDeclaration,
+                                                annotationName
+                                        );
                                     }
                                 }
 
@@ -560,7 +579,6 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                 .map(annotationExpr -> processorManager.getQualifiedNameByAnnotationExpr(annotationExpr))
                 .collect(Collectors.toList());
 
-
         List<String> subAnnotationExprList = classOrInterfaceDeclaration.getAnnotations().stream()
                 .filter(annotationExpr -> {
                             CompilationUnit annotationCompilationUnit = processorManager.getCompilationUnitByAnnotationExpr(annotationExpr);
@@ -586,11 +604,12 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
                         interceptorClassName.add(line);
+                        Logger.info("find interceptor class {} for {}", line, annotationName);
                     }
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.warn(e);
         }
 
         return Streams.concat(

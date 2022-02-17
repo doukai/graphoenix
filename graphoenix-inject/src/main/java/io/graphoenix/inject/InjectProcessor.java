@@ -212,7 +212,6 @@ public class InjectProcessor extends AbstractProcessor {
     }
 
     private CompilationUnit buildComponentProxy(CompilationUnit componentCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, AnnotationExpr named) {
-
         ClassOrInterfaceDeclaration componentProxyClassDeclaration = new ClassOrInterfaceDeclaration()
                 .addModifier(Modifier.Keyword.PUBLIC)
                 .addExtendedType(componentClassDeclaration.getNameAsString())
@@ -269,6 +268,7 @@ public class InjectProcessor extends AbstractProcessor {
                             componentProxyProcessor.processComponentProxy(componentCompilationUnit, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
                         }
                 );
+        Logger.info("{} proxy class build success", processorManager.getQualifiedNameByDeclaration(componentClassDeclaration));
         return componentProxyCompilationUnit;
     }
 
@@ -331,6 +331,7 @@ public class InjectProcessor extends AbstractProcessor {
                             componentProxyProcessor.processModule(moduleCompilationUnit, moduleClassDeclaration);
                         }
                 );
+        Logger.info("{} package module class build success", processorManager.getQualifiedNameByDeclaration(moduleClassDeclaration));
         return moduleCompilationUnit;
     }
 
@@ -676,6 +677,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                 componentProxyProcessor.processComponentModule(moduleCompilationUnit, moduleClassDeclaration);
                                             }
                                     );
+                            Logger.info("{} module class build success", processorManager.getQualifiedNameByDeclaration(moduleClassDeclaration));
                             return moduleCompilationUnit;
                         }
                 );
@@ -805,6 +807,7 @@ public class InjectProcessor extends AbstractProcessor {
 
         processorManager.importAllClassOrInterfaceType(componentProxyComponentInterfaceDeclaration, componentProxyClassDeclaration);
         processorManager.importAllClassOrInterfaceType(componentProxyComponentInterfaceDeclaration, moduleClassDeclaration);
+        Logger.info("{} component class build success", processorManager.getQualifiedNameByDeclaration(componentProxyComponentInterfaceDeclaration));
         return componentProxyComponentCompilationUnit;
     }
 
@@ -905,6 +908,7 @@ public class InjectProcessor extends AbstractProcessor {
                     componentProxyProcessor.processModuleContext(moduleContextCompilationUnit, blockStmt);
                 }
         );
+        Logger.info("{} module context class build success", processorManager.getQualifiedNameByDeclaration(moduleContextInterfaceDeclaration));
         return moduleContextCompilationUnit;
     }
 

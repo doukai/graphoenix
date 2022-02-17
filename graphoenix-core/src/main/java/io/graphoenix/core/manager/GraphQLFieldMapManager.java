@@ -214,8 +214,8 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                 withFrom.name().getText(),
                 withType.name().getText(),
                 withTo.name().getText(),
-                manager.getFieldTypeName(to.type()),
-                to.name().getText()
+                to != null ? manager.getFieldTypeName(to.type()) : null,
+                to != null ? to.name().getText() : null
         );
     }
 

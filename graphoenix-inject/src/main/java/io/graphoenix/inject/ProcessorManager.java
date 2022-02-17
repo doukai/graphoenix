@@ -256,9 +256,7 @@ public class ProcessorManager {
                     decompiler.decompile(decompilerLoader, decompilerPrinter, elementByType.asType().toString());
                     String source = decompilerPrinter.toString();
                     return javaParser.parse(source).getResult();
-                } catch (Exception e) {
-                    Logger.warn(e);
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "class decompile failed");
+                } catch (Exception ignored) {
                 }
             }
         }

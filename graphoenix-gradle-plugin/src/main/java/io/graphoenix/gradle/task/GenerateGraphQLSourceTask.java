@@ -8,6 +8,8 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.error.GraphQLErrorType;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
@@ -27,6 +29,7 @@ import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskExecutionException;
+import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -102,7 +105,8 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
             javaFileBuilder.writeToPath(new File(javaPath), graphQLConfig);
 
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            Logger.error(e);
+            throw new TaskExecutionException(this, e);
         }
     }
 
@@ -154,7 +158,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
         } else if (type.isArrayType()) {
             typeName = "[".concat(getInvokeFieldTypeName(type.asArrayType().getElementType())).concat("]");
         } else {
-            throw new RuntimeException();
+            throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_FIELD_TYPE.bind(type.toString()));
         }
         return typeName;
     }
@@ -172,6 +176,7 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
                 }
             }
         } catch (MalformedURLException e) {
+            Logger.error(e);
             throw new TaskExecutionException(this, e);
         }
         return new URLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());

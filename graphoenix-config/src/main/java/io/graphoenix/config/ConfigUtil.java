@@ -30,7 +30,7 @@ public enum ConfigUtil {
                 .filter(file -> Arrays.asList(configNames).contains(file.getName()))
                 .findFirst()
                 .map(ConfigFactory::parseFile)
-                .orElseThrow();
+                .orElse(null);
         return this;
     }
 
@@ -41,7 +41,7 @@ public enum ConfigUtil {
                 .map(fileObject -> CheckedFunction0.of(fileObject.toUri()::toURL).unchecked().get())
                 .map(ConfigFactory::parseURL)
                 .findFirst()
-                .orElseThrow();
+                .orElse(null);
         return this;
     }
 
