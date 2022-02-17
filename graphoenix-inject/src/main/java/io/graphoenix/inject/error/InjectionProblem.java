@@ -1,4 +1,4 @@
-package io.graphoenix.core.error;
+package io.graphoenix.inject.error;
 
 import com.google.gson.GsonBuilder;
 import org.zalando.problem.AbstractThrowableProblem;

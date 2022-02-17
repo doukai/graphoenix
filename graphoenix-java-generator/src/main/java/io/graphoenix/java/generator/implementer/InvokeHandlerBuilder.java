@@ -53,11 +53,11 @@ public class InvokeHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
+        Logger.info("InvokeHandler build success");
     }
 
     private JavaFile buildClass() {
         TypeSpec typeSpec = buildInvokeHandler();
-        Logger.info("InvokeHandler build success");
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 

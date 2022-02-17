@@ -83,18 +83,18 @@ public class OperationHandlerImplementer {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildQueryImplementClass().writeTo(filer);
+        Logger.info("QueryHandlerImpl build success");
         this.buildMutationImplementClass().writeTo(filer);
+        Logger.info("MutationHandlerImpl build success");
     }
 
     private JavaFile buildQueryImplementClass() {
         TypeSpec typeSpec = buildOperationHandlerImpl(QUERY);
-        Logger.info("QueryHandlerImpl build success");
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
     private JavaFile buildMutationImplementClass() {
         TypeSpec typeSpec = buildOperationHandlerImpl(MUTATION);
-        Logger.info("MutationHandlerImpl build success");
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 

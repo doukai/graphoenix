@@ -12,8 +12,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.BootstrapHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -22,7 +21,6 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class MysqlBootstrapHandler implements BootstrapHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(MysqlBootstrapHandler.class);
     private static final int sqlCount = 500;
 
     private final MysqlConfig mysqlConfig;
@@ -60,21 +58,25 @@ public class MysqlBootstrapHandler implements BootstrapHandler {
     public void bootstrap() {
 
         try {
+            Logger.info("action!");
             documentBuilder.startupManager();
             if (mysqlConfig.getCrateTable()) {
+                Logger.info("start create type table");
                 Stream<String> createTablesSQLStream = graphqlTypeToTable.createTablesSQL();
                 tableCreator.createTables(createTablesSQLStream).block();
+                Logger.info("create type table success");
             }
             if (mysqlConfig.getCrateIntrospection()) {
+                Logger.info("introspection data SQL insert started");
                 Operation operation = introspectionMutationBuilder.buildIntrospectionSchemaMutation();
                 Stream<String> introspectionMutationSQLStream = mutationToStatements.createStatementsSQL(operation.toString());
-
-                log.info("introspection data SQL insert started");
-                mutationExecutor.executeMutationsInBatchByGroup(introspectionMutationSQLStream, sqlCount).forEach(count -> log.info(count + " introspection data SQL insert success"));
-                log.info("All introspection data SQL insert success");
+                mutationExecutor.executeMutationsInBatchByGroup(introspectionMutationSQLStream, sqlCount).forEach(count -> Logger.info(count + " introspection data SQL insert success"));
+                Logger.info("all introspection data SQL insert success");
             }
+            Logger.info("startup success");
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            Logger.error(e);
+            Logger.info("startup failed");
         }
     }
 }

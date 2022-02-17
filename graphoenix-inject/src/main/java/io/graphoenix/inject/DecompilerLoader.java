@@ -2,6 +2,7 @@ package io.graphoenix.inject;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
+import org.tinylog.Logger;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -19,6 +20,7 @@ public class DecompilerLoader implements Loader {
         try {
             return classBytesCache.containsKey(className + ".class") || loadAndCache(className);
         } catch (LoaderException e) {
+            Logger.error(e);
             return false;
         }
     }
@@ -58,6 +60,7 @@ public class DecompilerLoader implements Loader {
                 return true;
             }
         } catch (IOException | ClassNotFoundException | URISyntaxException e) {
+            Logger.error(e);
             throw new LoaderException(e);
         }
         return false;

@@ -24,7 +24,10 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
+import io.graphoenix.inject.error.InjectionErrorType;
+import io.graphoenix.inject.error.InjectionProblem;
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
+import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -47,6 +50,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.inject.error.InjectionErrorType.CANNOT_GET_PROXY_COMPILATION_UNIT;
+import static io.graphoenix.inject.error.InjectionErrorType.CANNOT_PARSER_SOURCE_CODE;
+import static io.graphoenix.inject.error.InjectionErrorType.PUBLIC_ANNOTATION_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionErrorType.PUBLIC_CLASS_NOT_EXIST;
 
 public class ProcessorManager {
 
@@ -91,19 +99,24 @@ public class ProcessorManager {
             writer.close();
             Path path = Paths.get(tmp.toUri());
             Files.deleteIfExists(path);
-            return path.getParent();
+            Path generatedSourcePath = path.getParent();
+            Logger.info("generated source path: {}", generatedSourcePath.toString());
+            return generatedSourcePath;
         } catch (IOException e) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "Unable to determine generated source file path.");
+            Logger.error(e);
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Unable to determine generated source path.");
+            return null;
         }
-        return null;
     }
 
     private Path getSourcePath(Path generatedSourcePath) {
-        return generatedSourcePath.getParent().getParent().getParent().getParent().getParent().getParent().resolve("src/main/java");
+        Path sourcePath = generatedSourcePath.getParent().getParent().getParent().getParent().getParent().getParent().resolve("src/main/java");
+        Logger.info("source path: {}", sourcePath.toString());
+        return sourcePath;
     }
 
     public String getRootPackageName() {
-        return roundEnv.getRootElements().stream()
+        String rootPackageName = roundEnv.getRootElements().stream()
                 .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
                 .map(element -> (PackageElement) element)
                 .reduce((left, right) -> left.getQualifiedName().toString().length() < right.getQualifiedName().length() ? left : right)
@@ -117,8 +130,10 @@ public class ProcessorManager {
                                 .map(elements::getPackageOf)
                                 .reduce((left, right) -> left.getQualifiedName().toString().length() < right.getQualifiedName().length() ? left : right)
                                 .map(packageElement -> packageElement.getQualifiedName().toString())
-                                .orElseThrow()
+                                .orElseThrow(() -> new InjectionProblem(InjectionErrorType.ROOT_PACKAGE_NOT_EXIST))
                 );
+        Logger.info("root package: {}", rootPackageName);
+        return rootPackageName;
     }
 
     public Optional<CompilationUnit> parse(TypeElement typeElement) {
@@ -130,15 +145,16 @@ public class ProcessorManager {
     }
 
     public void writeToFiler(CompilationUnit compilationUnit) {
-        getPublicClassOrInterfaceDeclaration(compilationUnit)
+        getPublicClassOrInterfaceDeclarationOptional(compilationUnit)
                 .ifPresent(classOrInterfaceDeclaration -> {
                             try {
                                 Writer writer = filer.createSourceFile(classOrInterfaceDeclaration.getFullyQualifiedName().orElseGet(classOrInterfaceDeclaration::getNameAsString)).openWriter();
                                 writer.write(compilationUnit.toString());
                                 writer.close();
+                                Logger.info("{} build success", getQualifiedNameByDeclaration(classOrInterfaceDeclaration));
                             } catch (IOException e) {
-
-                                e.printStackTrace();
+                                Logger.error(e);
+                                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "java file create failed");
                             }
                         }
                 );
@@ -149,8 +165,10 @@ public class ProcessorManager {
             Writer writer = filer.createResource(StandardLocation.CLASS_OUTPUT, "", name).openWriter();
             writer.write(content);
             writer.close();
+            Logger.info("{} build success", name);
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error(e);
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "resource file create failed");
         }
     }
 
@@ -160,20 +178,24 @@ public class ProcessorManager {
             if (resource != null) {
                 return Optional.of(resource);
             }
-            return Optional.empty();
         } catch (IOException e) {
-            return Optional.empty();
+            Logger.warn(e);
         }
+        return Optional.empty();
     }
 
     public List<CompilationUnit> getCompilationUnitListWithAnnotationClass(Class<? extends Annotation> annotationClass) {
         return roundEnv.getElementsAnnotatedWith(annotationClass).stream()
                 .map(element -> trees.getPath(element).getCompilationUnit().toString())
-                .map(sourceCode -> getCompilationUnitBySourceCode(sourceCode).orElseThrow())
+                .map(sourceCode -> getCompilationUnitBySourceCode(sourceCode).orElseThrow(() -> new InjectionProblem(CANNOT_PARSER_SOURCE_CODE.bind(sourceCode))))
                 .collect(Collectors.toList());
     }
 
-    public Optional<CompilationUnit> getCompilationUnitBySourceCode(TypeElement typeElement) {
+    public CompilationUnit getCompilationUnitBySourceCode(TypeElement typeElement) {
+        return getCompilationUnitBySourceCodeOptional(typeElement).orElseThrow(() -> new InjectionProblem(InjectionErrorType.CANNOT_GET_PROXY_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
+    }
+
+    public Optional<CompilationUnit> getCompilationUnitBySourceCodeOptional(TypeElement typeElement) {
         return javaParser.parse(trees.getPath(typeElement).getCompilationUnit().toString()).getResult();
     }
 
@@ -181,27 +203,47 @@ public class ProcessorManager {
         return javaParser.parse(sourceCode).getResult();
     }
 
-    public Optional<CompilationUnit> getCompilationUnitByQualifiedName(String qualifiedName) {
-        return getCompilationUnitByClassOrInterfaceType(elements.getTypeElement(qualifiedName));
+    public CompilationUnit getCompilationUnitByQualifiedName(String qualifiedName) {
+        return getCompilationUnitByQualifiedNameOptional(qualifiedName).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(qualifiedName)));
     }
 
-    public Optional<CompilationUnit> getCompilationUnitByResolvedReferenceType(ResolvedReferenceType resolvedReferenceType) {
-        return getCompilationUnitByClassOrInterfaceType(elements.getTypeElement(resolvedReferenceType.getQualifiedName()));
+    public CompilationUnit getCompilationUnitByResolvedReferenceType(ResolvedReferenceType resolvedReferenceType) {
+        return getCompilationUnitByResolvedReferenceTypeOptional(resolvedReferenceType).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(resolvedReferenceType.getQualifiedName())));
     }
 
-    public Optional<CompilationUnit> getCompilationUnitByType(Type type) {
-        return getCompilationUnitByClassOrInterfaceType(getElementByType(type));
+    public CompilationUnit getCompilationUnitByType(Type type) {
+        return getCompilationUnitByTypeOptional(type).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(getQualifiedNameByType(type))));
     }
 
-    public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(ClassOrInterfaceType type) {
-        return getCompilationUnitByClassOrInterfaceType(getElementByType(type));
+    public CompilationUnit getCompilationUnitByClassOrInterfaceType(ClassOrInterfaceType type) {
+        return getCompilationUnitByClassOrInterfaceTypeOptional(type).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(getQualifiedNameByType(type))));
     }
 
-    public Optional<CompilationUnit> getCompilationUnitByAnnotationExpr(AnnotationExpr annotationExpr) {
-        return getCompilationUnitByClassOrInterfaceType(getElementByAnnotationExpr(annotationExpr));
+    public CompilationUnit getCompilationUnitByAnnotationExpr(AnnotationExpr annotationExpr) {
+        return getCompilationUnitByAnnotationExprOptional(annotationExpr).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(getQualifiedNameByAnnotationExpr(annotationExpr))));
     }
 
-    private Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceType(TypeElement elementByType) {
+    public Optional<CompilationUnit> getCompilationUnitByQualifiedNameOptional(String qualifiedName) {
+        return getCompilationUnitByClassOrInterfaceTypeOptional(elements.getTypeElement(qualifiedName));
+    }
+
+    public Optional<CompilationUnit> getCompilationUnitByResolvedReferenceTypeOptional(ResolvedReferenceType resolvedReferenceType) {
+        return getCompilationUnitByClassOrInterfaceTypeOptional(elements.getTypeElement(resolvedReferenceType.getQualifiedName()));
+    }
+
+    public Optional<CompilationUnit> getCompilationUnitByTypeOptional(Type type) {
+        return getCompilationUnitByClassOrInterfaceTypeOptional(getElementByType(type));
+    }
+
+    public Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceTypeOptional(ClassOrInterfaceType type) {
+        return getCompilationUnitByClassOrInterfaceTypeOptional(getElementByType(type));
+    }
+
+    public Optional<CompilationUnit> getCompilationUnitByAnnotationExprOptional(AnnotationExpr annotationExpr) {
+        return getCompilationUnitByClassOrInterfaceTypeOptional(getElementByAnnotationExpr(annotationExpr));
+    }
+
+    private Optional<CompilationUnit> getCompilationUnitByClassOrInterfaceTypeOptional(TypeElement elementByType) {
         if (elementByType != null) {
             TreePath treePath = trees.getPath(elementByType);
             if (treePath != null) {
@@ -215,7 +257,8 @@ public class ProcessorManager {
                     String source = decompilerPrinter.toString();
                     return javaParser.parse(source).getResult();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logger.warn(e);
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "class decompile failed");
                 }
             }
         }
@@ -329,7 +372,12 @@ public class ProcessorManager {
                 .map(ResolvedType::asReferenceType);
     }
 
-    public Optional<ClassOrInterfaceDeclaration> getPublicClassOrInterfaceDeclaration(CompilationUnit compilationUnit) {
+    public ClassOrInterfaceDeclaration getPublicClassOrInterfaceDeclaration(CompilationUnit compilationUnit) {
+        return getPublicClassOrInterfaceDeclarationOptional(compilationUnit)
+                .orElseThrow(() -> new InjectionProblem(PUBLIC_CLASS_NOT_EXIST.bind(compilationUnit.toString())));
+    }
+
+    public Optional<ClassOrInterfaceDeclaration> getPublicClassOrInterfaceDeclarationOptional(CompilationUnit compilationUnit) {
         return compilationUnit.getTypes().stream()
                 .filter(typeDeclaration -> typeDeclaration.hasModifier(Modifier.Keyword.PUBLIC))
                 .filter(BodyDeclaration::isClassOrInterfaceDeclaration)
@@ -337,7 +385,12 @@ public class ProcessorManager {
                 .findFirst();
     }
 
-    public Optional<AnnotationDeclaration> getPublicAnnotationDeclaration(CompilationUnit compilationUnit) {
+    public AnnotationDeclaration getPublicAnnotationDeclaration(CompilationUnit compilationUnit) {
+        return getPublicAnnotationDeclarationOptional(compilationUnit)
+                .orElseThrow(() -> new InjectionProblem(PUBLIC_ANNOTATION_NOT_EXIST.bind(compilationUnit.toString())));
+    }
+
+    private Optional<AnnotationDeclaration> getPublicAnnotationDeclarationOptional(CompilationUnit compilationUnit) {
         return compilationUnit.getTypes().stream()
                 .filter(typeDeclaration -> typeDeclaration.hasModifier(Modifier.Keyword.PUBLIC))
                 .filter(BodyDeclaration::isAnnotationDeclaration)

@@ -75,7 +75,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
         this.interceptorCompilationUnitList = processorManager.getCompilationUnitListWithAnnotationClass(Interceptor.class);
         this.interceptorCompilationUnitList.stream()
                 .flatMap(compilationUnit -> {
-                            ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow();
+                            ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
                             return getAspectAnnotationNameList(compilationUnit).stream().map(annotationName -> Tuple.of(annotationName, classOrInterfaceDeclaration.getFullyQualifiedName().orElse(classOrInterfaceDeclaration.getNameAsString())));
                         }
                 )
@@ -273,13 +273,13 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                             .setInitializer(
                                                                     new ArrayInitializerExpr(
                                                                             methodDeclaration.getParameters().stream().map(parameter -> {
-                                                                                        if (parameter.getType().isClassOrInterfaceType()) {
-                                                                                            return processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType());
-                                                                                        } else {
-                                                                                            return parameter.getType().asString();
-                                                                                        }
-                                                                                    }
-                                                                            )
+                                                                                                if (parameter.getType().isClassOrInterfaceType()) {
+                                                                                                    return processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType());
+                                                                                                } else {
+                                                                                                    return parameter.getType().asString();
+                                                                                                }
+                                                                                            }
+                                                                                    )
                                                                                     .map(StringLiteralExpr::new)
                                                                                     .collect(Collectors.toCollection(NodeList::new))
                                                                     )
@@ -484,13 +484,13 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                             .setInitializer(
                                                                     new ArrayInitializerExpr(
                                                                             constructorDeclaration.getParameters().stream().map(parameter -> {
-                                                                                        if (parameter.getType().isClassOrInterfaceType()) {
-                                                                                            return processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType());
-                                                                                        } else {
-                                                                                            return parameter.getType().asString();
-                                                                                        }
-                                                                                    }
-                                                                            )
+                                                                                                if (parameter.getType().isClassOrInterfaceType()) {
+                                                                                                    return processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType());
+                                                                                                } else {
+                                                                                                    return parameter.getType().asString();
+                                                                                                }
+                                                                                            }
+                                                                                    )
                                                                                     .map(StringLiteralExpr::new)
                                                                                     .collect(Collectors.toCollection(NodeList::new))
                                                                     )
@@ -547,12 +547,12 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
 
 
     private List<String> getAspectAnnotationNameList(CompilationUnit compilationUnit) {
-        ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow();
+        ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
 
         List<String> annotationExprList = classOrInterfaceDeclaration.getAnnotations().stream()
                 .filter(annotationExpr -> {
-                            CompilationUnit annotationCompilationUnit = processorManager.getCompilationUnitByAnnotationExpr(annotationExpr).orElseThrow();
-                            AnnotationDeclaration annotationDeclaration = processorManager.getPublicAnnotationDeclaration(annotationCompilationUnit).orElseThrow();
+                            CompilationUnit annotationCompilationUnit = processorManager.getCompilationUnitByAnnotationExpr(annotationExpr);
+                            AnnotationDeclaration annotationDeclaration = processorManager.getPublicAnnotationDeclaration(annotationCompilationUnit);
                             return annotationDeclaration.getAnnotations().stream()
                                     .anyMatch(subAnnotationExpr -> processorManager.getQualifiedNameByAnnotationExpr(subAnnotationExpr).equals(InterceptorBinding.class.getName()));
                         }
@@ -563,8 +563,8 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
 
         List<String> subAnnotationExprList = classOrInterfaceDeclaration.getAnnotations().stream()
                 .filter(annotationExpr -> {
-                            CompilationUnit annotationCompilationUnit = processorManager.getCompilationUnitByAnnotationExpr(annotationExpr).orElseThrow();
-                            AnnotationDeclaration annotationDeclaration = processorManager.getPublicAnnotationDeclaration(annotationCompilationUnit).orElseThrow();
+                            CompilationUnit annotationCompilationUnit = processorManager.getCompilationUnitByAnnotationExpr(annotationExpr);
+                            AnnotationDeclaration annotationDeclaration = processorManager.getPublicAnnotationDeclaration(annotationCompilationUnit);
                             return annotationDeclaration.getAnnotations().stream()
                                     .anyMatch(subAnnotationExpr -> annotationExprList.contains(processorManager.getQualifiedNameByAnnotationExpr(subAnnotationExpr)));
                         }
@@ -594,11 +594,11 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
         }
 
         return Streams.concat(
-                interceptorClassName.stream().flatMap(className -> processorManager.getCompilationUnitByQualifiedName(className).stream()),
-                interceptorCompilationUnitList.stream()
-        )
+                        interceptorClassName.stream().map(className -> processorManager.getCompilationUnitByQualifiedName(className)),
+                        interceptorCompilationUnitList.stream()
+                )
                 .flatMap(compilationUnit -> {
-                            ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow();
+                            ClassOrInterfaceDeclaration classOrInterfaceDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
                             return classOrInterfaceDeclaration.getMethods().stream().map(methodDeclaration -> Tuple.of(compilationUnit, classOrInterfaceDeclaration, methodDeclaration));
                         }
                 )

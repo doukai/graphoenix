@@ -39,6 +39,7 @@ public class OperationInterfaceImplementer {
 
     public void writeToFiler(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix, Filer filer) throws IOException {
         this.buildImplementClass(packageElement, typeElement, operationDAO, suffix).writeTo(filer);
+        Logger.info("{} build success", typeElement.getSimpleName().toString() + "Impl");
     }
 
     public JavaFile buildImplementClass(PackageElement packageElement, TypeElement typeElement, TypeMirror operationDAO, String suffix) {
@@ -56,7 +57,6 @@ public class OperationInterfaceImplementer {
                         .collect(Collectors.toList())
                 );
 
-        Logger.info("{} build success", typeElement.getSimpleName().toString() + "Impl");
         return JavaFile.builder(packageElement.getQualifiedName().toString(), builder.build()).build();
     }
 

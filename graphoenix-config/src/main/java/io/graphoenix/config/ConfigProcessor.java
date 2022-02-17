@@ -72,7 +72,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                     .findFirst()
                                     .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr())
                                     .orElseGet(() ->
-                                            processorManager.getPublicClassOrInterfaceDeclaration(processorManager.getCompilationUnitByType(fieldDeclaration.getElementType()).orElseThrow()).orElseThrow()
+                                            processorManager.getPublicClassOrInterfaceDeclaration(processorManager.getCompilationUnitByType(fieldDeclaration.getElementType()))
                                                     .getAnnotationByClass(ConfigProperties.class)
                                                     .flatMap(typeAnnotationExpr ->
                                                             typeAnnotationExpr
@@ -111,7 +111,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
         configPropertiesCompilationUnitLis
                 .forEach(compilationUnit -> {
                             moduleCompilationUnit.addImport(Config.class).addImport(ConfigProvider.class);
-                            ClassOrInterfaceDeclaration configClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow();
+                            ClassOrInterfaceDeclaration configClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
 
                             MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, configClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
                                     .addAnnotation(Provides.class)
@@ -162,7 +162,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                     .findFirst()
                                     .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr())
                                     .orElseGet(() ->
-                                            processorManager.getPublicClassOrInterfaceDeclaration(processorManager.getCompilationUnitByType(fieldDeclaration.getElementType()).orElseThrow()).orElseThrow()
+                                            processorManager.getPublicClassOrInterfaceDeclaration(processorManager.getCompilationUnitByType(fieldDeclaration.getElementType()))
                                                     .getAnnotationByClass(ConfigProperties.class)
                                                     .flatMap(typeAnnotationExpr ->
                                                             typeAnnotationExpr
@@ -200,7 +200,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
     public void processModuleContext(CompilationUnit moduleContextCompilationUnit, BlockStmt moduleContextStaticInitializer) {
         configPropertiesComponentCompilationUnitLis
                 .forEach(compilationUnit -> {
-                            ClassOrInterfaceDeclaration configPropertiesComponentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit).orElseThrow();
+                            ClassOrInterfaceDeclaration configPropertiesComponentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(compilationUnit);
                             String daggerClassName = "Dagger".concat(configPropertiesComponentClassDeclaration.getNameAsString());
                             String daggerVariableName = "dagger".concat(configPropertiesComponentClassDeclaration.getNameAsString());
 
@@ -326,7 +326,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
 
     private CompilationUnit buildConfigComponent(CompilationUnit configCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
 
-        ClassOrInterfaceDeclaration configClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(configCompilationUnit).orElseThrow();
+        ClassOrInterfaceDeclaration configClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(configCompilationUnit);
         ArrayInitializerExpr modules = new ArrayInitializerExpr();
         modules.getValues().add(new ClassExpr().setType(moduleClassDeclaration.getNameAsString()));
 

@@ -47,11 +47,11 @@ public class SelectionFilterBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
+        Logger.info("SelectionFilter build success");
     }
 
     private JavaFile buildClass() {
         TypeSpec typeSpec = buildSelectionFilter();
-        Logger.info("SelectionFilter build success");
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 

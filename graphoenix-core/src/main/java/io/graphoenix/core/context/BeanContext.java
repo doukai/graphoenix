@@ -1,6 +1,5 @@
 package io.graphoenix.core.context;
 
-import io.graphoenix.core.error.InjectionProblem;
 import io.graphoenix.spi.context.BeanProviders;
 import io.graphoenix.spi.context.ModuleContext;
 import jakarta.inject.Provider;
@@ -12,8 +11,6 @@ import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static io.graphoenix.core.error.InjectionErrorType.BEAN_NOT_EXIST;
 
 public class BeanContext {
 
@@ -74,10 +71,7 @@ public class BeanContext {
 
     private static <T> Supplier<T> getSupplier(Class<T> beanClass, String name) {
         return getSupplierOptional(beanClass, name)
-                .orElseGet(() ->
-                        getAndCacheSupplier(beanClass, name)
-                                .orElseThrow(() -> new InjectionProblem(BEAN_NOT_EXIST.bind(beanClass, name)))
-                );
+                .orElseGet(() -> getAndCacheSupplier(beanClass, name).orElse(null));
     }
 
     @SuppressWarnings("unchecked")

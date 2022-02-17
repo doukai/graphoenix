@@ -9,25 +9,20 @@ public interface ComponentProxyProcessor {
     void init(ProcessorManager processorManager);
 
     default void inProcess() {
-
     }
 
     default void processComponentProxy(CompilationUnit componentCompilationUnit,
                                        ClassOrInterfaceDeclaration componentClassDeclaration,
                                        CompilationUnit componentProxyCompilationUnit,
                                        ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
-
     }
 
     default void processComponentModule(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-
     }
 
     default void processModule(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration) {
-
     }
 
     default void processModuleContext(CompilationUnit moduleCompilationUnit, BlockStmt moduleContextStaticInitializer) {
-
     }
 }
