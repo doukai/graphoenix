@@ -1,4 +1,4 @@
-package io.graphoenix.spi.error;
+package io.graphoenix.core.error;
 
 public enum ElementErrorType {
     EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST(-201, "value or variable field not exist in expression annotation: %s"),
@@ -8,7 +8,10 @@ public enum ElementErrorType {
     EXPRESSION_OPERATOR_NOT_EXIST(-205, "operator not exist in expression annotation: %s"),
     EXPRESSIONS_CONDITIONAL_NOT_EXIST(-206, "conditional not exist in expressions annotation: %s"),
 
-    SOURCE_ANNOTATION_NOT_EXIST(-207, "@Source annotation not exist in api method: %s"),
+    SOURCE_ANNOTATION_NOT_EXIST(-207, "@Source annotation not exist in api method parameters: %s"),
+    INVOKE_METHOD_NOT_EXIST(-207, "{} {} invoke method not exist"),
+
+    UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE(-207, "unsupported operation method return type: %s"),
 
     UNKNOWN(-299, "unknown element error");
 

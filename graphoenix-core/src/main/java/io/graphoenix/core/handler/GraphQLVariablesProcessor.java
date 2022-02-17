@@ -8,8 +8,8 @@ import org.tinylog.Logger;
 import java.util.Map;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_EXIST;
 
 @ApplicationScoped
 public class GraphQLVariablesProcessor {

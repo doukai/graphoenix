@@ -1,10 +1,8 @@
 package io.graphoenix.core.error;
 
 import com.google.gson.GsonBuilder;
-import io.graphoenix.spi.error.GraphQLError;
 import io.graphoenix.spi.dto.GraphQLLocation;
-import io.graphoenix.spi.dto.GraphQLPath;
-import io.graphoenix.spi.error.GraphQLErrorType;
+import io.graphoenix.spi.dto.GraphQLError;
 import org.zalando.problem.AbstractThrowableProblem;
 import org.zalando.problem.gson.ProblemAdapterFactory;
 
@@ -46,7 +44,7 @@ public class GraphQLProblem extends AbstractThrowableProblem {
         return this.push(graphQLErrorType, null, null);
     }
 
-    public GraphQLProblem push(GraphQLErrorType graphQLErrorType, List<GraphQLLocation> locations, GraphQLPath path) {
+    public GraphQLProblem push(GraphQLErrorType graphQLErrorType, List<GraphQLLocation> locations, String path) {
         GraphQLError error = new GraphQLError();
         error.setMessage(graphQLErrorType.toString());
         error.setLocations(locations);

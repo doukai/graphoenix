@@ -6,6 +6,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -14,6 +15,9 @@ import jakarta.inject.Inject;
 
 import java.util.Collection;
 import java.util.Optional;
+
+import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.METHOD_NAME_ARGUMENT_NOT_EXIST;
 
 @ApplicationScoped
 public class TypeManager {
@@ -27,7 +31,7 @@ public class TypeManager {
         this.manager = manager;
     }
 
-    public TypeManager setManager(GraphQLConfig graphQLConfig) {
+    public TypeManager setGraphQLConfig(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         return this;
     }
@@ -71,13 +75,13 @@ public class TypeManager {
                                         .map(argumentContext -> argumentContext.valueWithVariable().StringValue())
                                         .map(stringValue -> stringValue.toString().substring(1, stringValue.getText().length() - 1))
                                         .findFirst()
-                                        .orElseThrow(),
+                                        .orElseThrow(() -> new GraphQLProblem(CLASS_NAME_ARGUMENT_NOT_EXIST)),
                                 directiveContext.arguments().argument().stream()
                                         .filter(argumentContext -> argumentContext.name().getText().equals("methodName"))
                                         .map(argumentContext -> argumentContext.valueWithVariable().StringValue())
                                         .map(stringValue -> stringValue.toString().substring(1, stringValue.getText().length() - 1))
                                         .findFirst()
-                                        .orElseThrow()
+                                        .orElseThrow(() -> new GraphQLProblem(METHOD_NAME_ARGUMENT_NOT_EXIST))
                         )
                 ).findFirst();
     }

@@ -50,11 +50,11 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_INPUT_NAME;
-import static io.graphoenix.spi.error.GraphQLErrorType.FIELD_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.TYPE_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
-import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_VALUE;
+import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
 
 @ApplicationScoped
 public class GraphQLArgumentsToWhere {

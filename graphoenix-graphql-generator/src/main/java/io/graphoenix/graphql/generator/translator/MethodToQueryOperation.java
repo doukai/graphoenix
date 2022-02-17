@@ -26,8 +26,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.error.ElementErrorType.*;
-import static io.graphoenix.spi.error.GraphQLErrorType.*;
+import static io.graphoenix.core.error.ElementErrorType.*;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 
 @ApplicationScoped
 public class MethodToQueryOperation {

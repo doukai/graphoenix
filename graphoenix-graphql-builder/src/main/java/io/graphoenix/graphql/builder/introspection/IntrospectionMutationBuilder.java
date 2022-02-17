@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 
 @ApplicationScoped
 public class IntrospectionMutationBuilder {
@@ -88,7 +88,8 @@ public class IntrospectionMutationBuilder {
                 .setOperationType("mutation")
                 .setName("introspection")
                 .setFields(Collections.singleton(new Field().setName("__schema").setArguments(arguments).setFields(Collections.singleton(new Field().setName("id")))));
-        Logger.debug("introspection schema mutation:\r\n{}", operation.toString());
+        Logger.info("introspection schema mutation build success");
+        Logger.debug("\r\n{}", operation.toString());
         return operation;
     }
 
@@ -114,7 +115,8 @@ public class IntrospectionMutationBuilder {
         subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setSubscriptionType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
 
         schema.setDirectives(manager.getDirectives().map(this::directiveDefinitionContextToDirective).collect(Collectors.toCollection(LinkedHashSet::new)));
-        Logger.debug("introspection schema:\r\n{}", schema.toString());
+        Logger.info("introspection schema build success");
+        Logger.debug("\r\n{}", schema.toString());
         return schema;
     }
 

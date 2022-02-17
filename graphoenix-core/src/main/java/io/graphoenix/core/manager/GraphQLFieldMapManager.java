@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.error.GraphQLErrorType.*;
-import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
 
 @ApplicationScoped
 public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {

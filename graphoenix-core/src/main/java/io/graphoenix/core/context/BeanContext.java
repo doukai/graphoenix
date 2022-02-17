@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.spi.error.InjectionErrorType.BEAN_NOT_EXIST;
+import static io.graphoenix.core.error.InjectionErrorType.BEAN_NOT_EXIST;
 
 public class BeanContext {
 

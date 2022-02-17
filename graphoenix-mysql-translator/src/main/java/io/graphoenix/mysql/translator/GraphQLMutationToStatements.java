@@ -43,17 +43,17 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.error.GraphQLErrorType.FIELD_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.MUTATION_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.TYPE_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 
 @ApplicationScoped
 public class GraphQLMutationToStatements {

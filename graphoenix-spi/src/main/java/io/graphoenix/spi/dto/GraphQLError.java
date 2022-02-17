@@ -1,7 +1,4 @@
-package io.graphoenix.spi.error;
-
-import io.graphoenix.spi.dto.GraphQLLocation;
-import io.graphoenix.spi.dto.GraphQLPath;
+package io.graphoenix.spi.dto;
 
 import java.util.List;
 
@@ -11,7 +8,7 @@ public class GraphQLError {
 
     private List<GraphQLLocation> locations;
 
-    private GraphQLPath path;
+    private String path;
 
     public String getMessage() {
         return message;
@@ -29,11 +26,11 @@ public class GraphQLError {
         this.locations = locations;
     }
 
-    public GraphQLPath getPath() {
+    public String getPath() {
         return path;
     }
 
-    public void setPath(GraphQLPath path) {
+    public void setPath(String path) {
         this.path = path;
     }
 }

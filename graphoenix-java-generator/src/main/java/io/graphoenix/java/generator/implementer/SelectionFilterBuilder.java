@@ -17,6 +17,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
@@ -26,34 +27,35 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class SelectionFilterHandlerImplementer {
+public class SelectionFilterBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public SelectionFilterHandlerImplementer(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public SelectionFilterBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
     }
 
-    public SelectionFilterHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
+    public SelectionFilterBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setManager(graphQLConfig);
+        this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {
-        this.buildImplementClass().writeTo(filer);
+        this.buildClass().writeTo(filer);
     }
 
-    private JavaFile buildImplementClass() {
-        TypeSpec typeSpec = buildSelectionFilterHandlerImpl();
+    private JavaFile buildClass() {
+        TypeSpec typeSpec = buildSelectionFilter();
+        Logger.info("SelectionFilter build success");
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildSelectionFilterHandlerImpl() {
+    private TypeSpec buildSelectionFilter() {
         return TypeSpec.classBuilder("SelectionFilter")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
@@ -76,12 +78,9 @@ public class SelectionFilterHandlerImplementer {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
-                .addStatement("this.$L = $L",
-                        "manager",
-                        "manager"
-                ).build();
+                .addStatement("this.manager = manager")
+                .build();
     }
-
 
     private List<MethodSpec> buildTypeMethods() {
         return manager.getObjects()
@@ -109,6 +108,7 @@ public class SelectionFilterHandlerImplementer {
                 objectTypeDefinitionContext.name().getText(),
                 ClassName.get(Collectors.class)
         );
+
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(fieldDefinitionContext -> {
                             String fieldGetterMethodName = typeManager.getFieldGetterMethodName(fieldDefinitionContext);
@@ -169,7 +169,6 @@ public class SelectionFilterHandlerImplementer {
         builder.addStatement("return jsonObject");
         builder.endControlFlow();
         builder.addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class));
-
         return builder.build();
     }
 

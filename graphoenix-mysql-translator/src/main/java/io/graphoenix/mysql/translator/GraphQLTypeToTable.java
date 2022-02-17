@@ -18,9 +18,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.error.GraphQLErrorType.DEFINITION_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.TYPE_DEFINITION_NOT_EXIST;
-import static io.graphoenix.spi.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.DEFINITION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_DEFINITION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 
 @ApplicationScoped
 public class GraphQLTypeToTable {

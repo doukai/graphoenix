@@ -20,7 +20,7 @@ import io.graphoenix.graphql.generator.document.Schema;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import io.graphoenix.spi.error.GraphQLErrorType;
+import io.graphoenix.core.error.GraphQLErrorType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.tinylog.Logger;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
-import static io.graphoenix.spi.error.GraphQLErrorType.META_INTERFACE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.META_INTERFACE_NOT_EXIST;
 
 @ApplicationScoped
 public class DocumentBuilder {
@@ -86,7 +86,8 @@ public class DocumentBuilder {
         manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
 
         Document document = getDocument();
-        Logger.debug("document build success:\r\n{}", document.toString());
+        Logger.info("document build success");
+        Logger.debug("\r\n{}", document.toString());
         return document;
     }
 

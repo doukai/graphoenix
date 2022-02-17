@@ -17,6 +17,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.core.error.GraphQLErrorType;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.handler.BaseOperationHandler;
 import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -30,6 +33,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Query;
+import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
@@ -46,6 +50,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.core.error.ElementErrorType.INVOKE_METHOD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
@@ -65,7 +72,7 @@ public class OperationHandlerImplementer {
 
     public OperationHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setManager(graphQLConfig);
+        this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
     }
 
@@ -81,11 +88,13 @@ public class OperationHandlerImplementer {
 
     private JavaFile buildQueryImplementClass() {
         TypeSpec typeSpec = buildOperationHandlerImpl(QUERY);
+        Logger.info("QueryHandlerImpl build success");
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
     private JavaFile buildMutationImplementClass() {
         TypeSpec typeSpec = buildOperationHandlerImpl(MUTATION);
+        Logger.info("MutationHandlerImpl build success");
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
@@ -102,7 +111,7 @@ public class OperationHandlerImplementer {
                 superinterface = ClassName.get(MutationHandler.class);
                 break;
             default:
-                throw new RuntimeException();
+                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
 
         return TypeSpec.classBuilder(className)
@@ -168,15 +177,16 @@ public class OperationHandlerImplementer {
     private Set<MethodSpec> buildMethods(OperationType type) {
         switch (type) {
             case QUERY:
-                return manager.getFields(manager.getQueryOperationTypeName().orElseThrow())
+                return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLProblem(QUERY_TYPE_NOT_EXIST)))
                         .map(fieldDefinitionContext -> buildMethod(fieldDefinitionContext, type))
                         .collect(Collectors.toCollection(LinkedHashSet::new));
             case MUTATION:
-                return manager.getFields(manager.getMutationOperationTypeName().orElseThrow())
+                return manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem(MUTATION_TYPE_NOT_EXIST)))
                         .map(fieldDefinitionContext -> buildMethod(fieldDefinitionContext, type))
                         .collect(Collectors.toCollection(LinkedHashSet::new));
+            default:
+                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
-        throw new RuntimeException();
     }
 
     private Set<FieldSpec> buildFields(OperationType type) {
@@ -194,7 +204,6 @@ public class OperationHandlerImplementer {
     }
 
     private MethodSpec buildOperationMethod(OperationType type) {
-
         String operationName;
         switch (type) {
             case QUERY:
@@ -204,7 +213,7 @@ public class OperationHandlerImplementer {
                 operationName = "mutation";
                 break;
             default:
-                throw new RuntimeException();
+                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
 
         return MethodSpec.methodBuilder(operationName)
@@ -238,12 +247,11 @@ public class OperationHandlerImplementer {
         String fieldTypeParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, manager.getFieldTypeName(fieldDefinitionContext.type()));
 
         if (invokeDirective.isPresent()) {
-
             Tuple2<TypeElement, ExecutableElement> method = invokeMethods.stream()
                     .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
                     .filter(tuple2 -> typeManager.getInvokeFieldName(tuple2._2().getSimpleName().toString()).equals(fieldDefinitionContext.name().getText()))
                     .findFirst()
-                    .orElseThrow();
+                    .orElseThrow(() -> new ElementProblem(INVOKE_METHOD_NOT_EXIST.bind(type.name(), fieldDefinitionContext.name().getText())));
 
             builder.addStatement("$T result = $L.get().$L($L)",
                     typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
@@ -318,30 +326,12 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)), "operationHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")), "invokeHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")), "selectionFilter")
-                .addStatement("this.$L = new $T()",
-                        "gsonBuilder",
-                        ClassName.get(GsonBuilder.class)
-                )
-                .addStatement("this.$L = $L",
-                        "manager",
-                        "manager"
-                )
-                .addStatement("this.$L = $L",
-                        "variablesProcessor",
-                        "variablesProcessor"
-                )
-                .addStatement("this.$L = $L",
-                        "operationHandler",
-                        "operationHandler"
-                )
-                .addStatement("this.$L = $L",
-                        "invokeHandler",
-                        "invokeHandler"
-                )
-                .addStatement("this.$L = $L",
-                        "selectionFilter",
-                        "selectionFilter"
-                );
+                .addStatement("this.gsonBuilder = new $T()", ClassName.get(GsonBuilder.class))
+                .addStatement("this.manager = manager")
+                .addStatement("this.variablesProcessor = variablesProcessor")
+                .addStatement("this.operationHandler = operationHandler")
+                .addStatement("this.invokeHandler = invokeHandler")
+                .addStatement("this.selectionFilter = selectionFilter");
 
         invokeMethods.stream()
                 .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
@@ -359,7 +349,7 @@ public class OperationHandlerImplementer {
 
         switch (type) {
             case QUERY:
-                manager.getFields(manager.getQueryOperationTypeName().orElseThrow())
+                manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLProblem(QUERY_TYPE_NOT_EXIST)))
                         .forEach(fieldDefinitionContext ->
                                 builder.addStatement("put($S, this::$L)",
                                         fieldDefinitionContext.name().getText(),
@@ -368,7 +358,7 @@ public class OperationHandlerImplementer {
                         );
                 break;
             case MUTATION:
-                manager.getFields(manager.getMutationOperationTypeName().orElseThrow())
+                manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem(MUTATION_TYPE_NOT_EXIST)))
                         .forEach(fieldDefinitionContext ->
                                 builder.addStatement("put($S, this::$L)",
                                         fieldDefinitionContext.name().getText(),
@@ -376,6 +366,8 @@ public class OperationHandlerImplementer {
                                 )
                         );
                 break;
+            default:
+                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
         return builder.build();
     }
@@ -387,7 +379,7 @@ public class OperationHandlerImplementer {
             case MUTATION:
                 return Mutation.class;
             default:
-                throw new RuntimeException();
+                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
     }
 }

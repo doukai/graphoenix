@@ -7,6 +7,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import java.io.File;
 import java.util.Optional;
@@ -28,10 +29,12 @@ public class JavaFileBuilder {
 
     public void writeToPath(File path) {
         this.buildJavaFileList().forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
+        Logger.info("all graphql entity generated");
     }
 
     public void writeToPath(File path, GraphQLConfig graphQLConfig) {
         this.buildJavaFileList(graphQLConfig, typeSpecBuilder.setConfiguration(graphQLConfig)).forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
+        Logger.info("all graphql entity generated");
     }
 
     public Stream<JavaFile> buildJavaFileList() {
@@ -39,7 +42,6 @@ public class JavaFileBuilder {
     }
 
     public Stream<JavaFile> buildJavaFileList(GraphQLConfig configuration, TypeSpecBuilder typeSpecBuilder) {
-
         return Streams.concat(
                 manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
                 manager.getDirectives()

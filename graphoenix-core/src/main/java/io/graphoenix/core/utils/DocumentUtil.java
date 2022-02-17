@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-import static io.graphoenix.spi.error.GraphQLErrorType.SYNTAX_ERROR;
+import static io.graphoenix.core.error.GraphQLErrorType.SYNTAX_ERROR;
 
 public enum DocumentUtil {
     DOCUMENT_UTIL;

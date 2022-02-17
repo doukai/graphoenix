@@ -14,6 +14,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.ExecutableElement;
@@ -26,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class InvokeHandlerImplementer {
+public class InvokeHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
@@ -34,32 +35,33 @@ public class InvokeHandlerImplementer {
     private Map<String, Map<TypeElement, List<ExecutableElement>>> invokeMethods;
 
     @Inject
-    public InvokeHandlerImplementer(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public InvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
     }
 
-    public InvokeHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
+    public InvokeHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setManager(graphQLConfig);
+        this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
     }
 
-    public InvokeHandlerImplementer setInvokeMethods(Map<String, Map<TypeElement, List<ExecutableElement>>> invokeMethods) {
+    public InvokeHandlerBuilder setInvokeMethods(Map<String, Map<TypeElement, List<ExecutableElement>>> invokeMethods) {
         this.invokeMethods = invokeMethods;
         return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {
-        this.buildImplementClass().writeTo(filer);
+        this.buildClass().writeTo(filer);
     }
 
-    private JavaFile buildImplementClass() {
-        TypeSpec typeSpec = buildInvokeHandlerImpl();
+    private JavaFile buildClass() {
+        TypeSpec typeSpec = buildInvokeHandler();
+        Logger.info("InvokeHandler build success");
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildInvokeHandlerImpl() {
+    private TypeSpec buildInvokeHandler() {
         return TypeSpec.classBuilder("InvokeHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
@@ -138,7 +140,8 @@ public class InvokeHandlerImplementer {
                                             executableElement.getSimpleName().toString(),
                                             getParameterName(objectTypeDefinitionContext)
                                     )
-                            ));
+                            )
+                    );
 
             manager.getFields(objectTypeDefinitionContext.name().getText())
                     .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))

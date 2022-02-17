@@ -13,9 +13,9 @@ import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
-import io.graphoenix.java.generator.implementer.InvokeHandlerImplementer;
+import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
-import io.graphoenix.java.generator.implementer.SelectionFilterHandlerImplementer;
+import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -67,8 +67,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private JavaElementToInterface javaElementToInterface;
     private JavaElementToInputType javaElementToInputType;
     private GraphQLApiBuilder graphQLApiBuilder;
-    private InvokeHandlerImplementer invokeHandlerImplementer;
-    private SelectionFilterHandlerImplementer selectionFilterHandlerImplementer;
+    private InvokeHandlerBuilder invokeHandlerBuilder;
+    private SelectionFilterBuilder selectionFilterBuilder;
     private OperationHandlerImplementer operationHandlerImplementer;
     private GraphQLConfig graphQLConfig;
     private Types typeUtils;
@@ -87,8 +87,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
-        this.invokeHandlerImplementer = BeanContext.get(InvokeHandlerImplementer.class);
-        this.selectionFilterHandlerImplementer = BeanContext.get(SelectionFilterHandlerImplementer.class);
+        this.invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
+        this.selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
         this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
@@ -166,7 +166,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
             writer.write(documentBuilder.getDocument().toString());
             writer.close();
 
-            invokeHandlerImplementer
+            invokeHandlerBuilder
                     .setConfiguration(graphQLConfig)
                     .setInvokeMethods(
                             manager.getObjects()
@@ -211,7 +211,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .writeToFiler(filer);
 
 
-            selectionFilterHandlerImplementer
+            selectionFilterBuilder
                     .setConfiguration(graphQLConfig)
                     .writeToFiler(filer);
 

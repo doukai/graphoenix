@@ -1,4 +1,4 @@
-package io.graphoenix.spi.error;
+package io.graphoenix.core.error;
 
 public enum GraphQLErrorType {
     DEFINITION_NOT_EXIST(-1, "definition not exist"),
@@ -38,6 +38,9 @@ public enum GraphQLErrorType {
     MAP_WITH_TYPE_NOT_EXIST(-25, "map with type not exist: %s"),
     MAP_WITH_FROM_FIELD_NOT_EXIST(-26, "map with type from field not exist: %s"),
     MAP_WITH_TO_FIELD_NOT_EXIST(-27, "map with type to field not exist: %s"),
+
+    CLASS_NAME_ARGUMENT_NOT_EXIST(-17, "className not exist in @invoke directive: %s"),
+    METHOD_NAME_ARGUMENT_NOT_EXIST(-18, "methodName not exist in @invoke directive: %s"),
 
     SYNTAX_ERROR(-27, "graphql syntax error: %s line: %s column %s"),
 

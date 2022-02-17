@@ -18,7 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.error.ElementErrorType.SOURCE_ANNOTATION_NOT_EXIST;
+import static io.graphoenix.core.error.ElementErrorType.SOURCE_ANNOTATION_NOT_EXIST;
 
 @ApplicationScoped
 public class GraphQLApiBuilder {

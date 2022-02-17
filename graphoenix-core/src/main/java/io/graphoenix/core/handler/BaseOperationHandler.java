@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
-import io.graphoenix.spi.error.GraphQLErrorType;
+import io.graphoenix.core.error.GraphQLErrorType;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package io.graphoenix.spi.error;
+package io.graphoenix.core.error;
 
 public enum InjectionErrorType {
     BEAN_NOT_EXIST(-101, "bean instance not exist: %s name: %s"),

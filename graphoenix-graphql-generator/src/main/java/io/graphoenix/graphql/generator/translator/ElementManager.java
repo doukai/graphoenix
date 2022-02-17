@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.error.ElementErrorType.EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST;
+import static io.graphoenix.core.error.ElementErrorType.EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST;
 
 @ApplicationScoped
 public class ElementManager {
