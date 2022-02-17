@@ -2,6 +2,8 @@ package io.graphoenix.mysql.utils;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.GraphQLErrorType;
+import io.graphoenix.core.error.GraphQLProblem;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.sf.jsqlparser.expression.DoubleValue;
@@ -67,7 +69,6 @@ public class DBValueUtil {
             return variableToJdbcNamedParameter(valueWithVariableContext.variable());
         }
         return new StringValue(valueWithVariableContext.enumValue().enumValueName().getText());
-
     }
 
     public Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
@@ -78,7 +79,7 @@ public class DBValueUtil {
         } else if (floatValue != null) {
             return new DoubleValue(floatValue.getText());
         } else if (booleanValue != null) {
-            //todo
+            throw new GraphQLProblem(GraphQLErrorType.UNKNOWN);
         } else if (nullValue != null) {
             return new NullValue();
         }

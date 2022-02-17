@@ -7,8 +7,7 @@ import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -19,8 +18,6 @@ import java.util.stream.Stream;
 
 @ApplicationScoped
 public class MutationExecutor {
-
-    private static final Logger log = LoggerFactory.getLogger(MutationExecutor.class);
 
     private final ConnectionCreator connectionCreator;
 
@@ -34,7 +31,11 @@ public class MutationExecutor {
                 .flatMap(connection -> {
                             connection.beginTransaction();
                             Batch batch = connection.createBatch();
-                            sqlStream.forEach(batch::add);
+                            sqlStream.forEach(sql -> {
+                                        Logger.debug("execute statement:\r\n{}", sql);
+                                        batch.add(sql);
+                                    }
+                            );
                             return Flux.from(batch.execute())
                                     .last()
                                     .doOnSuccess(result -> connection.commitTransaction())
@@ -53,17 +54,23 @@ public class MutationExecutor {
                             connection.beginTransaction();
                             Stream<Integer> stream = sqlListGroup.stream()
                                     .map(sqlList -> {
-                                        Batch batch = connection.createBatch();
-                                        sqlList.forEach(batch::add);
-                                        Mono.from(batch.execute())
-                                                .doOnError(throwable -> {
-                                                    throwable.printStackTrace();
-                                                    connection.rollbackTransaction();
-                                                    connection.close();
-                                                })
-                                                .block();
-                                        return sqlList.size();
-                                    });
+                                                Batch batch = connection.createBatch();
+                                                sqlList.forEach(sql -> {
+                                                            Logger.debug("execute statement:\r\n{}", sql);
+                                                            batch.add(sql);
+                                                        }
+                                                );
+                                                Mono.from(batch.execute())
+                                                        .doOnError(throwable -> {
+                                                                    throwable.printStackTrace();
+                                                                    connection.rollbackTransaction();
+                                                                    connection.close();
+                                                                }
+                                                        )
+                                                        .block();
+                                                return sqlList.size();
+                                            }
+                                    );
                             connection.commitTransaction();
                             connection.close();
                             return stream;
@@ -82,6 +89,8 @@ public class MutationExecutor {
                             connection.beginTransaction();
                             return Flux.fromStream(sqlStream
                                             .map(sql -> {
+                                                        Logger.debug("execute statement:\r\n{}", sql);
+                                                        Logger.debug("parameters:\r\n{}", parameters);
                                                         Statement statement = connection.createStatement(sql);
                                                         if (parameters != null) {
                                                             parameters.forEach(statement::bind);
@@ -106,6 +115,8 @@ public class MutationExecutor {
     public Mono<String> executeMutations(String sql, Map<String, Object> parameters) {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
+                            Logger.debug("execute statement:\r\n{}", sql);
+                            Logger.debug("parameters:\r\n{}", parameters);
                             Statement statement = connection.createStatement(sql);
                             if (parameters != null) {
                                 parameters.forEach(statement::bind);

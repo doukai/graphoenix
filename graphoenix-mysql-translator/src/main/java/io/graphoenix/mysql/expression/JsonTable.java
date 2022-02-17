@@ -42,7 +42,6 @@ public class JsonTable extends TableFunction {
 
     @Override
     public String toString() {
-
         return "JSON_TABLE(" +
                 json + "," +
                 path +

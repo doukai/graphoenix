@@ -79,7 +79,6 @@ public class GraphQLArgumentsToWhere {
         if (argumentsContext == null) {
             return Optional.of(isFalseExpression(dbNameUtil.fieldToColumn(manager.getFieldTypeName(fieldDefinitionContext.type()), DEPRECATED_FIELD_NAME, level)));
         }
-
         Stream<Expression> expressionStream = argumentsToExpressionList(fieldDefinitionContext.type(), fieldDefinitionContext.argumentsDefinition(), argumentsContext, level);
         return expressionStreamToMultipleExpression(expressionStream, hasOrConditional(argumentsContext, fieldDefinitionContext.argumentsDefinition()));
     }
@@ -925,7 +924,6 @@ public class GraphQLArgumentsToWhere {
                 valueContext.BooleanValue(),
                 valueContext.NullValue(),
                 null)
-
         );
     }
 
@@ -1412,7 +1410,7 @@ public class GraphQLArgumentsToWhere {
                     break;
             }
         } else {
-            //TODO
+            throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
         }
         ColumnDefinition columnDefinition = new ColumnDefinition();
         columnDefinition.setColumnName(dbNameUtil.graphqlFieldNameToColumnName(valueWithVariableContext.variable().name().getText()));

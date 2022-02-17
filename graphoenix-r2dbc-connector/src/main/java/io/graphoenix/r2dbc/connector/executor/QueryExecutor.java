@@ -7,6 +7,7 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,12 +31,13 @@ public class QueryExecutor {
     public Mono<String> executeQuery(String sql, Map<String, Object> parameters) {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
+                            Logger.debug("execute select:\r\n{}", sql);
+                            Logger.debug("parameters:\r\n{}", parameters);
                             Statement statement = connection.createStatement(sql);
                             if (parameters != null) {
                                 parameters.forEach(statement::bind);
                             }
-                            return Mono.from(statement.execute())
-                                    .doFinally(signalType -> connection.close());
+                            return Mono.from(statement.execute()).doFinally(signalType -> connection.close());
                         }
                 )
                 .flatMap(this::getJsonStringFromResult);
@@ -51,7 +53,10 @@ public class QueryExecutor {
                         Flux.fromStream(
                                 sqlStream.map(
                                         tuple2 -> {
-                                            Statement statement = connection.createStatement(tuple2._1());
+                                            String sql = tuple2._1();
+                                            Logger.debug("execute select:\r\n{}", sql);
+                                            Logger.debug("parameters:\r\n{}", parameters);
+                                            Statement statement = connection.createStatement(sql);
                                             if (parameters != null) {
                                                 parameters.forEach(statement::bind);
                                             }

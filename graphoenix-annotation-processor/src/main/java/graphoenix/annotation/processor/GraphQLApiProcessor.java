@@ -4,6 +4,8 @@ import com.google.auto.service.AutoService;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.error.GraphQLErrorType;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
@@ -28,6 +30,7 @@ import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 import org.eclipse.microprofile.graphql.Type;
+import org.tinylog.Logger;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -35,11 +38,13 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
@@ -49,6 +54,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
+import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes({
         "org.eclipse.microprofile.graphql.GraphQLApi",
@@ -57,6 +63,7 @@ import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
         "org.eclipse.microprofile.graphql.Interface",
         "org.eclipse.microprofile.graphql.Input"
 })
+@SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
 public class GraphQLApiProcessor extends AbstractProcessor {
 
@@ -101,7 +108,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            Logger.error(e);
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
         }
     }
 
@@ -171,25 +179,25 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .setInvokeMethods(
                             manager.getObjects()
                                     .collect(Collectors.toMap(
-                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                            objectTypeDefinitionContext ->
-                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                                            .collect(Collectors.toMap(
-                                                                    element -> (TypeElement) element,
-                                                                    element -> element.getEnclosedElements().stream()
-                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
-                                                                            .map(subElement -> (ExecutableElement) subElement)
-                                                                            .filter(executableElement ->
-                                                                                    executableElement.getAnnotation(Query.class) == null &&
-                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
-                                                                                            executableElement.getParameters().stream().anyMatch(
-                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
-                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                                    objectTypeDefinitionContext ->
+                                                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                                    .collect(Collectors.toMap(
+                                                                                    element -> (TypeElement) element,
+                                                                                    element -> element.getEnclosedElements().stream()
+                                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                                            .filter(executableElement ->
+                                                                                                    executableElement.getAnnotation(Query.class) == null &&
+                                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
+                                                                                                            executableElement.getParameters().stream().anyMatch(
+                                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
+                                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                                                                            )
                                                                                             )
+                                                                                            .collect(Collectors.toList())
                                                                             )
-                                                                            .collect(Collectors.toList())
                                                                     )
-                                                            )
                                             )
                                     )
                     )
@@ -216,30 +224,30 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .writeToFiler(filer);
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error(e);
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
         }
-
         return false;
     }
 
     private void registerGraphQLApiElement(Element element, Types typeUtils) {
-        element.getEnclosedElements().forEach(
-                subElement -> {
-                    if (subElement.getAnnotation(Query.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow();
-                        ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
-                        manager.registerGraphQL(objectType.toString());
-                    } else if (subElement.getAnnotation(Mutation.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow();
-                        ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
-                        manager.registerGraphQL(objectType.toString());
-                    } else if (subElement.getKind().equals(ElementKind.METHOD) && ((ExecutableElement) subElement).getParameters().stream().anyMatch(variableElement -> variableElement.getAnnotation(Source.class) != null)) {
-                        Tuple2<String, Field> objectField = graphQLApiBuilder.variableElementToObjectField((ExecutableElement) subElement, typeUtils);
-                        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectField._1()).orElseThrow();
-                        ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(objectField._2());
-                        manager.registerGraphQL(objectType.toString());
-                    }
-                }
-        );
+        element.getEnclosedElements()
+                .forEach(subElement -> {
+                            if (subElement.getAnnotation(Query.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
+                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.QUERY_TYPE_NOT_EXIST));
+                                ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
+                                manager.registerGraphQL(objectType.toString());
+                            } else if (subElement.getAnnotation(Mutation.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
+                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.MUTATION_TYPE_NOT_EXIST));
+                                ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
+                                manager.registerGraphQL(objectType.toString());
+                            } else if (subElement.getKind().equals(ElementKind.METHOD) && ((ExecutableElement) subElement).getParameters().stream().anyMatch(variableElement -> variableElement.getAnnotation(Source.class) != null)) {
+                                Tuple2<String, Field> objectField = graphQLApiBuilder.variableElementToObjectField((ExecutableElement) subElement, typeUtils);
+                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectField._1()).orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.TYPE_NOT_EXIST.bind(objectField._1())));
+                                ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(objectField._2());
+                                manager.registerGraphQL(objectType.toString());
+                            }
+                        }
+                );
     }
 }

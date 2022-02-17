@@ -3,6 +3,10 @@ package graphoenix.annotation.processor;
 import com.google.auto.service.AutoService;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.error.ElementErrorType;
+import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.core.error.GraphQLErrorType;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.manager.GraphQLOperationRouter;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
@@ -13,6 +17,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.graphoenix.spi.handler.GeneratorHandler;
 import io.vavr.control.Try;
+import org.tinylog.Logger;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -20,6 +25,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -28,6 +34,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
@@ -38,8 +45,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
+import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphQLOperation")
+@SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
 public class GraphQLOperationProcessor extends AbstractProcessor {
 
@@ -76,7 +85,8 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
             }
             mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            Logger.error(e);
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
         }
     }
 
@@ -98,15 +108,16 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                     AnnotationMirror graphQLOperationMirror = typeElement.getAnnotationMirrors().stream()
                             .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(GraphQLOperation.class.getName()))
                             .findFirst()
-                            .orElseThrow();
+                            .orElseThrow(() -> new ElementProblem(ElementErrorType.OPERATION_ANNOTATION_NOT_EXIST.bind(typeElement.getQualifiedName().toString())));
 
                     TypeMirror operationDAO = graphQLOperationMirror.getElementValues().entrySet().stream()
                             .filter(entry -> entry.getKey().getSimpleName().toString().equals("operationDAO"))
                             .findFirst()
                             .map(entry -> ((DeclaredType) entry.getValue().getValue()).asElement().asType())
-                            .orElseThrow();
+                            .orElseThrow(() -> new ElementProblem(ElementErrorType.OPERATION_DAO_VALUE_NOT_EXIST));
 
                     try {
+                        Logger.info("start build operation resource for interface {}", typeElement.getQualifiedName().toString());
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors.toMap(
@@ -118,16 +129,19 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                                                         case MUTATION:
                                                             return generatorHandler.mutation(entry.getValue());
                                                     }
-                                                    return "";
+                                                    throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
                                                 }
                                         )
                                 )
                                 .forEach((key, value) ->
                                         Try.run(() -> {
+                                                    String resourceName = typeElement.getSimpleName().toString().concat("_").concat(key).concat(".").concat(generatorHandler.extension());
+                                                    Logger.info("{} build success", resourceName);
+                                                    Logger.debug("resource content:\r\n{}", value);
                                                     FileObject fileObject = filer.createResource(
                                                             StandardLocation.CLASS_OUTPUT,
                                                             packageElement.getQualifiedName(),
-                                                            typeElement.getSimpleName().toString().concat("_").concat(key).concat(".").concat(generatorHandler.extension())
+                                                            resourceName
                                                     );
                                                     Writer writer = fileObject.openWriter();
                                                     writer.write(value);
@@ -139,12 +153,12 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                         operationInterfaceImplementer.writeToFiler(packageElement, typeElement, operationDAO, generatorHandler.extension(), filer);
 
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logger.error(e);
+                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
                     }
                 }
             }
         }
-
         return false;
     }
 }

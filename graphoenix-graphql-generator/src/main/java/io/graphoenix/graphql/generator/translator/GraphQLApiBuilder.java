@@ -48,20 +48,20 @@ public class GraphQLApiBuilder {
                 )
                 .setDirectives(
                         Stream.of(new Directive()
-                                .setName("invoke")
-                                .addArgument(
-                                        new Argument()
-                                                .setName("className")
-                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                        .setName("invoke")
+                                        .addArgument(
+                                                new Argument()
+                                                        .setName("className")
+                                                        .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                        )
+                                        .addArgument(
+                                                new Argument()
+                                                        .setName("methodName")
+                                                        .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                        )
                                 )
-                                .addArgument(
-                                        new Argument()
-                                                .setName("methodName")
-                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
-                                )
-                        )
-                                .map(Directive::toString).
-                                collect(Collectors.toCollection(LinkedHashSet::new))
+                                .map(Directive::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
                 );
     }
 
@@ -80,20 +80,20 @@ public class GraphQLApiBuilder {
                         .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
                         .setDirectives(
                                 Stream.of(new Directive()
-                                        .setName("invoke")
-                                        .addArgument(
-                                                new Argument()
-                                                        .setName("className")
-                                                        .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                                .setName("invoke")
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName("className")
+                                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                                )
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName("methodName")
+                                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                                )
                                         )
-                                        .addArgument(
-                                                new Argument()
-                                                        .setName("methodName")
-                                                        .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
-                                        )
-                                )
-                                        .map(Directive::toString).
-                                        collect(Collectors.toCollection(LinkedHashSet::new))
+                                        .map(Directive::toString)
+                                        .collect(Collectors.toCollection(LinkedHashSet::new))
                         )
         );
     }

@@ -41,7 +41,8 @@ public class GraphQLTypeToTable {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .map(this::createTable).map(CreateTable::toString);
+                .map(this::createTable)
+                .map(CreateTable::toString);
     }
 
     public Stream<String> createTablesSQL(IGraphQLDocumentManager manager) {
@@ -71,7 +72,6 @@ public class GraphQLTypeToTable {
     }
 
     protected Optional<CreateTable> createTable(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
-
         if (typeDefinitionContext.objectTypeDefinition() == null) {
             return Optional.empty();
         }

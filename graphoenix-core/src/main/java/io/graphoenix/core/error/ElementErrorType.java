@@ -11,6 +11,8 @@ public enum ElementErrorType {
     SOURCE_ANNOTATION_NOT_EXIST(-207, "@Source annotation not exist in api method parameters: %s"),
     INVOKE_METHOD_NOT_EXIST(-207, "{} {} invoke method not exist"),
 
+    OPERATION_ANNOTATION_NOT_EXIST(-207, "@GraphQLOperation annotation not exist in operation interface: %s"),
+    OPERATION_DAO_VALUE_NOT_EXIST(-207, "operationDAO value not exist in @GraphQLOperation"),
     UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE(-207, "unsupported operation method return type: %s"),
 
     UNKNOWN(-299, "unknown element error");

@@ -247,13 +247,13 @@ public class GraphQLQueryToSelect {
                                 return fieldToExpression(typeName, fieldDefinitionContext, level);
                             }
                         }
-                ).orElseThrow(() -> {
+                )
+                .orElseThrow(() -> {
                     throw new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText()));
                 });
     }
 
     protected Function selectionToJsonFunction(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, ExpressionList expressionList) {
-
         Function function = new Function();
         function.setName("JSON_OBJECT");
         function.setParameters(expressionList);

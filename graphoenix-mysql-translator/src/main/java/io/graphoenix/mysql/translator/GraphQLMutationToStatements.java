@@ -174,8 +174,10 @@ public class GraphQLMutationToStatements {
                                                                                 0
                                                                         )
                                                                 )
-                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                                )
+                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         Stream<Statement> listObjectInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
@@ -220,10 +222,11 @@ public class GraphQLMutationToStatements {
                                                                                 0
                                                                         )
                                                                 )
-                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                                )
+                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
-
 
         Stream<Statement> listInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
@@ -264,7 +267,8 @@ public class GraphQLMutationToStatements {
                                                                         .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         return Stream.concat(insertStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream)));
@@ -332,8 +336,10 @@ public class GraphQLMutationToStatements {
                                                                                 index
                                                                         )
                                                                 )
-                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                                )
+                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
 
@@ -388,8 +394,10 @@ public class GraphQLMutationToStatements {
                                                                                 level + 1
                                                                         )
                                                                 )
-                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                                )
+                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
 
@@ -432,7 +440,8 @@ public class GraphQLMutationToStatements {
                                                                         .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null)
                                                         )
                                                 )
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
@@ -490,8 +499,10 @@ public class GraphQLMutationToStatements {
                                                                                 index
                                                                         )
                                                                 )
-                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                                )
+                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         Stream<Statement> updateMapObjectFieldStatementStream = mapObjectTypeFieldRelationStatementStream(
@@ -536,8 +547,10 @@ public class GraphQLMutationToStatements {
                                                                                 level + 1
                                                                         )
                                                                 )
-                                                ).orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                                )
+                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         Stream<Statement> listInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
@@ -567,7 +580,8 @@ public class GraphQLMutationToStatements {
                                                                         .map(dbValueUtil::scalarValueToDBValue).orElse(null)
                                                         )
                                                 )
-                                ).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                )
+                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
@@ -1431,7 +1445,7 @@ public class GraphQLMutationToStatements {
                     break;
             }
         } else {
-            //TODO
+            throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
         }
         return colDataType;
     }
@@ -1576,7 +1590,6 @@ public class GraphQLMutationToStatements {
                                       List<Column> columnList,
                                       ExpressionList expressionList,
                                       boolean useDuplicate) {
-
         Insert insert = new Insert();
         insert.setTable(table);
         insert.setColumns(columnList);
@@ -1602,7 +1615,6 @@ public class GraphQLMutationToStatements {
                                             List<Column> columnList,
                                             Select select,
                                             boolean useDuplicate) {
-
         Insert insert = new Insert();
         insert.setTable(table);
         insert.setColumns(columnList);
@@ -1625,7 +1637,6 @@ public class GraphQLMutationToStatements {
                                       List<Column> columnList,
                                       List<Expression> expressionList,
                                       Expression where) {
-
         Update update = new Update();
         update.setTable(table);
         update.setColumns(columnList);
@@ -1635,7 +1646,6 @@ public class GraphQLMutationToStatements {
     }
 
     protected Delete deleteExpression(Table table, Expression where) {
-
         Delete delete = new Delete();
         delete.setTable(table);
         delete.setWhere(where);
@@ -1658,7 +1668,6 @@ public class GraphQLMutationToStatements {
         subEqualsTo.setRightExpression(idFieldValueExpression);
         subBody.setWhere(subEqualsTo);
         subSelect.setSelectBody(subBody);
-
         return subSelect;
     }
 }

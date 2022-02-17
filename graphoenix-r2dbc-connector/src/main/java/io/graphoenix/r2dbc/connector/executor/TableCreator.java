@@ -4,6 +4,7 @@ import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
 import io.r2dbc.spi.Batch;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Stream;
@@ -20,7 +21,11 @@ public class TableCreator {
 
     public Mono<Integer> createTable(String sql) {
         return connectionCreator.createConnection()
-                .flatMap(connection -> Mono.from(connection.createStatement(sql).execute()).doFinally(signalType -> connection.close()))
+                .flatMap(connection -> {
+                            Logger.debug("create table:\r\n{}", sql);
+                            return Mono.from(connection.createStatement(sql).execute()).doFinally(signalType -> connection.close());
+                        }
+                )
                 .flatMap(result -> Mono.from(result.getRowsUpdated()));
     }
 
@@ -28,8 +33,13 @@ public class TableCreator {
         return connectionCreator.createConnection()
                 .flatMap(connection -> {
                             Batch batch = connection.createBatch();
-                            sqlStream.forEach(batch::add);
-                            return Mono.from(batch.execute()).doFinally(signalType -> connection.close())
+                            sqlStream.forEach(sql -> {
+                                        Logger.debug("create table:\r\n{}", sql);
+                                        batch.add(sql);
+                                    }
+                            );
+                            return Mono.from(batch.execute())
+                                    .doFinally(signalType -> connection.close())
                                     .flatMap(result -> Mono.from(result.getRowsUpdated()));
                         }
                 );

@@ -6,6 +6,7 @@ import io.graphoenix.mysql.translator.GraphQLQueryToSelect;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import java.util.stream.Stream;
 
@@ -24,26 +25,36 @@ public class OperationToSQLConvertHandler {
     }
 
     public String queryToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        return graphqlQueryToSelect.createSelectSQL(operationDefinitionContext);
+        Logger.debug("translate query operation:{}\r\n{}", operationDefinitionContext.name().getText(), operationDefinitionContext.name().getText());
+        String selectSQL = graphqlQueryToSelect.createSelectSQL(operationDefinitionContext);
+        Logger.debug("translate to sql:\r\n{}", selectSQL);
+        return selectSQL;
     }
 
     public Stream<Tuple2<String, String>> querySelectionsToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        Logger.debug("translate query operation:{}\r\n{}", operationDefinitionContext.name().getText(), operationDefinitionContext.name().getText());
         return graphqlQueryToSelect.createSelectsSQL(operationDefinitionContext);
     }
 
     public Stream<String> mutationToStatements(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        Logger.debug("translate mutation operation:{}\r\n{}", operationDefinitionContext.name().getText(), operationDefinitionContext.name().getText());
         return graphqlMutationToStatements.createStatementsSQL(operationDefinitionContext);
     }
 
     public String queryToSelect(String graphQL) {
-        return graphqlQueryToSelect.createSelectSQL(graphQL);
+        Logger.debug("translate query operation:\r\n{}", graphQL);
+        String selectSQL = graphqlQueryToSelect.createSelectSQL(graphQL);
+        Logger.debug("translate to sql:\r\n{}", selectSQL);
+        return selectSQL;
     }
 
     public Stream<Tuple2<String, String>> querySelectionsToSelects(String graphQL) {
+        Logger.debug("translate query operation:\r\n{}", graphQL);
         return graphqlQueryToSelect.createSelectsSQL(graphQL);
     }
 
     public Stream<String> mutationToStatements(String graphQL) {
+        Logger.debug("translate mutation operation:\r\n{}", graphQL);
         return graphqlMutationToStatements.createStatementsSQL(graphQL);
     }
 }
