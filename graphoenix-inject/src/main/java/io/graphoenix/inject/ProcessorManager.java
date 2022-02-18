@@ -195,8 +195,7 @@ public class ProcessorManager {
             if (resource != null) {
                 return Optional.of(resource);
             }
-        } catch (IOException e) {
-            Logger.warn(e);
+        } catch (IOException ignored) {
         }
         return Optional.empty();
     }
