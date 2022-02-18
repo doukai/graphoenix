@@ -5,12 +5,14 @@ import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class ConnectionFactoryCreator {
 
     private final R2DBCConfig r2DBCConfig;
 
+    @Inject
     public ConnectionFactoryCreator(R2DBCConfig r2DBCConfig) {
         this.r2DBCConfig = r2DBCConfig;
     }
