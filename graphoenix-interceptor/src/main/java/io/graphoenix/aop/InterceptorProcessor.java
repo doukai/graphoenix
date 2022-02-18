@@ -268,7 +268,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                 processorManager.getQualifiedNameByDeclaration(componentClassDeclaration),
                                                 methodDeclaration.getNameAsString(),
                                                 processorManager.getQualifiedNameByDeclaration(invokeClassOrInterfaceDeclaration),
-                                                invokeMethodDeclaration,
+                                                invokeMethodDeclaration.getNameAsString(),
                                                 annotationName
                                         );
                                     }
@@ -488,7 +488,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                 processorManager.getQualifiedNameByDeclaration(componentClassDeclaration),
                                                 constructorDeclaration.getNameAsString(),
                                                 processorManager.getQualifiedNameByDeclaration(invokeClassOrInterfaceDeclaration),
-                                                invokeMethodDeclaration,
+                                                invokeMethodDeclaration.getNameAsString(),
                                                 annotationName
                                         );
                                     }
