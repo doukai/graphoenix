@@ -51,7 +51,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.inject.error.InjectionErrorType.CANNOT_GET_PROXY_COMPILATION_UNIT;
+import static io.graphoenix.inject.error.InjectionErrorType.CANNOT_GET_COMPILATION_UNIT;
 import static io.graphoenix.inject.error.InjectionErrorType.CANNOT_PARSER_SOURCE_CODE;
 import static io.graphoenix.inject.error.InjectionErrorType.PUBLIC_ANNOTATION_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionErrorType.PUBLIC_CLASS_NOT_EXIST;
@@ -195,8 +195,7 @@ public class ProcessorManager {
             if (resource != null) {
                 return Optional.of(resource);
             }
-        } catch (IOException e) {
-            Logger.warn(e);
+        } catch (IOException ignored) {
         }
         return Optional.empty();
     }
@@ -209,7 +208,7 @@ public class ProcessorManager {
     }
 
     public CompilationUnit getCompilationUnitBySourceCode(TypeElement typeElement) {
-        return getCompilationUnitBySourceCodeOptional(typeElement).orElseThrow(() -> new InjectionProblem(InjectionErrorType.CANNOT_GET_PROXY_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
+        return getCompilationUnitBySourceCodeOptional(typeElement).orElseThrow(() -> new InjectionProblem(InjectionErrorType.CANNOT_GET_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
     }
 
     public Optional<CompilationUnit> getCompilationUnitBySourceCodeOptional(TypeElement typeElement) {
@@ -221,23 +220,23 @@ public class ProcessorManager {
     }
 
     public CompilationUnit getCompilationUnitByQualifiedName(String qualifiedName) {
-        return getCompilationUnitByQualifiedNameOptional(qualifiedName).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(qualifiedName)));
+        return getCompilationUnitByQualifiedNameOptional(qualifiedName).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(qualifiedName)));
     }
 
     public CompilationUnit getCompilationUnitByResolvedReferenceType(ResolvedReferenceType resolvedReferenceType) {
-        return getCompilationUnitByResolvedReferenceTypeOptional(resolvedReferenceType).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(resolvedReferenceType.getQualifiedName())));
+        return getCompilationUnitByResolvedReferenceTypeOptional(resolvedReferenceType).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(resolvedReferenceType.getQualifiedName())));
     }
 
     public CompilationUnit getCompilationUnitByType(Type type) {
-        return getCompilationUnitByTypeOptional(type).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(getQualifiedNameByType(type))));
+        return getCompilationUnitByTypeOptional(type).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(getQualifiedNameByType(type))));
     }
 
     public CompilationUnit getCompilationUnitByClassOrInterfaceType(ClassOrInterfaceType type) {
-        return getCompilationUnitByClassOrInterfaceTypeOptional(type).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(getQualifiedNameByType(type))));
+        return getCompilationUnitByClassOrInterfaceTypeOptional(type).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(getQualifiedNameByType(type))));
     }
 
     public CompilationUnit getCompilationUnitByAnnotationExpr(AnnotationExpr annotationExpr) {
-        return getCompilationUnitByAnnotationExprOptional(annotationExpr).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(getQualifiedNameByAnnotationExpr(annotationExpr))));
+        return getCompilationUnitByAnnotationExprOptional(annotationExpr).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(getQualifiedNameByAnnotationExpr(annotationExpr))));
     }
 
     public Optional<CompilationUnit> getCompilationUnitByQualifiedNameOptional(String qualifiedName) {

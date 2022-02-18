@@ -67,7 +67,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.inject.error.InjectionErrorType.CANNOT_GET_PROXY_COMPILATION_UNIT;
+import static io.graphoenix.inject.error.InjectionErrorType.CANNOT_GET_COMPILATION_UNIT;
 import static io.graphoenix.inject.error.InjectionErrorType.COMPONENT_GET_METHOD_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionErrorType.CONSTRUCTOR_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionErrorType.MODULE_PROVIDERS_METHOD_NOT_EXIST;
@@ -196,7 +196,7 @@ public class InjectProcessor extends AbstractProcessor {
     }
 
     private CompilationUnit buildComponentProxy(TypeElement typeElement) {
-        return processorManager.parse(typeElement).map(this::buildComponentProxy).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
+        return processorManager.parse(typeElement).map(this::buildComponentProxy).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
     }
 
     private CompilationUnit buildComponentProxy(CompilationUnit componentCompilationUnit) {
@@ -273,7 +273,7 @@ public class InjectProcessor extends AbstractProcessor {
     }
 
     private Stream<CompilationUnit> buildProducesComponentProxyStream(TypeElement typeElement) {
-        return processorManager.parse(typeElement).map(this::buildProducesComponentProxyStream).orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
+        return processorManager.parse(typeElement).map(this::buildProducesComponentProxyStream).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
     }
 
     private Stream<CompilationUnit> buildProducesComponentProxyStream(CompilationUnit componentCompilationUnit) {
@@ -434,7 +434,7 @@ public class InjectProcessor extends AbstractProcessor {
                                 .anyMatch(classOrInterfaceType -> classOrInterfaceType.getNameAsString().equals(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString()))
                 )
                 .findFirst()
-                .orElseThrow(() -> new InjectionProblem(CANNOT_GET_PROXY_COMPILATION_UNIT.bind(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString())));
+                .orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString())));
     }
 
     private Stream<CompilationUnit> buildProducesModuleStream(Set<? extends Element> singletonSet,
