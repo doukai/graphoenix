@@ -10,7 +10,7 @@ public enum InjectionErrorType {
     PROVIDER_TYPE_NOT_EXIST(-106, "can't find type argument of provider"),
     MODULE_PROVIDERS_METHOD_NOT_EXIST(-107, "can't find module class providers method of %s"),
     COMPONENT_GET_METHOD_NOT_EXIST(-108, "can't find component class get method of %s"),
-    CANNOT_GET_PROXY_COMPILATION_UNIT(-109, "can't get proxy compilation unit of %s"),
+    CANNOT_GET_COMPILATION_UNIT(-109, "can't get compilation unit of %s"),
 
     CONFIG_PROPERTIES_PREFIX_NOT_EXIST(-111, "prefix not exist in @ConfigProperties in: %s"),
     CONFIG_PROPERTY_NOT_EXIST(-112, "@ConfigProperty not exist on: %s"),
