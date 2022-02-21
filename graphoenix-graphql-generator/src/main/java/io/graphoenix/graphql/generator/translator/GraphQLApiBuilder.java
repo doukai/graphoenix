@@ -35,6 +35,7 @@ public class GraphQLApiBuilder {
                 .setName(elementManager.getNameFromElement(executableElement))
                 .setDescription(elementManager.getDescriptionFromElement(executableElement))
                 .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
+                .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
                 .setArguments(
                         executableElement.getParameters().stream()
                                 .map(variableElement ->
@@ -78,6 +79,7 @@ public class GraphQLApiBuilder {
                         .setName(elementManager.getNameFromElement(executableElement))
                         .setDescription(elementManager.getDescriptionFromElement(executableElement))
                         .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
+                        .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
                         .setDirectives(
                                 Stream.of(new Directive()
                                                 .setName("invoke")

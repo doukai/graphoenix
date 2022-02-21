@@ -5,6 +5,7 @@ import io.graphoenix.showcase.mysql.dto.objectType.Organization;
 import io.graphoenix.showcase.mysql.dto.objectType.Role;
 import io.graphoenix.showcase.mysql.dto.objectType.User;
 import io.graphoenix.showcase.mysql.spi.OperationTest;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -15,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 @GraphQLApi
+@ApplicationScoped
 public class ApiTest {
 
     protected Provider<OperationTest> operationTest;

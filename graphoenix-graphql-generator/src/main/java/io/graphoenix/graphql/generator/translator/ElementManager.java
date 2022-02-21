@@ -3,6 +3,7 @@ package io.graphoenix.graphql.generator.translator;
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.graphql.generator.document.InputValue;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -12,6 +13,7 @@ import org.eclipse.microprofile.graphql.Description;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
+import org.eclipse.microprofile.graphql.Source;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -192,6 +194,22 @@ public class ElementManager {
             return typeName.concat("!");
         } else {
             return typeName;
+        }
+    }
+
+    public Set<InputValue> executableElementParametersToInputValues(ExecutableElement executableElement, Types typeUtils) {
+        if (executableElement.getParameters() != null) {
+            return executableElement.getParameters().stream()
+                    .filter(variableElement -> variableElement.getAnnotation(Source.class) == null)
+                    .map(variableElement ->
+                            new InputValue().setName(getNameFromElement(variableElement))
+                                    .setDefaultValue(getDefaultValueFromElement(variableElement))
+                                    .setTypeName(variableElementToTypeName(variableElement, typeUtils))
+                                    .setDescription(getDescriptionFromElement(variableElement))
+                    )
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        } else {
+            return new LinkedHashSet<>();
         }
     }
 }

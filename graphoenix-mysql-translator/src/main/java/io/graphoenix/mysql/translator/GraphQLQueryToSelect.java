@@ -124,7 +124,8 @@ public class GraphQLQueryToSelect {
                                                         objectSelectionToSelect(operationTypeDefinitionContext.typeName().name().getText(), selectionContext.field().selectionSet().selection())
                                         )
                                 )
-                        ).filter(result -> result._2().isPresent())
+                        )
+                        .filter(result -> result._2().isPresent())
                         .map(result -> Tuple.of(result._1(), result._2().get()));
             }
         }

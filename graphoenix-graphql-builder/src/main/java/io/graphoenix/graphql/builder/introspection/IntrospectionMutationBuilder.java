@@ -136,6 +136,8 @@ public class IntrospectionMutationBuilder {
         if (level == 0) {
             if (objectTypeDefinitionContext.implementsInterfaces() != null) {
                 type.setInterfaces(getInterfaceTypes(objectTypeDefinitionContext.implementsInterfaces(), level));
+            } else {
+                type.setInterfaces(new LinkedHashSet<>());
             }
 
             if (objectTypeDefinitionContext.description() != null) {
@@ -166,7 +168,10 @@ public class IntrospectionMutationBuilder {
         if (level == 0) {
             if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
                 type.setInterfaces(getInterfaceTypes(interfaceTypeDefinitionContext.implementsInterfaces(), level));
+            } else {
+                type.setInterfaces(new LinkedHashSet<>());
             }
+
             if (interfaceTypeDefinitionContext.description() != null) {
                 type.setDescription(interfaceTypeDefinitionContext.description().getText());
             }
@@ -188,6 +193,8 @@ public class IntrospectionMutationBuilder {
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             field.setArgs(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                     .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toCollection(LinkedHashSet::new)));
+        } else {
+            field.setArgs(new LinkedHashSet<>());
         }
         field.setType(typeContextToType(fieldDefinitionContext.type(), level));
         return field;
@@ -344,6 +351,8 @@ public class IntrospectionMutationBuilder {
         if (directiveDefinitionContext.argumentsDefinition() != null) {
             directive.setArgs(directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                     .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toCollection(LinkedHashSet::new)));
+        } else {
+            directive.setArgs(new LinkedHashSet<>());
         }
 
         Set<__DirectiveLocation> directiveLocationList = new LinkedHashSet<>();

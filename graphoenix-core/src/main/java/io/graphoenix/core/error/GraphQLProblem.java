@@ -1,8 +1,8 @@
 package io.graphoenix.core.error;
 
 import com.google.gson.GsonBuilder;
-import io.graphoenix.spi.dto.GraphQLLocation;
 import io.graphoenix.spi.dto.GraphQLError;
+import io.graphoenix.spi.dto.GraphQLLocation;
 import org.zalando.problem.AbstractThrowableProblem;
 import org.zalando.problem.gson.ProblemAdapterFactory;
 
@@ -19,24 +19,25 @@ public class GraphQLProblem extends AbstractThrowableProblem {
 
     public static final String TYPE_VALUE = "https://spec.graphql.org";
     public static final URI TYPE = URI.create(TYPE_VALUE);
+    public static GsonBuilder gsonBuilder;
 
     private final List<GraphQLError> errors;
 
     public GraphQLProblem() {
         super(TYPE, "graphQL errors", BAD_REQUEST);
         this.errors = new ArrayList<>();
+        gsonBuilder = new GsonBuilder()
+                .registerTypeAdapterFactory(new ProblemAdapterFactory().registerSubtype(TYPE, this.getClass()))
+                .setPrettyPrinting();
     }
 
     public GraphQLProblem(GraphQLErrorType graphQLErrorType) {
-        super(TYPE, "graphQL errors", BAD_REQUEST);
-        this.errors = new ArrayList<>();
+        this();
         this.push(graphQLErrorType);
     }
 
-
     public GraphQLProblem(GraphQLErrorType graphQLErrorType, int line, int column) {
-        super(TYPE, "graphQL errors", BAD_REQUEST);
-        this.errors = new ArrayList<>();
+        this();
         this.push(graphQLErrorType, line, column);
     }
 
@@ -63,10 +64,6 @@ public class GraphQLProblem extends AbstractThrowableProblem {
 
     @Override
     public String toString() {
-        return new GsonBuilder()
-                .registerTypeAdapterFactory(new ProblemAdapterFactory().registerSubtype(TYPE, this.getClass()))
-                .setPrettyPrinting()
-                .create()
-                .toJson(this);
+        return gsonBuilder.create().toJson(this);
     }
 }

@@ -25,19 +25,19 @@ public class OperationToSQLConvertHandler {
     }
 
     public String queryToSelect(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        Logger.debug("translate query operation:{}\r\n{}", operationDefinitionContext.name().getText(), operationDefinitionContext.name().getText());
+        Logger.debug("translate query operation:\r\n{}", operationDefinitionContext.getText());
         String selectSQL = graphqlQueryToSelect.createSelectSQL(operationDefinitionContext);
         Logger.debug("translate to sql:\r\n{}", selectSQL);
         return selectSQL;
     }
 
     public Stream<Tuple2<String, String>> querySelectionsToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        Logger.debug("translate query operation:{}\r\n{}", operationDefinitionContext.name().getText(), operationDefinitionContext.name().getText());
+        Logger.debug("translate query operation:\r\n{}", operationDefinitionContext.getText());
         return graphqlQueryToSelect.createSelectsSQL(operationDefinitionContext);
     }
 
     public Stream<String> mutationToStatements(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        Logger.debug("translate mutation operation:{}\r\n{}", operationDefinitionContext.name().getText(), operationDefinitionContext.name().getText());
+        Logger.debug("translate mutation operation:\r\n{}", operationDefinitionContext.getText());
         return graphqlMutationToStatements.createStatementsSQL(operationDefinitionContext);
     }
 

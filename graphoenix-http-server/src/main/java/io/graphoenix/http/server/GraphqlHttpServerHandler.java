@@ -24,6 +24,7 @@ import org.tinylog.Logger;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_REQUEST;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -67,7 +68,7 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
             GraphQLRequest requestBody = requestHandler.handle(request);
             Logger.info("Handle http query:{}", requestBody.getQuery());
             OperationType type = graphQLOperationRouter.getType(requestBody.getQuery());
-            JsonElement jsonResult = null;
+            JsonElement jsonResult;
             switch (type) {
                 case QUERY:
                     jsonResult = queryHandler.query(requestBody.getQuery(), requestBody.getVariables()).block();
@@ -75,17 +76,19 @@ public class GraphqlHttpServerHandler extends SimpleChannelInboundHandler<FullHt
                 case MUTATION:
                     jsonResult = mutationHandler.mutation(requestBody.getQuery(), requestBody.getVariables()).block();
                     break;
+                default:
+                    throw new GraphQLProblem(UNSUPPORTED_OPERATION_TYPE);
             }
-            response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.fromJson(jsonResult).getBytes(StandardCharsets.UTF_8)));
+            response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.success(jsonResult).getBytes(StandardCharsets.UTF_8)));
             response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
-        } catch (GraphQLProblem e) {
-            e.printStackTrace();
-            response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(e.toString().getBytes(StandardCharsets.UTF_8)));
+        } catch (GraphQLProblem problem) {
+            Logger.error(problem);
+            response = new DefaultFullHttpResponse(HTTP_1_1, BAD_REQUEST, Unpooled.wrappedBuffer(GRAPHQL_RESPONSE_UTIL.error(problem).getBytes(StandardCharsets.UTF_8)));
             response.headers().setInt(CONTENT_LENGTH, response.content().readableBytes());
             response.headers().set(CONTENT_TYPE, MediaType.JSON_UTF_8);
         } catch (Exception exception) {
-            exception.printStackTrace();
+            Logger.error(exception);
         }
 
         boolean keepAlive = HttpUtil.isKeepAlive(request);
