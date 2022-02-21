@@ -733,7 +733,7 @@ public class TypeSpecBuilder {
                             .collect(Collectors.toList())
             );
         }
-        Logger.info("annotation {}Expression{} build success", layer, objectTypeDefinitionContext.name().getText());
+        Logger.info("annotation {}Expression{} build success", objectTypeDefinitionContext.name().getText(), layer);
         return builder.build();
     }
 
@@ -778,7 +778,7 @@ public class TypeSpecBuilder {
                                                     .defaultValue("$L", "{}")
                                                     .build()
                                     );
-                            Logger.info("annotation {}Expressions{} build success", layer, objectTypeDefinitionContext.name().getText());
+                            Logger.info("annotation {}Expressions{} build success", objectTypeDefinitionContext.name().getText(), layer);
                             return builder.build();
                         }
                 );
@@ -857,7 +857,7 @@ public class TypeSpecBuilder {
                                                 .collect(Collectors.toList())
                                 );
                             }
-                            Logger.info("annotation {}Input{} build success", layer, objectTypeDefinitionContext.name().getText());
+                            Logger.info("annotation {}Input{} build success", objectTypeDefinitionContext.name().getText(), layer);
                             return builder.build();
                         }
                 );
