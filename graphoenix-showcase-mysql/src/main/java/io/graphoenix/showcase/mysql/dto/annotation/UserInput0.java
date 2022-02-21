@@ -16,6 +16,8 @@ public @interface UserInput0 {
 
   Sex sex() default Sex.MAN;
 
+  String __typename() default "";
+
   String[] phones() default {};
 
   String login() default "";
@@ -41,6 +43,8 @@ public @interface UserInput0 {
   String $sex() default "";
 
   String $roles() default "";
+
+  String $__typename() default "";
 
   String $phones() default "";
 

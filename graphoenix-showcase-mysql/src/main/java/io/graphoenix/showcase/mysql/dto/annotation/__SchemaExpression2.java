@@ -20,6 +20,8 @@ public @interface __SchemaExpression2 {
 
   String[] subscriptionTypeName() default {};
 
+  String[] __typename() default {};
+
   String[] queryTypeName() default {};
 
   String[] id() default {};
@@ -31,6 +33,8 @@ public @interface __SchemaExpression2 {
   String[] $mutationTypeName() default {};
 
   String[] $subscriptionTypeName() default {};
+
+  String[] $__typename() default {};
 
   String[] $queryTypeName() default {};
 

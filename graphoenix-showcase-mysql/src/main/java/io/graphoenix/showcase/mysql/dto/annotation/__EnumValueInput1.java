@@ -15,6 +15,8 @@ public @interface __EnumValueInput1 {
 
   boolean isDeprecated() default false;
 
+  String __typename() default "";
+
   String name() default "";
 
   String description() default "";
@@ -28,6 +30,8 @@ public @interface __EnumValueInput1 {
   String $deprecationReason() default "";
 
   String $isDeprecated() default "";
+
+  String $__typename() default "";
 
   String $name() default "";
 

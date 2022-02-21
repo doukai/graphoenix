@@ -17,6 +17,8 @@ public @interface __SchemaInput2 {
 
   String subscriptionTypeName() default "";
 
+  String __typename() default "";
+
   String queryTypeName() default "";
 
   String id() default "";
@@ -36,6 +38,8 @@ public @interface __SchemaInput2 {
   String $mutationType() default "";
 
   String $subscriptionTypeName() default "";
+
+  String $__typename() default "";
 
   String $queryTypeName() default "";
 

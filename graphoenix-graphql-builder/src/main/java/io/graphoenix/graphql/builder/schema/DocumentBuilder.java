@@ -19,6 +19,7 @@ import io.graphoenix.graphql.generator.document.ObjectType;
 import io.graphoenix.graphql.generator.document.ScalarType;
 import io.graphoenix.graphql.generator.document.Schema;
 import io.graphoenix.graphql.generator.operation.Argument;
+import io.graphoenix.graphql.generator.operation.StringValue;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -27,10 +28,7 @@ import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,7 +73,7 @@ public class DocumentBuilder {
 
     public Document buildDocument() throws IOException {
         manager.getObjects()
-                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true))
+                .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
         buildObjectExpressions().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
 
@@ -117,10 +115,10 @@ public class DocumentBuilder {
     }
 
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return buildObject(objectTypeDefinitionContext, false, false);
+        return buildObject(objectTypeDefinitionContext, false, false, false);
     }
 
-    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface, boolean buildArgument) {
+    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface, boolean buildArgument, boolean buildTypeNameField) {
         ObjectType objectType = new ObjectType()
                 .setName(objectTypeDefinitionContext.name().getText())
                 .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
@@ -140,6 +138,9 @@ public class DocumentBuilder {
 
         if (buildInterface) {
             objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+        }
+        if (buildTypeNameField) {
+            objectType.addField(buildTypeNameFiled(objectTypeDefinitionContext));
         }
         return objectType;
     }
@@ -203,6 +204,24 @@ public class DocumentBuilder {
                     .addArgument(new InputValue().setName("in").setTypeName("[".concat(manager.getFieldTypeName(fieldDefinitionContext.type())).concat("]")));
         }
         return field;
+    }
+
+    public Field buildTypeNameFiled(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return new Field().setName("__typename")
+                .setTypeName("String")
+                .setArguments(new LinkedHashSet<>())
+                .setDirectives(
+                        Collections.singleton(
+                                new Directive()
+                                        .setName("dataType")
+                                        .addArgument(
+                                                new Argument()
+                                                        .setName("default")
+                                                        .setValueWithVariable(new StringValue(objectTypeDefinitionContext.name().getText()))
+                                        )
+                                        .toString()
+                        )
+                );
     }
 
     public EnumValue buildEnumValue(GraphqlParser.EnumValueDefinitionContext enumValueDefinitionContext) {

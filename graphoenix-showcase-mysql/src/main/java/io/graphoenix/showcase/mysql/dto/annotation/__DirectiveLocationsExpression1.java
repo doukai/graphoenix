@@ -21,6 +21,8 @@ public @interface __DirectiveLocationsExpression1 {
 
   __DirectiveLocation[] directiveLocation() default {};
 
+  String[] __typename() default {};
+
   String[] id() default {};
 
   int[] version() default {};
@@ -30,6 +32,8 @@ public @interface __DirectiveLocationsExpression1 {
   String[] $isDeprecated() default {};
 
   String[] $directiveLocation() default {};
+
+  String[] $__typename() default {};
 
   String[] $id() default {};
 

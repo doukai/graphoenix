@@ -40,6 +40,8 @@ public class __TypeInput {
 
   private Boolean isDeprecated;
 
+  private String __typename;
+
   public String getName() {
     return this.name;
   }
@@ -142,5 +144,13 @@ public class __TypeInput {
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
   }
 }

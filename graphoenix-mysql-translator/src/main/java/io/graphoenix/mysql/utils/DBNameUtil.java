@@ -35,7 +35,7 @@ public class DBNameUtil {
         return String.format("%s=%s", CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, argumentName), stringValueToDBVarchar(CharMatcher.anyOf("\"").trimFrom(argumentValue)));
     }
 
-    public String directiveTocColumnDefinition(String argumentName, String argumentValue) {
+    public String directiveToColumnDefinition(String argumentName, String argumentValue) {
         return String.format("%s %s", CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, argumentName), stringValueToDBVarchar(CharMatcher.anyOf("\"").trimFrom(argumentValue)));
     }
 

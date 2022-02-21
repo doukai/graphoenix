@@ -21,6 +21,8 @@ public @interface __DirectiveExpression2 {
 
   int[] schemaId() default {};
 
+  String[] __typename() default {};
+
   String[] name() default {};
 
   String[] description() default {};
@@ -38,6 +40,8 @@ public @interface __DirectiveExpression2 {
   String[] $isDeprecated() default {};
 
   String[] $schemaId() default {};
+
+  String[] $__typename() default {};
 
   String[] $name() default {};
 

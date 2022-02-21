@@ -19,6 +19,8 @@ public @interface __TypeExpression2 {
 
   __TypeKind[] kind() default {};
 
+  String[] __typename() default {};
+
   String[] description() default {};
 
   int[] version() default {};
@@ -32,6 +34,8 @@ public @interface __TypeExpression2 {
   String[] $isDeprecated() default {};
 
   String[] $kind() default {};
+
+  String[] $__typename() default {};
 
   String[] $description() default {};
 

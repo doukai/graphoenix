@@ -20,6 +20,8 @@ public @interface __InputValueExpression2 {
 
   String[] defaultValue() default {};
 
+  String[] __typename() default {};
+
   String[] name() default {};
 
   String[] typeName() default {};
@@ -39,6 +41,8 @@ public @interface __InputValueExpression2 {
   String[] $isDeprecated() default {};
 
   String[] $defaultValue() default {};
+
+  String[] $__typename() default {};
 
   String[] $name() default {};
 

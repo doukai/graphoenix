@@ -18,6 +18,8 @@ public @interface __FieldExpression1 {
 
   boolean[] isDeprecated() default {};
 
+  String[] __typename() default {};
+
   String[] name() default {};
 
   String[] typeName() default {};
@@ -33,6 +35,8 @@ public @interface __FieldExpression1 {
   String[] $deprecationReason() default {};
 
   String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 
   String[] $name() default {};
 

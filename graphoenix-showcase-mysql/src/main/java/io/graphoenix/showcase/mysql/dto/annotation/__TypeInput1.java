@@ -16,6 +16,8 @@ public @interface __TypeInput1 {
 
   __TypeKind kind() default __TypeKind.SCALAR;
 
+  String __typename() default "";
+
   String description() default "";
 
   int version() default 0;
@@ -33,6 +35,8 @@ public @interface __TypeInput1 {
   String $possibleTypes() default "";
 
   String $kind() default "";
+
+  String $__typename() default "";
 
   String $description() default "";
 

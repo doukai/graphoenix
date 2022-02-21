@@ -18,6 +18,8 @@ public @interface UserRoleExpression2 {
 
   int[] roleId() default {};
 
+  String[] __typename() default {};
+
   String[] id() default {};
 
   int[] userId() default {};
@@ -27,6 +29,8 @@ public @interface UserRoleExpression2 {
   String[] $isDeprecated() default {};
 
   String[] $roleId() default {};
+
+  String[] $__typename() default {};
 
   String[] $id() default {};
 

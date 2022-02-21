@@ -67,6 +67,7 @@ directive @dataType(
     type: String
     length: Int
     decimals: Int
+    default: String
 ) on FIELD_DEFINITION
 
 directive @map(

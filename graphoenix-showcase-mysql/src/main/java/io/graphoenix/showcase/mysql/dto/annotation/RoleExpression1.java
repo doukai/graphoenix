@@ -16,6 +16,8 @@ public @interface RoleExpression1 {
 
   boolean[] isDeprecated() default {};
 
+  String[] __typename() default {};
+
   String[] name() default {};
 
   String[] id() default {};
@@ -23,6 +25,8 @@ public @interface RoleExpression1 {
   int[] version() default {};
 
   String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 
   String[] $name() default {};
 

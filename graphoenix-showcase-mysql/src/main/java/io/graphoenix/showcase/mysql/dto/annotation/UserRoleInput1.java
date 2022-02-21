@@ -15,6 +15,8 @@ public @interface UserRoleInput1 {
 
   int roleId() default 0;
 
+  String __typename() default "";
+
   String id() default "";
 
   int userId() default 0;
@@ -24,6 +26,8 @@ public @interface UserRoleInput1 {
   String $isDeprecated() default "";
 
   String $roleId() default "";
+
+  String $__typename() default "";
 
   String $id() default "";
 

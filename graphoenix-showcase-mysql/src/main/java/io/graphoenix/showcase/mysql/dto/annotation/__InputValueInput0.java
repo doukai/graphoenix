@@ -17,6 +17,8 @@ public @interface __InputValueInput0 {
 
   String defaultValue() default "";
 
+  String __typename() default "";
+
   String name() default "";
 
   String typeName() default "";
@@ -36,6 +38,8 @@ public @interface __InputValueInput0 {
   String $isDeprecated() default "";
 
   String $defaultValue() default "";
+
+  String $__typename() default "";
 
   String $name() default "";
 

@@ -16,6 +16,8 @@ public @interface __TypeInterfacesExpression0 {
 
   boolean[] isDeprecated() default {};
 
+  String[] __typename() default {};
+
   String[] typeName() default {};
 
   String[] id() default {};
@@ -25,6 +27,8 @@ public @interface __TypeInterfacesExpression0 {
   int[] version() default {};
 
   String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 
   String[] $typeName() default {};
 

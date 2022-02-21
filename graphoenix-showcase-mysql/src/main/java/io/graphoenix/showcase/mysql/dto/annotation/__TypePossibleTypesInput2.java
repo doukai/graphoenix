@@ -13,6 +13,8 @@ import java.lang.annotation.Target;
 public @interface __TypePossibleTypesInput2 {
   boolean isDeprecated() default false;
 
+  String __typename() default "";
+
   String typeName() default "";
 
   String possibleTypeName() default "";
@@ -22,6 +24,8 @@ public @interface __TypePossibleTypesInput2 {
   int version() default 0;
 
   String $isDeprecated() default "";
+
+  String $__typename() default "";
 
   String $typeName() default "";
 

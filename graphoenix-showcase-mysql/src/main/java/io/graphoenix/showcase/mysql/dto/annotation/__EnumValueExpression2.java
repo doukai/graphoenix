@@ -18,6 +18,8 @@ public @interface __EnumValueExpression2 {
 
   boolean[] isDeprecated() default {};
 
+  String[] __typename() default {};
+
   String[] name() default {};
 
   String[] description() default {};
@@ -31,6 +33,8 @@ public @interface __EnumValueExpression2 {
   String[] $deprecationReason() default {};
 
   String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 
   String[] $name() default {};
 

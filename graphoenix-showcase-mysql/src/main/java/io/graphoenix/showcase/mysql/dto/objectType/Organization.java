@@ -30,6 +30,8 @@ public class Organization implements Meta {
 
   private Boolean isDeprecated;
 
+  private String __typename;
+
   private Integer orgLevel2;
 
   private Collection<Integer> orgLevel3;
@@ -98,6 +100,14 @@ public class Organization implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
   }
 
   public Integer getOrgLevel2() {

@@ -18,6 +18,8 @@ public @interface UserPhonesExpression0 {
 
   String[] phone() default {};
 
+  String[] __typename() default {};
+
   String[] id() default {};
 
   int[] userId() default {};
@@ -27,6 +29,8 @@ public @interface UserPhonesExpression0 {
   String[] $isDeprecated() default {};
 
   String[] $phone() default {};
+
+  String[] $__typename() default {};
 
   String[] $id() default {};
 

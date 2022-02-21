@@ -14,9 +14,15 @@ import java.lang.annotation.Target;
 public @interface OrganizationExpression1 {
   Operator opr() default Operator.EQ;
 
-  int[] aboveId() default {};
-
   boolean[] isDeprecated() default {};
+
+  String[] __typename() default {};
+
+  boolean[] roleDisable() default {};
+
+  int[] version() default {};
+
+  int[] aboveId() default {};
 
   String[] name() default {};
 
@@ -24,15 +30,17 @@ public @interface OrganizationExpression1 {
 
   int[] orgLevel3() default {};
 
-  boolean[] roleDisable() default {};
-
   String[] id() default {};
 
-  int[] version() default {};
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
+
+  String[] $roleDisable() default {};
+
+  String[] $version() default {};
 
   String[] $aboveId() default {};
-
-  String[] $isDeprecated() default {};
 
   String[] $name() default {};
 
@@ -40,17 +48,13 @@ public @interface OrganizationExpression1 {
 
   String[] $orgLevel3() default {};
 
-  String[] $roleDisable() default {};
-
   String[] $id() default {};
-
-  String[] $version() default {};
 
   OrganizationExpressions2[] parent() default {};
 
   UserExpressions2[] userByOrg() default {};
 
-  OrganizationExpressions2[] above() default {};
-
   UserExpressions2[] users() default {};
+
+  OrganizationExpressions2[] above() default {};
 }

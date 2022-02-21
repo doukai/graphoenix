@@ -44,6 +44,8 @@ public class __Type implements Meta {
 
   private Boolean isDeprecated;
 
+  private String __typename;
+
   public String getName() {
     return this.name;
   }
@@ -150,5 +152,13 @@ public class __Type implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
   }
 }

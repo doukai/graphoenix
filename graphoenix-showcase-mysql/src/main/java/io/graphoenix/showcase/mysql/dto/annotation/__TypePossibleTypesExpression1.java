@@ -16,6 +16,8 @@ public @interface __TypePossibleTypesExpression1 {
 
   boolean[] isDeprecated() default {};
 
+  String[] __typename() default {};
+
   String[] typeName() default {};
 
   String[] possibleTypeName() default {};
@@ -25,6 +27,8 @@ public @interface __TypePossibleTypesExpression1 {
   int[] version() default {};
 
   String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 
   String[] $typeName() default {};
 

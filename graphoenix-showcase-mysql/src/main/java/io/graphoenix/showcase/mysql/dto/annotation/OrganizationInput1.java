@@ -11,9 +11,15 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface OrganizationInput1 {
-  int aboveId() default 0;
-
   boolean isDeprecated() default false;
+
+  String __typename() default "";
+
+  boolean roleDisable() default false;
+
+  int version() default 0;
+
+  int aboveId() default 0;
 
   String name() default "";
 
@@ -21,19 +27,23 @@ public @interface OrganizationInput1 {
 
   int[] orgLevel3() default {};
 
-  boolean roleDisable() default false;
-
   String id() default "";
 
-  int version() default 0;
-
   String $parent() default "";
-
-  String $aboveId() default "";
 
   String $isDeprecated() default "";
 
   String $userByOrg() default "";
+
+  String $__typename() default "";
+
+  String $roleDisable() default "";
+
+  String $version() default "";
+
+  String $users() default "";
+
+  String $aboveId() default "";
 
   String $above() default "";
 
@@ -43,19 +53,13 @@ public @interface OrganizationInput1 {
 
   String $orgLevel3() default "";
 
-  String $roleDisable() default "";
-
   String $id() default "";
-
-  String $version() default "";
-
-  String $users() default "";
 
   OrganizationInput2 parent() default @OrganizationInput2;
 
   UserInput2[] userByOrg() default {};
 
-  OrganizationInput2 above() default @OrganizationInput2;
-
   UserInput2[] users() default {};
+
+  OrganizationInput2 above() default @OrganizationInput2;
 }

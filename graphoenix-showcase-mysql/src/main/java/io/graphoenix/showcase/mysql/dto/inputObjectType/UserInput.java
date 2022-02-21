@@ -41,6 +41,8 @@ public class UserInput {
 
   private Boolean isDeprecated;
 
+  private String __typename;
+
   public String getId() {
     return this.id;
   }
@@ -143,5 +145,13 @@ public class UserInput {
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public String get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(String __typename) {
+    this.__typename = __typename;
   }
 }

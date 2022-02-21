@@ -37,6 +37,8 @@ public class __TypeExpression {
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
+  private StringExpression __typename;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -144,6 +146,14 @@ public class __TypeExpression {
 
   public void setIncludeDeprecated(Boolean includeDeprecated) {
     this.includeDeprecated = includeDeprecated;
+  }
+
+  public StringExpression get__typename() {
+    return this.__typename;
+  }
+
+  public void set__typename(StringExpression __typename) {
+    this.__typename = __typename;
   }
 
   public Conditional getCond() {

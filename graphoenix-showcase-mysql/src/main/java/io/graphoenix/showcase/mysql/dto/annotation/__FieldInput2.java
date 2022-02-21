@@ -15,6 +15,8 @@ public @interface __FieldInput2 {
 
   boolean isDeprecated() default false;
 
+  String __typename() default "";
+
   String name() default "";
 
   String typeName() default "";
@@ -32,6 +34,8 @@ public @interface __FieldInput2 {
   String $deprecationReason() default "";
 
   String $isDeprecated() default "";
+
+  String $__typename() default "";
 
   String $name() default "";
 

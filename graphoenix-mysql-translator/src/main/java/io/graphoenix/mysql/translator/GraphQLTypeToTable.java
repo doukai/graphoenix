@@ -132,6 +132,10 @@ public class GraphQLTypeToTable {
         if (nonNull) {
             columnSpecs.add("NOT NULL");
         }
+        getDataTypeDirective(fieldDefinitionContext.directives())
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("default")).findFirst())
+                .map(argumentContext -> dbNameUtil.directiveToColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText()))
+                .ifPresent(columnSpecs::add);
         columnDirectiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecs::addAll);
         if (fieldDefinitionContext.description() != null) {
             columnSpecs.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));
@@ -228,7 +232,7 @@ public class GraphQLTypeToTable {
         if (argumentContext.valueWithVariable().BooleanValue() != null) {
             return dbNameUtil.booleanDirectiveTocColumnDefinition(argumentContext.name().getText());
         } else {
-            return dbNameUtil.directiveTocColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
+            return dbNameUtil.directiveToColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText());
         }
     }
 

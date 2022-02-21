@@ -18,6 +18,8 @@ public @interface __DirectiveInput1 {
 
   int schemaId() default 0;
 
+  String __typename() default "";
+
   String name() default "";
 
   String description() default "";
@@ -37,6 +39,8 @@ public @interface __DirectiveInput1 {
   String $isDeprecated() default "";
 
   String $schemaId() default "";
+
+  String $__typename() default "";
 
   String $name() default "";
 

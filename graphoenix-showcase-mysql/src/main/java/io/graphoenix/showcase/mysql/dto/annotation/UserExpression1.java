@@ -19,6 +19,8 @@ public @interface UserExpression1 {
 
   Sex[] sex() default {};
 
+  String[] __typename() default {};
+
   String[] phones() default {};
 
   String[] login() default {};
@@ -42,6 +44,8 @@ public @interface UserExpression1 {
   String[] $isDeprecated() default {};
 
   String[] $sex() default {};
+
+  String[] $__typename() default {};
 
   String[] $phones() default {};
 

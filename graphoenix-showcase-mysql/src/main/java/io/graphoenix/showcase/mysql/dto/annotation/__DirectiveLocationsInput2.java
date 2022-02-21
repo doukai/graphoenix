@@ -18,6 +18,8 @@ public @interface __DirectiveLocationsInput2 {
 
   __DirectiveLocation directiveLocation() default __DirectiveLocation.QUERY;
 
+  String __typename() default "";
+
   String id() default "";
 
   int version() default 0;
@@ -27,6 +29,8 @@ public @interface __DirectiveLocationsInput2 {
   String $isDeprecated() default "";
 
   String $directiveLocation() default "";
+
+  String $__typename() default "";
 
   String $id() default "";
 

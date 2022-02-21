@@ -15,6 +15,8 @@ public @interface UserPhonesInput1 {
 
   String phone() default "";
 
+  String __typename() default "";
+
   String id() default "";
 
   int userId() default 0;
@@ -24,6 +26,8 @@ public @interface UserPhonesInput1 {
   String $isDeprecated() default "";
 
   String $phone() default "";
+
+  String $__typename() default "";
 
   String $id() default "";
 
