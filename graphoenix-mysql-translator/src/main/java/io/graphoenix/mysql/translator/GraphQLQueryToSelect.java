@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.OBJECT_SELECTION_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
@@ -285,7 +286,7 @@ public class GraphQLQueryToSelect {
                                                    int level) {
         SubSelect subSelect = new SubSelect();
         if (selectionContext.field().selectionSet() == null || selectionContext.field().selectionSet().selection().size() == 0) {
-            throw new GraphQLProblem(SELECTION_NOT_EXIST.bind(selectionContext.getText()));
+            throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(fieldDefinitionContext.getText()));
         }
         PlainSelect plainSelect = objectSelectionToPlainSelect(parentTypeName, typeName, fieldDefinitionContext, selectionContext.field().selectionSet().selection(), level);
 
