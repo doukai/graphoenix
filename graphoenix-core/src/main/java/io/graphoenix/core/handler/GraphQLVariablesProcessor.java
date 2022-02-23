@@ -2,7 +2,9 @@ package io.graphoenix.core.handler;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.tinylog.Logger;
 
 import java.util.Map;
@@ -13,6 +15,13 @@ import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_E
 
 @ApplicationScoped
 public class GraphQLVariablesProcessor {
+
+    private final IGraphQLDocumentManager manager;
+
+    @Inject
+    public GraphQLVariablesProcessor(IGraphQLDocumentManager manager) {
+        this.manager = manager;
+    }
 
     public GraphqlParser.OperationDefinitionContext buildVariables(String graphQL, Map<String, String> variables) {
         return buildVariables(DOCUMENT_UTIL.graphqlToOperation(graphQL), variables);
@@ -36,10 +45,34 @@ public class GraphQLVariablesProcessor {
 
     private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, String> variables) {
         if (valueWithVariableContext.variable() != null) {
-            GraphqlParser.ValueContext valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
+            GraphqlParser.ValueWithVariableContext valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
             Logger.debug("replace variable {} to {}", valueWithVariableContext.getChild(valueWithVariableContext.getChildCount() - 1).getText(), valueContext.getText());
             valueWithVariableContext.removeLastChild();
-            valueWithVariableContext.addChild(valueContext);
+            if (valueContext.BooleanValue() != null) {
+                valueContext.BooleanValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.BooleanValue());
+            } else if (valueContext.IntValue() != null) {
+                valueContext.IntValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.IntValue());
+            } else if (valueContext.FloatValue() != null) {
+                valueContext.FloatValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.FloatValue());
+            } else if (valueContext.StringValue() != null) {
+                valueContext.StringValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.StringValue());
+            } else if (valueContext.NullValue() != null) {
+                valueContext.NullValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.NullValue());
+            } else if (valueContext.enumValue() != null) {
+                valueContext.enumValue().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.enumValue());
+            } else if (valueContext.objectValueWithVariable() != null) {
+                valueContext.objectValueWithVariable().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.objectValueWithVariable());
+            } else if (valueContext.arrayValueWithVariable() != null) {
+                valueContext.arrayValueWithVariable().setParent(valueWithVariableContext);
+                valueWithVariableContext.addChild(valueContext.arrayValueWithVariable());
+            }
         } else if (valueWithVariableContext.objectValueWithVariable() != null) {
             valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable()
                     .forEach(objectFieldWithVariableContext -> replaceVariable(objectFieldWithVariableContext.valueWithVariable(), operationDefinitionContext, variables));
@@ -49,7 +82,7 @@ public class GraphQLVariablesProcessor {
         }
     }
 
-    private GraphqlParser.ValueContext getValueByVariable(GraphqlParser.VariableContext variableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, String> variables) {
+    private GraphqlParser.ValueWithVariableContext getValueByVariable(GraphqlParser.VariableContext variableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, String> variables) {
         return operationDefinitionContext.variableDefinitions().variableDefinition().stream()
                 .filter(variableDefinitionContext -> variableDefinitionContext.variable().name().getText().equals(variableContext.name().getText()))
                 .map(variableDefinitionContext -> variableToValue(variableDefinitionContext, variables.get(variableDefinitionContext.variable().name().getText())))
@@ -57,10 +90,14 @@ public class GraphQLVariablesProcessor {
                 .orElseThrow(() -> new GraphQLProblem(OPERATION_VARIABLE_NOT_EXIST.bind(variableContext.name().getText(), operationDefinitionContext.name().getText())));
     }
 
-    private GraphqlParser.ValueContext variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, String variable) {
+    private GraphqlParser.ValueWithVariableContext variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, String variable) {
         if (variable == null && variableDefinitionContext.type().nonNullType() != null) {
             throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
         }
-        return DOCUMENT_UTIL.getGraphqlParser(variable).value();
+        String fieldTypeName = manager.getFieldTypeName(variableDefinitionContext.type());
+        if (fieldTypeName.equals("String")) {
+            variable = "\"" + variable + "\"";
+        }
+        return DOCUMENT_UTIL.getGraphqlParser(variable).valueWithVariable();
     }
 }

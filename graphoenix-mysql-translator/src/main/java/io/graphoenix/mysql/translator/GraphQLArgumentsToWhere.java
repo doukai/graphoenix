@@ -1394,13 +1394,13 @@ public class GraphQLArgumentsToWhere {
             colDataType.setDataType("INT");
         } else if (manager.isScalar(fieldTypeName)) {
             switch (fieldTypeName) {
-                case "ID":
                 case "Int":
                     colDataType.setDataType("INT");
                     break;
                 case "Boolean":
                     colDataType.setDataType("BOOL");
                     break;
+                case "ID":
                 case "String":
                     colDataType.setDataType("VARCHAR");
                     colDataType.setArgumentsStringList(Collections.singletonList("255"));

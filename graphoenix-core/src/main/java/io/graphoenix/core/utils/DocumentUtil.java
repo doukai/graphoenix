@@ -88,7 +88,13 @@ public enum DocumentUtil {
         return getGraphqlParser(charStream);
     }
 
-    private GraphqlParser getGraphqlParser(CharStream charStream) {
+    public GraphqlLexer getGraphqlLexer(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return getGraphqlLexer(charStream);
+    }
+
+    private GraphqlLexer getGraphqlLexer(CharStream charStream) {
         GraphqlLexer lexer = new GraphqlLexer(charStream);
         lexer.removeErrorListeners();
         lexer.addErrorListener(new BaseErrorListener() {
@@ -98,7 +104,11 @@ public enum DocumentUtil {
                 throw new GraphQLProblem(SYNTAX_ERROR.bind(offendingSymbol, line, charPositionInLine), line, charPositionInLine);
             }
         });
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        return lexer;
+    }
+
+    private GraphqlParser getGraphqlParser(CharStream charStream) {
+        CommonTokenStream tokens = new CommonTokenStream(getGraphqlLexer(charStream));
         GraphqlParser parser = new GraphqlParser(tokens);
         parser.removeErrorListeners();
         parser.addErrorListener(new BaseErrorListener() {
