@@ -135,7 +135,7 @@ public class IntrospectionMutationBuilder {
 
         if (level == 0) {
             if (objectTypeDefinitionContext.implementsInterfaces() != null) {
-                type.setInterfaces(getInterfaceTypes(objectTypeDefinitionContext.implementsInterfaces(), level));
+                type.setInterfaces(getInterfaceTypes(objectTypeDefinitionContext.implementsInterfaces(), level + 1));
             } else {
                 type.setInterfaces(new LinkedHashSet<>());
             }
@@ -167,7 +167,7 @@ public class IntrospectionMutationBuilder {
 
         if (level == 0) {
             if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
-                type.setInterfaces(getInterfaceTypes(interfaceTypeDefinitionContext.implementsInterfaces(), level));
+                type.setInterfaces(getInterfaceTypes(interfaceTypeDefinitionContext.implementsInterfaces(), level + 1));
             } else {
                 type.setInterfaces(new LinkedHashSet<>());
             }
