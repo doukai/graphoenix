@@ -68,6 +68,9 @@ public class DBValueUtil {
         if (valueWithVariableContext.variable() != null) {
             return variableToJdbcNamedParameter(valueWithVariableContext.variable());
         }
+        if (valueWithVariableContext.NullValue() != null) {
+            return new NullValue();
+        }
         return new StringValue(valueWithVariableContext.enumValue().enumValueName().getText());
     }
 

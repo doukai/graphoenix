@@ -91,8 +91,12 @@ public class GraphQLVariablesProcessor {
     }
 
     private GraphqlParser.ValueWithVariableContext variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, String variable) {
-        if (variable == null && variableDefinitionContext.type().nonNullType() != null) {
-            throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
+        if (variable == null) {
+            if (variableDefinitionContext.type().nonNullType() != null) {
+                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
+            } else {
+                variable = "null";
+            }
         }
         String fieldTypeName = manager.getFieldTypeName(variableDefinitionContext.type());
         if (fieldTypeName.equals("String")) {
