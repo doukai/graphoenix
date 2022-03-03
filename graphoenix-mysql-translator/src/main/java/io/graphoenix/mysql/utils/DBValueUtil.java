@@ -19,6 +19,7 @@ import net.sf.jsqlparser.statement.SetStatement;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 @ApplicationScoped
 public class DBValueUtil {
@@ -109,16 +110,25 @@ public class DBValueUtil {
         return userVariable;
     }
 
-    public Expression createIdValueExpression(GraphqlParser.ArgumentContext idArgumentContext) {
-        return scalarValueWithVariableToDBValue(idArgumentContext.valueWithVariable());
+    public Optional<Expression> createIdValueExpression(GraphqlParser.ArgumentContext idArgumentContext) {
+        if (idArgumentContext.valueWithVariable().NullValue() != null) {
+            return Optional.empty();
+        }
+        return Optional.of(scalarValueWithVariableToDBValue(idArgumentContext.valueWithVariable()));
     }
 
-    public Expression createIdValueExpression(GraphqlParser.ObjectFieldWithVariableContext objectIdFieldWithVariableContext) {
-        return scalarValueWithVariableToDBValue(objectIdFieldWithVariableContext.valueWithVariable());
+    public Optional<Expression> createIdValueExpression(GraphqlParser.ObjectFieldWithVariableContext objectIdFieldWithVariableContext) {
+        if (objectIdFieldWithVariableContext.valueWithVariable().NullValue() != null) {
+            return Optional.empty();
+        }
+        return Optional.of(scalarValueWithVariableToDBValue(objectIdFieldWithVariableContext.valueWithVariable()));
     }
 
-    public Expression createIdValueExpression(GraphqlParser.ObjectFieldContext objectIdFieldContext) {
-        return scalarValueToDBValue(objectIdFieldContext.value());
+    public Optional<Expression> createIdValueExpression(GraphqlParser.ObjectFieldContext objectIdFieldContext) {
+        if (objectIdFieldContext.value().NullValue() != null) {
+            return Optional.empty();
+        }
+        return Optional.of(scalarValueToDBValue(objectIdFieldContext.value()));
     }
 
     public Expression valueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {

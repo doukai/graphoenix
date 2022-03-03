@@ -296,7 +296,7 @@ public class GraphQLQueryToSelect {
 
             if (idFieldName.isPresent()) {
                 Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), selectionContext.field().arguments())
-                        .map(dbValueUtil::createIdValueExpression)
+                        .flatMap(dbValueUtil::createIdValueExpression)
                         .orElseGet(() -> dbValueUtil.createInsertIdUserVariable(typeName, idFieldName.get(), 0, 0));
 
                 EqualsTo idEqualsTo = new EqualsTo();

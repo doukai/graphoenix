@@ -147,8 +147,10 @@ public class SelectionFilterBuilder {
                                             fieldGetterMethodName
                                     );
                                 } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("jsonObject.addProperty($S,$L.$L().name())",
+                                    builder.addStatement("jsonObject.addProperty($S,$L.$L() == null ? null : $L.$L().name())",
                                             fieldDefinitionContext.name().getText(),
+                                            typeParameterName,
+                                            fieldGetterMethodName,
                                             typeParameterName,
                                             fieldGetterMethodName
                                     );
