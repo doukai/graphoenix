@@ -97,10 +97,11 @@ public class GraphQLVariablesProcessor {
             } else {
                 variable = "null";
             }
-        }
-        String fieldTypeName = manager.getFieldTypeName(variableDefinitionContext.type());
-        if (fieldTypeName.equals("String")) {
-            variable = "\"" + variable + "\"";
+        } else {
+            String fieldTypeName = manager.getFieldTypeName(variableDefinitionContext.type());
+            if (fieldTypeName.equals("String")) {
+                variable = "\"" + variable + "\"";
+            }
         }
         return DOCUMENT_UTIL.getGraphqlParser(variable).valueWithVariable();
     }

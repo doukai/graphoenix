@@ -2,8 +2,6 @@ package io.graphoenix.mysql.utils;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLErrorType;
-import io.graphoenix.core.error.GraphQLProblem;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.sf.jsqlparser.expression.DoubleValue;
@@ -83,7 +81,7 @@ public class DBValueUtil {
         } else if (floatValue != null) {
             return new DoubleValue(floatValue.getText());
         } else if (booleanValue != null) {
-            throw new GraphQLProblem(GraphQLErrorType.UNKNOWN);
+            return booleanValue.getText().equals("true") ? new LongValue(1) : new LongValue(0);
         } else if (nullValue != null) {
             return new NullValue();
         }

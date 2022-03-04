@@ -294,13 +294,16 @@ public class DocumentBuilder {
 
     public Set<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .map(fieldDefinitionContext -> filedToArgument(fieldDefinitionContext, inputType))
+                .map(fieldDefinitionContext -> filedToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public InputValue filedToArgument(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
+    public InputValue filedToArgument(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         if (inputType.equals(InputType.INPUT)) {
+            if (fieldDefinitionContext.name().getText().equals("__typename")) {
+                return new InputValue().setName("__typename").setTypeName("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
+            }
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldDefinitionContext.type().getText()
                             .replace(fieldTypeName, fieldTypeName.concat(manager.isObject(fieldTypeName) ? InputType.INPUT.toString() : "")));

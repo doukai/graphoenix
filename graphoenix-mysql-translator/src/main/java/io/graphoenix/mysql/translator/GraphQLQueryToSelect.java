@@ -13,6 +13,7 @@ import jakarta.inject.Inject;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.HexValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -246,7 +247,14 @@ public class GraphQLQueryToSelect {
                             if (manager.isObject(fieldTypeName)) {
                                 return jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1));
                             } else {
-                                return fieldToExpression(typeName, fieldDefinitionContext, level);
+                                if (fieldTypeName.equals("Boolean")) {
+                                    Function function = new Function();
+                                    function.setName("IF");
+                                    function.setParameters(new ExpressionList(Arrays.asList(fieldToExpression(typeName, fieldDefinitionContext, level), new HexValue("TRUE"), new HexValue("FALSE"))));
+                                    return function;
+                                } else {
+                                    return fieldToExpression(typeName, fieldDefinitionContext, level);
+                                }
                             }
                         }
                 )
