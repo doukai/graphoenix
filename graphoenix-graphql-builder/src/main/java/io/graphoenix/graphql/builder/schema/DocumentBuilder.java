@@ -302,7 +302,7 @@ public class DocumentBuilder {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         if (inputType.equals(InputType.INPUT)) {
             if (fieldDefinitionContext.name().getText().equals("__typename")) {
-                return new InputValue().setName("__typename").setTypeName("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
+                return new InputValue().setName("__typename").setTypeName("String!").setDefaultValue(objectTypeDefinitionContext.name().getText());
             }
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldDefinitionContext.type().getText()

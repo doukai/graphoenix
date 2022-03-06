@@ -37,7 +37,7 @@ public class InputValue {
 
     public InputValue setDefaultValue(String defaultValue) {
         if (defaultValue != null) {
-            if (this.getTypeName() != null && this.getTypeName().equals("String")) {
+            if (this.getTypeName() != null && (this.getTypeName().equals("String") || this.getTypeName().equals("String!"))) {
                 this.defaultValue = "\"".concat(defaultValue).concat("\"");
             } else {
                 this.defaultValue = defaultValue;
