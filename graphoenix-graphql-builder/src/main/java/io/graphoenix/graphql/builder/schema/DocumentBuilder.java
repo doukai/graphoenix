@@ -273,15 +273,25 @@ public class DocumentBuilder {
     }
 
     public Field buildSchemaTypeField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        return new Field().setName(getSchemaFieldName(objectTypeDefinitionContext))
+        Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext))
                 .setTypeName(objectTypeDefinitionContext.name().getText())
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType));
+
+        if (inputType.equals(InputType.EXPRESSION)) {
+            field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
+        }
+        return field;
     }
 
     public Field buildSchemaTypeFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        return new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
+        Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType));
+
+        if (inputType.equals(InputType.EXPRESSION)) {
+            field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
+        }
+        return field;
     }
 
     private String getSchemaFieldName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
