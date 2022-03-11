@@ -80,3 +80,10 @@ directive @invoke(
     className: String
     methodName: String
 ) on FIELD_DEFINITION
+
+type PageInfo {
+    hasPreviousPage: Boolean!
+    hasNextPage: Boolean!
+    startCursor: String
+    endCursor: String
+}
