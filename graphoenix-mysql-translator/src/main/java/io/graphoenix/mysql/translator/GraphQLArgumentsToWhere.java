@@ -48,13 +48,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_INPUT_NAME;
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLArgumentsToWhere {
@@ -63,6 +62,7 @@ public class GraphQLArgumentsToWhere {
     private final IGraphQLFieldMapManager mapper;
     private final DBNameUtil dbNameUtil;
     private final DBValueUtil dbValueUtil;
+    private final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME};
 
     @Inject
     public GraphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
@@ -341,7 +341,7 @@ public class GraphQLArgumentsToWhere {
                                                                   GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                   GraphqlParser.ArgumentContext argumentContext,
                                                                   int level) {
-        if (inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME)) {
+        if (Arrays.stream(EXCLUDE_INPUT).anyMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText()))) {
             return Optional.empty();
         }
 
@@ -391,7 +391,7 @@ public class GraphQLArgumentsToWhere {
                                                                                  GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                                  GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext,
                                                                                  int level) {
-        if (inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME)) {
+        if (Arrays.stream(EXCLUDE_INPUT).anyMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText()))) {
             return Optional.empty();
         }
 
@@ -442,7 +442,7 @@ public class GraphQLArgumentsToWhere {
                                                                      GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                      GraphqlParser.ObjectFieldContext objectFieldContext,
                                                                      int level) {
-        if (inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME)) {
+        if (Arrays.stream(EXCLUDE_INPUT).anyMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText()))) {
             return Optional.empty();
         }
 
@@ -491,7 +491,7 @@ public class GraphQLArgumentsToWhere {
     protected Optional<Expression> singleTypeInputValueToExpression(GraphqlParser.TypeContext typeContext,
                                                                     GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                     int level) {
-        if (inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME)) {
+        if (Arrays.stream(EXCLUDE_INPUT).anyMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText()))) {
             return Optional.empty();
         }
 

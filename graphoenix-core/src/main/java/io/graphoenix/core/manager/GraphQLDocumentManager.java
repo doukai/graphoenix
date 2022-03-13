@@ -283,6 +283,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public Stream<GraphqlParser.FieldDefinitionContext> getFieldByDirective(String objectName, String directiveName) {
+        return graphQLFieldManager.getFieldDefinitionByDirective(objectName, directiveName);
+    }
+
+    @Override
     public Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterface(String name) {
         return graphQLInterfaceManager.getInterfaceTypeDefinition(name);
     }

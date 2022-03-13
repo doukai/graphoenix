@@ -16,6 +16,8 @@ public interface IGraphQLFieldManager {
 
     Optional<GraphqlParser.FieldDefinitionContext> getFieldDefinition(String objectTypeName, String fieldName);
 
+    Stream<GraphqlParser.FieldDefinitionContext> getFieldDefinitionByDirective(String objectTypeName, String directiveName);
+
     boolean isInvokeField(String objectTypeName, String fieldName);
 
     boolean isNotInvokeField(String objectTypeName, String fieldName);

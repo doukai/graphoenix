@@ -179,8 +179,10 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.annotationBuilder(directiveDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(getGeneratedAnnotationSpec());
-        directiveDefinitionContext.argumentsDefinition().inputValueDefinition()
-                .forEach(inputValueDefinitionContext -> builder.addMethod(buildAnnotationMethod(inputValueDefinitionContext)));
+        if (directiveDefinitionContext.argumentsDefinition() != null) {
+            directiveDefinitionContext.argumentsDefinition().inputValueDefinition()
+                    .forEach(inputValueDefinitionContext -> builder.addMethod(buildAnnotationMethod(inputValueDefinitionContext)));
+        }
         builder.addAnnotation(AnnotationSpec.builder(Documented.class).build());
         builder.addAnnotation(
                 AnnotationSpec.builder(Retention.class)

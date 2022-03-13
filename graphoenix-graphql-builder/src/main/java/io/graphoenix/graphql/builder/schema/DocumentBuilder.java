@@ -129,7 +129,7 @@ public class DocumentBuilder {
                                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                                         .map(fieldDefinitionContext ->
                                                 buildArgument ?
-                                                        buildFiled(fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText())) :
+                                                        buildFiled(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText())) :
                                                         buildFiled(fieldDefinitionContext)
                                         )
                                         .collect(Collectors.toCollection(LinkedHashSet::new))
@@ -158,14 +158,16 @@ public class DocumentBuilder {
                 .setName(interfaceTypeDefinitionContext.name().getText())
                 .setDescription(interfaceTypeDefinitionContext.description() == null ? null : interfaceTypeDefinitionContext.description().getText())
                 .setInterfaces(interfaceTypeDefinitionContext.implementsInterfaces() == null ? new LinkedHashSet<>() : interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .setFields(interfaceTypeDefinitionContext.fieldsDefinition() == null ? null : interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false)).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .setFields(interfaceTypeDefinitionContext.fieldsDefinition() == null ? null : interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(fieldDefinitionContext -> buildFiled(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, false)).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .setDirectives(interfaceTypeDefinitionContext.directives() == null ? null : interfaceTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     public List<Field> getMetaInterfaceFields() {
+        GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLProblem(META_INTERFACE_NOT_EXIST));
+
         return manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLProblem(META_INTERFACE_NOT_EXIST))
                 .fieldsDefinition().fieldDefinition().stream()
-                .map(fieldDefinitionContext -> buildFiled(fieldDefinitionContext, false))
+                .map(fieldDefinitionContext -> buildFiled(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, false))
                 .collect(Collectors.toList());
     }
 
@@ -185,7 +187,7 @@ public class DocumentBuilder {
                 .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
-    public Field buildFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean isMutationOperationType) {
+    public Field buildFiled(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean isMutationOperationType) {
         Field field = new Field().setName(fieldDefinitionContext.name().getText())
                 .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
                 .setTypeName(fieldDefinitionContext.type().getText())
@@ -197,6 +199,17 @@ public class DocumentBuilder {
                 field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.INPUT));
             } else {
                 field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.EXPRESSION));
+                if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                    field.addArgument(new InputValue().setName("first").setTypeName("Int").setDefaultValue("10"))
+                            .addArgument(new InputValue().setName("offset").setTypeName("Int"));
+
+                    manager.getFieldByDirective(typeName, "cursor")
+                            .findFirst()
+                            .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
+                            .ifPresent(cursorFieldDefinitionContext ->
+                                    field.addArgument(new InputValue().setName("after").setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                            );
+                }
             }
         } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             field.addArgument(new InputValue().setName("opr").setTypeName("Operator").setDefaultValue("EQ"))
@@ -290,6 +303,15 @@ public class DocumentBuilder {
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
+            field.addArgument(new InputValue().setName("first").setTypeName("Int").setDefaultValue("10"))
+                    .addArgument(new InputValue().setName("offset").setTypeName("Int"));
+
+            manager.getFieldByDirective(objectTypeDefinitionContext.name().getText(), "cursor")
+                    .findFirst()
+                    .or(() -> manager.getObjectTypeIDFieldDefinition(objectTypeDefinitionContext.name().getText()))
+                    .ifPresent(cursorFieldDefinitionContext ->
+                            field.addArgument(new InputValue().setName("after").setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                    );
         }
         return field;
     }

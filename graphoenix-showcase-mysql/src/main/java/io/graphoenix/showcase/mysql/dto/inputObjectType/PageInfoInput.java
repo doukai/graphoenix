@@ -4,51 +4,58 @@ import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
-import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-public class __TypePossibleTypesInput {
-  private String id;
+public class PageInfoInput {
+  @NonNull
+  private Boolean hasPreviousPage;
 
   @NonNull
-  private String typeName;
+  private Boolean hasNextPage;
 
-  @NonNull
-  private String possibleTypeName;
+  private String startCursor;
+
+  private String endCursor;
 
   private Integer version;
 
   private Boolean isDeprecated;
 
-  @DefaultValue("\"__TypePossibleTypes\"")
-  @NonNull
   private String __typename;
 
-  public String getId() {
-    return this.id;
+  public Boolean getHasPreviousPage() {
+    return this.hasPreviousPage;
   }
 
-  public void setId(String id) {
-    this.id = id;
+  public void setHasPreviousPage(Boolean hasPreviousPage) {
+    this.hasPreviousPage = hasPreviousPage;
   }
 
-  public String getTypeName() {
-    return this.typeName;
+  public Boolean getHasNextPage() {
+    return this.hasNextPage;
   }
 
-  public void setTypeName(String typeName) {
-    this.typeName = typeName;
+  public void setHasNextPage(Boolean hasNextPage) {
+    this.hasNextPage = hasNextPage;
   }
 
-  public String getPossibleTypeName() {
-    return this.possibleTypeName;
+  public String getStartCursor() {
+    return this.startCursor;
   }
 
-  public void setPossibleTypeName(String possibleTypeName) {
-    this.possibleTypeName = possibleTypeName;
+  public void setStartCursor(String startCursor) {
+    this.startCursor = startCursor;
+  }
+
+  public String getEndCursor() {
+    return this.endCursor;
+  }
+
+  public void setEndCursor(String endCursor) {
+    this.endCursor = endCursor;
   }
 
   public Integer getVersion() {

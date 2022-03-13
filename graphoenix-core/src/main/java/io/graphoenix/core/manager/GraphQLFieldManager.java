@@ -89,6 +89,18 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
+    public Stream<GraphqlParser.FieldDefinitionContext> getFieldDefinitionByDirective(String objectTypeName, String directiveName) {
+        return fieldDefinitionTree.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(objectTypeName))
+                .flatMap(entry -> entry.getValue().values().stream())
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
+                .filter(fieldDefinitionContext ->
+                        fieldDefinitionContext.directives().directive().stream()
+                                .anyMatch(directiveContext -> directiveContext.name().getText().equals(directiveName))
+                );
+    }
+
+    @Override
     public boolean isInvokeField(String objectTypeName, String fieldName) {
         return invokeFieldDefinitionTree.get(objectTypeName).containsKey(fieldName);
     }

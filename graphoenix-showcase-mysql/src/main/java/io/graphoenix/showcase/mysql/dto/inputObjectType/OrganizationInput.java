@@ -5,6 +5,7 @@ import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
 import java.util.Collection;
+import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
@@ -26,6 +27,8 @@ public class OrganizationInput {
 
   private Boolean isDeprecated;
 
+  @DefaultValue("\"Organization\"")
+  @NonNull
   private String __typename;
 
   public String getId() {

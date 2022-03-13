@@ -66,6 +66,8 @@ public interface IGraphQLDocumentManager {
 
     Optional<GraphqlParser.FieldDefinitionContext> getField(String objectName, String name);
 
+    Stream<GraphqlParser.FieldDefinitionContext> getFieldByDirective(String objectName, String directiveName);
+
     Optional<GraphqlParser.InterfaceTypeDefinitionContext> getInterface(String name);
 
     Optional<GraphqlParser.UnionTypeDefinitionContext> getUnion(String name);

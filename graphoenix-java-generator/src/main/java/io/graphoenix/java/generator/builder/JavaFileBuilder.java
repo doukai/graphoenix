@@ -45,6 +45,7 @@ public class JavaFileBuilder {
         return Streams.concat(
                 manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
                 manager.getDirectives()
+                        .filter(directiveDefinitionContext -> directiveDefinitionContext.argumentsDefinition() != null)
                         .flatMap(directiveDefinitionContext ->
                                 directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                                         .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))

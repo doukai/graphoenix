@@ -4,7 +4,9 @@ import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
+import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
@@ -19,6 +21,8 @@ public class UserPhonesInput {
 
   private Boolean isDeprecated;
 
+  @DefaultValue("\"UserPhones\"")
+  @NonNull
   private String __typename;
 
   public String getId() {
