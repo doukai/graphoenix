@@ -794,6 +794,58 @@ public class GraphQLArgumentsToWhere {
         return operatorValueToExpression(leftExpression, inputValueDefinitionContext, objectFieldContext.value());
     }
 
+    public Optional<Expression> operatorArgumentsToExpression(Expression leftExpression,
+                                                               GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                               GraphqlParser.ArgumentsContext argumentsContext) {
+
+        if (argumentsContext == null) {
+            return Optional.empty();
+        }
+
+        Optional<GraphqlParser.EnumValueContext> operatorEnumValueContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(fieldInputValueDefinitionContext ->
+                        manager.isEnum(fieldInputValueDefinitionContext.type().getText()) && manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
+                .findFirst()
+                .flatMap(fieldInputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(argumentsContext, fieldInputValueDefinitionContext))
+                .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue());
+
+        Optional<GraphqlParser.EnumValueContext> defaultOperatorEnumValueContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(fieldInputValueDefinitionContext ->
+                        manager.isEnum(fieldInputValueDefinitionContext.type().getText()) && manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
+                .findFirst()
+                .flatMap(manager::getDefaultValueFromInputValueDefinition)
+                .map(GraphqlParser.ValueContext::enumValue);
+
+        Optional<GraphqlParser.InputValueDefinitionContext> subInputValueDefinitionContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(fieldInputValueDefinitionContext ->
+                        !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
+                                manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
+                .filter(fieldInputValueDefinitionContext ->
+                        argumentsContext.argument().stream()
+                                .anyMatch(argumentContext -> argumentContext.name().getText().equals(fieldInputValueDefinitionContext.name().getText()))
+                )
+                .findFirst();
+
+        Optional<GraphqlParser.ValueWithVariableContext> subValueWithVariableContext = subInputValueDefinitionContext
+                .flatMap(fieldInputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(argumentsContext, fieldInputValueDefinitionContext))
+                .map(GraphqlParser.ArgumentContext::valueWithVariable);
+
+        Optional<GraphqlParser.ValueContext> subDefaultValueContext = subInputValueDefinitionContext
+                .flatMap(manager::getDefaultValueFromInputValueDefinition);
+
+        if (operatorEnumValueContext.isPresent() && subValueWithVariableContext.isPresent()) {
+            return operatorValueWithVariableToExpression(leftExpression, operatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subValueWithVariableContext.get());
+        } else if (operatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
+            return operatorValueToExpression(leftExpression, operatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
+        } else if (defaultOperatorEnumValueContext.isPresent() && subValueWithVariableContext.isPresent()) {
+            return operatorValueWithVariableToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subValueWithVariableContext.get());
+        } else if (defaultOperatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
+            return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
+        } else {
+            throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+        }
+    }
+
     private Optional<Expression> operatorValueWithVariableToExpression(Expression leftExpression,
                                                                        GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                        GraphqlParser.ValueWithVariableContext valueWithVariableContext) {

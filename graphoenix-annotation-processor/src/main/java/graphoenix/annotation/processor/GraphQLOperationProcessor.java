@@ -80,10 +80,10 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
             manager.clearAll();
             configRegister.registerPreset(GraphQLOperationProcessor.class.getClassLoader());
             configRegister.registerConfig(graphQLConfig, filer);
+            mapper.registerFieldMaps();
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
-            mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

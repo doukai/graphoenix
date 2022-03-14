@@ -19,6 +19,7 @@ import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
 import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.annotation.Generated;
@@ -98,12 +99,14 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
         this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
 
         try {
             manager.clearAll();
             configRegister.registerPreset(GraphQLApiProcessor.class.getClassLoader());
             configRegister.registerConfig(graphQLConfig, filer);
+            mapper.registerFieldMaps();
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }

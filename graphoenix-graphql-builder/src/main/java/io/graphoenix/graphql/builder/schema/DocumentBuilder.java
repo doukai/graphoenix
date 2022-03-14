@@ -33,7 +33,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.META_INTERFACE_NOT_EXIST;
+import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
 
 @ApplicationScoped
 public class DocumentBuilder {
@@ -200,14 +204,15 @@ public class DocumentBuilder {
             } else {
                 field.addArguments(buildArgumentsFromObjectType(filedObjectTypeDefinitionContext.get(), InputType.EXPRESSION));
                 if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                    field.addArgument(new InputValue().setName("first").setTypeName("Int").setDefaultValue("10"))
-                            .addArgument(new InputValue().setName("offset").setTypeName("Int"));
+                    field.addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int").setDefaultValue("10"))
+                            .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"));
 
                     manager.getFieldByDirective(typeName, "cursor")
                             .findFirst()
                             .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
                             .ifPresent(cursorFieldDefinitionContext ->
-                                    field.addArgument(new InputValue().setName("after").setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                                    field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                                            .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                             );
                 }
             }
@@ -215,6 +220,21 @@ public class DocumentBuilder {
             field.addArgument(new InputValue().setName("opr").setTypeName("Operator").setDefaultValue("EQ"))
                     .addArgument(new InputValue().setName("val").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type())))
                     .addArgument(new InputValue().setName("in").setTypeName("[".concat(manager.getFieldTypeName(fieldDefinitionContext.type())).concat("]")));
+
+            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                field.addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int").setDefaultValue("10"))
+                        .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"));
+
+                mapper.getWithObjectTypeDefinition(typeName, fieldDefinitionContext.name().getText())
+                        .flatMap(objectTypeDefinitionContext -> manager.getFieldByDirective(objectTypeDefinitionContext.name().getText(), "cursor")
+                                .findFirst()
+                                .or(() -> manager.getObjectTypeIDFieldDefinition(objectTypeDefinitionContext.name().getText()))
+                        )
+                        .ifPresent(cursorFieldDefinitionContext ->
+                                field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                                        .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                        );
+            }
         }
         return field;
     }
@@ -303,14 +323,15 @@ public class DocumentBuilder {
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
-            field.addArgument(new InputValue().setName("first").setTypeName("Int").setDefaultValue("10"))
-                    .addArgument(new InputValue().setName("offset").setTypeName("Int"));
+            field.addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int").setDefaultValue("10"))
+                    .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"));
 
             manager.getFieldByDirective(objectTypeDefinitionContext.name().getText(), "cursor")
                     .findFirst()
                     .or(() -> manager.getObjectTypeIDFieldDefinition(objectTypeDefinitionContext.name().getText()))
                     .ifPresent(cursorFieldDefinitionContext ->
-                            field.addArgument(new InputValue().setName("after").setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                            field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
+                                    .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                     );
         }
         return field;

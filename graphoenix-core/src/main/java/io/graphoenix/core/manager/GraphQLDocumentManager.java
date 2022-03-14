@@ -457,6 +457,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public Optional<GraphqlParser.ArgumentContext> getArgumentFromInputValueDefinition(GraphqlParser.ArgumentsContext argumentsContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (argumentsContext == null) {
+            return Optional.empty();
+        }
         return argumentsContext.argument().stream()
                 .filter(argumentContext -> argumentContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
                 .filter(argumentContext -> !(argumentContext.valueWithVariable().NullValue() != null && inputValueDefinitionContext.type().nonNullType() != null))
@@ -465,6 +468,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public Optional<GraphqlParser.ObjectFieldWithVariableContext> getObjectFieldWithVariableFromInputValueDefinition(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (objectValueWithVariableContext == null) {
+            return Optional.empty();
+        }
         return objectValueWithVariableContext.objectFieldWithVariable().stream()
                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
                 .filter(objectFieldWithVariableContext -> !(objectFieldWithVariableContext.valueWithVariable().NullValue() != null && inputValueDefinitionContext.type().nonNullType() != null))
@@ -473,6 +479,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public Optional<GraphqlParser.ObjectFieldContext> getObjectFieldFromInputValueDefinition(GraphqlParser.ObjectValueContext objectValueContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        if (objectValueContext == null) {
+            return Optional.empty();
+        }
         return objectValueContext.objectField().stream()
                 .filter(objectFieldContext -> objectFieldContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
                 .filter(objectFieldContext -> !(objectFieldContext.value().NullValue() != null && inputValueDefinitionContext.type().nonNullType() != null))
