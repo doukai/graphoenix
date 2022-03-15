@@ -33,6 +33,11 @@ enum Conditional {
     OR
 }
 
+enum Sort {
+    ASC
+    DESC
+}
+
 input IDExpression {
     opr: Operator = EQ
     val: ID
