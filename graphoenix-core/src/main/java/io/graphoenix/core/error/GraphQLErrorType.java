@@ -28,6 +28,7 @@ public enum GraphQLErrorType {
     UNSUPPORTED_OPERATION_TYPE(-41, "unsupported operation type"),
     UNSUPPORTED_FIELD_TYPE(-42, "unsupported field type: %s"),
     UNSUPPORTED_VALUE(-43, "unsupported field value: %s"),
+    UNSUPPORTED_OPERATOR(-43, "unsupported operator value: %s simple:(file:{opr:GT, val:\"graphoenix\"})"),
 
     MAP_DIRECTIVE_NOT_EXIST(-51, "object type field must have @map directive: %s"),
     MAP_FROM_ARGUMENT_NOT_EXIST(-52, "from argument not exist in @map directive: %s"),

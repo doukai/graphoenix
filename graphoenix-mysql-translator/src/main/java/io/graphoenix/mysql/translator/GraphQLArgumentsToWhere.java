@@ -52,6 +52,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATOR;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
 import static io.graphoenix.spi.constant.Hammurabi.*;
 
@@ -795,14 +796,15 @@ public class GraphQLArgumentsToWhere {
     }
 
     public Optional<Expression> operatorArgumentsToExpression(Expression leftExpression,
-                                                               GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                               GraphqlParser.ArgumentsContext argumentsContext) {
+                                                              GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                              GraphqlParser.ArgumentsContext argumentsContext) {
 
         if (argumentsContext == null) {
             return Optional.empty();
         }
 
         Optional<GraphqlParser.EnumValueContext> operatorEnumValueContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(fieldInputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(fieldInputValueDefinitionContext.name().getText())))
                 .filter(fieldInputValueDefinitionContext ->
                         manager.isEnum(fieldInputValueDefinitionContext.type().getText()) && manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
                 .findFirst()
@@ -810,6 +812,7 @@ public class GraphQLArgumentsToWhere {
                 .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue());
 
         Optional<GraphqlParser.EnumValueContext> defaultOperatorEnumValueContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(fieldInputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(fieldInputValueDefinitionContext.name().getText())))
                 .filter(fieldInputValueDefinitionContext ->
                         manager.isEnum(fieldInputValueDefinitionContext.type().getText()) && manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
                 .findFirst()
@@ -817,6 +820,7 @@ public class GraphQLArgumentsToWhere {
                 .map(GraphqlParser.ValueContext::enumValue);
 
         Optional<GraphqlParser.InputValueDefinitionContext> subInputValueDefinitionContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(fieldInputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(fieldInputValueDefinitionContext.name().getText())))
                 .filter(fieldInputValueDefinitionContext ->
                         !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
                                 manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
@@ -827,6 +831,7 @@ public class GraphQLArgumentsToWhere {
                 .findFirst();
 
         Optional<GraphqlParser.ValueWithVariableContext> subValueWithVariableContext = subInputValueDefinitionContext
+                .filter(fieldInputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(fieldInputValueDefinitionContext.name().getText())))
                 .flatMap(fieldInputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(argumentsContext, fieldInputValueDefinitionContext))
                 .map(GraphqlParser.ArgumentContext::valueWithVariable);
 
@@ -842,7 +847,7 @@ public class GraphQLArgumentsToWhere {
         } else if (defaultOperatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
             return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
         } else {
-            throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+            return Optional.empty();
         }
     }
 
@@ -850,6 +855,10 @@ public class GraphQLArgumentsToWhere {
                                                                        GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                        GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinition = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
+
+        if (valueWithVariableContext.objectValueWithVariable() == null) {
+            throw new GraphQLProblem(UNSUPPORTED_OPERATOR.bind(valueWithVariableContext.getText()));
+        }
 
         if (inputObjectTypeDefinition.isPresent()) {
             Optional<GraphqlParser.EnumValueContext> operatorEnumValueContext = inputObjectTypeDefinition.get().inputObjectValueDefinitions().inputValueDefinition().stream()
@@ -902,6 +911,11 @@ public class GraphQLArgumentsToWhere {
     private Optional<Expression> operatorValueToExpression(Expression leftExpression,
                                                            GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                            GraphqlParser.ValueContext valueContext) {
+
+        if (valueContext.objectValue() == null) {
+            throw new GraphQLProblem(UNSUPPORTED_OPERATOR.bind(valueContext.getText()));
+        }
+
         Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinition = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
 
         if (inputObjectTypeDefinition.isPresent()) {
