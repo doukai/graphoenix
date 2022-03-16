@@ -237,6 +237,8 @@ public class DocumentBuilder {
                                 field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                                         .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                         );
+
+                field.addArgument(new InputValue().setName("sort").setTypeName("Sort"));
             }
         }
         return field;

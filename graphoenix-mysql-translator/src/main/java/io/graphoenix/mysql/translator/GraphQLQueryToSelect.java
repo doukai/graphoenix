@@ -10,24 +10,14 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.HexValue;
-import net.sf.jsqlparser.expression.LongValue;
-import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.Limit;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
 import java.util.Arrays;
@@ -50,10 +40,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.QUERY_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLQueryToSelect {
@@ -437,6 +424,44 @@ public class GraphQLQueryToSelect {
         }
     }
 
+    protected void buildSortArguments(PlainSelect plainSelect, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
+
+        if (fieldDefinitionContext.argumentsDefinition() != null) {
+            if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+
+                Optional<GraphqlParser.InputValueDefinitionContext> orderByInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                        .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
+                        .findFirst();
+
+                Optional<GraphqlParser.ArgumentContext> orderBy = orderByInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
+
+                if(orderBy.isPresent()){
+                    if(orderBy.get().valueWithVariable().objectValueWithVariable()!=null){
+
+                    }
+                }
+            } else {
+
+                Optional<GraphqlParser.InputValueDefinitionContext> sortInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                        .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(SORT_INPUT_NAME))
+                        .findFirst();
+
+                Optional<GraphqlParser.ArgumentContext> sort = sortInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
+
+                if (sort.isPresent()) {
+                    GraphqlParser.EnumValueContext enumValueContext = sort.get().valueWithVariable().enumValue();
+                    if (enumValueContext != null) {
+                        OrderByElement orderByElement = new OrderByElement();
+                        if (enumValueContext.enumValueName().getText().equals("DESC")) {
+                            orderByElement.setAsc(false);
+                        }
+                        plainSelect.setOrderByElements(Collections.singletonList(orderByElement));
+                    }
+                }
+            }
+        }
+    }
+
     protected Expression fieldToExpression(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
@@ -488,6 +513,8 @@ public class GraphQLQueryToSelect {
 
                     argumentsToWhere.operatorArgumentsToExpression(fieldToColumn(withTable, mapWithToFieldDefinition.get()), fieldDefinitionContext, selectionContext.field().arguments())
                             .ifPresent(plainSelect::setWhere);
+
+                    buildSortArguments(plainSelect, fieldDefinitionContext, selectionContext);
 
                     GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(mapWithObjectName, "cursor").findFirst()
                             .or(() -> manager.getObjectTypeIDFieldDefinition(mapWithObjectName))
