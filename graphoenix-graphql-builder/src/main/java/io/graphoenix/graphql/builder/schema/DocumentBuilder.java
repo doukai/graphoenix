@@ -351,10 +351,18 @@ public class DocumentBuilder {
     }
 
     public Set<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                .map(fieldDefinitionContext -> filedToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (inputType.equals(InputType.ORDER_BY)) {
+            return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                    .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                    .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                    .map(fieldDefinitionContext -> filedToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        } else {
+            return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                    .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                    .map(fieldDefinitionContext -> filedToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
     }
 
     public InputValue filedToArgument(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, InputType inputType) {
