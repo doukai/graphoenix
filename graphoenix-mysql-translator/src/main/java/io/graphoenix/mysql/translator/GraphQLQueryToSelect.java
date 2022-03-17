@@ -24,17 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.OBJECT_SELECTION_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.QUERY_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.*;
 
@@ -442,8 +432,18 @@ public class GraphQLQueryToSelect {
                                 }
                                 orderByElement.setExpression(fieldToColumn(typeToTable(objectTypeDefinitionContext, level), objectFieldWithVariableContext));
                                 orderByElementList.add(orderByElement);
-                            }else if(objectValueWithVariableContext!=null){
-                                //TODO
+                            } else if (objectValueWithVariableContext != null) {
+
+                                String subTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                                Optional<GraphqlParser.ObjectTypeDefinitionContext> subObjectTypeDefinitionContext = manager.getObject(subTypeName);
+                                buildOrderByInput(
+                                        orderByElementList,
+                                        fieldToColumn(typeToTable(objectTypeDefinitionContext, level), objectFieldWithVariableContext),
+                                        subObjectTypeDefinitionContext.orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(subTypeName))).name().getText(),
+                                        manager.getField(subObjectTypeDefinitionContext.get().name().getText(), objectFieldWithVariableContext.name().getText()).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(subTypeName, objectFieldWithVariableContext.name().getText()))),
+                                        objectValueWithVariableContext,
+                                        level + 1
+                                );
                             }
                         }
                     }
@@ -469,6 +469,59 @@ public class GraphQLQueryToSelect {
                         plainSelect.setOrderByElements(Collections.singletonList(orderByElement));
                     }
                 }
+            }
+        }
+    }
+
+    protected void buildOrderByInput(List<OrderByElement> orderByElementList, Expression parentExpression, String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ObjectValueWithVariableContext parentObjectValueWithVariableContext, int level) {
+        for (GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext : parentObjectValueWithVariableContext.objectFieldWithVariable()) {
+            GraphqlParser.EnumValueContext enumValueContext = objectFieldWithVariableContext.valueWithVariable().enumValue();
+            GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext = objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable();
+            if (enumValueContext != null) {
+                OrderByElement orderByElement = new OrderByElement();
+                if (enumValueContext.enumValueName().getText().equals("DESC")) {
+                    orderByElement.setAsc(false);
+                }
+
+                PlainSelect plainSelect = new PlainSelect();
+                plainSelect.addSelectItems(new SelectExpressionItem(fieldToColumn(typeToTable(typeName, level), objectFieldWithVariableContext)));
+                String fieldName = fieldDefinitionContext.name().getText();
+                Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(typeName, fieldName);
+                Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(typeName, fieldName);
+
+                if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
+                    Table parentTable = typeToTable(typeName, level - 1);
+                    boolean mapWithType = mapper.mapWithType(typeName, fieldName);
+                    EqualsTo equalsParentColumn = new EqualsTo();
+
+                    if (mapWithType) {
+                        Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(typeName, fieldName);
+                        Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(typeName, fieldName);
+                        Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(typeName, fieldName);
+                    }else {
+                        plainSelect.setFromItem(typeToTable(typeName,level));
+                        equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
+                        equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
+                        plainSelect.setWhere(equalsParentColumn);
+
+                    }
+                }
+
+                orderByElement.setExpression(fieldToColumn(typeToTable(objectTypeDefinitionContext, level), objectFieldWithVariableContext));
+
+
+                orderByElementList.add(orderByElement);
+            } else if (objectValueWithVariableContext != null) {
+                String subTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                Optional<GraphqlParser.ObjectTypeDefinitionContext> subObjectTypeDefinitionContext = manager.getObject(subTypeName);
+                buildOrderByInput(
+                        orderByElementList,
+                        fieldToColumn(typeToTable(typeName, level), objectFieldWithVariableContext),
+                        subObjectTypeDefinitionContext.orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(subTypeName))).name().getText(),
+                        manager.getField(subObjectTypeDefinitionContext.get().name().getText(), objectFieldWithVariableContext.name().getText()).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(subTypeName, objectFieldWithVariableContext.name().getText()))),
+                        objectValueWithVariableContext,
+                        level + 1
+                );
             }
         }
     }
