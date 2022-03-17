@@ -20,11 +20,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -424,24 +420,38 @@ public class GraphQLQueryToSelect {
         }
     }
 
-    protected void buildSortArguments(PlainSelect plainSelect, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
-
+    protected void buildSortArguments(PlainSelect plainSelect, GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-
                 Optional<GraphqlParser.InputValueDefinitionContext> orderByInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                         .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
                         .findFirst();
 
                 Optional<GraphqlParser.ArgumentContext> orderBy = orderByInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
 
-                if(orderBy.isPresent()){
-                    if(orderBy.get().valueWithVariable().objectValueWithVariable()!=null){
-
+                if (orderBy.isPresent()) {
+                    List<OrderByElement> orderByElementList = new ArrayList<>();
+                    if (orderBy.get().valueWithVariable().objectValueWithVariable() != null) {
+                        for (GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext : orderBy.get().valueWithVariable().objectValueWithVariable().objectFieldWithVariable()) {
+                            GraphqlParser.EnumValueContext enumValueContext = objectFieldWithVariableContext.valueWithVariable().enumValue();
+                            GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext = objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable();
+                            if (enumValueContext != null) {
+                                OrderByElement orderByElement = new OrderByElement();
+                                if (enumValueContext.enumValueName().getText().equals("DESC")) {
+                                    orderByElement.setAsc(false);
+                                }
+                                orderByElement.setExpression(fieldToColumn(typeToTable(objectTypeDefinitionContext, level), objectFieldWithVariableContext));
+                                orderByElementList.add(orderByElement);
+                            }else if(objectValueWithVariableContext!=null){
+                                //TODO
+                            }
+                        }
+                    }
+                    if (orderByElementList.size() > 0) {
+                        plainSelect.setOrderByElements(orderByElementList);
                     }
                 }
             } else {
-
                 Optional<GraphqlParser.InputValueDefinitionContext> sortInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                         .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(SORT_INPUT_NAME))
                         .findFirst();
@@ -455,6 +465,7 @@ public class GraphQLQueryToSelect {
                         if (enumValueContext.enumValueName().getText().equals("DESC")) {
                             orderByElement.setAsc(false);
                         }
+                        orderByElement.setExpression(fieldToColumn(typeToTable(objectTypeDefinitionContext, level), fieldDefinitionContext));
                         plainSelect.setOrderByElements(Collections.singletonList(orderByElement));
                     }
                 }
@@ -514,7 +525,7 @@ public class GraphQLQueryToSelect {
                     argumentsToWhere.operatorArgumentsToExpression(fieldToColumn(withTable, mapWithToFieldDefinition.get()), fieldDefinitionContext, selectionContext.field().arguments())
                             .ifPresent(plainSelect::setWhere);
 
-                    buildSortArguments(plainSelect, fieldDefinitionContext, selectionContext);
+                    buildSortArguments(plainSelect, mapWithObjectDefinition.get(), mapWithToFieldDefinition.get(), selectionContext, level);
 
                     GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(mapWithObjectName, "cursor").findFirst()
                             .or(() -> manager.getObjectTypeIDFieldDefinition(mapWithObjectName))
@@ -570,11 +581,19 @@ public class GraphQLQueryToSelect {
         }
     }
 
+    protected Table typeToTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, int level) {
+        return typeToTable(objectTypeDefinitionContext.name().getText(), level);
+    }
+
     protected Table typeToTable(String typeName, int level) {
         if (manager.isQueryOperationType(typeName) || manager.isMutationOperationType(typeName)) {
             return dbNameUtil.dualTable();
         }
         return dbNameUtil.typeToTable(typeName, level);
+    }
+
+    protected Column fieldToColumn(Table table, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
+        return dbNameUtil.fieldToColumn(table, objectFieldWithVariableContext);
     }
 
     protected Column fieldToColumn(Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
