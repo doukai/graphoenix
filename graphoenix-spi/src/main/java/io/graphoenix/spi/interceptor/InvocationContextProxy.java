@@ -95,7 +95,7 @@ public class InvocationContextProxy implements InvocationContext {
                                 .allMatch(index -> method.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
                 )
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(NoSuchMethodError::new);
 
         return this;
     }
@@ -113,7 +113,7 @@ public class InvocationContextProxy implements InvocationContext {
                                 .allMatch(index -> constructor.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
                 )
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(NoSuchMethodError::new);
 
         return this;
     }
