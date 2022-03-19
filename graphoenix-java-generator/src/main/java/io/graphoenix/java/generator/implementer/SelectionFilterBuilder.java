@@ -94,7 +94,7 @@ public class SelectionFilterBuilder {
     }
 
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String typeParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText());
+        String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonElement.class))
@@ -112,14 +112,14 @@ public class SelectionFilterBuilder {
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(fieldDefinitionContext -> {
                             String fieldGetterMethodName = typeManager.getFieldGetterMethodName(fieldDefinitionContext);
-                            String fieldParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, manager.getFieldTypeName(fieldDefinitionContext.type()));
+                            String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
                             builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
                             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                                builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class));
-                                builder.beginControlFlow("if ($L.$L() != null)",
-                                        typeParameterName,
-                                        fieldGetterMethodName
-                                );
+                                builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class))
+                                        .beginControlFlow("if ($L.$L() != null)",
+                                                typeParameterName,
+                                                fieldGetterMethodName
+                                        );
                                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                                     builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item))",
                                             typeParameterName,
@@ -131,14 +131,17 @@ public class SelectionFilterBuilder {
                                             fieldGetterMethodName
                                     );
                                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add($L(item,selectionContext.field().selectionSet())))",
+                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add($L(item, selectionContext.field().selectionSet())))",
                                             typeParameterName,
                                             fieldGetterMethodName,
                                             fieldParameterName
                                     );
                                 }
-                                builder.addStatement("jsonObject.add($S, jsonArray)", fieldDefinitionContext.name().getText());
-                                builder.endControlFlow();
+                                builder.addStatement("jsonObject.add($S, jsonArray)", fieldDefinitionContext.name().getText())
+                                        .endControlFlow()
+                                        .beginControlFlow("else")
+                                        .addStatement("jsonObject.add($S, $T.INSTANCE)", fieldDefinitionContext.name().getText(), ClassName.get(JsonNull.class))
+                                        .endControlFlow();
                             } else {
                                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                                     builder.addStatement("jsonObject.addProperty($S,$L.$L())",
@@ -186,7 +189,7 @@ public class SelectionFilterBuilder {
     }
 
     private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String typeParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText());
+        String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         String listTypeParameterName = typeParameterName.concat("List");
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)

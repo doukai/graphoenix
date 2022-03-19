@@ -1,10 +1,7 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -196,7 +193,7 @@ public class OperationHandlerImplementer {
                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 .stream()
                 .map(typeElement ->
-                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)), typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -244,7 +241,7 @@ public class OperationHandlerImplementer {
         Optional<Tuple2<String, String>> invokeDirective = typeManager.getInvokeDirective(fieldDefinitionContext);
         boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        String fieldTypeParameterName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, manager.getFieldTypeName(fieldDefinitionContext.type()));
+        String fieldTypeParameterName = typeManager.typeToLowerCamelName(manager.getFieldTypeName(fieldDefinitionContext.type()));
 
         if (invokeDirective.isPresent()) {
             Tuple2<TypeElement, ExecutableElement> method = invokeMethods.stream()
@@ -255,7 +252,7 @@ public class OperationHandlerImplementer {
 
             builder.addStatement("$T result = $L.get().$L($L)",
                     typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                    CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, method._1().getSimpleName().toString()),
+                    typeManager.typeToLowerCamelName(method._1().getSimpleName().toString()),
                     method._2().getSimpleName().toString(),
                     CodeBlock.join(method._2().getParameters().stream()
                             .map(variableElement ->
@@ -275,9 +272,12 @@ public class OperationHandlerImplementer {
                 }
             } else {
                 if (fieldTypeIsList) {
-                    builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class));
-                    builder.addStatement("result.stream().forEach(item -> jsonArray.add(new $T(item)))", ClassName.get(JsonPrimitive.class));
-                    builder.addStatement("return jsonArray");
+                    builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class))
+                            .beginControlFlow("if(result == null)")
+                            .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
+                            .endControlFlow()
+                            .addStatement("result.stream().forEach(item -> jsonArray.add(new $T(item)))", ClassName.get(JsonPrimitive.class))
+                            .addStatement("return jsonArray");
                 } else {
                     builder.addStatement("return new $T(result)", ClassName.get(JsonPrimitive.class));
                 }
@@ -285,27 +285,31 @@ public class OperationHandlerImplementer {
         } else {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
-                    builder.addStatement("$T type = new $T<$T>() {}.getType()",
+                    builder.addStatement(
+                            "$T type = new $T<$T>() {}.getType()",
                             ClassName.get(Type.class),
                             ClassName.get(TypeToken.class),
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    );
-                    builder.addStatement("$T result = $L.create().fromJson(jsonElement, type)",
+                    ).addStatement(
+                            "$T result = $L.create().fromJson(jsonElement, type)",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                             "gsonBuilder"
-                    );
-                    builder.addStatement("return selectionFilter.get().$L(result.stream().map(item -> invokeHandler.get().$L(item)).collect($T.toList()), selectionContext.field().selectionSet())",
-                            fieldTypeParameterName.concat("List"),
-                            fieldTypeParameterName,
-                            ClassName.get(Collectors.class)
-                    );
+                    ).beginControlFlow("if(result == null)")
+                            .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
+                            .endControlFlow()
+                            .addStatement(
+                                    "return selectionFilter.get().$L(result.stream().map(item -> invokeHandler.get().$L(item)).collect($T.toList()), selectionContext.field().selectionSet())",
+                                    fieldTypeParameterName.concat("List"),
+                                    fieldTypeParameterName,
+                                    ClassName.get(Collectors.class)
+                            );
                 } else {
-                    builder.addStatement("$T result = $L.create().fromJson(jsonElement, $T.class)",
+                    builder.addStatement(
+                            "$T result = $L.create().fromJson(jsonElement, $T.class)",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                             "gsonBuilder",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    );
-                    builder.addStatement("return selectionFilter.get().$L(invokeHandler.get().$L(result), selectionContext.field().selectionSet())",
+                    ).addStatement("return selectionFilter.get().$L(invokeHandler.get().$L(result), selectionContext.field().selectionSet())",
                             fieldTypeParameterName,
                             fieldTypeParameterName
                     );
@@ -340,10 +344,10 @@ public class OperationHandlerImplementer {
                 .forEach(typeElement ->
                         builder.addParameter(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)),
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString())
+                                typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString())
                         ).addStatement("this.$L = $L",
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
-                                CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString())
+                                typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString()),
+                                typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString())
                         )
                 );
 

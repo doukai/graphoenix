@@ -107,4 +107,17 @@ public class TypeManager {
             }
         }
     }
+
+    public String typeToLowerCamelName(GraphqlParser.TypeContext typeContext) {
+        String fieldTypeName = manager.getFieldTypeName(typeContext);
+        return typeToLowerCamelName(fieldTypeName);
+    }
+
+    public String typeToLowerCamelName(String fieldTypeName) {
+        if (fieldTypeName.startsWith("__")) {
+            return "__".concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName.replaceFirst("__", "")));
+        } else {
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
+        }
+    }
 }

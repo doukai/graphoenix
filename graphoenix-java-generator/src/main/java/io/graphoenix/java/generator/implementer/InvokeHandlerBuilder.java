@@ -76,7 +76,7 @@ public class InvokeHandlerBuilder {
                 .flatMap(typeElementListMap ->
                         typeElementListMap.keySet().stream()
                                 .map(typeElement ->
-                                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)), CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()))
+                                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)), typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString()))
                                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                                 .build()
                                 )
@@ -96,7 +96,7 @@ public class InvokeHandlerBuilder {
                         .map(typeElement ->
                                 ParameterSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)),
-                                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString())
+                                        typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString())
                                 ).build()
                         )
                         .collect(Collectors.toList())
@@ -104,8 +104,8 @@ public class InvokeHandlerBuilder {
 
         invokeElement.forEach(typeElement ->
                 builder.addStatement("this.$L = $L",
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString()),
-                        CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, typeElement.getSimpleName().toString())
+                        typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString()),
+                        typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString())
                 )
         );
 
@@ -123,7 +123,7 @@ public class InvokeHandlerBuilder {
     }
 
     private MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText()))
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()))
                 .addParameter(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), getParameterName(objectTypeDefinitionContext));
@@ -136,7 +136,7 @@ public class InvokeHandlerBuilder {
                                     builder.addStatement("$L.$L($L.get().$L($L))",
                                             getParameterName(objectTypeDefinitionContext),
                                             typeManager.getInvokeFieldSetterMethodName(executableElement.getSimpleName().toString()),
-                                            CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, key.getSimpleName().toString()),
+                                            typeManager.typeToLowerCamelName(key.getSimpleName().toString()),
                                             executableElement.getSimpleName().toString(),
                                             getParameterName(objectTypeDefinitionContext)
                                     )
@@ -176,10 +176,10 @@ public class InvokeHandlerBuilder {
     }
 
     private String getParameterName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectTypeDefinitionContext.name().getText());
+        return typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
     }
 
     private String getObjectMethodName(String objectName) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, objectName);
+        return typeManager.typeToLowerCamelName(objectName);
     }
 }
