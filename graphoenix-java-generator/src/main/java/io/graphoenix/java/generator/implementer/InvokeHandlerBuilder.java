@@ -1,6 +1,5 @@
 package io.graphoenix.java.generator.implementer;
 
-import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;

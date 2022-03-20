@@ -1,6 +1,5 @@
 package io.graphoenix.java.generator.implementer;
 
-import com.google.common.base.CaseFormat;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -138,8 +137,7 @@ public class SelectionFilterBuilder {
                                     );
                                 }
                                 builder.addStatement("jsonObject.add($S, jsonArray)", fieldDefinitionContext.name().getText())
-                                        .endControlFlow()
-                                        .beginControlFlow("else")
+                                        .nextControlFlow("else")
                                         .addStatement("jsonObject.add($S, $T.INSTANCE)", fieldDefinitionContext.name().getText(), ClassName.get(JsonNull.class))
                                         .endControlFlow();
                             } else {
