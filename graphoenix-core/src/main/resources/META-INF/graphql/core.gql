@@ -87,3 +87,5 @@ directive @invoke(
 ) on FIELD_DEFINITION
 
 directive @cursor on FIELD_DEFINITION
+
+directive @func on FIELD_DEFINITION
