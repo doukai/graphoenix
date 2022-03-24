@@ -134,7 +134,7 @@ public class InvokeHandlerBuilder {
                             value.forEach(executableElement ->
                                     builder.addStatement("$L.$L($L.get().$L($L))",
                                             getParameterName(objectTypeDefinitionContext),
-                                            typeManager.getInvokeFieldSetterMethodName(executableElement.getSimpleName().toString()),
+                                            typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(executableElement.getSimpleName().toString())),
                                             typeManager.typeToLowerCamelName(key.getSimpleName().toString()),
                                             executableElement.getSimpleName().toString(),
                                             getParameterName(objectTypeDefinitionContext)

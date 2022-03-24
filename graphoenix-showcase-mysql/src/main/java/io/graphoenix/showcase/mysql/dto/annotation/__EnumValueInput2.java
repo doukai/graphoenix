@@ -11,35 +11,35 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __EnumValueInput2 {
+  String id() default "";
+
+  String name() default "";
+
+  String ofTypeName() default "";
+
+  String description() default "";
+
   String deprecationReason() default "";
+
+  int version() default 0;
 
   boolean isDeprecated() default false;
 
   String __typename() default "";
 
-  String name() default "";
+  String $id() default "";
 
-  String description() default "";
+  String $name() default "";
 
-  String id() default "";
+  String $ofTypeName() default "";
 
-  int version() default 0;
-
-  String ofTypeName() default "";
+  String $description() default "";
 
   String $deprecationReason() default "";
+
+  String $version() default "";
 
   String $isDeprecated() default "";
 
   String $__typename() default "";
-
-  String $name() default "";
-
-  String $description() default "";
-
-  String $id() default "";
-
-  String $version() default "";
-
-  String $ofTypeName() default "";
 }

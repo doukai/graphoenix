@@ -12,15 +12,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __DirectiveInput2 {
-  boolean onFragment() default false;
-
-  boolean isDeprecated() default false;
+  String name() default "";
 
   int schemaId() default 0;
-
-  String __typename() default "";
-
-  String name() default "";
 
   String description() default "";
 
@@ -28,29 +22,35 @@ public @interface __DirectiveInput2 {
 
   boolean onOperation() default false;
 
-  int version() default 0;
+  boolean onFragment() default false;
 
   boolean onField() default false;
 
-  String $args() default "";
+  int version() default 0;
 
-  String $onFragment() default "";
+  boolean isDeprecated() default false;
 
-  String $isDeprecated() default "";
-
-  String $schemaId() default "";
-
-  String $__typename() default "";
+  String __typename() default "";
 
   String $name() default "";
+
+  String $schemaId() default "";
 
   String $description() default "";
 
   String $locations() default "";
 
+  String $args() default "";
+
   String $onOperation() default "";
+
+  String $onFragment() default "";
+
+  String $onField() default "";
 
   String $version() default "";
 
-  String $onField() default "";
+  String $isDeprecated() default "";
+
+  String $__typename() default "";
 }

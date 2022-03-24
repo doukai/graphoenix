@@ -14,23 +14,23 @@ import java.lang.annotation.Target;
 public @interface RoleExpression2 {
   Operator opr() default Operator.EQ;
 
+  String[] id() default {};
+
+  String[] name() default {};
+
+  int[] version() default {};
+
   boolean[] isDeprecated() default {};
 
   String[] __typename() default {};
 
-  String[] name() default {};
+  String[] $id() default {};
 
-  String[] id() default {};
+  String[] $name() default {};
 
-  int[] version() default {};
+  String[] $version() default {};
 
   String[] $isDeprecated() default {};
 
   String[] $__typename() default {};
-
-  String[] $name() default {};
-
-  String[] $id() default {};
-
-  String[] $version() default {};
 }

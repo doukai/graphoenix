@@ -46,20 +46,29 @@ public class TypeManager {
         }
     }
 
-    public String getInvokeFieldGetterMethodName(String methodName) {
-        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(methodName)));
-    }
-
-    public String getInvokeFieldSetterMethodName(String methodName) {
-        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(methodName)));
-    }
 
     public String getFieldGetterMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(fieldDefinitionContext.name().getText())));
+        return getFieldGetterMethodName(fieldDefinitionContext.name().getText());
+    }
+
+    public String getFieldGetterMethodName(String fieldName) {
+        if (fieldName.startsWith("__")) {
+            return "get__".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst("__", "")));
+        } else {
+            return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
+        }
     }
 
     public String getFieldSetterMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getInvokeFieldName(fieldDefinitionContext.name().getText())));
+        return getFieldSetterMethodName(fieldDefinitionContext.name().getText());
+    }
+
+    public String getFieldSetterMethodName(String fieldName) {
+        if (fieldName.startsWith("__")) {
+            return "set__".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst("__", "")));
+        } else {
+            return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
+        }
     }
 
     public Optional<Tuple2<String, String>> getInvokeDirective(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {

@@ -88,11 +88,11 @@ public class __EnumValueExpression {
     this.includeDeprecated = includeDeprecated;
   }
 
-  public StringExpression get__typename() {
+  public StringExpression get__Typename() {
     return this.__typename;
   }
 
-  public void set__typename(StringExpression __typename) {
+  public void set__Typename(StringExpression __typename) {
     this.__typename = __typename;
   }
 

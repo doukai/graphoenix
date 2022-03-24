@@ -11,51 +11,51 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __SchemaInput1 {
-  boolean isDeprecated() default false;
+  String id() default "";
+
+  String queryTypeName() default "";
 
   String mutationTypeName() default "";
 
   String subscriptionTypeName() default "";
 
+  int version() default 0;
+
+  boolean isDeprecated() default false;
+
   String __typename() default "";
 
-  String queryTypeName() default "";
+  String $id() default "";
 
-  String id() default "";
+  String $queryTypeName() default "";
 
-  int version() default 0;
+  String $mutationTypeName() default "";
+
+  String $subscriptionTypeName() default "";
 
   String $types() default "";
 
-  String $isDeprecated() default "";
+  String $queryType() default "";
 
-  String $mutationTypeName() default "";
+  String $mutationType() default "";
 
   String $subscriptionType() default "";
 
   String $directives() default "";
 
-  String $mutationType() default "";
+  String $version() default "";
 
-  String $subscriptionTypeName() default "";
+  String $isDeprecated() default "";
 
   String $__typename() default "";
 
-  String $queryTypeName() default "";
-
-  String $id() default "";
-
-  String $version() default "";
-
-  String $queryType() default "";
-
   __TypeInput2[] types() default {};
+
+  __TypeInput2 queryType() default @__TypeInput2;
+
+  __TypeInput2 mutationType() default @__TypeInput2;
 
   __TypeInput2 subscriptionType() default @__TypeInput2;
 
   __DirectiveInput2[] directives() default {};
-
-  __TypeInput2 mutationType() default @__TypeInput2;
-
-  __TypeInput2 queryType() default @__TypeInput2;
 }

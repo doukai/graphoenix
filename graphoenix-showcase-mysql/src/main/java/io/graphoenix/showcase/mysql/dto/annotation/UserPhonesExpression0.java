@@ -14,27 +14,27 @@ import java.lang.annotation.Target;
 public @interface UserPhonesExpression0 {
   Operator opr() default Operator.EQ;
 
-  boolean[] isDeprecated() default {};
-
-  String[] phone() default {};
-
-  String[] __typename() default {};
-
   String[] id() default {};
 
   int[] userId() default {};
 
+  String[] phone() default {};
+
   int[] version() default {};
 
-  String[] $isDeprecated() default {};
+  boolean[] isDeprecated() default {};
 
-  String[] $phone() default {};
-
-  String[] $__typename() default {};
+  String[] __typename() default {};
 
   String[] $id() default {};
 
   String[] $userId() default {};
 
+  String[] $phone() default {};
+
   String[] $version() default {};
+
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 }

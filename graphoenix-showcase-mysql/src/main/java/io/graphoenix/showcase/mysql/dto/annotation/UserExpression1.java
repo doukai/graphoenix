@@ -15,59 +15,59 @@ import java.lang.annotation.Target;
 public @interface UserExpression1 {
   Operator opr() default Operator.EQ;
 
-  boolean[] isDeprecated() default {};
-
-  Sex[] sex() default {};
-
-  String[] __typename() default {};
-
-  String[] phones() default {};
+  String[] id() default {};
 
   String[] login() default {};
 
-  String[] userDetail2() default {};
-
-  int[] version() default {};
-
-  int[] organizationId() default {};
-
   String[] password() default {};
-
-  boolean[] disable() default {};
 
   String[] name() default {};
 
-  String[] id() default {};
-
   int[] age() default {};
 
-  String[] $isDeprecated() default {};
+  boolean[] disable() default {};
 
-  String[] $sex() default {};
+  Sex[] sex() default {};
 
-  String[] $__typename() default {};
+  int[] organizationId() default {};
 
-  String[] $phones() default {};
+  String[] phones() default {};
 
-  String[] $login() default {};
+  int[] version() default {};
 
-  String[] $userDetail2() default {};
+  boolean[] isDeprecated() default {};
 
-  String[] $version() default {};
+  String[] __typename() default {};
 
-  String[] $organizationId() default {};
-
-  String[] $password() default {};
-
-  String[] $disable() default {};
-
-  String[] $name() default {};
+  String[] userDetail2() default {};
 
   String[] $id() default {};
 
+  String[] $login() default {};
+
+  String[] $password() default {};
+
+  String[] $name() default {};
+
   String[] $age() default {};
 
-  RoleExpressions2[] roles() default {};
+  String[] $disable() default {};
+
+  String[] $sex() default {};
+
+  String[] $organizationId() default {};
+
+  String[] $phones() default {};
+
+  String[] $version() default {};
+
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
+
+  String[] $userDetail2() default {};
 
   OrganizationExpressions2[] organization() default {};
+
+  RoleExpressions2[] roles() default {};
 }

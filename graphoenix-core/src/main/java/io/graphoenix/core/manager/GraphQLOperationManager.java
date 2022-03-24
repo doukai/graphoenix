@@ -5,7 +5,7 @@ import io.graphoenix.spi.antlr.IGraphQLOperationManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.tinylog.Logger;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class GraphQLOperationManager implements IGraphQLOperationManager {
 
-    private final Map<String, GraphqlParser.OperationTypeDefinitionContext> operationTypeDefinitionMap = new HashMap<>();
+    private final Map<String, GraphqlParser.OperationTypeDefinitionContext> operationTypeDefinitionMap = new LinkedHashMap<>();
 
     @Override
     public Map<String, GraphqlParser.OperationTypeDefinitionContext> register(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {

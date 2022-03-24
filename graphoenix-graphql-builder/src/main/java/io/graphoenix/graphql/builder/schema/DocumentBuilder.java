@@ -222,8 +222,8 @@ public class DocumentBuilder {
                                             .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                             );
 
-                    field.addArgument(new InputValue().setName("orderBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.SELECTION_SET.toString())))
-                            .addArgument(new InputValue().setName("groupBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.SELECTION_SET.toString())));
+                    field.addArgument(new InputValue().setName("orderBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ARGUMENT_SET.toString())))
+                            .addArgument(new InputValue().setName("groupBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ARGUMENT_SET.toString())));
                 }
             }
         } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
@@ -332,8 +332,8 @@ public class DocumentBuilder {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
-                .addArgument(new InputValue().setName("orderBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION_SET.toString())))
-                .addArgument(new InputValue().setName("groupBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION_SET.toString())));
+                .addArgument(new InputValue().setName("orderBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString())))
+                .addArgument(new InputValue().setName("groupBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString())));
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"))
@@ -360,7 +360,7 @@ public class DocumentBuilder {
     }
 
     public Set<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        if (inputType.equals(InputType.SELECTION_SET)) {
+        if (inputType.equals(InputType.ARGUMENT_SET)) {
             return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
@@ -394,8 +394,8 @@ public class DocumentBuilder {
         } else {
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(manager.isObject(fieldTypeName) ?
-                            manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.SELECTION_SET.toString()) :
-                            objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION.toString()));
+                            manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ARGUMENT_SET.toString()) :
+                            objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT.toString()));
         }
     }
 
@@ -423,14 +423,13 @@ public class DocumentBuilder {
     }
 
     public InputObjectType objectToSelectionSet(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION_SET.toString()))
-                .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.SELECTION_SET));
+        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString()))
+                .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.ARGUMENT_SET));
     }
 
     public InputObjectType objectToSelection(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION.toString()))
-                .addInputValue(new InputValue().setName("type").setTypeName("SelectionType").setDefaultValue("FIELD"))
-                .addInputValue(new InputValue().setName("args").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION_SET.toString())))
+        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT.toString()))
+                .addInputValue(new InputValue().setName("args").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString())))
                 .addInputValue(new InputValue().setName("sort").setTypeName("Sort"));
     }
 
@@ -486,7 +485,7 @@ public class DocumentBuilder {
     }
 
     private enum InputType {
-        EXPRESSION("Expression"), INPUT("Input"), SELECTION_SET("SelectionSet"), SELECTION("Selection");
+        EXPRESSION("Expression"), INPUT("Input"), ARGUMENT_SET("ArgumentSet"), ARGUMENT("Argument");
 
         private final String suffix;
 
@@ -528,7 +527,7 @@ public class DocumentBuilder {
                     .addArgument(
                             new InputValue()
                                     .setName("args")
-                                    .setTypeName(objectName.concat(InputType.SELECTION_SET.toString()))
+                                    .setTypeName(objectName.concat(InputType.ARGUMENT_SET.toString()))
                     )
                     .addDirective("func");
         }

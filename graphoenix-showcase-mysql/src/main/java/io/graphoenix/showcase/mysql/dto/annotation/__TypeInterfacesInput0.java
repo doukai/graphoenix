@@ -11,27 +11,27 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __TypeInterfacesInput0 {
-  boolean isDeprecated() default false;
-
-  String __typename() default "";
+  String id() default "";
 
   String typeName() default "";
-
-  String id() default "";
 
   String interfaceName() default "";
 
   int version() default 0;
 
-  String $isDeprecated() default "";
+  boolean isDeprecated() default false;
 
-  String $__typename() default "";
-
-  String $typeName() default "";
+  String __typename() default "";
 
   String $id() default "";
+
+  String $typeName() default "";
 
   String $interfaceName() default "";
 
   String $version() default "";
+
+  String $isDeprecated() default "";
+
+  String $__typename() default "";
 }

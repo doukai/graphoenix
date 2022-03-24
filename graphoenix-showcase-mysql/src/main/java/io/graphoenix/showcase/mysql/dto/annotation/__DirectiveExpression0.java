@@ -15,15 +15,9 @@ import java.lang.annotation.Target;
 public @interface __DirectiveExpression0 {
   Operator opr() default Operator.EQ;
 
-  boolean[] onFragment() default {};
-
-  boolean[] isDeprecated() default {};
+  String[] name() default {};
 
   int[] schemaId() default {};
-
-  String[] __typename() default {};
-
-  String[] name() default {};
 
   String[] description() default {};
 
@@ -31,19 +25,19 @@ public @interface __DirectiveExpression0 {
 
   boolean[] onOperation() default {};
 
-  int[] version() default {};
+  boolean[] onFragment() default {};
 
   boolean[] onField() default {};
 
-  String[] $onFragment() default {};
+  int[] version() default {};
 
-  String[] $isDeprecated() default {};
+  boolean[] isDeprecated() default {};
 
-  String[] $schemaId() default {};
-
-  String[] $__typename() default {};
+  String[] __typename() default {};
 
   String[] $name() default {};
+
+  String[] $schemaId() default {};
 
   String[] $description() default {};
 
@@ -51,9 +45,15 @@ public @interface __DirectiveExpression0 {
 
   String[] $onOperation() default {};
 
-  String[] $version() default {};
+  String[] $onFragment() default {};
 
   String[] $onField() default {};
+
+  String[] $version() default {};
+
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 
   __InputValueExpressions1[] args() default {};
 }

@@ -12,63 +12,63 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface UserInput0 {
-  boolean isDeprecated() default false;
-
-  Sex sex() default Sex.MAN;
-
-  String __typename() default "";
-
-  String[] phones() default {};
+  String id() default "";
 
   String login() default "";
 
-  String userDetail2() default "";
-
-  int version() default 0;
-
-  int organizationId() default 0;
-
   String password() default "";
-
-  boolean disable() default false;
 
   String name() default "";
 
-  String id() default "";
-
   int age() default 0;
 
-  String $isDeprecated() default "";
+  boolean disable() default false;
 
-  String $sex() default "";
+  Sex sex() default Sex.MAN;
 
-  String $roles() default "";
+  int organizationId() default 0;
 
-  String $__typename() default "";
+  String[] phones() default {};
 
-  String $phones() default "";
+  int version() default 0;
 
-  String $login() default "";
+  boolean isDeprecated() default false;
 
-  String $userDetail2() default "";
+  String __typename() default "";
 
-  String $version() default "";
-
-  String $organizationId() default "";
-
-  String $password() default "";
-
-  String $disable() default "";
-
-  String $organization() default "";
-
-  String $name() default "";
+  String userDetail2() default "";
 
   String $id() default "";
 
+  String $login() default "";
+
+  String $password() default "";
+
+  String $name() default "";
+
   String $age() default "";
 
-  RoleInput1[] roles() default {};
+  String $disable() default "";
+
+  String $sex() default "";
+
+  String $organizationId() default "";
+
+  String $organization() default "";
+
+  String $roles() default "";
+
+  String $phones() default "";
+
+  String $version() default "";
+
+  String $isDeprecated() default "";
+
+  String $__typename() default "";
+
+  String $userDetail2() default "";
 
   OrganizationInput1 organization() default @OrganizationInput1;
+
+  RoleInput1[] roles() default {};
 }

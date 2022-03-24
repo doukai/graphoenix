@@ -14,47 +14,47 @@ import java.lang.annotation.Target;
 public @interface OrganizationExpression0 {
   Operator opr() default Operator.EQ;
 
-  boolean[] isDeprecated() default {};
-
-  String[] __typename() default {};
-
-  boolean[] roleDisable() default {};
-
-  int[] version() default {};
+  String[] id() default {};
 
   int[] aboveId() default {};
 
   String[] name() default {};
 
+  int[] version() default {};
+
+  boolean[] isDeprecated() default {};
+
+  String[] __typename() default {};
+
   int[] orgLevel2() default {};
 
   int[] orgLevel3() default {};
 
-  String[] id() default {};
+  boolean[] roleDisable() default {};
 
-  String[] $isDeprecated() default {};
-
-  String[] $__typename() default {};
-
-  String[] $roleDisable() default {};
-
-  String[] $version() default {};
+  String[] $id() default {};
 
   String[] $aboveId() default {};
 
   String[] $name() default {};
 
+  String[] $version() default {};
+
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
+
   String[] $orgLevel2() default {};
 
   String[] $orgLevel3() default {};
 
-  String[] $id() default {};
+  String[] $roleDisable() default {};
 
-  OrganizationExpressions1[] parent() default {};
-
-  UserExpressions1[] userByOrg() default {};
+  OrganizationExpressions1[] above() default {};
 
   UserExpressions1[] users() default {};
 
-  OrganizationExpressions1[] above() default {};
+  UserExpressions1[] userByOrg() default {};
+
+  OrganizationExpressions1[] parent() default {};
 }

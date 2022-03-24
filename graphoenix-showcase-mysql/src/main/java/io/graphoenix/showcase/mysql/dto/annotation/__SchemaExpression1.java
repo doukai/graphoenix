@@ -14,41 +14,41 @@ import java.lang.annotation.Target;
 public @interface __SchemaExpression1 {
   Operator opr() default Operator.EQ;
 
-  boolean[] isDeprecated() default {};
+  String[] id() default {};
+
+  String[] queryTypeName() default {};
 
   String[] mutationTypeName() default {};
 
   String[] subscriptionTypeName() default {};
 
-  String[] __typename() default {};
-
-  String[] queryTypeName() default {};
-
-  String[] id() default {};
-
   int[] version() default {};
 
-  String[] $isDeprecated() default {};
+  boolean[] isDeprecated() default {};
+
+  String[] __typename() default {};
+
+  String[] $id() default {};
+
+  String[] $queryTypeName() default {};
 
   String[] $mutationTypeName() default {};
 
   String[] $subscriptionTypeName() default {};
 
-  String[] $__typename() default {};
-
-  String[] $queryTypeName() default {};
-
-  String[] $id() default {};
-
   String[] $version() default {};
 
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
+
   __TypeExpressions2[] types() default {};
+
+  __TypeExpressions2[] queryType() default {};
+
+  __TypeExpressions2[] mutationType() default {};
 
   __TypeExpressions2[] subscriptionType() default {};
 
   __DirectiveExpressions2[] directives() default {};
-
-  __TypeExpressions2[] mutationType() default {};
-
-  __TypeExpressions2[] queryType() default {};
 }

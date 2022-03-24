@@ -11,45 +11,45 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __FieldInput0 {
-  String deprecationReason() default "";
-
-  boolean isDeprecated() default false;
-
-  String __typename() default "";
+  String id() default "";
 
   String name() default "";
 
   String typeName() default "";
 
+  String ofTypeName() default "";
+
   String description() default "";
 
-  String id() default "";
+  String deprecationReason() default "";
 
   int version() default 0;
 
-  String ofTypeName() default "";
+  boolean isDeprecated() default false;
 
-  String $args() default "";
+  String __typename() default "";
 
-  String $deprecationReason() default "";
-
-  String $isDeprecated() default "";
-
-  String $__typename() default "";
+  String $id() default "";
 
   String $name() default "";
 
   String $typeName() default "";
 
+  String $ofTypeName() default "";
+
   String $description() default "";
 
-  String $id() default "";
+  String $args() default "";
 
   String $type() default "";
 
+  String $deprecationReason() default "";
+
   String $version() default "";
 
-  String $ofTypeName() default "";
+  String $isDeprecated() default "";
+
+  String $__typename() default "";
 
   __InputValueInput1[] args() default {};
 

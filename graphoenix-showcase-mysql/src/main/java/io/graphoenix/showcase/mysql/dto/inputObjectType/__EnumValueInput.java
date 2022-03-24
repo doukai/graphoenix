@@ -85,11 +85,11 @@ public class __EnumValueInput {
     this.isDeprecated = isDeprecated;
   }
 
-  public String get__typename() {
+  public String get__Typename() {
     return this.__typename;
   }
 
-  public void set__typename(String __typename) {
+  public void set__Typename(String __typename) {
     this.__typename = __typename;
   }
 }

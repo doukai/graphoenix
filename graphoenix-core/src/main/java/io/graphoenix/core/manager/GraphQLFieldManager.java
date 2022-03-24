@@ -13,17 +13,17 @@ import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVES;
 @ApplicationScoped
 public class GraphQLFieldManager implements IGraphQLFieldManager {
 
-    private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> fieldDefinitionTree = new HashMap<>();
+    private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> fieldDefinitionTree = new LinkedHashMap<>();
 
-    private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> invokeFieldDefinitionTree = new HashMap<>();
+    private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> invokeFieldDefinitionTree = new LinkedHashMap<>();
 
     @Override
     public Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        Map<String, GraphqlParser.FieldDefinitionContext> fieldMap = new HashMap<>();
+        Map<String, GraphqlParser.FieldDefinitionContext> fieldMap = new LinkedHashMap<>();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().forEach(fieldDefinitionContext -> fieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext));
         fieldDefinitionTree.put(objectTypeDefinitionContext.name().getText(), fieldMap);
 
-        Map<String, GraphqlParser.FieldDefinitionContext> invokeFieldMap = new HashMap<>();
+        Map<String, GraphqlParser.FieldDefinitionContext> invokeFieldMap = new LinkedHashMap<>();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
                 .filter(fieldDefinitionContext ->
@@ -44,11 +44,11 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     @Override
     public Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        Map<String, GraphqlParser.FieldDefinitionContext> fieldMap = new HashMap<>();
+        Map<String, GraphqlParser.FieldDefinitionContext> fieldMap = new LinkedHashMap<>();
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().forEach(fieldDefinitionContext -> fieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext));
         fieldDefinitionTree.put(interfaceTypeDefinitionContext.name().getText(), fieldMap);
 
-        Map<String, GraphqlParser.FieldDefinitionContext> invokeFieldMap = new HashMap<>();
+        Map<String, GraphqlParser.FieldDefinitionContext> invokeFieldMap = new LinkedHashMap<>();
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
                 .filter(fieldDefinitionContext ->

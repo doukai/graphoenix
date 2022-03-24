@@ -11,27 +11,27 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface UserPhonesInput1 {
-  boolean isDeprecated() default false;
-
-  String phone() default "";
-
-  String __typename() default "";
-
   String id() default "";
 
   int userId() default 0;
 
+  String phone() default "";
+
   int version() default 0;
 
-  String $isDeprecated() default "";
+  boolean isDeprecated() default false;
 
-  String $phone() default "";
-
-  String $__typename() default "";
+  String __typename() default "";
 
   String $id() default "";
 
   String $userId() default "";
 
+  String $phone() default "";
+
   String $version() default "";
+
+  String $isDeprecated() default "";
+
+  String $__typename() default "";
 }

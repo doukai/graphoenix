@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import org.tinylog.Logger;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,7 +24,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
 
     private final IGraphQLDocumentManager manager;
 
-    private final Map<String, Map<String, FieldMap>> fieldMapTree = new HashMap<>();
+    private final Map<String, Map<String, FieldMap>> fieldMapTree = new LinkedHashMap<>();
 
     @Inject
     public GraphQLFieldMapManager(IGraphQLDocumentManager manager) {

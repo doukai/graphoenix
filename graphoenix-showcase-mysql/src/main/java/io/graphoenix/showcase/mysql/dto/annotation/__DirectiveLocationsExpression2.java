@@ -15,27 +15,27 @@ import java.lang.annotation.Target;
 public @interface __DirectiveLocationsExpression2 {
   Operator opr() default Operator.EQ;
 
-  String[] directiveName() default {};
+  String[] id() default {};
 
-  boolean[] isDeprecated() default {};
+  String[] directiveName() default {};
 
   __DirectiveLocation[] directiveLocation() default {};
 
-  String[] __typename() default {};
-
-  String[] id() default {};
-
   int[] version() default {};
 
-  String[] $directiveName() default {};
+  boolean[] isDeprecated() default {};
 
-  String[] $isDeprecated() default {};
-
-  String[] $directiveLocation() default {};
-
-  String[] $__typename() default {};
+  String[] __typename() default {};
 
   String[] $id() default {};
 
+  String[] $directiveName() default {};
+
+  String[] $directiveLocation() default {};
+
   String[] $version() default {};
+
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 }

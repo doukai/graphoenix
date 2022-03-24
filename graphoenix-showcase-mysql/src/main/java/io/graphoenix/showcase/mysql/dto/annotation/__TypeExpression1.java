@@ -15,47 +15,47 @@ import java.lang.annotation.Target;
 public @interface __TypeExpression1 {
   Operator opr() default Operator.EQ;
 
-  boolean[] isDeprecated() default {};
-
-  __TypeKind[] kind() default {};
-
-  String[] __typename() default {};
-
-  String[] description() default {};
-
-  int[] version() default {};
+  String[] name() default {};
 
   int[] schemaId() default {};
 
-  String[] name() default {};
+  __TypeKind[] kind() default {};
+
+  String[] description() default {};
 
   String[] ofTypeName() default {};
 
-  String[] $isDeprecated() default {};
+  int[] version() default {};
 
-  String[] $kind() default {};
+  boolean[] isDeprecated() default {};
 
-  String[] $__typename() default {};
-
-  String[] $description() default {};
-
-  String[] $version() default {};
-
-  String[] $schemaId() default {};
+  String[] __typename() default {};
 
   String[] $name() default {};
 
+  String[] $schemaId() default {};
+
+  String[] $kind() default {};
+
+  String[] $description() default {};
+
   String[] $ofTypeName() default {};
+
+  String[] $version() default {};
+
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
+
+  __FieldExpressions2[] fields() default {};
 
   __TypeExpressions2[] interfaces() default {};
 
   __TypeExpressions2[] possibleTypes() default {};
 
+  __EnumValueExpressions2[] enumValues() default {};
+
   __InputValueExpressions2[] inputFields() default {};
 
-  __FieldExpressions2[] fields() default {};
-
   __TypeExpressions2[] ofType() default {};
-
-  __EnumValueExpressions2[] enumValues() default {};
 }

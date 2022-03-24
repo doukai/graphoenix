@@ -5,7 +5,7 @@ import io.graphoenix.spi.antlr.IGraphQLInputObjectManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.tinylog.Logger;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class GraphQLInputObjectManager implements IGraphQLInputObjectManager {
 
-    private final Map<String, GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionMap = new HashMap<>();
+    private final Map<String, GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionMap = new LinkedHashMap<>();
 
     @Override
     public Map<String, GraphqlParser.InputObjectTypeDefinitionContext> register(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {

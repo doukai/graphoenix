@@ -11,25 +11,25 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface RoleInput2 {
+  String id() default "";
+
+  String name() default "";
+
+  int version() default 0;
+
   boolean isDeprecated() default false;
 
   String __typename() default "";
 
-  String name() default "";
+  String $id() default "";
 
-  String id() default "";
+  String $name() default "";
 
-  int version() default 0;
+  String $users() default "";
+
+  String $version() default "";
 
   String $isDeprecated() default "";
 
   String $__typename() default "";
-
-  String $name() default "";
-
-  String $id() default "";
-
-  String $version() default "";
-
-  String $users() default "";
 }

@@ -12,27 +12,27 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __DirectiveLocationsInput0 {
-  String directiveName() default "";
+  String id() default "";
 
-  boolean isDeprecated() default false;
+  String directiveName() default "";
 
   __DirectiveLocation directiveLocation() default __DirectiveLocation.QUERY;
 
-  String __typename() default "";
-
-  String id() default "";
-
   int version() default 0;
 
-  String $directiveName() default "";
+  boolean isDeprecated() default false;
 
-  String $isDeprecated() default "";
-
-  String $directiveLocation() default "";
-
-  String $__typename() default "";
+  String __typename() default "";
 
   String $id() default "";
 
+  String $directiveName() default "";
+
+  String $directiveLocation() default "";
+
   String $version() default "";
+
+  String $isDeprecated() default "";
+
+  String $__typename() default "";
 }

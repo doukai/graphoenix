@@ -14,27 +14,27 @@ import java.lang.annotation.Target;
 public @interface __TypePossibleTypesExpression2 {
   Operator opr() default Operator.EQ;
 
-  boolean[] isDeprecated() default {};
-
-  String[] __typename() default {};
+  String[] id() default {};
 
   String[] typeName() default {};
 
   String[] possibleTypeName() default {};
 
-  String[] id() default {};
-
   int[] version() default {};
 
-  String[] $isDeprecated() default {};
+  boolean[] isDeprecated() default {};
 
-  String[] $__typename() default {};
+  String[] __typename() default {};
+
+  String[] $id() default {};
 
   String[] $typeName() default {};
 
   String[] $possibleTypeName() default {};
 
-  String[] $id() default {};
-
   String[] $version() default {};
+
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 }

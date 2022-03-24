@@ -11,47 +11,47 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface OrganizationInput2 {
-  boolean isDeprecated() default false;
-
-  String __typename() default "";
-
-  boolean roleDisable() default false;
-
-  int version() default 0;
+  String id() default "";
 
   int aboveId() default 0;
 
   String name() default "";
 
+  int version() default 0;
+
+  boolean isDeprecated() default false;
+
+  String __typename() default "";
+
   int orgLevel2() default 0;
 
   int[] orgLevel3() default {};
 
-  String id() default "";
+  boolean roleDisable() default false;
 
-  String $parent() default "";
-
-  String $isDeprecated() default "";
-
-  String $userByOrg() default "";
-
-  String $__typename() default "";
-
-  String $roleDisable() default "";
-
-  String $version() default "";
-
-  String $users() default "";
+  String $id() default "";
 
   String $aboveId() default "";
 
   String $above() default "";
 
+  String $users() default "";
+
   String $name() default "";
+
+  String $version() default "";
+
+  String $isDeprecated() default "";
+
+  String $__typename() default "";
 
   String $orgLevel2() default "";
 
   String $orgLevel3() default "";
 
-  String $id() default "";
+  String $roleDisable() default "";
+
+  String $userByOrg() default "";
+
+  String $parent() default "";
 }

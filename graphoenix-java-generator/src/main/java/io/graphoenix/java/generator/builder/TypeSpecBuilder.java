@@ -13,6 +13,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.annotation.TypeExpression;
 import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.annotation.TypeInput;
@@ -52,11 +53,13 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 public class TypeSpecBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public TypeSpecBuilder(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig) {
+    public TypeSpecBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
     }
 
@@ -76,7 +79,8 @@ public class TypeSpecBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Type.class)
                 .addAnnotation(getGeneratedAnnotationSpec());
-        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
+        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .forEach(fieldDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(fieldDefinitionContext);
                             builder.addField(fieldSpec);
@@ -108,8 +112,7 @@ public class TypeSpecBuilder {
                 .addAnnotation(Input.class)
                 .addAnnotation(getGeneratedAnnotationSpec());
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
-                .forEach(
-                        inputValueDefinitionContext -> {
+                .forEach(inputValueDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(inputValueDefinitionContext);
                             builder.addField(fieldSpec);
                             addGetterAndSetter(fieldSpec, builder, null);
@@ -151,9 +154,9 @@ public class TypeSpecBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Interface.class)
                 .addAnnotation(getGeneratedAnnotationSpec());
-        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
-                .forEach(
-                        fieldDefinitionContext -> {
+        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> manager.isNotFunctionField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                .forEach(fieldDefinitionContext -> {
                             FieldSpec fieldSpec = buildInterfaceField(fieldDefinitionContext);
                             builder.addField(fieldSpec);
                             addInterfaceGetterAndSetter(fieldSpec, builder);
@@ -572,9 +575,8 @@ public class TypeSpecBuilder {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
             case "Int":
-                return CodeBlock.of("$L", 0);
             case "Float":
-                return CodeBlock.of("$L", 0.0f);
+                return CodeBlock.of("$L", 0);
             case "ID":
             case "String":
                 return CodeBlock.of("$S", "");
@@ -590,7 +592,7 @@ public class TypeSpecBuilder {
     }
 
     private void addSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder, GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
-        String setterName = "set" + capitalizeFirstLetter(fieldSpec.name);
+        String setterName = typeManager.getFieldSetterMethodName(fieldSpec.name);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(setterName).addModifiers(Modifier.PUBLIC);
         methodBuilder.addParameter(fieldSpec.type, fieldSpec.name);
         methodBuilder.addStatement("this." + fieldSpec.name + " = " + fieldSpec.name);
@@ -609,7 +611,7 @@ public class TypeSpecBuilder {
     }
 
     public void addGetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder, GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
-        String getterName = "get" + capitalizeFirstLetter(fieldSpec.name);
+        String getterName = typeManager.getFieldGetterMethodName(fieldSpec.name);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(getterName).returns(fieldSpec.type).addModifiers(Modifier.PUBLIC);
         methodBuilder.addStatement("return this." + fieldSpec.name);
 
@@ -633,22 +635,17 @@ public class TypeSpecBuilder {
     }
 
     private void addInterfaceSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder) {
-        String setterName = "set" + capitalizeFirstLetter(fieldSpec.name);
+        String setterName = typeManager.getFieldSetterMethodName(fieldSpec.name);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(setterName).addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC);
         methodBuilder.addParameter(fieldSpec.type, fieldSpec.name);
         classBuilder.addMethod(methodBuilder.build());
     }
 
     public void addInterfaceGetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder) {
-        String getterName = "get" + capitalizeFirstLetter(fieldSpec.name);
+        String getterName = typeManager.getFieldGetterMethodName(fieldSpec.name);
         MethodSpec.Builder methodBuilder = MethodSpec.methodBuilder(getterName).returns(fieldSpec.type).addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC);
         classBuilder.addMethod(methodBuilder.build());
     }
-
-    private String capitalizeFirstLetter(final String fieldName) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
-    }
-
 
     public Stream<TypeSpec> buildObjectTypeExpressionAnnotations() {
         return IntStream.range(0, graphQLConfig.getInputLayers())
@@ -694,6 +691,7 @@ public class TypeSpecBuilder {
                                         manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                 manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                 )
+                                .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                 .map(fieldDefinitionContext ->
                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -709,6 +707,7 @@ public class TypeSpecBuilder {
                                         manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                 manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                 )
+                                .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                 .map(fieldDefinitionContext ->
                                         MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -819,6 +818,7 @@ public class TypeSpecBuilder {
                                                             manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                                     manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                     )
+                                                    .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                     .map(fieldDefinitionContext ->
                                                             MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -830,6 +830,7 @@ public class TypeSpecBuilder {
                                     )
                                     .addMethods(
                                             manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                    .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                     .map(fieldDefinitionContext ->
                                                             MethodSpec.methodBuilder("$".concat(fieldDefinitionContext.name().getText()))
                                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)

@@ -14,47 +14,47 @@ import java.lang.annotation.Target;
 public @interface __InputValueExpression2 {
   Operator opr() default Operator.EQ;
 
-  String[] directiveName() default {};
-
-  boolean[] isDeprecated() default {};
-
-  String[] defaultValue() default {};
-
-  String[] __typename() default {};
+  String[] id() default {};
 
   String[] name() default {};
 
   String[] typeName() default {};
 
-  String[] description() default {};
-
-  String[] id() default {};
-
-  int[] version() default {};
-
   String[] ofTypeName() default {};
 
   int[] fieldId() default {};
 
-  String[] $directiveName() default {};
+  String[] directiveName() default {};
 
-  String[] $isDeprecated() default {};
+  String[] description() default {};
 
-  String[] $defaultValue() default {};
+  String[] defaultValue() default {};
 
-  String[] $__typename() default {};
+  int[] version() default {};
+
+  boolean[] isDeprecated() default {};
+
+  String[] __typename() default {};
+
+  String[] $id() default {};
 
   String[] $name() default {};
 
   String[] $typeName() default {};
 
-  String[] $description() default {};
-
-  String[] $id() default {};
-
-  String[] $version() default {};
-
   String[] $ofTypeName() default {};
 
   String[] $fieldId() default {};
+
+  String[] $directiveName() default {};
+
+  String[] $description() default {};
+
+  String[] $defaultValue() default {};
+
+  String[] $version() default {};
+
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 }

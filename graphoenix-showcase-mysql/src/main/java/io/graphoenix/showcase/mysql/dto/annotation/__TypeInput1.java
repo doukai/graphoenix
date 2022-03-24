@@ -12,59 +12,59 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __TypeInput1 {
-  boolean isDeprecated() default false;
-
-  __TypeKind kind() default __TypeKind.SCALAR;
-
-  String __typename() default "";
-
-  String description() default "";
-
-  int version() default 0;
+  String name() default "";
 
   int schemaId() default 0;
 
-  String name() default "";
+  __TypeKind kind() default __TypeKind.SCALAR;
+
+  String description() default "";
 
   String ofTypeName() default "";
 
-  String $interfaces() default "";
+  int version() default 0;
 
-  String $isDeprecated() default "";
+  boolean isDeprecated() default false;
 
-  String $possibleTypes() default "";
-
-  String $kind() default "";
-
-  String $__typename() default "";
-
-  String $description() default "";
-
-  String $version() default "";
-
-  String $inputFields() default "";
-
-  String $schemaId() default "";
+  String __typename() default "";
 
   String $name() default "";
 
+  String $schemaId() default "";
+
+  String $kind() default "";
+
+  String $description() default "";
+
   String $fields() default "";
 
-  String $ofType() default "";
+  String $interfaces() default "";
+
+  String $possibleTypes() default "";
 
   String $enumValues() default "";
 
+  String $inputFields() default "";
+
   String $ofTypeName() default "";
+
+  String $ofType() default "";
+
+  String $version() default "";
+
+  String $isDeprecated() default "";
+
+  String $__typename() default "";
+
+  __FieldInput2[] fields() default {};
 
   __TypeInput2[] interfaces() default {};
 
   __TypeInput2[] possibleTypes() default {};
 
+  __EnumValueInput2[] enumValues() default {};
+
   __InputValueInput2[] inputFields() default {};
 
-  __FieldInput2[] fields() default {};
-
   __TypeInput2 ofType() default @__TypeInput2;
-
-  __EnumValueInput2[] enumValues() default {};
 }

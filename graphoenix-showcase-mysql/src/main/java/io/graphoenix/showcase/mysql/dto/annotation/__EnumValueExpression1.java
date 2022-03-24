@@ -14,35 +14,35 @@ import java.lang.annotation.Target;
 public @interface __EnumValueExpression1 {
   Operator opr() default Operator.EQ;
 
+  String[] id() default {};
+
+  String[] name() default {};
+
+  String[] ofTypeName() default {};
+
+  String[] description() default {};
+
   String[] deprecationReason() default {};
+
+  int[] version() default {};
 
   boolean[] isDeprecated() default {};
 
   String[] __typename() default {};
 
-  String[] name() default {};
+  String[] $id() default {};
 
-  String[] description() default {};
+  String[] $name() default {};
 
-  String[] id() default {};
+  String[] $ofTypeName() default {};
 
-  int[] version() default {};
-
-  String[] ofTypeName() default {};
+  String[] $description() default {};
 
   String[] $deprecationReason() default {};
+
+  String[] $version() default {};
 
   String[] $isDeprecated() default {};
 
   String[] $__typename() default {};
-
-  String[] $name() default {};
-
-  String[] $description() default {};
-
-  String[] $id() default {};
-
-  String[] $version() default {};
-
-  String[] $ofTypeName() default {};
 }

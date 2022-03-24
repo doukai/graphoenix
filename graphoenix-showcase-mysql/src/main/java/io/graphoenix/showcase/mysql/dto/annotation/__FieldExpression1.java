@@ -14,41 +14,41 @@ import java.lang.annotation.Target;
 public @interface __FieldExpression1 {
   Operator opr() default Operator.EQ;
 
-  String[] deprecationReason() default {};
-
-  boolean[] isDeprecated() default {};
-
-  String[] __typename() default {};
+  String[] id() default {};
 
   String[] name() default {};
 
   String[] typeName() default {};
 
+  String[] ofTypeName() default {};
+
   String[] description() default {};
 
-  String[] id() default {};
+  String[] deprecationReason() default {};
 
   int[] version() default {};
 
-  String[] ofTypeName() default {};
+  boolean[] isDeprecated() default {};
 
-  String[] $deprecationReason() default {};
+  String[] __typename() default {};
 
-  String[] $isDeprecated() default {};
-
-  String[] $__typename() default {};
+  String[] $id() default {};
 
   String[] $name() default {};
 
   String[] $typeName() default {};
 
+  String[] $ofTypeName() default {};
+
   String[] $description() default {};
 
-  String[] $id() default {};
+  String[] $deprecationReason() default {};
 
   String[] $version() default {};
 
-  String[] $ofTypeName() default {};
+  String[] $isDeprecated() default {};
+
+  String[] $__typename() default {};
 
   __InputValueExpressions2[] args() default {};
 
