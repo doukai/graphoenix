@@ -38,6 +38,11 @@ enum Sort {
     DESC
 }
 
+enum SelectionType {
+    FIELD
+    FUNC
+}
+
 input IDExpression {
     opr: Operator = EQ
     val: ID

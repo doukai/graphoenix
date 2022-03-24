@@ -54,6 +54,10 @@ public interface IGraphQLDocumentManager {
 
     boolean isNotInvokeField(String objectTypeName, String name);
 
+    boolean isFunctionField(String objectTypeName, String name);
+
+    boolean isNotFunctionField(String objectTypeName, String name);
+
     GraphqlParser.SchemaDefinitionContext getSchema();
 
     Optional<GraphqlParser.DirectiveDefinitionContext> getDirective(String name);

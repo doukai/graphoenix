@@ -22,5 +22,9 @@ public interface IGraphQLFieldManager {
 
     boolean isNotInvokeField(String objectTypeName, String fieldName);
 
+    boolean isFunctionField(String objectTypeName, String fieldName);
+
+    boolean isNotFunctionField(String objectTypeName, String fieldName);
+
     void clear();
 }

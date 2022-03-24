@@ -1,7 +1,10 @@
 package io.graphoenix.java.generator.implementer;
 
-import com.google.common.base.CaseFormat;
-import com.google.gson.*;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -266,9 +269,9 @@ public class OperationHandlerImplementer {
 
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
-                    builder.addStatement("return selectionFilter.get().$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName.concat("List"));
+                    builder.addStatement("return selectionFilter.get().$L(result, jsonElement, selectionContext.field().selectionSet())", fieldTypeParameterName.concat("List"));
                 } else {
-                    builder.addStatement("return selectionFilter.get().$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName);
+                    builder.addStatement("return selectionFilter.get().$L(result, jsonElement, selectionContext.field().selectionSet())", fieldTypeParameterName);
                 }
             } else {
                 if (fieldTypeIsList) {
@@ -286,19 +289,19 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                            "$T type = new $T<$T>() {}.getType()",
-                            ClassName.get(Type.class),
-                            ClassName.get(TypeToken.class),
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement(
-                            "$T result = $L.create().fromJson(jsonElement, type)",
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                            "gsonBuilder"
-                    ).beginControlFlow("if(result == null)")
+                                    "$T type = new $T<$T>() {}.getType()",
+                                    ClassName.get(Type.class),
+                                    ClassName.get(TypeToken.class),
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).addStatement(
+                                    "$T result = $L.create().fromJson(jsonElement, type)",
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                    "gsonBuilder"
+                            ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
                             .endControlFlow()
                             .addStatement(
-                                    "return selectionFilter.get().$L(result.stream().map(item -> invokeHandler.get().$L(item)).collect($T.toList()), selectionContext.field().selectionSet())",
+                                    "return selectionFilter.get().$L(result.stream().map(item -> invokeHandler.get().$L(item)).collect($T.toList()), jsonElement, selectionContext.field().selectionSet())",
                                     fieldTypeParameterName.concat("List"),
                                     fieldTypeParameterName,
                                     ClassName.get(Collectors.class)
@@ -309,7 +312,7 @@ public class OperationHandlerImplementer {
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                             "gsonBuilder",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement("return selectionFilter.get().$L(invokeHandler.get().$L(result), selectionContext.field().selectionSet())",
+                    ).addStatement("return selectionFilter.get().$L(invokeHandler.get().$L(result), jsonElement, selectionContext.field().selectionSet())",
                             fieldTypeParameterName,
                             fieldTypeParameterName
                     );

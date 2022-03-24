@@ -111,6 +111,17 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
+    public boolean isFunctionField(String objectTypeName, String fieldName) {
+        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
+        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("func"));
+    }
+
+    @Override
+    public boolean isNotFunctionField(String objectTypeName, String fieldName) {
+        return !isFunctionField(objectTypeName, fieldName);
+    }
+
+    @Override
     public void clear() {
         fieldDefinitionTree.clear();
         invokeFieldDefinitionTree.clear();

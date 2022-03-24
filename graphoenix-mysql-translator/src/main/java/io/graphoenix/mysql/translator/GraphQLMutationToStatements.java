@@ -102,6 +102,12 @@ public class GraphQLMutationToStatements {
                                                 selectionContext.field().name().getText()
                                         )
                                 )
+                                .filter(selectionContext ->
+                                        manager.isNotFunctionField(
+                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem().push(MUTATION_NOT_EXIST)),
+                                                selectionContext.field().name().getText()
+                                        )
+                                )
                                 .flatMap(this::selectionToStatementStream),
                         Stream.of(graphqlQueryToSelect.objectSelectionToSelect(mutationOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection()))
                 );
@@ -162,18 +168,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                objectDefaultValueToStatementStream(
-                                                                        fieldDefinitionContext,
-                                                                        idValueExpression,
-                                                                        subFieldDefinitionContext,
-                                                                        inputObjectTypeDefinitionContext,
-                                                                        inputValueDefinitionContext,
-                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                        0,
-                                                                        0
+                                                                        objectDefaultValueToStatementStream(
+                                                                                fieldDefinitionContext,
+                                                                                idValueExpression,
+                                                                                subFieldDefinitionContext,
+                                                                                inputObjectTypeDefinitionContext,
+                                                                                inputValueDefinitionContext,
+                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                0,
+                                                                                0
+                                                                        )
                                                                 )
-                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -634,16 +640,16 @@ public class GraphQLMutationToStatements {
 
         Stream<Statement> listObjectValueInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
                 .mapToObj(index -> objectValueWithVariableToInsertStatementStream(
-                        parentFieldDefinitionContext,
-                        parentIdValueExpression,
-                        fieldDefinitionContext,
-                        inputObjectTypeDefinitionContext,
-                        arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable(),
-                        fromValueExpression,
-                        mapper.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
-                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                        level,
-                        index
+                                parentFieldDefinitionContext,
+                                parentIdValueExpression,
+                                fieldDefinitionContext,
+                                inputObjectTypeDefinitionContext,
+                                arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable(),
+                                fromValueExpression,
+                                mapper.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
+                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                level,
+                                index
                         )
                 )
                 .flatMap(statementStream -> statementStream);
@@ -683,16 +689,16 @@ public class GraphQLMutationToStatements {
 
         Stream<Statement> listObjectValueInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
                 .mapToObj(index -> objectValueToStatementStream(
-                        parentFieldDefinitionContext,
-                        parentIdValueExpression,
-                        fieldDefinitionContext,
-                        inputObjectTypeDefinitionContext,
-                        arrayValueContext.value(index).objectValue(),
-                        fromValueExpression,
-                        mapper.getMapToValueFromObjectField(fieldDefinitionContext, arrayValueContext.value(index).objectValue())
-                                .map(dbValueUtil::scalarValueToDBValue).orElse(null),
-                        level,
-                        index
+                                parentFieldDefinitionContext,
+                                parentIdValueExpression,
+                                fieldDefinitionContext,
+                                inputObjectTypeDefinitionContext,
+                                arrayValueContext.value(index).objectValue(),
+                                fromValueExpression,
+                                mapper.getMapToValueFromObjectField(fieldDefinitionContext, arrayValueContext.value(index).objectValue())
+                                        .map(dbValueUtil::scalarValueToDBValue).orElse(null),
+                                level,
+                                index
                         )
                 )
                 .flatMap(statementStream -> statementStream);
@@ -756,11 +762,11 @@ public class GraphQLMutationToStatements {
 
         Stream<Insert> listValueInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
                 .mapToObj(index -> mapScalarOrEnumTypeFieldRelationInsertStream(
-                        parentFieldDefinitionContext,
-                        parentIdValueExpression,
-                        fieldDefinitionContext,
-                        dbValueUtil.valueWithVariableToDBValue(arrayValueWithVariableContext.valueWithVariable(index)),
-                        fromValueExpression
+                                parentFieldDefinitionContext,
+                                parentIdValueExpression,
+                                fieldDefinitionContext,
+                                dbValueUtil.valueWithVariableToDBValue(arrayValueWithVariableContext.valueWithVariable(index)),
+                                fromValueExpression
                         )
                 )
                 .flatMap(statementStream -> statementStream);
@@ -808,11 +814,11 @@ public class GraphQLMutationToStatements {
 
         Stream<Insert> listValueInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
                 .mapToObj(index -> mapScalarOrEnumTypeFieldRelationInsertStream(
-                        parentFieldDefinitionContext,
-                        parentIdValueExpression,
-                        fieldDefinitionContext,
-                        dbValueUtil.valueToDBValue(arrayValueContext.value(index)),
-                        fromValueExpression
+                                parentFieldDefinitionContext,
+                                parentIdValueExpression,
+                                fieldDefinitionContext,
+                                dbValueUtil.valueToDBValue(arrayValueContext.value(index)),
+                                fromValueExpression
                         )
                 )
                 .flatMap(statementStream -> statementStream);

@@ -29,7 +29,12 @@ import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -123,7 +128,7 @@ public class DocumentBuilder {
         return buildObject(objectTypeDefinitionContext, false, false, false);
     }
 
-    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface, boolean buildArgument, boolean buildTypeNameField) {
+    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface, boolean buildArgument, boolean buildField) {
         ObjectType objectType = new ObjectType()
                 .setName(objectTypeDefinitionContext.name().getText())
                 .setDescription(objectTypeDefinitionContext.description() == null ? null : objectTypeDefinitionContext.description().getText())
@@ -144,8 +149,9 @@ public class DocumentBuilder {
         if (buildInterface) {
             objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
         }
-        if (buildTypeNameField) {
+        if (buildField) {
             objectType.addField(buildTypeNameFiled(objectTypeDefinitionContext));
+            objectType.addFields(buildFunctionFieldList(objectTypeDefinitionContext));
         }
         return objectType;
     }
@@ -216,7 +222,8 @@ public class DocumentBuilder {
                                             .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                             );
 
-                    field.addArgument(new InputValue().setName("orderBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ORDER_BY.toString())));
+                    field.addArgument(new InputValue().setName("orderBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.SELECTION_SET.toString())))
+                            .addArgument(new InputValue().setName("groupBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.SELECTION_SET.toString())));
                 }
             }
         } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
@@ -324,11 +331,13 @@ public class DocumentBuilder {
     public Field buildSchemaTypeFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
-                .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType));
+                .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
+                .addArgument(new InputValue().setName("orderBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION_SET.toString())))
+                .addArgument(new InputValue().setName("groupBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION_SET.toString())));
 
         if (inputType.equals(InputType.EXPRESSION)) {
-            field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
-            field.addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
+            field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"))
+                    .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
                     .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"));
 
             manager.getFieldByDirective(objectTypeDefinitionContext.name().getText(), "cursor")
@@ -338,8 +347,6 @@ public class DocumentBuilder {
                             field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                                     .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                     );
-
-            field.addArgument(new InputValue().setName("orderBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())));
         }
         return field;
     }
@@ -353,15 +360,17 @@ public class DocumentBuilder {
     }
 
     public Set<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        if (inputType.equals(InputType.ORDER_BY)) {
+        if (inputType.equals(InputType.SELECTION_SET)) {
             return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                    .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                     .map(fieldDefinitionContext -> filedToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         } else {
             return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                    .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .map(fieldDefinitionContext -> filedToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
@@ -384,33 +393,26 @@ public class DocumentBuilder {
                     .setTypeName(fieldTypeName.concat(fieldTypeName.equals("Boolean") ? "" : InputType.EXPRESSION.toString()));
         } else {
             return new InputValue().setName(fieldDefinitionContext.name().getText())
-                    .setTypeName(manager.isObject(fieldTypeName) ? manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ORDER_BY.toString()) : "Sort");
+                    .setTypeName(manager.isObject(fieldTypeName) ?
+                            manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.SELECTION_SET.toString()) :
+                            objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION.toString()));
         }
     }
 
     public List<InputObjectType> buildObjectExpressions() {
+        List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
+                .collect(Collectors.toList());
+
         return Streams.concat(
-                manager.getObjects()
-                        .filter(objectTypeDefinitionContext ->
-                                !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                        !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                        !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                        )
-                        .map(this::objectToInput),
-                manager.getObjects()
-                        .filter(objectTypeDefinitionContext ->
-                                !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                        !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                        !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                        )
-                        .map(this::objectToOrderBy),
-                manager.getObjects()
-                        .filter(objectTypeDefinitionContext ->
-                                !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                        !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                        !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                        )
-                        .map(this::objectToExpression),
+                objectTypeDefinitionContextList.stream().map(this::objectToInput),
+                objectTypeDefinitionContextList.stream().map(this::objectToSelectionSet),
+                objectTypeDefinitionContextList.stream().map(this::objectToSelection),
+                objectTypeDefinitionContextList.stream().map(this::objectToExpression),
                 manager.getEnums().map(this::enumToExpression)
         ).collect(Collectors.toList());
     }
@@ -420,9 +422,16 @@ public class DocumentBuilder {
                 .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.INPUT));
     }
 
-    public InputObjectType objectToOrderBy(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString()))
-                .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.ORDER_BY));
+    public InputObjectType objectToSelectionSet(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION_SET.toString()))
+                .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.SELECTION_SET));
+    }
+
+    public InputObjectType objectToSelection(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION.toString()))
+                .addInputValue(new InputValue().setName("type").setTypeName("SelectionType").setDefaultValue("FIELD"))
+                .addInputValue(new InputValue().setName("args").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.SELECTION_SET.toString())))
+                .addInputValue(new InputValue().setName("sort").setTypeName("Sort"));
     }
 
     public InputObjectType objectToExpression(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -440,11 +449,17 @@ public class DocumentBuilder {
     }
 
     public Directive buildDirective(GraphqlParser.DirectiveContext directiveContext) {
-        return new Directive()
-                .setName(directiveContext.name().getText())
-                .setArguments(directiveContext.arguments().argument().stream()
-                        .map(this::buildArgument)
-                        .collect(Collectors.toCollection(LinkedHashSet::new)));
+        Directive directive = new Directive()
+                .setName(directiveContext.name().getText());
+
+        if (directiveContext.arguments() != null) {
+            directive.setArguments(
+                    directiveContext.arguments().argument().stream()
+                            .map(this::buildArgument)
+                            .collect(Collectors.toCollection(LinkedHashSet::new))
+            );
+        }
+        return directive;
     }
 
     public Argument buildArgument(GraphqlParser.ArgumentContext argumentContext) {
@@ -453,18 +468,74 @@ public class DocumentBuilder {
                 .setValueWithVariable(argumentContext.valueWithVariable());
     }
 
+    public List<Field> buildFunctionFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        List<Field> fieldList = new ArrayList<>();
+
+        fieldList.add(FunctionField.COUNT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.SUM_INT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.MAX_INT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.MIN_INT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.AVG_INT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.SUM_FLOAT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.MAX_FLOAT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.MIN_FLOAT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.AVG_FLOAT.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.MAX_STRING.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.MIN_STRING.toField(objectTypeDefinitionContext.name().getText()));
+        return fieldList;
+    }
+
     private enum InputType {
-        EXPRESSION("Expression"), INPUT("Input"), ORDER_BY("OrderBy");
+        EXPRESSION("Expression"), INPUT("Input"), SELECTION_SET("SelectionSet"), SELECTION("Selection");
 
-        private final String express;
+        private final String suffix;
 
-        InputType(String express) {
-            this.express = express;
+        InputType(String suffix) {
+            this.suffix = suffix;
         }
 
         @Override
         public String toString() {
-            return express;
+            return suffix;
+        }
+    }
+
+    private enum FunctionField {
+        COUNT("count", "Int"),
+        SUM_INT("sumInt", "Int"),
+        MAX_INT("maxInt", "Int"),
+        MIN_INT("minInt", "Int"),
+        AVG_INT("avgInt", "Int"),
+        SUM_FLOAT("sumFloat", "Float"),
+        MAX_FLOAT("maxFloat", "Float"),
+        MIN_FLOAT("minFloat", "Float"),
+        AVG_FLOAT("avgFloat", "Float"),
+        MAX_STRING("maxString", "String"),
+        MIN_STRING("minString", "String");
+
+        private final String fieldName;
+        private final String fieldTypeName;
+
+        FunctionField(String fieldName, String fieldTypeName) {
+            this.fieldName = fieldName;
+            this.fieldTypeName = fieldTypeName;
+        }
+
+        public Field toField(String objectName) {
+            return new Field()
+                    .setName(fieldName)
+                    .setTypeName(fieldTypeName)
+                    .addArgument(
+                            new InputValue()
+                                    .setName("args")
+                                    .setTypeName(objectName.concat(InputType.SELECTION_SET.toString()))
+                    )
+                    .addDirective("func");
+        }
+
+        @Override
+        public String toString() {
+            return fieldName;
         }
     }
 }

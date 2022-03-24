@@ -253,6 +253,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean isFunctionField(String objectTypeName, String name) {
+        return graphQLFieldManager.isFunctionField(objectTypeName, name);
+    }
+
+    @Override
+    public boolean isNotFunctionField(String objectTypeName, String name) {
+        return graphQLFieldManager.isNotFunctionField(objectTypeName, name);
+    }
+
+    @Override
     public GraphqlParser.SchemaDefinitionContext getSchema() {
         return graphQLSchemaManager.getSchemaDefinitionContext();
     }

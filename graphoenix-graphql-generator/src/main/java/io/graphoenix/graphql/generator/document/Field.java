@@ -5,6 +5,7 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Field {
 
@@ -63,7 +64,20 @@ public class Field {
     }
 
     public Field setDirectives(Set<String> directives) {
-        this.directives = directives;
+        if (directives != null) {
+            this.directives = directives.stream().map(directive -> !directive.startsWith("@") ? "@".concat(directive) : directive).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        return this;
+    }
+
+    public Field addDirective(String directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        if (!directive.startsWith("@")) {
+            directive = "@".concat(directive);
+        }
+        this.directives.add(directive);
         return this;
     }
 
