@@ -1,6 +1,5 @@
 package io.graphoenix.java.generator.builder;
 
-import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -79,8 +78,7 @@ public class TypeSpecBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Type.class)
                 .addAnnotation(getGeneratedAnnotationSpec());
-        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(fieldDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(fieldDefinitionContext);
                             builder.addField(fieldSpec);
@@ -154,8 +152,7 @@ public class TypeSpecBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Interface.class)
                 .addAnnotation(getGeneratedAnnotationSpec());
-        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isNotFunctionField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(fieldDefinitionContext -> {
                             FieldSpec fieldSpec = buildInterfaceField(fieldDefinitionContext);
                             builder.addField(fieldSpec);

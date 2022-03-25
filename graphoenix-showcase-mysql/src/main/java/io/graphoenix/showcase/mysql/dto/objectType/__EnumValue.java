@@ -29,6 +29,38 @@ public class __EnumValue implements Meta {
 
   private String __typename;
 
+  private Integer idCount;
+
+  @Id
+  private String idMax;
+
+  @Id
+  private String idMin;
+
+  private Integer nameCount;
+
+  private String nameMax;
+
+  private String nameMin;
+
+  private Integer ofTypeNameCount;
+
+  private String ofTypeNameMax;
+
+  private String ofTypeNameMin;
+
+  private Integer descriptionCount;
+
+  private String descriptionMax;
+
+  private String descriptionMin;
+
+  private Integer deprecationReasonCount;
+
+  private String deprecationReasonMax;
+
+  private String deprecationReasonMin;
+
   public String getId() {
     return this.id;
   }
@@ -95,5 +127,125 @@ public class __EnumValue implements Meta {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getIdCount() {
+    return this.idCount;
+  }
+
+  public void setIdCount(Integer idCount) {
+    this.idCount = idCount;
+  }
+
+  public String getIdMax() {
+    return this.idMax;
+  }
+
+  public void setIdMax(String idMax) {
+    this.idMax = idMax;
+  }
+
+  public String getIdMin() {
+    return this.idMin;
+  }
+
+  public void setIdMin(String idMin) {
+    this.idMin = idMin;
+  }
+
+  public Integer getNameCount() {
+    return this.nameCount;
+  }
+
+  public void setNameCount(Integer nameCount) {
+    this.nameCount = nameCount;
+  }
+
+  public String getNameMax() {
+    return this.nameMax;
+  }
+
+  public void setNameMax(String nameMax) {
+    this.nameMax = nameMax;
+  }
+
+  public String getNameMin() {
+    return this.nameMin;
+  }
+
+  public void setNameMin(String nameMin) {
+    this.nameMin = nameMin;
+  }
+
+  public Integer getOfTypeNameCount() {
+    return this.ofTypeNameCount;
+  }
+
+  public void setOfTypeNameCount(Integer ofTypeNameCount) {
+    this.ofTypeNameCount = ofTypeNameCount;
+  }
+
+  public String getOfTypeNameMax() {
+    return this.ofTypeNameMax;
+  }
+
+  public void setOfTypeNameMax(String ofTypeNameMax) {
+    this.ofTypeNameMax = ofTypeNameMax;
+  }
+
+  public String getOfTypeNameMin() {
+    return this.ofTypeNameMin;
+  }
+
+  public void setOfTypeNameMin(String ofTypeNameMin) {
+    this.ofTypeNameMin = ofTypeNameMin;
+  }
+
+  public Integer getDescriptionCount() {
+    return this.descriptionCount;
+  }
+
+  public void setDescriptionCount(Integer descriptionCount) {
+    this.descriptionCount = descriptionCount;
+  }
+
+  public String getDescriptionMax() {
+    return this.descriptionMax;
+  }
+
+  public void setDescriptionMax(String descriptionMax) {
+    this.descriptionMax = descriptionMax;
+  }
+
+  public String getDescriptionMin() {
+    return this.descriptionMin;
+  }
+
+  public void setDescriptionMin(String descriptionMin) {
+    this.descriptionMin = descriptionMin;
+  }
+
+  public Integer getDeprecationReasonCount() {
+    return this.deprecationReasonCount;
+  }
+
+  public void setDeprecationReasonCount(Integer deprecationReasonCount) {
+    this.deprecationReasonCount = deprecationReasonCount;
+  }
+
+  public String getDeprecationReasonMax() {
+    return this.deprecationReasonMax;
+  }
+
+  public void setDeprecationReasonMax(String deprecationReasonMax) {
+    this.deprecationReasonMax = deprecationReasonMax;
+  }
+
+  public String getDeprecationReasonMin() {
+    return this.deprecationReasonMin;
+  }
+
+  public void setDeprecationReasonMin(String deprecationReasonMin) {
+    this.deprecationReasonMin = deprecationReasonMin;
   }
 }

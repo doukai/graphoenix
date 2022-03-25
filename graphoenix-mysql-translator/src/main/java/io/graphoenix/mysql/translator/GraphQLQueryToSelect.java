@@ -134,7 +134,7 @@ public class GraphQLQueryToSelect {
                                 .filter(selectionContext -> manager.isNotInvokeField(typeName, selectionContext.field().name().getText()))
                                 .map(selectionContext ->
                                         new ExpressionList(
-                                                selectionToStringValueKey(typeName, selectionContext), selectionToExpression(typeName, selectionContext, level)
+                                                selectionToStringValueKey(selectionContext), selectionToExpression(typeName, selectionContext, level)
                                         )
                                 )
                                 .map(ExpressionList::getExpressions)
@@ -269,18 +269,13 @@ public class GraphQLQueryToSelect {
                                     return jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1));
                                 }
                             } else {
-                                if (manager.isFunctionField(typeName, selectionContext.field().name().getText())) {
-                                    return functionFieldToExpression(typeName, selectionContext, level);
-                                } else {
-                                    return fieldToExpression(typeName, fieldDefinitionContext, selectionContext, level);
-                                }
+                                return fieldToExpression(typeName, fieldDefinitionContext, selectionContext, level);
                             }
                         }
                 )
                 .orElseThrow(() -> {
                     throw new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText()));
                 });
-
     }
 
     protected Function selectionToJsonFunction(ExpressionList expressionList) {
@@ -425,15 +420,23 @@ public class GraphQLQueryToSelect {
                         .findFirst();
 
                 Optional<GraphqlParser.ArgumentContext> orderBy = orderByInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
-                if (orderBy.isPresent()) {
-                    if (orderBy.get().valueWithVariable().objectValueWithVariable() != null) {
+                orderBy.ifPresent(argumentContext ->
                         plainSelect.setOrderByElements(
-                                orderBy.get().valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                                        .flatMap(objectFieldWithVariableContext -> functionFieldToOrderByElementStream(typeName, objectFieldWithVariableContext, level))
+                                argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
+                                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue() != null)
+                                        .map(objectFieldWithVariableContext -> {
+                                                    GraphqlParser.EnumValueContext enumValueContext = objectFieldWithVariableContext.valueWithVariable().enumValue();
+                                                    OrderByElement orderByElement = new OrderByElement();
+                                                    if (enumValueContext.enumValueName().getText().equals("DESC")) {
+                                                        orderByElement.setAsc(false);
+                                                    }
+                                                    orderByElement.setExpression(fieldToColumn(typeToTable(typeName, level), objectFieldWithVariableContext));
+                                                    return orderByElement;
+                                                }
+                                        )
                                         .collect(Collectors.toList())
-                        );
-                    }
-                }
+                        )
+                );
             } else {
                 Optional<GraphqlParser.InputValueDefinitionContext> sortInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                         .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(SORT_INPUT_NAME))
@@ -454,219 +457,6 @@ public class GraphQLQueryToSelect {
                 }
             }
         }
-    }
-
-    protected Expression functionFieldToExpression(String typeName, GraphqlParser.SelectionContext selectionContext, int level) {
-        Optional<GraphqlParser.EnumValueContext> func = selectionContext.field().arguments().argument().stream()
-                .filter(argumentContext -> argumentContext.name().getText().equals("func"))
-                .filter(argumentContext -> argumentContext.valueWithVariable().enumValue() != null)
-                .findFirst()
-                .map(argumentContext -> argumentContext.valueWithVariable().enumValue());
-
-        if (func.isPresent()) {
-            GraphqlParser.ObjectValueWithVariableContext args = selectionContext.field().arguments().argument().stream()
-                    .filter(argumentContext -> argumentContext.name().getText().equals("args"))
-                    .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
-                    .findFirst()
-                    .map(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable())
-                    .orElse(null);
-
-            return fieldToFunction(func.get().enumValueName().getText(), argumentToExpressionList(typeName, args, level).map(Tuple2::_1).toArray(Expression[]::new));
-        } else {
-            throw new GraphQLProblem(MAP_FROM_FIELD_NOT_EXIST.bind(selectionContext.getText()));
-        }
-    }
-
-    protected Stream<OrderByElement> functionFieldToOrderByElementStream(String parentTypeName, GraphqlParser.ObjectFieldWithVariableContext parentObjectFieldWithVariableContext, int level) {
-        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(parentTypeName, parentObjectFieldWithVariableContext.name().getText())
-                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(parentTypeName, parentObjectFieldWithVariableContext.name().getText())));
-
-        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (manager.isObject(fieldTypeName)) {
-            GraphqlParser.ObjectValueWithVariableContext args = parentObjectFieldWithVariableContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                    .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("args"))
-                    .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null)
-                    .findFirst()
-                    .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable())
-                    .orElse(null);
-
-            return argumentToExpressionList(parentTypeName, args, level)
-                    .map(tuple2 -> {
-                                OrderByElement orderByElement = new OrderByElement();
-                                orderByElement.setExpression(tuple2._1());
-                                Optional<GraphqlParser.EnumValueContext> sort = tuple2._2().objectFieldWithVariable().stream()
-                                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("sort"))
-                                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue() != null)
-                                        .findFirst()
-                                        .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue());
-                                if (sort.isPresent() && sort.get().enumValueName().getText().equals("DESC")) {
-                                    orderByElement.setAsc(false);
-                                }
-                                return orderByElement;
-                            }
-
-                    );
-        } else {
-            OrderByElement orderByElement = new OrderByElement();
-            orderByElement.setExpression(fieldToColumn(typeToTable(parentTypeName, level), parentObjectFieldWithVariableContext));
-            if (parentObjectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() == null) {
-                Optional<GraphqlParser.EnumValueContext> sort = parentObjectFieldWithVariableContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
-                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("sort"))
-                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue() != null)
-                        .findFirst()
-                        .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue());
-                if (sort.isPresent() && sort.get().enumValueName().getText().equals("DESC")) {
-                    orderByElement.setAsc(false);
-                }
-            }
-            return Stream.of(orderByElement);
-        }
-    }
-
-    protected Tuple2<Expression, GraphqlParser.ObjectValueWithVariableContext> functionFieldToExpression(String typeName, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, int level) {
-        Optional<GraphqlParser.EnumValueContext> func = objectValueWithVariableContext.objectFieldWithVariable().stream()
-                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("func"))
-                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue() != null)
-                .findFirst()
-                .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue());
-
-        if (func.isPresent()) {
-            GraphqlParser.ObjectValueWithVariableContext args = objectValueWithVariableContext.objectFieldWithVariable().stream()
-                    .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("args"))
-                    .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable() != null)
-                    .findFirst()
-                    .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable())
-                    .orElse(null);
-
-            return Tuple.of(
-                    fieldToFunction(func.get().enumValueName().getText(), subArgumentToExpressionList(typeName, args, level).map(Tuple2::_1).toArray(Expression[]::new)),
-                    objectValueWithVariableContext
-            );
-        } else {
-            throw new GraphQLProblem(MAP_FROM_FIELD_NOT_EXIST.bind(objectValueWithVariableContext.getText()));
-        }
-    }
-
-    protected Stream<Tuple2<Expression, GraphqlParser.ObjectValueWithVariableContext>> argumentToExpressionList(String typeName, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext, int level) {
-        if (objectValueWithVariableContext != null && objectValueWithVariableContext.objectFieldWithVariable() != null) {
-            return objectValueWithVariableContext.objectFieldWithVariable().stream()
-                    .map(objectFieldWithVariableContext -> {
-                                GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, objectFieldWithVariableContext.name().getText())
-                                        .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, objectFieldWithVariableContext.name().getText())));
-                                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                                if (manager.isFunctionField(typeName, fieldDefinitionContext.name().getText())) {
-                                    return functionFieldToExpression(fieldTypeName, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(), level);
-                                } else {
-                                    Table table = typeToTable(typeName, level);
-                                    if (fieldTypeName.equals("Boolean")) {
-                                        Function function = new Function();
-                                        function.setName("IF");
-                                        function.setParameters(new ExpressionList(Arrays.asList(fieldToColumn(table, fieldDefinitionContext), new HexValue("TRUE"), new HexValue("FALSE"))));
-                                        return Tuple.of(function, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable());
-                                    } else {
-                                        return Tuple.of(fieldToColumn(table, fieldDefinitionContext), objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable());
-                                    }
-                                }
-                            }
-                    );
-        } else {
-            return Stream.empty();
-        }
-    }
-
-    protected Stream<Tuple2<Expression, GraphqlParser.ObjectValueWithVariableContext>> subArgumentToExpressionList(String parentTypeName, GraphqlParser.ObjectValueWithVariableContext parentObjectValueWithVariableContext, int level) {
-        if (parentObjectValueWithVariableContext != null && parentObjectValueWithVariableContext.objectFieldWithVariable() != null) {
-            return parentObjectValueWithVariableContext.objectFieldWithVariable().stream()
-                    .flatMap(objectFieldWithVariableContext -> {
-                                GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext = objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable();
-                                if (objectValueWithVariableContext != null) {
-                                    GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(parentTypeName, objectFieldWithVariableContext.name().getText())
-                                            .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(parentTypeName, objectFieldWithVariableContext.name().getText())));
-                                    String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                                    Table table = typeToTable(typeName, level);
-
-                                    SubSelect subSelect = new SubSelect();
-                                    PlainSelect plainSelect = new PlainSelect();
-
-                                    String fieldName = fieldDefinitionContext.name().getText();
-                                    Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentTypeName, fieldName);
-                                    Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
-
-                                    if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
-                                        Table parentTable = typeToTable(parentTypeName, level - 1);
-                                        boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
-                                        EqualsTo equalsParentColumn = new EqualsTo();
-
-                                        if (mapWithType) {
-                                            Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(parentTypeName, fieldName);
-                                            Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(parentTypeName, fieldName);
-                                            Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(parentTypeName, fieldName);
-
-                                            if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
-                                                Table withTable = typeToTable(mapWithObjectDefinition.get().name().getText(), level);
-                                                plainSelect.setFromItem(withTable);
-
-                                                Join join = new Join();
-                                                join.setLeft(true);
-                                                join.setRightItem(table);
-                                                EqualsTo joinEqualsTo = new EqualsTo();
-                                                joinEqualsTo.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
-                                                joinEqualsTo.setRightExpression(fieldToColumn(withTable, mapWithToFieldDefinition.get()));
-                                                join.setOnExpression(joinEqualsTo);
-                                                plainSelect.setJoins(Collections.singletonList(join));
-
-                                                equalsParentColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
-                                                equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
-                                                plainSelect.setWhere(equalsParentColumn);
-                                            }
-                                        } else {
-                                            plainSelect.setFromItem(table);
-                                            equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
-                                            equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
-                                        }
-                                        plainSelect.setWhere(equalsParentColumn);
-
-                                        if (manager.isFunctionField(parentTypeName, fieldName)) {
-                                            return subArgumentToExpressionList(
-                                                    typeName,
-                                                    objectValueWithVariableContext,
-                                                    level + 1
-                                            ).map(tuple2 -> {
-                                                        plainSelect.addSelectItems(new SelectExpressionItem(tuple2._1()));
-                                                        subSelect.setSelectBody(plainSelect);
-                                                        return Tuple.of(subSelect, tuple2._2());
-                                                    }
-                                            );
-                                        } else {
-                                            plainSelect.addSelectItems(new SelectExpressionItem(fieldToColumn(table, objectFieldWithVariableContext)));
-                                            subSelect.setSelectBody(plainSelect);
-                                            return Stream.of(Tuple.of(subSelect, objectValueWithVariableContext));
-                                        }
-                                    } else {
-                                        GraphQLProblem graphQLProblem = new GraphQLProblem();
-                                        if (fromFieldDefinition.isEmpty()) {
-                                            graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                                        }
-                                        if (toFieldDefinition.isEmpty()) {
-                                            graphQLProblem.push(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                                        }
-                                        throw graphQLProblem;
-                                    }
-                                } else {
-                                    return Stream.empty();
-                                }
-                            }
-                    );
-        } else {
-            return Stream.empty();
-        }
-    }
-
-    protected Expression fieldToFunction(String name, Expression... expressions) {
-        Function function = new Function();
-        function.setName(name);
-        function.setParameters(new ExpressionList(expressions));
-        return function;
     }
 
     protected Expression fieldToExpression(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
@@ -769,13 +559,9 @@ public class GraphQLQueryToSelect {
         }
     }
 
-    protected StringValue selectionToStringValueKey(String typeName, GraphqlParser.SelectionContext selectionContext) {
-        if (manager.isFunctionField(typeName, selectionContext.field().name().getText())) {
-            if (selectionContext.field().alias() != null) {
-                return new StringValue(selectionContext.field().alias().getText());
-            } else {
-                return new StringValue(selectionContext.field().name().getText());
-            }
+    protected StringValue selectionToStringValueKey(GraphqlParser.SelectionContext selectionContext) {
+        if (selectionContext.field().alias() != null) {
+            return new StringValue(selectionContext.field().alias().getText());
         } else {
             return new StringValue(selectionContext.field().name().getText());
         }

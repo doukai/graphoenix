@@ -3,11 +3,14 @@ package io.graphoenix.showcase.mysql.dto.objectType;
 import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
-
-import java.util.Collection;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
@@ -43,6 +46,58 @@ public class User implements Meta {
   private Boolean isDeprecated;
 
   private String __typename;
+
+  private Integer idCount;
+
+  @Id
+  private String idMax;
+
+  @Id
+  private String idMin;
+
+  private Integer loginCount;
+
+  private String loginMax;
+
+  private String loginMin;
+
+  private Integer passwordCount;
+
+  private String passwordMax;
+
+  private String passwordMin;
+
+  private Integer nameCount;
+
+  private String nameMax;
+
+  private String nameMin;
+
+  private Integer phonesCount;
+
+  private String phonesMax;
+
+  private String phonesMin;
+
+  private Integer ageCount;
+
+  private Integer ageSum;
+
+  private Integer ageAvg;
+
+  private Integer ageMax;
+
+  private Integer ageMin;
+
+  private Integer organizationIdCount;
+
+  private Integer organizationIdSum;
+
+  private Integer organizationIdAvg;
+
+  private Integer organizationIdMax;
+
+  private Integer organizationIdMin;
 
   private String userDetail2;
 
@@ -160,6 +215,206 @@ public class User implements Meta {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getIdCount() {
+    return this.idCount;
+  }
+
+  public void setIdCount(Integer idCount) {
+    this.idCount = idCount;
+  }
+
+  public String getIdMax() {
+    return this.idMax;
+  }
+
+  public void setIdMax(String idMax) {
+    this.idMax = idMax;
+  }
+
+  public String getIdMin() {
+    return this.idMin;
+  }
+
+  public void setIdMin(String idMin) {
+    this.idMin = idMin;
+  }
+
+  public Integer getLoginCount() {
+    return this.loginCount;
+  }
+
+  public void setLoginCount(Integer loginCount) {
+    this.loginCount = loginCount;
+  }
+
+  public String getLoginMax() {
+    return this.loginMax;
+  }
+
+  public void setLoginMax(String loginMax) {
+    this.loginMax = loginMax;
+  }
+
+  public String getLoginMin() {
+    return this.loginMin;
+  }
+
+  public void setLoginMin(String loginMin) {
+    this.loginMin = loginMin;
+  }
+
+  public Integer getPasswordCount() {
+    return this.passwordCount;
+  }
+
+  public void setPasswordCount(Integer passwordCount) {
+    this.passwordCount = passwordCount;
+  }
+
+  public String getPasswordMax() {
+    return this.passwordMax;
+  }
+
+  public void setPasswordMax(String passwordMax) {
+    this.passwordMax = passwordMax;
+  }
+
+  public String getPasswordMin() {
+    return this.passwordMin;
+  }
+
+  public void setPasswordMin(String passwordMin) {
+    this.passwordMin = passwordMin;
+  }
+
+  public Integer getNameCount() {
+    return this.nameCount;
+  }
+
+  public void setNameCount(Integer nameCount) {
+    this.nameCount = nameCount;
+  }
+
+  public String getNameMax() {
+    return this.nameMax;
+  }
+
+  public void setNameMax(String nameMax) {
+    this.nameMax = nameMax;
+  }
+
+  public String getNameMin() {
+    return this.nameMin;
+  }
+
+  public void setNameMin(String nameMin) {
+    this.nameMin = nameMin;
+  }
+
+  public Integer getPhonesCount() {
+    return this.phonesCount;
+  }
+
+  public void setPhonesCount(Integer phonesCount) {
+    this.phonesCount = phonesCount;
+  }
+
+  public String getPhonesMax() {
+    return this.phonesMax;
+  }
+
+  public void setPhonesMax(String phonesMax) {
+    this.phonesMax = phonesMax;
+  }
+
+  public String getPhonesMin() {
+    return this.phonesMin;
+  }
+
+  public void setPhonesMin(String phonesMin) {
+    this.phonesMin = phonesMin;
+  }
+
+  public Integer getAgeCount() {
+    return this.ageCount;
+  }
+
+  public void setAgeCount(Integer ageCount) {
+    this.ageCount = ageCount;
+  }
+
+  public Integer getAgeSum() {
+    return this.ageSum;
+  }
+
+  public void setAgeSum(Integer ageSum) {
+    this.ageSum = ageSum;
+  }
+
+  public Integer getAgeAvg() {
+    return this.ageAvg;
+  }
+
+  public void setAgeAvg(Integer ageAvg) {
+    this.ageAvg = ageAvg;
+  }
+
+  public Integer getAgeMax() {
+    return this.ageMax;
+  }
+
+  public void setAgeMax(Integer ageMax) {
+    this.ageMax = ageMax;
+  }
+
+  public Integer getAgeMin() {
+    return this.ageMin;
+  }
+
+  public void setAgeMin(Integer ageMin) {
+    this.ageMin = ageMin;
+  }
+
+  public Integer getOrganizationIdCount() {
+    return this.organizationIdCount;
+  }
+
+  public void setOrganizationIdCount(Integer organizationIdCount) {
+    this.organizationIdCount = organizationIdCount;
+  }
+
+  public Integer getOrganizationIdSum() {
+    return this.organizationIdSum;
+  }
+
+  public void setOrganizationIdSum(Integer organizationIdSum) {
+    this.organizationIdSum = organizationIdSum;
+  }
+
+  public Integer getOrganizationIdAvg() {
+    return this.organizationIdAvg;
+  }
+
+  public void setOrganizationIdAvg(Integer organizationIdAvg) {
+    this.organizationIdAvg = organizationIdAvg;
+  }
+
+  public Integer getOrganizationIdMax() {
+    return this.organizationIdMax;
+  }
+
+  public void setOrganizationIdMax(Integer organizationIdMax) {
+    this.organizationIdMax = organizationIdMax;
+  }
+
+  public Integer getOrganizationIdMin() {
+    return this.organizationIdMin;
+  }
+
+  public void setOrganizationIdMin(Integer organizationIdMin) {
+    this.organizationIdMin = organizationIdMin;
   }
 
   public String getUserDetail2() {

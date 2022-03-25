@@ -29,6 +29,20 @@ public class __DirectiveLocations implements Meta {
 
   private String __typename;
 
+  private Integer idCount;
+
+  @Id
+  private String idMax;
+
+  @Id
+  private String idMin;
+
+  private Integer directiveNameCount;
+
+  private String directiveNameMax;
+
+  private String directiveNameMin;
+
   public String getId() {
     return this.id;
   }
@@ -79,5 +93,53 @@ public class __DirectiveLocations implements Meta {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getIdCount() {
+    return this.idCount;
+  }
+
+  public void setIdCount(Integer idCount) {
+    this.idCount = idCount;
+  }
+
+  public String getIdMax() {
+    return this.idMax;
+  }
+
+  public void setIdMax(String idMax) {
+    this.idMax = idMax;
+  }
+
+  public String getIdMin() {
+    return this.idMin;
+  }
+
+  public void setIdMin(String idMin) {
+    this.idMin = idMin;
+  }
+
+  public Integer getDirectiveNameCount() {
+    return this.directiveNameCount;
+  }
+
+  public void setDirectiveNameCount(Integer directiveNameCount) {
+    this.directiveNameCount = directiveNameCount;
+  }
+
+  public String getDirectiveNameMax() {
+    return this.directiveNameMax;
+  }
+
+  public void setDirectiveNameMax(String directiveNameMax) {
+    this.directiveNameMax = directiveNameMax;
+  }
+
+  public String getDirectiveNameMin() {
+    return this.directiveNameMin;
+  }
+
+  public void setDirectiveNameMin(String directiveNameMin) {
+    this.directiveNameMin = directiveNameMin;
   }
 }

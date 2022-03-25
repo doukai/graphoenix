@@ -46,6 +46,36 @@ public class __Type implements Meta {
 
   private String __typename;
 
+  private Integer nameCount;
+
+  @Id
+  private String nameMax;
+
+  @Id
+  private String nameMin;
+
+  private Integer descriptionCount;
+
+  private String descriptionMax;
+
+  private String descriptionMin;
+
+  private Integer ofTypeNameCount;
+
+  private String ofTypeNameMax;
+
+  private String ofTypeNameMin;
+
+  private Integer schemaIdCount;
+
+  private Integer schemaIdSum;
+
+  private Integer schemaIdAvg;
+
+  private Integer schemaIdMax;
+
+  private Integer schemaIdMin;
+
   public String getName() {
     return this.name;
   }
@@ -160,5 +190,117 @@ public class __Type implements Meta {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getNameCount() {
+    return this.nameCount;
+  }
+
+  public void setNameCount(Integer nameCount) {
+    this.nameCount = nameCount;
+  }
+
+  public String getNameMax() {
+    return this.nameMax;
+  }
+
+  public void setNameMax(String nameMax) {
+    this.nameMax = nameMax;
+  }
+
+  public String getNameMin() {
+    return this.nameMin;
+  }
+
+  public void setNameMin(String nameMin) {
+    this.nameMin = nameMin;
+  }
+
+  public Integer getDescriptionCount() {
+    return this.descriptionCount;
+  }
+
+  public void setDescriptionCount(Integer descriptionCount) {
+    this.descriptionCount = descriptionCount;
+  }
+
+  public String getDescriptionMax() {
+    return this.descriptionMax;
+  }
+
+  public void setDescriptionMax(String descriptionMax) {
+    this.descriptionMax = descriptionMax;
+  }
+
+  public String getDescriptionMin() {
+    return this.descriptionMin;
+  }
+
+  public void setDescriptionMin(String descriptionMin) {
+    this.descriptionMin = descriptionMin;
+  }
+
+  public Integer getOfTypeNameCount() {
+    return this.ofTypeNameCount;
+  }
+
+  public void setOfTypeNameCount(Integer ofTypeNameCount) {
+    this.ofTypeNameCount = ofTypeNameCount;
+  }
+
+  public String getOfTypeNameMax() {
+    return this.ofTypeNameMax;
+  }
+
+  public void setOfTypeNameMax(String ofTypeNameMax) {
+    this.ofTypeNameMax = ofTypeNameMax;
+  }
+
+  public String getOfTypeNameMin() {
+    return this.ofTypeNameMin;
+  }
+
+  public void setOfTypeNameMin(String ofTypeNameMin) {
+    this.ofTypeNameMin = ofTypeNameMin;
+  }
+
+  public Integer getSchemaIdCount() {
+    return this.schemaIdCount;
+  }
+
+  public void setSchemaIdCount(Integer schemaIdCount) {
+    this.schemaIdCount = schemaIdCount;
+  }
+
+  public Integer getSchemaIdSum() {
+    return this.schemaIdSum;
+  }
+
+  public void setSchemaIdSum(Integer schemaIdSum) {
+    this.schemaIdSum = schemaIdSum;
+  }
+
+  public Integer getSchemaIdAvg() {
+    return this.schemaIdAvg;
+  }
+
+  public void setSchemaIdAvg(Integer schemaIdAvg) {
+    this.schemaIdAvg = schemaIdAvg;
+  }
+
+  public Integer getSchemaIdMax() {
+    return this.schemaIdMax;
+  }
+
+  public void setSchemaIdMax(Integer schemaIdMax) {
+    this.schemaIdMax = schemaIdMax;
+  }
+
+  public Integer getSchemaIdMin() {
+    return this.schemaIdMin;
+  }
+
+  public void setSchemaIdMin(Integer schemaIdMin) {
+    this.schemaIdMin = schemaIdMin;
   }
 }

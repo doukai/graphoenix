@@ -42,6 +42,32 @@ public class __Schema implements Meta {
 
   private String __typename;
 
+  private Integer idCount;
+
+  @Id
+  private String idMax;
+
+  @Id
+  private String idMin;
+
+  private Integer queryTypeNameCount;
+
+  private String queryTypeNameMax;
+
+  private String queryTypeNameMin;
+
+  private Integer mutationTypeNameCount;
+
+  private String mutationTypeNameMax;
+
+  private String mutationTypeNameMin;
+
+  private Integer subscriptionTypeNameCount;
+
+  private String subscriptionTypeNameMax;
+
+  private String subscriptionTypeNameMin;
+
   public String getId() {
     return this.id;
   }
@@ -140,5 +166,101 @@ public class __Schema implements Meta {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getIdCount() {
+    return this.idCount;
+  }
+
+  public void setIdCount(Integer idCount) {
+    this.idCount = idCount;
+  }
+
+  public String getIdMax() {
+    return this.idMax;
+  }
+
+  public void setIdMax(String idMax) {
+    this.idMax = idMax;
+  }
+
+  public String getIdMin() {
+    return this.idMin;
+  }
+
+  public void setIdMin(String idMin) {
+    this.idMin = idMin;
+  }
+
+  public Integer getQueryTypeNameCount() {
+    return this.queryTypeNameCount;
+  }
+
+  public void setQueryTypeNameCount(Integer queryTypeNameCount) {
+    this.queryTypeNameCount = queryTypeNameCount;
+  }
+
+  public String getQueryTypeNameMax() {
+    return this.queryTypeNameMax;
+  }
+
+  public void setQueryTypeNameMax(String queryTypeNameMax) {
+    this.queryTypeNameMax = queryTypeNameMax;
+  }
+
+  public String getQueryTypeNameMin() {
+    return this.queryTypeNameMin;
+  }
+
+  public void setQueryTypeNameMin(String queryTypeNameMin) {
+    this.queryTypeNameMin = queryTypeNameMin;
+  }
+
+  public Integer getMutationTypeNameCount() {
+    return this.mutationTypeNameCount;
+  }
+
+  public void setMutationTypeNameCount(Integer mutationTypeNameCount) {
+    this.mutationTypeNameCount = mutationTypeNameCount;
+  }
+
+  public String getMutationTypeNameMax() {
+    return this.mutationTypeNameMax;
+  }
+
+  public void setMutationTypeNameMax(String mutationTypeNameMax) {
+    this.mutationTypeNameMax = mutationTypeNameMax;
+  }
+
+  public String getMutationTypeNameMin() {
+    return this.mutationTypeNameMin;
+  }
+
+  public void setMutationTypeNameMin(String mutationTypeNameMin) {
+    this.mutationTypeNameMin = mutationTypeNameMin;
+  }
+
+  public Integer getSubscriptionTypeNameCount() {
+    return this.subscriptionTypeNameCount;
+  }
+
+  public void setSubscriptionTypeNameCount(Integer subscriptionTypeNameCount) {
+    this.subscriptionTypeNameCount = subscriptionTypeNameCount;
+  }
+
+  public String getSubscriptionTypeNameMax() {
+    return this.subscriptionTypeNameMax;
+  }
+
+  public void setSubscriptionTypeNameMax(String subscriptionTypeNameMax) {
+    this.subscriptionTypeNameMax = subscriptionTypeNameMax;
+  }
+
+  public String getSubscriptionTypeNameMin() {
+    return this.subscriptionTypeNameMin;
+  }
+
+  public void setSubscriptionTypeNameMin(String subscriptionTypeNameMin) {
+    this.subscriptionTypeNameMin = subscriptionTypeNameMin;
   }
 }

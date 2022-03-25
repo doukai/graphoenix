@@ -269,9 +269,9 @@ public class OperationHandlerImplementer {
 
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
-                    builder.addStatement("return selectionFilter.get().$L(result, jsonElement, selectionContext.field().selectionSet())", fieldTypeParameterName.concat("List"));
+                    builder.addStatement("return selectionFilter.get().$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName.concat("List"));
                 } else {
-                    builder.addStatement("return selectionFilter.get().$L(result, jsonElement, selectionContext.field().selectionSet())", fieldTypeParameterName);
+                    builder.addStatement("return selectionFilter.get().$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName);
                 }
             } else {
                 if (fieldTypeIsList) {
@@ -301,7 +301,7 @@ public class OperationHandlerImplementer {
                             .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
                             .endControlFlow()
                             .addStatement(
-                                    "return selectionFilter.get().$L(result.stream().map(item -> invokeHandler.get().$L(item)).collect($T.toList()), jsonElement, selectionContext.field().selectionSet())",
+                                    "return selectionFilter.get().$L(result.stream().map(item -> invokeHandler.get().$L(item)).collect($T.toList()), selectionContext.field().selectionSet())",
                                     fieldTypeParameterName.concat("List"),
                                     fieldTypeParameterName,
                                     ClassName.get(Collectors.class)
@@ -312,7 +312,7 @@ public class OperationHandlerImplementer {
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                             "gsonBuilder",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement("return selectionFilter.get().$L(invokeHandler.get().$L(result), jsonElement, selectionContext.field().selectionSet())",
+                    ).addStatement("return selectionFilter.get().$L(invokeHandler.get().$L(result), selectionContext.field().selectionSet())",
                             fieldTypeParameterName,
                             fieldTypeParameterName
                     );

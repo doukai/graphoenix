@@ -222,8 +222,8 @@ public class DocumentBuilder {
                                             .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                             );
 
-                    field.addArgument(new InputValue().setName("orderBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ARGUMENT_SET.toString())))
-                            .addArgument(new InputValue().setName("groupBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ARGUMENT_SET.toString())));
+                    field.addArgument(new InputValue().setName("orderBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ORDER_BY.toString())))
+                            .addArgument(new InputValue().setName("groupBy").setTypeName("[String!]"));
                 }
             }
         } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
@@ -332,8 +332,8 @@ public class DocumentBuilder {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
-                .addArgument(new InputValue().setName("orderBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString())))
-                .addArgument(new InputValue().setName("groupBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString())));
+                .addArgument(new InputValue().setName("orderBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())))
+                .addArgument(new InputValue().setName("groupBy").setTypeName("[String!]"));
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"))
@@ -360,11 +360,12 @@ public class DocumentBuilder {
     }
 
     public Set<InputValue> buildArgumentsFromObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        if (inputType.equals(InputType.ARGUMENT_SET)) {
+        if (inputType.equals(InputType.ORDER_BY)) {
             return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                    .filter(fieldDefinitionContext -> manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())))
                     .map(fieldDefinitionContext -> filedToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         } else {
@@ -392,10 +393,7 @@ public class DocumentBuilder {
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldTypeName.concat(fieldTypeName.equals("Boolean") ? "" : InputType.EXPRESSION.toString()));
         } else {
-            return new InputValue().setName(fieldDefinitionContext.name().getText())
-                    .setTypeName(manager.isObject(fieldTypeName) ?
-                            manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ARGUMENT_SET.toString()) :
-                            objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT.toString()));
+            return new InputValue().setName(fieldDefinitionContext.name().getText()).setTypeName("Sort");
         }
     }
 
@@ -410,8 +408,7 @@ public class DocumentBuilder {
 
         return Streams.concat(
                 objectTypeDefinitionContextList.stream().map(this::objectToInput),
-                objectTypeDefinitionContextList.stream().map(this::objectToSelectionSet),
-                objectTypeDefinitionContextList.stream().map(this::objectToSelection),
+                objectTypeDefinitionContextList.stream().map(this::objectToOrderBy),
                 objectTypeDefinitionContextList.stream().map(this::objectToExpression),
                 manager.getEnums().map(this::enumToExpression)
         ).collect(Collectors.toList());
@@ -422,16 +419,9 @@ public class DocumentBuilder {
                 .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.INPUT));
     }
 
-    public InputObjectType objectToSelectionSet(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString()))
-                .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.ARGUMENT_SET));
-    }
-
-    public InputObjectType objectToSelection(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT.toString()))
-                .addInputValue(new InputValue().setName("func").setTypeName("Function"))
-                .addInputValue(new InputValue().setName("args").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString())))
-                .addInputValue(new InputValue().setName("sort").setTypeName("Sort"));
+    public InputObjectType objectToOrderBy(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString()))
+                .setInputValues(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.ORDER_BY));
     }
 
     public InputObjectType objectToExpression(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -469,16 +459,38 @@ public class DocumentBuilder {
     }
 
     public List<Field> buildFunctionFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        List<Field> fieldList = new ArrayList<>();
-        fieldList.add(FunctionField.INT_FUNC.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.FLOAT_FUNC.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.STRING_FUNC.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.BOOLEAN_FUNC.toField(objectTypeDefinitionContext.name().getText()));
-        return fieldList;
+        return Stream.concat(
+                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                        .filter(fieldDefinitionContext ->
+                                manager.getFieldTypeName(fieldDefinitionContext.type()).equals("ID") ||
+                                        manager.getFieldTypeName(fieldDefinitionContext.type()).equals("String")
+                        )
+                        .flatMap(fieldDefinitionContext ->
+                                Stream.of(
+                                        Function.COUNT.toField(fieldDefinitionContext.name().getText(), "Int"),
+                                        Function.MAX.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                        Function.MIN.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                )
+                        ),
+                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                        .filter(fieldDefinitionContext ->
+                                manager.getFieldTypeName(fieldDefinitionContext.type()).equals("Int") ||
+                                        manager.getFieldTypeName(fieldDefinitionContext.type()).equals("Float")
+                        )
+                        .flatMap(fieldDefinitionContext ->
+                                Stream.of(
+                                        Function.COUNT.toField(fieldDefinitionContext.name().getText(), "Int"),
+                                        Function.SUM.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                        Function.AVG.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                        Function.MAX.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                        Function.MIN.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                )
+                        )
+        ).collect(Collectors.toList());
     }
 
     private enum InputType {
-        EXPRESSION("Expression"), INPUT("Input"), ARGUMENT_SET("ArgumentSet"), ARGUMENT("Argument");
+        EXPRESSION("Expression"), INPUT("Input"), ORDER_BY("OrderBy");
 
         private final String suffix;
 
@@ -492,40 +504,24 @@ public class DocumentBuilder {
         }
     }
 
-    private enum FunctionField {
-        INT_FUNC("intFunc", "Int"),
-        FLOAT_FUNC("floatFunc", "Float"),
-        STRING_FUNC("stringFunc", "String"),
-        BOOLEAN_FUNC("booleanFunc", "Boolean");
+    private enum Function {
+        COUNT("Count"),
+        SUM("Sum"),
+        AVG("Avg"),
+        MAX("Max"),
+        MIN("Min");
 
-        private final String fieldName;
-        private final String fieldTypeName;
+        private final String name;
 
-        FunctionField(String fieldName, String fieldTypeName) {
-            this.fieldName = fieldName;
-            this.fieldTypeName = fieldTypeName;
+        Function(String name) {
+            this.name = name;
         }
 
-        public Field toField(String objectName) {
+        public Field toField(String filedName, String fieldTypeName) {
             return new Field()
-                    .setName(fieldName)
+                    .setName(filedName.concat(name))
                     .setTypeName(fieldTypeName)
-                    .addArgument(
-                            new InputValue()
-                                    .setName("func")
-                                    .setTypeName("Function")
-                    )
-                    .addArgument(
-                            new InputValue()
-                                    .setName("args")
-                                    .setTypeName(objectName.concat(InputType.ARGUMENT_SET.toString()))
-                    )
-                    .addDirective("func");
-        }
-
-        @Override
-        public String toString() {
-            return fieldName;
+                    .addDirective("func(name: ".concat(this.name()).concat(", field: \"").concat(filedName).concat("\")"));
         }
     }
 }

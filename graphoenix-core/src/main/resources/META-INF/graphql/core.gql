@@ -96,4 +96,4 @@ directive @invoke(
 
 directive @cursor on FIELD_DEFINITION
 
-directive @func on FIELD_DEFINITION
+directive @func(name: Function field: String) on FIELD_DEFINITION

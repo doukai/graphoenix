@@ -98,23 +98,18 @@ public class SelectionFilterBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonElement.class))
                 .addParameter(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), typeParameterName)
-                .addParameter(ClassName.get(JsonElement.class), "original")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
 
-        builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName);
-        builder.addStatement("$T jsonObject = new $T()", ClassName.get(JsonObject.class), ClassName.get(JsonObject.class));
-        builder.beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
+        builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName)
+                .addStatement("$T jsonObject = new $T()", ClassName.get(JsonObject.class), ClassName.get(JsonObject.class))
+                .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
                         ClassName.get(GraphqlParser.SelectionContext.class),
                         objectTypeDefinitionContext.name().getText(),
                         ClassName.get(Collectors.class)
                 )
-                .addStatement("String selectionName = selectionContext.field().alias() == null ? selectionContext.field().name().getText() : selectionContext.field().alias().name().getText()")
-                .beginControlFlow("if (manager.get().isFunctionField($S, selectionContext.field().name().getText()))", objectTypeDefinitionContext.name().getText())
-                .addStatement("jsonObject.add(selectionName, original.getAsJsonObject().get(selectionName))")
-                .nextControlFlow("else");
+                .addStatement("String selectionName = selectionContext.field().alias() == null ? selectionContext.field().name().getText() : selectionContext.field().alias().name().getText()");
 
-        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(fieldDefinitionContext -> {
                             String fieldGetterMethodName = typeManager.getFieldGetterMethodName(fieldDefinitionContext);
                             String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
@@ -137,10 +132,11 @@ public class SelectionFilterBuilder {
                                             fieldGetterMethodName
                                     );
                                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("int index = 0")
-                                            .beginControlFlow("for ($T item : $L.$L())", ClassName.get(graphQLConfig.getObjectTypePackageName(), manager.getFieldTypeName(fieldDefinitionContext.type())), typeParameterName, fieldGetterMethodName)
-                                            .addStatement("jsonArray.add($L(item, original.getAsJsonObject().get($S).getAsJsonArray().get(index++), selectionContext.field().selectionSet()))", fieldParameterName, fieldDefinitionContext.name().getText())
-                                            .endControlFlow();
+                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add($L(item, selectionContext.field().selectionSet())))",
+                                            typeParameterName,
+                                            fieldGetterMethodName,
+                                            fieldParameterName
+                                    );
                                 }
                                 builder.addStatement("jsonObject.add(selectionName, jsonArray)")
                                         .nextControlFlow("else")
@@ -160,11 +156,10 @@ public class SelectionFilterBuilder {
                                             fieldGetterMethodName
                                     );
                                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("jsonObject.add(selectionName, $L($L.$L(), original.getAsJsonObject().get($S), selectionContext.field().selectionSet()))",
+                                    builder.addStatement("jsonObject.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",
                                             fieldParameterName,
                                             typeParameterName,
-                                            fieldGetterMethodName,
-                                            fieldDefinitionContext.name().getText()
+                                            fieldGetterMethodName
                                     );
                                 }
                             }
@@ -172,7 +167,6 @@ public class SelectionFilterBuilder {
                         }
                 );
         builder.endControlFlow()
-                .endControlFlow()
                 .addStatement("return jsonObject")
                 .endControlFlow()
                 .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class));
@@ -199,15 +193,14 @@ public class SelectionFilterBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonElement.class))
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Collection.class), typeClassName), listTypeParameterName)
-                .addParameter(ClassName.get(JsonElement.class), "original")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
 
         builder.beginControlFlow("if (selectionSet != null && $L != null)", listTypeParameterName)
                 .addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class))
-                .addStatement("int index = 0")
-                .beginControlFlow("for ($T item : $L)", typeClassName, listTypeParameterName)
-                .addStatement("jsonArray.add($L(item, original.getAsJsonArray().get(index++), selectionSet))", typeParameterName)
-                .endControlFlow()
+                .addStatement("$L.forEach(item -> jsonArray.add($L(item, selectionSet)))",
+                        listTypeParameterName,
+                        typeParameterName
+                )
                 .addStatement("return jsonArray")
                 .endControlFlow()
                 .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class));

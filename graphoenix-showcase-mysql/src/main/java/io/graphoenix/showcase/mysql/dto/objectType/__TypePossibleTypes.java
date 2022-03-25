@@ -28,6 +28,26 @@ public class __TypePossibleTypes implements Meta {
 
   private String __typename;
 
+  private Integer idCount;
+
+  @Id
+  private String idMax;
+
+  @Id
+  private String idMin;
+
+  private Integer typeNameCount;
+
+  private String typeNameMax;
+
+  private String typeNameMin;
+
+  private Integer possibleTypeNameCount;
+
+  private String possibleTypeNameMax;
+
+  private String possibleTypeNameMin;
+
   public String getId() {
     return this.id;
   }
@@ -78,5 +98,77 @@ public class __TypePossibleTypes implements Meta {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getIdCount() {
+    return this.idCount;
+  }
+
+  public void setIdCount(Integer idCount) {
+    this.idCount = idCount;
+  }
+
+  public String getIdMax() {
+    return this.idMax;
+  }
+
+  public void setIdMax(String idMax) {
+    this.idMax = idMax;
+  }
+
+  public String getIdMin() {
+    return this.idMin;
+  }
+
+  public void setIdMin(String idMin) {
+    this.idMin = idMin;
+  }
+
+  public Integer getTypeNameCount() {
+    return this.typeNameCount;
+  }
+
+  public void setTypeNameCount(Integer typeNameCount) {
+    this.typeNameCount = typeNameCount;
+  }
+
+  public String getTypeNameMax() {
+    return this.typeNameMax;
+  }
+
+  public void setTypeNameMax(String typeNameMax) {
+    this.typeNameMax = typeNameMax;
+  }
+
+  public String getTypeNameMin() {
+    return this.typeNameMin;
+  }
+
+  public void setTypeNameMin(String typeNameMin) {
+    this.typeNameMin = typeNameMin;
+  }
+
+  public Integer getPossibleTypeNameCount() {
+    return this.possibleTypeNameCount;
+  }
+
+  public void setPossibleTypeNameCount(Integer possibleTypeNameCount) {
+    this.possibleTypeNameCount = possibleTypeNameCount;
+  }
+
+  public String getPossibleTypeNameMax() {
+    return this.possibleTypeNameMax;
+  }
+
+  public void setPossibleTypeNameMax(String possibleTypeNameMax) {
+    this.possibleTypeNameMax = possibleTypeNameMax;
+  }
+
+  public String getPossibleTypeNameMin() {
+    return this.possibleTypeNameMin;
+  }
+
+  public void setPossibleTypeNameMin(String possibleTypeNameMin) {
+    this.possibleTypeNameMin = possibleTypeNameMin;
   }
 }

@@ -39,6 +39,60 @@ public class __InputValue implements Meta {
 
   private String __typename;
 
+  private Integer idCount;
+
+  @Id
+  private String idMax;
+
+  @Id
+  private String idMin;
+
+  private Integer nameCount;
+
+  private String nameMax;
+
+  private String nameMin;
+
+  private Integer typeNameCount;
+
+  private String typeNameMax;
+
+  private String typeNameMin;
+
+  private Integer ofTypeNameCount;
+
+  private String ofTypeNameMax;
+
+  private String ofTypeNameMin;
+
+  private Integer directiveNameCount;
+
+  private String directiveNameMax;
+
+  private String directiveNameMin;
+
+  private Integer descriptionCount;
+
+  private String descriptionMax;
+
+  private String descriptionMin;
+
+  private Integer defaultValueCount;
+
+  private String defaultValueMax;
+
+  private String defaultValueMin;
+
+  private Integer fieldIdCount;
+
+  private Integer fieldIdSum;
+
+  private Integer fieldIdAvg;
+
+  private Integer fieldIdMax;
+
+  private Integer fieldIdMin;
+
   public String getId() {
     return this.id;
   }
@@ -137,5 +191,213 @@ public class __InputValue implements Meta {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getIdCount() {
+    return this.idCount;
+  }
+
+  public void setIdCount(Integer idCount) {
+    this.idCount = idCount;
+  }
+
+  public String getIdMax() {
+    return this.idMax;
+  }
+
+  public void setIdMax(String idMax) {
+    this.idMax = idMax;
+  }
+
+  public String getIdMin() {
+    return this.idMin;
+  }
+
+  public void setIdMin(String idMin) {
+    this.idMin = idMin;
+  }
+
+  public Integer getNameCount() {
+    return this.nameCount;
+  }
+
+  public void setNameCount(Integer nameCount) {
+    this.nameCount = nameCount;
+  }
+
+  public String getNameMax() {
+    return this.nameMax;
+  }
+
+  public void setNameMax(String nameMax) {
+    this.nameMax = nameMax;
+  }
+
+  public String getNameMin() {
+    return this.nameMin;
+  }
+
+  public void setNameMin(String nameMin) {
+    this.nameMin = nameMin;
+  }
+
+  public Integer getTypeNameCount() {
+    return this.typeNameCount;
+  }
+
+  public void setTypeNameCount(Integer typeNameCount) {
+    this.typeNameCount = typeNameCount;
+  }
+
+  public String getTypeNameMax() {
+    return this.typeNameMax;
+  }
+
+  public void setTypeNameMax(String typeNameMax) {
+    this.typeNameMax = typeNameMax;
+  }
+
+  public String getTypeNameMin() {
+    return this.typeNameMin;
+  }
+
+  public void setTypeNameMin(String typeNameMin) {
+    this.typeNameMin = typeNameMin;
+  }
+
+  public Integer getOfTypeNameCount() {
+    return this.ofTypeNameCount;
+  }
+
+  public void setOfTypeNameCount(Integer ofTypeNameCount) {
+    this.ofTypeNameCount = ofTypeNameCount;
+  }
+
+  public String getOfTypeNameMax() {
+    return this.ofTypeNameMax;
+  }
+
+  public void setOfTypeNameMax(String ofTypeNameMax) {
+    this.ofTypeNameMax = ofTypeNameMax;
+  }
+
+  public String getOfTypeNameMin() {
+    return this.ofTypeNameMin;
+  }
+
+  public void setOfTypeNameMin(String ofTypeNameMin) {
+    this.ofTypeNameMin = ofTypeNameMin;
+  }
+
+  public Integer getDirectiveNameCount() {
+    return this.directiveNameCount;
+  }
+
+  public void setDirectiveNameCount(Integer directiveNameCount) {
+    this.directiveNameCount = directiveNameCount;
+  }
+
+  public String getDirectiveNameMax() {
+    return this.directiveNameMax;
+  }
+
+  public void setDirectiveNameMax(String directiveNameMax) {
+    this.directiveNameMax = directiveNameMax;
+  }
+
+  public String getDirectiveNameMin() {
+    return this.directiveNameMin;
+  }
+
+  public void setDirectiveNameMin(String directiveNameMin) {
+    this.directiveNameMin = directiveNameMin;
+  }
+
+  public Integer getDescriptionCount() {
+    return this.descriptionCount;
+  }
+
+  public void setDescriptionCount(Integer descriptionCount) {
+    this.descriptionCount = descriptionCount;
+  }
+
+  public String getDescriptionMax() {
+    return this.descriptionMax;
+  }
+
+  public void setDescriptionMax(String descriptionMax) {
+    this.descriptionMax = descriptionMax;
+  }
+
+  public String getDescriptionMin() {
+    return this.descriptionMin;
+  }
+
+  public void setDescriptionMin(String descriptionMin) {
+    this.descriptionMin = descriptionMin;
+  }
+
+  public Integer getDefaultValueCount() {
+    return this.defaultValueCount;
+  }
+
+  public void setDefaultValueCount(Integer defaultValueCount) {
+    this.defaultValueCount = defaultValueCount;
+  }
+
+  public String getDefaultValueMax() {
+    return this.defaultValueMax;
+  }
+
+  public void setDefaultValueMax(String defaultValueMax) {
+    this.defaultValueMax = defaultValueMax;
+  }
+
+  public String getDefaultValueMin() {
+    return this.defaultValueMin;
+  }
+
+  public void setDefaultValueMin(String defaultValueMin) {
+    this.defaultValueMin = defaultValueMin;
+  }
+
+  public Integer getFieldIdCount() {
+    return this.fieldIdCount;
+  }
+
+  public void setFieldIdCount(Integer fieldIdCount) {
+    this.fieldIdCount = fieldIdCount;
+  }
+
+  public Integer getFieldIdSum() {
+    return this.fieldIdSum;
+  }
+
+  public void setFieldIdSum(Integer fieldIdSum) {
+    this.fieldIdSum = fieldIdSum;
+  }
+
+  public Integer getFieldIdAvg() {
+    return this.fieldIdAvg;
+  }
+
+  public void setFieldIdAvg(Integer fieldIdAvg) {
+    this.fieldIdAvg = fieldIdAvg;
+  }
+
+  public Integer getFieldIdMax() {
+    return this.fieldIdMax;
+  }
+
+  public void setFieldIdMax(Integer fieldIdMax) {
+    this.fieldIdMax = fieldIdMax;
+  }
+
+  public Integer getFieldIdMin() {
+    return this.fieldIdMin;
+  }
+
+  public void setFieldIdMin(Integer fieldIdMin) {
+    this.fieldIdMin = fieldIdMin;
   }
 }

@@ -32,6 +32,30 @@ public class Organization implements Meta {
 
   private String __typename;
 
+  private Integer idCount;
+
+  @Id
+  private String idMax;
+
+  @Id
+  private String idMin;
+
+  private Integer nameCount;
+
+  private String nameMax;
+
+  private String nameMin;
+
+  private Integer aboveIdCount;
+
+  private Integer aboveIdSum;
+
+  private Integer aboveIdAvg;
+
+  private Integer aboveIdMax;
+
+  private Integer aboveIdMin;
+
   private Integer orgLevel2;
 
   private Collection<Integer> orgLevel3;
@@ -108,6 +132,94 @@ public class Organization implements Meta {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public Integer getIdCount() {
+    return this.idCount;
+  }
+
+  public void setIdCount(Integer idCount) {
+    this.idCount = idCount;
+  }
+
+  public String getIdMax() {
+    return this.idMax;
+  }
+
+  public void setIdMax(String idMax) {
+    this.idMax = idMax;
+  }
+
+  public String getIdMin() {
+    return this.idMin;
+  }
+
+  public void setIdMin(String idMin) {
+    this.idMin = idMin;
+  }
+
+  public Integer getNameCount() {
+    return this.nameCount;
+  }
+
+  public void setNameCount(Integer nameCount) {
+    this.nameCount = nameCount;
+  }
+
+  public String getNameMax() {
+    return this.nameMax;
+  }
+
+  public void setNameMax(String nameMax) {
+    this.nameMax = nameMax;
+  }
+
+  public String getNameMin() {
+    return this.nameMin;
+  }
+
+  public void setNameMin(String nameMin) {
+    this.nameMin = nameMin;
+  }
+
+  public Integer getAboveIdCount() {
+    return this.aboveIdCount;
+  }
+
+  public void setAboveIdCount(Integer aboveIdCount) {
+    this.aboveIdCount = aboveIdCount;
+  }
+
+  public Integer getAboveIdSum() {
+    return this.aboveIdSum;
+  }
+
+  public void setAboveIdSum(Integer aboveIdSum) {
+    this.aboveIdSum = aboveIdSum;
+  }
+
+  public Integer getAboveIdAvg() {
+    return this.aboveIdAvg;
+  }
+
+  public void setAboveIdAvg(Integer aboveIdAvg) {
+    this.aboveIdAvg = aboveIdAvg;
+  }
+
+  public Integer getAboveIdMax() {
+    return this.aboveIdMax;
+  }
+
+  public void setAboveIdMax(Integer aboveIdMax) {
+    this.aboveIdMax = aboveIdMax;
+  }
+
+  public Integer getAboveIdMin() {
+    return this.aboveIdMin;
+  }
+
+  public void setAboveIdMin(Integer aboveIdMin) {
+    this.aboveIdMin = aboveIdMin;
   }
 
   public Integer getOrgLevel2() {
