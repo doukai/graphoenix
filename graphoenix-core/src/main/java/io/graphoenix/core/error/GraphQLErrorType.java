@@ -46,6 +46,8 @@ public enum GraphQLErrorType {
     CLASS_NAME_ARGUMENT_NOT_EXIST(-71, "className not exist in @invoke directive: %s"),
     METHOD_NAME_ARGUMENT_NOT_EXIST(-72, "methodName not exist in @invoke directive: %s"),
 
+    FUNC_ARGUMENT_NOT_EXIST(-81, "func argument not exist in function filed: %s"),
+
     SYNTAX_ERROR(-81, "graphql syntax error: %s line: %s column %s"),
 
     UNKNOWN(-99, "unknown graphql error");

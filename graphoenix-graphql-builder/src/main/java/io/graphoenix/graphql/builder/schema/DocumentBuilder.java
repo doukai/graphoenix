@@ -429,6 +429,7 @@ public class DocumentBuilder {
 
     public InputObjectType objectToSelection(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return new InputObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT.toString()))
+                .addInputValue(new InputValue().setName("func").setTypeName("Function"))
                 .addInputValue(new InputValue().setName("args").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ARGUMENT_SET.toString())))
                 .addInputValue(new InputValue().setName("sort").setTypeName("Sort"));
     }
@@ -469,18 +470,10 @@ public class DocumentBuilder {
 
     public List<Field> buildFunctionFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         List<Field> fieldList = new ArrayList<>();
-
-        fieldList.add(FunctionField.COUNT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.SUM_INT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.MAX_INT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.MIN_INT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.AVG_INT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.SUM_FLOAT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.MAX_FLOAT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.MIN_FLOAT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.AVG_FLOAT.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.MAX_STRING.toField(objectTypeDefinitionContext.name().getText()));
-        fieldList.add(FunctionField.MIN_STRING.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.INT_FUNC.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.FLOAT_FUNC.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.STRING_FUNC.toField(objectTypeDefinitionContext.name().getText()));
+        fieldList.add(FunctionField.BOOLEAN_FUNC.toField(objectTypeDefinitionContext.name().getText()));
         return fieldList;
     }
 
@@ -500,17 +493,10 @@ public class DocumentBuilder {
     }
 
     private enum FunctionField {
-        COUNT("count", "Int"),
-        SUM_INT("sumInt", "Int"),
-        MAX_INT("maxInt", "Int"),
-        MIN_INT("minInt", "Int"),
-        AVG_INT("avgInt", "Int"),
-        SUM_FLOAT("sumFloat", "Float"),
-        MAX_FLOAT("maxFloat", "Float"),
-        MIN_FLOAT("minFloat", "Float"),
-        AVG_FLOAT("avgFloat", "Float"),
-        MAX_STRING("maxString", "String"),
-        MIN_STRING("minString", "String");
+        INT_FUNC("intFunc", "Int"),
+        FLOAT_FUNC("floatFunc", "Float"),
+        STRING_FUNC("stringFunc", "String"),
+        BOOLEAN_FUNC("booleanFunc", "Boolean");
 
         private final String fieldName;
         private final String fieldTypeName;
@@ -524,6 +510,11 @@ public class DocumentBuilder {
             return new Field()
                     .setName(fieldName)
                     .setTypeName(fieldTypeName)
+                    .addArgument(
+                            new InputValue()
+                                    .setName("func")
+                                    .setTypeName("Function")
+                    )
                     .addArgument(
                             new InputValue()
                                     .setName("args")

@@ -1,6 +1,8 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.GraphQLErrorType;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -54,6 +56,6 @@ public class JavaElementToOperation {
         if (mutationOperation != null) {
             return methodToMutationOperation.executableElementToMutation(mutationOperation.value(), executableElement, mutationOperation.layers());
         }
-        return null;
+        throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
     }
 }

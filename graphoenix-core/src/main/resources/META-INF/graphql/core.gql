@@ -38,6 +38,14 @@ enum Sort {
     DESC
 }
 
+enum Function {
+    COUNT
+    MAX
+    MIN
+    SUM
+    AVG
+}
+
 input IDExpression {
     opr: Operator = EQ
     val: ID

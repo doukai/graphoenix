@@ -139,7 +139,7 @@ public class SelectionFilterBuilder {
                                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                                     builder.addStatement("int index = 0")
                                             .beginControlFlow("for ($T item : $L.$L())", ClassName.get(graphQLConfig.getObjectTypePackageName(), manager.getFieldTypeName(fieldDefinitionContext.type())), typeParameterName, fieldGetterMethodName)
-                                            .addStatement("jsonArray.add($L(item, original.getAsJsonObject().get($S).getAsJsonArray().get(index++), selectionSet))", fieldParameterName, fieldDefinitionContext.name().getText())
+                                            .addStatement("jsonArray.add($L(item, original.getAsJsonObject().get($S).getAsJsonArray().get(index++), selectionContext.field().selectionSet()))", fieldParameterName, fieldDefinitionContext.name().getText())
                                             .endControlFlow();
                                 }
                                 builder.addStatement("jsonObject.add(selectionName, jsonArray)")
