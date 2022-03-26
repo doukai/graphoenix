@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.METHOD_NAME_ARGUMENT_NOT_EXIST;
+import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 
 @ApplicationScoped
 public class TypeManager {
@@ -52,8 +53,8 @@ public class TypeManager {
     }
 
     public String getFieldGetterMethodName(String fieldName) {
-        if (fieldName.startsWith("__")) {
-            return "get__".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst("__", "")));
+        if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
+            return "get".concat(INTROSPECTION_PREFIX).concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
         } else {
             return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
         }
@@ -64,8 +65,8 @@ public class TypeManager {
     }
 
     public String getFieldSetterMethodName(String fieldName) {
-        if (fieldName.startsWith("__")) {
-            return "set__".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst("__", "")));
+        if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
+            return "set".concat(INTROSPECTION_PREFIX).concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
         } else {
             return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
         }
@@ -123,8 +124,8 @@ public class TypeManager {
     }
 
     public String typeToLowerCamelName(String fieldTypeName) {
-        if (fieldTypeName.startsWith("__")) {
-            return "__".concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName.replaceFirst("__", "")));
+        if (fieldTypeName.startsWith(INTROSPECTION_PREFIX)) {
+            return INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName.replaceFirst(INTROSPECTION_PREFIX, "")));
         } else {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
         }

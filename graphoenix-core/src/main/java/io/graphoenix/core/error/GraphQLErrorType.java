@@ -29,6 +29,7 @@ public enum GraphQLErrorType {
     UNSUPPORTED_FIELD_TYPE(-42, "unsupported field type: %s"),
     UNSUPPORTED_VALUE(-43, "unsupported field value: %s"),
     UNSUPPORTED_OPERATOR(-43, "unsupported operator value: %s simple:(file:{opr:GT, val:\"graphoenix\"})"),
+    UNSUPPORTED_FUNCTION_NAME(-44, "unsupported function name: %s"),
 
     MAP_DIRECTIVE_NOT_EXIST(-51, "object type field must have @map directive: %s"),
     MAP_FROM_ARGUMENT_NOT_EXIST(-52, "from argument not exist in @map directive: %s"),
@@ -46,9 +47,10 @@ public enum GraphQLErrorType {
     CLASS_NAME_ARGUMENT_NOT_EXIST(-71, "className not exist in @invoke directive: %s"),
     METHOD_NAME_ARGUMENT_NOT_EXIST(-72, "methodName not exist in @invoke directive: %s"),
 
-    FUNC_ARGUMENT_NOT_EXIST(-81, "func argument not exist in function filed: %s"),
+    FUNC_NAME_NOT_EXIST(-81, "@func name argument not exist in function filed: %s"),
+    FUNC_FIELD_NOT_EXIST(-82, "@func field argument not exist in function filed: %s"),
 
-    SYNTAX_ERROR(-81, "graphql syntax error: %s line: %s column %s"),
+    SYNTAX_ERROR(-91, "graphql syntax error: %s line: %s column %s"),
 
     UNKNOWN(-99, "unknown graphql error");
 

@@ -63,7 +63,7 @@ public class GraphQLArgumentsToWhere {
     private final IGraphQLFieldMapManager mapper;
     private final DBNameUtil dbNameUtil;
     private final DBValueUtil dbValueUtil;
-    private final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME};
+    private final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, GROUP_BY_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME};
 
     @Inject
     public GraphQLArgumentsToWhere(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
@@ -156,6 +156,7 @@ public class GraphQLArgumentsToWhere {
         Stream<Expression> expressionStream = argumentsDefinitionContext.inputValueDefinition().stream()
                 .filter(this::isNotConditional)
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
+                .filter(inputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText())))
                 .map(inputValueDefinitionContext -> argumentsToExpression(typeContext, inputValueDefinitionContext, argumentsContext, level))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
@@ -170,6 +171,7 @@ public class GraphQLArgumentsToWhere {
         Stream<Expression> expressionStream = inputObjectValueDefinitionsContext.inputValueDefinition().stream()
                 .filter(this::isNotConditional)
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
+                .filter(inputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText())))
                 .map(inputValueDefinitionContext -> objectValueWithVariableToExpression(typeContext, inputValueDefinitionContext, objectValueWithVariableContext, level))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
@@ -184,6 +186,7 @@ public class GraphQLArgumentsToWhere {
         Stream<Expression> expressionStream = inputObjectValueDefinitionsContext.inputValueDefinition().stream()
                 .filter(this::isNotConditional)
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
+                .filter(inputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText())))
                 .map(inputValueDefinitionContext -> objectValueToExpression(typeContext, inputValueDefinitionContext, objectValueContext, level))
                 .filter(Optional::isPresent)
                 .map(Optional::get);
@@ -342,10 +345,6 @@ public class GraphQLArgumentsToWhere {
                                                                   GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                   GraphqlParser.ArgumentContext argumentContext,
                                                                   int level) {
-        if (Arrays.stream(EXCLUDE_INPUT).anyMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText()))) {
-            return Optional.empty();
-        }
-
         Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(typeContext));
         if (objectTypeDefinitionContext.isPresent()) {
             Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext);
@@ -392,10 +391,6 @@ public class GraphQLArgumentsToWhere {
                                                                                  GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                                  GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext,
                                                                                  int level) {
-        if (Arrays.stream(EXCLUDE_INPUT).anyMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText()))) {
-            return Optional.empty();
-        }
-
         Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(typeContext));
         if (objectTypeDefinitionContext.isPresent()) {
 
@@ -443,10 +438,6 @@ public class GraphQLArgumentsToWhere {
                                                                      GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                      GraphqlParser.ObjectFieldContext objectFieldContext,
                                                                      int level) {
-        if (Arrays.stream(EXCLUDE_INPUT).anyMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText()))) {
-            return Optional.empty();
-        }
-
         Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(typeContext));
         if (objectTypeDefinitionContext.isPresent()) {
             Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext);
@@ -492,10 +483,6 @@ public class GraphQLArgumentsToWhere {
     protected Optional<Expression> singleTypeInputValueToExpression(GraphqlParser.TypeContext typeContext,
                                                                     GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                     int level) {
-        if (Arrays.stream(EXCLUDE_INPUT).anyMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText()))) {
-            return Optional.empty();
-        }
-
         Optional<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinition = manager.getObject(manager.getFieldTypeName(typeContext));
         if (objectTypeDefinition.isPresent()) {
             Optional<GraphqlParser.FieldDefinitionContext> fieldDefinitionContext = manager.getFieldDefinitionFromInputValueDefinition(typeContext, inputValueDefinitionContext);
@@ -804,7 +791,6 @@ public class GraphQLArgumentsToWhere {
         }
 
         Optional<GraphqlParser.EnumValueContext> operatorEnumValueContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                .filter(fieldInputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(fieldInputValueDefinitionContext.name().getText())))
                 .filter(fieldInputValueDefinitionContext ->
                         manager.isEnum(fieldInputValueDefinitionContext.type().getText()) && manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
                 .findFirst()
@@ -812,7 +798,6 @@ public class GraphQLArgumentsToWhere {
                 .map(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue());
 
         Optional<GraphqlParser.EnumValueContext> defaultOperatorEnumValueContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                .filter(fieldInputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(fieldInputValueDefinitionContext.name().getText())))
                 .filter(fieldInputValueDefinitionContext ->
                         manager.isEnum(fieldInputValueDefinitionContext.type().getText()) && manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator"))
                 .findFirst()
@@ -820,7 +805,6 @@ public class GraphQLArgumentsToWhere {
                 .map(GraphqlParser.ValueContext::enumValue);
 
         Optional<GraphqlParser.InputValueDefinitionContext> subInputValueDefinitionContext = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                .filter(fieldInputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(fieldInputValueDefinitionContext.name().getText())))
                 .filter(fieldInputValueDefinitionContext ->
                         !(manager.isEnum(fieldInputValueDefinitionContext.type().getText()) &&
                                 manager.getFieldTypeName(fieldInputValueDefinitionContext.type()).equals("Operator")))
@@ -831,7 +815,6 @@ public class GraphQLArgumentsToWhere {
                 .findFirst();
 
         Optional<GraphqlParser.ValueWithVariableContext> subValueWithVariableContext = subInputValueDefinitionContext
-                .filter(fieldInputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(fieldInputValueDefinitionContext.name().getText())))
                 .flatMap(fieldInputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(argumentsContext, fieldInputValueDefinitionContext))
                 .map(GraphqlParser.ArgumentContext::valueWithVariable);
 
