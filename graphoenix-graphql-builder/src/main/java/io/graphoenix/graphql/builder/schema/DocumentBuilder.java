@@ -223,12 +223,12 @@ public class DocumentBuilder {
                 }
             }
         } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-            field.addArgument(new InputValue().setName("opr").setTypeName("Operator").setDefaultValue("EQ"))
-                    .addArgument(new InputValue().setName("val").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                    .addArgument(new InputValue().setName("in").setTypeName("[".concat(manager.getFieldTypeName(fieldDefinitionContext.type())).concat("]")));
 
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                field.addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
+                field.addArgument(new InputValue().setName("opr").setTypeName("Operator").setDefaultValue("EQ"))
+                        .addArgument(new InputValue().setName("val").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                        .addArgument(new InputValue().setName("in").setTypeName("[".concat(manager.getFieldTypeName(fieldDefinitionContext.type())).concat("]")))
+                        .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
                         .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"));
 
                 mapper.getWithObjectTypeDefinition(typeName, fieldDefinitionContext.name().getText())
@@ -463,9 +463,24 @@ public class DocumentBuilder {
                         )
                         .flatMap(fieldDefinitionContext ->
                                 Stream.of(
-                                        Function.COUNT.toField(fieldDefinitionContext.name().getText(), "Int"),
-                                        Function.MAX.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                        Function.MIN.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                        Function.COUNT.toField(
+                                                fieldDefinitionContext.name().getText(),
+                                                "Int",
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.fieldTypeIsList(fieldDefinitionContext.type())
+                                        ),
+                                        Function.MAX.toField(
+                                                fieldDefinitionContext.name().getText(),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.fieldTypeIsList(fieldDefinitionContext.type())
+                                        ),
+                                        Function.MIN.toField(
+                                                fieldDefinitionContext.name().getText(),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.fieldTypeIsList(fieldDefinitionContext.type())
+                                        )
                                 )
                         ),
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
@@ -475,11 +490,36 @@ public class DocumentBuilder {
                         )
                         .flatMap(fieldDefinitionContext ->
                                 Stream.of(
-                                        Function.COUNT.toField(fieldDefinitionContext.name().getText(), "Int"),
-                                        Function.SUM.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                        Function.AVG.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                        Function.MAX.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                        Function.MIN.toField(fieldDefinitionContext.name().getText(), manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                        Function.COUNT.toField(
+                                                fieldDefinitionContext.name().getText(),
+                                                "Int",
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.fieldTypeIsList(fieldDefinitionContext.type())
+                                        ),
+                                        Function.SUM.toField(
+                                                fieldDefinitionContext.name().getText(),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.fieldTypeIsList(fieldDefinitionContext.type())
+                                        ),
+                                        Function.AVG.toField(
+                                                fieldDefinitionContext.name().getText(),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.fieldTypeIsList(fieldDefinitionContext.type())
+                                        ),
+                                        Function.MAX.toField(
+                                                fieldDefinitionContext.name().getText(),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.fieldTypeIsList(fieldDefinitionContext.type())
+                                        ),
+                                        Function.MIN.toField(
+                                                fieldDefinitionContext.name().getText(),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.fieldTypeIsList(fieldDefinitionContext.type())
+                                        )
                                 )
                         )
         ).collect(Collectors.toList());
@@ -513,11 +553,18 @@ public class DocumentBuilder {
             this.name = name;
         }
 
-        public Field toField(String filedName, String fieldTypeName) {
-            return new Field()
+        public Field toField(String filedName, String returnTypeName, String fieldTypeName, boolean isList) {
+            Field field = new Field()
                     .setName(filedName.concat(name))
-                    .setTypeName(fieldTypeName)
+                    .setTypeName(returnTypeName)
                     .addDirective("func(name: ".concat(this.name()).concat(", field: \"").concat(filedName).concat("\")"));
+
+            if (isList) {
+                field.addArgument(new InputValue().setName("opr").setTypeName("Operator").setDefaultValue("EQ"))
+                        .addArgument(new InputValue().setName("val").setTypeName(fieldTypeName))
+                        .addArgument(new InputValue().setName("in").setTypeName("[".concat(fieldTypeName).concat("]")));
+            }
+            return field;
         }
     }
 }

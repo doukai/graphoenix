@@ -287,10 +287,18 @@ public class GraphQLQueryToSelect {
     }
 
     protected Function jsonArrayFunction(ExpressionList expressionList) {
-        Function function = new Function();
-        function.setName("JSON_ARRAYAGG");
-        function.setParameters(expressionList);
-        return function;
+        Function ifNull = new Function();
+        ifNull.setName("IFNULL");
+
+        Function jsonAggArray = new Function();
+        jsonAggArray.setName("JSON_ARRAYAGG");
+        jsonAggArray.setParameters(expressionList);
+
+        Function jsonArray = new Function();
+        jsonArray.setName("JSON_ARRAY");
+
+        ifNull.setParameters(new ExpressionList(jsonAggArray, jsonArray));
+        return ifNull;
     }
 
     protected Function jsonExtractFunction(Expression expression) {
@@ -443,7 +451,6 @@ public class GraphQLQueryToSelect {
                 Optional<GraphqlParser.InputValueDefinitionContext> sortInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                         .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(SORT_INPUT_NAME))
                         .findFirst();
-
                 Optional<GraphqlParser.ArgumentContext> sort = sortInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
 
                 if (sort.isPresent()) {
