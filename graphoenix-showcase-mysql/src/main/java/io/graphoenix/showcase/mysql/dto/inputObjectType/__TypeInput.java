@@ -45,6 +45,16 @@ public class __TypeInput {
   @NonNull
   private String __typename;
 
+  private __FieldInput fieldsAggregate;
+
+  private __TypeInput interfacesAggregate;
+
+  private __TypeInput possibleTypesAggregate;
+
+  private __EnumValueInput enumValuesAggregate;
+
+  private __InputValueInput inputFieldsAggregate;
+
   public String getName() {
     return this.name;
   }
@@ -155,5 +165,45 @@ public class __TypeInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public __FieldInput getFieldsAggregate() {
+    return this.fieldsAggregate;
+  }
+
+  public void setFieldsAggregate(__FieldInput fieldsAggregate) {
+    this.fieldsAggregate = fieldsAggregate;
+  }
+
+  public __TypeInput getInterfacesAggregate() {
+    return this.interfacesAggregate;
+  }
+
+  public void setInterfacesAggregate(__TypeInput interfacesAggregate) {
+    this.interfacesAggregate = interfacesAggregate;
+  }
+
+  public __TypeInput getPossibleTypesAggregate() {
+    return this.possibleTypesAggregate;
+  }
+
+  public void setPossibleTypesAggregate(__TypeInput possibleTypesAggregate) {
+    this.possibleTypesAggregate = possibleTypesAggregate;
+  }
+
+  public __EnumValueInput getEnumValuesAggregate() {
+    return this.enumValuesAggregate;
+  }
+
+  public void setEnumValuesAggregate(__EnumValueInput enumValuesAggregate) {
+    this.enumValuesAggregate = enumValuesAggregate;
+  }
+
+  public __InputValueInput getInputFieldsAggregate() {
+    return this.inputFieldsAggregate;
+  }
+
+  public void setInputFieldsAggregate(__InputValueInput inputFieldsAggregate) {
+    this.inputFieldsAggregate = inputFieldsAggregate;
   }
 }

@@ -38,6 +38,8 @@ public class __FieldInput {
   @NonNull
   private String __typename;
 
+  private __InputValueInput argsAggregate;
+
   public String getId() {
     return this.id;
   }
@@ -124,5 +126,13 @@ public class __FieldInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public __InputValueInput getArgsAggregate() {
+    return this.argsAggregate;
+  }
+
+  public void setArgsAggregate(__InputValueInput argsAggregate) {
+    this.argsAggregate = argsAggregate;
   }
 }

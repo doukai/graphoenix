@@ -56,6 +56,8 @@ public class Organization implements Meta {
 
   private Integer aboveIdMin;
 
+  private User usersAggregate;
+
   private Integer orgLevel2;
 
   private Collection<Integer> orgLevel3;
@@ -220,6 +222,14 @@ public class Organization implements Meta {
 
   public void setAboveIdMin(Integer aboveIdMin) {
     this.aboveIdMin = aboveIdMin;
+  }
+
+  public User getUsersAggregate() {
+    return this.usersAggregate;
+  }
+
+  public void setUsersAggregate(User usersAggregate) {
+    this.usersAggregate = usersAggregate;
   }
 
   public Integer getOrgLevel2() {

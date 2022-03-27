@@ -58,4 +58,14 @@ public @interface __TypeExpression0 {
   __InputValueExpressions1[] inputFields() default {};
 
   __TypeExpressions1[] ofType() default {};
+
+  __FieldExpressions1[] fieldsAggregate() default {};
+
+  __TypeExpressions1[] interfacesAggregate() default {};
+
+  __TypeExpressions1[] possibleTypesAggregate() default {};
+
+  __EnumValueExpressions1[] enumValuesAggregate() default {};
+
+  __InputValueExpressions1[] inputFieldsAggregate() default {};
 }

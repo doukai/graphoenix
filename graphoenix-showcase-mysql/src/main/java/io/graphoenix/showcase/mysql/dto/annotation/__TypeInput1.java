@@ -56,6 +56,16 @@ public @interface __TypeInput1 {
 
   String $__typename() default "";
 
+  String $fieldsAggregate() default "";
+
+  String $interfacesAggregate() default "";
+
+  String $possibleTypesAggregate() default "";
+
+  String $enumValuesAggregate() default "";
+
+  String $inputFieldsAggregate() default "";
+
   __FieldInput2[] fields() default {};
 
   __TypeInput2[] interfaces() default {};
@@ -67,4 +77,14 @@ public @interface __TypeInput1 {
   __InputValueInput2[] inputFields() default {};
 
   __TypeInput2 ofType() default @__TypeInput2;
+
+  __FieldInput2 fieldsAggregate() default @__FieldInput2;
+
+  __TypeInput2 interfacesAggregate() default @__TypeInput2;
+
+  __TypeInput2 possibleTypesAggregate() default @__TypeInput2;
+
+  __EnumValueInput2 enumValuesAggregate() default @__EnumValueInput2;
+
+  __InputValueInput2 inputFieldsAggregate() default @__InputValueInput2;
 }

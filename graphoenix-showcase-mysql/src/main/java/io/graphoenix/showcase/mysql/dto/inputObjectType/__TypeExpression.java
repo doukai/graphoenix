@@ -39,6 +39,16 @@ public class __TypeExpression {
 
   private StringExpression __typename;
 
+  private __FieldExpression fieldsAggregate;
+
+  private __TypeExpression interfacesAggregate;
+
+  private __TypeExpression possibleTypesAggregate;
+
+  private __EnumValueExpression enumValuesAggregate;
+
+  private __InputValueExpression inputFieldsAggregate;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -154,6 +164,46 @@ public class __TypeExpression {
 
   public void set__Typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public __FieldExpression getFieldsAggregate() {
+    return this.fieldsAggregate;
+  }
+
+  public void setFieldsAggregate(__FieldExpression fieldsAggregate) {
+    this.fieldsAggregate = fieldsAggregate;
+  }
+
+  public __TypeExpression getInterfacesAggregate() {
+    return this.interfacesAggregate;
+  }
+
+  public void setInterfacesAggregate(__TypeExpression interfacesAggregate) {
+    this.interfacesAggregate = interfacesAggregate;
+  }
+
+  public __TypeExpression getPossibleTypesAggregate() {
+    return this.possibleTypesAggregate;
+  }
+
+  public void setPossibleTypesAggregate(__TypeExpression possibleTypesAggregate) {
+    this.possibleTypesAggregate = possibleTypesAggregate;
+  }
+
+  public __EnumValueExpression getEnumValuesAggregate() {
+    return this.enumValuesAggregate;
+  }
+
+  public void setEnumValuesAggregate(__EnumValueExpression enumValuesAggregate) {
+    this.enumValuesAggregate = enumValuesAggregate;
+  }
+
+  public __InputValueExpression getInputFieldsAggregate() {
+    return this.inputFieldsAggregate;
+  }
+
+  public void setInputFieldsAggregate(__InputValueExpression inputFieldsAggregate) {
+    this.inputFieldsAggregate = inputFieldsAggregate;
   }
 
   public Conditional getCond() {

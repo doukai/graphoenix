@@ -76,6 +76,16 @@ public class __Type implements Meta {
 
   private Integer schemaIdMin;
 
+  private __Field fieldsAggregate;
+
+  private __Type interfacesAggregate;
+
+  private __Type possibleTypesAggregate;
+
+  private __EnumValue enumValuesAggregate;
+
+  private __InputValue inputFieldsAggregate;
+
   public String getName() {
     return this.name;
   }
@@ -302,5 +312,45 @@ public class __Type implements Meta {
 
   public void setSchemaIdMin(Integer schemaIdMin) {
     this.schemaIdMin = schemaIdMin;
+  }
+
+  public __Field getFieldsAggregate() {
+    return this.fieldsAggregate;
+  }
+
+  public void setFieldsAggregate(__Field fieldsAggregate) {
+    this.fieldsAggregate = fieldsAggregate;
+  }
+
+  public __Type getInterfacesAggregate() {
+    return this.interfacesAggregate;
+  }
+
+  public void setInterfacesAggregate(__Type interfacesAggregate) {
+    this.interfacesAggregate = interfacesAggregate;
+  }
+
+  public __Type getPossibleTypesAggregate() {
+    return this.possibleTypesAggregate;
+  }
+
+  public void setPossibleTypesAggregate(__Type possibleTypesAggregate) {
+    this.possibleTypesAggregate = possibleTypesAggregate;
+  }
+
+  public __EnumValue getEnumValuesAggregate() {
+    return this.enumValuesAggregate;
+  }
+
+  public void setEnumValuesAggregate(__EnumValue enumValuesAggregate) {
+    this.enumValuesAggregate = enumValuesAggregate;
+  }
+
+  public __InputValue getInputFieldsAggregate() {
+    return this.inputFieldsAggregate;
+  }
+
+  public void setInputFieldsAggregate(__InputValue inputFieldsAggregate) {
+    this.inputFieldsAggregate = inputFieldsAggregate;
   }
 }

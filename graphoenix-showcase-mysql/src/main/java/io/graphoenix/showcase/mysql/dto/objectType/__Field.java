@@ -77,6 +77,8 @@ public class __Field implements Meta {
 
   private String deprecationReasonMin;
 
+  private __InputValue argsAggregate;
+
   public String getId() {
     return this.id;
   }
@@ -311,5 +313,13 @@ public class __Field implements Meta {
 
   public void setDeprecationReasonMin(String deprecationReasonMin) {
     this.deprecationReasonMin = deprecationReasonMin;
+  }
+
+  public __InputValue getArgsAggregate() {
+    return this.argsAggregate;
+  }
+
+  public void setArgsAggregate(__InputValue argsAggregate) {
+    this.argsAggregate = argsAggregate;
   }
 }

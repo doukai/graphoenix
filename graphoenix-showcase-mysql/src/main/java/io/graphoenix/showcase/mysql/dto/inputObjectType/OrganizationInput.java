@@ -31,6 +31,8 @@ public class OrganizationInput {
   @NonNull
   private String __typename;
 
+  private UserInput usersAggregate;
+
   public String getId() {
     return this.id;
   }
@@ -93,5 +95,13 @@ public class OrganizationInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public UserInput getUsersAggregate() {
+    return this.usersAggregate;
+  }
+
+  public void setUsersAggregate(UserInput usersAggregate) {
+    this.usersAggregate = usersAggregate;
   }
 }

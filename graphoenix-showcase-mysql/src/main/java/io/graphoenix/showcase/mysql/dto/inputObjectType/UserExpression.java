@@ -39,6 +39,8 @@ public class UserExpression {
 
   private StringExpression __typename;
 
+  private RoleExpression rolesAggregate;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -154,6 +156,14 @@ public class UserExpression {
 
   public void set__Typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public RoleExpression getRolesAggregate() {
+    return this.rolesAggregate;
+  }
+
+  public void setRolesAggregate(RoleExpression rolesAggregate) {
+    this.rolesAggregate = rolesAggregate;
   }
 
   public Conditional getCond() {

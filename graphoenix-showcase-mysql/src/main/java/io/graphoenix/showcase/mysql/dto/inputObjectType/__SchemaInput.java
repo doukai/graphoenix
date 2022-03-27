@@ -41,6 +41,10 @@ public class __SchemaInput {
   @NonNull
   private String __typename;
 
+  private __TypeInput typesAggregate;
+
+  private __DirectiveInput directivesAggregate;
+
   public String getId() {
     return this.id;
   }
@@ -135,5 +139,21 @@ public class __SchemaInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public __TypeInput getTypesAggregate() {
+    return this.typesAggregate;
+  }
+
+  public void setTypesAggregate(__TypeInput typesAggregate) {
+    this.typesAggregate = typesAggregate;
+  }
+
+  public __DirectiveInput getDirectivesAggregate() {
+    return this.directivesAggregate;
+  }
+
+  public void setDirectivesAggregate(__DirectiveInput directivesAggregate) {
+    this.directivesAggregate = directivesAggregate;
   }
 }

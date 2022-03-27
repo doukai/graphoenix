@@ -51,4 +51,8 @@ public @interface __SchemaExpression0 {
   __TypeExpressions1[] subscriptionType() default {};
 
   __DirectiveExpressions1[] directives() default {};
+
+  __TypeExpressions1[] typesAggregate() default {};
+
+  __DirectiveExpressions1[] directivesAggregate() default {};
 }

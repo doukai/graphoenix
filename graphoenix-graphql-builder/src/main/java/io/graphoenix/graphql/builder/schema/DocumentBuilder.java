@@ -29,7 +29,6 @@ import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -88,6 +87,7 @@ public class DocumentBuilder {
         manager.registerGraphQL(queryType.toString());
         manager.registerGraphQL(mutationType.toString());
         manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
+        mapper.registerFieldMaps();
 
         Document document = getDocument();
         Logger.info("document build success");
@@ -148,6 +148,13 @@ public class DocumentBuilder {
         if (buildField) {
             objectType.addField(buildTypeNameFiled(objectTypeDefinitionContext));
             objectType.addFields(buildFunctionFieldList(objectTypeDefinitionContext));
+            objectType.addFields(
+                    objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                            .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                            .map(this::buildListObjectAggregateFiled)
+                            .collect(Collectors.toList())
+            );
         }
         return objectType;
     }
@@ -223,7 +230,6 @@ public class DocumentBuilder {
                 }
             }
         } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 field.addArgument(new InputValue().setName("opr").setTypeName("Operator").setDefaultValue("EQ"))
                         .addArgument(new InputValue().setName("val").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type())))
@@ -244,6 +250,17 @@ public class DocumentBuilder {
                 field.addArgument(new InputValue().setName("sort").setTypeName("Sort"));
             }
         }
+        return field;
+    }
+
+    public Field buildListObjectAggregateFiled(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        Field field = new Field().setName(fieldDefinitionContext.name().getText().concat("Aggregate"))
+                .setDescription(fieldDefinitionContext.description() == null ? null : fieldDefinitionContext.description().getText())
+                .setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                .setDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
+
+        Optional<GraphqlParser.ObjectTypeDefinitionContext> filedObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
+        filedObjectTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> field.addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION)));
         return field;
     }
 

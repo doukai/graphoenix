@@ -51,7 +51,11 @@ public @interface __FieldInput0 {
 
   String $__typename() default "";
 
+  String $argsAggregate() default "";
+
   __InputValueInput1[] args() default {};
 
   __TypeInput1 type() default @__TypeInput1;
+
+  __InputValueInput1 argsAggregate() default @__InputValueInput1;
 }

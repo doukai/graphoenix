@@ -64,6 +64,8 @@ public class __Directive implements Meta {
 
   private Integer schemaIdMin;
 
+  private __InputValue argsAggregate;
+
   public String getName() {
     return this.name;
   }
@@ -242,5 +244,13 @@ public class __Directive implements Meta {
 
   public void setSchemaIdMin(Integer schemaIdMin) {
     this.schemaIdMin = schemaIdMin;
+  }
+
+  public __InputValue getArgsAggregate() {
+    return this.argsAggregate;
+  }
+
+  public void setArgsAggregate(__InputValue argsAggregate) {
+    this.argsAggregate = argsAggregate;
   }
 }

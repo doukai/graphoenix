@@ -53,4 +53,6 @@ public @interface __DirectiveInput2 {
   String $isDeprecated() default "";
 
   String $__typename() default "";
+
+  String $argsAggregate() default "";
 }

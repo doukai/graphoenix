@@ -55,4 +55,14 @@ public @interface __TypeInput2 {
   String $isDeprecated() default "";
 
   String $__typename() default "";
+
+  String $fieldsAggregate() default "";
+
+  String $interfacesAggregate() default "";
+
+  String $possibleTypesAggregate() default "";
+
+  String $enumValuesAggregate() default "";
+
+  String $inputFieldsAggregate() default "";
 }

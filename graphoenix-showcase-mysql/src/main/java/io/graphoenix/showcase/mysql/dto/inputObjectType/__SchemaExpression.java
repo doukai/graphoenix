@@ -35,6 +35,10 @@ public class __SchemaExpression {
 
   private StringExpression __typename;
 
+  private __TypeExpression typesAggregate;
+
+  private __DirectiveExpression directivesAggregate;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -134,6 +138,22 @@ public class __SchemaExpression {
 
   public void set__Typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public __TypeExpression getTypesAggregate() {
+    return this.typesAggregate;
+  }
+
+  public void setTypesAggregate(__TypeExpression typesAggregate) {
+    this.typesAggregate = typesAggregate;
+  }
+
+  public __DirectiveExpression getDirectivesAggregate() {
+    return this.directivesAggregate;
+  }
+
+  public void setDirectivesAggregate(__DirectiveExpression directivesAggregate) {
+    this.directivesAggregate = directivesAggregate;
   }
 
   public Conditional getCond() {

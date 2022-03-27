@@ -54,5 +54,9 @@ public @interface __DirectiveInput1 {
 
   String $__typename() default "";
 
+  String $argsAggregate() default "";
+
   __InputValueInput2[] args() default {};
+
+  __InputValueInput2 argsAggregate() default @__InputValueInput2;
 }

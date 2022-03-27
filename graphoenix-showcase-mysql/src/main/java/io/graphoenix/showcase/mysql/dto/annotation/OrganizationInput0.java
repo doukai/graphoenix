@@ -45,6 +45,8 @@ public @interface OrganizationInput0 {
 
   String $__typename() default "";
 
+  String $usersAggregate() default "";
+
   String $orgLevel2() default "";
 
   String $orgLevel3() default "";
@@ -58,6 +60,8 @@ public @interface OrganizationInput0 {
   OrganizationInput1 above() default @OrganizationInput1;
 
   UserInput1[] users() default {};
+
+  UserInput1 usersAggregate() default @UserInput1;
 
   UserInput1[] userByOrg() default {};
 

@@ -66,9 +66,13 @@ public @interface UserInput1 {
 
   String $__typename() default "";
 
+  String $rolesAggregate() default "";
+
   String $userDetail2() default "";
 
   OrganizationInput2 organization() default @OrganizationInput2;
 
   RoleInput2[] roles() default {};
+
+  RoleInput2 rolesAggregate() default @RoleInput2;
 }

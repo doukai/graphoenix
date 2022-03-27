@@ -32,4 +32,6 @@ public @interface RoleInput2 {
   String $isDeprecated() default "";
 
   String $__typename() default "";
+
+  String $usersAggregate() default "";
 }

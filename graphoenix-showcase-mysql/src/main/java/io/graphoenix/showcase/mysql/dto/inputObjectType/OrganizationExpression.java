@@ -27,6 +27,8 @@ public class OrganizationExpression {
 
   private StringExpression __typename;
 
+  private UserExpression usersAggregate;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -94,6 +96,14 @@ public class OrganizationExpression {
 
   public void set__Typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public UserExpression getUsersAggregate() {
+    return this.usersAggregate;
+  }
+
+  public void setUsersAggregate(UserExpression usersAggregate) {
+    this.usersAggregate = usersAggregate;
   }
 
   public Conditional getCond() {

@@ -42,8 +42,7 @@ public class ElementManager {
 
     public Set<Field> buildFields(String typeName, int level, int layers) {
         return getFields(typeName, level, layers)
-                .map(fieldDefinitionContext ->
-                        {
+                .map(fieldDefinitionContext -> {
                             Field field = new Field().setName(fieldDefinitionContext.name().getText());
                             if (level <= layers) {
                                 field.setFields(buildFields(manager.getFieldTypeName(fieldDefinitionContext.type()), level + 1, layers));
@@ -57,6 +56,7 @@ public class ElementManager {
     public Stream<GraphqlParser.FieldDefinitionContext> getFields(String typeName, int level, int layers) {
         return manager.getFields(typeName)
                 .filter(fieldDefinitionContext -> manager.isNotFunctionField(typeName, fieldDefinitionContext.name().getText()))
+                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith("Aggregate"))
                 .filter(fieldDefinitionContext -> level < layers ||
                         level == layers && (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 );

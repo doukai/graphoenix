@@ -99,6 +99,8 @@ public class User implements Meta {
 
   private Integer organizationIdMin;
 
+  private Role rolesAggregate;
+
   private String userDetail2;
 
   public String getId() {
@@ -415,6 +417,14 @@ public class User implements Meta {
 
   public void setOrganizationIdMin(Integer organizationIdMin) {
     this.organizationIdMin = organizationIdMin;
+  }
+
+  public Role getRolesAggregate() {
+    return this.rolesAggregate;
+  }
+
+  public void setRolesAggregate(Role rolesAggregate) {
+    this.rolesAggregate = rolesAggregate;
   }
 
   public String getUserDetail2() {

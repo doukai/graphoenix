@@ -46,6 +46,8 @@ public class UserInput {
   @NonNull
   private String __typename;
 
+  private RoleInput rolesAggregate;
+
   public String getId() {
     return this.id;
   }
@@ -156,5 +158,13 @@ public class UserInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
+  }
+
+  public RoleInput getRolesAggregate() {
+    return this.rolesAggregate;
+  }
+
+  public void setRolesAggregate(RoleInput rolesAggregate) {
+    this.rolesAggregate = rolesAggregate;
   }
 }

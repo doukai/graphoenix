@@ -35,4 +35,6 @@ public @interface RoleExpression0 {
   String[] $__typename() default {};
 
   UserExpressions1[] users() default {};
+
+  UserExpressions1[] usersAggregate() default {};
 }

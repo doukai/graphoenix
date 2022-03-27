@@ -33,6 +33,8 @@ public class __FieldExpression {
 
   private StringExpression __typename;
 
+  private __InputValueExpression argsAggregate;
+
   @DefaultValue("AND")
   private Conditional cond;
 
@@ -124,6 +126,14 @@ public class __FieldExpression {
 
   public void set__Typename(StringExpression __typename) {
     this.__typename = __typename;
+  }
+
+  public __InputValueExpression getArgsAggregate() {
+    return this.argsAggregate;
+  }
+
+  public void setArgsAggregate(__InputValueExpression argsAggregate) {
+    this.argsAggregate = argsAggregate;
   }
 
   public Conditional getCond() {

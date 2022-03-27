@@ -42,6 +42,8 @@ public class Role implements Meta {
 
   private String nameMin;
 
+  private User usersAggregate;
+
   public String getId() {
     return this.id;
   }
@@ -140,5 +142,13 @@ public class Role implements Meta {
 
   public void setNameMin(String nameMin) {
     this.nameMin = nameMin;
+  }
+
+  public User getUsersAggregate() {
+    return this.usersAggregate;
+  }
+
+  public void setUsersAggregate(User usersAggregate) {
+    this.usersAggregate = usersAggregate;
   }
 }

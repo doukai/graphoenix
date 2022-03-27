@@ -70,4 +70,6 @@ public @interface UserExpression1 {
   OrganizationExpressions2[] organization() default {};
 
   RoleExpressions2[] roles() default {};
+
+  RoleExpressions2[] rolesAggregate() default {};
 }

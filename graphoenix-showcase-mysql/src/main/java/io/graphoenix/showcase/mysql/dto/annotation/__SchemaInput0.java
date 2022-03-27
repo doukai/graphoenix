@@ -49,6 +49,10 @@ public @interface __SchemaInput0 {
 
   String $__typename() default "";
 
+  String $typesAggregate() default "";
+
+  String $directivesAggregate() default "";
+
   __TypeInput1[] types() default {};
 
   __TypeInput1 queryType() default @__TypeInput1;
@@ -58,4 +62,8 @@ public @interface __SchemaInput0 {
   __TypeInput1 subscriptionType() default @__TypeInput1;
 
   __DirectiveInput1[] directives() default {};
+
+  __TypeInput1 typesAggregate() default @__TypeInput1;
+
+  __DirectiveInput1 directivesAggregate() default @__DirectiveInput1;
 }

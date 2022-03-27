@@ -33,5 +33,9 @@ public @interface RoleInput1 {
 
   String $__typename() default "";
 
+  String $usersAggregate() default "";
+
   UserInput2[] users() default {};
+
+  UserInput2 usersAggregate() default @UserInput2;
 }

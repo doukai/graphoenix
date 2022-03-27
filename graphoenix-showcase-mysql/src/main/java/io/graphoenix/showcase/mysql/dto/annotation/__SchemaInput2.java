@@ -48,4 +48,8 @@ public @interface __SchemaInput2 {
   String $isDeprecated() default "";
 
   String $__typename() default "";
+
+  String $typesAggregate() default "";
+
+  String $directivesAggregate() default "";
 }

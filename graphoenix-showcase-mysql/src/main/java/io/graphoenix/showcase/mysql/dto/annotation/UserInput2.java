@@ -66,5 +66,7 @@ public @interface UserInput2 {
 
   String $__typename() default "";
 
+  String $rolesAggregate() default "";
+
   String $userDetail2() default "";
 }

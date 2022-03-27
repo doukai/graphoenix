@@ -50,4 +50,6 @@ public @interface __FieldInput2 {
   String $isDeprecated() default "";
 
   String $__typename() default "";
+
+  String $argsAggregate() default "";
 }

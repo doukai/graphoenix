@@ -68,6 +68,10 @@ public class __Schema implements Meta {
 
   private String subscriptionTypeNameMin;
 
+  private __Type typesAggregate;
+
+  private __Directive directivesAggregate;
+
   public String getId() {
     return this.id;
   }
@@ -262,5 +266,21 @@ public class __Schema implements Meta {
 
   public void setSubscriptionTypeNameMin(String subscriptionTypeNameMin) {
     this.subscriptionTypeNameMin = subscriptionTypeNameMin;
+  }
+
+  public __Type getTypesAggregate() {
+    return this.typesAggregate;
+  }
+
+  public void setTypesAggregate(__Type typesAggregate) {
+    this.typesAggregate = typesAggregate;
+  }
+
+  public __Directive getDirectivesAggregate() {
+    return this.directivesAggregate;
+  }
+
+  public void setDirectivesAggregate(__Directive directivesAggregate) {
+    this.directivesAggregate = directivesAggregate;
   }
 }

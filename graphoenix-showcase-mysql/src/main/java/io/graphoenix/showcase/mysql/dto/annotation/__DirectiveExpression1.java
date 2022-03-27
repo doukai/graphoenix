@@ -56,4 +56,6 @@ public @interface __DirectiveExpression1 {
   String[] $__typename() default {};
 
   __InputValueExpressions2[] args() default {};
+
+  __InputValueExpressions2[] argsAggregate() default {};
 }
