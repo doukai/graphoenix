@@ -486,8 +486,27 @@ public class GraphQLQueryToSelect {
     }
 
     protected Expression fieldToExpression(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
-        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-            String fieldName = fieldDefinitionContext.name().getText();
+        Optional<GraphqlParser.FieldDefinitionContext> functionFieldDefinitionContext = Optional.empty();
+        if (fieldDefinitionContext.directives() != null) {
+            functionFieldDefinitionContext = fieldDefinitionContext.directives().directive().stream()
+                    .filter(directiveContext -> directiveContext.name().getText().equals("func"))
+                    .flatMap(directiveContext -> directiveContext.arguments().argument().stream()
+                            .filter(argumentContext -> argumentContext.name().getText().equals("field"))
+                            .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                            .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue())))
+                    .findFirst()
+                    .map(fieldName -> manager.getField(typeName, fieldName).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, fieldName))));
+        }
+
+        if (manager.fieldTypeIsList(fieldDefinitionContext.type()) ||
+                functionFieldDefinitionContext.isPresent() && manager.fieldTypeIsList(functionFieldDefinitionContext.get().type())
+        ) {
+            String fieldName;
+            if (functionFieldDefinitionContext.isPresent()) {
+                fieldName = functionFieldDefinitionContext.get().name().getText();
+            } else {
+                fieldName = fieldDefinitionContext.name().getText();
+            }
             Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(typeName, fieldName);
             boolean mapWithType = mapper.mapWithType(typeName, fieldName);
 
@@ -501,16 +520,43 @@ public class GraphQLQueryToSelect {
                     String mapWithObjectName = mapWithObjectDefinition.get().name().getText();
                     SubSelect arraySubSelect = new SubSelect();
                     PlainSelect arrayPlainSelect = new PlainSelect();
-                    arrayPlainSelect.addSelectItems(
-                            new SelectExpressionItem(
-                                    jsonArrayFunction(
-                                            new ExpressionList(
-                                                    new Column(new Table(aliasName), mapWithToFieldDefinition.get().name().getText())
-                                            )
-                                    )
-                            )
-                    );
+                    Function function;
+                    Optional<GraphqlParser.DirectiveContext> func = fieldDefinitionContext.directives().directive().stream()
+                            .filter(directiveContext -> directiveContext.name().getText().equals("func"))
+                            .findFirst();
 
+                    if (func.isPresent()) {
+                        Optional<GraphqlParser.EnumValueContext> name = func.get().arguments().argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals("name"))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().enumValue() != null)
+                                .findFirst()
+                                .map(argumentContext -> argumentContext.valueWithVariable().enumValue());
+
+                        Optional<TerminalNode> field = func.get().arguments().argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals("field"))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                                .findFirst()
+                                .map(argumentContext -> argumentContext.valueWithVariable().StringValue());
+
+                        if (name.isPresent() && field.isPresent()) {
+                            function = new Function();
+                            function.setName(functionEnumValueToFunctionName(name.get()));
+                            function.setParameters(new ExpressionList(new Column(new Table(aliasName), mapWithToFieldDefinition.get().name().getText())));
+                        } else {
+                            if (name.isEmpty()) {
+                                throw new GraphQLProblem(FUNC_NAME_NOT_EXIST.bind(func.get().getText()));
+                            } else {
+                                throw new GraphQLProblem(FUNC_FIELD_NOT_EXIST.bind(func.get().getText()));
+                            }
+                        }
+                    } else {
+                        function = jsonArrayFunction(
+                                new ExpressionList(
+                                        new Column(new Table(aliasName), mapWithToFieldDefinition.get().name().getText())
+                                )
+                        );
+                    }
+                    arrayPlainSelect.addSelectItems(new SelectExpressionItem(function));
                     SubSelect subSelect = new SubSelect();
                     PlainSelect plainSelect = new PlainSelect();
                     Table withTable = typeToTable(mapWithObjectName, level);
