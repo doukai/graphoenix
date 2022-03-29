@@ -5,6 +5,9 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public class StringValue {
 
@@ -20,6 +23,18 @@ public class StringValue {
 
     public StringValue(String value) {
         this.value = value;
+    }
+
+    public StringValue(LocalDate localDate) {
+        this.value = localDate.toString();
+    }
+
+    public StringValue(LocalTime localTime) {
+        this.value = localTime.toString();
+    }
+
+    public StringValue(LocalDateTime localDateTime) {
+        this.value = localDateTime.toString();
     }
 
     public StringValue(TerminalNode value) {

@@ -38,10 +38,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -509,15 +511,26 @@ public class TypeSpecBuilder {
     public TypeName buildType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
-            case "Int":
-                return TypeName.get(Integer.class);
-            case "Float":
-                return TypeName.get(Float.class);
             case "ID":
             case "String":
                 return TypeName.get(String.class);
             case "Boolean":
                 return TypeName.get(Boolean.class);
+            case "Int":
+                return TypeName.get(Integer.class);
+            case "Float":
+                return TypeName.get(Float.class);
+            case "BigInteger":
+                return TypeName.get(BigInteger.class);
+            case "BigDecimal":
+                return TypeName.get(BigDecimal.class);
+            case "Date":
+                return TypeName.get(LocalDate.class);
+            case "Time":
+                return TypeName.get(LocalTime.class);
+            case "DateTime":
+            case "Timestamp":
+                return TypeName.get(LocalDateTime.class);
         }
         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
     }
@@ -525,15 +538,21 @@ public class TypeSpecBuilder {
     public TypeName buildAnnotationType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
-            case "Int":
-                return TypeName.get(int.class);
-            case "Float":
-                return TypeName.get(float.class);
             case "ID":
             case "String":
+            case "Date":
+            case "Time":
+            case "DateTime":
+            case "Timestamp":
                 return TypeName.get(String.class);
             case "Boolean":
                 return TypeName.get(boolean.class);
+            case "Int":
+            case "BigInteger":
+                return TypeName.get(int.class);
+            case "Float":
+            case "BigDecimal":
+                return TypeName.get(float.class);
         }
         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
     }
@@ -571,14 +590,20 @@ public class TypeSpecBuilder {
     public CodeBlock buildAnnotationDefaultValue(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
         String name = scalarTypeDefinitionContext.name().getText();
         switch (name) {
-            case "Int":
-            case "Float":
-                return CodeBlock.of("$L", 0);
             case "ID":
             case "String":
+            case "Date":
+            case "Time":
+            case "DateTime":
+            case "Timestamp":
                 return CodeBlock.of("$S", "");
             case "Boolean":
                 return CodeBlock.of("$L", false);
+            case "Int":
+            case "Float":
+            case "BigInteger":
+            case "BigDecimal":
+                return CodeBlock.of("$L", 0);
         }
         throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
     }

@@ -179,23 +179,44 @@ public class GraphQLTypeToTable {
         List<String> argumentsStringList = new ArrayList<>();
         ColDataType colDataType = new ColDataType();
         switch (typeNameContext.name().getText()) {
-            case "Int":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
+            case "ID":
+            case "String":
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
                 argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));
                 break;
             case "Boolean":
                 colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BOOL"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
-            case "ID":
-            case "String":
-                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("VARCHAR"));
-                argumentsStringList.add(length.map(argumentContext -> argumentContext.valueWithVariable().IntValue().getText()).orElse("255"));
+            case "Int":
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("INT"));
+                length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 break;
             case "Float":
                 colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("FLOAT"));
                 length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
                 decimals.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
+                break;
+            case "BigInteger":
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("BIGINT"));
+                length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
+                break;
+            case "BigDecimal":
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("DECIMAL"));
+                length.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
+                decimals.ifPresent(argumentContext -> argumentsStringList.add(argumentContext.valueWithVariable().IntValue().getText()));
+                break;
+            case "Date":
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("DATE"));
+                break;
+            case "Time":
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("TIME"));
+                break;
+            case "DateTime":
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("DATETIME"));
+                break;
+            case "Timestamp":
+                colDataType.setDataType(dataType.map(argumentContext -> dbNameUtil.graphqlStringValueToDBOption(argumentContext.valueWithVariable().StringValue().getText())).orElse("TIMESTAMP"));
                 break;
         }
 

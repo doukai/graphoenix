@@ -33,11 +33,16 @@ import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -144,6 +149,16 @@ public class GenerateGraphQLSourceTask extends DefaultTask {
             } else if (classOrInterfaceType.getName().getIdentifier().equals(boolean.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(Boolean.class.getSimpleName())) {
                 typeName = "Boolean";
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(BigInteger.class.getName())) {
+                typeName = "BigInteger";
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(BigDecimal.class.getName())) {
+                typeName = "BigDecimal";
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalDate.class.getName())) {
+                typeName = "Date";
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalTime.class.getName())) {
+                typeName = "Time";
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalDateTime.class.getName())) {
+                typeName = "DateTime";
             } else if (classOrInterfaceType.getName().getIdentifier().equals(Collection.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(List.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(Set.class.getSimpleName())) {

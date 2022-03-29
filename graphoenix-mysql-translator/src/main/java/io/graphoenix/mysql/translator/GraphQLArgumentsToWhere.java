@@ -1464,19 +1464,37 @@ public class GraphQLArgumentsToWhere {
             colDataType.setDataType("INT");
         } else if (manager.isScalar(fieldTypeName)) {
             switch (fieldTypeName) {
-                case "Int":
-                    colDataType.setDataType("INT");
-                    break;
-                case "Boolean":
-                    colDataType.setDataType("BOOL");
-                    break;
                 case "ID":
                 case "String":
                     colDataType.setDataType("VARCHAR");
                     colDataType.setArgumentsStringList(Collections.singletonList("255"));
                     break;
+                case "Boolean":
+                    colDataType.setDataType("BOOL");
+                    break;
+                case "Int":
+                    colDataType.setDataType("INT");
+                    break;
                 case "Float":
                     colDataType.setDataType("FLOAT");
+                    break;
+                case "BigInteger":
+                    colDataType.setDataType("BIGINT");
+                    break;
+                case "BigDecimal":
+                    colDataType.setDataType("DECIMAL");
+                    break;
+                case "Date":
+                    colDataType.setDataType("DATE");
+                    break;
+                case "Time":
+                    colDataType.setDataType("TIME");
+                    break;
+                case "DateTime":
+                    colDataType.setDataType("DATETIME");
+                    break;
+                case "Timestamp":
+                    colDataType.setDataType("TIMESTAMP");
                     break;
             }
         } else {

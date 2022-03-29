@@ -3,6 +3,7 @@ package io.graphoenix.graphql.generator.translator;
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.graphql.generator.document.InputValue;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -22,6 +23,11 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Types;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.ElementErrorType.EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 
 @ApplicationScoped
 public class ElementManager {
@@ -128,6 +135,16 @@ public class ElementManager {
             typeName = "String";
         } else if (typeElement.getQualifiedName().toString().equals(Boolean.class.getName())) {
             typeName = "Boolean";
+        } else if (typeElement.getQualifiedName().toString().equals(BigInteger.class.getName())) {
+            typeName = "BigInteger";
+        } else if (typeElement.getQualifiedName().toString().equals(BigDecimal.class.getName())) {
+            typeName = "BigDecimal";
+        } else if (typeElement.getQualifiedName().toString().equals(LocalDate.class.getName())) {
+            typeName = "Date";
+        } else if (typeElement.getQualifiedName().toString().equals(LocalTime.class.getName())) {
+            typeName = "Time";
+        } else if (typeElement.getQualifiedName().toString().equals(LocalDateTime.class.getName())) {
+            typeName = "DateTime";
         } else if (typeElement.getQualifiedName().toString().equals(Collection.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(List.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Set.class.getName())) {
@@ -137,7 +154,7 @@ public class ElementManager {
             } else if (element.getKind().equals(ElementKind.FIELD)) {
                 typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
             } else {
-                throw new RuntimeException();
+                throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
             }
         } else {
             typeName = typeElement.getSimpleName().toString();
@@ -176,6 +193,16 @@ public class ElementManager {
             typeName = "String";
         } else if (typeElement.getQualifiedName().toString().equals(Boolean.class.getName())) {
             typeName = "Boolean";
+        } else if (typeElement.getQualifiedName().toString().equals(BigInteger.class.getName())) {
+            typeName = "BigInteger";
+        } else if (typeElement.getQualifiedName().toString().equals(BigDecimal.class.getName())) {
+            typeName = "BigDecimal";
+        } else if (typeElement.getQualifiedName().toString().equals(LocalDate.class.getName())) {
+            typeName = "Date";
+        } else if (typeElement.getQualifiedName().toString().equals(LocalTime.class.getName())) {
+            typeName = "Time";
+        } else if (typeElement.getQualifiedName().toString().equals(LocalDateTime.class.getName())) {
+            typeName = "DateTime";
         } else if (typeElement.getQualifiedName().toString().equals(Collection.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(List.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Set.class.getName())) {
@@ -185,7 +212,7 @@ public class ElementManager {
             } else if (element.getKind().equals(ElementKind.FIELD)) {
                 typeName = "[".concat(elementToInputTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
             } else {
-                throw new RuntimeException();
+                throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
             }
         } else {
             typeName = typeElement.getSimpleName().toString().concat("Input");

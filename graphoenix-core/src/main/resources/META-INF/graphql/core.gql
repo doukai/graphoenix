@@ -3,6 +3,12 @@ scalar Int
 scalar Float
 scalar String
 scalar Boolean
+scalar BigInteger
+scalar BigDecimal
+scalar Date
+scalar Time
+scalar DateTime
+scalar Timestamp
 
 interface Meta {
     version: Int

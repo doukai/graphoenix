@@ -13,6 +13,11 @@ import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -112,6 +117,17 @@ public class TypeManager {
                     return ClassName.get(Float.class);
                 case "Boolean":
                     return ClassName.get(Boolean.class);
+                case "BigInteger":
+                    return TypeName.get(BigInteger.class);
+                case "BigDecimal":
+                    return TypeName.get(BigDecimal.class);
+                case "Date":
+                    return TypeName.get(LocalDate.class);
+                case "Time":
+                    return TypeName.get(LocalTime.class);
+                case "DateTime":
+                case "Timestamp":
+                    return TypeName.get(LocalDateTime.class);
                 default:
                     return ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName);
             }
