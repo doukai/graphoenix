@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     implementation project(":graphoenix-core")
-    implementation 'com.github.jsqlparser:jsqlparser:3.2'
+    implementation 'com.github.jsqlparser:jsqlparser:4.3'
     implementation 'com.github.vertical-blank:sql-formatter:2.0.3'
 
     annotationProcessor project(":graphoenix-inject")

@@ -17,6 +17,7 @@ import net.sf.jsqlparser.statement.SetStatement;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -98,7 +99,7 @@ public class DBValueUtil {
         String idVariableName = "@" + dbNameUtil.graphqlFieldNameToVariableName(typeName, idFieldName) + "_" + level + "_" + index;
         Function function = new Function();
         function.setName("LAST_INSERT_ID");
-        return new SetStatement(idVariableName, function);
+        return new SetStatement(idVariableName, Collections.singletonList(function));
     }
 
     public UserVariable createInsertIdUserVariable(String typeName, String idFieldName, int level, int index) {
