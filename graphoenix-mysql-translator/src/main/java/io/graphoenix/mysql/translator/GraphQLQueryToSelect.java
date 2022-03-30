@@ -308,13 +308,13 @@ public class GraphQLQueryToSelect {
             });
         }
         buildGroupArguments(plainSelect, fieldDefinitionContext, selectionContext, level);
-        subSelect.setSelectBody(plainSelect);
         if (!manager.fieldTypeIsList(fieldDefinitionContext.type())) {
             Limit limit = new Limit();
             limit.setOffset(new LongValue(0));
             limit.setRowCount(new LongValue(1));
             plainSelect.setLimit(limit);
         }
+        subSelect.setSelectBody(plainSelect);
         return subSelect;
     }
 
