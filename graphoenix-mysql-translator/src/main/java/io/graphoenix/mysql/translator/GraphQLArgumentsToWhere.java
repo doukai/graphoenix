@@ -3,7 +3,6 @@ package io.graphoenix.mysql.translator;
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
-import io.graphoenix.mysql.expression.IsExpression;
 import io.graphoenix.mysql.expression.JsonTable;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.mysql.utils.DBValueUtil;
@@ -1395,10 +1394,10 @@ public class GraphQLArgumentsToWhere {
 
     protected Optional<Expression> isBooleanExpression(Expression leftExpression, GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         if (valueWithVariableContext.variable() != null) {
-            IsExpression isExpression = new IsExpression();
-            isExpression.setLeftExpression(leftExpression);
-            isExpression.setRightExpression(dbValueUtil.variableToJdbcNamedParameter(valueWithVariableContext.variable()));
-            return Optional.of(isExpression);
+            EqualsTo equalsTo = new EqualsTo();
+            equalsTo.setLeftExpression(leftExpression);
+            equalsTo.setRightExpression(dbValueUtil.variableToJdbcNamedParameter(valueWithVariableContext.variable()));
+            return Optional.of(equalsTo);
         } else if (valueWithVariableContext.BooleanValue() != null) {
             IsBooleanExpression isBooleanExpression = new IsBooleanExpression();
             isBooleanExpression.setLeftExpression(leftExpression);
