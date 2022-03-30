@@ -182,8 +182,9 @@ public class JsonArrayAggregateFunction extends Function {
         return limit;
     }
 
-    public void setLimit(Limit limit) {
+    public Function setLimit(Limit limit) {
         this.limit = limit;
+        return this;
     }
 
     @Override

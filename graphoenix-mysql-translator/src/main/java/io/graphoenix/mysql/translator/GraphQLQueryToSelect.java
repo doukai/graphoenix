@@ -128,15 +128,16 @@ public class GraphQLQueryToSelect {
 
     protected PlainSelect objectSelectionToPlainSelect(String parentTypeName, String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, List<GraphqlParser.SelectionContext> selectionContextList, int level) {
         PlainSelect plainSelect = new PlainSelect();
+        Table table = typeToTable(typeName, level);
 
         Function function = jsonObjectFunction(
                 new ExpressionList(
                         selectionContextList.stream()
-                                .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, selectionContext))
-                                .filter(subSelectionContext -> manager.isNotInvokeField(typeName, selectionContext.field().name().getText()))
+                                .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
+                                .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
                                 .map(subSelectionContext ->
                                         new ExpressionList(
-                                                selectionToStringValueKey(selectionContext), selectionToExpression(typeName, selectionContext, level)
+                                                selectionToStringValueKey(subSelectionContext), selectionToExpression(typeName, subSelectionContext, level)
                                         )
                                 )
                                 .map(ExpressionList::getExpressions)
@@ -145,7 +146,7 @@ public class GraphQLQueryToSelect {
                 )
         );
         if (fieldDefinitionContext != null && manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-            function = jsonArrayAggFunction(new ExpressionList(function), selectionContext, fieldDefinitionContext, level);
+            function = jsonArrayAggFunction(new ExpressionList(function), table, selectionContext, fieldDefinitionContext);
         }
         SelectExpressionItem selectExpressionItem = new SelectExpressionItem(function);
         plainSelect.setSelectItems(Collections.singletonList(selectExpressionItem));
@@ -173,7 +174,6 @@ public class GraphQLQueryToSelect {
                         if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
                             Table withTable = typeToTable(mapWithObjectDefinition.get().name().getText(), level);
                             plainSelect.setFromItem(withTable);
-                            Table table = typeToTable(typeName, level);
 
                             Join join = new Join();
                             join.setLeft(true);
@@ -198,7 +198,6 @@ public class GraphQLQueryToSelect {
                             throw graphQLProblem;
                         }
                     } else {
-                        Table table = typeToTable(typeName, level);
                         plainSelect.setFromItem(table);
                         equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
                     }
@@ -215,7 +214,6 @@ public class GraphQLQueryToSelect {
                     throw graphQLProblem;
                 }
             } else {
-                Table table = typeToTable(typeName, level);
                 plainSelect.setFromItem(table);
             }
         }
@@ -227,7 +225,7 @@ public class GraphQLQueryToSelect {
                 .map(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
-                                return jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1));
+                                return jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1), manager.fieldTypeIsList(fieldDefinitionContext.type()));
                             } else {
                                 return fieldToExpression(typeName, fieldDefinitionContext, selectionContext, level);
                             }
@@ -245,26 +243,30 @@ public class GraphQLQueryToSelect {
         return function;
     }
 
-    protected Function jsonArrayAggFunction(ExpressionList expressionList, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
-        Function ifNull = new Function();
-        ifNull.setName("IFNULL");
-
+    protected Function jsonArrayAggFunction(ExpressionList expressionList, Table table, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         JsonArrayAggregateFunction jsonArrayAggregateFunction = new JsonArrayAggregateFunction();
+        jsonArrayAggregateFunction.setName("JSON_ARRAYAGG");
         jsonArrayAggregateFunction.setParameters(expressionList);
-        buildSortArguments(jsonArrayAggregateFunction, fieldDefinitionContext, selectionContext, level);
+        buildSortArguments(jsonArrayAggregateFunction, table, fieldDefinitionContext, selectionContext);
         buildPageArguments(jsonArrayAggregateFunction, fieldDefinitionContext, selectionContext);
-
-        Function jsonArray = new Function();
-        jsonArray.setName("JSON_ARRAY");
-
-        ifNull.setParameters(new ExpressionList(jsonArrayAggregateFunction, jsonArray));
-        return ifNull;
+        return jsonArrayAggregateFunction;
     }
 
-    protected Function jsonExtractFunction(Expression expression) {
+    protected Function jsonExtractFunction(Expression expression, boolean isList) {
         Function function = new Function();
         function.setName("JSON_EXTRACT");
-        function.setParameters(new ExpressionList(Arrays.asList(expression, new StringValue("$"))));
+        if (isList) {
+            Function ifNull = new Function();
+            ifNull.setName("IFNULL");
+
+            Function jsonArray = new Function();
+            jsonArray.setName("JSON_ARRAY");
+
+            ifNull.setParameters(new ExpressionList(expression, jsonArray));
+            function.setParameters(new ExpressionList(ifNull, new StringValue("$")));
+        } else {
+            function.setParameters(new ExpressionList(expression, new StringValue("$")));
+        }
         return function;
     }
 
@@ -376,9 +378,8 @@ public class GraphQLQueryToSelect {
         }
     }
 
-    protected void buildSortArguments(JsonArrayAggregateFunction jsonArrayAggregateFunction, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
+    protected void buildSortArguments(JsonArrayAggregateFunction jsonArrayAggregateFunction, Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext) {
         if (fieldDefinitionContext.argumentsDefinition() != null) {
-            String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                 Optional<GraphqlParser.InputValueDefinitionContext> orderByInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                         .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
@@ -395,7 +396,7 @@ public class GraphQLQueryToSelect {
                                                     if (enumValueContext.enumValueName().getText().equals("DESC")) {
                                                         orderByElement.setAsc(false);
                                                     }
-                                                    orderByElement.setExpression(fieldToColumn(typeToTable(typeName, level), objectFieldWithVariableContext));
+                                                    orderByElement.setExpression(fieldToColumn(table, objectFieldWithVariableContext));
                                                     return orderByElement;
                                                 }
                                         )
@@ -415,7 +416,7 @@ public class GraphQLQueryToSelect {
                         if (enumValueContext.enumValueName().getText().equals("DESC")) {
                             orderByElement.setAsc(false);
                         }
-                        orderByElement.setExpression(fieldToColumn(typeToTable(typeName, level), fieldDefinitionContext));
+                        orderByElement.setExpression(fieldToColumn(table, fieldDefinitionContext));
                         jsonArrayAggregateFunction.setOrderByElements(Collections.singletonList(orderByElement));
                     }
                 }
@@ -442,7 +443,7 @@ public class GraphQLQueryToSelect {
                                                     .collect(Collectors.toList())
                                     )
                             );
-                            plainSelect.setGroupByElement(groupByElement);
+                            plainSelect.setGroupByElement(groupByElement.withUsingBrackets(false));
                         }
                     }
             );
@@ -517,9 +518,9 @@ public class GraphQLQueryToSelect {
                     } else {
                         function = jsonArrayAggFunction(
                                 new ExpressionList(scalarFieldToExpression(withTable, mapWithToFieldDefinition.get())),
+                                withTable,
                                 selectionContext,
-                                fieldDefinitionContext,
-                                level
+                                mapWithToFieldDefinition.get()
                         );
                     }
                     plainSelect.setFromItem(withTable);
@@ -542,7 +543,7 @@ public class GraphQLQueryToSelect {
                     equalsTo.setRightExpression(fieldToColumn(typeToTable(typeName, level), fromFieldDefinition.get()));
                     plainSelect.setWhere(equalsTo);
                     subSelect.setSelectBody(plainSelect);
-                    return jsonExtractFunction(subSelect);
+                    return jsonExtractFunction(subSelect, true);
                 } else {
                     GraphQLProblem graphQLProblem = new GraphQLProblem();
                     if (mapWithObjectDefinition.isEmpty()) {
