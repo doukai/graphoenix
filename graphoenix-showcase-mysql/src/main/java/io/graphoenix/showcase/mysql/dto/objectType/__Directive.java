@@ -2,6 +2,7 @@ package io.graphoenix.showcase.mysql.dto.objectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -14,6 +15,7 @@ import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __Directive implements Meta {
   @Id
   private String name;
@@ -65,6 +67,8 @@ public class __Directive implements Meta {
   private Integer schemaIdMin;
 
   private __InputValue argsAggregate;
+
+  private __InputValueConnection argsConnection;
 
   public String getName() {
     return this.name;
@@ -252,5 +256,13 @@ public class __Directive implements Meta {
 
   public void setArgsAggregate(__InputValue argsAggregate) {
     this.argsAggregate = argsAggregate;
+  }
+
+  public __InputValueConnection getArgsConnection() {
+    return this.argsConnection;
+  }
+
+  public void setArgsConnection(__InputValueConnection argsConnection) {
+    this.argsConnection = argsConnection;
   }
 }

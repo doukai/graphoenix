@@ -35,10 +35,9 @@ public class Field {
 
     public Field addArguments(Set<InputValue> arguments) {
         if (this.arguments == null) {
-            this.arguments = arguments;
-        } else {
-            this.arguments.addAll(arguments);
+            this.arguments = new LinkedHashSet<>();
         }
+        this.arguments.addAll(arguments);
         return this;
     }
 

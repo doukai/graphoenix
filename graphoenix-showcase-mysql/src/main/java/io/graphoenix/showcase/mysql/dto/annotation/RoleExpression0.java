@@ -37,4 +37,6 @@ public @interface RoleExpression0 {
   UserExpressions1[] users() default {};
 
   UserExpressions1[] usersAggregate() default {};
+
+  UserConnectionExpressions1[] usersConnection() default {};
 }

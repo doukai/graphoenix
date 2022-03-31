@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -11,6 +12,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __SchemaInput {
   private String id;
 
@@ -40,10 +42,6 @@ public class __SchemaInput {
   @DefaultValue("\"__Schema\"")
   @NonNull
   private String __typename;
-
-  private __TypeInput typesAggregate;
-
-  private __DirectiveInput directivesAggregate;
 
   public String getId() {
     return this.id;
@@ -139,21 +137,5 @@ public class __SchemaInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
-  }
-
-  public __TypeInput getTypesAggregate() {
-    return this.typesAggregate;
-  }
-
-  public void setTypesAggregate(__TypeInput typesAggregate) {
-    this.typesAggregate = typesAggregate;
-  }
-
-  public __DirectiveInput getDirectivesAggregate() {
-    return this.directivesAggregate;
-  }
-
-  public void setDirectivesAggregate(__DirectiveInput directivesAggregate) {
-    this.directivesAggregate = directivesAggregate;
   }
 }

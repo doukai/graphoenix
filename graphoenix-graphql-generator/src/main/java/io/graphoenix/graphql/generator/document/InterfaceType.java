@@ -3,6 +3,7 @@ package io.graphoenix.graphql.generator.document;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class InterfaceType {
@@ -51,12 +52,9 @@ public class InterfaceType {
 
     public InterfaceType addFields(Set<Field> fields) {
         if (this.fields == null) {
-            this.fields = fields;
-        } else {
-            if (fields != null) {
-                this.fields.addAll(fields);
-            }
+            this.fields = new LinkedHashSet<>();
         }
+        this.fields.addAll(fields);
         return this;
     }
 

@@ -68,6 +68,8 @@ public @interface UserInput1 {
 
   String $rolesAggregate() default "";
 
+  String $rolesConnection() default "";
+
   String $userDetail2() default "";
 
   OrganizationInput2 organization() default @OrganizationInput2;
@@ -75,4 +77,6 @@ public @interface UserInput1 {
   RoleInput2[] roles() default {};
 
   RoleInput2 rolesAggregate() default @RoleInput2;
+
+  RoleConnectionInput2 rolesConnection() default @RoleConnectionInput2;
 }

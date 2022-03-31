@@ -6,6 +6,7 @@ import org.stringtemplate.v4.STGroupFile;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ObjectType {
 
@@ -45,8 +46,36 @@ public class ObjectType {
         return directives;
     }
 
-    public ObjectType setDirectives(Set<String> directives) {
-        this.directives = directives;
+    public ObjectType setStringDirectives(Set<String> directives) {
+        if (directives != null) {
+            this.directives = directives.stream().map(directive -> !directive.startsWith("@") ? "@".concat(directive) : directive).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        return this;
+    }
+
+    public ObjectType setDirectives(Set<Directive> directives) {
+        if (directives != null) {
+            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        return this;
+    }
+
+    public ObjectType addStringDirective(String directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        if (!directive.startsWith("@")) {
+            directive = "@".concat(directive);
+        }
+        this.directives.add(directive);
+        return this;
+    }
+
+    public ObjectType addDirective(Directive directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.add(directive.toString());
         return this;
     }
 

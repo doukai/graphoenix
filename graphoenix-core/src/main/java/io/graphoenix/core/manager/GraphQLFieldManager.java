@@ -122,6 +122,17 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
+    public boolean isConnectionField(String objectTypeName, String fieldName) {
+        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
+        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("connection"));
+    }
+
+    @Override
+    public boolean isNotConnectionField(String objectTypeName, String fieldName) {
+        return !isConnectionField(objectTypeName, fieldName);
+    }
+
+    @Override
     public void clear() {
         fieldDefinitionTree.clear();
         invokeFieldDefinitionTree.clear();

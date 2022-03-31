@@ -53,9 +53,13 @@ public @interface __FieldInput1 {
 
   String $argsAggregate() default "";
 
+  String $argsConnection() default "";
+
   __InputValueInput2[] args() default {};
 
   __TypeInput2 type() default @__TypeInput2;
 
   __InputValueInput2 argsAggregate() default @__InputValueInput2;
+
+  __InputValueConnectionInput2 argsConnection() default @__InputValueConnectionInput2;
 }

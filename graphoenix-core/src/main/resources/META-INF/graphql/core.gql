@@ -52,6 +52,13 @@ enum Function {
     AVG
 }
 
+type PageInfo @containerType {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String!
+    endCursor: String!
+}
+
 input IDExpression {
     opr: Operator = EQ
     val: ID
@@ -103,3 +110,7 @@ directive @invoke(
 directive @cursor on FIELD_DEFINITION
 
 directive @func(name: Function field: String) on FIELD_DEFINITION
+
+directive @containerType on OBJECT
+
+directive @connection(field: String agg: String) on FIELD_DEFINITION

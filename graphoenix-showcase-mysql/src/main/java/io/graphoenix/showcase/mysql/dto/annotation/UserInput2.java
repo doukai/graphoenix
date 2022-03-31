@@ -68,5 +68,7 @@ public @interface UserInput2 {
 
   String $rolesAggregate() default "";
 
+  String $rolesConnection() default "";
+
   String $userDetail2() default "";
 }

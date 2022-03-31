@@ -52,4 +52,6 @@ public @interface __FieldInput2 {
   String $__typename() default "";
 
   String $argsAggregate() default "";
+
+  String $argsConnection() default "";
 }

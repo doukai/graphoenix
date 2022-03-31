@@ -197,7 +197,8 @@ public class GraphQLArgumentsToWhere {
                                                            List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                            GraphqlParser.ArgumentsContext argumentsContext,
                                                            int level) {
-        Optional<GraphqlParser.ArgumentContext> argumentContext = inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
+        Optional<GraphqlParser.ArgumentContext> argumentContext = inputValueDefinitionContextList.stream()
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
                 .filter(inputValueDefinitionContext -> manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean"))
                 .findFirst()
                 .flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(argumentsContext, inputValueDefinitionContext));
@@ -213,7 +214,8 @@ public class GraphQLArgumentsToWhere {
                                                            List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                            GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
                                                            int level) {
-        Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> objectFieldWithVariableContext = inputValueDefinitionContextList.stream()
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
                 .filter(inputValueDefinitionContext -> manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean"))
                 .findFirst()
                 .flatMap(inputValueDefinitionContext -> manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext));
@@ -229,7 +231,8 @@ public class GraphQLArgumentsToWhere {
                                                            List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContextList,
                                                            GraphqlParser.ObjectValueContext objectValueContext,
                                                            int level) {
-        Optional<GraphqlParser.ObjectFieldContext> objectFieldContext = inputValueDefinitionContextList.stream().filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
+        Optional<GraphqlParser.ObjectFieldContext> objectFieldContext = inputValueDefinitionContextList.stream()
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(DEPRECATED_INPUT_NAME))
                 .filter(inputValueDefinitionContext -> manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean"))
                 .findFirst()
                 .flatMap(inputValueDefinitionContext -> manager.getObjectFieldFromInputValueDefinition(objectValueContext, inputValueDefinitionContext));

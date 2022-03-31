@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -11,6 +12,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class RoleInput {
   private String id;
 
@@ -26,8 +28,6 @@ public class RoleInput {
   @DefaultValue("\"Role\"")
   @NonNull
   private String __typename;
-
-  private UserInput usersAggregate;
 
   public String getId() {
     return this.id;
@@ -75,13 +75,5 @@ public class RoleInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
-  }
-
-  public UserInput getUsersAggregate() {
-    return this.usersAggregate;
-  }
-
-  public void setUsersAggregate(UserInput usersAggregate) {
-    this.usersAggregate = usersAggregate;
   }
 }

@@ -26,5 +26,9 @@ public interface IGraphQLFieldManager {
 
     boolean isNotFunctionField(String objectTypeName, String fieldName);
 
+    boolean isConnectionField(String objectTypeName, String fieldName);
+
+    boolean isNotConnectionField(String objectTypeName, String fieldName);
+
     void clear();
 }

@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -13,6 +14,7 @@ import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __Schema implements Meta {
   @Id
   private String id;
@@ -71,6 +73,10 @@ public class __Schema implements Meta {
   private __Type typesAggregate;
 
   private __Directive directivesAggregate;
+
+  private __TypeConnection typesConnection;
+
+  private __DirectiveConnection directivesConnection;
 
   public String getId() {
     return this.id;
@@ -282,5 +288,21 @@ public class __Schema implements Meta {
 
   public void setDirectivesAggregate(__Directive directivesAggregate) {
     this.directivesAggregate = directivesAggregate;
+  }
+
+  public __TypeConnection getTypesConnection() {
+    return this.typesConnection;
+  }
+
+  public void setTypesConnection(__TypeConnection typesConnection) {
+    this.typesConnection = typesConnection;
+  }
+
+  public __DirectiveConnection getDirectivesConnection() {
+    return this.directivesConnection;
+  }
+
+  public void setDirectivesConnection(__DirectiveConnection directivesConnection) {
+    this.directivesConnection = directivesConnection;
   }
 }

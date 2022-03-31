@@ -18,11 +18,11 @@ import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
 import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
+import io.graphoenix.spi.annotation.SchemaBean;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.Enum;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Input;
@@ -124,17 +124,17 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         }
 
         roundEnv.getElementsAnnotatedWith(Enum.class).stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getAnnotation(SchemaBean.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.ENUM))
                 .forEach(element -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) element).toString()));
 
         roundEnv.getElementsAnnotatedWith(Interface.class).stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getAnnotation(SchemaBean.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
                 .forEach(element -> {
                             manager.registerGraphQL(javaElementToInterface.buildInterface((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
-                                    .filter(subElement -> subElement.getAnnotation(Generated.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(SchemaBean.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
                                     .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
@@ -142,12 +142,12 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 );
 
         roundEnv.getElementsAnnotatedWith(Type.class).stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getAnnotation(SchemaBean.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> {
                             manager.registerGraphQL(javaElementToObject.buildObject((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
-                                    .filter(subElement -> subElement.getAnnotation(Generated.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(SchemaBean.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
                                     .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
@@ -155,12 +155,12 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 );
 
         roundEnv.getElementsAnnotatedWith(Input.class).stream()
-                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getAnnotation(SchemaBean.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> {
                             manager.registerGraphQL(javaElementToInputType.buildInputType((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
-                                    .filter(subElement -> subElement.getAnnotation(Generated.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(SchemaBean.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
                                     .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));

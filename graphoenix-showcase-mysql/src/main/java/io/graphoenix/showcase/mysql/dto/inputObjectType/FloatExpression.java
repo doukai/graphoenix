@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Operator;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Float;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import org.eclipse.microprofile.graphql.Input;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class FloatExpression {
   @DefaultValue("EQ")
   private Operator opr;

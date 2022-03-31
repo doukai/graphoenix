@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -12,6 +13,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __DirectiveInput {
   private String name;
 
@@ -38,8 +40,6 @@ public class __DirectiveInput {
   @DefaultValue("\"__Directive\"")
   @NonNull
   private String __typename;
-
-  private __InputValueInput argsAggregate;
 
   public String getName() {
     return this.name;
@@ -127,13 +127,5 @@ public class __DirectiveInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
-  }
-
-  public __InputValueInput getArgsAggregate() {
-    return this.argsAggregate;
-  }
-
-  public void setArgsAggregate(__InputValueInput argsAggregate) {
-    this.argsAggregate = argsAggregate;
   }
 }

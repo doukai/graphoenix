@@ -56,6 +56,8 @@ public @interface OrganizationExpression1 {
 
   UserExpressions2[] usersAggregate() default {};
 
+  UserConnectionExpressions2[] usersConnection() default {};
+
   UserExpressions2[] userByOrg() default {};
 
   OrganizationExpressions2[] parent() default {};

@@ -55,4 +55,6 @@ public @interface __DirectiveInput2 {
   String $__typename() default "";
 
   String $argsAggregate() default "";
+
+  String $argsConnection() default "";
 }

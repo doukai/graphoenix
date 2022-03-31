@@ -243,6 +243,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean isContainerType(String objectTypeName) {
+        return graphQLObjectManager.isContainerType(objectTypeName);
+    }
+
+    @Override
+    public boolean isNotContainerType(String objectTypeName) {
+        return graphQLObjectManager.isNotContainerType(objectTypeName);
+    }
+
+    @Override
     public boolean isInvokeField(String objectTypeName, String name) {
         return graphQLFieldManager.isInvokeField(objectTypeName, name);
     }
@@ -260,6 +270,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public boolean isNotFunctionField(String objectTypeName, String name) {
         return graphQLFieldManager.isNotFunctionField(objectTypeName, name);
+    }
+
+    @Override
+    public boolean isConnectionField(String objectTypeName, String name) {
+        return graphQLFieldManager.isConnectionField(objectTypeName, name);
+    }
+
+    @Override
+    public boolean isNotConnectionField(String objectTypeName, String name) {
+        return graphQLFieldManager.isNotConnectionField(objectTypeName, name);
     }
 
     @Override

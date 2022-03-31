@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -11,6 +12,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __FieldInput {
   private String id;
 
@@ -37,8 +39,6 @@ public class __FieldInput {
   @DefaultValue("\"__Field\"")
   @NonNull
   private String __typename;
-
-  private __InputValueInput argsAggregate;
 
   public String getId() {
     return this.id;
@@ -126,13 +126,5 @@ public class __FieldInput {
 
   public void set__Typename(String __typename) {
     this.__typename = __typename;
-  }
-
-  public __InputValueInput getArgsAggregate() {
-    return this.argsAggregate;
-  }
-
-  public void setArgsAggregate(__InputValueInput argsAggregate) {
-    this.argsAggregate = argsAggregate;
   }
 }

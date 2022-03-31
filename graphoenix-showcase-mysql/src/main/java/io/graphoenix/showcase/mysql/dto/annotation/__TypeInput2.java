@@ -65,4 +65,14 @@ public @interface __TypeInput2 {
   String $enumValuesAggregate() default "";
 
   String $inputFieldsAggregate() default "";
+
+  String $fieldsConnection() default "";
+
+  String $interfacesConnection() default "";
+
+  String $possibleTypesConnection() default "";
+
+  String $enumValuesConnection() default "";
+
+  String $inputFieldsConnection() default "";
 }

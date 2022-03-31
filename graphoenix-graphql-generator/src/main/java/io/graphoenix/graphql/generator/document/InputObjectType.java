@@ -50,10 +50,9 @@ public class InputObjectType {
 
     public InputObjectType addInputValues(Set<InputValue> inputValues) {
         if (this.inputValues == null) {
-            this.inputValues = inputValues;
-        } else {
-            this.inputValues.addAll(inputValues);
+            this.inputValues = new LinkedHashSet<>();
         }
+        this.inputValues.addAll(inputValues);
         return this;
     }
 

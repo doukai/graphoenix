@@ -7,9 +7,9 @@ type User @table(engine: "InnoDB") {
     disable: Boolean
     sex: Sex
     organizationId: Int
-    organization: Organization @map(from: "organizationId", to: "id")
-    roles: [Role!] @map(from: "id" with: {type: "UserRole", from: "userId", to: "roleId"} to: "id")
-    phones: [String] @map(from: "id" with: {type: "UserPhones", from: "userId", to: "phone"})
+    organization: Organization @map(from: "organizationId" to: "id")
+    roles: [Role!] @map(from: "id" with: {type: "UserRole", from: "userId" to: "roleId"} to: "id")
+    phones: [String] @map(from: "id" with: {type: "UserPhones" from: "userId" to: "phone"})
 }
 
 type UserPhones @table(engine: "InnoDB") {
@@ -32,7 +32,7 @@ type UserRole @table(engine: "InnoDB") {
 type Role @table(engine: "InnoDB") {
     id: ID @dataType(type: "int") @column(autoIncrement: true)
     name: String!
-    users: [User!] @map(from: "id" with: {type: "UserRole", from: "roleId", to: "userId"} to: "id")
+    users: [User!] @map(from: "id" with: {type: "UserRole" from: "roleId" to: "userId"} to: "id")
 }
 
 type Organization @table(engine: "InnoDB") {

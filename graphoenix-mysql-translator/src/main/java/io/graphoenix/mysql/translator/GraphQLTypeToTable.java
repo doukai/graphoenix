@@ -36,6 +36,7 @@ public class GraphQLTypeToTable {
 
     public Stream<String> createTablesSQL() {
         return manager.getObjects()
+                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&

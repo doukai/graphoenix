@@ -2,6 +2,7 @@ package io.graphoenix.showcase.mysql.dto.objectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -13,6 +14,7 @@ import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __DirectiveLocations implements Meta {
   @Id
   private String id;

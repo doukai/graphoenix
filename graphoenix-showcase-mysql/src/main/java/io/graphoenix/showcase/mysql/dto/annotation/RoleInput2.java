@@ -34,4 +34,6 @@ public @interface RoleInput2 {
   String $__typename() default "";
 
   String $usersAggregate() default "";
+
+  String $usersConnection() default "";
 }

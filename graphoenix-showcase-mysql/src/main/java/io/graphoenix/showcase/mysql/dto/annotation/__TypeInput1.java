@@ -66,6 +66,16 @@ public @interface __TypeInput1 {
 
   String $inputFieldsAggregate() default "";
 
+  String $fieldsConnection() default "";
+
+  String $interfacesConnection() default "";
+
+  String $possibleTypesConnection() default "";
+
+  String $enumValuesConnection() default "";
+
+  String $inputFieldsConnection() default "";
+
   __FieldInput2[] fields() default {};
 
   __TypeInput2[] interfaces() default {};
@@ -87,4 +97,14 @@ public @interface __TypeInput1 {
   __EnumValueInput2 enumValuesAggregate() default @__EnumValueInput2;
 
   __InputValueInput2 inputFieldsAggregate() default @__InputValueInput2;
+
+  __FieldConnectionInput2 fieldsConnection() default @__FieldConnectionInput2;
+
+  __TypeConnectionInput2 interfacesConnection() default @__TypeConnectionInput2;
+
+  __TypeConnectionInput2 possibleTypesConnection() default @__TypeConnectionInput2;
+
+  __EnumValueConnectionInput2 enumValuesConnection() default @__EnumValueConnectionInput2;
+
+  __InputValueConnectionInput2 inputFieldsConnection() default @__InputValueConnectionInput2;
 }

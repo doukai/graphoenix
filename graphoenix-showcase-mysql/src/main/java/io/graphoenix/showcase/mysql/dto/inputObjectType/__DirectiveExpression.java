@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import org.eclipse.microprofile.graphql.Input;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __DirectiveExpression {
   private IDExpression name;
 
@@ -32,8 +34,6 @@ public class __DirectiveExpression {
   private Boolean includeDeprecated;
 
   private StringExpression __typename;
-
-  private __InputValueExpression argsAggregate;
 
   @DefaultValue("AND")
   private Conditional cond;
@@ -126,14 +126,6 @@ public class __DirectiveExpression {
 
   public void set__Typename(StringExpression __typename) {
     this.__typename = __typename;
-  }
-
-  public __InputValueExpression getArgsAggregate() {
-    return this.argsAggregate;
-  }
-
-  public void setArgsAggregate(__InputValueExpression argsAggregate) {
-    this.argsAggregate = argsAggregate;
   }
 
   public Conditional getCond() {

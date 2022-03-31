@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.util.Collection;
@@ -9,6 +10,7 @@ import org.eclipse.microprofile.graphql.Input;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __TypeInterfacesExpression {
   private IDExpression id;
 

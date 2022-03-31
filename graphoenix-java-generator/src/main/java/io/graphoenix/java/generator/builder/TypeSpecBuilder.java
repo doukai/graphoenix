@@ -13,6 +13,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.java.generator.implementer.TypeManager;
+import io.graphoenix.spi.annotation.SchemaBean;
 import io.graphoenix.spi.annotation.TypeExpression;
 import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.annotation.TypeInput;
@@ -75,11 +76,17 @@ public class TypeSpecBuilder {
                 .build();
     }
 
+    private AnnotationSpec getSchemaBeanAnnotationSpec() {
+        return AnnotationSpec.builder(SchemaBean.class)
+                .build();
+    }
+
     public TypeSpec buildClass(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.classBuilder(objectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Type.class)
-                .addAnnotation(getGeneratedAnnotationSpec());
+                .addAnnotation(getGeneratedAnnotationSpec())
+                .addAnnotation(getSchemaBeanAnnotationSpec());
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(fieldDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(fieldDefinitionContext);
@@ -110,7 +117,8 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.classBuilder(inputObjectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Input.class)
-                .addAnnotation(getGeneratedAnnotationSpec());
+                .addAnnotation(getGeneratedAnnotationSpec())
+                .addAnnotation(getSchemaBeanAnnotationSpec());
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .forEach(inputValueDefinitionContext -> {
                             FieldSpec fieldSpec = buildField(inputValueDefinitionContext);
@@ -134,7 +142,8 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.enumBuilder(enumTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Enum.class)
-                .addAnnotation(getGeneratedAnnotationSpec());
+                .addAnnotation(getGeneratedAnnotationSpec())
+                .addAnnotation(getSchemaBeanAnnotationSpec());
         enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
                 .forEach(enumValueDefinitionContext -> builder.addEnumConstant(enumValueDefinitionContext.enumValue().enumValueName().getText()));
         if (enumTypeDefinitionContext.description() != null) {
@@ -153,7 +162,8 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.interfaceBuilder(interfaceTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Interface.class)
-                .addAnnotation(getGeneratedAnnotationSpec());
+                .addAnnotation(getGeneratedAnnotationSpec())
+                .addAnnotation(getSchemaBeanAnnotationSpec());
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
                 .forEach(fieldDefinitionContext -> {
                             FieldSpec fieldSpec = buildInterfaceField(fieldDefinitionContext);
@@ -180,7 +190,8 @@ public class TypeSpecBuilder {
     public TypeSpec buildAnnotation(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.annotationBuilder(directiveDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(getGeneratedAnnotationSpec());
+                .addAnnotation(getGeneratedAnnotationSpec())
+                .addAnnotation(getSchemaBeanAnnotationSpec());
         if (directiveDefinitionContext.argumentsDefinition() != null) {
             directiveDefinitionContext.argumentsDefinition().inputValueDefinition()
                     .forEach(inputValueDefinitionContext -> builder.addMethod(buildAnnotationMethod(inputValueDefinitionContext)));
@@ -215,7 +226,8 @@ public class TypeSpecBuilder {
     public TypeSpec buildAnnotation(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         TypeSpec.Builder builder = TypeSpec.annotationBuilder(inputObjectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(getGeneratedAnnotationSpec());
+                .addAnnotation(getGeneratedAnnotationSpec())
+                .addAnnotation(getSchemaBeanAnnotationSpec());
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
                 .stream().filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                 .forEach(inputValueDefinitionContext -> builder.addMethod(buildAnnotationMethod(inputValueDefinitionContext)));

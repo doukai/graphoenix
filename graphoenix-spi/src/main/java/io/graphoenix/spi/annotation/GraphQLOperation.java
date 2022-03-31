@@ -14,6 +14,4 @@ import java.lang.annotation.Target;
 public @interface GraphQLOperation {
 
     Class<? extends OperationDAO> operationDAO();
-
-    boolean useInject() default false;
 }

@@ -1,11 +1,13 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class MapWith {
   private String type;
 

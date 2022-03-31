@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -13,6 +14,7 @@ import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __Field implements Meta {
   @Id
   private String id;
@@ -78,6 +80,8 @@ public class __Field implements Meta {
   private String deprecationReasonMin;
 
   private __InputValue argsAggregate;
+
+  private __InputValueConnection argsConnection;
 
   public String getId() {
     return this.id;
@@ -321,5 +325,13 @@ public class __Field implements Meta {
 
   public void setArgsAggregate(__InputValue argsAggregate) {
     this.argsAggregate = argsAggregate;
+  }
+
+  public __InputValueConnection getArgsConnection() {
+    return this.argsConnection;
+  }
+
+  public void setArgsConnection(__InputValueConnection argsConnection) {
+    this.argsConnection = argsConnection;
   }
 }

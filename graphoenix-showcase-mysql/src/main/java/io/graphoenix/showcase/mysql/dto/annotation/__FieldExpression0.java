@@ -55,4 +55,6 @@ public @interface __FieldExpression0 {
   __TypeExpressions1[] type() default {};
 
   __InputValueExpressions1[] argsAggregate() default {};
+
+  __InputValueConnectionExpressions1[] argsConnection() default {};
 }

@@ -2,6 +2,7 @@ package io.graphoenix.showcase.mysql.dto.objectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.__TypeKind;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -14,6 +15,7 @@ import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __Type implements Meta {
   @Id
   @NonNull
@@ -85,6 +87,16 @@ public class __Type implements Meta {
   private __EnumValue enumValuesAggregate;
 
   private __InputValue inputFieldsAggregate;
+
+  private __FieldConnection fieldsConnection;
+
+  private __TypeConnection interfacesConnection;
+
+  private __TypeConnection possibleTypesConnection;
+
+  private __EnumValueConnection enumValuesConnection;
+
+  private __InputValueConnection inputFieldsConnection;
 
   public String getName() {
     return this.name;
@@ -352,5 +364,45 @@ public class __Type implements Meta {
 
   public void setInputFieldsAggregate(__InputValue inputFieldsAggregate) {
     this.inputFieldsAggregate = inputFieldsAggregate;
+  }
+
+  public __FieldConnection getFieldsConnection() {
+    return this.fieldsConnection;
+  }
+
+  public void setFieldsConnection(__FieldConnection fieldsConnection) {
+    this.fieldsConnection = fieldsConnection;
+  }
+
+  public __TypeConnection getInterfacesConnection() {
+    return this.interfacesConnection;
+  }
+
+  public void setInterfacesConnection(__TypeConnection interfacesConnection) {
+    this.interfacesConnection = interfacesConnection;
+  }
+
+  public __TypeConnection getPossibleTypesConnection() {
+    return this.possibleTypesConnection;
+  }
+
+  public void setPossibleTypesConnection(__TypeConnection possibleTypesConnection) {
+    this.possibleTypesConnection = possibleTypesConnection;
+  }
+
+  public __EnumValueConnection getEnumValuesConnection() {
+    return this.enumValuesConnection;
+  }
+
+  public void setEnumValuesConnection(__EnumValueConnection enumValuesConnection) {
+    this.enumValuesConnection = enumValuesConnection;
+  }
+
+  public __InputValueConnection getInputFieldsConnection() {
+    return this.inputFieldsConnection;
+  }
+
+  public void setInputFieldsConnection(__InputValueConnection inputFieldsConnection) {
+    this.inputFieldsConnection = inputFieldsConnection;
   }
 }

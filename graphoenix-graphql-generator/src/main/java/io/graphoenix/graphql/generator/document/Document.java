@@ -33,9 +33,8 @@ public class Document {
     public Document addDefinitions(Set<String> definitions) {
         if (this.definitions == null) {
             this.definitions = definitions;
-        } else {
-            this.definitions.addAll(definitions);
         }
+        this.definitions.addAll(definitions);
         return this;
     }
 

@@ -58,4 +58,6 @@ public @interface __DirectiveExpression0 {
   __InputValueExpressions1[] args() default {};
 
   __InputValueExpressions1[] argsAggregate() default {};
+
+  __InputValueConnectionExpressions1[] argsConnection() default {};
 }

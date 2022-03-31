@@ -52,4 +52,8 @@ public @interface __SchemaInput2 {
   String $typesAggregate() default "";
 
   String $directivesAggregate() default "";
+
+  String $typesConnection() default "";
+
+  String $directivesConnection() default "";
 }

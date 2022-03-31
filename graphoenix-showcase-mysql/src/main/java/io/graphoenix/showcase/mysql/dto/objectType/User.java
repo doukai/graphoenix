@@ -2,6 +2,7 @@ package io.graphoenix.showcase.mysql.dto.objectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -14,6 +15,7 @@ import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class User implements Meta {
   @Id
   private String id;
@@ -100,6 +102,8 @@ public class User implements Meta {
   private Integer organizationIdMin;
 
   private Role rolesAggregate;
+
+  private RoleConnection rolesConnection;
 
   private String userDetail2;
 
@@ -425,6 +429,14 @@ public class User implements Meta {
 
   public void setRolesAggregate(Role rolesAggregate) {
     this.rolesAggregate = rolesAggregate;
+  }
+
+  public RoleConnection getRolesConnection() {
+    return this.rolesConnection;
+  }
+
+  public void setRolesConnection(RoleConnection rolesConnection) {
+    this.rolesConnection = rolesConnection;
   }
 
   public String getUserDetail2() {

@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -10,6 +11,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
+@SchemaBean
 public class __TypePossibleTypesInput {
   private String id;
 

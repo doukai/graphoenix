@@ -50,6 +50,10 @@ public interface IGraphQLDocumentManager {
 
     boolean isOperation(String name);
 
+    boolean isContainerType(String objectTypeName);
+
+    boolean isNotContainerType(String objectTypeName);
+
     boolean isInvokeField(String objectTypeName, String name);
 
     boolean isNotInvokeField(String objectTypeName, String name);
@@ -57,6 +61,10 @@ public interface IGraphQLDocumentManager {
     boolean isFunctionField(String objectTypeName, String name);
 
     boolean isNotFunctionField(String objectTypeName, String name);
+
+    boolean isConnectionField(String objectTypeName, String name);
+
+    boolean isNotConnectionField(String objectTypeName, String name);
 
     GraphqlParser.SchemaDefinitionContext getSchema();
 

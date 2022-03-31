@@ -53,6 +53,10 @@ public @interface __SchemaInput0 {
 
   String $directivesAggregate() default "";
 
+  String $typesConnection() default "";
+
+  String $directivesConnection() default "";
+
   __TypeInput1[] types() default {};
 
   __TypeInput1 queryType() default @__TypeInput1;
@@ -66,4 +70,8 @@ public @interface __SchemaInput0 {
   __TypeInput1 typesAggregate() default @__TypeInput1;
 
   __DirectiveInput1 directivesAggregate() default @__DirectiveInput1;
+
+  __TypeConnectionInput1 typesConnection() default @__TypeConnectionInput1;
+
+  __DirectiveConnectionInput1 directivesConnection() default @__DirectiveConnectionInput1;
 }
