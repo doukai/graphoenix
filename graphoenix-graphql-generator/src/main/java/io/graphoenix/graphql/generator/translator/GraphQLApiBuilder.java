@@ -47,22 +47,19 @@ public class GraphQLApiBuilder {
                                 )
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
-                .setDirectives(
-                        Stream.of(new Directive()
-                                        .setName("invoke")
-                                        .addArgument(
-                                                new Argument()
-                                                        .setName("className")
-                                                        .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
-                                        )
-                                        .addArgument(
-                                                new Argument()
-                                                        .setName("methodName")
-                                                        .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
-                                        )
+                .addDirective(
+                        new Directive()
+                                .setName("invoke")
+                                .addArgument(
+                                        new Argument()
+                                                .setName("className")
+                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
                                 )
-                                .map(Directive::toString)
-                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                                .addArgument(
+                                        new Argument()
+                                                .setName("methodName")
+                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                )
                 );
     }
 
@@ -80,7 +77,7 @@ public class GraphQLApiBuilder {
                         .setDescription(elementManager.getDescriptionFromElement(executableElement))
                         .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
                         .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
-                        .setDirectives(
+                        .setStringDirectives(
                                 Stream.of(new Directive()
                                                 .setName("invoke")
                                                 .addArgument(

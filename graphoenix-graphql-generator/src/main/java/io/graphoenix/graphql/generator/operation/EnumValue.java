@@ -10,6 +10,10 @@ public class EnumValue {
 
     private String value;
 
+    public EnumValue(String value) {
+        this.value = value;
+    }
+
     public EnumValue(AnnotationValue value) {
         this.value = value.getValue().toString();
     }

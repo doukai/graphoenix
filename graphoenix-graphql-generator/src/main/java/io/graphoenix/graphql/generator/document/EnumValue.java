@@ -15,6 +15,12 @@ public class EnumValue {
         return name;
     }
 
+    public EnumValue() {}
+
+    public EnumValue(String name) {
+        this.name = name;
+    }
+
     public EnumValue setName(String name) {
         this.name = name;
         return this;
