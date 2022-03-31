@@ -174,18 +174,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -645,7 +645,8 @@ public class GraphQLMutationToStatements {
         );
 
         Stream<Statement> listObjectValueInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
-                .mapToObj(index -> objectValueWithVariableToInsertStatementStream(
+                .mapToObj(index ->
+                        objectValueWithVariableToInsertStatementStream(
                                 parentFieldDefinitionContext,
                                 parentIdValueExpression,
                                 fieldDefinitionContext,
@@ -664,7 +665,8 @@ public class GraphQLMutationToStatements {
                 .mapToObj(index ->
                         manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
                                 .flatMap(dbValueUtil::createIdValueExpression)
-                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index)))
+                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index))
+                )
                 .collect(Collectors.toList());
 
         Stream<Statement> deleteObjectTypeFieldRelationStatementStream = deleteObjectTypeFieldRelationStatementStream(
@@ -694,7 +696,8 @@ public class GraphQLMutationToStatements {
         );
 
         Stream<Statement> listObjectValueInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
-                .mapToObj(index -> objectValueToStatementStream(
+                .mapToObj(index ->
+                        objectValueToStatementStream(
                                 parentFieldDefinitionContext,
                                 parentIdValueExpression,
                                 fieldDefinitionContext,
@@ -713,7 +716,8 @@ public class GraphQLMutationToStatements {
                 .mapToObj(index ->
                         manager.getIDObjectField(fieldDefinitionContext.type(), arrayValueContext.value(index).objectValue())
                                 .flatMap(dbValueUtil::createIdValueExpression)
-                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index)))
+                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index))
+                )
                 .collect(Collectors.toList());
 
         Stream<Statement> deleteObjectTypeFieldRelationStatementStream = deleteObjectTypeFieldRelationStatementStream(
@@ -767,7 +771,8 @@ public class GraphQLMutationToStatements {
         );
 
         Stream<Insert> listValueInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
-                .mapToObj(index -> mapScalarOrEnumTypeFieldRelationInsertStream(
+                .mapToObj(index ->
+                        mapScalarOrEnumTypeFieldRelationInsertStream(
                                 parentFieldDefinitionContext,
                                 parentIdValueExpression,
                                 fieldDefinitionContext,
@@ -819,7 +824,8 @@ public class GraphQLMutationToStatements {
         );
 
         Stream<Insert> listValueInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
-                .mapToObj(index -> mapScalarOrEnumTypeFieldRelationInsertStream(
+                .mapToObj(index ->
+                        mapScalarOrEnumTypeFieldRelationInsertStream(
                                 parentFieldDefinitionContext,
                                 parentIdValueExpression,
                                 fieldDefinitionContext,
@@ -1275,7 +1281,6 @@ public class GraphQLMutationToStatements {
         if ((idObjectFieldWithVariable.isEmpty() || idObjectFieldWithVariable.get().valueWithVariable().NullValue() != null) && idFieldName.isPresent()) {
             return Stream.of(insert, dbValueUtil.createInsertIdSetStatement(typeName, idFieldName.get(), level, index));
         }
-
         return Stream.of(insert);
     }
 
@@ -1297,7 +1302,6 @@ public class GraphQLMutationToStatements {
         if ((idObjectField.isEmpty() || idObjectField.get().value().NullValue() != null) && idFieldName.isPresent()) {
             return Stream.of(insert, dbValueUtil.createInsertIdSetStatement(typeName, idFieldName.get(), level, index));
         }
-
         return Stream.of(insert);
     }
 
@@ -1420,19 +1424,22 @@ public class GraphQLMutationToStatements {
         jsonTable.setJson(jdbcNamedParameter);
         jsonTable.setPath(new StringValue("$[*]"));
 
-        List<ColumnDefinition> columnDefinitions = fieldList.stream().map(subFieldDefinitionContext -> {
-            ColumnDefinition columnDefinition = new ColumnDefinition();
-            columnDefinition.setColumnName(dbNameUtil.graphqlFieldNameToColumnName(subFieldDefinitionContext.name().getText()));
-            columnDefinition.setColDataType(buildJsonColumnDataType(subFieldDefinitionContext.type()));
-            columnDefinition.setColumnSpecs(Arrays.asList("PATH", "'$." + subFieldDefinitionContext.name().getText() + "'"));
-            return columnDefinition;
-        }).collect(Collectors.toList());
+        List<ColumnDefinition> columnDefinitions = fieldList.stream()
+                .map(subFieldDefinitionContext -> {
+                            ColumnDefinition columnDefinition = new ColumnDefinition();
+                            columnDefinition.setColumnName(dbNameUtil.graphqlFieldNameToColumnName(subFieldDefinitionContext.name().getText()));
+                            columnDefinition.setColDataType(buildJsonColumnDataType(subFieldDefinitionContext.type()));
+                            columnDefinition.addColumnSpecs("PATH", "'$." + subFieldDefinitionContext.name().getText() + "'");
+                            return columnDefinition;
+                        }
+                )
+                .collect(Collectors.toList());
 
         jsonTable.setColumnDefinitions(columnDefinitions);
         jsonTable.setAlias(new Alias(valueWithVariableContext.variable().name().getText()));
 
         PlainSelect body = new PlainSelect();
-        body.setSelectItems(Collections.singletonList(new AllColumns()));
+        body.addSelectItems(new AllColumns());
         body.setFromItem(jsonTable);
         select.setSelectBody(body);
         return select;
@@ -1497,12 +1504,12 @@ public class GraphQLMutationToStatements {
         ColumnDefinition columnDefinition = new ColumnDefinition();
         columnDefinition.setColumnName(columnName);
         columnDefinition.setColDataType(buildJsonColumnDataType(fieldDefinitionContext.type()));
-        columnDefinition.setColumnSpecs(Arrays.asList("PATH", "'$'"));
+        columnDefinition.addColumnSpecs("PATH", "'$'");
         jsonTable.setColumnDefinitions(Collections.singletonList(columnDefinition));
         jsonTable.setAlias(new Alias(valueWithVariableContext.variable().name().getText()));
 
         PlainSelect body = new PlainSelect();
-        body.setSelectItems(Arrays.asList(new SelectExpressionItem(parentColumnExpression), new SelectExpressionItem(new Column(columnName))));
+        body.addSelectItems(new SelectExpressionItem(parentColumnExpression), new SelectExpressionItem(new Column(columnName)));
         body.setFromItem(jsonTable);
         select.setSelectBody(body);
         return select;
@@ -1632,7 +1639,8 @@ public class GraphQLMutationToStatements {
             insert.setUseDuplicate(true);
             insert.setDuplicateUpdateColumns(columnList);
             List<Expression> values = columnList.stream()
-                    .map(this::buildValuesFunction).collect(Collectors.toList());
+                    .map(this::buildValuesFunction)
+                    .collect(Collectors.toList());
             insert.setDuplicateUpdateExpressionList(values);
         }
         return insert;
@@ -1656,12 +1664,15 @@ public class GraphQLMutationToStatements {
         if (useDuplicate && columnList.size() > 0) {
             insert.setUseDuplicate(true);
             insert.setDuplicateUpdateColumns(columnList);
-            List<Expression> values = columnList.stream().map(column -> {
-                Function function = new Function();
-                function.setName("VALUES");
-                function.setParameters(new ExpressionList(Collections.singletonList(column)));
-                return function;
-            }).collect(Collectors.toList());
+            List<Expression> values = columnList.stream()
+                    .map(column -> {
+                                Function function = new Function();
+                                function.setName("VALUES");
+                                function.setParameters(new ExpressionList(Collections.singletonList(column)));
+                                return function;
+                            }
+                    )
+                    .collect(Collectors.toList());
             insert.setDuplicateUpdateExpressionList(values);
         }
         return insert;
@@ -1673,8 +1684,8 @@ public class GraphQLMutationToStatements {
                                       Expression where) {
         Update update = new Update();
         update.setTable(table);
-        update.setColumns(columnList);
-        update.setExpressions(expressionList);
+        update.addColumns(columnList);
+        update.addExpressions(expressionList);
         update.setWhere(where);
         return update;
     }
@@ -1690,7 +1701,6 @@ public class GraphQLMutationToStatements {
                                                   Column selectColumn,
                                                   Column idColumn,
                                                   Expression idFieldValueExpression) {
-
         SubSelect subSelect = new SubSelect();
         PlainSelect subBody = new PlainSelect();
         subBody.setFromItem(table);

@@ -100,6 +100,12 @@ public class GraphQLTypeToTable {
                                         fieldDefinitionContext.name().getText()
                                 )
                         )
+                        .filter(fieldDefinitionContext ->
+                                manager.isNotConnectionField(
+                                        objectTypeDefinitionContext.name().getText(),
+                                        fieldDefinitionContext.name().getText()
+                                )
+                        )
                         .map(this::createColumn)
                         .filter(Optional::isPresent)
                         .map(Optional::get)

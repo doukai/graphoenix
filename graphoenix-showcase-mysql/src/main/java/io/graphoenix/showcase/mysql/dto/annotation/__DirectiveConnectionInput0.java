@@ -11,6 +11,10 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @TypeInput
 public @interface __DirectiveConnectionInput0 {
+  int totalCount() default 0;
+
+  String $totalCount() default "";
+
   String $pageInfo() default "";
 
   String $edges() default "";
