@@ -219,11 +219,10 @@ public class GraphQLQueryToSelect {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getObjectFieldDefinition(typeName, selectionContext.field().name().getText())
                 .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
 
-        StringValue selectionKey = selectionToStringValueKey(selectionContext);
-
-        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         if (manager.isConnectionField(typeName, fieldDefinitionContext.name().getText())) {
-
+            if (selectionContext.field().selectionSet() == null || selectionContext.field().selectionSet().selection().size() == 0) {
+                throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(selectionContext.getText()));
+            }
             Optional<GraphqlParser.DirectiveContext> connection = fieldDefinitionContext.directives().directive().stream()
                     .filter(directiveContext -> directiveContext.name().getText().equals("connection"))
                     .findFirst();
@@ -248,72 +247,105 @@ public class GraphQLQueryToSelect {
                             .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, connectionAggFieldName.get())));
                     String connectionFieldTypeName = manager.getFieldTypeName(connectionFieldDefinitionContext.type());
 
-                    StringValue connectionFieldKey = fieldDefinitionToStringValueKey(connectionFieldDefinitionContext);
-                    StringValue connectionAggFieldKey = fieldDefinitionToStringValueKey(connectionAggFieldDefinitionContext);
-
                     return Stream.concat(
-                            Stream.of(
-                                    connectionFieldKey,
-                                    jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionFieldDefinitionContext, buildConnectionSelection(selectionContext, connectionFieldDefinitionContext), level + 1), true)
-                            ),
-                            buildConnectionAggSelection(typeName, selectionContext, connectionAggFieldDefinitionContext).stream()
+                            buildConnectionSelection(typeName, selectionContext, connectionFieldDefinitionContext).stream()
+                                    .flatMap(connectionSelectionContext ->
+                                            Stream.of(
+                                                    fieldDefinitionToStringValueKey(connectionFieldDefinitionContext),
+                                                    jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionFieldDefinitionContext, connectionSelectionContext, level + 1), true)
+                                            )
+                                    ),
+                            buildConnectionTotalSelection(typeName, selectionContext, connectionAggFieldDefinitionContext).stream()
                                     .flatMap(aggSelectionContext ->
                                             Stream.of(
-                                                    connectionAggFieldKey,
+                                                    fieldDefinitionToStringValueKey(connectionAggFieldDefinitionContext),
                                                     jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionAggFieldDefinitionContext, aggSelectionContext, level + 1), false)
                                             )
                                     )
                     );
+                } else {
+                    if (connectionFieldName.isEmpty()) {
+                        throw new GraphQLProblem(CONNECTION_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
+                    } else {
+                        throw new GraphQLProblem(CONNECTION_AGG_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
+                    }
                 }
             }
-            return Stream.empty();
-        } else if (manager.isObject(fieldTypeName)) {
-            return Stream.of(
-                    selectionKey,
-                    jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1), manager.fieldTypeIsList(fieldDefinitionContext.type()))
-            );
+            throw new GraphQLProblem(CONNECTION_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
         } else {
-            return Stream.of(
-                    selectionKey,
-                    fieldToExpression(typeName, fieldDefinitionContext, selectionContext, level)
-            );
+            StringValue selectionKey = selectionToStringValueKey(selectionContext);
+            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+            if (manager.isObject(fieldTypeName)) {
+                return Stream.of(
+                        selectionKey,
+                        jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1), manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                );
+            } else {
+                return Stream.of(
+                        selectionKey,
+                        fieldToExpression(typeName, fieldDefinitionContext, selectionContext, level)
+                );
+            }
         }
     }
 
-    protected GraphqlParser.SelectionContext buildConnectionSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext) {
-
-        GraphqlParser.SelectionContext edges = selectionContext.field().selectionSet().selection().stream()
+    protected Optional<GraphqlParser.SelectionContext> buildConnectionSelection(String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext) {
+        return selectionContext.field().selectionSet().selection().stream()
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("edges"))
                 .findFirst()
-                .orElseThrow();
-
-        GraphqlParser.SelectionContext node = edges.field().selectionSet().selection().stream()
-                .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("node"))
-                .findFirst()
-                .orElseThrow();
-
-        String arguments = selectionContext.field().arguments().argument().stream()
-                .map(argumentContext -> {
-                            if (argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) {
-                                return argumentContext.name().getText().concat(":") + (Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1);
-                            } else {
-                                return argumentContext.getText();
+                .map(edges -> {
+                            if (edges.field().selectionSet() == null || edges.field().selectionSet().selection().size() == 0) {
+                                throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(edges.getText()));
                             }
+                            return Stream.concat(
+                                            edges.field().selectionSet().selection().stream()
+                                                    .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("cursor"))
+                                                    .findFirst()
+                                                    .map(cursor ->
+                                                            manager.getFieldByDirective(typeName, "cursor")
+                                                                    .findFirst()
+                                                                    .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
+                                                                    .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)))
+                                                                    .name()
+                                                                    .getText()
+                                                    )
+                                                    .stream(),
+                                            edges.field().selectionSet().selection().stream()
+                                                    .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("node"))
+                                                    .flatMap(node -> {
+                                                                if (node.field().selectionSet() == null || node.field().selectionSet().selection().size() == 0) {
+                                                                    throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(node.getText()));
+                                                                }
+                                                                return node.field().selectionSet().selection().stream().map(RuleContext::getText);
+                                                            }
+                                                    )
+                                    )
+                                    .collect(Collectors.joining(" "));
                         }
                 )
-                .collect(Collectors.joining(" "));
-
-        return DOCUMENT_UTIL.graphqlToSelection(
-                String.format("%s(%s)%s",
-                        connectionFieldDefinitionContext.name().getText(),
-                        arguments,
-                        node.field().selectionSet().getText()
-                )
-        );
+                .map(selectionSet -> {
+                            String arguments = selectionContext.field().arguments().argument().stream()
+                                    .map(argumentContext -> {
+                                                if (argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) {
+                                                    return argumentContext.name().getText().concat(":") + (Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1);
+                                                } else {
+                                                    return argumentContext.getText();
+                                                }
+                                            }
+                                    )
+                                    .collect(Collectors.joining(" "));
+                            return DOCUMENT_UTIL.graphqlToSelection(
+                                    String.format("%s(%s){%s}",
+                                            connectionFieldDefinitionContext.name().getText(),
+                                            arguments,
+                                            selectionSet
+                                    )
+                            );
+                        }
+                );
     }
 
-    protected Optional<GraphqlParser.SelectionContext> buildConnectionAggSelection(String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionAggFieldDefinitionContext) {
-
+    protected Optional<GraphqlParser.SelectionContext> buildConnectionTotalSelection(String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionAggFieldDefinitionContext) {
         Optional<GraphqlParser.SelectionContext> totalCount = selectionContext.field().selectionSet().selection().stream()
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("totalCount"))
                 .findFirst();
@@ -326,10 +358,10 @@ public class GraphQLQueryToSelect {
         if (totalCount.isPresent()) {
             return Optional.of(
                     DOCUMENT_UTIL.graphqlToSelection(
-                            String.format("%s(%s){totalCount:%s}",
+                            String.format("%s(%s){%s}",
                                     connectionAggFieldDefinitionContext.name().getText(),
                                     arguments,
-                                    manager.getObjectTypeIDFieldName(typeName).orElseThrow().concat("Count")
+                                    manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName))).concat("Count")
                             )
                     )
             );
@@ -378,7 +410,7 @@ public class GraphQLQueryToSelect {
                                                    int level) {
         SubSelect subSelect = new SubSelect();
         if (selectionContext.field().selectionSet() == null || selectionContext.field().selectionSet().selection().size() == 0) {
-            throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+            throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(selectionContext.getText()));
         }
         PlainSelect plainSelect = objectSelectionToPlainSelect(parentTypeName, typeName, selectionContext, fieldDefinitionContext, selectionContext.field().selectionSet().selection(), level);
         buildCursorArguments(plainSelect, typeName, selectionContext, fieldDefinitionContext, level);

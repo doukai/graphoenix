@@ -49,6 +49,9 @@ public enum GraphQLErrorType {
 
     FUNC_NAME_NOT_EXIST(-81, "@func name argument not exist in function filed: %s"),
     FUNC_FIELD_NOT_EXIST(-82, "@func field argument not exist in function filed: %s"),
+    CONNECTION_NOT_EXIST(-83, "@connection not exist in filed: %s"),
+    CONNECTION_FIELD_NOT_EXIST(-84, "@connection field argument not exist in connection filed: %s"),
+    CONNECTION_AGG_FIELD_NOT_EXIST(-85, "@connection agg argument not exist in connection filed: %s"),
 
     SYNTAX_ERROR(-91, "graphql syntax error: %s line: %s column %s"),
 

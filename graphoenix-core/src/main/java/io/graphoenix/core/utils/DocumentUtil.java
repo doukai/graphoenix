@@ -111,7 +111,7 @@ public enum DocumentUtil {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
                 Logger.error(e);
-                throw new GraphQLProblem(SYNTAX_ERROR.bind(offendingSymbol, line, charPositionInLine), line, charPositionInLine);
+                throw new GraphQLProblem(SYNTAX_ERROR.bind(msg, line, charPositionInLine), line, charPositionInLine);
             }
         });
         return lexer;
@@ -125,7 +125,7 @@ public enum DocumentUtil {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
                 Logger.error(e);
-                throw new GraphQLProblem(SYNTAX_ERROR.bind(offendingSymbol, line, charPositionInLine), line, charPositionInLine);
+                throw new GraphQLProblem(SYNTAX_ERROR.bind(msg, line, charPositionInLine), line, charPositionInLine);
             }
         });
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
