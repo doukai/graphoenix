@@ -20,6 +20,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
+import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
@@ -135,16 +136,7 @@ public class GraphQLQueryToSelect {
                         selectionContextList.stream()
                                 .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
                                 .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
-                                .flatMap(subSelectionContext ->
-                                        selectionToExpressionStream(typeName, subSelectionContext, level)
-                                                .map(tuple2 ->
-                                                        new ExpressionList(
-                                                                tuple2._1(), tuple2._2()
-                                                        )
-                                                )
-                                )
-                                .map(ExpressionList::getExpressions)
-                                .flatMap(Collection::stream)
+                                .flatMap(subSelectionContext -> selectionToExpressionStream(typeName, subSelectionContext, level))
                                 .collect(Collectors.toList())
                 )
         );
@@ -223,7 +215,7 @@ public class GraphQLQueryToSelect {
         return plainSelect;
     }
 
-    protected Stream<Tuple2<Expression, Expression>> selectionToExpressionStream(String typeName, GraphqlParser.SelectionContext selectionContext, int level) {
+    protected Stream<Expression> selectionToExpressionStream(String typeName, GraphqlParser.SelectionContext selectionContext, int level) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getObjectFieldDefinition(typeName, selectionContext.field().name().getText())
                 .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
 
@@ -259,32 +251,31 @@ public class GraphQLQueryToSelect {
                     StringValue connectionFieldKey = fieldDefinitionToStringValueKey(connectionFieldDefinitionContext);
                     StringValue connectionAggFieldKey = fieldDefinitionToStringValueKey(connectionAggFieldDefinitionContext);
 
-                    return Stream.of(
-                            Tuple.of(
+                    return Stream.concat(
+                            Stream.of(
                                     connectionFieldKey,
                                     jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionFieldDefinitionContext, buildConnectionSelection(selectionContext, connectionFieldDefinitionContext), level + 1), true)
                             ),
-                            Tuple.of(
-                                    connectionAggFieldKey,
-                                    jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionAggFieldDefinitionContext, buildConnectionAggSelection(typeName, selectionContext, connectionAggFieldDefinitionContext), level + 1), false)
-                            )
+                            buildConnectionAggSelection(typeName, selectionContext, connectionAggFieldDefinitionContext).stream()
+                                    .flatMap(aggSelectionContext ->
+                                            Stream.of(
+                                                    connectionAggFieldKey,
+                                                    jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionAggFieldDefinitionContext, aggSelectionContext, level + 1), false)
+                                            )
+                                    )
                     );
                 }
             }
             return Stream.empty();
         } else if (manager.isObject(fieldTypeName)) {
             return Stream.of(
-                    Tuple.of(
-                            selectionKey,
-                            jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1), manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                    )
+                    selectionKey,
+                    jsonExtractFunction(objectSelectionToSubSelect(typeName, fieldTypeName, fieldDefinitionContext, selectionContext, level + 1), manager.fieldTypeIsList(fieldDefinitionContext.type()))
             );
         } else {
             return Stream.of(
-                    Tuple.of(
-                            selectionKey,
-                            fieldToExpression(typeName, fieldDefinitionContext, selectionContext, level)
-                    )
+                    selectionKey,
+                    fieldToExpression(typeName, fieldDefinitionContext, selectionContext, level)
             );
         }
     }
@@ -301,48 +292,49 @@ public class GraphQLQueryToSelect {
                 .findFirst()
                 .orElseThrow();
 
+        String arguments = selectionContext.field().arguments().argument().stream()
+                .map(argumentContext -> {
+                            if (argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) {
+                                return argumentContext.name().getText().concat(":") + (Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1);
+                            } else {
+                                return argumentContext.getText();
+                            }
+                        }
+                )
+                .collect(Collectors.joining(" "));
+
         return DOCUMENT_UTIL.graphqlToSelection(
-                String.format("%s%s%s",
+                String.format("%s(%s)%s",
                         connectionFieldDefinitionContext.name().getText(),
-                        selectionContext.field().arguments().getText(),
+                        arguments,
                         node.field().selectionSet().getText()
                 )
         );
     }
 
-    protected GraphqlParser.SelectionContext buildConnectionAggSelection(String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionAggFieldDefinitionContext) {
-        List<Tuple2<String, String>> fieldNameList = new ArrayList<>();
+    protected Optional<GraphqlParser.SelectionContext> buildConnectionAggSelection(String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionAggFieldDefinitionContext) {
 
-        selectionContext.field().selectionSet().selection().stream()
+        Optional<GraphqlParser.SelectionContext> totalCount = selectionContext.field().selectionSet().selection().stream()
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("totalCount"))
-                .findFirst()
-                .ifPresent(subSelectionContext ->
-                        fieldNameList.add(Tuple.of(manager.getObjectTypeIDFieldName(typeName).orElseThrow().concat("Count"), "totalCount"))
-                );
+                .findFirst();
 
-        selectionContext.field().selectionSet().selection().stream()
-                .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("pageInfo"))
-                .flatMap(subSelectionContext -> subSelectionContext.field().selectionSet().selection().stream())
-                .forEach(subSelectionContext -> {
-                            GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(typeName, "cursor").findFirst()
-                                    .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
-                                    .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
-                            if (subSelectionContext.field().name().getText().equals("hasPreviousPage")) {
-                                fieldNameList.add(Tuple.of(cursorFieldDefinitionContext.name().getText().concat("Min"), "cursorMin"));
-                            }
-                            if (subSelectionContext.field().name().getText().equals("hasNextPage")) {
-                                fieldNameList.add(Tuple.of(cursorFieldDefinitionContext.name().getText().concat("Max"), "cursorMax"));
-                            }
-                        }
-                );
+        String arguments = selectionContext.field().arguments().argument().stream()
+                .filter(argumentContext -> !argumentContext.name().getText().equals(FIRST_INPUT_NAME) && !argumentContext.name().getText().equals(LAST_INPUT_NAME))
+                .map(RuleContext::getText)
+                .collect(Collectors.joining(" "));
 
-        return DOCUMENT_UTIL.graphqlToSelection(
-                String.format("%s%s{%s}",
-                        connectionAggFieldDefinitionContext.name().getText(),
-                        selectionContext.field().arguments().getText(),
-                        fieldNameList.stream().map(tuple2 -> tuple2._2().concat(":").concat(tuple2._1())).collect(Collectors.joining(" "))
-                )
-        );
+        if (totalCount.isPresent()) {
+            return Optional.of(
+                    DOCUMENT_UTIL.graphqlToSelection(
+                            String.format("%s(%s){totalCount:%s}",
+                                    connectionAggFieldDefinitionContext.name().getText(),
+                                    arguments,
+                                    manager.getObjectTypeIDFieldName(typeName).orElseThrow().concat("Count")
+                            )
+                    )
+            );
+        }
+        return Optional.empty();
     }
 
     protected Function jsonObjectFunction(ExpressionList expressionList) {
