@@ -20,24 +20,27 @@ public class JsonTable extends TableFunction {
         return json;
     }
 
-    public void setJson(Expression json) {
+    public JsonTable setJson(Expression json) {
         this.json = json;
+        return this;
     }
 
     public StringValue getPath() {
         return path;
     }
 
-    public void setPath(StringValue path) {
+    public JsonTable setPath(StringValue path) {
         this.path = path;
+        return this;
     }
 
     public List<ColumnDefinition> getColumnDefinitions() {
         return columnDefinitions;
     }
 
-    public void setColumnDefinitions(List<ColumnDefinition> columnDefinitions) {
+    public JsonTable setColumnDefinitions(List<ColumnDefinition> columnDefinitions) {
         this.columnDefinitions = columnDefinitions;
+        return this;
     }
 
     @Override
