@@ -64,14 +64,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.SORT_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLQueryToSelect {
@@ -266,7 +259,7 @@ public class GraphQLQueryToSelect {
                 throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(selectionContext.getText()));
             }
             Optional<GraphqlParser.DirectiveContext> connection = fieldDefinitionContext.directives().directive().stream()
-                    .filter(directiveContext -> directiveContext.name().getText().equals("connection"))
+                    .filter(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME))
                     .findFirst();
 
             if (connection.isPresent()) {
@@ -676,7 +669,7 @@ public class GraphQLQueryToSelect {
         Optional<GraphqlParser.FieldDefinitionContext> functionFieldDefinitionContext = Optional.empty();
         if (fieldDefinitionContext.directives() != null) {
             functionFieldDefinitionContext = fieldDefinitionContext.directives().directive().stream()
-                    .filter(directiveContext -> directiveContext.name().getText().equals("func"))
+                    .filter(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME))
                     .flatMap(directiveContext -> directiveContext.arguments().argument().stream()
                             .filter(argumentContext -> argumentContext.name().getText().equals("field"))
                             .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
@@ -710,7 +703,7 @@ public class GraphQLQueryToSelect {
                     Function function;
 
                     Optional<GraphqlParser.DirectiveContext> func = fieldDefinitionContext.directives().directive().stream()
-                            .filter(directiveContext -> directiveContext.name().getText().equals("func"))
+                            .filter(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME))
                             .findFirst();
 
                     if (func.isPresent()) {
@@ -791,7 +784,7 @@ public class GraphQLQueryToSelect {
             Table table = typeToTable(typeName, level);
             if (functionFieldDefinitionContext.isPresent()) {
                 Optional<GraphqlParser.DirectiveContext> func = fieldDefinitionContext.directives().directive().stream()
-                        .filter(directiveContext -> directiveContext.name().getText().equals("func"))
+                        .filter(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME))
                         .findFirst();
 
                 if (func.isPresent()) {

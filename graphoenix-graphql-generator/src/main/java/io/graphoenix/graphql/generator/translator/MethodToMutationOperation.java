@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
+import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 
 @ApplicationScoped
 public class MethodToMutationOperation {
@@ -165,7 +166,7 @@ public class MethodToMutationOperation {
                 .map(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
-                                return fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + "Input");
+                                return fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName.concat(INPUT_SUFFIX));
                             } else {
                                 return fieldDefinitionContext.type().getText();
                             }

@@ -19,8 +19,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.OBJECT_SELECTION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class ConnectionBuilder {
@@ -39,7 +38,7 @@ public class ConnectionBuilder {
                     .orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
 
             Optional<GraphqlParser.DirectiveContext> connection = fieldDefinitionContext.directives().directive().stream()
-                    .filter(directiveContext -> directiveContext.name().getText().equals("connection"))
+                    .filter(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME))
                     .findFirst();
 
             if (connection.isPresent()) {

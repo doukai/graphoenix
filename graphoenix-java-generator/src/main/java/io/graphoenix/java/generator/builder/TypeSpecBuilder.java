@@ -50,6 +50,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.spi.constant.Hammurabi.EXPRESSION_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 
 @ApplicationScoped
 public class TypeSpecBuilder {
@@ -592,7 +594,7 @@ public class TypeSpecBuilder {
             if (object.isPresent()) {
                 return CodeBlock.of(
                         "@$T",
-                        ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + "Input" + layer)
+                        ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText().concat(INPUT_SUFFIX) + layer)
                 );
             }
         }
@@ -699,7 +701,7 @@ public class TypeSpecBuilder {
 
     public TypeSpec ObjectTypeToInputExpressionAnnotation(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, int layer) {
 
-        TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expression" + layer)
+        TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + EXPRESSION_SUFFIX + layer)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(
                         AnnotationSpec.builder(Retention.class)
@@ -809,7 +811,7 @@ public class TypeSpecBuilder {
                                     .addMethod(
                                             MethodSpec.methodBuilder("value")
                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                    .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + "Expression" + layer)))
+                                                    .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + EXPRESSION_SUFFIX + layer)))
                                                     .defaultValue("$L", "{}")
                                                     .build()
                                     );
@@ -833,7 +835,7 @@ public class TypeSpecBuilder {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .map(objectTypeDefinitionContext -> {
-                            TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Input" + layer)
+                            TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText().concat(INPUT_SUFFIX) + layer)
                                     .addModifiers(Modifier.PUBLIC)
                                     .addAnnotation(
                                             AnnotationSpec.builder(Retention.class)
@@ -885,8 +887,8 @@ public class TypeSpecBuilder {
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                                                                 .returns(
                                                                         manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
-                                                                                ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input" + (layer + 1))) :
-                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()) + "Input" + (layer + 1))
+                                                                                ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
+                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
                                                                 )
                                                                 .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
                                                                 .build()

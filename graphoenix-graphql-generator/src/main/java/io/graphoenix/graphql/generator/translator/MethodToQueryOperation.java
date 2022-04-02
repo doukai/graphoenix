@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.ElementErrorType.*;
 import static io.graphoenix.core.error.GraphQLErrorType.*;
+import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 
 @ApplicationScoped
 public class MethodToQueryOperation {
@@ -365,7 +366,7 @@ public class MethodToQueryOperation {
                 .map(fieldDefinitionContext -> {
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                             if (manager.isObject(fieldTypeName)) {
-                                return fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName + "Input");
+                                return fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName.concat(INPUT_SUFFIX));
                             } else {
                                 return fieldDefinitionContext.type().getText();
                             }

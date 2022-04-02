@@ -8,7 +8,7 @@ import org.tinylog.Logger;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVES;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLFieldManager implements IGraphQLFieldManager {
@@ -113,7 +113,7 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     @Override
     public boolean isFunctionField(String objectTypeName, String fieldName) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("func"));
+        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME));
     }
 
     @Override
@@ -124,7 +124,7 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     @Override
     public boolean isConnectionField(String objectTypeName, String fieldName) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("connection"));
+        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME));
     }
 
     @Override

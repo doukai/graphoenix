@@ -148,20 +148,20 @@ public class DocumentBuilder {
             objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
         }
         if (buildField) {
-            objectType.addField(buildTypeNamefield(objectTypeDefinitionContext));
+            objectType.addField(buildTypeNameField(objectTypeDefinitionContext));
             objectType.addFields(buildFunctionFieldList(objectTypeDefinitionContext));
             objectType.addFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                             .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                             .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                            .map(this::buildListObjectAggregatefield)
+                            .map(this::buildListObjectAggregateField)
                             .collect(Collectors.toList())
             );
             objectType.addFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                             .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                             .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                            .map(this::buildListObjectConnectionfield)
+                            .map(this::buildListObjectConnectionField)
                             .collect(Collectors.toList())
             );
         }
@@ -235,8 +235,8 @@ public class DocumentBuilder {
                                             .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                             );
 
-                    field.addArgument(new InputValue().setName("orderBy").setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ORDER_BY.toString())))
-                            .addArgument(new InputValue().setName("groupBy").setTypeName("[String!]"));
+                    field.addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ORDER_BY.toString())))
+                            .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"));
                 }
             }
         } else if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
@@ -258,14 +258,14 @@ public class DocumentBuilder {
                                         .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                         );
 
-                field.addArgument(new InputValue().setName("sort").setTypeName("Sort"));
+                field.addArgument(new InputValue().setName(SORT_INPUT_NAME).setTypeName("Sort"));
             }
         }
         return field;
     }
 
-    public Field buildListObjectAggregatefield(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        Field field = new Field().setName(fieldDefinitionContext.name().getText().concat("Aggregate"))
+    public Field buildListObjectAggregateField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        Field field = new Field().setName(fieldDefinitionContext.name().getText().concat(AGGREGATE_SUFFIX))
                 .setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .setStringDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
 
@@ -274,13 +274,13 @@ public class DocumentBuilder {
         return field;
     }
 
-    public Field buildListObjectConnectionfield(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        Field field = new Field().setName(fieldDefinitionContext.name().getText().concat("Connection"))
-                .setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat("Connection"))
+    public Field buildListObjectConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        Field field = new Field().setName(fieldDefinitionContext.name().getText().concat(CONNECTION_SUFFIX))
+                .setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(CONNECTION_SUFFIX))
                 .addDirective(new Directive()
-                        .setName("connection")
+                        .setName(CONNECTION_DIRECTIVE_NAME)
                         .addArgument(new Argument().setName("field").setValueWithVariable(new StringValue(fieldDefinitionContext.name().getText())))
-                        .addArgument(new Argument().setName("agg").setValueWithVariable(new StringValue(fieldDefinitionContext.name().getText().concat("Aggregate"))))
+                        .addArgument(new Argument().setName("agg").setValueWithVariable(new StringValue(fieldDefinitionContext.name().getText().concat(AGGREGATE_SUFFIX))))
                 );
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> fieldObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
@@ -288,7 +288,7 @@ public class DocumentBuilder {
         return field;
     }
 
-    public Field buildTypeNamefield(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    public Field buildTypeNameField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return new Field().setName("__typename")
                 .setTypeName("String")
                 .setArguments(new LinkedHashSet<>())
@@ -369,8 +369,8 @@ public class DocumentBuilder {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
-                .addArgument(new InputValue().setName("orderBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())))
-                .addArgument(new InputValue().setName("groupBy").setTypeName("[String!]"));
+                .addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())))
+                .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"));
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"))
@@ -390,13 +390,13 @@ public class DocumentBuilder {
     }
 
     public Field buildSchemaTypeFieldConnection(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
-        Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("Connection"))
-                .setTypeName(objectTypeDefinitionContext.name().getText().concat("Connection"))
+        Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat(CONNECTION_SUFFIX))
+                .setTypeName(objectTypeDefinitionContext.name().getText().concat(CONNECTION_SUFFIX))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
-                .addArgument(new InputValue().setName("orderBy").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())))
-                .addArgument(new InputValue().setName("groupBy").setTypeName("[String!]"))
+                .addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())))
+                .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"))
                 .addDirective(new Directive()
-                        .setName("connection")
+                        .setName(CONNECTION_DIRECTIVE_NAME)
                         .addArgument(new Argument().setName("field").setValueWithVariable(new StringValue(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))))
                         .addArgument(new Argument().setName("agg").setValueWithVariable(new StringValue(getSchemaFieldName(objectTypeDefinitionContext))))
                 );
@@ -432,7 +432,7 @@ public class DocumentBuilder {
                     .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                    .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith("Aggregate"))
+                    .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                     .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                     .filter(fieldDefinitionContext -> manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())))
                     .map(fieldDefinitionContext -> fieldToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
@@ -442,7 +442,7 @@ public class DocumentBuilder {
                     .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                     .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                    .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith("Aggregate"))
+                    .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                     .map(fieldDefinitionContext -> fieldToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
@@ -458,8 +458,8 @@ public class DocumentBuilder {
                     .setTypeName(fieldDefinitionContext.type().getText()
                             .replace(fieldTypeName, fieldTypeName.concat(manager.isObject(fieldTypeName) ? InputType.INPUT.toString() : "")));
         } else if (inputType.equals(InputType.EXPRESSION)) {
-            if (fieldDefinitionContext.name().getText().equals("isDeprecated")) {
-                return new InputValue().setName("includeDeprecated").setTypeName("Boolean").setDefaultValue("false");
+            if (fieldDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME)) {
+                return new InputValue().setName(DEPRECATED_INPUT_NAME).setTypeName("Boolean").setDefaultValue("false");
             }
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldTypeName.concat(fieldTypeName.equals("Boolean") ? "" : InputType.EXPRESSION.toString()));
@@ -644,7 +644,7 @@ public class DocumentBuilder {
     }
 
     private enum InputType {
-        EXPRESSION("Expression"), INPUT("Input"), ORDER_BY("OrderBy"), CONNECTION("Connection"), EDGE("Edge");
+        EXPRESSION(EXPRESSION_SUFFIX), INPUT(INPUT_SUFFIX), ORDER_BY(ORDER_BY_SUFFIX), CONNECTION(CONNECTION_SUFFIX), EDGE(EDGE_SUFFIX);
 
         private final String suffix;
 
@@ -677,7 +677,7 @@ public class DocumentBuilder {
                     .setTypeName(returnTypeName)
                     .addDirective(
                             new Directive()
-                                    .setName("func")
+                                    .setName(FUNC_DIRECTIVE_NAME)
                                     .addArgument(
                                             new Argument()
                                                     .setName("name")

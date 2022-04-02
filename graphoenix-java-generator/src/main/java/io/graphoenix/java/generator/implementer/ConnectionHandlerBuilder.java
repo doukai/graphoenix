@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.spi.constant.Hammurabi.*;
+
 @ApplicationScoped
 public class ConnectionHandlerBuilder {
 
@@ -87,7 +89,7 @@ public class ConnectionHandlerBuilder {
 
     private List<MethodSpec> buildTypeConnectionMethods() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals("PageInfo"))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(this::buildTypeConnectionMethod).collect(Collectors.toList());
     }
 
@@ -107,8 +109,8 @@ public class ConnectionHandlerBuilder {
             builder.addParameter(ClassName.get(GraphqlParser.SelectionContext.class), "selectionContext");
         }
 
-        if (objectTypeDefinitionContext.name().getText().endsWith("Connection")) {
-            String typeName = objectTypeDefinitionContext.name().getText().substring(0, objectTypeDefinitionContext.name().getText().length() - "Connection".length());
+        if (objectTypeDefinitionContext.name().getText().endsWith(CONNECTION_SUFFIX)) {
+            String typeName = objectTypeDefinitionContext.name().getText().substring(0, objectTypeDefinitionContext.name().getText().length() - CONNECTION_SUFFIX.length());
             builder.beginControlFlow("if (selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
                     .addStatement("jsonElement.getAsJsonObject().add(selectionContext.field().name().getText(), builder.build(jsonElement, typeName, selectionContext))")
                     .beginControlFlow("for ($T subSelectionContext : selectionContext.field().selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
@@ -119,7 +121,7 @@ public class ConnectionHandlerBuilder {
                     .beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", "edges")
                     .addStatement("jsonElement.getAsJsonObject().get(selectionContext.field().name().getText()).getAsJsonObject().get($S).getAsJsonArray().forEach(item -> $L(item, $S, subSelectionContext))",
                             "edges",
-                            getObjectMethodName(typeName.concat("Edge")),
+                            getObjectMethodName(typeName.concat(EDGE_SUFFIX)),
                             objectTypeDefinitionContext.name().getText()
                     )
                     .endControlFlow()
@@ -145,40 +147,40 @@ public class ConnectionHandlerBuilder {
                         );
             }
 
-            manager.getFields(objectTypeDefinitionContext.name().getText())
+            List<GraphqlParser.FieldDefinitionContext> objectFieldList = manager.getFields(objectTypeDefinitionContext.name().getText())
                     .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                    .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                    .forEach(fieldDefinitionContext -> {
-                                builder.beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
-                                if (manager.isConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText())) {
-                                    builder.addStatement("$L(jsonElement, $S, subSelectionContext)",
-                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                            objectTypeDefinitionContext.name().getText()
-                                    );
-                                } else {
-                                    builder.addStatement("$L(jsonElement.getAsJsonObject().get($S), $S, subSelectionContext)",
-                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                            fieldDefinitionContext.name().getText(),
-                                            objectTypeDefinitionContext.name().getText()
-                                    );
-                                }
-                                builder.endControlFlow();
-                            }
-                    );
+                    .collect(Collectors.toList());
 
-            manager.getFields(objectTypeDefinitionContext.name().getText())
-                    .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                    .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                    .forEach(fieldDefinitionContext ->
-                            builder.beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText())
-                                    .addStatement("jsonElement.getAsJsonObject().get($S).getAsJsonArray().forEach(item -> $L(item, $S, subSelectionContext))",
-                                            fieldDefinitionContext.name().getText(),
-                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                            objectTypeDefinitionContext.name().getText()
-                                    )
-                                    .endControlFlow()
-                                    .build()
+            int index = 0;
+            for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : objectFieldList) {
+                if (index == 0) {
+                    builder.beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+                } else {
+                    builder.nextControlFlow("else if (subSelectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+                }
+                if (manager.isConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText())) {
+                    builder.addStatement("$L(jsonElement, $S, subSelectionContext)",
+                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                            objectTypeDefinitionContext.name().getText()
                     );
+                } else if (!manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                    builder.addStatement("$L(jsonElement.getAsJsonObject().get($S), $S, subSelectionContext)",
+                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                            fieldDefinitionContext.name().getText(),
+                            objectTypeDefinitionContext.name().getText()
+                    );
+                } else {
+                    builder.addStatement("jsonElement.getAsJsonObject().get($S).getAsJsonArray().forEach(item -> $L(item, $S, subSelectionContext))",
+                            fieldDefinitionContext.name().getText(),
+                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                            objectTypeDefinitionContext.name().getText()
+                    );
+                }
+                if (index == objectFieldList.size() - 1) {
+                    builder.endControlFlow();
+                }
+                index++;
+            }
             builder.endControlFlow()
                     .endControlFlow();
         }

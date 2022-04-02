@@ -37,6 +37,8 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.ElementErrorType.EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 
 @ApplicationScoped
 public class ElementManager {
@@ -64,7 +66,7 @@ public class ElementManager {
         return manager.getFields(typeName)
                 .filter(fieldDefinitionContext -> manager.isNotFunctionField(typeName, fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(typeName, fieldDefinitionContext.name().getText()))
-                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith("Aggregate"))
+                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .filter(fieldDefinitionContext -> level < layers ||
                         level == layers && (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 );
@@ -216,7 +218,7 @@ public class ElementManager {
                 throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
             }
         } else {
-            typeName = typeElement.getSimpleName().toString().concat("Input");
+            typeName = typeElement.getSimpleName().toString().concat(INPUT_SUFFIX);
         }
 
         if (element.getAnnotation(NonNull.class) != null) {

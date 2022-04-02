@@ -109,63 +109,69 @@ public class SelectionFilterBuilder {
                 )
                 .addStatement("String selectionName = selectionContext.field().alias() == null ? selectionContext.field().name().getText() : selectionContext.field().alias().name().getText()");
 
-        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
-                .forEach(fieldDefinitionContext -> {
-                            String fieldGetterMethodName = typeManager.getFieldGetterMethodName(fieldDefinitionContext);
-                            String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
-                            builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
-
-                            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                                builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class))
-                                        .beginControlFlow("if ($L.$L() != null)",
-                                                typeParameterName,
-                                                fieldGetterMethodName
-                                        );
-                                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item))",
-                                            typeParameterName,
-                                            fieldGetterMethodName
-                                    );
-                                } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item.name()))",
-                                            typeParameterName,
-                                            fieldGetterMethodName
-                                    );
-                                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add($L(item, selectionContext.field().selectionSet())))",
-                                            typeParameterName,
-                                            fieldGetterMethodName,
-                                            fieldParameterName
-                                    );
-                                }
-                                builder.addStatement("jsonObject.add(selectionName, jsonArray)")
-                                        .nextControlFlow("else")
-                                        .addStatement("jsonObject.add(selectionName, $T.INSTANCE)", ClassName.get(JsonNull.class))
-                                        .endControlFlow();
-                            } else {
-                                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("jsonObject.addProperty(selectionName, $L.$L())",
-                                            typeParameterName,
-                                            fieldGetterMethodName
-                                    );
-                                } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("jsonObject.addProperty(selectionName, $L.$L() == null ? null : $L.$L().name())",
-                                            typeParameterName,
-                                            fieldGetterMethodName,
-                                            typeParameterName,
-                                            fieldGetterMethodName
-                                    );
-                                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                                    builder.addStatement("jsonObject.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",
-                                            fieldParameterName,
-                                            typeParameterName,
-                                            fieldGetterMethodName
-                                    );
-                                }
-                            }
-                            builder.endControlFlow();
-                        }
-                );
+        int index = 0;
+        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition();
+        for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
+            String fieldGetterMethodName = typeManager.getFieldGetterMethodName(fieldDefinitionContext);
+            String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
+            if (index == 0) {
+                builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+            } else {
+                builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+            }
+            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class))
+                        .beginControlFlow("if ($L.$L() != null)",
+                                typeParameterName,
+                                fieldGetterMethodName
+                        );
+                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item))",
+                            typeParameterName,
+                            fieldGetterMethodName
+                    );
+                } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item.name()))",
+                            typeParameterName,
+                            fieldGetterMethodName
+                    );
+                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add($L(item, selectionContext.field().selectionSet())))",
+                            typeParameterName,
+                            fieldGetterMethodName,
+                            fieldParameterName
+                    );
+                }
+                builder.addStatement("jsonObject.add(selectionName, jsonArray)")
+                        .nextControlFlow("else")
+                        .addStatement("jsonObject.add(selectionName, $T.INSTANCE)", ClassName.get(JsonNull.class))
+                        .endControlFlow();
+            } else {
+                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("jsonObject.addProperty(selectionName, $L.$L())",
+                            typeParameterName,
+                            fieldGetterMethodName
+                    );
+                } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("jsonObject.addProperty(selectionName, $L.$L() == null ? null : $L.$L().name())",
+                            typeParameterName,
+                            fieldGetterMethodName,
+                            typeParameterName,
+                            fieldGetterMethodName
+                    );
+                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("jsonObject.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",
+                            fieldParameterName,
+                            typeParameterName,
+                            fieldGetterMethodName
+                    );
+                }
+            }
+            if (index == fieldDefinitionContextList.size() - 1) {
+                builder.endControlFlow();
+            }
+            index++;
+        }
         builder.endControlFlow()
                 .addStatement("return jsonObject")
                 .endControlFlow()
