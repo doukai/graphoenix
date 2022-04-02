@@ -283,14 +283,14 @@ public class GraphQLQueryToSelect {
                     String connectionFieldTypeName = manager.getFieldTypeName(connectionFieldDefinitionContext.type());
 
                     return Stream.concat(
-                            buildConnectionSelection(typeName, selectionContext, connectionFieldDefinitionContext).stream()
+                            buildConnectionSelection(selectionContext, connectionFieldDefinitionContext).stream()
                                     .flatMap(connectionSelectionContext ->
                                             Stream.of(
                                                     fieldDefinitionToStringValueKey(connectionFieldDefinitionContext),
                                                     jsonExtractFunction(objectSelectionToSubSelect(typeName, connectionFieldTypeName, connectionFieldDefinitionContext, connectionSelectionContext, level + 1), true)
                                             )
                                     ),
-                            buildConnectionTotalSelection(typeName, selectionContext, connectionAggFieldDefinitionContext).stream()
+                            buildConnectionTotalSelection(selectionContext, connectionAggFieldDefinitionContext).stream()
                                     .flatMap(aggSelectionContext ->
                                             Stream.of(
                                                     fieldDefinitionToStringValueKey(connectionAggFieldDefinitionContext),
@@ -324,7 +324,8 @@ public class GraphQLQueryToSelect {
         }
     }
 
-    protected Optional<GraphqlParser.SelectionContext> buildConnectionSelection(String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext) {
+    protected Optional<GraphqlParser.SelectionContext> buildConnectionSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext) {
+        String fieldTypeName = manager.getFieldTypeName(connectionFieldDefinitionContext.type());
         return selectionContext.field().selectionSet().selection().stream()
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("edges"))
                 .findFirst()
@@ -338,10 +339,10 @@ public class GraphQLQueryToSelect {
                                             .findFirst()
                                             .map(cursor ->
                                                     new Field(
-                                                            manager.getFieldByDirective(typeName, "cursor")
+                                                            manager.getFieldByDirective(fieldTypeName, "cursor")
                                                                     .findFirst()
-                                                                    .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
-                                                                    .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)))
+                                                                    .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
+                                                                    .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)))
                                                                     .name()
                                                                     .getText()
                                                     )
@@ -384,7 +385,8 @@ public class GraphQLQueryToSelect {
                 );
     }
 
-    protected Optional<GraphqlParser.SelectionContext> buildConnectionTotalSelection(String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionAggFieldDefinitionContext) {
+    protected Optional<GraphqlParser.SelectionContext> buildConnectionTotalSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext connectionAggFieldDefinitionContext) {
+        String fieldTypeName = manager.getFieldTypeName(connectionAggFieldDefinitionContext.type());
         Optional<GraphqlParser.SelectionContext> totalCount = selectionContext.field().selectionSet().selection().stream()
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("totalCount"))
                 .findFirst();
@@ -399,7 +401,7 @@ public class GraphQLQueryToSelect {
                     DOCUMENT_UTIL.graphqlToSelection(
                             new Field(connectionAggFieldDefinitionContext.name().getText())
                                     .setArguments(arguments)
-                                    .addField(new Field(manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName))).concat("Count")))
+                                    .addField(new Field(manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName))).concat("Count")))
                                     .toString()
                     )
             );

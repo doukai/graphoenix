@@ -34,10 +34,9 @@ public class ConnectionBuilder {
     public JsonElement build(JsonElement jsonElement, String typeName, GraphqlParser.SelectionContext selectionContext) {
         JsonObject connectionObject = new JsonObject();
         if (selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0) {
-            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, selectionContext.field().name().getText())
+            GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext = manager.getField(typeName, selectionContext.field().name().getText())
                     .orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
-
-            Optional<GraphqlParser.DirectiveContext> connection = fieldDefinitionContext.directives().directive().stream()
+            Optional<GraphqlParser.DirectiveContext> connection = connectionFieldDefinitionContext.directives().directive().stream()
                     .filter(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME))
                     .findFirst();
 
@@ -55,16 +54,21 @@ public class ConnectionBuilder {
                         .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
 
                 if (connectionFieldName.isPresent() && connectionAggFieldName.isPresent()) {
-                    String cursorFieldName = manager.getFieldByDirective(typeName, "cursor")
+                    String fieldName = selectionContext.field().name().getText().substring(0, selectionContext.field().name().getText().length() - CONNECTION_SUFFIX.length());
+                    GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, fieldName)
+                            .orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, fieldName)));
+                    String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                    String cursorFieldName = manager.getFieldByDirective(fieldTypeName, "cursor")
                             .findFirst()
-                            .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
-                            .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)))
+                            .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
+                            .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)))
                             .name()
                             .getText();
+
                     for (GraphqlParser.SelectionContext connectionSelectionContext : selectionContext.field().selectionSet().selection()) {
                         switch (connectionSelectionContext.field().name().getText()) {
                             case "totalCount":
-                                String idFieldName = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
+                                String idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
                                 connectionObject.add("totalCount", jsonElement.getAsJsonObject().get(connectionAggFieldName.get()).getAsJsonObject().get(idFieldName.concat("Count")));
                                 break;
                             case "edges":
@@ -150,13 +154,13 @@ public class ConnectionBuilder {
                     }
                 } else {
                     if (connectionFieldName.isEmpty()) {
-                        throw new GraphQLProblem(CONNECTION_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
+                        throw new GraphQLProblem(CONNECTION_FIELD_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
                     } else {
-                        throw new GraphQLProblem(CONNECTION_AGG_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
+                        throw new GraphQLProblem(CONNECTION_AGG_FIELD_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
                     }
                 }
             } else {
-                throw new GraphQLProblem(CONNECTION_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
+                throw new GraphQLProblem(CONNECTION_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
             }
         }
         return connectionObject;
