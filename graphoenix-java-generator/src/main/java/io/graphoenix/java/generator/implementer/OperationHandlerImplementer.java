@@ -161,6 +161,14 @@ public class OperationHandlerImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ConnectionHandler")),
+                                "connectionHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")),
                                 "selectionFilter",
                                 Modifier.PRIVATE,
@@ -205,12 +213,15 @@ public class OperationHandlerImplementer {
 
     private MethodSpec buildOperationMethod(OperationType type) {
         String operationName;
+        String operationTypeName;
         switch (type) {
             case QUERY:
                 operationName = "query";
+                operationTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLProblem(QUERY_TYPE_NOT_EXIST));
                 break;
             case MUTATION:
                 operationName = "mutation";
+                operationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem(MUTATION_TYPE_NOT_EXIST));
                 break;
             default:
                 throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
@@ -229,7 +240,7 @@ public class OperationHandlerImplementer {
                         operationName,
                         ClassName.get(JsonElement.class)
                 )
-                .addStatement("return result.map(jsonElement -> invoke(jsonElement, operationDefinitionContext))")
+                .addStatement("return result.map(jsonElement -> invoke(connectionHandler.get().$L(jsonElement,operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName))
                 .build();
     }
 
@@ -332,12 +343,14 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLVariablesProcessor.class)), "variablesProcessor")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)), "operationHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")), "invokeHandler")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ConnectionHandler")), "connectionHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")), "selectionFilter")
                 .addStatement("this.gsonBuilder = new $T()", ClassName.get(GsonBuilder.class))
                 .addStatement("this.manager = manager")
                 .addStatement("this.variablesProcessor = variablesProcessor")
                 .addStatement("this.operationHandler = operationHandler")
                 .addStatement("this.invokeHandler = invokeHandler")
+                .addStatement("this.connectionHandler = connectionHandler")
                 .addStatement("this.selectionFilter = selectionFilter");
 
         invokeMethods.stream()
