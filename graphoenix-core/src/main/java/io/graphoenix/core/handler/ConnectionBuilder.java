@@ -125,7 +125,7 @@ public class ConnectionBuilder {
                                                     if (isFirst) {
                                                         pageInfo.add("startCursor", nodeArray.get(0).getAsJsonObject().get(cursorFieldName));
                                                     } else {
-                                                        pageInfo.add("startCursor", nodeArray.get(nodeArray.size() - 2).getAsJsonObject().get(cursorFieldName));
+                                                        pageInfo.add("startCursor", nodeArray.get(nodeArray.size() - 1).getAsJsonObject().get(cursorFieldName));
                                                     }
                                                 } else {
                                                     pageInfo.add("startCursor", JsonNull.INSTANCE);
@@ -134,9 +134,9 @@ public class ConnectionBuilder {
                                             case "endCursor":
                                                 if (nodeArray != null && nodeArray.size() > 2) {
                                                     if (isFirst) {
-                                                        pageInfo.add("startCursor", nodeArray.get(nodeArray.size() - 2).getAsJsonObject().get(cursorFieldName));
+                                                        pageInfo.add("endCursor", nodeArray.get(nodeArray.size() - 2).getAsJsonObject().get(cursorFieldName));
                                                     } else {
-                                                        pageInfo.add("startCursor", nodeArray.get(0).getAsJsonObject().get(cursorFieldName));
+                                                        pageInfo.add("endCursor", nodeArray.get(1).getAsJsonObject().get(cursorFieldName));
                                                     }
                                                 } else {
                                                     pageInfo.add("endCursor", JsonNull.INSTANCE);

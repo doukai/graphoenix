@@ -37,7 +37,7 @@ public class Field {
         }
         if (selectionContext.field().selectionSet() != null) {
             this.fields = selectionContext.field().selectionSet().selection().stream()
-                    .map(subSelectionContext -> new Field(selectionContext))
+                    .map(Field::new)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (selectionContext.field().directives() != null) {
