@@ -2,6 +2,9 @@ package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.graphql.generator.operation.Argument;
+import io.graphoenix.graphql.generator.operation.Field;
+import io.graphoenix.graphql.generator.operation.IntValue;
 import io.graphoenix.mysql.expression.JsonArrayAggregateFunction;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.mysql.utils.DBValueUtil;
@@ -11,25 +14,64 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.HexValue;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.*;
+import net.sf.jsqlparser.statement.select.GroupByElement;
+import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
-import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.*;
+import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_AGG_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.FUNC_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.FUNC_NAME_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.OBJECT_SELECTION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.SORT_INPUT_NAME;
 
 @ApplicationScoped
 public class GraphQLQueryToSelect {
@@ -298,10 +340,11 @@ public class GraphQLQueryToSelect {
                                 throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(edges.getText()));
                             }
                             return Stream.concat(
-                                            edges.field().selectionSet().selection().stream()
-                                                    .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("cursor"))
-                                                    .findFirst()
-                                                    .map(cursor ->
+                                    edges.field().selectionSet().selection().stream()
+                                            .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("cursor"))
+                                            .findFirst()
+                                            .map(cursor ->
+                                                    new Field(
                                                             manager.getFieldByDirective(typeName, "cursor")
                                                                     .findFirst()
                                                                     .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
@@ -309,37 +352,40 @@ public class GraphQLQueryToSelect {
                                                                     .name()
                                                                     .getText()
                                                     )
-                                                    .stream(),
-                                            edges.field().selectionSet().selection().stream()
-                                                    .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("node"))
-                                                    .flatMap(node -> {
-                                                                if (node.field().selectionSet() == null || node.field().selectionSet().selection().size() == 0) {
-                                                                    throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(node.getText()));
-                                                                }
-                                                                return node.field().selectionSet().selection().stream().map(RuleContext::getText);
-                                                            }
-                                                    )
-                                    )
-                                    .collect(Collectors.joining(" "));
+                                            )
+                                            .stream(),
+                                    edges.field().selectionSet().selection().stream()
+                                            .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("node"))
+                                            .flatMap(node -> {
+                                                        if (node.field().selectionSet() == null || node.field().selectionSet().selection().size() == 0) {
+                                                            throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(node.getText()));
+                                                        }
+                                                        return node.field().selectionSet().selection().stream().map(Field::new);
+                                                    }
+                                            )
+                            );
                         }
                 )
-                .map(selectionSet -> {
-                            String arguments = selectionContext.field().arguments().argument().stream()
+                .map(fieldStream -> {
+                            Set<Argument> arguments = selectionContext.field().arguments().argument().stream()
                                     .map(argumentContext -> {
                                                 if (argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) {
-                                                    return argumentContext.name().getText().concat(":") + (Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1);
+                                                    return new Argument()
+                                                            .setName(argumentContext.name().getText())
+                                                            .setValueWithVariable(new IntValue(Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1));
                                                 } else {
-                                                    return argumentContext.getText();
+                                                    return new Argument()
+                                                            .setName(argumentContext.name().getText())
+                                                            .setValueWithVariable(argumentContext.valueWithVariable());
                                                 }
                                             }
                                     )
-                                    .collect(Collectors.joining(" "));
+                                    .collect(Collectors.toCollection(LinkedHashSet::new));
                             return DOCUMENT_UTIL.graphqlToSelection(
-                                    String.format("%s(%s){%s}",
-                                            connectionFieldDefinitionContext.name().getText(),
-                                            arguments,
-                                            selectionSet
-                                    )
+                                    new Field(connectionFieldDefinitionContext.name().getText())
+                                            .setArguments(arguments)
+                                            .setFields(fieldStream.collect(Collectors.toCollection(LinkedHashSet::new)))
+                                            .toString()
                             );
                         }
                 );
@@ -350,19 +396,18 @@ public class GraphQLQueryToSelect {
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("totalCount"))
                 .findFirst();
 
-        String arguments = selectionContext.field().arguments().argument().stream()
+        LinkedHashSet<Argument> arguments = selectionContext.field().arguments().argument().stream()
                 .filter(argumentContext -> !argumentContext.name().getText().equals(FIRST_INPUT_NAME) && !argumentContext.name().getText().equals(LAST_INPUT_NAME))
-                .map(RuleContext::getText)
-                .collect(Collectors.joining(" "));
+                .map(Argument::new)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         if (totalCount.isPresent()) {
             return Optional.of(
                     DOCUMENT_UTIL.graphqlToSelection(
-                            String.format("%s(%s){%s}",
-                                    connectionAggFieldDefinitionContext.name().getText(),
-                                    arguments,
-                                    manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName))).concat("Count")
-                            )
+                            new Field(connectionAggFieldDefinitionContext.name().getText())
+                                    .setArguments(arguments)
+                                    .addField(new Field(manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName))).concat("Count")))
+                                    .toString()
                     )
             );
         }

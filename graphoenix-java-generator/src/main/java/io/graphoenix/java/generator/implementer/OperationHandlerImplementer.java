@@ -240,7 +240,7 @@ public class OperationHandlerImplementer {
                         operationName,
                         ClassName.get(JsonElement.class)
                 )
-                .addStatement("return result.map(jsonElement -> invoke(connectionHandler.get().$L(jsonElement,operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName))
+                .addStatement("return result.map(jsonElement -> invoke(connectionHandler.get().$L(jsonElement, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName)
                 .build();
     }
 

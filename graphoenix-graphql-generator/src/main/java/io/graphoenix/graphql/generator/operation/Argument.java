@@ -12,6 +12,11 @@ public class Argument {
     public Argument() {
     }
 
+    public Argument(GraphqlParser.ArgumentContext argumentContext) {
+        this.name = argumentContext.name().getText();
+        this.valueWithVariable = argumentContext.valueWithVariable().getText();
+    }
+
     public Argument(String name, String valueWithVariable) {
         this.name = name;
         this.valueWithVariable = valueWithVariable;

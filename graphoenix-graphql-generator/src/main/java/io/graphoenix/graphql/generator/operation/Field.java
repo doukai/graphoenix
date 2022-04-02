@@ -1,5 +1,7 @@
 package io.graphoenix.graphql.generator.operation;
 
+import graphql.parser.antlr.GraphqlParser;
+import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -15,6 +17,35 @@ public class Field {
     private Set<Argument> arguments;
     private Set<String> directives;
     private Set<Field> fields;
+
+    public Field() {
+    }
+
+    public Field(String name) {
+        this.name = name;
+    }
+
+    public Field(GraphqlParser.SelectionContext selectionContext) {
+        this.name = selectionContext.field().name().getText();
+        if (selectionContext.field().alias() != null) {
+            this.alias = selectionContext.field().alias().name().getText();
+        }
+        if (selectionContext.field().arguments() != null) {
+            this.arguments = selectionContext.field().arguments().argument().stream()
+                    .map(Argument::new)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        if (selectionContext.field().selectionSet() != null) {
+            this.fields = selectionContext.field().selectionSet().selection().stream()
+                    .map(subSelectionContext -> new Field(selectionContext))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        if (selectionContext.field().directives() != null) {
+            this.directives = selectionContext.field().directives().directive().stream()
+                    .map(RuleContext::toString)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+    }
 
     public String getName() {
         return name;
@@ -74,6 +105,14 @@ public class Field {
 
     public Field setFields(Set<Field> fields) {
         this.fields = fields;
+        return this;
+    }
+
+    public Field addField(Field field) {
+        if (this.fields == null) {
+            this.fields = new LinkedHashSet<>();
+        }
+        this.fields.add(field);
         return this;
     }
 

@@ -13,7 +13,11 @@ import jakarta.inject.Inject;
 
 import java.util.Optional;
 
-import static io.graphoenix.core.error.GraphQLErrorType.*;
+import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_AGG_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.OBJECT_SELECTION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
@@ -28,7 +32,7 @@ public class ConnectionBuilder {
         this.manager = manager;
     }
 
-    public JsonElement build(JsonElement jsonElement, String typeName, String idFieldName, String cursorFieldName, GraphqlParser.SelectionContext selectionContext) {
+    public JsonElement build(JsonElement jsonElement, String typeName, GraphqlParser.SelectionContext selectionContext) {
         JsonObject connectionObject = new JsonObject();
         if (selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0) {
             GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, selectionContext.field().name().getText())
@@ -52,69 +56,96 @@ public class ConnectionBuilder {
                         .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
 
                 if (connectionFieldName.isPresent() && connectionAggFieldName.isPresent()) {
+                    String cursorFieldName = manager.getFieldByDirective(typeName, "cursor")
+                            .findFirst()
+                            .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
+                            .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)))
+                            .name()
+                            .getText();
                     for (GraphqlParser.SelectionContext connectionSelectionContext : selectionContext.field().selectionSet().selection()) {
                         switch (connectionSelectionContext.field().name().getText()) {
                             case "totalCount":
+                                String idFieldName = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
                                 connectionObject.add("totalCount", jsonElement.getAsJsonObject().get(connectionAggFieldName.get()).getAsJsonObject().get(idFieldName.concat("Count")));
                                 break;
                             case "edges":
-                                JsonArray edges = new JsonArray();
-                                if (connectionSelectionContext.field().selectionSet() != null && connectionSelectionContext.field().selectionSet().selection().size() > 0) {
+                                if (connectionSelectionContext.field().selectionSet() == null || connectionSelectionContext.field().selectionSet().selection().size() == 0) {
+                                    throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(connectionSelectionContext.field().getText()));
+                                } else {
                                     JsonArray nodeArray = jsonElement.getAsJsonObject().get(connectionFieldName.get()).getAsJsonArray();
+                                    JsonArray edges = new JsonArray();
                                     int index = 0;
-                                    for (GraphqlParser.SelectionContext edgesSelectionContext : connectionSelectionContext.field().selectionSet().selection()) {
+                                    for (JsonElement node : nodeArray) {
                                         if (index < nodeArray.size() - 1) {
                                             JsonObject edge = new JsonObject();
-                                            if (edgesSelectionContext.field().name().getText().equals("cursor")) {
-                                                edge.add("cursor", nodeArray.get(index).getAsJsonObject().get(cursorFieldName));
-                                            } else if (edgesSelectionContext.field().name().getText().equals("node")) {
-                                                edge.add("node", nodeArray.get(index).getAsJsonObject());
+                                            for (GraphqlParser.SelectionContext edgesSelectionContext : connectionSelectionContext.field().selectionSet().selection()) {
+                                                if (edgesSelectionContext.field().name().getText().equals("cursor")) {
+                                                    edge.add("cursor", node.getAsJsonObject().get(cursorFieldName));
+                                                } else if (edgesSelectionContext.field().name().getText().equals("node")) {
+                                                    edge.add("node", node.getAsJsonObject());
+                                                }
                                             }
                                             edges.add(edge);
+                                            index++;
                                         }
                                     }
+                                    connectionObject.add("edges", edges);
                                 }
-                                connectionObject.add("edges", edges);
                                 break;
                             case "pageInfo":
-                                GraphqlParser.ArgumentContext limitArgument = selectionContext.field().arguments().argument().stream()
-                                        .filter(argumentContext -> argumentContext.name().getText().equals(FIRST_INPUT_NAME))
-                                        .findFirst()
-                                        .orElseGet(() ->
-                                                selectionContext.field().arguments().argument().stream()
-                                                        .filter(argumentContext -> argumentContext.getText().equals(LAST_INPUT_NAME))
-                                                        .findFirst()
-                                                        .orElseThrow()
-                                        );
-                                int limit = Integer.parseInt(limitArgument.valueWithVariable().IntValue().getText());
-                                JsonObject pageInfo = new JsonObject();
-                                JsonArray nodeArray = jsonElement.getAsJsonObject().get(connectionFieldName.get()).getAsJsonArray();
+                                if (connectionSelectionContext.field().selectionSet() == null || connectionSelectionContext.field().selectionSet().selection().size() == 0) {
+                                    throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(connectionSelectionContext.field().getText()));
+                                } else {
+                                    JsonArray nodeArray = jsonElement.getAsJsonObject().get(connectionFieldName.get()).getAsJsonArray();
+                                    int limit = selectionContext.field().arguments().argument().stream()
+                                            .filter(argumentContext -> argumentContext.name().getText().equals(FIRST_INPUT_NAME))
+                                            .findFirst()
+                                            .map(argumentContext -> Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()))
+                                            .orElseGet(() ->
+                                                    selectionContext.field().arguments().argument().stream()
+                                                            .filter(argumentContext -> argumentContext.getText().equals(LAST_INPUT_NAME))
+                                                            .findFirst()
+                                                            .map(argumentContext -> Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()))
+                                                            .orElse(nodeArray.size())
+                                            );
 
-                                for (GraphqlParser.SelectionContext pageInfoSelectionContext : connectionSelectionContext.field().selectionSet().selection()) {
-                                    switch (pageInfoSelectionContext.field().name().getText()) {
-                                        case "hasNextPage":
-                                            pageInfo.addProperty("hasNextPage", nodeArray != null && limit < nodeArray.size());
-                                            break;
-                                        case "hasPreviousPage":
-                                            pageInfo.addProperty("hasPreviousPage", nodeArray != null && limit < nodeArray.size());
-                                            break;
-                                        case "startCursor":
-                                            if (nodeArray != null && nodeArray.size() > 2) {
-                                                pageInfo.add("startCursor", nodeArray.get(nodeArray.size() - 2).getAsJsonObject().get(cursorFieldName));
-                                            } else {
-                                                pageInfo.add("startCursor", JsonNull.INSTANCE);
-                                            }
-                                            break;
-                                        case "endCursor":
-                                            if (nodeArray != null && nodeArray.size() > 2) {
-                                                pageInfo.add("endCursor", nodeArray.get(nodeArray.size() - 2).getAsJsonObject().get(cursorFieldName));
-                                            } else {
-                                                pageInfo.add("endCursor", JsonNull.INSTANCE);
-                                            }
-                                            break;
+                                    boolean isLast = selectionContext.field().arguments().argument().stream().anyMatch(argumentContext -> argumentContext.getText().equals(LAST_INPUT_NAME));
+                                    boolean isFirst = !isLast;
+                                    JsonObject pageInfo = new JsonObject();
+                                    for (GraphqlParser.SelectionContext pageInfoSelectionContext : connectionSelectionContext.field().selectionSet().selection()) {
+                                        switch (pageInfoSelectionContext.field().name().getText()) {
+                                            case "hasNextPage":
+                                                pageInfo.addProperty("hasNextPage", nodeArray != null && limit < nodeArray.size());
+                                                break;
+                                            case "hasPreviousPage":
+                                                pageInfo.addProperty("hasPreviousPage", nodeArray != null && limit < nodeArray.size());
+                                                break;
+                                            case "startCursor":
+                                                if (nodeArray != null && nodeArray.size() > 2) {
+                                                    if (isFirst) {
+                                                        pageInfo.add("startCursor", nodeArray.get(0).getAsJsonObject().get(cursorFieldName));
+                                                    } else {
+                                                        pageInfo.add("startCursor", nodeArray.get(nodeArray.size() - 2).getAsJsonObject().get(cursorFieldName));
+                                                    }
+                                                } else {
+                                                    pageInfo.add("startCursor", JsonNull.INSTANCE);
+                                                }
+                                                break;
+                                            case "endCursor":
+                                                if (nodeArray != null && nodeArray.size() > 2) {
+                                                    if (isFirst) {
+                                                        pageInfo.add("startCursor", nodeArray.get(nodeArray.size() - 2).getAsJsonObject().get(cursorFieldName));
+                                                    } else {
+                                                        pageInfo.add("startCursor", nodeArray.get(0).getAsJsonObject().get(cursorFieldName));
+                                                    }
+                                                } else {
+                                                    pageInfo.add("endCursor", JsonNull.INSTANCE);
+                                                }
+                                                break;
+                                        }
                                     }
+                                    connectionObject.add("pageInfo", pageInfo);
                                 }
-                                connectionObject.add("pageInfo", pageInfo);
                                 break;
                         }
                     }
@@ -125,8 +156,9 @@ public class ConnectionBuilder {
                         throw new GraphQLProblem(CONNECTION_AGG_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
                     }
                 }
+            } else {
+                throw new GraphQLProblem(CONNECTION_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
             }
-            throw new GraphQLProblem(CONNECTION_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
         }
         return connectionObject;
     }

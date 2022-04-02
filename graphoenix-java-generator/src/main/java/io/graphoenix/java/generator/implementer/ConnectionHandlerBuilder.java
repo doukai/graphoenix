@@ -8,7 +8,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.GraphQLProblem;
 import io.graphoenix.core.handler.ConnectionBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,8 +19,6 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 
 @ApplicationScoped
 public class ConnectionHandlerBuilder {
@@ -48,11 +45,11 @@ public class ConnectionHandlerBuilder {
     }
 
     private JavaFile buildClass() {
-        TypeSpec typeSpec = buildInvokeHandler();
+        TypeSpec typeSpec = buildConnectionHandler();
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildInvokeHandler() {
+    private TypeSpec buildConnectionHandler() {
         return TypeSpec.classBuilder("ConnectionHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
@@ -73,7 +70,7 @@ public class ConnectionHandlerBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeInvokeMethods())
+                .addMethods(buildTypeConnectionMethods())
                 .build();
     }
 
@@ -88,18 +85,19 @@ public class ConnectionHandlerBuilder {
         return builder.build();
     }
 
-    private List<MethodSpec> buildTypeInvokeMethods() {
+    private List<MethodSpec> buildTypeConnectionMethods() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals("PageInfo"))
-                .map(this::buildTypeInvokeMethod).collect(Collectors.toList());
+                .map(this::buildTypeConnectionMethod).collect(Collectors.toList());
     }
 
-    private MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    private MethodSpec buildTypeConnectionMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String fieldName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         MethodSpec.Builder builder = MethodSpec.methodBuilder(fieldName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonElement.class))
-                .addParameter(ClassName.get(JsonElement.class), "jsonElement");
+                .addParameter(ClassName.get(JsonElement.class), "jsonElement")
+                .addParameter(ClassName.get(String.class), "typeName");
 
         if (manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) ||
                 manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) ||
@@ -111,32 +109,18 @@ public class ConnectionHandlerBuilder {
 
         if (objectTypeDefinitionContext.name().getText().endsWith("Connection")) {
             String typeName = objectTypeDefinitionContext.name().getText().substring(0, objectTypeDefinitionContext.name().getText().length() - "Connection".length());
-            String idFieldName = manager.getObjectTypeIDFieldName(typeName)
-                    .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
-            String cursorFieldName = manager.getFieldByDirective(typeName, "cursor")
-                    .findFirst()
-                    .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
-                    .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)))
-                    .name()
-                    .getText();
-
-            builder.addStatement("jsonElement.getAsJsonObject().add($S, builder.build(jsonElement, $S, $S, $S, selectionContext))",
-                            fieldName,
-                            typeName,
-                            idFieldName,
-                            cursorFieldName
-                    )
-                    .beginControlFlow("if (selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
+            builder.beginControlFlow("if (selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
+                    .addStatement("jsonElement.getAsJsonObject().add(selectionContext.field().name().getText(), builder.build(jsonElement, typeName, selectionContext))")
                     .beginControlFlow("for ($T subSelectionContext : selectionContext.field().selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
                             ClassName.get(GraphqlParser.SelectionContext.class),
                             objectTypeDefinitionContext.name().getText(),
                             ClassName.get(Collectors.class)
                     )
                     .beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", "edges")
-                    .addStatement("jsonElement.getAsJsonObject().get($S).getAsJsonObject().get($S).getAsJsonArray().forEach(item -> $L(item, subSelectionContext))",
-                            fieldName,
+                    .addStatement("jsonElement.getAsJsonObject().get(selectionContext.field().name().getText()).getAsJsonObject().get($S).getAsJsonArray().forEach(item -> $L(item, $S, subSelectionContext))",
                             "edges",
-                            getObjectMethodName(typeName.concat("Edge"))
+                            getObjectMethodName(typeName.concat("Edge")),
+                            objectTypeDefinitionContext.name().getText()
                     )
                     .endControlFlow()
                     .endControlFlow()
@@ -167,13 +151,15 @@ public class ConnectionHandlerBuilder {
                     .forEach(fieldDefinitionContext -> {
                                 builder.beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
                                 if (manager.isConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText())) {
-                                    builder.addStatement("$L(jsonElement, subSelectionContext)",
-                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                    builder.addStatement("$L(jsonElement, $S, subSelectionContext)",
+                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                            objectTypeDefinitionContext.name().getText()
                                     );
                                 } else {
-                                    builder.addStatement("$L(jsonElement.getAsJsonObject().get($S), subSelectionContext)",
+                                    builder.addStatement("$L(jsonElement.getAsJsonObject().get($S), $S, subSelectionContext)",
                                             getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                            fieldDefinitionContext.name().getText()
+                                            fieldDefinitionContext.name().getText(),
+                                            objectTypeDefinitionContext.name().getText()
                                     );
                                 }
                                 builder.endControlFlow();
@@ -185,11 +171,13 @@ public class ConnectionHandlerBuilder {
                     .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                     .forEach(fieldDefinitionContext ->
                             builder.beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText())
-                                    .addStatement("jsonElement.getAsJsonObject().get($S).getAsJsonArray().forEach(item -> $L(item, subSelectionContext))",
+                                    .addStatement("jsonElement.getAsJsonObject().get($S).getAsJsonArray().forEach(item -> $L(item, $S, subSelectionContext))",
                                             fieldDefinitionContext.name().getText(),
-                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                            objectTypeDefinitionContext.name().getText()
                                     )
-                                    .endControlFlow().build()
+                                    .endControlFlow()
+                                    .build()
                     );
             builder.endControlFlow()
                     .endControlFlow();
