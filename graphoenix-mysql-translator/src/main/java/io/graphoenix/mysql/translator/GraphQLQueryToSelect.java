@@ -361,26 +361,26 @@ public class GraphQLQueryToSelect {
                         }
                 )
                 .map(fieldStream -> {
-                            Set<Argument> arguments = selectionContext.field().arguments().argument().stream()
-                                    .map(argumentContext -> {
-                                                if (argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) {
-                                                    return new Argument()
-                                                            .setName(argumentContext.name().getText())
-                                                            .setValueWithVariable(new IntValue(Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1));
-                                                } else {
-                                                    return new Argument()
-                                                            .setName(argumentContext.name().getText())
-                                                            .setValueWithVariable(argumentContext.valueWithVariable());
+                            Field field = new Field(connectionFieldDefinitionContext.name().getText())
+                                    .setFields(fieldStream.collect(Collectors.toCollection(LinkedHashSet::new)));
+                            if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
+                                Set<Argument> arguments = selectionContext.field().arguments().argument().stream()
+                                        .map(argumentContext -> {
+                                                    if (argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) {
+                                                        return new Argument()
+                                                                .setName(argumentContext.name().getText())
+                                                                .setValueWithVariable(new IntValue(Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1));
+                                                    } else {
+                                                        return new Argument()
+                                                                .setName(argumentContext.name().getText())
+                                                                .setValueWithVariable(argumentContext.valueWithVariable());
+                                                    }
                                                 }
-                                            }
-                                    )
-                                    .collect(Collectors.toCollection(LinkedHashSet::new));
-                            return DOCUMENT_UTIL.graphqlToSelection(
-                                    new Field(connectionFieldDefinitionContext.name().getText())
-                                            .setArguments(arguments)
-                                            .setFields(fieldStream.collect(Collectors.toCollection(LinkedHashSet::new)))
-                                            .toString()
-                            );
+                                        )
+                                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                                field.setArguments(arguments);
+                            }
+                            return DOCUMENT_UTIL.graphqlToSelection(field.toString());
                         }
                 );
     }
@@ -390,20 +390,20 @@ public class GraphQLQueryToSelect {
         Optional<GraphqlParser.SelectionContext> totalCount = selectionContext.field().selectionSet().selection().stream()
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("totalCount"))
                 .findFirst();
+        Field field = new Field(connectionAggFieldDefinitionContext.name().getText())
+                .addField(new Field(manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName))).concat("Count")));
 
-        LinkedHashSet<Argument> arguments = selectionContext.field().arguments().argument().stream()
-                .filter(argumentContext -> !argumentContext.name().getText().equals(FIRST_INPUT_NAME) && !argumentContext.name().getText().equals(LAST_INPUT_NAME))
-                .map(Argument::new)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
+            LinkedHashSet<Argument> arguments = selectionContext.field().arguments().argument().stream()
+                    .filter(argumentContext -> !argumentContext.name().getText().equals(FIRST_INPUT_NAME) && !argumentContext.name().getText().equals(LAST_INPUT_NAME))
+                    .map(Argument::new)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            field.setArguments(arguments);
+        }
 
         if (totalCount.isPresent()) {
             return Optional.of(
-                    DOCUMENT_UTIL.graphqlToSelection(
-                            new Field(connectionAggFieldDefinitionContext.name().getText())
-                                    .setArguments(arguments)
-                                    .addField(new Field(manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName))).concat("Count")))
-                                    .toString()
-                    )
+                    DOCUMENT_UTIL.graphqlToSelection(field.toString())
             );
         }
         return Optional.empty();
@@ -573,6 +573,7 @@ public class GraphQLQueryToSelect {
     protected void buildSortArguments(JsonArrayAggregateFunction jsonArrayAggregateFunction, String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, int level) {
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             Table table = typeToTable(typeName, level);
+
             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                 Optional<GraphqlParser.InputValueDefinitionContext> orderByInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                         .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(ORDER_BY_INPUT_NAME))
@@ -580,10 +581,6 @@ public class GraphQLQueryToSelect {
 
                 Optional<GraphqlParser.ArgumentContext> orderBy = orderByInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
                 orderBy.ifPresent(argumentContext -> {
-                            Optional<GraphqlParser.InputValueDefinitionContext> lastInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                                    .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(LAST_INPUT_NAME))
-                                    .findFirst();
-
                             List<OrderByElement> orderByElementList = argumentContext.valueWithVariable().objectValueWithVariable().objectFieldWithVariable().stream()
                                     .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().enumValue() != null)
                                     .map(objectFieldWithVariableContext -> {
@@ -597,14 +594,6 @@ public class GraphQLQueryToSelect {
                                             }
                                     )
                                     .collect(Collectors.toList());
-
-                            if (lastInput.isPresent()) {
-                                OrderByElement idOrderByElement = new OrderByElement();
-                                idOrderByElement.setAsc(false);
-                                GraphqlParser.FieldDefinitionContext idFieldDefinitionContext = manager.getObjectTypeIDFieldDefinition(typeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
-                                idOrderByElement.setExpression(fieldToColumn(table, idFieldDefinitionContext));
-                                orderByElementList.add(0, idOrderByElement);
-                            }
                             jsonArrayAggregateFunction.setOrderByElements(orderByElementList);
                         }
                 );
@@ -622,19 +611,25 @@ public class GraphQLQueryToSelect {
                             orderByElement.setAsc(false);
                         }
                         orderByElement.setExpression(fieldToColumn(table, fieldDefinitionContext));
+                        jsonArrayAggregateFunction.setOrderByElements(Collections.singletonList(orderByElement));
+                    }
+                }
+            }
 
-                        Optional<GraphqlParser.InputValueDefinitionContext> lastInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
-                                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(LAST_INPUT_NAME))
-                                .findFirst();
-                        if (lastInput.isPresent()) {
-                            OrderByElement idOrderByElement = new OrderByElement();
-                            idOrderByElement.setAsc(false);
-                            GraphqlParser.FieldDefinitionContext idFieldDefinitionContext = manager.getObjectTypeIDFieldDefinition(typeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
-                            idOrderByElement.setExpression(fieldToColumn(table, idFieldDefinitionContext));
-                            jsonArrayAggregateFunction.setOrderByElements(Arrays.asList(idOrderByElement, orderByElement));
-                        } else {
-                            jsonArrayAggregateFunction.setOrderByElements(Collections.singletonList(orderByElement));
-                        }
+            if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
+                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                Optional<GraphqlParser.ArgumentContext> lastArgument = selectionContext.field().arguments().argument().stream()
+                        .filter(argumentContext -> argumentContext.name().getText().equals(LAST_INPUT_NAME))
+                        .findFirst();
+                if (lastArgument.isPresent()) {
+                    OrderByElement idOrderByElement = new OrderByElement();
+                    idOrderByElement.setAsc(false);
+                    GraphqlParser.FieldDefinitionContext idFieldDefinitionContext = manager.getObjectTypeIDFieldDefinition(fieldTypeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
+                    idOrderByElement.setExpression(fieldToColumn(table, idFieldDefinitionContext));
+                    if (jsonArrayAggregateFunction.getOrderByElements() != null) {
+                        jsonArrayAggregateFunction.getOrderByElements().add(0, idOrderByElement);
+                    } else {
+                        jsonArrayAggregateFunction.setOrderByElements(Collections.singletonList(idOrderByElement));
                     }
                 }
             }
