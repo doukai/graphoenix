@@ -19,6 +19,7 @@ graphql {
     graphQLFileName = "auth.gql"
     packageName = "io.graphoenix.showcase.mysql"
     inputLayers = 3
+    outputPath = "D:/Work"
 }
 
 group 'io.graphoenix'

@@ -32,12 +32,10 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.statement.update.Update;
+import net.sf.jsqlparser.statement.update.UpdateSet;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -1684,8 +1682,10 @@ public class GraphQLMutationToStatements {
                                       Expression where) {
         Update update = new Update();
         update.setTable(table);
-        update.addColumns(columnList);
-        update.addExpressions(expressionList);
+        UpdateSet updateSet = new UpdateSet();
+        updateSet.setColumns(new ArrayList<>(columnList));
+        updateSet.setExpressions(new ArrayList<>(expressionList));
+        update.addUpdateSet(updateSet);
         update.setWhere(where);
         return update;
     }

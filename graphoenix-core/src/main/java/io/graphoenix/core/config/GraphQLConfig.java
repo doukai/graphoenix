@@ -59,6 +59,9 @@ public class GraphQLConfig {
     @Optional
     private int inputLayers = 1;
 
+    @Optional
+    private String outputPath;
+
     public String getGraphQL() {
         return graphQL;
     }
@@ -201,5 +204,13 @@ public class GraphQLConfig {
 
     public void setInputLayers(int inputLayers) {
         this.inputLayers = inputLayers;
+    }
+
+    public String getOutputPath() {
+        return outputPath;
+    }
+
+    public void setOutputPath(String outputPath) {
+        this.outputPath = outputPath;
     }
 }
