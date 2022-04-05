@@ -102,6 +102,8 @@ public class ConnectionBuilder {
                                     JsonArray nodeArray = jsonElement.getAsJsonObject().get(connectionFieldName.get()).getAsJsonArray();
                                     int limit;
                                     boolean isLast;
+                                    boolean isBefore;
+                                    boolean isAfter;
                                     if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
                                         limit = selectionContext.field().arguments().argument().stream()
                                                 .filter(argumentContext -> argumentContext.name().getText().equals(FIRST_INPUT_NAME))
@@ -115,9 +117,13 @@ public class ConnectionBuilder {
                                                                 .orElse(nodeArray.size())
                                                 );
                                         isLast = selectionContext.field().arguments().argument().stream().anyMatch(argumentContext -> argumentContext.name().getText().equals(LAST_INPUT_NAME));
+                                        isBefore = selectionContext.field().arguments().argument().stream().anyMatch(argumentContext -> argumentContext.name().getText().equals(BEFORE_INPUT_NAME));
+                                        isAfter = selectionContext.field().arguments().argument().stream().anyMatch(argumentContext -> argumentContext.name().getText().equals(AFTER_INPUT_NAME));
                                     } else {
                                         limit = nodeArray.size();
                                         isLast = false;
+                                        isBefore = false;
+                                        isAfter = false;
                                     }
                                     boolean isFirst = !isLast;
                                     JsonObject pageInfo = new JsonObject();
@@ -127,14 +133,14 @@ public class ConnectionBuilder {
                                                 if (isFirst) {
                                                     pageInfo.addProperty("hasNextPage", nodeArray != null && limit < nodeArray.size());
                                                 } else {
-                                                    pageInfo.addProperty("hasNextPage", false);
+                                                    pageInfo.addProperty("hasNextPage", isBefore);
                                                 }
                                                 break;
                                             case "hasPreviousPage":
                                                 if (isLast) {
                                                     pageInfo.addProperty("hasPreviousPage", nodeArray != null && limit < nodeArray.size());
                                                 } else {
-                                                    pageInfo.addProperty("hasPreviousPage", false);
+                                                    pageInfo.addProperty("hasPreviousPage", isAfter);
                                                 }
                                                 break;
                                             case "startCursor":
