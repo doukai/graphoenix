@@ -616,21 +616,19 @@ public class GraphQLQueryToSelect {
                 }
             }
 
-            if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
-                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                Optional<GraphqlParser.ArgumentContext> lastArgument = selectionContext.field().arguments().argument().stream()
-                        .filter(argumentContext -> argumentContext.name().getText().equals(LAST_INPUT_NAME))
-                        .findFirst();
-                if (lastArgument.isPresent()) {
-                    OrderByElement idOrderByElement = new OrderByElement();
-                    idOrderByElement.setAsc(false);
-                    GraphqlParser.FieldDefinitionContext idFieldDefinitionContext = manager.getObjectTypeIDFieldDefinition(fieldTypeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
-                    idOrderByElement.setExpression(fieldToColumn(table, idFieldDefinitionContext));
-                    if (jsonArrayAggregateFunction.getOrderByElements() != null) {
-                        jsonArrayAggregateFunction.getOrderByElements().add(0, idOrderByElement);
-                    } else {
-                        jsonArrayAggregateFunction.setOrderByElements(Collections.singletonList(idOrderByElement));
-                    }
+            if (jsonArrayAggregateFunction.getOrderByElements() == null || jsonArrayAggregateFunction.getOrderByElements().size() == 0) {
+                if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
+                    String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                    Optional<GraphqlParser.ArgumentContext> lastArgument = selectionContext.field().arguments().argument().stream()
+                            .filter(argumentContext -> argumentContext.name().getText().equals(LAST_INPUT_NAME))
+                            .findFirst();
+                    OrderByElement orderByElement = new OrderByElement();
+                    orderByElement.setAsc(lastArgument.isEmpty());
+                    GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(fieldTypeName, "cursor").findFirst()
+                            .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
+                            .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
+                    orderByElement.setExpression(fieldToColumn(table, cursorFieldDefinitionContext));
+                    jsonArrayAggregateFunction.setOrderByElements(Collections.singletonList(orderByElement));
                 }
             }
         }
