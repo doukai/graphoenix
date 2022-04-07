@@ -35,7 +35,7 @@ public abstract class BaseOperationHandler {
         operationDefinitionContext.selectionSet().selection()
                 .forEach(selectionContext ->
                         jsonObject.add(
-                                selectionContext.field().name().getText(),
+                                selectionContext.field().alias() == null ? selectionContext.field().name().getText() : selectionContext.field().alias().name().getText(),
                                 getOperationHandler(selectionContext.field().name().getText())
                                         .apply(jsonElement.getAsJsonObject().get(selectionContext.field().name().getText()), selectionContext)
                         )
