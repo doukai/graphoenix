@@ -99,7 +99,7 @@ public class GraphQLVariablesProcessor {
             }
         } else {
             String fieldTypeName = manager.getFieldTypeName(variableDefinitionContext.type());
-            if (fieldTypeName.equals("String")) {
+            if (fieldTypeName.equals("String") || fieldTypeName.equals("ID")) {
                 variable = "\"" + variable + "\"";
             }
         }
