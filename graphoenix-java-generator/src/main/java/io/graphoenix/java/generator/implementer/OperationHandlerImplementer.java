@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.ClassName;
@@ -235,10 +236,10 @@ public class OperationHandlerImplementer {
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonElement.class)))
                 .addStatement("manager.get().registerFragment(graphQL)")
                 .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
-                .addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> gsonBuilder.create().fromJson(jsonString, $T.class))",
+                .addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> $T.parseString(jsonString))",
                         ParameterizedTypeName.get(Mono.class, JsonElement.class),
                         operationName,
-                        ClassName.get(JsonElement.class)
+                        ClassName.get(JsonParser.class)
                 )
                 .addStatement("return result.map(jsonElement -> invoke(connectionHandler.get().$L(jsonElement, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName)
                 .build();
