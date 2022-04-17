@@ -1,7 +1,7 @@
 package io.graphoenix.showcase.mysql;
 
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.http.server.GraphqlHttpServer;
+import io.graphoenix.http.server.GraphQLHttpServer;
 
 public class Application {
 
@@ -11,7 +11,7 @@ public class Application {
 
     private void run() throws Exception {
 
-        GraphqlHttpServer graphqlHttpServer = BeanContext.get(GraphqlHttpServer.class);
+        GraphQLHttpServer graphqlHttpServer = BeanContext.get(GraphQLHttpServer.class);
         graphqlHttpServer.run();
     }
 }

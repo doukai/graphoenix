@@ -1,32 +1,54 @@
 package io.graphoenix.http.handler;
 
-import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.server.HttpServerRequest;
+import reactor.netty.http.server.HttpServerResponse;
 
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 
-@ApplicationScoped
-public class GetRequestHandler implements RequestHandler {
+import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
+import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
-    @Override
-    public GraphQLRequest handle(FullHttpRequest fullHttpRequest) {
-        String requestUri = fullHttpRequest.uri();
-        QueryStringDecoder queryDecoder = new QueryStringDecoder(requestUri, StandardCharsets.UTF_8);
-        Map<String, List<String>> parameters = queryDecoder.parameters();
+@ApplicationScoped
+public class GetRequestHandler {
+
+    private final GsonBuilder gsonBuilder = new GsonBuilder();
+    private final GraphQLRequestHandler graphQLRequestHandler;
+
+    @Inject
+    public GetRequestHandler(GraphQLRequestHandler graphQLRequestHandler) {
+        this.graphQLRequestHandler = graphQLRequestHandler;
+    }
+
+    public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
+
         Type type = new TypeToken<Map<String, String>>() {
         }.getType();
 
-        return new GraphQLRequest(
-                parameters.get("query").get(0),
-                parameters.get("operationName").get(0),
-                new Gson().fromJson(parameters.get("variables").get(0), type)
+        GraphQLRequest graphQLRequest = new GraphQLRequest(
+                request.param("query"),
+                request.param("operationName"),
+                gsonBuilder.create().fromJson(request.param("variables"), type)
         );
+
+        return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
+                .sendString(
+                        graphQLRequestHandler.handle(graphQLRequest)
+                                .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
+                                .onErrorResume(throwable -> {
+                                    response.status(HttpResponseStatus.BAD_REQUEST);
+                                    return Mono.just(GRAPHQL_RESPONSE_UTIL.error((GraphQLProblem) throwable));
+                                })
+                )
+                .then();
     }
 }

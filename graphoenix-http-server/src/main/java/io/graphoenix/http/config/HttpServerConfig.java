@@ -25,7 +25,11 @@ public class HttpServerConfig {
     private Integer port = 8080;
 
     public String getGraphqlContextPath() {
-        return graphqlContextPath;
+        if (graphqlContextPath.startsWith("/")) {
+            return graphqlContextPath;
+        } else {
+            return "/".concat(graphqlContextPath);
+        }
     }
 
     public void setGraphqlContextPath(String graphqlContextPath) {
