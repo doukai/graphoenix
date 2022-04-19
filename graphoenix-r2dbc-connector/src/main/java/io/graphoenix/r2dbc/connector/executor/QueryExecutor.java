@@ -1,6 +1,7 @@
 package io.graphoenix.r2dbc.connector.executor;
 
 import io.graphoenix.r2dbc.connector.connection.ConnectionCreator;
+import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
 import io.r2dbc.spi.Statement;
 import io.vavr.Tuple;
@@ -29,17 +30,22 @@ public class QueryExecutor {
     }
 
     public Mono<String> executeQuery(String sql, Map<String, Object> parameters) {
-        return connectionCreator.createConnection()
-                .flatMap(connection -> {
+
+        return Flux
+                .usingWhen(
+                        connectionCreator.createConnection(),
+                        connection -> {
                             Logger.debug("execute select:\r\n{}", sql);
                             Logger.debug("parameters:\r\n{}", parameters);
                             Statement statement = connection.createStatement(sql);
                             if (parameters != null) {
                                 parameters.forEach(statement::bind);
                             }
-                            return Mono.from(statement.execute()).doFinally(signalType -> connection.close());
-                        }
+                            return statement.execute();
+                        },
+                        Connection::close
                 )
+                .single()
                 .flatMap(this::getJsonStringFromResult);
     }
 
@@ -48,12 +54,14 @@ public class QueryExecutor {
     }
 
     public Flux<Tuple2<String, String>> executeQuery(Stream<Tuple2<String, String>> sqlStream, Map<String, Object> parameters) {
-        return connectionCreator.createConnection()
-                .flatMapMany(connection ->
-                        Flux.fromStream(
+
+        return Flux
+                .usingWhen(
+                        connectionCreator.createConnection(),
+                        connection -> Flux.fromStream(
                                 sqlStream.map(
                                         tuple2 -> {
-                                            String sql = tuple2._1();
+                                            String sql = tuple2._2();
                                             Logger.debug("execute select:\r\n{}", sql);
                                             Logger.debug("parameters:\r\n{}", parameters);
                                             Statement statement = connection.createStatement(sql);
@@ -61,14 +69,15 @@ public class QueryExecutor {
                                                 parameters.forEach(statement::bind);
                                             }
                                             return Tuple.of(
-                                                    tuple2._2(),
+                                                    tuple2._1(),
                                                     Mono.from(statement.execute())
                                                             .flatMap(this::getJsonStringFromResult)
                                                             .block()
                                             );
                                         }
                                 )
-                        ).doFinally(signalType -> connection.close())
+                        ),
+                        Connection::close
                 );
     }
 

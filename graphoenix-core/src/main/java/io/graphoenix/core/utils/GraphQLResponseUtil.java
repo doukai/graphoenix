@@ -9,9 +9,21 @@ public enum GraphQLResponseUtil {
 
     private final GsonBuilder gsonBuilder = new GsonBuilder();
 
+    public String success(String jsonString) {
+        JsonObject response = new JsonObject();
+        response.add("data", JsonParser.parseString(jsonString));
+        return response.toString();
+    }
+
     public String success(JsonElement jsonElement) {
         JsonObject response = new JsonObject();
         response.add("data", jsonElement);
+        return response.toString();
+    }
+
+    public String success(Object object) {
+        JsonObject response = new JsonObject();
+        response.add("data", gsonBuilder.create().toJsonTree(object));
         return response.toString();
     }
 

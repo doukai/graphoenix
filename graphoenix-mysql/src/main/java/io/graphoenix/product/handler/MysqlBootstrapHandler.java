@@ -70,8 +70,10 @@ public class MysqlBootstrapHandler implements BootstrapHandler {
                 Logger.info("introspection data SQL insert started");
                 Operation operation = introspectionMutationBuilder.buildIntrospectionSchemaMutation();
                 Stream<String> introspectionMutationSQLStream = mutationToStatements.createStatementsSQL(operation.toString());
-                mutationExecutor.executeMutationsInBatchByGroup(introspectionMutationSQLStream, sqlCount).forEach(count -> Logger.info(count + " introspection data SQL insert success"));
-                Logger.info("all introspection data SQL insert success");
+                mutationExecutor.executeMutationsInBatchByGroup(introspectionMutationSQLStream, sqlCount)
+                        .doOnNext(count -> Logger.info(count + " introspection data SQL insert success"))
+                        .doOnComplete(() -> Logger.info("all introspection data SQL insert success"))
+                        .blockLast();
             }
             Logger.info("startup success");
         } catch (IOException | URISyntaxException e) {
