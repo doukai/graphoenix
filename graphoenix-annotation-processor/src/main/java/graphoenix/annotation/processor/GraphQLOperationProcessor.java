@@ -3,12 +3,12 @@ package graphoenix.annotation.processor;
 import com.google.auto.service.AutoService;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.error.ElementErrorType;
-import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.core.error.ElementProcessErrorType;
+import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrorType;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
-import io.graphoenix.core.manager.GraphQLOperationRouter;
+import io.graphoenix.core.handler.GraphQLOperationRouter;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
 import io.graphoenix.java.generator.implementer.OperationInterfaceImplementer;
@@ -108,13 +108,13 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                     AnnotationMirror graphQLOperationMirror = typeElement.getAnnotationMirrors().stream()
                             .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(GraphQLOperation.class.getName()))
                             .findFirst()
-                            .orElseThrow(() -> new ElementProblem(ElementErrorType.OPERATION_ANNOTATION_NOT_EXIST.bind(typeElement.getQualifiedName().toString())));
+                            .orElseThrow(() -> new ElementProcessException(ElementProcessErrorType.OPERATION_ANNOTATION_NOT_EXIST.bind(typeElement.getQualifiedName().toString())));
 
                     TypeMirror operationDAO = graphQLOperationMirror.getElementValues().entrySet().stream()
                             .filter(entry -> entry.getKey().getSimpleName().toString().equals("operationDAO"))
                             .findFirst()
                             .map(entry -> ((DeclaredType) entry.getValue().getValue()).asElement().asType())
-                            .orElseThrow(() -> new ElementProblem(ElementErrorType.OPERATION_DAO_VALUE_NOT_EXIST));
+                            .orElseThrow(() -> new ElementProcessException(ElementProcessErrorType.OPERATION_DAO_VALUE_NOT_EXIST));
 
                     try {
                         Logger.info("start build operation resource for interface {}", typeElement.getQualifiedName().toString());
@@ -129,7 +129,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                                                         case MUTATION:
                                                             return generatorHandler.mutation(entry.getValue());
                                                     }
-                                                    throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                                                    throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
                                                 }
                                         )
                                 )

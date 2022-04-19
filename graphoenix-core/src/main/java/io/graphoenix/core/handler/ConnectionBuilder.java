@@ -6,7 +6,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrorType;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -43,7 +43,7 @@ public class ConnectionBuilder {
         JsonObject connectionObject = new JsonObject();
         if (selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0) {
             GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext = manager.getField(typeName, selectionContext.field().name().getText())
-                    .orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
+                    .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
             Optional<GraphqlParser.DirectiveContext> connection = connectionFieldDefinitionContext.directives().directive().stream()
                     .filter(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME))
                     .findFirst();
@@ -64,12 +64,12 @@ public class ConnectionBuilder {
                 if (connectionFieldName.isPresent() && connectionAggFieldName.isPresent()) {
                     String fieldName = selectionContext.field().name().getText().substring(0, selectionContext.field().name().getText().length() - CONNECTION_SUFFIX.length());
                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, fieldName)
-                            .orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, fieldName)));
+                            .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, fieldName)));
                     String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String cursorFieldName = manager.getFieldByDirective(fieldTypeName, "cursor")
                             .findFirst()
                             .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
-                            .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)))
+                            .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)))
                             .name()
                             .getText();
 
@@ -104,12 +104,12 @@ public class ConnectionBuilder {
 
                         switch (connectionSelectionContext.field().name().getText()) {
                             case "totalCount":
-                                String idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
+                                String idFieldName = manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
                                 connectionObject.add("totalCount", jsonElement.getAsJsonObject().get(connectionAggFieldName.get()).getAsJsonObject().get(idFieldName.concat("Count")));
                                 break;
                             case "edges":
                                 if (connectionSelectionContext.field().selectionSet() == null || connectionSelectionContext.field().selectionSet().selection().size() == 0) {
-                                    throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(connectionSelectionContext.field().getText()));
+                                    throw new GraphQLErrors(OBJECT_SELECTION_NOT_EXIST.bind(connectionSelectionContext.field().getText()));
                                 }
                                 JsonArray edges = new JsonArray();
                                 List<JsonElement> jsonElementList = new ArrayList<>();
@@ -136,7 +136,7 @@ public class ConnectionBuilder {
                                 break;
                             case "pageInfo":
                                 if (connectionSelectionContext.field().selectionSet() == null || connectionSelectionContext.field().selectionSet().selection().size() == 0) {
-                                    throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(connectionSelectionContext.field().getText()));
+                                    throw new GraphQLErrors(OBJECT_SELECTION_NOT_EXIST.bind(connectionSelectionContext.field().getText()));
                                 }
                                 JsonObject pageInfo = new JsonObject();
                                 for (GraphqlParser.SelectionContext pageInfoSelectionContext : connectionSelectionContext.field().selectionSet().selection()) {
@@ -201,13 +201,13 @@ public class ConnectionBuilder {
                     }
                 } else {
                     if (connectionFieldName.isEmpty()) {
-                        throw new GraphQLProblem(CONNECTION_FIELD_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
+                        throw new GraphQLErrors(CONNECTION_FIELD_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
                     } else {
-                        throw new GraphQLProblem(CONNECTION_AGG_FIELD_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
+                        throw new GraphQLErrors(CONNECTION_AGG_FIELD_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
                     }
                 }
             } else {
-                throw new GraphQLProblem(CONNECTION_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
+                throw new GraphQLErrors(CONNECTION_NOT_EXIST.bind(connectionFieldDefinitionContext.name().getText()));
             }
         }
         return connectionObject;

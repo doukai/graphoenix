@@ -1,6 +1,6 @@
 package io.graphoenix.inject.error;
 
-public enum InjectionErrorType {
+public enum InjectionProcessErrorType {
 
     ROOT_PACKAGE_NOT_EXIST(-101, "can't find root package"),
     CANNOT_PARSER_SOURCE_CODE(-102, "can't parser source code: %s"),
@@ -21,7 +21,7 @@ public enum InjectionErrorType {
     private final String description;
     private Object[] variables;
 
-    InjectionErrorType(int code, String description) {
+    InjectionProcessErrorType(int code, String description) {
         this.code = code;
         this.description = description;
     }
@@ -34,7 +34,7 @@ public enum InjectionErrorType {
         return code;
     }
 
-    public InjectionErrorType bind(Object... variables) {
+    public InjectionProcessErrorType bind(Object... variables) {
         this.variables = variables;
         return this;
     }

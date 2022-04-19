@@ -6,7 +6,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -90,13 +90,13 @@ public class TypeManager {
                                         .map(argumentContext -> argumentContext.valueWithVariable().StringValue())
                                         .map(stringValue -> stringValue.toString().substring(1, stringValue.getText().length() - 1))
                                         .findFirst()
-                                        .orElseThrow(() -> new GraphQLProblem(CLASS_NAME_ARGUMENT_NOT_EXIST)),
+                                        .orElseThrow(() -> new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST)),
                                 directiveContext.arguments().argument().stream()
                                         .filter(argumentContext -> argumentContext.name().getText().equals("methodName"))
                                         .map(argumentContext -> argumentContext.valueWithVariable().StringValue())
                                         .map(stringValue -> stringValue.toString().substring(1, stringValue.getText().length() - 1))
                                         .findFirst()
-                                        .orElseThrow(() -> new GraphQLProblem(METHOD_NAME_ARGUMENT_NOT_EXIST))
+                                        .orElseThrow(() -> new GraphQLErrors(METHOD_NAME_ARGUMENT_NOT_EXIST))
                         )
                 ).findFirst();
     }

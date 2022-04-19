@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.error.GraphQLErrorType;
 
 import java.util.HashMap;
@@ -48,6 +48,6 @@ public abstract class BaseOperationHandler {
                 .filter(argumentContext -> argumentContext.name().getText().equals(name))
                 .findFirst()
                 .map(argumentContext -> gsonBuilder.create().fromJson(argumentContext.valueWithVariable().getText(), beanClass))
-                .orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.SELECTION_ARGUMENT_NOT_EXIST.bind(name, selectionContext.field().name().getText())));
+                .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SELECTION_ARGUMENT_NOT_EXIST.bind(name, selectionContext.field().name().getText())));
     }
 }

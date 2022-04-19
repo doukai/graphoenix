@@ -1,6 +1,6 @@
 package io.graphoenix.core.error;
 
-public enum ElementErrorType {
+public enum ElementProcessErrorType {
 
     SOURCE_ANNOTATION_NOT_EXIST(-201, "@Source annotation not exist in api method parameters: %s"),
     INVOKE_METHOD_NOT_EXIST(-202, "%s %s invoke method not exist"),
@@ -21,7 +21,7 @@ public enum ElementErrorType {
     private final String description;
     private Object[] variables;
 
-    ElementErrorType(int code, String description) {
+    ElementProcessErrorType(int code, String description) {
         this.code = code;
         this.description = description;
     }
@@ -34,7 +34,7 @@ public enum ElementErrorType {
         return code;
     }
 
-    public ElementErrorType bind(Object... variables) {
+    public ElementProcessErrorType bind(Object... variables) {
         this.variables = variables;
         return this;
     }

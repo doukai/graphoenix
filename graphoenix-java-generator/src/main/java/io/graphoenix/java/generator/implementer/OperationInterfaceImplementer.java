@@ -9,7 +9,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
 import io.vavr.CheckedFunction0;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.core.error.ElementErrorType.UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE;
+import static io.graphoenix.core.error.ElementProcessErrorType.UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE;
 
 @ApplicationScoped
 public class OperationInterfaceImplementer {
@@ -169,6 +169,6 @@ public class OperationInterfaceImplementer {
                 return "save";
             }
         }
-        throw new ElementProblem(UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE.bind(executableElement.getReturnType().toString()));
+        throw new ElementProcessException(UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE.bind(executableElement.getReturnType().toString()));
     }
 }

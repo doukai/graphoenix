@@ -18,9 +18,9 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrorType;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.BaseOperationHandler;
 import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -51,7 +51,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.core.error.ElementErrorType.INVOKE_METHOD_NOT_EXIST;
+import static io.graphoenix.core.error.ElementProcessErrorType.INVOKE_METHOD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
@@ -112,7 +112,7 @@ public class OperationHandlerImplementer {
                 superinterface = ClassName.get(MutationHandler.class);
                 break;
             default:
-                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
 
         return TypeSpec.classBuilder(className)
@@ -186,15 +186,15 @@ public class OperationHandlerImplementer {
     private Set<MethodSpec> buildMethods(OperationType type) {
         switch (type) {
             case QUERY:
-                return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLProblem(QUERY_TYPE_NOT_EXIST)))
+                return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
                         .map(fieldDefinitionContext -> buildMethod(fieldDefinitionContext, type))
                         .collect(Collectors.toCollection(LinkedHashSet::new));
             case MUTATION:
-                return manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem(MUTATION_TYPE_NOT_EXIST)))
+                return manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
                         .map(fieldDefinitionContext -> buildMethod(fieldDefinitionContext, type))
                         .collect(Collectors.toCollection(LinkedHashSet::new));
             default:
-                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
     }
 
@@ -218,14 +218,14 @@ public class OperationHandlerImplementer {
         switch (type) {
             case QUERY:
                 operationName = "query";
-                operationTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLProblem(QUERY_TYPE_NOT_EXIST));
+                operationTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
                 break;
             case MUTATION:
                 operationName = "mutation";
-                operationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem(MUTATION_TYPE_NOT_EXIST));
+                operationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
                 break;
             default:
-                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
 
         return MethodSpec.methodBuilder(operationName)
@@ -263,7 +263,7 @@ public class OperationHandlerImplementer {
                     .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
                     .filter(tuple2 -> typeManager.getInvokeFieldName(tuple2._2().getSimpleName().toString()).equals(fieldDefinitionContext.name().getText()))
                     .findFirst()
-                    .orElseThrow(() -> new ElementProblem(INVOKE_METHOD_NOT_EXIST.bind(type.name(), fieldDefinitionContext.name().getText())));
+                    .orElseThrow(() -> new ElementProcessException(INVOKE_METHOD_NOT_EXIST.bind(type.name(), fieldDefinitionContext.name().getText())));
 
             builder.addStatement("$T result = $L.get().$L($L)",
                     typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
@@ -370,7 +370,7 @@ public class OperationHandlerImplementer {
 
         switch (type) {
             case QUERY:
-                manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLProblem(QUERY_TYPE_NOT_EXIST)))
+                manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
                         .forEach(fieldDefinitionContext ->
                                 builder.addStatement("put($S, this::$L)",
                                         fieldDefinitionContext.name().getText(),
@@ -379,7 +379,7 @@ public class OperationHandlerImplementer {
                         );
                 break;
             case MUTATION:
-                manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem(MUTATION_TYPE_NOT_EXIST)))
+                manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
                         .forEach(fieldDefinitionContext ->
                                 builder.addStatement("put($S, this::$L)",
                                         fieldDefinitionContext.name().getText(),
@@ -388,7 +388,7 @@ public class OperationHandlerImplementer {
                         );
                 break;
             default:
-                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
         return builder.build();
     }
@@ -400,7 +400,7 @@ public class OperationHandlerImplementer {
             case MUTATION:
                 return Mutation.class;
             default:
-                throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
     }
 }

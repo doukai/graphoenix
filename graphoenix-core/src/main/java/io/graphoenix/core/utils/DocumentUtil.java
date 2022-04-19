@@ -2,7 +2,7 @@ package io.graphoenix.core.utils;
 
 import graphql.parser.antlr.GraphqlLexer;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
@@ -111,7 +111,7 @@ public enum DocumentUtil {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
                 Logger.error(e);
-                throw new GraphQLProblem(SYNTAX_ERROR.bind(msg, line, charPositionInLine), line, charPositionInLine);
+                throw new GraphQLErrors(SYNTAX_ERROR.bind(msg, line, charPositionInLine), line, charPositionInLine);
             }
         });
         return lexer;
@@ -125,7 +125,7 @@ public enum DocumentUtil {
             @Override
             public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
                 Logger.error(e);
-                throw new GraphQLProblem(SYNTAX_ERROR.bind(msg, line, charPositionInLine), line, charPositionInLine);
+                throw new GraphQLErrors(SYNTAX_ERROR.bind(msg, line, charPositionInLine), line, charPositionInLine);
             }
         });
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);

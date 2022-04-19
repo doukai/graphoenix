@@ -1,8 +1,8 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.ElementProblem;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.ElementProcessException;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.ElementErrorType.*;
+import static io.graphoenix.core.error.ElementProcessErrorType.*;
 import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 
@@ -104,7 +104,7 @@ public class MethodToQueryOperation {
                         .orElseGet(() ->
                                 getVariableArgumentName(expression)
                                         .map(argumentName -> argumentName.substring(1))
-                                        .orElseThrow(() -> new ElementProblem(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                                        .orElseThrow(() -> new ElementProcessException(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
                         )
                 )
                 .setValueWithVariable(expressionAnnotationToMap(executableElement, expression));
@@ -113,24 +113,24 @@ public class MethodToQueryOperation {
     private Map<String, Object> expressionAnnotationToMap(ExecutableElement executableElement, AnnotationMirror expression) {
         if (valueIsExpressions(expression)) {
             return getExpressionsValue(executableElement, expression)
-                    .orElseThrow(() -> new ElementProblem(EXPRESSION_EXPRESSIONS_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())));
+                    .orElseThrow(() -> new ElementProcessException(EXPRESSION_EXPRESSIONS_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())));
         } else {
             return Map.of(
                     getOperatorArgumentName(expression),
                     getOperator(expression)
                             .orElseGet(() ->
                                     getDefaultOperator(expression)
-                                            .orElseThrow(() -> new ElementProblem(EXPRESSION_OPERATOR_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                                            .orElseThrow(() -> new ElementProcessException(EXPRESSION_OPERATOR_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
                             ),
                     getValueName(expression)
                             .orElseGet(() ->
                                     getVariableName(expression, executableElement)
-                                            .orElseThrow(() -> new ElementProblem(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                                            .orElseThrow(() -> new ElementProcessException(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
                             ),
                     getValue(expression)
                             .orElseGet(() ->
                                     getVariable(expression, executableElement)
-                                            .orElseThrow(() -> new ElementProblem(EXPRESSION_VALUE_OR_VARIABLE_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                                            .orElseThrow(() -> new ElementProcessException(EXPRESSION_VALUE_OR_VARIABLE_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
                             )
             );
         }
@@ -143,7 +143,7 @@ public class MethodToQueryOperation {
                         getConditional(expressions)
                                 .orElseGet(() ->
                                         getDefaultConditional(expressions)
-                                                .orElseThrow(() -> new ElementProblem(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())))
+                                                .orElseThrow(() -> new ElementProcessException(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())))
                                 )
                 );
 
@@ -162,7 +162,7 @@ public class MethodToQueryOperation {
                 getConditional(expressions)
                         .orElseGet(() ->
                                 getDefaultConditional(expressions)
-                                        .orElseThrow(() -> new ElementProblem(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())))
+                                        .orElseThrow(() -> new ElementProcessException(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())))
                         )
         );
 
@@ -170,7 +170,7 @@ public class MethodToQueryOperation {
                 .forEach(expression ->
                         expressionsMap.put(
                                 getValueArgumentName(expression)
-                                        .orElseThrow(() -> new ElementProblem(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName()))),
+                                        .orElseThrow(() -> new ElementProcessException(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName()))),
                                 expressionAnnotationToMap(executableElement, expression)
                         )
                 );
@@ -199,7 +199,7 @@ public class MethodToQueryOperation {
                 .filter(element -> ((ExecutableElement) element).getReturnType().toString().equals(conditionalName))
                 .findFirst()
                 .map(element -> element.getSimpleName().toString())
-                .orElseThrow(() -> new ElementProblem(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())));
+                .orElseThrow(() -> new ElementProcessException(EXPRESSIONS_CONDITIONAL_NOT_EXIST.bind(expressions.getAnnotationType().asElement().getSimpleName())));
     }
 
     private Optional<AnnotationValue> getConditional(AnnotationMirror expressions) {
@@ -221,7 +221,7 @@ public class MethodToQueryOperation {
                 .filter(element -> ((ExecutableElement) element).getReturnType().toString().equals(operatorName))
                 .findFirst()
                 .map(element -> element.getSimpleName().toString())
-                .orElseThrow(() -> new ElementProblem(EXPRESSION_OPERATOR_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())));
+                .orElseThrow(() -> new ElementProcessException(EXPRESSION_OPERATOR_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())));
     }
 
     private Optional<AnnotationValue> getOperator(AnnotationMirror expression) {
@@ -372,13 +372,13 @@ public class MethodToQueryOperation {
                             }
                         }
                 )
-                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(queryTypeName, argumentName)));
+                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(queryTypeName, argumentName)));
     }
 
     private String getQueryTypeName(String queryFieldName) {
         return manager.getQueryOperationTypeName()
                 .flatMap(queryTypeName -> manager.getField(queryTypeName, queryFieldName))
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
-                .orElseThrow(() -> new GraphQLProblem(QUERY_TYPE_NOT_EXIST));
+                .orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
     }
 }

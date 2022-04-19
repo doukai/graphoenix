@@ -1,6 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
@@ -172,13 +172,13 @@ public class MethodToMutationOperation {
                             }
                         }
                 )
-                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(mutationTypeName, argumentName)));
+                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(mutationTypeName, argumentName)));
     }
 
     private String getMutationTypeName(String mutationFieldName) {
         return manager.getMutationOperationTypeName()
                 .flatMap(mutationTypeName -> manager.getField(mutationTypeName, mutationFieldName))
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
-                .orElseThrow(() -> new GraphQLProblem(MUTATION_TYPE_NOT_EXIST));
+                .orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
     }
 }

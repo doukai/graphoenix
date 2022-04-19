@@ -2,7 +2,7 @@ package io.graphoenix.mysql.translator;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.mysql.expression.JsonTable;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.mysql.utils.DBValueUtil;
@@ -288,7 +288,7 @@ public class GraphQLArgumentsToWhere {
             if (inputValueDefinitionContext.defaultValue() != null) {
                 return inputValueToExpression(typeContext, inputValueDefinitionContext, level);
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
         }
         return Optional.empty();
@@ -364,7 +364,7 @@ public class GraphQLArgumentsToWhere {
                                 )
                         );
                     } else {
-                        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
@@ -378,16 +378,16 @@ public class GraphQLArgumentsToWhere {
                     } else if (manager.isEnum(fieldTypeName)) {
                         return Optional.of(enumValueWithVariableToExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable()));
                     } else {
-                        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else {
-                    throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                 }
             } else {
-                throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
+                throw new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
             }
         } else {
-            throw new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(typeContext)));
+            throw new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(typeContext)));
         }
     }
 
@@ -413,7 +413,7 @@ public class GraphQLArgumentsToWhere {
                                 )
                         );
                     } else {
-                        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
@@ -427,16 +427,16 @@ public class GraphQLArgumentsToWhere {
                     } else if (manager.isEnum(fieldTypeName)) {
                         return Optional.of(enumValueWithVariableToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), objectFieldWithVariableContext.valueWithVariable()));
                     } else {
-                        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else {
-                    throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
+                    throw new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
                 }
             } else {
-                throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
+                throw new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
             }
         } else {
-            throw new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(typeContext)));
+            throw new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(typeContext)));
         }
     }
 
@@ -461,7 +461,7 @@ public class GraphQLArgumentsToWhere {
                                 )
                         );
                     } else {
-                        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
@@ -475,16 +475,16 @@ public class GraphQLArgumentsToWhere {
                     } else if (manager.isEnum(fieldTypeName)) {
                         return Optional.of(enumValueToExpression(objectFieldToColumn(typeContext, objectFieldContext, level), objectFieldContext.value().enumValue()));
                     } else {
-                        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else {
-                    throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
+                    throw new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
                 }
             } else {
-                throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
+                throw new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
             }
         } else {
-            throw new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(typeContext)));
+            throw new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(typeContext)));
         }
     }
 
@@ -508,7 +508,7 @@ public class GraphQLArgumentsToWhere {
                                 )
                         );
                     } else {
-                        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else if (manager.isScalar(fieldTypeName) || manager.isEnum(fieldTypeName)) {
                     if (isOperatorObject(inputValueDefinitionContext)) {
@@ -522,16 +522,16 @@ public class GraphQLArgumentsToWhere {
                     } else if (manager.isEnum(fieldTypeName)) {
                         return Optional.of(enumValueToExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level), inputValueDefinitionContext.defaultValue().value().enumValue()));
                     } else {
-                        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+                        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
                     }
                 } else {
-                    throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
+                    throw new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
                 }
             } else {
-                throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
+                throw new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
             }
         } else {
-            throw new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(typeContext)));
+            throw new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(typeContext)));
         }
     }
 
@@ -647,7 +647,7 @@ public class GraphQLArgumentsToWhere {
                         .filter(Optional::isPresent)
                         .map(Optional::get);
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
         }
         return Stream.empty();
@@ -868,7 +868,7 @@ public class GraphQLArgumentsToWhere {
         Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinition = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
 
         if (valueWithVariableContext.objectValueWithVariable() == null) {
-            throw new GraphQLProblem(UNSUPPORTED_OPERATOR.bind(valueWithVariableContext.getText()));
+            throw new GraphQLErrors(UNSUPPORTED_OPERATOR.bind(valueWithVariableContext.getText()));
         }
 
         if (inputObjectTypeDefinition.isPresent()) {
@@ -912,10 +912,10 @@ public class GraphQLArgumentsToWhere {
             } else if (defaultOperatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
                 return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
         } else {
-            throw new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type())));
+            throw new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type())));
         }
     }
 
@@ -924,7 +924,7 @@ public class GraphQLArgumentsToWhere {
                                                            GraphqlParser.ValueContext valueContext) {
 
         if (valueContext.objectValue() == null) {
-            throw new GraphQLProblem(UNSUPPORTED_OPERATOR.bind(valueContext.getText()));
+            throw new GraphQLErrors(UNSUPPORTED_OPERATOR.bind(valueContext.getText()));
         }
 
         Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinition = manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()));
@@ -970,10 +970,10 @@ public class GraphQLArgumentsToWhere {
             } else if (defaultOperatorEnumValueContext.isPresent() && subDefaultValueContext.isPresent()) {
                 return operatorValueToExpression(leftExpression, defaultOperatorEnumValueContext.get(), subInputValueDefinitionContext.get(), subDefaultValueContext.get());
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
         } else {
-            throw new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type())));
+            throw new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type())));
         }
     }
 
@@ -1116,7 +1116,7 @@ public class GraphQLArgumentsToWhere {
                 isNotNullExpression.setLeftExpression(leftExpression);
                 return isNotNullExpression;
             default:
-                throw new GraphQLProblem(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
+                throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
         }
     }
 
@@ -1173,7 +1173,7 @@ public class GraphQLArgumentsToWhere {
                 isNotNullExpression.setLeftExpression(leftExpression);
                 return isNotNullExpression;
             default:
-                throw new GraphQLProblem(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
+                throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
         }
     }
 
@@ -1235,7 +1235,7 @@ public class GraphQLArgumentsToWhere {
                 isNotNullExpression.setLeftExpression(leftExpression);
                 return isNotNullExpression;
             default:
-                throw new GraphQLProblem(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
+                throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
         }
     }
 
@@ -1466,7 +1466,7 @@ public class GraphQLArgumentsToWhere {
                 isBooleanExpression.setIsTrue(Boolean.parseBoolean(inputValueDefinitionContext.defaultValue().value().BooleanValue().getText()));
                 return Optional.of(isBooleanExpression);
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
         }
         return Optional.empty();
@@ -1536,7 +1536,7 @@ public class GraphQLArgumentsToWhere {
                     break;
             }
         } else {
-            throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
+            throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
         }
         ColumnDefinition columnDefinition = new ColumnDefinition();
         columnDefinition.setColumnName(dbNameUtil.graphqlFieldNameToColumnName(valueWithVariableContext.variable().name().getText()));

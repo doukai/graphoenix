@@ -2,12 +2,13 @@ package io.graphoenix.http.handler;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
@@ -45,9 +46,11 @@ public class GetRequestHandler {
                         graphQLRequestHandler.handle(graphQLRequest)
                                 .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                 .onErrorResume(throwable -> {
-                                    response.status(HttpResponseStatus.BAD_REQUEST);
-                                    return Mono.just(GRAPHQL_RESPONSE_UTIL.error((GraphQLProblem) throwable));
-                                })
+                                            Logger.error(throwable);
+                                            response.status(HttpResponseStatus.BAD_REQUEST);
+                                            return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
+                                        }
+                                )
                 )
                 .then();
     }

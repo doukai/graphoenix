@@ -5,7 +5,7 @@ import com.google.common.collect.Streams;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrorType;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.generator.document.Directive;
 import io.graphoenix.graphql.generator.document.DirectiveDefinition;
@@ -111,7 +111,7 @@ public class DocumentBuilder {
 
     public Schema buildSchema() {
         return new Schema()
-                .setQuery(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.QUERY_TYPE_NOT_EXIST)))
+                .setQuery(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.QUERY_TYPE_NOT_EXIST)))
                 .setMutation(manager.getMutationOperationTypeName().orElse(null));
     }
 
@@ -186,9 +186,9 @@ public class DocumentBuilder {
     }
 
     public List<Field> getMetaInterfaceFields() {
-        GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLProblem(META_INTERFACE_NOT_EXIST));
+        GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLErrors(META_INTERFACE_NOT_EXIST));
 
-        return manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLProblem(META_INTERFACE_NOT_EXIST))
+        return manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLErrors(META_INTERFACE_NOT_EXIST))
                 .fieldsDefinition().fieldDefinition().stream()
                 .map(fieldDefinitionContext -> buildfield(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, false))
                 .collect(Collectors.toList());
@@ -524,7 +524,7 @@ public class DocumentBuilder {
         String typeName = objectTypeDefinitionContext.name().getText();
         GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(typeName, "cursor").findFirst()
                 .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
-                .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
+                .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
         return new ObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.EDGE.toString()))
                 .addField(new Field().setName("node").setTypeName(objectTypeDefinitionContext.name().getText()))

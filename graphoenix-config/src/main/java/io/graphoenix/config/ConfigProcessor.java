@@ -29,7 +29,7 @@ import dagger.Component;
 import dagger.Provides;
 import io.graphoenix.inject.ComponentProxyProcessor;
 import io.graphoenix.inject.ProcessorManager;
-import io.graphoenix.inject.error.InjectionProblem;
+import io.graphoenix.inject.error.InjectionProcessException;
 import io.vavr.control.Try;
 import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -40,9 +40,9 @@ import org.eclipse.microprofile.config.spi.Converter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.inject.error.InjectionErrorType.COMPONENT_GET_METHOD_NOT_EXIST;
-import static io.graphoenix.inject.error.InjectionErrorType.CONFIG_PROPERTIES_PREFIX_NOT_EXIST;
-import static io.graphoenix.inject.error.InjectionErrorType.CONFIG_PROPERTY_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.COMPONENT_GET_METHOD_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.CONFIG_PROPERTIES_PREFIX_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.CONFIG_PROPERTY_NOT_EXIST;
 
 @AutoService(ComponentProxyProcessor.class)
 public class ConfigProcessor implements ComponentProxyProcessor {
@@ -70,7 +70,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                 .filter(fieldDeclaration -> fieldDeclaration.hasModifier(Modifier.Keyword.PUBLIC) || fieldDeclaration.hasModifier(Modifier.Keyword.PROTECTED))
                 .forEach(fieldDeclaration -> {
                             componentProxyCompilationUnit.addImport(Config.class).addImport(ConfigProvider.class).addImport(Converter.class).addImport(processorManager.getQualifiedNameByType(fieldDeclaration.getCommonType()));
-                            AnnotationExpr annotationExpr = fieldDeclaration.getAnnotationByClass(ConfigProperty.class).orElseThrow(() -> new InjectionProblem(CONFIG_PROPERTY_NOT_EXIST.bind(fieldDeclaration.toString())));
+                            AnnotationExpr annotationExpr = fieldDeclaration.getAnnotationByClass(ConfigProperty.class).orElseThrow(() -> new InjectionProcessException(CONFIG_PROPERTY_NOT_EXIST.bind(fieldDeclaration.toString())));
 
                             StringLiteralExpr name = annotationExpr.asNormalAnnotationExpr().getPairs().stream()
                                     .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
@@ -130,7 +130,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                                     .findFirst()
                                                     .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr())
                                     )
-                                    .orElseThrow(() -> new InjectionProblem(CONFIG_PROPERTIES_PREFIX_NOT_EXIST.bind(processorManager.getQualifiedNameByDeclaration(configClassDeclaration))));
+                                    .orElseThrow(() -> new InjectionProcessException(CONFIG_PROPERTIES_PREFIX_NOT_EXIST.bind(processorManager.getQualifiedNameByDeclaration(configClassDeclaration))));
 
                             methodDeclaration.createBody()
                                     .addStatement(
@@ -160,7 +160,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                 .filter(fieldDeclaration -> fieldDeclaration.hasModifier(Modifier.Keyword.PUBLIC) || fieldDeclaration.hasModifier(Modifier.Keyword.PROTECTED))
                 .forEach(fieldDeclaration -> {
                             moduleCompilationUnit.addImport(Config.class).addImport(ConfigProvider.class).addImport(Converter.class).addImport(processorManager.getQualifiedNameByType(fieldDeclaration.getCommonType()));
-                            AnnotationExpr annotationExpr = fieldDeclaration.getAnnotationByClass(ConfigProperty.class).orElseThrow(() -> new InjectionProblem(CONFIG_PROPERTY_NOT_EXIST.bind(fieldDeclaration.toString())));
+                            AnnotationExpr annotationExpr = fieldDeclaration.getAnnotationByClass(ConfigProperty.class).orElseThrow(() -> new InjectionProcessException(CONFIG_PROPERTY_NOT_EXIST.bind(fieldDeclaration.toString())));
 
                             StringLiteralExpr name = annotationExpr.asNormalAnnotationExpr().getPairs().stream()
                                     .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
@@ -217,7 +217,7 @@ public class ConfigProcessor implements ComponentProxyProcessor {
                                     .filter(Type::isClassOrInterfaceType)
                                     .map(Type::asClassOrInterfaceType)
                                     .findFirst()
-                                    .orElseThrow(() -> new InjectionProblem(COMPONENT_GET_METHOD_NOT_EXIST.bind(configPropertiesComponentClassDeclaration.getNameAsString())));
+                                    .orElseThrow(() -> new InjectionProcessException(COMPONENT_GET_METHOD_NOT_EXIST.bind(configPropertiesComponentClassDeclaration.getNameAsString())));
 
                             moduleContextStaticInitializer.addStatement(new VariableDeclarationExpr()
                                     .addVariable(

@@ -1,7 +1,7 @@
 package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLEnumManager;
@@ -412,7 +412,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             if (fragmentDefinitionContext.isPresent()) {
                 return fragmentDefinitionContext.get().selectionSet().selection().stream();
             } else {
-                throw new GraphQLProblem().push(FRAGMENT_NOT_EXIST.bind(selectionContext.fragmentSpread().fragmentName().getText()));
+                throw new GraphQLErrors().add(FRAGMENT_NOT_EXIST.bind(selectionContext.fragmentSpread().fragmentName().getText()));
             }
         } else {
             return Stream.of(selectionContext);
@@ -563,7 +563,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeContext.listType() != null) {
             return getFieldTypeName(typeContext.listType().type());
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     @Override
@@ -579,7 +579,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeContext.listType() != null) {
             return true;
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     @Override

@@ -33,6 +33,7 @@ public class GraphQLHttpServer {
 
     public void run() {
         bootstrapHandler.bootstrap();
+
         CorsConfig corsConfig =
                 CorsConfigBuilder
                         .forAnyOrigin()

@@ -1,7 +1,7 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -60,14 +60,14 @@ public class GraphQLTypeToTable {
 
     protected Optional<CreateTable> createTable(GraphqlParser.DefinitionContext definitionContext) {
         if (definitionContext.typeSystemDefinition() == null) {
-            throw new GraphQLProblem(DEFINITION_NOT_EXIST);
+            throw new GraphQLErrors(DEFINITION_NOT_EXIST);
         }
         return createTable(definitionContext.typeSystemDefinition());
     }
 
     protected Optional<CreateTable> createTable(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
         if (typeSystemDefinitionContext.typeDefinition() == null) {
-            throw new GraphQLProblem(TYPE_DEFINITION_NOT_EXIST);
+            throw new GraphQLErrors(TYPE_DEFINITION_NOT_EXIST);
         }
         return createTable(typeSystemDefinitionContext.typeDefinition());
     }
@@ -128,7 +128,7 @@ public class GraphQLTypeToTable {
                 return Optional.empty();
             }
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(fieldDefinitionContext.type().getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldDefinitionContext.type().getText()));
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.TypeNameContext typeNameContext, boolean nonNull) {
@@ -163,7 +163,7 @@ public class GraphQLTypeToTable {
         } else if (manager.isScalar(typeNameContext.name().getText())) {
             return createScalarColDataType(typeNameContext, directivesContext);
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeNameContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeNameContext.getText()));
     }
 
     protected ColDataType createEnumColDataType(GraphqlParser.TypeNameContext typeNameContext) {

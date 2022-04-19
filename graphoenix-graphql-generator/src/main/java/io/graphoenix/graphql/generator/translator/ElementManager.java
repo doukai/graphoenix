@@ -2,8 +2,8 @@ package io.graphoenix.graphql.generator.translator;
 
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.ElementProblem;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.ElementProcessException;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.graphql.generator.document.InputValue;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.ElementErrorType.EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST;
+import static io.graphoenix.core.error.ElementProcessErrorType.EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
@@ -76,7 +76,7 @@ public class ElementManager {
         return executableElement.getParameters().stream()
                 .filter(parameter -> parameter.getSimpleName().toString().equals(name))
                 .findFirst()
-                .orElseThrow(() -> new ElementProblem(EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST.bind(executableElement.getSimpleName(), name)));
+                .orElseThrow(() -> new ElementProcessException(EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST.bind(executableElement.getSimpleName(), name)));
     }
 
     public String getNameFromElement(Element element) {
@@ -157,7 +157,7 @@ public class ElementManager {
             } else if (element.getKind().equals(ElementKind.FIELD)) {
                 typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
             } else {
-                throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
+                throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
             }
         } else {
             typeName = typeElement.getSimpleName().toString();
@@ -215,7 +215,7 @@ public class ElementManager {
             } else if (element.getKind().equals(ElementKind.FIELD)) {
                 typeName = "[".concat(elementToInputTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
             } else {
-                throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
+                throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
             }
         } else {
             typeName = typeElement.getSimpleName().toString().concat(INPUT_SUFFIX);

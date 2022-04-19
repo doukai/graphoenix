@@ -9,7 +9,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.ObjectType;
@@ -155,7 +155,7 @@ public class GenerateGraphQLSourceTask extends BaseTask {
         } else if (type.isArrayType()) {
             typeName = "[".concat(getInvokeFieldTypeName(type.asArrayType().getElementType())).concat("]");
         } else {
-            throw new GraphQLProblem(GraphQLErrorType.UNSUPPORTED_FIELD_TYPE.bind(type.toString()));
+            throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_FIELD_TYPE.bind(type.toString()));
         }
         return typeName;
     }

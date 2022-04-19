@@ -1,7 +1,6 @@
-package io.graphoenix.http.handler;
+package io.graphoenix.core.handler;
 
-import io.graphoenix.core.error.GraphQLProblem;
-import io.graphoenix.core.manager.GraphQLOperationRouter;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.graphoenix.spi.dto.type.OperationType;
 import io.graphoenix.spi.handler.MutationHandler;
@@ -39,7 +38,7 @@ public class GraphQLRequestHandler {
                 return mutationHandler.mutation(requestBody.getQuery(), requestBody.getVariables())
                         .map(GRAPHQL_RESPONSE_UTIL::success);
             default:
-                throw new GraphQLProblem(UNSUPPORTED_OPERATION_TYPE);
+                throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
     }
 }

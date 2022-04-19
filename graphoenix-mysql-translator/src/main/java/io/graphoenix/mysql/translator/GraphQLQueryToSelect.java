@@ -1,7 +1,7 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.IntValue;
@@ -122,10 +122,10 @@ public class GraphQLQueryToSelect {
             if (queryOperationTypeDefinition.isPresent()) {
                 return objectSelectionToSelect(queryOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection());
             } else {
-                throw new GraphQLProblem().push(OPERATION_NOT_EXIST);
+                throw new GraphQLErrors().add(OPERATION_NOT_EXIST);
             }
         }
-        throw new GraphQLProblem().push(QUERY_NOT_EXIST);
+        throw new GraphQLErrors().add(QUERY_NOT_EXIST);
     }
 
     public Stream<Tuple2<String, Select>> operationDefinitionToSelects(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
@@ -133,7 +133,7 @@ public class GraphQLQueryToSelect {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
             if (queryOperationTypeDefinition.isPresent()) {
                 if (operationDefinitionContext.selectionSet() == null || operationDefinitionContext.selectionSet().selection().size() == 0) {
-                    throw new GraphQLProblem(SELECTION_NOT_EXIST.bind(queryOperationTypeDefinition.get().getText()));
+                    throw new GraphQLErrors(SELECTION_NOT_EXIST.bind(queryOperationTypeDefinition.get().getText()));
                 }
                 return operationDefinitionContext.selectionSet().selection().stream()
                         .map(selectionContext ->
@@ -149,7 +149,7 @@ public class GraphQLQueryToSelect {
                         .map(result -> Tuple.of(result._1(), result._2().get()));
             }
         }
-        throw new GraphQLProblem().push(QUERY_NOT_EXIST);
+        throw new GraphQLErrors().add(QUERY_NOT_EXIST);
     }
 
     public Select objectSelectionToSelect(String typeName, List<GraphqlParser.SelectionContext> selectionContextList) {
@@ -215,17 +215,17 @@ public class GraphQLQueryToSelect {
                             plainSelect.addJoins(join);
                             equalsParentColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
                         } else {
-                            GraphQLProblem graphQLProblem = new GraphQLProblem();
+                            GraphQLErrors graphQLErrors = new GraphQLErrors();
                             if (mapWithObjectDefinition.isEmpty()) {
-                                graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                                graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
                             if (mapWithFromFieldDefinition.isEmpty()) {
-                                graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                                graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
                             if (mapWithToFieldDefinition.isEmpty()) {
-                                graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                                graphQLErrors.add(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                             }
-                            throw graphQLProblem;
+                            throw graphQLErrors;
                         }
                     } else {
                         plainSelect.setFromItem(table);
@@ -234,14 +234,14 @@ public class GraphQLQueryToSelect {
                     equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
                     plainSelect.setWhere(equalsParentColumn);
                 } else {
-                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    GraphQLErrors graphQLErrors = new GraphQLErrors();
                     if (fromFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (toFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
-                    throw graphQLProblem;
+                    throw graphQLErrors;
                 }
             } else {
                 plainSelect.setFromItem(table);
@@ -252,11 +252,11 @@ public class GraphQLQueryToSelect {
 
     protected Stream<Expression> selectionToExpressionStream(String typeName, GraphqlParser.SelectionContext selectionContext, int level) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getObjectFieldDefinition(typeName, selectionContext.field().name().getText())
-                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
+                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
 
         if (manager.isConnectionField(typeName, fieldDefinitionContext.name().getText())) {
             if (selectionContext.field().selectionSet() == null || selectionContext.field().selectionSet().selection().size() == 0) {
-                throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(selectionContext.getText()));
+                throw new GraphQLErrors(OBJECT_SELECTION_NOT_EXIST.bind(selectionContext.getText()));
             }
             Optional<GraphqlParser.DirectiveContext> connection = fieldDefinitionContext.directives().directive().stream()
                     .filter(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME))
@@ -277,9 +277,9 @@ public class GraphQLQueryToSelect {
 
                 if (connectionFieldName.isPresent() && connectionAggFieldName.isPresent()) {
                     GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext = manager.getField(typeName, connectionFieldName.get())
-                            .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, connectionFieldName.get())));
+                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeName, connectionFieldName.get())));
                     GraphqlParser.FieldDefinitionContext connectionAggFieldDefinitionContext = manager.getField(typeName, connectionAggFieldName.get())
-                            .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, connectionAggFieldName.get())));
+                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeName, connectionAggFieldName.get())));
                     String connectionFieldTypeName = manager.getFieldTypeName(connectionFieldDefinitionContext.type());
 
                     return Stream.concat(
@@ -300,13 +300,13 @@ public class GraphQLQueryToSelect {
                     );
                 } else {
                     if (connectionFieldName.isEmpty()) {
-                        throw new GraphQLProblem(CONNECTION_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
+                        throw new GraphQLErrors(CONNECTION_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
                     } else {
-                        throw new GraphQLProblem(CONNECTION_AGG_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
+                        throw new GraphQLErrors(CONNECTION_AGG_FIELD_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
                     }
                 }
             }
-            throw new GraphQLProblem(CONNECTION_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
+            throw new GraphQLErrors(CONNECTION_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
         } else {
             StringValue selectionKey = selectionToStringValueKey(selectionContext);
             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
@@ -331,7 +331,7 @@ public class GraphQLQueryToSelect {
                 .findFirst()
                 .map(edges -> {
                             if (edges.field().selectionSet() == null || edges.field().selectionSet().selection().size() == 0) {
-                                throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(edges.getText()));
+                                throw new GraphQLErrors(OBJECT_SELECTION_NOT_EXIST.bind(edges.getText()));
                             }
                             return Stream.concat(
                                     edges.field().selectionSet().selection().stream()
@@ -342,7 +342,7 @@ public class GraphQLQueryToSelect {
                                                             manager.getFieldByDirective(fieldTypeName, "cursor")
                                                                     .findFirst()
                                                                     .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
-                                                                    .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)))
+                                                                    .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)))
                                                                     .name()
                                                                     .getText()
                                                     )
@@ -352,7 +352,7 @@ public class GraphQLQueryToSelect {
                                             .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("node"))
                                             .flatMap(node -> {
                                                         if (node.field().selectionSet() == null || node.field().selectionSet().selection().size() == 0) {
-                                                            throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(node.getText()));
+                                                            throw new GraphQLErrors(OBJECT_SELECTION_NOT_EXIST.bind(node.getText()));
                                                         }
                                                         return node.field().selectionSet().selection().stream().map(Field::new);
                                                     }
@@ -391,7 +391,7 @@ public class GraphQLQueryToSelect {
                 .filter(subSelectionContext -> subSelectionContext.field().name().getText().equals("totalCount"))
                 .findFirst();
         Field field = new Field(connectionAggFieldDefinitionContext.name().getText())
-                .addField(new Field(manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName))).concat("Count")));
+                .addField(new Field(manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName))).concat("Count")));
 
         if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
             LinkedHashSet<Argument> arguments = selectionContext.field().arguments().argument().stream()
@@ -450,7 +450,7 @@ public class GraphQLQueryToSelect {
                                                    int level) {
         SubSelect subSelect = new SubSelect();
         if (selectionContext.field().selectionSet() == null || selectionContext.field().selectionSet().selection().size() == 0) {
-            throw new GraphQLProblem(OBJECT_SELECTION_NOT_EXIST.bind(selectionContext.getText()));
+            throw new GraphQLErrors(OBJECT_SELECTION_NOT_EXIST.bind(selectionContext.getText()));
         }
         PlainSelect plainSelect = objectSelectionToPlainSelect(parentTypeName, typeName, selectionContext, fieldDefinitionContext, selectionContext.field().selectionSet().selection(), level);
         buildCursorArguments(plainSelect, typeName, selectionContext, fieldDefinitionContext, level);
@@ -468,7 +468,7 @@ public class GraphQLQueryToSelect {
                 idEqualsTo.setRightExpression(idValueExpression);
                 plainSelect.setWhere(idEqualsTo);
             } else {
-                throw new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                throw new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
             }
         } else {
             Optional<Expression> where = argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext, selectionContext.field().arguments(), level);
@@ -553,7 +553,7 @@ public class GraphQLQueryToSelect {
 
         GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(typeName, "cursor").findFirst()
                 .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
-                .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
+                .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
         Column cursorColumn = dbNameUtil.fieldToColumn(typeName, cursorFieldDefinitionContext, level);
 
@@ -626,7 +626,7 @@ public class GraphQLQueryToSelect {
                     orderByElement.setAsc(lastArgument.isEmpty());
                     GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(fieldTypeName, "cursor").findFirst()
                             .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
-                            .orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
+                            .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
                     orderByElement.setExpression(fieldToColumn(table, cursorFieldDefinitionContext));
                     jsonArrayAggregateFunction.setOrderByElements(Collections.singletonList(orderByElement));
                 }
@@ -670,7 +670,7 @@ public class GraphQLQueryToSelect {
                             .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                             .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue())))
                     .findFirst()
-                    .map(fieldName -> manager.getField(typeName, fieldName).orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(typeName, fieldName))));
+                    .map(fieldName -> manager.getField(typeName, fieldName).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeName, fieldName))));
         }
 
         if (manager.fieldTypeIsList(fieldDefinitionContext.type()) ||
@@ -720,9 +720,9 @@ public class GraphQLQueryToSelect {
                             function.setParameters(new ExpressionList(scalarFieldToExpression(withTable, mapWithToFieldDefinition.get())));
                         } else {
                             if (name.isEmpty()) {
-                                throw new GraphQLProblem(FUNC_NAME_NOT_EXIST.bind(func.get().getText()));
+                                throw new GraphQLErrors(FUNC_NAME_NOT_EXIST.bind(func.get().getText()));
                             } else {
-                                throw new GraphQLProblem(FUNC_FIELD_NOT_EXIST.bind(func.get().getText()));
+                                throw new GraphQLErrors(FUNC_FIELD_NOT_EXIST.bind(func.get().getText()));
                             }
                         }
                     } else {
@@ -756,24 +756,24 @@ public class GraphQLQueryToSelect {
                     subSelect.setSelectBody(plainSelect);
                     return jsonExtractFunction(subSelect, true);
                 } else {
-                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    GraphQLErrors graphQLErrors = new GraphQLErrors();
                     if (mapWithObjectDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithFromFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithToFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
-                    throw graphQLProblem;
+                    throw graphQLErrors;
                 }
             } else {
-                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
                 if (fromFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
-                throw graphQLProblem;
+                throw graphQLErrors;
             }
         } else {
             Table table = typeToTable(typeName, level);
@@ -802,9 +802,9 @@ public class GraphQLQueryToSelect {
                         return function;
                     } else {
                         if (name.isEmpty()) {
-                            throw new GraphQLProblem(FUNC_NAME_NOT_EXIST.bind(func.get().getText()));
+                            throw new GraphQLErrors(FUNC_NAME_NOT_EXIST.bind(func.get().getText()));
                         } else {
-                            throw new GraphQLProblem(FUNC_FIELD_NOT_EXIST.bind(func.get().getText()));
+                            throw new GraphQLErrors(FUNC_FIELD_NOT_EXIST.bind(func.get().getText()));
                         }
                     }
                 }
@@ -838,7 +838,7 @@ public class GraphQLQueryToSelect {
             case "AVG":
                 return "AVG";
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(enumValueContext.enumValueName().getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(enumValueContext.enumValueName().getText()));
     }
 
     protected StringValue selectionToStringValueKey(GraphqlParser.SelectionContext selectionContext) {

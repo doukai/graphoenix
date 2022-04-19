@@ -1,7 +1,7 @@
-package io.graphoenix.core.manager;
+package io.graphoenix.core.handler;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,6 +29,6 @@ public class GraphQLOperationRouter {
         } else if (operationTypeContext.SUBSCRIPTION() != null) {
             return OperationType.SUBSCRIPTION;
         }
-        throw new GraphQLProblem(UNSUPPORTED_OPERATION_TYPE);
+        throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
     }
 }

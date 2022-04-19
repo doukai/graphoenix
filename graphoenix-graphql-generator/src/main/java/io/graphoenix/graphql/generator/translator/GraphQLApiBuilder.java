@@ -1,6 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
-import io.graphoenix.core.error.ElementProblem;
+import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.graphql.generator.document.Directive;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.InputValue;
@@ -18,7 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.ElementErrorType.SOURCE_ANNOTATION_NOT_EXIST;
+import static io.graphoenix.core.error.ElementProcessErrorType.SOURCE_ANNOTATION_NOT_EXIST;
 
 @ApplicationScoped
 public class GraphQLApiBuilder {
@@ -69,7 +69,7 @@ public class GraphQLApiBuilder {
                         executableElement.getParameters().stream()
                                 .filter(variableElement -> variableElement.getAnnotation(Source.class) != null)
                                 .findFirst()
-                                .orElseThrow(() -> new ElementProblem(SOURCE_ANNOTATION_NOT_EXIST.bind(executableElement.getSimpleName()))),
+                                .orElseThrow(() -> new ElementProcessException(SOURCE_ANNOTATION_NOT_EXIST.bind(executableElement.getSimpleName()))),
                         typeUtils
                 ),
                 new Field()

@@ -1,7 +1,7 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.mysql.expression.JsonTable;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.mysql.utils.DBValueUtil;
@@ -96,19 +96,19 @@ public class GraphQLMutationToStatements {
                         operationDefinitionContext.selectionSet().selection().stream()
                                 .filter(selectionContext ->
                                         manager.isNotInvokeField(
-                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem().push(MUTATION_NOT_EXIST)),
+                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
                                                 selectionContext.field().name().getText()
                                         )
                                 )
                                 .filter(selectionContext ->
                                         manager.isNotFunctionField(
-                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem().push(MUTATION_NOT_EXIST)),
+                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
                                                 selectionContext.field().name().getText()
                                         )
                                 )
                                 .filter(selectionContext ->
                                         manager.isNotConnectionField(
-                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLProblem().push(MUTATION_NOT_EXIST)),
+                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
                                                 selectionContext.field().name().getText()
                                         )
                                 )
@@ -117,7 +117,7 @@ public class GraphQLMutationToStatements {
                 );
             }
         }
-        throw new GraphQLProblem(MUTATION_NOT_EXIST);
+        throw new GraphQLErrors(MUTATION_NOT_EXIST);
     }
 
     protected Stream<Statement> selectionToStatementStream(GraphqlParser.SelectionContext selectionContext) {
@@ -129,7 +129,7 @@ public class GraphQLMutationToStatements {
             GraphqlParser.ArgumentsContext argumentsContext = selectionContext.field().arguments();
             return argumentsToStatementStream(fieldDefinitionContext, argumentsContext);
         }
-        throw new GraphQLProblem(MUTATION_NOT_EXIST);
+        throw new GraphQLErrors(MUTATION_NOT_EXIST);
     }
 
     protected Stream<Statement> argumentsToStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
@@ -185,9 +185,9 @@ public class GraphQLMutationToStatements {
                                                                 )
                                                         )
                                                 )
-                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         Stream<Statement> listObjectInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
@@ -233,9 +233,9 @@ public class GraphQLMutationToStatements {
                                                                         )
                                                                 )
                                                 )
-                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         Stream<Statement> listInsertStatementStream = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
@@ -278,7 +278,7 @@ public class GraphQLMutationToStatements {
                                                         )
                                                 )
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         return Stream.concat(insertStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream)));
@@ -347,9 +347,9 @@ public class GraphQLMutationToStatements {
                                                                         )
                                                                 )
                                                 )
-                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
 
@@ -405,9 +405,9 @@ public class GraphQLMutationToStatements {
                                                                         )
                                                                 )
                                                 )
-                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
 
@@ -451,7 +451,7 @@ public class GraphQLMutationToStatements {
                                                         )
                                                 )
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
@@ -510,9 +510,9 @@ public class GraphQLMutationToStatements {
                                                                         )
                                                                 )
                                                 )
-                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         Stream<Statement> updateMapObjectFieldStatementStream = mapObjectTypeFieldRelationStatementStream(
@@ -558,9 +558,9 @@ public class GraphQLMutationToStatements {
                                                                         )
                                                                 )
                                                 )
-                                                .orElseThrow(() -> new GraphQLProblem(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         Stream<Statement> listInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
@@ -591,7 +591,7 @@ public class GraphQLMutationToStatements {
                                                         )
                                                 )
                                 )
-                                .orElseThrow(() -> new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
         return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
@@ -621,7 +621,7 @@ public class GraphQLMutationToStatements {
                         index
                 );
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
         }
         return Stream.empty();
@@ -749,7 +749,7 @@ public class GraphQLMutationToStatements {
                         level
                 );
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
         }
         return Stream.empty();
@@ -851,7 +851,7 @@ public class GraphQLMutationToStatements {
                         fromValueExpression
                 );
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
         }
         return Stream.empty();
@@ -917,17 +917,17 @@ public class GraphQLMutationToStatements {
                         return Stream.of(insertExpression(withTable, Arrays.asList(withParentColumn, withColumn), new ExpressionList(Arrays.asList(parentColumnExpression, columnExpression))));
                     }
                 } else {
-                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    GraphQLErrors graphQLErrors = new GraphQLErrors();
                     if (mapWithObjectDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithFromFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithToFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
-                    throw graphQLProblem;
+                    throw graphQLErrors;
                 }
             } else {
                 EqualsTo parentIdEqualsTo = new EqualsTo();
@@ -955,20 +955,20 @@ public class GraphQLMutationToStatements {
                 }
             }
         } else {
-            GraphQLProblem graphQLProblem = new GraphQLProblem();
+            GraphQLErrors graphQLErrors = new GraphQLErrors();
             if (parentIdFieldDefinition.isEmpty()) {
-                graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentFieldTypeName));
+                graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(parentFieldTypeName));
             }
             if (idFieldDefinition.isEmpty()) {
-                graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName));
+                graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName));
             }
             if (fromFieldDefinition.isEmpty()) {
-                graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
             }
             if (toFieldDefinition.isEmpty()) {
-                graphQLProblem.push(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                graphQLErrors.add(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
             }
-            throw graphQLProblem;
+            throw graphQLErrors;
         }
     }
 
@@ -1012,30 +1012,30 @@ public class GraphQLMutationToStatements {
                         return Stream.of(insertExpression(withTable, Arrays.asList(withParentColumn, withColumn), new ExpressionList(Arrays.asList(parentColumnExpression, valueExpression))));
                     }
                 } else {
-                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    GraphQLErrors graphQLErrors = new GraphQLErrors();
                     if (mapWithObjectDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithFromFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithToFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
-                    throw graphQLProblem;
+                    throw graphQLErrors;
                 }
             } else {
-                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
                 if (fromFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
                 if (parentIdFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                    graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
                 }
-                throw graphQLProblem;
+                throw graphQLErrors;
             }
         } else {
-            throw new GraphQLProblem(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+            throw new GraphQLErrors(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
         }
     }
 
@@ -1079,30 +1079,30 @@ public class GraphQLMutationToStatements {
                         return Stream.of(insertSelectExpression(withTable, Arrays.asList(withParentColumn, withColumn), selectVariablesFromJsonArray(parentColumnExpression, fieldDefinitionContext, valueWithVariableContext), true));
                     }
                 } else {
-                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    GraphQLErrors graphQLErrors = new GraphQLErrors();
                     if (mapWithObjectDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithFromFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithToFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
-                    throw graphQLProblem;
+                    throw graphQLErrors;
                 }
             } else {
-                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
                 if (fromFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
                 if (parentIdFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                    graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
                 }
-                throw graphQLProblem;
+                throw graphQLErrors;
             }
         } else {
-            throw new GraphQLProblem(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+            throw new GraphQLErrors(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
         }
     }
 
@@ -1148,24 +1148,24 @@ public class GraphQLMutationToStatements {
                     }
                     return Stream.of(deleteExpression(withTable, withParentColumnEqualsTo));
                 } else {
-                    GraphQLProblem graphQLProblem = new GraphQLProblem();
+                    GraphQLErrors graphQLErrors = new GraphQLErrors();
                     if (mapWithObjectDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
                     if (mapWithFromFieldDefinition.isEmpty()) {
-                        graphQLProblem.push(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                     }
-                    throw graphQLProblem;
+                    throw graphQLErrors;
                 }
             } else {
-                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
                 if (fromFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
                 if (parentIdFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                    graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
                 }
-                throw graphQLProblem;
+                throw graphQLErrors;
             }
         }
         return Stream.empty();
@@ -1222,20 +1222,20 @@ public class GraphQLMutationToStatements {
                     return Stream.of(deleteExpression(table, parentColumnEqualsTo));
                 }
             } else {
-                GraphQLProblem graphQLProblem = new GraphQLProblem();
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
                 if (parentIdFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(parentFieldTypeName));
+                    graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(parentFieldTypeName));
                 }
                 if (idFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName));
+                    graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName));
                 }
                 if (fromFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
                 if (toFieldDefinition.isEmpty()) {
-                    graphQLProblem.push(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    graphQLErrors.add(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                 }
-                throw graphQLProblem;
+                throw graphQLErrors;
             }
         }
         return Stream.empty();
@@ -1484,7 +1484,7 @@ public class GraphQLMutationToStatements {
                     break;
             }
         } else {
-            throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+            throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
         }
         return colDataType;
     }
@@ -1555,7 +1555,7 @@ public class GraphQLMutationToStatements {
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.enumValueWithVariableToDBValue(argumentContext.valueWithVariable());
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(argumentContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(argumentContext.getText()));
     }
 
     protected Expression objectFieldWithVariableToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
@@ -1564,7 +1564,7 @@ public class GraphQLMutationToStatements {
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.enumValueWithVariableToDBValue(objectFieldWithVariableContext.valueWithVariable());
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(objectFieldWithVariableContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(objectFieldWithVariableContext.getText()));
     }
 
     protected Expression objectFieldToDBValue(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ObjectFieldContext objectFieldContext) {
@@ -1573,7 +1573,7 @@ public class GraphQLMutationToStatements {
         } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
             return dbValueUtil.enumValueToDBValue(objectFieldContext.value());
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(objectFieldContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(objectFieldContext.getText()));
     }
 
     protected Expression defaultValueToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
@@ -1584,10 +1584,10 @@ public class GraphQLMutationToStatements {
                 } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
                     return dbValueUtil.enumValueToDBValue(inputValueDefinitionContext.defaultValue().value());
                 } else {
-                    throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(inputValueDefinitionContext.getText()));
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(inputValueDefinitionContext.getText()));
                 }
             } else {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
         }
         return null;
@@ -1607,7 +1607,7 @@ public class GraphQLMutationToStatements {
             if (fieldDefinitionContext.isPresent()) {
                 return dbNameUtil.fieldToColumn(table, fieldDefinitionContext.get());
             } else {
-                throw new GraphQLProblem(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
+                throw new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(typeContext), inputValueDefinitionContext.name().getText()));
             }
         }
         return null;
@@ -1616,7 +1616,7 @@ public class GraphQLMutationToStatements {
     public UserVariable createInsertIdUserVariable(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level, int index) {
         String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
-        return idFieldName.map(fieldName -> dbValueUtil.createInsertIdUserVariable(typeName, fieldName, level, index)).orElseThrow(() -> new GraphQLProblem(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
+        return idFieldName.map(fieldName -> dbValueUtil.createInsertIdUserVariable(typeName, fieldName, level, index)).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
     }
 
     protected Insert insertExpression(Table table,

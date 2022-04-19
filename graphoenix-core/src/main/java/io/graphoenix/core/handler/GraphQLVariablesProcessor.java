@@ -1,7 +1,7 @@
 package io.graphoenix.core.handler;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -87,13 +87,13 @@ public class GraphQLVariablesProcessor {
                 .filter(variableDefinitionContext -> variableDefinitionContext.variable().name().getText().equals(variableContext.name().getText()))
                 .map(variableDefinitionContext -> variableToValue(variableDefinitionContext, variables.get(variableDefinitionContext.variable().name().getText())))
                 .findFirst()
-                .orElseThrow(() -> new GraphQLProblem(OPERATION_VARIABLE_NOT_EXIST.bind(variableContext.name().getText(), operationDefinitionContext.name().getText())));
+                .orElseThrow(() -> new GraphQLErrors(OPERATION_VARIABLE_NOT_EXIST.bind(variableContext.name().getText(), operationDefinitionContext.name().getText())));
     }
 
     private GraphqlParser.ValueWithVariableContext variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, String variable) {
         if (variable == null) {
             if (variableDefinitionContext.type().nonNullType() != null) {
-                throw new GraphQLProblem(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
             } else {
                 variable = "null";
             }

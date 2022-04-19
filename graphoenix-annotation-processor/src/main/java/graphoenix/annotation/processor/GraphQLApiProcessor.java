@@ -5,7 +5,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
@@ -243,16 +243,16 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         element.getEnclosedElements()
                 .forEach(subElement -> {
                             if (subElement.getAnnotation(Query.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.QUERY_TYPE_NOT_EXIST));
+                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.QUERY_TYPE_NOT_EXIST));
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.registerGraphQL(objectType.toString());
                             } else if (subElement.getAnnotation(Mutation.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.MUTATION_TYPE_NOT_EXIST));
+                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.MUTATION_TYPE_NOT_EXIST));
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.registerGraphQL(objectType.toString());
                             } else if (subElement.getKind().equals(ElementKind.METHOD) && ((ExecutableElement) subElement).getParameters().stream().anyMatch(variableElement -> variableElement.getAnnotation(Source.class) != null)) {
                                 Tuple2<String, Field> objectField = graphQLApiBuilder.variableElementToObjectField((ExecutableElement) subElement, typeUtils);
-                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectField._1()).orElseThrow(() -> new GraphQLProblem(GraphQLErrorType.TYPE_NOT_EXIST.bind(objectField._1())));
+                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectField._1()).orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.TYPE_NOT_EXIST.bind(objectField._1())));
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(objectField._2());
                                 manager.registerGraphQL(objectType.toString());
                             }

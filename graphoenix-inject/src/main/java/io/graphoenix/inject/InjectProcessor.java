@@ -37,7 +37,7 @@ import com.google.common.collect.Streams;
 import dagger.Component;
 import dagger.Module;
 import dagger.Provides;
-import io.graphoenix.inject.error.InjectionProblem;
+import io.graphoenix.inject.error.InjectionProcessException;
 import io.graphoenix.spi.context.BaseModuleContext;
 import io.graphoenix.spi.context.ModuleContext;
 import jakarta.annotation.Generated;
@@ -67,11 +67,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.inject.error.InjectionErrorType.CANNOT_GET_COMPILATION_UNIT;
-import static io.graphoenix.inject.error.InjectionErrorType.COMPONENT_GET_METHOD_NOT_EXIST;
-import static io.graphoenix.inject.error.InjectionErrorType.CONSTRUCTOR_NOT_EXIST;
-import static io.graphoenix.inject.error.InjectionErrorType.MODULE_PROVIDERS_METHOD_NOT_EXIST;
-import static io.graphoenix.inject.error.InjectionErrorType.PROVIDER_TYPE_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.CANNOT_GET_COMPILATION_UNIT;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.COMPONENT_GET_METHOD_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.CONSTRUCTOR_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.MODULE_PROVIDERS_METHOD_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.PROVIDER_TYPE_NOT_EXIST;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes({
@@ -196,7 +196,7 @@ public class InjectProcessor extends AbstractProcessor {
     }
 
     private CompilationUnit buildComponentProxy(TypeElement typeElement) {
-        return processorManager.parse(typeElement).map(this::buildComponentProxy).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
+        return processorManager.parse(typeElement).map(this::buildComponentProxy).orElseThrow(() -> new InjectionProcessException(CANNOT_GET_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
     }
 
     private CompilationUnit buildComponentProxy(CompilationUnit componentCompilationUnit) {
@@ -273,7 +273,7 @@ public class InjectProcessor extends AbstractProcessor {
     }
 
     private Stream<CompilationUnit> buildProducesComponentProxyStream(TypeElement typeElement) {
-        return processorManager.parse(typeElement).map(this::buildProducesComponentProxyStream).orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
+        return processorManager.parse(typeElement).map(this::buildProducesComponentProxyStream).orElseThrow(() -> new InjectionProcessException(CANNOT_GET_COMPILATION_UNIT.bind(typeElement.getQualifiedName().toString())));
     }
 
     private Stream<CompilationUnit> buildProducesComponentProxyStream(CompilationUnit componentCompilationUnit) {
@@ -395,7 +395,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                         .map(methodCallExpr -> (Expression) methodCallExpr)
                                                                         .collect(Collectors.toCollection(NodeList::new))
                                                         )
-                                                        .orElseThrow(() -> new InjectionProblem(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
+                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
                                         )
                         )
         );
@@ -415,7 +415,7 @@ public class InjectProcessor extends AbstractProcessor {
             methodCallExpr = new MethodCallExpr()
                     .setName("getProvider")
                     .setScope(new NameExpr().setName("BeanContext"))
-                    .addArgument(new ClassExpr().setType(classOrInterfaceType.getTypeArguments().orElseThrow(() -> new InjectionProblem(PROVIDER_TYPE_NOT_EXIST)).get(0)));
+                    .addArgument(new ClassExpr().setType(classOrInterfaceType.getTypeArguments().orElseThrow(() -> new InjectionProcessException(PROVIDER_TYPE_NOT_EXIST)).get(0)));
             belongCompilationUnit.addImport(Provider.class);
         } else {
             methodCallExpr = new MethodCallExpr()
@@ -434,7 +434,7 @@ public class InjectProcessor extends AbstractProcessor {
                                 .anyMatch(classOrInterfaceType -> classOrInterfaceType.getNameAsString().equals(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString()))
                 )
                 .findFirst()
-                .orElseThrow(() -> new InjectionProblem(CANNOT_GET_COMPILATION_UNIT.bind(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString())));
+                .orElseThrow(() -> new InjectionProcessException(CANNOT_GET_COMPILATION_UNIT.bind(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString())));
     }
 
     private Stream<CompilationUnit> buildProducesModuleStream(Set<? extends Element> singletonSet,
@@ -774,7 +774,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                 componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> processorManager.getQualifiedNameByType(extendType).equals(resolvedReferenceType.getQualifiedName())))
                 )
                 .findFirst()
-                .orElseThrow(() -> new InjectionProblem(MODULE_PROVIDERS_METHOD_NOT_EXIST.bind(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration))));
+                .orElseThrow(() -> new InjectionProcessException(MODULE_PROVIDERS_METHOD_NOT_EXIST.bind(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration))));
 
         Type typeClone = providesMethodDeclaration.getType().clone();
 
@@ -853,7 +853,7 @@ public class InjectProcessor extends AbstractProcessor {
                             .filter(Type::isClassOrInterfaceType)
                             .map(Type::asClassOrInterfaceType)
                             .findFirst()
-                            .orElseThrow(() -> new InjectionProblem(COMPONENT_GET_METHOD_NOT_EXIST.bind(componentProxyComponentClassDeclaration.getNameAsString())));
+                            .orElseThrow(() -> new InjectionProcessException(COMPONENT_GET_METHOD_NOT_EXIST.bind(componentProxyComponentClassDeclaration.getNameAsString())));
 
                     moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(componentType));
 

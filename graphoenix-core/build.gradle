@@ -16,8 +16,6 @@ dependencies {
     compile project(":graphoenix-spi")
     compile project(":graphoenix-config")
     compile "com.google.guava:guava:30.1.1-jre"
-    compile "org.zalando:problem:0.26.0"
-    compile "org.zalando:problem-gson:0.26.0"
     compile "org.tinylog:tinylog-impl:2.4.1"
     compile "org.tinylog:slf4j-tinylog:2.4.1"
     compile "org.tinylog:jcl-tinylog:2.4.1"

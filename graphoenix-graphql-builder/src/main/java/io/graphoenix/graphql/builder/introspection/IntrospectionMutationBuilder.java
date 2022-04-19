@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.builder.introspection;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.graphql.generator.introspection.__Directive;
 import io.graphoenix.graphql.generator.introspection.__DirectiveLocation;
 import io.graphoenix.graphql.generator.introspection.__EnumValue;
@@ -244,7 +244,7 @@ public class IntrospectionMutationBuilder {
             nonNullType.setName(nonNullType.getOfType().getName() + "!");
             return nonNullType;
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     private __Type enumTypeDefinitionContextToType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {

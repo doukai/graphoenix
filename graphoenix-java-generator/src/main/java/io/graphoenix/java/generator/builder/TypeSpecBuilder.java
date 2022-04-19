@@ -11,7 +11,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.GraphQLProblem;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.annotation.SchemaBean;
 import io.graphoenix.spi.annotation.TypeExpression;
@@ -412,7 +412,7 @@ public class TypeSpecBuilder {
             codeBuilder.add("}");
             return codeBuilder.build();
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(valueContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(valueContext.getText()));
     }
 
     public TypeName buildType(GraphqlParser.TypeContext typeContext) {
@@ -435,7 +435,7 @@ public class TypeSpecBuilder {
                 return buildType(typeContext.nonNullType().listType(), isAnnotation, layer);
             }
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     public TypeName buildExpressionType(GraphqlParser.TypeContext typeContext, boolean isAnnotation) {
@@ -450,7 +450,7 @@ public class TypeSpecBuilder {
                 return buildExpressionType(typeContext.nonNullType().listType().type(), isAnnotation);
             }
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     public TypeName buildType(GraphqlParser.NameContext nameContext, boolean isAnnotation, int layer) {
@@ -492,7 +492,7 @@ public class TypeSpecBuilder {
                 }
             }
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(nameContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(nameContext.getText()));
     }
 
     public TypeName buildExpressionType(GraphqlParser.NameContext nameContext, boolean isAnnotation) {
@@ -511,7 +511,7 @@ public class TypeSpecBuilder {
                 return ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText());
             }
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(nameContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(nameContext.getText()));
     }
 
     public TypeName buildType(GraphqlParser.ListTypeContext listTypeContext, boolean isAnnotation, int layer) {
@@ -546,7 +546,7 @@ public class TypeSpecBuilder {
             case "Timestamp":
                 return TypeName.get(LocalDateTime.class);
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
     }
 
     public TypeName buildAnnotationType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
@@ -568,7 +568,7 @@ public class TypeSpecBuilder {
             case "BigDecimal":
                 return TypeName.get(float.class);
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
     }
 
     public CodeBlock buildAnnotationDefaultValue(GraphqlParser.TypeContext typeContext, int layer) {
@@ -598,7 +598,7 @@ public class TypeSpecBuilder {
                 );
             }
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
     }
 
     public CodeBlock buildAnnotationDefaultValue(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
@@ -619,7 +619,7 @@ public class TypeSpecBuilder {
             case "BigDecimal":
                 return CodeBlock.of("$L", 0);
         }
-        throw new GraphQLProblem(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(scalarTypeDefinitionContext.getText()));
     }
 
     public void addGetterAndSetter(FieldSpec fieldSpec, TypeSpec.Builder classBuilder, GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
