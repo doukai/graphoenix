@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class MysqlBootstrapHandler implements BootstrapHandler {
 
-    private static final int sqlCount = 500;
+    private static final int sqlCount = 300;
 
     private final MysqlConfig mysqlConfig;
     private final IGraphQLDocumentManager manager;
@@ -70,10 +70,12 @@ public class MysqlBootstrapHandler implements BootstrapHandler {
                 Logger.info("introspection data SQL insert started");
                 Operation operation = introspectionMutationBuilder.buildIntrospectionSchemaMutation();
                 Stream<String> introspectionMutationSQLStream = mutationToStatements.createStatementsSQL(operation.toString());
-                mutationExecutor.executeMutationsInBatchByGroup(introspectionMutationSQLStream, sqlCount)
+                Integer updateCountTotal = mutationExecutor.executeMutationsInBatchByGroup(introspectionMutationSQLStream, sqlCount)
                         .doOnNext(count -> Logger.info(count + " introspection data SQL insert success"))
                         .doOnComplete(() -> Logger.info("all introspection data SQL insert success"))
-                        .blockLast();
+                        .reduce(0, Integer::sum)
+                        .block();
+                Logger.debug("introspection update total:\r\n{}", updateCountTotal);
             }
             Logger.info("startup success");
         } catch (IOException | URISyntaxException e) {

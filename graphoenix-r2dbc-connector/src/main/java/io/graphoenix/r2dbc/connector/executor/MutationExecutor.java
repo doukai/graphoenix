@@ -31,29 +31,27 @@ public class MutationExecutor {
         return Flux
                 .usingWhen(
                         connectionCreator.createConnection(),
-                        connection -> {
-                            connection.beginTransaction();
-                            Batch batch = connection.createBatch();
-                            sqlStream.forEach(sql -> {
-                                        Logger.debug("execute statement:\r\n{}", sql);
-                                        batch.add(sql);
-                                    }
-                            );
-                            return batch.execute();
-                        },
-                        connection -> {
-                            connection.commitTransaction();
-                            return connection.close();
-                        },
+                        connection ->
+                                Flux.from(connection.setAutoCommit(false))
+                                        .thenMany(connection.beginTransaction())
+                                        .thenMany(
+                                                Flux.defer(() -> {
+                                                            Batch batch = connection.createBatch();
+                                                            sqlStream.forEach(sql -> {
+                                                                        Logger.debug("execute statement:\r\n{}", sql);
+                                                                        batch.add(sql);
+                                                                    }
+                                                            );
+                                                            return batch.execute();
+                                                        }
+                                                )
+                                        ),
+                        connection -> Flux.from(connection.commitTransaction()).thenMany(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            connection.rollbackTransaction();
-                            return connection.close();
+                            return Flux.from(connection.rollbackTransaction()).thenMany(connection.close());
                         },
-                        connection -> {
-                            connection.rollbackTransaction();
-                            return connection.close();
-                        }
+                        connection -> Flux.from(connection.rollbackTransaction()).thenMany(connection.close())
                 )
                 .last()
                 .flatMap(this::getJsonStringFromResult);
@@ -65,36 +63,26 @@ public class MutationExecutor {
         return Flux
                 .usingWhen(
                         connectionCreator.createConnection(),
-                        connection -> {
-                            connection.beginTransaction();
-                            return Flux.fromIterable(sqlListGroup)
-                                    .map(sqlList -> {
-                                                Batch batch = connection.createBatch();
-                                                sqlList.forEach(sql -> {
-                                                            Logger.debug("execute statement:\r\n{}", sql);
-                                                            batch.add(sql);
-                                                        }
-                                                );
-                                                return batch.execute();
-                                            }
-                                    );
-                        },
-                        connection -> {
-                            connection.commitTransaction();
-                            return connection.close();
-                        },
+                        connection ->
+                                Flux.from(connection.setAutoCommit(false))
+                                        .thenMany(connection.beginTransaction())
+                                        .thenMany(
+                                                Flux.fromIterable(sqlListGroup)
+                                                        .flatMap(sqlList -> {
+                                                                    Batch batch = connection.createBatch();
+                                                                    Logger.debug("execute statement count:\r\n{}", sqlList.size());
+                                                                    sqlList.forEach(batch::add);
+                                                                    return Mono.from(batch.execute()).flatMap(result -> Mono.from(result.getRowsUpdated()));
+                                                                }
+                                                        )
+                                        ),
+                        connection -> Flux.from(connection.commitTransaction()).thenMany(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            connection.rollbackTransaction();
-                            return connection.close();
+                            return Flux.from(connection.rollbackTransaction()).thenMany(connection.close());
                         },
-                        connection -> {
-                            connection.rollbackTransaction();
-                            return connection.close();
-                        }
-                )
-                .flatMap(Mono::from)
-                .flatMap(result -> Mono.from(result.getRowsUpdated()));
+                        connection -> Flux.from(connection.rollbackTransaction()).thenMany(connection.close())
+                );
     }
 
     public Mono<String> executeMutations(Stream<String> sqlStream) {
@@ -106,34 +94,28 @@ public class MutationExecutor {
         return Flux
                 .usingWhen(
                         connectionCreator.createConnection(),
-                        connection -> {
-                            connection.beginTransaction();
-                            return Flux.fromStream(
-                                    sqlStream.map(sql -> {
-                                                Logger.debug("execute statement:\r\n{}", sql);
-                                                Logger.debug("parameters:\r\n{}", parameters);
-                                                Statement statement = connection.createStatement(sql);
-                                                if (parameters != null) {
-                                                    parameters.forEach(statement::bind);
-                                                }
-                                                return statement;
-                                            }
-                                    )
-                            ).flatMap(Statement::execute);
-                        },
-                        connection -> {
-                            connection.commitTransaction();
-                            return connection.close();
-                        },
+                        connection ->
+                                Flux.from(connection.setAutoCommit(false))
+                                        .thenMany(connection.beginTransaction())
+                                        .thenMany(
+                                                Flux.fromStream(sqlStream)
+                                                        .map(sql -> {
+                                                                    Logger.debug("execute statement:\r\n{}", sql);
+                                                                    Logger.debug("parameters:\r\n{}", parameters);
+                                                                    Statement statement = connection.createStatement(sql);
+                                                                    if (parameters != null) {
+                                                                        parameters.forEach(statement::bind);
+                                                                    }
+                                                                    return statement;
+                                                                }
+                                                        )
+                                                        .flatMap(Statement::execute)),
+                        connection -> Flux.from(connection.commitTransaction()).thenMany(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            connection.rollbackTransaction();
-                            return connection.close();
+                            return Flux.from(connection.rollbackTransaction()).thenMany(connection.close());
                         },
-                        connection -> {
-                            connection.rollbackTransaction();
-                            return connection.close();
-                        }
+                        connection -> Flux.from(connection.rollbackTransaction()).thenMany(connection.close())
                 )
                 .last()
                 .flatMap(this::getJsonStringFromResult);
@@ -144,32 +126,31 @@ public class MutationExecutor {
     }
 
     public Mono<String> executeMutations(String sql, Map<String, Object> parameters) {
+
         return Flux
                 .usingWhen(
                         connectionCreator.createConnection(),
-                        connection -> {
-                            connection.beginTransaction();
-                            Logger.debug("execute statement:\r\n{}", sql);
-                            Logger.debug("parameters:\r\n{}", parameters);
-                            Statement statement = connection.createStatement(sql);
-                            if (parameters != null) {
-                                parameters.forEach(statement::bind);
-                            }
-                            return statement.execute();
-                        },
-                        connection -> {
-                            connection.commitTransaction();
-                            return connection.close();
-                        },
+                        connection ->
+                                Flux.from(connection.setAutoCommit(false))
+                                        .thenMany(connection.beginTransaction())
+                                        .thenMany(
+                                                Flux.defer(() -> {
+                                                            Logger.debug("execute statement:\r\n{}", sql);
+                                                            Logger.debug("parameters:\r\n{}", parameters);
+                                                            Statement statement = connection.createStatement(sql);
+                                                            if (parameters != null) {
+                                                                parameters.forEach(statement::bind);
+                                                            }
+                                                            return statement.execute();
+                                                        }
+                                                )
+                                        ),
+                        connection -> Flux.from(connection.commitTransaction()).thenMany(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            connection.rollbackTransaction();
-                            return connection.close();
+                            return Flux.from(connection.rollbackTransaction()).thenMany(connection.close());
                         },
-                        connection -> {
-                            connection.rollbackTransaction();
-                            return connection.close();
-                        }
+                        connection -> Flux.from(connection.rollbackTransaction()).thenMany(connection.close())
                 )
                 .last()
                 .flatMap(this::getJsonStringFromResult);

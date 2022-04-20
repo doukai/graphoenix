@@ -58,25 +58,21 @@ public class QueryExecutor {
         return Flux
                 .usingWhen(
                         connectionCreator.createConnection(),
-                        connection -> Flux.fromStream(
-                                sqlStream.map(
-                                        tuple2 -> {
-                                            String sql = tuple2._2();
-                                            Logger.debug("execute select:\r\n{}", sql);
-                                            Logger.debug("parameters:\r\n{}", parameters);
-                                            Statement statement = connection.createStatement(sql);
-                                            if (parameters != null) {
-                                                parameters.forEach(statement::bind);
-                                            }
-                                            return Tuple.of(
-                                                    tuple2._1(),
-                                                    Mono.from(statement.execute())
+                        connection ->
+                                Flux.fromStream(sqlStream)
+                                        .flatMap(tuple2 -> {
+                                                    String sql = tuple2._2();
+                                                    Logger.debug("execute select:\r\n{}", sql);
+                                                    Logger.debug("parameters:\r\n{}", parameters);
+                                                    Statement statement = connection.createStatement(sql);
+                                                    if (parameters != null) {
+                                                        parameters.forEach(statement::bind);
+                                                    }
+                                                    return Mono.from(statement.execute())
                                                             .flatMap(this::getJsonStringFromResult)
-                                                            .block()
-                                            );
-                                        }
-                                )
-                        ),
+                                                            .map(jsonString -> Tuple.of(tuple2._1(), jsonString));
+                                                }
+                                        ),
                         Connection::close
                 );
     }

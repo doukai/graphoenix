@@ -25,7 +25,7 @@ public class R2DBCConfig {
     private String password;
 
     @Optional
-    private Boolean usePool = false;
+    private Boolean usePool = true;
 
     @Optional
     private Integer poolMaxSize = 10;

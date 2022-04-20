@@ -43,9 +43,9 @@ public class GraphQLHttpServer {
                         .build();
 
         DisposableServer server = HttpServer.create()
-                .option(ChannelOption.TCP_NODELAY, httpServerConfig.getTcpNoDelay())
-                .option(ChannelOption.SO_KEEPALIVE, httpServerConfig.getSoKeepAlive())
-                .option(ChannelOption.SO_BACKLOG, httpServerConfig.getSoBackLog())
+                .childOption(ChannelOption.TCP_NODELAY, httpServerConfig.getTcpNoDelay())
+                .childOption(ChannelOption.SO_KEEPALIVE, httpServerConfig.getSoKeepAlive())
+                .childOption(ChannelOption.SO_BACKLOG, httpServerConfig.getSoBackLog())
                 .doOnConnection(connection -> connection.addHandlerLast("cors", new CorsHandler(corsConfig)))
                 .route(httpServerRoutes ->
                         httpServerRoutes

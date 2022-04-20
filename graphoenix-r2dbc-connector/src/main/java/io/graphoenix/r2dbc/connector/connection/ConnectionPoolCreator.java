@@ -12,15 +12,15 @@ import java.time.Duration;
 public class ConnectionPoolCreator {
 
     private final ConnectionFactoryCreator connectionFactoryCreator;
-    private final R2DBCConfig r2DBCConfig;
+    private final ConnectionPool connectionPool;
 
     @Inject
     public ConnectionPoolCreator(ConnectionFactoryCreator connectionFactoryCreator, R2DBCConfig r2DBCConfig) {
         this.connectionFactoryCreator = connectionFactoryCreator;
-        this.r2DBCConfig = r2DBCConfig;
+        this.connectionPool = createConnectionPool(r2DBCConfig);
     }
 
-    public ConnectionPool createConnectionPool() {
+    private ConnectionPool createConnectionPool(R2DBCConfig r2DBCConfig) {
 
         ConnectionPoolConfiguration poolConfiguration = ConnectionPoolConfiguration
                 .builder(connectionFactoryCreator.createFactory())
@@ -29,5 +29,9 @@ public class ConnectionPoolCreator {
                 .build();
 
         return new ConnectionPool(poolConfiguration);
+    }
+
+    public ConnectionPool getConnectionPool() {
+        return connectionPool;
     }
 }

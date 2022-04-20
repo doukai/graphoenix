@@ -22,7 +22,7 @@ public class ConnectionCreator {
 
     public Mono<Connection> createConnection() {
         if (r2DBCConfig.getUsePool()) {
-            return connectionPoolCreator.createConnectionPool().create();
+            return connectionPoolCreator.getConnectionPool().create();
         } else {
             return Mono.from(connectionFactoryCreator.createFactory().create());
         }
