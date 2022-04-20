@@ -1,6 +1,10 @@
 package io.graphoenix.showcase.mysql.inject;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
 
 public class Class6 {
+
+    @Inject
+    public Class6() {
+    }
 }

@@ -16,7 +16,7 @@ repositories {
 dependencies {
     compile project(":graphoenix-spi")
     compile project(":graphoenix-inject")
-    compile "com.typesafe:config:1.4.1"
+    compile 'com.typesafe:config:1.4.2'
     implementation "com.google.auto.service:auto-service:1.0.1"
     implementation "org.tinylog:tinylog-impl:2.4.1"
     implementation "org.tinylog:slf4j-tinylog:2.4.1"
@@ -24,8 +24,8 @@ dependencies {
 
     annotationProcessor "com.google.auto.service:auto-service:1.0.1"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }
 
 test {

@@ -1,4 +1,4 @@
-// Generated from Graphql.g4 by ANTLR 4.9.2
+// Generated from Graphql.g4 by ANTLR 4.9.3
 
     package graphql.parser.antlr;
 

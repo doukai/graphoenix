@@ -11,7 +11,7 @@ import jakarta.inject.Provider;
 public class Class3 {
 
     @Inject
-    private Provider<Class1> class1;
+    public Provider<Class1> class1;
 
     private Provider<Class2> class2;
 

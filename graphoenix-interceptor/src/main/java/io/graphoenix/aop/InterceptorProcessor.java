@@ -280,7 +280,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                         .ifPresent(statement -> {
                                                     StringLiteralExpr methodName = new StringLiteralExpr(methodDeclaration.getNameAsString());
                                                     IntegerLiteralExpr methodParameterCount = new IntegerLiteralExpr(String.valueOf(methodDeclaration.getParameters().size()));
-                                                    ArrayCreationExpr methodParameterTypeNames = new ArrayCreationExpr().setElementType(String[].class)
+                                                    ArrayCreationExpr methodParameterTypeNames = new ArrayCreationExpr().setElementType(String.class)
                                                             .setInitializer(
                                                                     new ArrayInitializerExpr(
                                                                             methodDeclaration.getParameters().stream().map(parameter -> {
@@ -499,7 +499,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                 blockStmt.getStatements().getLast()
                                         .ifPresent(statement -> {
                                                     IntegerLiteralExpr constructorParameterCount = new IntegerLiteralExpr(String.valueOf(constructorDeclaration.getParameters().size()));
-                                                    ArrayCreationExpr constructorParameterTypeNames = new ArrayCreationExpr().setElementType(String[].class)
+                                                    ArrayCreationExpr constructorParameterTypeNames = new ArrayCreationExpr().setElementType(String.class)
                                                             .setInitializer(
                                                                     new ArrayInitializerExpr(
                                                                             constructorDeclaration.getParameters().stream().map(parameter -> {
