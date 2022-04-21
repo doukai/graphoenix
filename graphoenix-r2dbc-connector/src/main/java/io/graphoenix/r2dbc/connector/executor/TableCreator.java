@@ -21,7 +21,7 @@ public class TableCreator {
         this.connectionCreator = connectionCreator;
     }
 
-    public Mono<Integer> createTable(String sql) {
+    public Mono<Void> createTable(String sql) {
 
         return Flux
                 .usingWhen(
@@ -32,11 +32,10 @@ public class TableCreator {
                         },
                         Connection::close
                 )
-                .last()
-                .flatMap(result -> Mono.from(result.getRowsUpdated()));
+                .then();
     }
 
-    public Mono<Integer> createTables(Stream<String> sqlStream) {
+    public Mono<Void> createTables(Stream<String> sqlStream) {
 
         return Flux
                 .usingWhen(
@@ -52,7 +51,6 @@ public class TableCreator {
                         },
                         Connection::close
                 )
-                .last()
-                .flatMap(result -> Mono.from(result.getRowsUpdated()));
+                .then();
     }
 }

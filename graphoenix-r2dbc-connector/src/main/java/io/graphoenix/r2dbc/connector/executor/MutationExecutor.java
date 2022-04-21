@@ -46,12 +46,12 @@ public class MutationExecutor {
                                                         }
                                                 )
                                         ),
-                        connection -> Flux.from(connection.commitTransaction()).thenMany(connection.close()),
+                        connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            return Flux.from(connection.rollbackTransaction()).thenMany(connection.close());
+                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close());
                         },
-                        connection -> Flux.from(connection.rollbackTransaction()).thenMany(connection.close())
+                        connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                 )
                 .last()
                 .flatMap(this::getJsonStringFromResult);
@@ -72,16 +72,16 @@ public class MutationExecutor {
                                                                     Batch batch = connection.createBatch();
                                                                     Logger.debug("execute statement count:\r\n{}", sqlList.size());
                                                                     sqlList.forEach(batch::add);
-                                                                    return Mono.from(batch.execute()).flatMap(result -> Mono.from(result.getRowsUpdated()));
+                                                                    return Mono.from(batch.execute()).thenReturn(sqlList.size());
                                                                 }
                                                         )
                                         ),
-                        connection -> Flux.from(connection.commitTransaction()).thenMany(connection.close()),
+                        connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            return Flux.from(connection.rollbackTransaction()).thenMany(connection.close());
+                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close());
                         },
-                        connection -> Flux.from(connection.rollbackTransaction()).thenMany(connection.close())
+                        connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                 );
     }
 
@@ -110,12 +110,12 @@ public class MutationExecutor {
                                                                 }
                                                         )
                                                         .flatMap(Statement::execute)),
-                        connection -> Flux.from(connection.commitTransaction()).thenMany(connection.close()),
+                        connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            return Flux.from(connection.rollbackTransaction()).thenMany(connection.close());
+                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close());
                         },
-                        connection -> Flux.from(connection.rollbackTransaction()).thenMany(connection.close())
+                        connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                 )
                 .last()
                 .flatMap(this::getJsonStringFromResult);
@@ -145,12 +145,12 @@ public class MutationExecutor {
                                                         }
                                                 )
                                         ),
-                        connection -> Flux.from(connection.commitTransaction()).thenMany(connection.close()),
+                        connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            return Flux.from(connection.rollbackTransaction()).thenMany(connection.close());
+                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close());
                         },
-                        connection -> Flux.from(connection.rollbackTransaction()).thenMany(connection.close())
+                        connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                 )
                 .last()
                 .flatMap(this::getJsonStringFromResult);
