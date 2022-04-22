@@ -38,7 +38,7 @@ public class MutationExecutor {
                                                 Flux.defer(() -> {
                                                             Batch batch = connection.createBatch();
                                                             sqlStream.forEach(sql -> {
-                                                                        Logger.debug("execute statement:\r\n{}", sql);
+                                                                        Logger.info("execute statement:\r\n{}", sql);
                                                                         batch.add(sql);
                                                                     }
                                                             );
@@ -70,7 +70,7 @@ public class MutationExecutor {
                                                 Flux.fromIterable(sqlListGroup)
                                                         .flatMap(sqlList -> {
                                                                     Batch batch = connection.createBatch();
-                                                                    Logger.debug("execute statement count:\r\n{}", sqlList.size());
+                                                                    Logger.info("execute statement count:\r\n{}", sqlList.size());
                                                                     sqlList.forEach(batch::add);
                                                                     return Mono.from(batch.execute()).thenReturn(sqlList.size());
                                                                 }
@@ -100,8 +100,8 @@ public class MutationExecutor {
                                         .thenMany(
                                                 Flux.fromStream(sqlStream)
                                                         .map(sql -> {
-                                                                    Logger.debug("execute statement:\r\n{}", sql);
-                                                                    Logger.debug("parameters:\r\n{}", parameters);
+                                                                    Logger.info("execute statement:\r\n{}", sql);
+                                                                    Logger.info("sql parameters:\r\n{}", parameters);
                                                                     Statement statement = connection.createStatement(sql);
                                                                     if (parameters != null) {
                                                                         parameters.forEach(statement::bind);
@@ -135,8 +135,8 @@ public class MutationExecutor {
                                         .thenMany(connection.beginTransaction())
                                         .thenMany(
                                                 Flux.defer(() -> {
-                                                            Logger.debug("execute statement:\r\n{}", sql);
-                                                            Logger.debug("parameters:\r\n{}", parameters);
+                                                            Logger.info("execute statement:\r\n{}", sql);
+                                                            Logger.info("sql parameters:\r\n{}", parameters);
                                                             Statement statement = connection.createStatement(sql);
                                                             if (parameters != null) {
                                                                 parameters.forEach(statement::bind);

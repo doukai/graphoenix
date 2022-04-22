@@ -35,8 +35,8 @@ public class QueryExecutor {
                 .usingWhen(
                         connectionCreator.createConnection(),
                         connection -> {
-                            Logger.debug("execute select:\r\n{}", sql);
-                            Logger.debug("parameters:\r\n{}", parameters);
+                            Logger.info("execute select:\r\n{}", sql);
+                            Logger.info("sql parameters:\r\n{}", parameters);
                             Statement statement = connection.createStatement(sql);
                             if (parameters != null) {
                                 parameters.forEach(statement::bind);
@@ -62,8 +62,8 @@ public class QueryExecutor {
                                 Flux.fromStream(sqlStream)
                                         .flatMap(tuple2 -> {
                                                     String sql = tuple2._2();
-                                                    Logger.debug("execute select:\r\n{}", sql);
-                                                    Logger.debug("parameters:\r\n{}", parameters);
+                                                    Logger.info("execute select:\r\n{}", sql);
+                                                    Logger.info("sql parameters:\r\n{}", parameters);
                                                     Statement statement = connection.createStatement(sql);
                                                     if (parameters != null) {
                                                         parameters.forEach(statement::bind);

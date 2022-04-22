@@ -24,6 +24,7 @@ public enum GraphQLErrorType {
     OBJECT_SELECTION_NOT_EXIST(-37, "selection definition not exist in object type field: %s"),
     SELECTION_ARGUMENT_NOT_EXIST(-38, "argument: %s definition not exist in selection: %s"),
     NON_NULL_VALUE_NOT_EXIST(-39, "non null value not exist: %s"),
+    ID_ARGUMENT_NOT_EXIST(-40, "id argument not exist: %s"),
 
     UNSUPPORTED_OPERATION_TYPE(-41, "unsupported operation type"),
     UNSUPPORTED_FIELD_TYPE(-42, "unsupported field type: %s"),

@@ -60,6 +60,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.OBJECT_SELECTION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
@@ -148,6 +149,7 @@ public class GraphQLQueryToSelect {
                         .filter(result -> result._2().isPresent())
                         .map(result -> Tuple.of(result._1(), result._2().get()));
             }
+            throw new GraphQLErrors().add(QUERY_TYPE_NOT_EXIST);
         }
         throw new GraphQLErrors().add(QUERY_NOT_EXIST);
     }

@@ -79,17 +79,6 @@ type __EnumValue {
     deprecationReason: String
 }
 
-enum __TypeKind {
-    SCALAR
-    OBJECT
-    INTERFACE
-    UNION
-    ENUM
-    INPUT_OBJECT
-    LIST
-    NON_NULL
-}
-
 type __Directive {
     name: ID @dataType(type: "varchar")
     schemaId: Int
@@ -105,25 +94,4 @@ type __DirectiveLocations {
     id: ID @dataType(type: "int") @column(autoIncrement: true)
     directiveName: String!
     directiveLocation: __DirectiveLocation!
-}
-
-enum __DirectiveLocation {
-    QUERY
-    MUTATION
-    SUBSCRIPTION
-    FIELD
-    FRAGMENT_DEFINITION
-    FRAGMENT_SPREAD
-    INLINE_FRAGMENT
-    SCHEMA
-    SCALAR
-    OBJECT
-    FIELD_DEFINITION
-    ARGUMENT_DEFINITION
-    INTERFACE
-    UNION
-    ENUM
-    ENUM_VALUE
-    INPUT_OBJECT
-    INPUT_FIELD_DEFINITION
 }

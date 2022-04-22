@@ -27,7 +27,7 @@ public class TableCreator {
                 .usingWhen(
                         connectionCreator.createConnection(),
                         connection -> {
-                            Logger.debug("execute select:\r\n{}", sql);
+                            Logger.info("create table:\r\n{}", sql);
                             return connection.createStatement(sql).execute();
                         },
                         Connection::close
@@ -43,7 +43,7 @@ public class TableCreator {
                         connection -> {
                             Batch batch = connection.createBatch();
                             sqlStream.forEach(sql -> {
-                                        Logger.debug("create table:\r\n{}", sql);
+                                        Logger.info("create table:\r\n{}", sql);
                                         batch.add(sql);
                                     }
                             );
