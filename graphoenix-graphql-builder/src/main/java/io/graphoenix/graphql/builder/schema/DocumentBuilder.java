@@ -357,7 +357,8 @@ public class DocumentBuilder {
     public Field buildSchemaTypeField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext))
                 .setTypeName(objectTypeDefinitionContext.name().getText())
-                .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType));
+                .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
+                .addArgument(new InputValue("where").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.EXPRESSION.toString())));
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));

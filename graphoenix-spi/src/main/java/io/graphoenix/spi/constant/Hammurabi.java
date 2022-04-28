@@ -5,6 +5,7 @@ public class Hammurabi {
     public static final String META_INTERFACE_NAME = "Meta";
     public static final String DEPRECATED_FIELD_NAME = "isDeprecated";
     public static final String DEPRECATED_INPUT_NAME = "includeDeprecated";
+    public static final String WHERE_INPUT_NAME = "where";
     public static final String FIRST_INPUT_NAME = "first";
     public static final String LAST_INPUT_NAME = "last";
     public static final String OFFSET_INPUT_NAME = "offset";

@@ -333,13 +333,6 @@ public class IntrospectionMutationBuilder {
         return type;
     }
 
-    private __Type innerScalarTypeDefinitionContextToType(String scalarName) {
-        __Type type = new __Type();
-        type.setKind(__TypeKind.SCALAR);
-        type.setName(scalarName);
-        return type;
-    }
-
     private __Directive directiveDefinitionContextToDirective(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
         __Directive directive = new __Directive();
         directive.setName(directiveDefinitionContext.name().getText());

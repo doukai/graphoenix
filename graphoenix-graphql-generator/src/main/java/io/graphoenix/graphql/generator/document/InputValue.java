@@ -13,6 +13,13 @@ public class InputValue {
     private Set<String> directives;
     private String description;
 
+    public InputValue() {
+    }
+
+    public InputValue(String name) {
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }
