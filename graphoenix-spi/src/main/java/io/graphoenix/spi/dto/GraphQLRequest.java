@@ -1,5 +1,7 @@
 package io.graphoenix.spi.dto;
 
+import com.google.gson.JsonElement;
+
 import java.util.Map;
 
 public class GraphQLRequest {
@@ -8,13 +10,13 @@ public class GraphQLRequest {
 
     private String operationName;
 
-    private Map<String, String> variables;
+    private Map<String, JsonElement> variables;
 
     public GraphQLRequest(String query) {
         this.query = query;
     }
 
-    public GraphQLRequest(String query, String operationName, Map<String, String> variables) {
+    public GraphQLRequest(String query, String operationName, Map<String, JsonElement> variables) {
         this.query = query;
         this.operationName = operationName;
         this.variables = variables;
@@ -36,11 +38,11 @@ public class GraphQLRequest {
         this.operationName = operationName;
     }
 
-    public Map<String, String> getVariables() {
+    public Map<String, JsonElement> getVariables() {
         return variables;
     }
 
-    public void setVariables(Map<String, String> variables) {
+    public void setVariables(Map<String, JsonElement> variables) {
         this.variables = variables;
     }
 }

@@ -1282,14 +1282,15 @@ public class GraphQLMutationToStatements {
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))).collect(Collectors.toList());
 
-        Optional<Expression> expression = graphQLArgumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext, argumentsContext, 0);
+        Optional<Expression> whereExpression = graphQLArgumentsToWhere.objectValueWithVariableToWhereExpression(fieldDefinitionContext, argumentsContext);
+
         Statement statement;
         switch (mutationType) {
             case UPDATE:
-                statement = argumentsToUpdate(table, fieldDefinitionContext.type(), argumentsContext, expression.orElse(null));
+                statement = argumentsToUpdate(table, fieldDefinitionContext.type(), argumentsContext, whereExpression.orElse(null));
                 break;
             case DELETE:
-                statement = argumentsToDelete(table, fieldDefinitionContext.type(), argumentsContext, expression.orElse(null));
+                statement = argumentsToDelete(table, fieldDefinitionContext.type(), argumentsContext, whereExpression.orElse(null));
                 break;
             default:
                 statement = argumentsToInsert(table, fieldDefinitionContext.type(), fieldList, argumentsContext);
@@ -1383,33 +1384,47 @@ public class GraphQLMutationToStatements {
                                        GraphqlParser.TypeContext typeContext,
                                        GraphqlParser.ArgumentsContext argumentsContext,
                                        Expression where) {
+        if (where == null) {
+            GraphqlParser.ArgumentContext idArgument = manager.getIDArgument(typeContext, argumentsContext)
+                    .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(argumentsContext.getText())));
+            Column idColumn = dbNameUtil.fieldToColumn(table, idArgument);
+            Expression idValue = argumentToDBValue(
+                    manager.getField(typeContext.typeName().name().getText(), idArgument.name().getText())
+                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeContext.typeName().name().getText(), idArgument.name().getText()))),
+                    idArgument
+            );
 
-        GraphqlParser.ArgumentContext idArgument = manager.getIDArgument(typeContext, argumentsContext)
-                .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(argumentsContext.getText())));
-        Column idColumn = dbNameUtil.fieldToColumn(table, idArgument);
-        Expression idValue = argumentToDBValue(
-                manager.getField(typeContext.typeName().name().getText(), idArgument.name().getText())
-                        .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeContext.typeName().name().getText(), idArgument.name().getText()))),
-                idArgument
-        );
+            List<UpdateSet> updateSetList = argumentsContext.argument().stream()
+                    .filter(argumentContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(argumentContext.name().getText())))
+                    .filter(argumentContext -> !argumentContext.name().getText().equals(idArgument.name().getText()))
+                    .map(argumentContext ->
+                            new UpdateSet(
+                                    dbNameUtil.fieldToColumn(table, argumentContext),
+                                    argumentToDBValue(
+                                            manager.getField(typeContext.typeName().name().getText(), argumentContext.name().getText())
+                                                    .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeContext.typeName().name().getText(), argumentContext.name().getText()))),
+                                            argumentContext
+                                    )
+                            )
+                    )
+                    .collect(Collectors.toList());
+            return updateExpression(table, updateSetList, idColumn, idValue);
+        }
 
         List<UpdateSet> updateSetList = argumentsContext.argument().stream()
-                .filter(argumentContext -> !argumentContext.name().getText().equals(idArgument.name().getText()))
+                .filter(argumentContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(argumentContext.name().getText())))
                 .map(argumentContext ->
                         new UpdateSet(
                                 dbNameUtil.fieldToColumn(table, argumentContext),
                                 argumentToDBValue(
                                         manager.getField(typeContext.typeName().name().getText(), argumentContext.name().getText())
-                                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeContext.typeName().name().getText(), idArgument.name().getText()))),
+                                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeContext.typeName().name().getText(), argumentContext.name().getText()))),
                                         argumentContext
                                 )
                         )
                 )
                 .collect(Collectors.toList());
 
-        if (where == null) {
-            return updateExpression(table, updateSetList, idColumn, idValue);
-        }
         return updateExpression(table, updateSetList, where);
     }
 
@@ -1417,16 +1432,15 @@ public class GraphQLMutationToStatements {
                                        GraphqlParser.TypeContext typeContext,
                                        GraphqlParser.ArgumentsContext argumentsContext,
                                        Expression where) {
-
-        GraphqlParser.ArgumentContext idArgument = manager.getIDArgument(typeContext, argumentsContext)
-                .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(argumentsContext.getText())));
-        Column idColumn = dbNameUtil.fieldToColumn(table, idArgument);
-        Expression idValue = argumentToDBValue(
-                manager.getField(typeContext.typeName().name().getText(), idArgument.name().getText())
-                        .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeContext.typeName().name().getText(), idArgument.name().getText()))),
-                idArgument
-        );
         if (where == null) {
+            GraphqlParser.ArgumentContext idArgument = manager.getIDArgument(typeContext, argumentsContext)
+                    .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(argumentsContext.getText())));
+            Column idColumn = dbNameUtil.fieldToColumn(table, idArgument);
+            Expression idValue = argumentToDBValue(
+                    manager.getField(typeContext.typeName().name().getText(), idArgument.name().getText())
+                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeContext.typeName().name().getText(), idArgument.name().getText()))),
+                    idArgument
+            );
             return deleteExpression(table, idColumn, idValue);
         }
         return deleteExpression(table, where);

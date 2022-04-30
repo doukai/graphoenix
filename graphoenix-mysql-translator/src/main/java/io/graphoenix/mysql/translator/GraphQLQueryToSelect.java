@@ -458,20 +458,25 @@ public class GraphQLQueryToSelect {
         buildCursorArguments(plainSelect, typeName, selectionContext, fieldDefinitionContext, level);
 
         if (manager.isMutationOperationType(parentTypeName)) {
-            Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
-
-            if (idFieldName.isPresent()) {
-                Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), selectionContext.field().arguments())
-                        .flatMap(dbValueUtil::createIdValueExpression)
-                        .orElseGet(() -> dbValueUtil.createInsertIdUserVariable(typeName, idFieldName.get(), 0, 0));
-
-                EqualsTo idEqualsTo = new EqualsTo();
-                idEqualsTo.setLeftExpression(fieldToColumn(typeToTable(typeName, level), idFieldName.get()));
-                idEqualsTo.setRightExpression(idValueExpression);
-                plainSelect.setWhere(idEqualsTo);
+            Optional<Expression> whereExpression = argumentsToWhere.objectValueWithVariableToWhereExpression(fieldDefinitionContext, selectionContext.field().arguments());
+            if (whereExpression.isPresent()) {
+                plainSelect.setWhere(whereExpression.get());
             } else {
-                throw new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
+                if (idFieldName.isPresent()) {
+                    Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), selectionContext.field().arguments())
+                            .flatMap(dbValueUtil::createIdValueExpression)
+                            .orElseGet(() -> dbValueUtil.createInsertIdUserVariable(typeName, idFieldName.get(), 0, 0));
+
+                    EqualsTo idEqualsTo = new EqualsTo();
+                    idEqualsTo.setLeftExpression(fieldToColumn(typeToTable(typeName, level), idFieldName.get()));
+                    idEqualsTo.setRightExpression(idValueExpression);
+                    plainSelect.setWhere(idEqualsTo);
+                } else {
+                    throw new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                }
             }
+
         } else {
             Optional<Expression> where = argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext, selectionContext.field().arguments(), level);
             where.ifPresent(expression -> {

@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface QueryHandler {
 
-    Mono<JsonElement> query(String graphQL, Map<String, String> variables);
+    Mono<JsonElement> query(String graphQL, Map<String, JsonElement> variables);
 }

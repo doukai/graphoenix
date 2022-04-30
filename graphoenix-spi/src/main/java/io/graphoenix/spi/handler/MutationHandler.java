@@ -7,5 +7,5 @@ import java.util.Map;
 
 public interface MutationHandler {
 
-    Mono<JsonElement> mutation(String graphQL, Map<String, String> variables);
+    Mono<JsonElement> mutation(String graphQL, Map<String, JsonElement> variables);
 }

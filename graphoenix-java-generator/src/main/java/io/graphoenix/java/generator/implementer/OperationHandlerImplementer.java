@@ -232,7 +232,7 @@ public class OperationHandlerImplementer {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
-                .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, String.class), "variables").build())
+                .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonElement.class), "variables").build())
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonElement.class)))
                 .addStatement("manager.get().registerFragment(graphQL)")
                 .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
@@ -301,15 +301,15 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                                    "$T type = new $T<$T>() {}.getType()",
-                                    ClassName.get(Type.class),
-                                    ClassName.get(TypeToken.class),
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            ).addStatement(
-                                    "$T result = $L.create().fromJson(jsonElement, type)",
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                                    "gsonBuilder"
-                            ).beginControlFlow("if(result == null)")
+                            "$T type = new $T<$T>() {}.getType()",
+                            ClassName.get(Type.class),
+                            ClassName.get(TypeToken.class),
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                    ).addStatement(
+                            "$T result = $L.create().fromJson(jsonElement, type)",
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                            "gsonBuilder"
+                    ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
                             .endControlFlow()
                             .addStatement(

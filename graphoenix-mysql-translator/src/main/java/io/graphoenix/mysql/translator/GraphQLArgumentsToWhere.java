@@ -1279,6 +1279,28 @@ public class GraphQLArgumentsToWhere {
         return existsExpression(body);
     }
 
+    protected Optional<Expression> objectValueWithVariableToWhereExpression(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                            GraphqlParser.ArgumentsContext argumentsContext) {
+
+        return fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(WHERE_INPUT_NAME))
+                .findFirst()
+                .flatMap(inputValueDefinitionContext ->
+                        argumentsContext.argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals(inputValueDefinitionContext.name().getText()))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().objectValueWithVariable() != null)
+                                .findFirst()
+                                .flatMap(argumentContext ->
+                                        objectValueWithVariableToMultipleExpression(
+                                                fieldDefinitionContext.type(),
+                                                inputValueDefinitionContext,
+                                                argumentContext.valueWithVariable().objectValueWithVariable(),
+                                                1
+                                        )
+                                )
+                );
+    }
+
 
     protected PlainSelect mapFieldPlainSelect(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext,
                                               GraphqlParser.FieldDefinitionContext fieldDefinitionContext,

@@ -64,7 +64,7 @@ public class DBNameUtil {
     }
 
     public Table typeToTable(String typeName) {
-        return new Table(graphqlTypeNameToTableName(typeName));
+        return typeToTable(typeName, 1);
     }
 
     public Table typeToTable(String typeName, int level) {
