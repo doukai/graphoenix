@@ -2,6 +2,7 @@ package io.graphoenix.mysql.utils;
 
 import com.google.common.base.CharMatcher;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.GraphQLErrors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.sf.jsqlparser.expression.DoubleValue;
@@ -19,6 +20,9 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
+
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 @ApplicationScoped
 public class DBValueUtil {
@@ -61,7 +65,13 @@ public class DBValueUtil {
     }
 
     public Expression enumValueToDBValue(GraphqlParser.ValueContext valueContext) {
-        return new StringValue(valueContext.enumValue().enumValueName().getText());
+        if (valueContext.StringValue() != null) {
+            return new StringValue(DOCUMENT_UTIL.getStringValue(valueContext.StringValue()));
+        }
+        if (valueContext.enumValue() != null) {
+            return new StringValue(valueContext.enumValue().enumValueName().getText());
+        }
+        throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueContext.getText()));
     }
 
     public Expression enumValueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
@@ -71,7 +81,13 @@ public class DBValueUtil {
         if (valueWithVariableContext.NullValue() != null) {
             return new NullValue();
         }
-        return new StringValue(valueWithVariableContext.enumValue().enumValueName().getText());
+        if (valueWithVariableContext.StringValue() != null) {
+            return new StringValue(DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
+        }
+        if (valueWithVariableContext.enumValue() != null) {
+            return new StringValue(valueWithVariableContext.enumValue().enumValueName().getText());
+        }
+        throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueWithVariableContext.getText()));
     }
 
     public Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {

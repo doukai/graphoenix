@@ -84,8 +84,7 @@ public class GraphQLTypeToTable {
 
     protected CreateTable createTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         CreateTable createTable = new CreateTable();
-
-        Table table = new Table(dbNameUtil.graphqlTypeNameToTableName(objectTypeDefinitionContext.name().getText()));
+        Table table = dbNameUtil.typeToTable(objectTypeDefinitionContext.name().getText());
         createTable.setTable(table);
         createTable.setColumnDefinitions(
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()

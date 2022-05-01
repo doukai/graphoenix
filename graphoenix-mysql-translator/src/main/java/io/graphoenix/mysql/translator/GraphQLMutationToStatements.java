@@ -1287,10 +1287,10 @@ public class GraphQLMutationToStatements {
         Statement statement;
         switch (mutationType) {
             case UPDATE:
-                statement = argumentsToUpdate(table, fieldDefinitionContext.type(), argumentsContext, whereExpression.orElse(null));
+                statement = argumentsToUpdate(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 1), fieldDefinitionContext.type(), argumentsContext, whereExpression.orElse(null));
                 break;
             case DELETE:
-                statement = argumentsToDelete(table, fieldDefinitionContext.type(), argumentsContext, whereExpression.orElse(null));
+                statement = argumentsToDelete(dbNameUtil.typeToTable(manager.getFieldTypeName(fieldDefinitionContext.type()), 1), fieldDefinitionContext.type(), argumentsContext, whereExpression.orElse(null));
                 break;
             default:
                 statement = argumentsToInsert(table, fieldDefinitionContext.type(), fieldList, argumentsContext);
