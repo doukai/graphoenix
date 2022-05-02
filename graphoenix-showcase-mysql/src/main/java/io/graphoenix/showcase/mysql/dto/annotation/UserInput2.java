@@ -30,6 +30,10 @@ public @interface UserInput2 {
 
   String[] phones() default {};
 
+  int[] test1() default {};
+
+  boolean[] test2() default {};
+
   int version() default 0;
 
   boolean isDeprecated() default false;
@@ -59,6 +63,10 @@ public @interface UserInput2 {
   String $roles() default "";
 
   String $phones() default "";
+
+  String $test1() default "";
+
+  String $test2() default "";
 
   String $version() default "";
 

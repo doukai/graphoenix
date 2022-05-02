@@ -43,6 +43,10 @@ public class User implements Meta {
 
   private Collection<String> phones;
 
+  private Collection<Integer> test1;
+
+  private Collection<Boolean> test2;
+
   private Integer version;
 
   private Boolean isDeprecated;
@@ -100,6 +104,16 @@ public class User implements Meta {
   private Integer organizationIdMax;
 
   private Integer organizationIdMin;
+
+  private Integer test1Count;
+
+  private Integer test1Sum;
+
+  private Integer test1Avg;
+
+  private Integer test1Max;
+
+  private Integer test1Min;
 
   private Role rolesAggregate;
 
@@ -193,6 +207,22 @@ public class User implements Meta {
 
   public void setPhones(Collection<String> phones) {
     this.phones = phones;
+  }
+
+  public Collection<Integer> getTest1() {
+    return this.test1;
+  }
+
+  public void setTest1(Collection<Integer> test1) {
+    this.test1 = test1;
+  }
+
+  public Collection<Boolean> getTest2() {
+    return this.test2;
+  }
+
+  public void setTest2(Collection<Boolean> test2) {
+    this.test2 = test2;
   }
 
   @Override
@@ -421,6 +451,46 @@ public class User implements Meta {
 
   public void setOrganizationIdMin(Integer organizationIdMin) {
     this.organizationIdMin = organizationIdMin;
+  }
+
+  public Integer getTest1Count() {
+    return this.test1Count;
+  }
+
+  public void setTest1Count(Integer test1Count) {
+    this.test1Count = test1Count;
+  }
+
+  public Integer getTest1Sum() {
+    return this.test1Sum;
+  }
+
+  public void setTest1Sum(Integer test1Sum) {
+    this.test1Sum = test1Sum;
+  }
+
+  public Integer getTest1Avg() {
+    return this.test1Avg;
+  }
+
+  public void setTest1Avg(Integer test1Avg) {
+    this.test1Avg = test1Avg;
+  }
+
+  public Integer getTest1Max() {
+    return this.test1Max;
+  }
+
+  public void setTest1Max(Integer test1Max) {
+    this.test1Max = test1Max;
+  }
+
+  public Integer getTest1Min() {
+    return this.test1Min;
+  }
+
+  public void setTest1Min(Integer test1Min) {
+    this.test1Min = test1Min;
   }
 
   public Role getRolesAggregate() {

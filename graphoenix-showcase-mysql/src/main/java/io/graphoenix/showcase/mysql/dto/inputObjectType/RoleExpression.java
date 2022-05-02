@@ -16,6 +16,8 @@ public class RoleExpression {
 
   private StringExpression name;
 
+  private RoleTypeExpression type;
+
   private UserExpression users;
 
   private IntExpression version;
@@ -44,6 +46,14 @@ public class RoleExpression {
 
   public void setName(StringExpression name) {
     this.name = name;
+  }
+
+  public RoleTypeExpression getType() {
+    return this.type;
+  }
+
+  public void setType(RoleTypeExpression type) {
+    this.type = type;
   }
 
   public UserExpression getUsers() {

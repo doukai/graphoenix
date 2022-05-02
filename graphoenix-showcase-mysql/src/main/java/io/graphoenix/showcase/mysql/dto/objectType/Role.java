@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
+import io.graphoenix.showcase.mysql.dto.enumType.RoleType;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
@@ -21,6 +22,8 @@ public class Role implements Meta {
 
   @NonNull
   private String name;
+
+  private Collection<RoleType> type;
 
   private Collection<User> users;
 
@@ -62,6 +65,14 @@ public class Role implements Meta {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Collection<RoleType> getType() {
+    return this.type;
+  }
+
+  public void setType(Collection<RoleType> type) {
+    this.type = type;
   }
 
   public Collection<User> getUsers() {

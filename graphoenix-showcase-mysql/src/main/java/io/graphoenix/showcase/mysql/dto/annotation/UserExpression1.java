@@ -33,6 +33,10 @@ public @interface UserExpression1 {
 
   String[] phones() default {};
 
+  int[] test1() default {};
+
+  boolean[] test2() default {};
+
   int[] version() default {};
 
   boolean[] isDeprecated() default {};
@@ -58,6 +62,10 @@ public @interface UserExpression1 {
   String[] $organizationId() default {};
 
   String[] $phones() default {};
+
+  String[] $test1() default {};
+
+  String[] $test2() default {};
 
   String[] $version() default {};
 

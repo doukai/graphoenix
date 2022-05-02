@@ -34,6 +34,10 @@ public class UserExpression {
 
   private StringExpression phones;
 
+  private IntExpression test1;
+
+  private Boolean test2;
+
   private IntExpression version;
 
   @DefaultValue("false")
@@ -132,6 +136,22 @@ public class UserExpression {
 
   public void setPhones(StringExpression phones) {
     this.phones = phones;
+  }
+
+  public IntExpression getTest1() {
+    return this.test1;
+  }
+
+  public void setTest1(IntExpression test1) {
+    this.test1 = test1;
+  }
+
+  public Boolean getTest2() {
+    return this.test2;
+  }
+
+  public void setTest2(Boolean test2) {
+    this.test2 = test2;
   }
 
   public IntExpression getVersion() {

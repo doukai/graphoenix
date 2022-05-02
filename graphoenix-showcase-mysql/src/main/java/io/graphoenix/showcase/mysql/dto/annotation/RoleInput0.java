@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
+import io.graphoenix.showcase.mysql.dto.enumType.RoleType;
 import io.graphoenix.spi.annotation.TypeInput;
 import java.lang.String;
 import java.lang.annotation.ElementType;
@@ -15,6 +16,8 @@ public @interface RoleInput0 {
 
   String name() default "";
 
+  RoleType[] type() default {};
+
   int version() default 0;
 
   boolean isDeprecated() default false;
@@ -24,6 +27,8 @@ public @interface RoleInput0 {
   String $id() default "";
 
   String $name() default "";
+
+  String $type() default "";
 
   String $users() default "";
 

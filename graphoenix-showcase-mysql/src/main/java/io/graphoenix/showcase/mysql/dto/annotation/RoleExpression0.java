@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Operator;
+import io.graphoenix.showcase.mysql.dto.enumType.RoleType;
 import io.graphoenix.spi.annotation.TypeExpression;
 import java.lang.String;
 import java.lang.annotation.ElementType;
@@ -18,6 +19,8 @@ public @interface RoleExpression0 {
 
   String[] name() default {};
 
+  RoleType[] type() default {};
+
   int[] version() default {};
 
   boolean[] isDeprecated() default {};
@@ -27,6 +30,8 @@ public @interface RoleExpression0 {
   String[] $id() default {};
 
   String[] $name() default {};
+
+  String[] $type() default {};
 
   String[] $version() default {};
 

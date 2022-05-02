@@ -40,6 +40,10 @@ public class UserInput {
 
   private Collection<String> phones;
 
+  private Collection<Integer> test1;
+
+  private Collection<Boolean> test2;
+
   private Integer version;
 
   private Boolean isDeprecated;
@@ -134,6 +138,22 @@ public class UserInput {
 
   public void setPhones(Collection<String> phones) {
     this.phones = phones;
+  }
+
+  public Collection<Integer> getTest1() {
+    return this.test1;
+  }
+
+  public void setTest1(Collection<Integer> test1) {
+    this.test1 = test1;
+  }
+
+  public Collection<Boolean> getTest2() {
+    return this.test2;
+  }
+
+  public void setTest2(Collection<Boolean> test2) {
+    this.test2 = test2;
   }
 
   public Integer getVersion() {
