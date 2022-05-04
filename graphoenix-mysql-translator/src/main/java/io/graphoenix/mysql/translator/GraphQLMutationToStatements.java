@@ -673,30 +673,36 @@ public class GraphQLMutationToStatements {
                 fromValueExpression
         );
 
-        Stream<Statement> listObjectValueInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
-                .mapToObj(index ->
-                        objectValueWithVariableToInsertStatementStream(
-                                parentFieldDefinitionContext,
-                                parentIdValueExpression,
-                                fieldDefinitionContext,
-                                inputObjectTypeDefinitionContext,
-                                arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable(),
-                                fromValueExpression,
-                                mapper.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
-                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                level,
-                                index
-                        )
-                )
-                .flatMap(statementStream -> statementStream);
+        Stream<Statement> listObjectValueInsertStatementStream =
+                arrayValueWithVariableContext == null ?
+                        Stream.empty() :
+                        IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
+                                .mapToObj(index ->
+                                        objectValueWithVariableToInsertStatementStream(
+                                                parentFieldDefinitionContext,
+                                                parentIdValueExpression,
+                                                fieldDefinitionContext,
+                                                inputObjectTypeDefinitionContext,
+                                                arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable(),
+                                                fromValueExpression,
+                                                mapper.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
+                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                level,
+                                                index
+                                        )
+                                )
+                                .flatMap(statementStream -> statementStream);
 
-        List<Expression> idValueExpressionList = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
-                .mapToObj(index ->
-                        manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
-                                .flatMap(dbValueUtil::createIdValueExpression)
-                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index))
-                )
-                .collect(Collectors.toList());
+        List<Expression> idValueExpressionList =
+                arrayValueWithVariableContext == null ?
+                        null :
+                        IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
+                                .mapToObj(index ->
+                                        manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), arrayValueWithVariableContext.valueWithVariable(index).objectValueWithVariable())
+                                                .flatMap(dbValueUtil::createIdValueExpression)
+                                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index))
+                                )
+                                .collect(Collectors.toList());
 
         Stream<Statement> deleteObjectTypeFieldRelationStatementStream = deleteObjectTypeFieldRelationStatementStream(
                 parentFieldDefinitionContext,
@@ -724,30 +730,36 @@ public class GraphQLMutationToStatements {
                 fromValueExpression
         );
 
-        Stream<Statement> listObjectValueInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
-                .mapToObj(index ->
-                        objectValueToStatementStream(
-                                parentFieldDefinitionContext,
-                                parentIdValueExpression,
-                                fieldDefinitionContext,
-                                inputObjectTypeDefinitionContext,
-                                arrayValueContext.value(index).objectValue(),
-                                fromValueExpression,
-                                mapper.getMapToValueFromObjectField(fieldDefinitionContext, arrayValueContext.value(index).objectValue())
-                                        .map(dbValueUtil::scalarValueToDBValue).orElse(null),
-                                level,
-                                index
-                        )
-                )
-                .flatMap(statementStream -> statementStream);
+        Stream<Statement> listObjectValueInsertStatementStream =
+                arrayValueContext == null ?
+                        Stream.empty() :
+                        IntStream.range(0, arrayValueContext.value().size())
+                                .mapToObj(index ->
+                                        objectValueToStatementStream(
+                                                parentFieldDefinitionContext,
+                                                parentIdValueExpression,
+                                                fieldDefinitionContext,
+                                                inputObjectTypeDefinitionContext,
+                                                arrayValueContext.value(index).objectValue(),
+                                                fromValueExpression,
+                                                mapper.getMapToValueFromObjectField(fieldDefinitionContext, arrayValueContext.value(index).objectValue())
+                                                        .map(dbValueUtil::scalarValueToDBValue).orElse(null),
+                                                level,
+                                                index
+                                        )
+                                )
+                                .flatMap(statementStream -> statementStream);
 
-        List<Expression> idValueExpressionList = IntStream.range(0, arrayValueContext.value().size())
-                .mapToObj(index ->
-                        manager.getIDObjectField(fieldDefinitionContext.type(), arrayValueContext.value(index).objectValue())
-                                .flatMap(dbValueUtil::createIdValueExpression)
-                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index))
-                )
-                .collect(Collectors.toList());
+        List<Expression> idValueExpressionList =
+                arrayValueContext == null ?
+                        null :
+                        IntStream.range(0, arrayValueContext.value().size())
+                                .mapToObj(index ->
+                                        manager.getIDObjectField(fieldDefinitionContext.type(), arrayValueContext.value(index).objectValue())
+                                                .flatMap(dbValueUtil::createIdValueExpression)
+                                                .orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index))
+                                )
+                                .collect(Collectors.toList());
 
         Stream<Statement> deleteObjectTypeFieldRelationStatementStream = deleteObjectTypeFieldRelationStatementStream(
                 parentFieldDefinitionContext,
@@ -799,17 +811,20 @@ public class GraphQLMutationToStatements {
                 fromValueExpression
         );
 
-        Stream<Insert> listValueInsertStatementStream = IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
-                .mapToObj(index ->
-                        mapScalarOrEnumTypeFieldRelationInsertStream(
-                                parentFieldDefinitionContext,
-                                parentIdValueExpression,
-                                fieldDefinitionContext,
-                                dbValueUtil.valueWithVariableToDBValue(arrayValueWithVariableContext.valueWithVariable(index)),
-                                fromValueExpression
-                        )
-                )
-                .flatMap(statementStream -> statementStream);
+        Stream<Insert> listValueInsertStatementStream =
+                arrayValueWithVariableContext == null ?
+                        Stream.empty() :
+                        IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
+                                .mapToObj(index ->
+                                        mapScalarOrEnumTypeFieldRelationInsertStream(
+                                                parentFieldDefinitionContext,
+                                                parentIdValueExpression,
+                                                fieldDefinitionContext,
+                                                dbValueUtil.valueWithVariableToDBValue(arrayValueWithVariableContext.valueWithVariable(index)),
+                                                fromValueExpression
+                                        )
+                                )
+                                .flatMap(statementStream -> statementStream);
 
         return Stream.concat(listValueDeleteStatementStream, listValueInsertStatementStream);
     }
@@ -851,17 +866,20 @@ public class GraphQLMutationToStatements {
                 fromValueExpression
         );
 
-        Stream<Insert> listValueInsertStatementStream = IntStream.range(0, arrayValueContext.value().size())
-                .mapToObj(index ->
-                        mapScalarOrEnumTypeFieldRelationInsertStream(
-                                parentFieldDefinitionContext,
-                                parentIdValueExpression,
-                                fieldDefinitionContext,
-                                dbValueUtil.valueToDBValue(arrayValueContext.value(index)),
-                                fromValueExpression
-                        )
-                )
-                .flatMap(statementStream -> statementStream);
+        Stream<Insert> listValueInsertStatementStream =
+                arrayValueContext == null ?
+                        Stream.empty() :
+                        IntStream.range(0, arrayValueContext.value().size())
+                                .mapToObj(index ->
+                                        mapScalarOrEnumTypeFieldRelationInsertStream(
+                                                parentFieldDefinitionContext,
+                                                parentIdValueExpression,
+                                                fieldDefinitionContext,
+                                                dbValueUtil.valueToDBValue(arrayValueContext.value(index)),
+                                                fromValueExpression
+                                        )
+                                )
+                                .flatMap(statementStream -> statementStream);
 
         return Stream.concat(listValueDeleteStatementStream, listValueInsertStatementStream);
     }

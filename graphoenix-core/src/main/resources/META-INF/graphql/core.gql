@@ -32,6 +32,8 @@ enum Operator {
     NNIL
     IN
     NIN
+    BT
+    NBT
 }
 
 enum Conditional {

@@ -64,6 +64,16 @@ public class DBValueUtil {
         return function;
     }
 
+    public Expression arrayFieldVariableToDBValue(int index, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        JdbcNamedParameter jdbcNamedParameter = new JdbcNamedParameter();
+        jdbcNamedParameter.setName(valueWithVariableContext.variable().name().getText());
+
+        Function function = new Function();
+        function.setName("JSON_EXTRACT");
+        function.setParameters(new ExpressionList(Arrays.asList(jdbcNamedParameter, new StringValue("$[" + index + "]"))));
+        return function;
+    }
+
     public Expression enumValueToDBValue(GraphqlParser.ValueContext valueContext) {
         if (valueContext.StringValue() != null) {
             return new StringValue(DOCUMENT_UTIL.getStringValue(valueContext.StringValue()));

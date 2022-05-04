@@ -1,6 +1,7 @@
 package io.graphoenix.mysql.translator;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.collect.Lists;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.mysql.expression.JsonTable;
@@ -45,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
@@ -1032,35 +1034,161 @@ public class GraphQLArgumentsToWhere {
     private Expression operatorValueToInExpression(Expression leftExpression,
                                                    GraphqlParser.EnumValueContext enumValueContext,
                                                    GraphqlParser.ValueContext valueContext) {
-        InExpression inExpression = new InExpression();
-        inExpression.setLeftExpression(leftExpression);
-        inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream()
-                .map(dbValueUtil::valueToDBValue)
-                .collect(Collectors.toList())));
-        if ("NIN".equals(enumValueContext.enumValueName().getText())) {
-            inExpression.setNot(true);
+
+        if ("BT".equals(enumValueContext.enumValueName().getText()) || "NBT".equals(enumValueContext.enumValueName().getText())) {
+            List<List<GraphqlParser.ValueContext>> betweenGroup = Lists.partition(valueContext.arrayValue().value(), 2);
+            return new MultiOrExpression(
+                    betweenGroup.stream()
+                            .map(valueContextList -> {
+                                        if (valueContextList.size() == 2) {
+                                            if ("BT".equals(enumValueContext.enumValueName().getText())) {
+                                                return new MultiAndExpression(
+                                                        Arrays.asList(
+                                                                new GreaterThanEquals()
+                                                                        .withLeftExpression(leftExpression)
+                                                                        .withRightExpression(dbValueUtil.valueToDBValue(valueContextList.get(0))),
+                                                                new MinorThanEquals()
+                                                                        .withLeftExpression(leftExpression)
+                                                                        .withRightExpression(dbValueUtil.valueToDBValue(valueContextList.get(1)))
+                                                        )
+                                                );
+                                            } else {
+                                                return new MultiAndExpression(
+                                                        Arrays.asList(
+                                                                new MinorThanEquals()
+                                                                        .withLeftExpression(leftExpression)
+                                                                        .withRightExpression(dbValueUtil.valueToDBValue(valueContextList.get(0))),
+                                                                new GreaterThanEquals()
+                                                                        .withLeftExpression(leftExpression)
+                                                                        .withRightExpression(dbValueUtil.valueToDBValue(valueContextList.get(1)))
+                                                        )
+                                                );
+                                            }
+                                        } else {
+                                            if ("BT".equals(enumValueContext.enumValueName().getText())) {
+                                                return new GreaterThanEquals()
+                                                        .withLeftExpression(leftExpression)
+                                                        .withRightExpression(dbValueUtil.valueToDBValue(valueContextList.get(0)));
+                                            } else {
+                                                return new MinorThanEquals()
+                                                        .withLeftExpression(leftExpression)
+                                                        .withRightExpression(dbValueUtil.valueToDBValue(valueContextList.get(0)));
+                                            }
+                                        }
+                                    }
+                            )
+                            .collect(Collectors.toList())
+            );
+        } else {
+            InExpression inExpression = new InExpression();
+            inExpression.setLeftExpression(leftExpression);
+            inExpression.setRightItemsList(
+                    new ExpressionList(
+                            valueContext.arrayValue().value().stream()
+                                    .map(dbValueUtil::valueToDBValue)
+                                    .collect(Collectors.toList())
+                    )
+            );
+            if ("NIN".equals(enumValueContext.enumValueName().getText())) {
+                inExpression.setNot(true);
+            }
+            return inExpression;
         }
-        return inExpression;
     }
 
     private Expression operatorValueWithVariableToInExpression(Expression leftExpression,
                                                                GraphqlParser.EnumValueContext enumValueContext,
                                                                GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
                                                                GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-
-        InExpression inExpression = new InExpression();
-        inExpression.setLeftExpression(leftExpression);
-        if (valueWithVariableContext.variable() != null) {
-            inExpression.setRightExpression(selectVariablesFromJsonArray(inputValueDefinitionContext, valueWithVariableContext));
+        if ("BT".equals(enumValueContext.enumValueName().getText()) || "NBT".equals(enumValueContext.enumValueName().getText())) {
+            if (valueWithVariableContext.variable() != null) {
+                if ("BT".equals(enumValueContext.enumValueName().getText())) {
+                    return new MultiAndExpression(
+                            Arrays.asList(
+                                    new GreaterThanEquals()
+                                            .withLeftExpression(leftExpression)
+                                            .withRightExpression(dbValueUtil.arrayFieldVariableToDBValue(0, valueWithVariableContext)),
+                                    new MinorThanEquals()
+                                            .withLeftExpression(leftExpression)
+                                            .withRightExpression(dbValueUtil.arrayFieldVariableToDBValue(1, valueWithVariableContext))
+                            )
+                    );
+                } else {
+                    return new MultiAndExpression(
+                            Arrays.asList(
+                                    new MinorThanEquals()
+                                            .withLeftExpression(leftExpression)
+                                            .withRightExpression(dbValueUtil.arrayFieldVariableToDBValue(0, valueWithVariableContext)),
+                                    new GreaterThanEquals()
+                                            .withLeftExpression(leftExpression)
+                                            .withRightExpression(dbValueUtil.arrayFieldVariableToDBValue(1, valueWithVariableContext))
+                            )
+                    );
+                }
+            } else {
+                List<List<GraphqlParser.ValueWithVariableContext>> betweenGroup = Lists.partition(valueWithVariableContext.arrayValueWithVariable().valueWithVariable(), 2);
+                return new MultiOrExpression(
+                        betweenGroup.stream()
+                                .map(valueWithVariableContextList -> {
+                                            if (valueWithVariableContextList.size() == 2) {
+                                                if ("BT".equals(enumValueContext.enumValueName().getText())) {
+                                                    return new MultiAndExpression(
+                                                            Arrays.asList(
+                                                                    new GreaterThanEquals()
+                                                                            .withLeftExpression(leftExpression)
+                                                                            .withRightExpression(dbValueUtil.valueWithVariableToDBValue(valueWithVariableContextList.get(0))),
+                                                                    new MinorThanEquals()
+                                                                            .withLeftExpression(leftExpression)
+                                                                            .withRightExpression(dbValueUtil.valueWithVariableToDBValue(valueWithVariableContextList.get(1)))
+                                                            )
+                                                    );
+                                                } else {
+                                                    return new MultiAndExpression(
+                                                            Arrays.asList(
+                                                                    new MinorThanEquals()
+                                                                            .withLeftExpression(leftExpression)
+                                                                            .withRightExpression(dbValueUtil.valueWithVariableToDBValue(valueWithVariableContextList.get(0))),
+                                                                    new GreaterThanEquals()
+                                                                            .withLeftExpression(leftExpression)
+                                                                            .withRightExpression(dbValueUtil.valueWithVariableToDBValue(valueWithVariableContextList.get(1)))
+                                                            )
+                                                    );
+                                                }
+                                            } else {
+                                                if ("BT".equals(enumValueContext.enumValueName().getText())) {
+                                                    return new GreaterThanEquals()
+                                                            .withLeftExpression(leftExpression)
+                                                            .withRightExpression(dbValueUtil.valueWithVariableToDBValue(valueWithVariableContextList.get(0)));
+                                                } else {
+                                                    return new MinorThanEquals()
+                                                            .withLeftExpression(leftExpression)
+                                                            .withRightExpression(dbValueUtil.valueWithVariableToDBValue(valueWithVariableContextList.get(0)));
+                                                }
+                                            }
+                                        }
+                                )
+                                .collect(Collectors.toList())
+                );
+            }
         } else {
-            inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                    .map(dbValueUtil::valueWithVariableToDBValue)
-                    .collect(Collectors.toList())));
+            InExpression inExpression = new InExpression();
+            inExpression.setLeftExpression(leftExpression);
+            if (valueWithVariableContext.variable() != null) {
+                inExpression.setRightExpression(selectVariablesFromJsonArray(inputValueDefinitionContext, valueWithVariableContext));
+            } else {
+                inExpression.setRightItemsList(
+                        new ExpressionList(
+                                valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+                                        .map(dbValueUtil::valueWithVariableToDBValue)
+                                        .collect(Collectors.toList())
+                        )
+                );
+            }
+            if ("NIN".equals(enumValueContext.enumValueName().getText())) {
+                inExpression.setNot(true);
+            }
+            return inExpression;
         }
-        if ("NIN".equals(enumValueContext.enumValueName().getText())) {
-            inExpression.setNot(true);
-        }
-        return inExpression;
     }
 
     private Expression operatorEnumValueToExpression(Expression leftExpression,
@@ -1330,7 +1458,6 @@ public class GraphQLArgumentsToWhere {
                 Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(parentTypeName, fieldName);
 
                 if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
-
                     Table withTable = dbNameUtil.typeToTable(mapWithObjectDefinition.get(), level);
                     SubSelect selectWithTable = new SubSelect();
                     PlainSelect subPlainSelect = new PlainSelect();
