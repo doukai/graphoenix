@@ -32,6 +32,16 @@ public class __FieldInput {
 
   private String deprecationReason;
 
+  private String from;
+
+  private String to;
+
+  private String withType;
+
+  private String withFrom;
+
+  private String withTo;
+
   private Integer version;
 
   private Boolean isDeprecated;
@@ -102,6 +112,46 @@ public class __FieldInput {
 
   public void setDeprecationReason(String deprecationReason) {
     this.deprecationReason = deprecationReason;
+  }
+
+  public String getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(String from) {
+    this.from = from;
+  }
+
+  public String getTo() {
+    return this.to;
+  }
+
+  public void setTo(String to) {
+    this.to = to;
+  }
+
+  public String getWithType() {
+    return this.withType;
+  }
+
+  public void setWithType(String withType) {
+    this.withType = withType;
+  }
+
+  public String getWithFrom() {
+    return this.withFrom;
+  }
+
+  public void setWithFrom(String withFrom) {
+    this.withFrom = withFrom;
+  }
+
+  public String getWithTo() {
+    return this.withTo;
+  }
+
+  public void setWithTo(String withTo) {
+    this.withTo = withTo;
   }
 
   public Integer getVersion() {

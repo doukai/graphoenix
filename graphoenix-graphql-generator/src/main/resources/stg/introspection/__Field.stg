@@ -6,6 +6,11 @@ __fieldDefinition(__field) ::= <<
     description: "<__field.description>"<endif><if(__field.type)>,
     type: <__field.type><endif><if(__field.isDeprecated)>,
     isDeprecated: <__field.isDeprecated><endif><if(__field.deprecationReason)>,
-    deprecationReason: "<__field.deprecationReason>"<endif>
+    deprecationReason: "<__field.deprecationReason>"<endif><if(__field.from)>,
+    from: "<__field.from>"<endif><if(__field.to)>,
+    to: "<__field.to>"<endif><if(__field.withType)>,
+    withType: "<__field.withType>"<endif><if(__field.withFrom)>,
+    withFrom: "<__field.withFrom>"<endif><if(__field.withTo)>,
+    withTo: "<__field.withTo>"<endif>
 }
 >>

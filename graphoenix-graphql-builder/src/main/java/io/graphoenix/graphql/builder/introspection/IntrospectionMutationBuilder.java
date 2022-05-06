@@ -15,6 +15,7 @@ import io.graphoenix.graphql.generator.operation.ArrayValueWithVariable;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.tinylog.Logger;
@@ -32,12 +33,14 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 public class IntrospectionMutationBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final IGraphQLFieldMapManager mapper;
 
     private final int levelThreshold;
 
     @Inject
-    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager) {
+    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
         this.manager = manager;
+        this.mapper = mapper;
         this.levelThreshold = 1;
     }
 
@@ -145,7 +148,8 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toCollection(LinkedHashSet::new)));
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
         }
         return type;
     }
@@ -177,12 +181,13 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                     .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1)).collect(Collectors.toCollection(LinkedHashSet::new)));
+                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
+                    .collect(Collectors.toCollection(LinkedHashSet::new)));
         }
         return type;
     }
 
-    private __Field fieldDefinitionContextToField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
+    private __Field fieldDefinitionContextToField(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
         __Field field = new __Field();
         field.setName(fieldDefinitionContext.name().getText());
 
@@ -197,6 +202,17 @@ public class IntrospectionMutationBuilder {
             field.setArgs(new LinkedHashSet<>());
         }
         field.setType(typeContextToType(fieldDefinitionContext.type(), level));
+
+        mapper.getFromFieldDefinition(typeName, fieldDefinitionContext.name().getText())
+                .ifPresent(formFieldDefinitionContext -> field.setFrom(formFieldDefinitionContext.name().getText()));
+        mapper.getToFieldDefinition(typeName, fieldDefinitionContext.name().getText())
+                .ifPresent(toFieldDefinitionContext -> field.setTo(toFieldDefinitionContext.name().getText()));
+        mapper.getWithObjectTypeDefinition(typeName, fieldDefinitionContext.name().getText())
+                .ifPresent(objectTypeDefinitionContext -> field.setWithType(objectTypeDefinitionContext.name().getText()));
+        mapper.getWithFromFieldDefinition(typeName, fieldDefinitionContext.name().getText())
+                .ifPresent(withFormFieldDefinitionContext -> field.setWithFrom(withFormFieldDefinitionContext.name().getText()));
+        mapper.getWithToFieldDefinition(typeName, fieldDefinitionContext.name().getText())
+                .ifPresent(withToFieldDefinitionContext -> field.setWithTo(withToFieldDefinitionContext.name().getText()));
         return field;
     }
 

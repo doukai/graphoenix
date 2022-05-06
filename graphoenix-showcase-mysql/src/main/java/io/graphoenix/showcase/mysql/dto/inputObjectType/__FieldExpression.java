@@ -28,6 +28,16 @@ public class __FieldExpression {
 
   private StringExpression deprecationReason;
 
+  private StringExpression from;
+
+  private StringExpression to;
+
+  private StringExpression withType;
+
+  private StringExpression withFrom;
+
+  private StringExpression withTo;
+
   private IntExpression version;
 
   @DefaultValue("false")
@@ -102,6 +112,46 @@ public class __FieldExpression {
 
   public void setDeprecationReason(StringExpression deprecationReason) {
     this.deprecationReason = deprecationReason;
+  }
+
+  public StringExpression getFrom() {
+    return this.from;
+  }
+
+  public void setFrom(StringExpression from) {
+    this.from = from;
+  }
+
+  public StringExpression getTo() {
+    return this.to;
+  }
+
+  public void setTo(StringExpression to) {
+    this.to = to;
+  }
+
+  public StringExpression getWithType() {
+    return this.withType;
+  }
+
+  public void setWithType(StringExpression withType) {
+    this.withType = withType;
+  }
+
+  public StringExpression getWithFrom() {
+    return this.withFrom;
+  }
+
+  public void setWithFrom(StringExpression withFrom) {
+    this.withFrom = withFrom;
+  }
+
+  public StringExpression getWithTo() {
+    return this.withTo;
+  }
+
+  public void setWithTo(StringExpression withTo) {
+    this.withTo = withTo;
   }
 
   public IntExpression getVersion() {

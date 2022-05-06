@@ -23,6 +23,16 @@ public @interface __FieldInput2 {
 
   String deprecationReason() default "";
 
+  String from() default "";
+
+  String to() default "";
+
+  String withType() default "";
+
+  String withFrom() default "";
+
+  String withTo() default "";
+
   int version() default 0;
 
   boolean isDeprecated() default false;
@@ -44,6 +54,16 @@ public @interface __FieldInput2 {
   String $type() default "";
 
   String $deprecationReason() default "";
+
+  String $from() default "";
+
+  String $to() default "";
+
+  String $withType() default "";
+
+  String $withFrom() default "";
+
+  String $withTo() default "";
 
   String $version() default "";
 

@@ -38,5 +38,9 @@ public enum Operator {
 
   IN,
 
-  NIN
+  NIN,
+
+  BT,
+
+  NBT
 }

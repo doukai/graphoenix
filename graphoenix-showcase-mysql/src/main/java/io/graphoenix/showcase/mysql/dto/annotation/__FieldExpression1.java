@@ -26,6 +26,16 @@ public @interface __FieldExpression1 {
 
   String[] deprecationReason() default {};
 
+  String[] from() default {};
+
+  String[] to() default {};
+
+  String[] withType() default {};
+
+  String[] withFrom() default {};
+
+  String[] withTo() default {};
+
   int[] version() default {};
 
   boolean[] isDeprecated() default {};
@@ -43,6 +53,16 @@ public @interface __FieldExpression1 {
   String[] $description() default {};
 
   String[] $deprecationReason() default {};
+
+  String[] $from() default {};
+
+  String[] $to() default {};
+
+  String[] $withType() default {};
+
+  String[] $withFrom() default {};
+
+  String[] $withTo() default {};
 
   String[] $version() default {};
 
