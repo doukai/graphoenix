@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import org.tinylog.Logger;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
@@ -100,6 +101,20 @@ public class GraphQLVariablesProcessor {
                 variable = JsonNull.INSTANCE;
             }
         }
-        return DOCUMENT_UTIL.getGraphqlParser(variable.toString()).valueWithVariable();
+        return DOCUMENT_UTIL.getGraphqlParser(jsonElementToVariableString(variable)).valueWithVariable();
+    }
+
+    public String jsonElementToVariableString(JsonElement element) {
+        if (element.isJsonObject()) {
+            return "{"
+                    .concat(
+                            element.getAsJsonObject().entrySet().stream()
+                                    .map(entry -> entry.getKey().concat(": ").concat(jsonElementToVariableString(entry.getValue())))
+                                    .collect(Collectors.joining(" "))
+                    )
+                    .concat("}");
+        } else {
+            return element.toString();
+        }
     }
 }
