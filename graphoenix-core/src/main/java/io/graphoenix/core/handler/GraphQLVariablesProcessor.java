@@ -1,5 +1,6 @@
 package io.graphoenix.core.handler;
 
+import com.google.common.collect.Streams;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import graphql.parser.antlr.GraphqlParser;
@@ -12,9 +13,9 @@ import org.tinylog.Logger;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_EXIST;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 @ApplicationScoped
 public class GraphQLVariablesProcessor {
@@ -113,6 +114,12 @@ public class GraphQLVariablesProcessor {
                                     .collect(Collectors.joining(" "))
                     )
                     .concat("}");
+        } else if (element.isJsonArray()) {
+            return "["
+                    .concat(
+                            Streams.stream(element.getAsJsonArray()).map(this::jsonElementToVariableString).collect(Collectors.joining(", "))
+                    )
+                    .concat("]");
         } else {
             return element.toString();
         }
