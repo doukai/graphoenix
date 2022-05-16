@@ -101,6 +101,12 @@ public class GraphQLVariablesProcessor {
             } else {
                 variable = JsonNull.INSTANCE;
             }
+        } else {
+            if (variable.isJsonNull()) {
+                if (variableDefinitionContext.type().nonNullType() != null) {
+                    throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
+                }
+            }
         }
         return DOCUMENT_UTIL.getGraphqlParser(jsonElementToVariableString(variable)).valueWithVariable();
     }
