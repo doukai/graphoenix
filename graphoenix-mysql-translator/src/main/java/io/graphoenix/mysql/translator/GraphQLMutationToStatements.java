@@ -201,18 +201,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -330,14 +330,20 @@ public class GraphQLMutationToStatements {
         Expression idValueExpression = objectIdFieldWithVariableContext.flatMap(dbValueUtil::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index));
 
         if (objectValueWithVariableContext == null) {
-            return mapObjectTypeFieldRelationStatementStream(
+            Stream<Delete> objectWithTypeDeleteStream = objectWithTypeDeleteStream(
                     parentFieldDefinitionContext,
                     parentIdValueExpression,
                     fieldDefinitionContext,
-                    idValueExpression,
-                    fromValueExpression,
-                    toValueExpression
+                    fromValueExpression
             );
+            Stream<Statement> objectTypeFieldRelationDeleteStream = objectTypeFieldRelationDeleteStream(
+                    parentFieldDefinitionContext,
+                    parentIdValueExpression,
+                    fieldDefinitionContext,
+                    null,
+                    fromValueExpression
+            );
+            return Stream.concat(objectWithTypeDeleteStream, objectTypeFieldRelationDeleteStream);
         }
 
         Stream<Statement> insertStatementStream = objectValueWithVariableToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueWithVariableContext, level, index);
@@ -395,7 +401,7 @@ public class GraphQLMutationToStatements {
                 );
 
 
-        Stream<Statement> updateMapObjectFieldStatementStream = mapObjectTypeFieldRelationStatementStream(
+        Stream<Statement> objectTypeFieldRelationStatementStream = objectTypeFieldRelationStatementStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -496,7 +502,7 @@ public class GraphQLMutationToStatements {
                                 .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
-        return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
+        return Stream.concat(insertStatementStream, Stream.concat(objectTypeFieldRelationStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
     }
 
     protected Stream<Statement> objectValueToStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -514,14 +520,20 @@ public class GraphQLMutationToStatements {
         Expression idValueExpression = objectIdFieldContext.flatMap(dbValueUtil::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, level, index));
 
         if (objectValueContext == null) {
-            return mapObjectTypeFieldRelationStatementStream(
+            Stream<Delete> objectWithTypeDeleteStream = objectWithTypeDeleteStream(
                     parentFieldDefinitionContext,
                     parentIdValueExpression,
                     fieldDefinitionContext,
-                    idValueExpression,
-                    fromValueExpression,
-                    toValueExpression
+                    fromValueExpression
             );
+            Stream<Statement> objectTypeFieldRelationDeleteStream = objectTypeFieldRelationDeleteStream(
+                    parentFieldDefinitionContext,
+                    parentIdValueExpression,
+                    fieldDefinitionContext,
+                    null,
+                    fromValueExpression
+            );
+            return Stream.concat(objectWithTypeDeleteStream, objectTypeFieldRelationDeleteStream);
         }
 
         Stream<Statement> insertStatementStream = objectValueToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueContext, level, index);
@@ -569,7 +581,7 @@ public class GraphQLMutationToStatements {
                                 .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
-        Stream<Statement> updateMapObjectFieldStatementStream = mapObjectTypeFieldRelationStatementStream(
+        Stream<Statement> objectTypeFieldRelationStatementStream = objectTypeFieldRelationStatementStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -648,7 +660,7 @@ public class GraphQLMutationToStatements {
                                 .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
 
-        return Stream.concat(insertStatementStream, Stream.concat(updateMapObjectFieldStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
+        return Stream.concat(insertStatementStream, Stream.concat(objectTypeFieldRelationStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream))));
     }
 
     protected Stream<Statement> objectDefaultValueToStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -689,7 +701,7 @@ public class GraphQLMutationToStatements {
                                                                                    Expression fromValueExpression,
                                                                                    int level) {
 
-        Stream<Delete> withTypeDeleteStream = withTypeDeleteStream(
+        Stream<Delete> objectWithTypeDeleteStream = objectWithTypeDeleteStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -735,7 +747,7 @@ public class GraphQLMutationToStatements {
                 fromValueExpression
         );
 
-        return Stream.concat(withTypeDeleteStream, Stream.concat(listObjectValueInsertStatementStream, objectTypeFieldRelationDeleteStream));
+        return Stream.concat(objectWithTypeDeleteStream, Stream.concat(listObjectValueInsertStatementStream, objectTypeFieldRelationDeleteStream));
     }
 
     protected Stream<Statement> listObjectValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -746,7 +758,7 @@ public class GraphQLMutationToStatements {
                                                                        Expression fromValueExpression,
                                                                        int level) {
 
-        Stream<Delete> withTypeDeleteStream = withTypeDeleteStream(
+        Stream<Delete> objectWithTypeDeleteStream = objectWithTypeDeleteStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -792,7 +804,7 @@ public class GraphQLMutationToStatements {
                 fromValueExpression
         );
 
-        return Stream.concat(withTypeDeleteStream, Stream.concat(listObjectValueInsertStatementStream, objectTypeFieldRelationDeleteStream));
+        return Stream.concat(objectWithTypeDeleteStream, Stream.concat(listObjectValueInsertStatementStream, objectTypeFieldRelationDeleteStream));
     }
 
     protected Stream<Statement> listObjectDefaultValueToStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -827,7 +839,7 @@ public class GraphQLMutationToStatements {
                                                                              GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext,
                                                                              Expression fromValueExpression) {
 
-        Stream<Delete> listValueDeleteStatementStream = withTypeDeleteStream(
+        Stream<Delete> objectWithTypeDeleteStream = objectWithTypeDeleteStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -839,7 +851,7 @@ public class GraphQLMutationToStatements {
                         Stream.empty() :
                         IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
                                 .mapToObj(index ->
-                                        mapScalarOrEnumTypeFieldRelationInsertStream(
+                                        scalarOrEnumTypeFieldRelationInsertStream(
                                                 parentFieldDefinitionContext,
                                                 parentIdValueExpression,
                                                 fieldDefinitionContext,
@@ -849,7 +861,7 @@ public class GraphQLMutationToStatements {
                                 )
                                 .flatMap(statementStream -> statementStream);
 
-        return Stream.concat(listValueDeleteStatementStream, listValueInsertStatementStream);
+        return Stream.concat(objectWithTypeDeleteStream, listValueInsertStatementStream);
     }
 
     protected Stream<Statement> arrayVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -858,14 +870,14 @@ public class GraphQLMutationToStatements {
                                                                      GraphqlParser.ValueWithVariableContext valueWithVariableContext,
                                                                      Expression fromValueExpression) {
 
-        Stream<Delete> listValueDeleteStatementStream = withTypeDeleteStream(
+        Stream<Delete> objectWithTypeDeleteStream = objectWithTypeDeleteStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
                 fromValueExpression
         );
 
-        Stream<Insert> scalarOrEnumTypeVariableInsertStream = mapScalarOrEnumTypeVariableInsertStream(
+        Stream<Insert> scalarOrEnumTypeVariableInsertStream = scalarOrEnumTypeVariableInsertStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -873,7 +885,7 @@ public class GraphQLMutationToStatements {
                 fromValueExpression
         );
 
-        return Stream.concat(listValueDeleteStatementStream, scalarOrEnumTypeVariableInsertStream);
+        return Stream.concat(objectWithTypeDeleteStream, scalarOrEnumTypeVariableInsertStream);
     }
 
     protected Stream<Statement> listValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -882,7 +894,7 @@ public class GraphQLMutationToStatements {
                                                                  GraphqlParser.ArrayValueContext arrayValueContext,
                                                                  Expression fromValueExpression) {
 
-        Stream<Delete> listValueDeleteStatementStream = withTypeDeleteStream(
+        Stream<Delete> objectWithTypeDeleteStream = objectWithTypeDeleteStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
@@ -894,7 +906,7 @@ public class GraphQLMutationToStatements {
                         Stream.empty() :
                         IntStream.range(0, arrayValueContext.value().size())
                                 .mapToObj(index ->
-                                        mapScalarOrEnumTypeFieldRelationInsertStream(
+                                        scalarOrEnumTypeFieldRelationInsertStream(
                                                 parentFieldDefinitionContext,
                                                 parentIdValueExpression,
                                                 fieldDefinitionContext,
@@ -904,7 +916,7 @@ public class GraphQLMutationToStatements {
                                 )
                                 .flatMap(statementStream -> statementStream);
 
-        return Stream.concat(listValueDeleteStatementStream, listValueInsertStatementStream);
+        return Stream.concat(objectWithTypeDeleteStream, listValueInsertStatementStream);
     }
 
     protected Stream<Statement> listDefaultValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -928,12 +940,12 @@ public class GraphQLMutationToStatements {
         return Stream.empty();
     }
 
-    protected Stream<Statement> mapObjectTypeFieldRelationStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                          Expression parentIdValueExpression,
-                                                                          GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                          Expression idValueExpression,
-                                                                          Expression fromValueExpression,
-                                                                          Expression toValueExpression) {
+    protected Stream<Statement> objectTypeFieldRelationStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                       Expression parentIdValueExpression,
+                                                                       GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                       Expression idValueExpression,
+                                                                       Expression fromValueExpression,
+                                                                       Expression toValueExpression) {
 
         String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
@@ -1043,11 +1055,11 @@ public class GraphQLMutationToStatements {
         }
     }
 
-    protected Stream<Insert> mapScalarOrEnumTypeFieldRelationInsertStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                          Expression parentIdValueExpression,
-                                                                          GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                          Expression valueExpression,
-                                                                          Expression fromValueExpression) {
+    protected Stream<Insert> scalarOrEnumTypeFieldRelationInsertStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                       Expression parentIdValueExpression,
+                                                                       GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                       Expression valueExpression,
+                                                                       Expression fromValueExpression) {
         String parentTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
         String fieldName = fieldDefinitionContext.name().getText();
         boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
@@ -1110,11 +1122,11 @@ public class GraphQLMutationToStatements {
         }
     }
 
-    protected Stream<Insert> mapScalarOrEnumTypeVariableInsertStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                     Expression parentIdValueExpression,
-                                                                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                     GraphqlParser.ValueWithVariableContext valueWithVariableContext,
-                                                                     Expression fromValueExpression) {
+    protected Stream<Insert> scalarOrEnumTypeVariableInsertStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                  Expression parentIdValueExpression,
+                                                                  GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                  GraphqlParser.ValueWithVariableContext valueWithVariableContext,
+                                                                  Expression fromValueExpression) {
         String parentTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
         String fieldName = fieldDefinitionContext.name().getText();
         boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
@@ -1177,10 +1189,10 @@ public class GraphQLMutationToStatements {
         }
     }
 
-    protected Stream<Delete> withTypeDeleteStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                  Expression parentIdValueExpression,
-                                                  GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                  Expression fromValueExpression) {
+    protected Stream<Delete> objectWithTypeDeleteStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                        Expression parentIdValueExpression,
+                                                        GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                        Expression fromValueExpression) {
 
         String parentTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
         String fieldName = fieldDefinitionContext.name().getText();
