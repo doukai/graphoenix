@@ -538,7 +538,13 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             return Optional.empty();
         }
         Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
-        return idFieldDefinition.flatMap(fieldDefinitionContext -> argumentsContext.argument().stream().filter(argumentContext -> argumentContext.name().getText().equals(fieldDefinitionContext.name().getText())).findFirst());
+        return idFieldDefinition
+                .flatMap(fieldDefinitionContext ->
+                        argumentsContext.argument().stream()
+                                .filter(argumentContext -> argumentContext.valueWithVariable().NullValue() == null)
+                                .filter(argumentContext -> argumentContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .findFirst()
+                );
     }
 
     @Override
@@ -547,7 +553,13 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             return Optional.empty();
         }
         Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
-        return idFieldDefinition.flatMap(fieldDefinitionContext -> objectValueWithVariableContext.objectFieldWithVariable().stream().filter(argumentContext -> argumentContext.name().getText().equals(fieldDefinitionContext.name().getText())).findFirst());
+        return idFieldDefinition
+                .flatMap(fieldDefinitionContext ->
+                        objectValueWithVariableContext.objectFieldWithVariable().stream()
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .findFirst()
+                );
     }
 
     @Override
@@ -556,7 +568,13 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             return Optional.empty();
         }
         Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = getObjectTypeIDFieldDefinition(getFieldTypeName(typeContext));
-        return idFieldDefinition.flatMap(fieldDefinitionContext -> objectValueContext.objectField().stream().filter(argumentContext -> argumentContext.name().getText().equals(fieldDefinitionContext.name().getText())).findFirst());
+        return idFieldDefinition
+                .flatMap(fieldDefinitionContext ->
+                        objectValueContext.objectField().stream()
+                                .filter(objectFieldContext -> objectFieldContext.value().NullValue() == null)
+                                .filter(objectFieldContext -> objectFieldContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .findFirst()
+                );
     }
 
     @Override

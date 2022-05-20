@@ -49,7 +49,7 @@ public class MutationExecutor {
                         connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close());
+                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
                         },
                         connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                 )
@@ -79,7 +79,7 @@ public class MutationExecutor {
                         connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close());
+                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
                         },
                         connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                 );
@@ -113,7 +113,7 @@ public class MutationExecutor {
                         connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close());
+                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
                         },
                         connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                 )
@@ -148,7 +148,7 @@ public class MutationExecutor {
                         connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
-                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close());
+                            return Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
                         },
                         connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
                 )

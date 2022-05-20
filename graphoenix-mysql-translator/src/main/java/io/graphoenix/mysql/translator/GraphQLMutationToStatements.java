@@ -18,7 +18,6 @@ import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
@@ -35,26 +34,30 @@ import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.statement.update.UpdateSet;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.ID_ARGUMENT_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
-import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.ID_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
 
 @ApplicationScoped
 public class GraphQLMutationToStatements {
@@ -201,18 +204,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                objectDefaultValueToStatementStream(
-                                                                        fieldDefinitionContext,
-                                                                        idValueExpression,
-                                                                        subFieldDefinitionContext,
-                                                                        inputObjectTypeDefinitionContext,
-                                                                        inputValueDefinitionContext,
-                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                        0,
-                                                                        0
+                                                                        objectDefaultValueToStatementStream(
+                                                                                fieldDefinitionContext,
+                                                                                idValueExpression,
+                                                                                subFieldDefinitionContext,
+                                                                                inputObjectTypeDefinitionContext,
+                                                                                inputValueDefinitionContext,
+                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                0,
+                                                                                0
+                                                                        )
                                                                 )
-                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -1025,15 +1028,17 @@ public class GraphQLMutationToStatements {
                 } else if (fromValueExpression == null && toValueExpression != null) {
                     return Stream.of(updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(toValueExpression), parentIdEqualsTo));
                 } else {
-                    IsNullExpression parentColumnIsNull = new IsNullExpression();
-                    parentColumnIsNull.setLeftExpression(parentColumn);
-
-                    IsNullExpression columnIsNull = new IsNullExpression();
-                    columnIsNull.setLeftExpression(column);
+//                    IsNullExpression parentColumnIsNull = new IsNullExpression();
+//                    parentColumnIsNull.setLeftExpression(parentColumn);
+//
+//                    IsNullExpression columnIsNull = new IsNullExpression();
+//                    columnIsNull.setLeftExpression(column);
 
                     return Stream.of(
-                            updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(columnExpression), new MultiAndExpression(Arrays.asList(parentColumnIsNull, parentIdEqualsTo))),
-                            updateExpression(table, Collections.singletonList(column), Collections.singletonList(parentColumnExpression), new MultiAndExpression(Arrays.asList(columnIsNull, idEqualsTo)))
+//                            updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(columnExpression), new MultiAndExpression(Arrays.asList(parentColumnIsNull, parentIdEqualsTo))),
+//                            updateExpression(table, Collections.singletonList(column), Collections.singletonList(parentColumnExpression), new MultiAndExpression(Arrays.asList(columnIsNull, idEqualsTo)))
+                            updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(columnExpression), parentIdEqualsTo),
+                            updateExpression(table, Collections.singletonList(column), Collections.singletonList(parentColumnExpression), idEqualsTo)
                     );
                 }
             }

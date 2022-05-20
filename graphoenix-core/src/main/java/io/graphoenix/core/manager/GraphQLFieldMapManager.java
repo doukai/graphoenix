@@ -276,6 +276,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         return getFromFieldDefinition(manager.getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(fromFieldDefinition ->
                         parentArgumentsContext.argument().stream()
+                                .filter(argumentContext -> argumentContext.valueWithVariable().NullValue() == null)
                                 .filter(argumentContext -> argumentContext.name().getText().equals(fromFieldDefinition.name().getText()))
                                 .map(GraphqlParser.ArgumentContext::valueWithVariable)
                                 .findFirst()
@@ -289,9 +290,11 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         return getFromFieldDefinition(manager.getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(fromFieldDefinition ->
                         parentObjectValueWithVariableContext.objectFieldWithVariable().stream()
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
                                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fromFieldDefinition.name().getText()))
                                 .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
-                                .findFirst());
+                                .findFirst()
+                );
     }
 
     @Override
@@ -301,6 +304,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         return getFromFieldDefinition(manager.getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(fromFieldDefinition ->
                         parentObjectValueContext.objectField().stream()
+                                .filter(objectFieldContext -> objectFieldContext.value().NullValue() == null)
                                 .filter(objectFieldContext -> objectFieldContext.name().getText().equals(fromFieldDefinition.name().getText()))
                                 .map(GraphqlParser.ObjectFieldContext::value)
                                 .findFirst()
@@ -313,6 +317,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         return getFromFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(toFieldDefinition ->
                         objectValueWithVariableContext.objectFieldWithVariable().stream()
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
                                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(toFieldDefinition.name().getText()))
                                 .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
                                 .findFirst()
@@ -325,6 +330,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         return getFromFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(toFieldDefinition ->
                         objectValueContext.objectField().stream()
+                                .filter(objectFieldContext -> objectFieldContext.value().NullValue() == null)
                                 .filter(objectFieldContext -> objectFieldContext.name().getText().equals(toFieldDefinition.name().getText()))
                                 .map(GraphqlParser.ObjectFieldContext::value)
                                 .findFirst()
