@@ -18,6 +18,7 @@ import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
@@ -204,18 +205,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -541,7 +542,7 @@ public class GraphQLMutationToStatements {
 
         Stream<Statement> insertStatementStream = objectValueToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueContext, level, index);
 
-        Stream<Statement> objectInsertStatementStream = objectValueContext == null ? Stream.empty() : inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+        Stream<Statement> objectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                 .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                 .flatMap(inputValueDefinitionContext ->
@@ -1028,17 +1029,17 @@ public class GraphQLMutationToStatements {
                 } else if (fromValueExpression == null && toValueExpression != null) {
                     return Stream.of(updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(toValueExpression), parentIdEqualsTo));
                 } else {
-//                    IsNullExpression parentColumnIsNull = new IsNullExpression();
-//                    parentColumnIsNull.setLeftExpression(parentColumn);
-//
-//                    IsNullExpression columnIsNull = new IsNullExpression();
-//                    columnIsNull.setLeftExpression(column);
+                    IsNullExpression columnIsNotNull = new IsNullExpression();
+                    columnIsNotNull.setNot(true);
+                    columnIsNotNull.setLeftExpression(columnExpression);
+
+                    IsNullExpression parentColumnIsNotNull = new IsNullExpression();
+                    parentColumnIsNotNull.setNot(true);
+                    parentColumnIsNotNull.setLeftExpression(parentColumnExpression);
 
                     return Stream.of(
-//                            updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(columnExpression), new MultiAndExpression(Arrays.asList(parentColumnIsNull, parentIdEqualsTo))),
-//                            updateExpression(table, Collections.singletonList(column), Collections.singletonList(parentColumnExpression), new MultiAndExpression(Arrays.asList(columnIsNull, idEqualsTo)))
-                            updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(columnExpression), parentIdEqualsTo),
-                            updateExpression(table, Collections.singletonList(column), Collections.singletonList(parentColumnExpression), idEqualsTo)
+                            updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(columnExpression), new MultiAndExpression(Arrays.asList(columnIsNotNull, parentIdEqualsTo))),
+                            updateExpression(table, Collections.singletonList(column), Collections.singletonList(parentColumnExpression), new MultiAndExpression(Arrays.asList(parentColumnIsNotNull, idEqualsTo)))
                     );
                 }
             }
