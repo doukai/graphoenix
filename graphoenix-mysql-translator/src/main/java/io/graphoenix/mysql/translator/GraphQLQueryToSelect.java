@@ -167,6 +167,7 @@ public class GraphQLQueryToSelect {
     protected PlainSelect objectSelectionToPlainSelect(String parentTypeName, String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, List<GraphqlParser.SelectionContext> selectionContextList, int level) {
         PlainSelect plainSelect = new PlainSelect();
         Table table = typeToTable(typeName, level);
+        plainSelect.setFromItem(table);
 
         Function function = jsonObjectFunction(
                 new ExpressionList(
@@ -187,66 +188,59 @@ public class GraphQLQueryToSelect {
             selectExpressionItem.setAlias(new Alias("`data`"));
         } else if (manager.isMutationOperationType(typeName)) {
             selectExpressionItem.setAlias(new Alias("`data`"));
-        } else {
-            if (fieldDefinitionContext != null && !manager.isQueryOperationType(parentTypeName) && !manager.isMutationOperationType(parentTypeName) && !manager.isSubscriptionOperationType(parentTypeName)) {
-                String fieldName = fieldDefinitionContext.name().getText();
-                Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentTypeName, fieldName);
-                Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
+        } else if (fieldDefinitionContext != null && !manager.isQueryOperationType(parentTypeName) && !manager.isMutationOperationType(parentTypeName) && !manager.isSubscriptionOperationType(parentTypeName)) {
+            String fieldName = fieldDefinitionContext.name().getText();
+            Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentTypeName, fieldName);
+            Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
 
-                if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
-                    Table parentTable = typeToTable(parentTypeName, level - 1);
-                    boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
-                    EqualsTo equalsParentColumn = new EqualsTo();
+            if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent()) {
+                Table parentTable = typeToTable(parentTypeName, level - 1);
+                boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
+                EqualsTo equalsParentColumn = new EqualsTo();
 
-                    if (mapWithType) {
-                        Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(parentTypeName, fieldName);
-                        Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(parentTypeName, fieldName);
-                        Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(parentTypeName, fieldName);
+                if (mapWithType) {
+                    Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(parentTypeName, fieldName);
+                    Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(parentTypeName, fieldName);
+                    Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(parentTypeName, fieldName);
 
-                        if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
-                            Table withTable = typeToTable(mapWithObjectDefinition.get().name().getText(), level);
-                            plainSelect.setFromItem(withTable);
-
-                            Join join = new Join();
-                            join.setLeft(true);
-                            join.setRightItem(table);
-                            EqualsTo joinEqualsTo = new EqualsTo();
-                            joinEqualsTo.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
-                            joinEqualsTo.setRightExpression(fieldToColumn(withTable, mapWithToFieldDefinition.get()));
-                            join.addOnExpression(joinEqualsTo);
-                            plainSelect.addJoins(join);
-                            equalsParentColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
-                        } else {
-                            GraphQLErrors graphQLErrors = new GraphQLErrors();
-                            if (mapWithObjectDefinition.isEmpty()) {
-                                graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                            }
-                            if (mapWithFromFieldDefinition.isEmpty()) {
-                                graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                            }
-                            if (mapWithToFieldDefinition.isEmpty()) {
-                                graphQLErrors.add(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                            }
-                            throw graphQLErrors;
-                        }
+                    if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
+                        Table withTable = typeToTable(mapWithObjectDefinition.get().name().getText(), level);
+                        Join join = new Join();
+                        join.setLeft(true);
+                        join.setRightItem(withTable);
+                        EqualsTo joinEqualsTo = new EqualsTo();
+                        joinEqualsTo.setLeftExpression(fieldToColumn(withTable, mapWithToFieldDefinition.get()));
+                        joinEqualsTo.setRightExpression(fieldToColumn(table, toFieldDefinition.get()));
+                        join.addOnExpression(joinEqualsTo);
+                        plainSelect.addJoins(join);
+                        equalsParentColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
                     } else {
-                        plainSelect.setFromItem(table);
-                        equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
+                        GraphQLErrors graphQLErrors = new GraphQLErrors();
+                        if (mapWithObjectDefinition.isEmpty()) {
+                            graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        }
+                        if (mapWithFromFieldDefinition.isEmpty()) {
+                            graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        }
+                        if (mapWithToFieldDefinition.isEmpty()) {
+                            graphQLErrors.add(MAP_WITH_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                        }
+                        throw graphQLErrors;
                     }
-                    equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
-                    plainSelect.setWhere(equalsParentColumn);
                 } else {
-                    GraphQLErrors graphQLErrors = new GraphQLErrors();
-                    if (fromFieldDefinition.isEmpty()) {
-                        graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                    }
-                    if (toFieldDefinition.isEmpty()) {
-                        graphQLErrors.add(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
-                    }
-                    throw graphQLErrors;
+                    equalsParentColumn.setLeftExpression(fieldToColumn(table, toFieldDefinition.get()));
                 }
+                equalsParentColumn.setRightExpression(fieldToColumn(parentTable, fromFieldDefinition.get()));
+                plainSelect.setWhere(equalsParentColumn);
             } else {
-                plainSelect.setFromItem(table);
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
+                if (fromFieldDefinition.isEmpty()) {
+                    graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                if (toFieldDefinition.isEmpty()) {
+                    graphQLErrors.add(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                throw graphQLErrors;
             }
         }
         return plainSelect;
