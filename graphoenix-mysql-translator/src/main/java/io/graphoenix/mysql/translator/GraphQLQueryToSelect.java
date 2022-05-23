@@ -23,6 +23,7 @@ import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -211,7 +212,10 @@ public class GraphQLQueryToSelect {
                         EqualsTo joinEqualsTo = new EqualsTo();
                         joinEqualsTo.setLeftExpression(fieldToColumn(withTable, mapWithToFieldDefinition.get()));
                         joinEqualsTo.setRightExpression(fieldToColumn(table, toFieldDefinition.get()));
-                        join.addOnExpression(joinEqualsTo);
+
+                        IsNullExpression isNotDeprecated = new IsNullExpression();
+                        isNotDeprecated.setLeftExpression(fieldToColumn(withTable, DEPRECATED_FIELD_NAME));
+                        join.addOnExpression(new MultiAndExpression(Arrays.asList(joinEqualsTo, isNotDeprecated)));
                         plainSelect.addJoins(join);
                         equalsParentColumn.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
                     } else {
@@ -753,7 +757,9 @@ public class GraphQLQueryToSelect {
                     EqualsTo equalsTo = new EqualsTo();
                     equalsTo.setLeftExpression(fieldToColumn(withTable, mapWithFromFieldDefinition.get()));
                     equalsTo.setRightExpression(fieldToColumn(typeToTable(typeName, level), fromFieldDefinition.get()));
-                    plainSelect.setWhere(equalsTo);
+                    IsNullExpression isNotDeprecated = new IsNullExpression();
+                    isNotDeprecated.setLeftExpression(fieldToColumn(withTable, DEPRECATED_FIELD_NAME));
+                    plainSelect.setWhere(new MultiAndExpression(Arrays.asList(equalsTo, isNotDeprecated)));
                     subSelect.setSelectBody(plainSelect);
                     return jsonExtractFunction(subSelect, true);
                 } else {
