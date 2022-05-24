@@ -1,62 +1,101 @@
-input Validation {
-    type: String,
-    properties: [Property]
+input StringValidation {
     const: String
-    enum: [String]
     minLength: Int
     maxLength: Int
     pattern: String
     format: String
-    multipleOf: Float
+    contentMediaType: String
+    contentEncoding: String
+    allOf: [StringValidation]
+    anyOf: [StringValidation]
+    oneOf: [StringValidation]
+    not: StringValidation
+}
+
+input FloatValidation {
+    const: Float
     minimum: Float
     exclusiveMinimum: Float
     maximum: Float
     exclusiveMaximum: Float
-    contentMediaType: String
-    contentEncoding: String
-    minItems: Int
-    maxItems: Int
-    uniqueItems: Boolean
-    dependentRequired: [String]
-    allOf: [Validation]
-    anyOf: [Validation]
-    oneOf: [Validation]
-    not: Validation
-    if: Validation
-    then: Validation
-    else: Validation
+    multipleOf: Float
+    allOf: [FloatValidation]
+    anyOf: [FloatValidation]
+    oneOf: [FloatValidation]
+    not: FloatValidation
 }
 
-input Property {
-    name: String
-    Validation: Validation
+input BooleanValidation {
+    const: Boolean
+    not: BooleanValidation
 }
 
-directive @validation(
-    type: String,
-    properties: [Property]
-    const: String
+input EnumValidation {
     enum: [String]
-    minLength: Int
-    maxLength: Int
-    pattern: String
-    format: String
-    multipleOf: Float
-    minimum: Float
-    exclusiveMinimum: Float
-    maximum: Float
-    exclusiveMaximum: Float
-    contentMediaType: String
-    contentEncoding: String
+    not: EnumValidation
+}
+
+input StringListValidation {
+    items: StringValidation
     minItems: Int
     maxItems: Int
     uniqueItems: Boolean
-    dependentRequired: [String]
-    allOf: [Validation]
-    anyOf: [Validation]
-    oneOf: [Validation]
-    not: Validation
-    if: Validation
-    then: Validation
-    else: Validation
-) on OBJECT | FIELD_DEFINITION
+}
+
+input FloatListValidation {
+    items: FloatValidation
+    minItems: Int
+    maxItems: Int
+    uniqueItems: Boolean
+}
+
+input BooleanListValidation {
+    items: BooleanValidation
+    minItems: Int
+    maxItems: Int
+    uniqueItems: Boolean
+}
+
+input EnumListValidation {
+    items: EnumValidation
+    minItems: Int
+    maxItems: Int
+    uniqueItems: Boolean
+}
+
+input UserValidation {
+    properties: UserProperties
+    allOf: [UserValidation]
+    anyOf: [UserValidation]
+    oneOf: [UserValidation]
+    not: UserValidation
+    dependentRequired: UserDependentRequired
+    if: UserValidation
+    then: UserValidation
+    else: UserValidation
+}
+
+input UserListValidation {
+    items: UserValidation
+    minItems: Int
+    maxItems: Int
+    uniqueItems: Boolean
+}
+
+input UserDependentRequired {
+    login: [String!]
+    password: [String!]
+    name: [String!]
+    age: [String!]
+    disable: [String!]
+    sex: [String!]
+}
+
+input UserProperties {
+    login: StringValidation
+    password: StringValidation
+    name: StringValidation
+    age: FloatValidation
+    disable: BooleanValidation
+    sex: EnumValidation
+}
