@@ -1,0 +1,62 @@
+input Validation {
+    type: String,
+    properties: [Property]
+    const: String
+    enum: [String]
+    minLength: Int
+    maxLength: Int
+    pattern: String
+    format: String
+    multipleOf: Float
+    minimum: Float
+    exclusiveMinimum: Float
+    maximum: Float
+    exclusiveMaximum: Float
+    contentMediaType: String
+    contentEncoding: String
+    minItems: Int
+    maxItems: Int
+    uniqueItems: Boolean
+    dependentRequired: [String]
+    allOf: [Validation]
+    anyOf: [Validation]
+    oneOf: [Validation]
+    not: Validation
+    if: Validation
+    then: Validation
+    else: Validation
+}
+
+input Property {
+    name: String
+    Validation: Validation
+}
+
+directive @validation(
+    type: String,
+    properties: [Property]
+    const: String
+    enum: [String]
+    minLength: Int
+    maxLength: Int
+    pattern: String
+    format: String
+    multipleOf: Float
+    minimum: Float
+    exclusiveMinimum: Float
+    maximum: Float
+    exclusiveMaximum: Float
+    contentMediaType: String
+    contentEncoding: String
+    minItems: Int
+    maxItems: Int
+    uniqueItems: Boolean
+    dependentRequired: [String]
+    allOf: [Validation]
+    anyOf: [Validation]
+    oneOf: [Validation]
+    not: Validation
+    if: Validation
+    then: Validation
+    else: Validation
+) on OBJECT | FIELD_DEFINITION
