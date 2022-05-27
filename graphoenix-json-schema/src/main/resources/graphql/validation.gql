@@ -20,20 +20,17 @@ input Validation {
     anyOf: [Validation]
     oneOf: [Validation]
     not: Validation
-    if: Property
-    then: Property
-    else: Property
-    dependentRequired: [DependentRequired]
-}
-
-input DependentRequired {
-    dependent: String
-    required: [String]
+    properties: [Property]
+    if: [Property]
+    then: [Property]
+    else: [Property]
+    dependentRequired: [Property]
 }
 
 input Property {
-    name: String
+    name: String!
     validation: Validation
+    required: [String]
 }
 
 directive @validation(
@@ -58,8 +55,9 @@ directive @validation(
     anyOf: [Validation]
     oneOf: [Validation]
     not: Validation
-    if: Property
-    then: Property
-    else: Property
-    dependentRequired: [DependentRequired]
+    properties: [Property]
+    if: [Property]
+    then: [Property]
+    else: [Property]
+    dependentRequired: [Property]
 ) on OBJECT | FIELD_DEFINITION

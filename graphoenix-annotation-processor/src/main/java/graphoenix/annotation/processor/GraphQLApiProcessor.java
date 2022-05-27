@@ -19,6 +19,7 @@ import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
 import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
+import io.graphoenix.json.schema.translator.JsonSchemaTranslator;
 import io.graphoenix.spi.annotation.SchemaBean;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
@@ -80,6 +81,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private ConnectionHandlerBuilder connectionHandlerBuilder;
     private SelectionFilterBuilder selectionFilterBuilder;
     private OperationHandlerImplementer operationHandlerImplementer;
+    private JsonSchemaTranslator jsonSchemaTranslator;
     private GraphQLConfig graphQLConfig;
     private Types typeUtils;
     private Filer filer;
@@ -101,6 +103,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
         this.selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
         this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
+        this.jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
@@ -178,6 +181,13 @@ public class GraphQLApiProcessor extends AbstractProcessor {
             FileObject fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
             Writer writer = fileObject.openWriter();
             writer.write(documentBuilder.getDocument().toString());
+            for (GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext : manager.getObjects()
+                    .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                    .collect(Collectors.toList())) {
+                fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText()).concat(".json"));
+                writer = fileObject.openWriter();
+                writer.write(jsonSchemaTranslator.objectToJsonSchemaString(objectTypeDefinitionContext));
+            }
             writer.close();
 
             invokeHandlerBuilder
