@@ -1,17 +1,16 @@
 package io.graphoenix.json.schema.translator;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.Optional;
 
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 @ApplicationScoped
@@ -50,89 +49,263 @@ public class JsonSchemaTranslator {
     }
 
     protected JsonElement fieldToProperty(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        JsonObject property = new JsonObject();
         if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+            JsonObject property = new JsonObject();
             property.addProperty("type", "array");
-            JsonObject items = new JsonObject();
-            items.addProperty("type", fieldTypeToPropertyType(fieldDefinitionContext.type()));
-            buildValidation(fieldDefinitionContext, items);
-            property.add("items", items);
+            property.add("items", buildValidation(fieldDefinitionContext));
+            getValidationDirectiveContext(fieldDefinitionContext.directives())
+                    .ifPresent(directiveContext -> {
+                                getValidationIntArgument(directiveContext, "items")
+                                        .ifPresent(minItems -> property.addProperty("minItems", minItems));
+                                getValidationIntArgument(directiveContext, "minItems")
+                                        .ifPresent(minItems -> property.addProperty("minItems", minItems));
+                                getValidationIntArgument(directiveContext, "maxItems")
+                                        .ifPresent(maxItems -> property.addProperty("maxItems", maxItems));
+                                getValidationBooleanArgument(directiveContext, "uniqueItems")
+                                        .ifPresent(uniqueItems -> property.addProperty("uniqueItems", uniqueItems));
+                            }
+                    );
+            return property;
         } else {
-            property.addProperty("type", fieldTypeToPropertyType(fieldDefinitionContext.type()));
-            buildValidation(fieldDefinitionContext, property);
+            return buildValidation(fieldDefinitionContext);
         }
-        return property;
     }
 
-    protected void buildValidation(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, JsonObject jsonObject) {
+    protected JsonElement buildValidation(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        JsonObject jsonObject = new JsonObject();
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        switch (fieldTypeName) {
-            case "ID":
-            case "String":
-            case "Date":
-            case "Time":
-            case "DateTime":
-            case "Timestamp":
-                getValidationDirectiveContext(fieldDefinitionContext.directives())
-                        .ifPresent(directiveContext -> {
-                            getValidationIntArgument(directiveContext, "minLength")
-                                    .ifPresent(minLength -> jsonObject.addProperty("minLength", minLength));
-                            getValidationIntArgument(directiveContext, "maxLength")
-                                    .ifPresent(maxLength -> jsonObject.addProperty("maxLength", maxLength));
-                            getValidationStringArgument(directiveContext, "pattern")
-                                    .ifPresent(pattern -> jsonObject.addProperty("pattern", pattern));
-                            getValidationStringArgument(directiveContext, "format")
-                                    .ifPresent(format -> jsonObject.addProperty("format", format));
-                            getValidationStringArgument(directiveContext, "contentMediaType")
-                                    .ifPresent(contentMediaType -> jsonObject.addProperty("contentMediaType", contentMediaType));
-                            getValidationStringArgument(directiveContext, "contentEncoding")
-                                    .ifPresent(contentEncoding -> jsonObject.addProperty("contentEncoding", contentEncoding));
-                        });
-                break;
-            case "Boolean":
-                break;
-            case "Int":
-            case "BigInteger":
-            case "Float":
-            case "BigDecimal":
-                getValidationDirectiveContext(fieldDefinitionContext.directives())
-                        .ifPresent(directiveContext -> {
-                            getValidationFloatArgument(directiveContext, "minimum")
-                                    .ifPresent(minimum -> jsonObject.addProperty("minimum", minimum));
-                            getValidationFloatArgument(directiveContext, "exclusiveMinimum")
-                                    .ifPresent(exclusiveMinimum -> jsonObject.addProperty("exclusiveMinimum", exclusiveMinimum));
-                            getValidationFloatArgument(directiveContext, "maximum")
-                                    .ifPresent(maximum -> jsonObject.addProperty("maximum", maximum));
-                            getValidationFloatArgument(directiveContext, "exclusiveMaximum")
-                                    .ifPresent(exclusiveMaximum -> jsonObject.addProperty("exclusiveMaximum", exclusiveMaximum));
-                            getValidationFloatArgument(directiveContext, "multipleOf")
-                                    .ifPresent(multipleOf -> jsonObject.addProperty("multipleOf", multipleOf));
-                        });
-                break;
+        if (manager.isScalar(fieldTypeName)) {
+            switch (fieldTypeName) {
+                case "ID":
+                case "String":
+                case "Date":
+                case "Time":
+                case "DateTime":
+                case "Timestamp":
+                    jsonObject.addProperty("type", "string");
+                    break;
+                case "Boolean":
+                    jsonObject.addProperty("type", "boolean");
+                    break;
+                case "Int":
+                case "BigInteger":
+                case "Float":
+                case "BigDecimal":
+                    jsonObject.addProperty("type", "number");
+                    break;
+            }
+        } else if (manager.isEnum(fieldTypeName)) {
+            jsonObject.addProperty("type", "string");
+            JsonArray enumValues = new JsonArray();
+            manager.getEnum(fieldTypeName)
+                    .ifPresent(enumTypeDefinitionContext -> {
+                                enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
+                                        .forEach(enumValueDefinitionContext -> enumValues.add(enumValueDefinitionContext.enumValue().getText()));
+                                jsonObject.add("enum", enumValues);
+                            }
+                    );
         }
-        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldDefinitionContext.getText()));
+
+        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+            getValidationDirectiveContext(fieldDefinitionContext.directives())
+                    .flatMap(directiveContext -> getValidationObjectArgument(directiveContext, "items"))
+                    .ifPresent(objectValueWithVariableContext -> {
+                        getValidationIntArgument(objectValueWithVariableContext, "minLength")
+                                .ifPresent(minLength -> jsonObject.addProperty("minLength", minLength));
+                        getValidationIntArgument(objectValueWithVariableContext, "maxLength")
+                                .ifPresent(maxLength -> jsonObject.addProperty("maxLength", maxLength));
+                        getValidationStringArgument(objectValueWithVariableContext, "pattern")
+                                .ifPresent(pattern -> jsonObject.addProperty("pattern", pattern));
+                        getValidationStringArgument(objectValueWithVariableContext, "format")
+                                .ifPresent(format -> jsonObject.addProperty("format", format));
+                        getValidationStringArgument(objectValueWithVariableContext, "contentMediaType")
+                                .ifPresent(contentMediaType -> jsonObject.addProperty("contentMediaType", contentMediaType));
+                        getValidationStringArgument(objectValueWithVariableContext, "contentEncoding")
+                                .ifPresent(contentEncoding -> jsonObject.addProperty("contentEncoding", contentEncoding));
+
+                        getValidationFloatArgument(objectValueWithVariableContext, "minimum")
+                                .ifPresent(minimum -> jsonObject.addProperty("minimum", minimum));
+                        getValidationFloatArgument(objectValueWithVariableContext, "exclusiveMinimum")
+                                .ifPresent(exclusiveMinimum -> jsonObject.addProperty("exclusiveMinimum", exclusiveMinimum));
+                        getValidationFloatArgument(objectValueWithVariableContext, "maximum")
+                                .ifPresent(maximum -> jsonObject.addProperty("maximum", maximum));
+                        getValidationFloatArgument(objectValueWithVariableContext, "exclusiveMaximum")
+                                .ifPresent(exclusiveMaximum -> jsonObject.addProperty("exclusiveMaximum", exclusiveMaximum));
+                        getValidationFloatArgument(objectValueWithVariableContext, "multipleOf")
+                                .ifPresent(multipleOf -> jsonObject.addProperty("multipleOf", multipleOf));
+
+                        getValidationStringArgument(objectValueWithVariableContext, "const")
+                                .ifPresent(constValue -> jsonObject.addProperty("const", constValue));
+
+                        getValidationArrayArgument(objectValueWithVariableContext, "allOf")
+                                .ifPresent(arrayValueWithVariableContext -> {
+                                            JsonArray allOf = new JsonArray();
+                                            arrayValueWithVariableContext.valueWithVariable().stream()
+                                                    .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                                    .forEach(valueWithVariableContext -> allOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                                            jsonObject.add("allOf", allOf);
+                                        }
+                                );
+
+                        getValidationArrayArgument(objectValueWithVariableContext, "anyOf")
+                                .ifPresent(arrayValueWithVariableContext -> {
+                                            JsonArray anyOf = new JsonArray();
+                                            arrayValueWithVariableContext.valueWithVariable().stream()
+                                                    .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                                    .forEach(valueWithVariableContext -> anyOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                                            jsonObject.add("anyOf", anyOf);
+                                        }
+                                );
+
+                        getValidationArrayArgument(objectValueWithVariableContext, "oneOf")
+                                .ifPresent(arrayValueWithVariableContext -> {
+                                            JsonArray oneOf = new JsonArray();
+                                            arrayValueWithVariableContext.valueWithVariable().stream()
+                                                    .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                                    .forEach(valueWithVariableContext -> oneOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                                            jsonObject.add("oneOf", oneOf);
+                                        }
+                                );
+
+                        getValidationObjectArgument(objectValueWithVariableContext, "not")
+                                .ifPresent(not -> jsonObject.add("not", buildValidation(not)));
+                    });
+        } else {
+            getValidationDirectiveContext(fieldDefinitionContext.directives())
+                    .ifPresent(directiveContext -> {
+                                getValidationIntArgument(directiveContext, "minLength")
+                                        .ifPresent(minLength -> jsonObject.addProperty("minLength", minLength));
+                                getValidationIntArgument(directiveContext, "maxLength")
+                                        .ifPresent(maxLength -> jsonObject.addProperty("maxLength", maxLength));
+                                getValidationStringArgument(directiveContext, "pattern")
+                                        .ifPresent(pattern -> jsonObject.addProperty("pattern", pattern));
+                                getValidationStringArgument(directiveContext, "format")
+                                        .ifPresent(format -> jsonObject.addProperty("format", format));
+                                getValidationStringArgument(directiveContext, "contentMediaType")
+                                        .ifPresent(contentMediaType -> jsonObject.addProperty("contentMediaType", contentMediaType));
+                                getValidationStringArgument(directiveContext, "contentEncoding")
+                                        .ifPresent(contentEncoding -> jsonObject.addProperty("contentEncoding", contentEncoding));
+
+                                getValidationFloatArgument(directiveContext, "minimum")
+                                        .ifPresent(minimum -> jsonObject.addProperty("minimum", minimum));
+                                getValidationFloatArgument(directiveContext, "exclusiveMinimum")
+                                        .ifPresent(exclusiveMinimum -> jsonObject.addProperty("exclusiveMinimum", exclusiveMinimum));
+                                getValidationFloatArgument(directiveContext, "maximum")
+                                        .ifPresent(maximum -> jsonObject.addProperty("maximum", maximum));
+                                getValidationFloatArgument(directiveContext, "exclusiveMaximum")
+                                        .ifPresent(exclusiveMaximum -> jsonObject.addProperty("exclusiveMaximum", exclusiveMaximum));
+                                getValidationFloatArgument(directiveContext, "multipleOf")
+                                        .ifPresent(multipleOf -> jsonObject.addProperty("multipleOf", multipleOf));
+
+                                getValidationStringArgument(directiveContext, "const")
+                                        .ifPresent(constValue -> jsonObject.addProperty("const", constValue));
+
+                                getValidationArrayArgument(directiveContext, "allOf")
+                                        .ifPresent(arrayValueWithVariableContext -> {
+                                                    JsonArray allOf = new JsonArray();
+                                                    arrayValueWithVariableContext.valueWithVariable().stream()
+                                                            .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                                            .forEach(valueWithVariableContext -> allOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                                                    jsonObject.add("allOf", allOf);
+                                                }
+                                        );
+
+                                getValidationArrayArgument(directiveContext, "anyOf")
+                                        .ifPresent(arrayValueWithVariableContext -> {
+                                                    JsonArray anyOf = new JsonArray();
+                                                    arrayValueWithVariableContext.valueWithVariable().stream()
+                                                            .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                                            .forEach(valueWithVariableContext -> anyOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                                                    jsonObject.add("anyOf", anyOf);
+                                                }
+                                        );
+
+                                getValidationArrayArgument(directiveContext, "oneOf")
+                                        .ifPresent(arrayValueWithVariableContext -> {
+                                                    JsonArray oneOf = new JsonArray();
+                                                    arrayValueWithVariableContext.valueWithVariable().stream()
+                                                            .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                                            .forEach(valueWithVariableContext -> oneOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                                                    jsonObject.add("oneOf", oneOf);
+                                                }
+                                        );
+
+                                getValidationObjectArgument(directiveContext, "not")
+                                        .ifPresent(not -> jsonObject.add("not", buildValidation(not)));
+                            }
+                    );
+        }
+
+        return jsonObject;
     }
 
-    protected String fieldTypeToPropertyType(GraphqlParser.TypeContext typeContext) {
-        String fieldTypeName = manager.getFieldTypeName(typeContext);
-        switch (fieldTypeName) {
-            case "ID":
-            case "String":
-            case "Date":
-            case "Time":
-            case "DateTime":
-            case "Timestamp":
-                return "string";
-            case "Boolean":
-                return "boolean";
-            case "Int":
-            case "BigInteger":
-            case "Float":
-            case "BigDecimal":
-                return "number";
-        }
-        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext));
+    protected JsonObject buildValidation(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+
+        JsonObject jsonObject = new JsonObject();
+
+        getValidationIntArgument(objectValueWithVariableContext, "minLength")
+                .ifPresent(minLength -> jsonObject.addProperty("minLength", minLength));
+        getValidationIntArgument(objectValueWithVariableContext, "maxLength")
+                .ifPresent(maxLength -> jsonObject.addProperty("maxLength", maxLength));
+        getValidationStringArgument(objectValueWithVariableContext, "pattern")
+                .ifPresent(pattern -> jsonObject.addProperty("pattern", pattern));
+        getValidationStringArgument(objectValueWithVariableContext, "format")
+                .ifPresent(format -> jsonObject.addProperty("format", format));
+        getValidationStringArgument(objectValueWithVariableContext, "contentMediaType")
+                .ifPresent(contentMediaType -> jsonObject.addProperty("contentMediaType", contentMediaType));
+        getValidationStringArgument(objectValueWithVariableContext, "contentEncoding")
+                .ifPresent(contentEncoding -> jsonObject.addProperty("contentEncoding", contentEncoding));
+
+        getValidationFloatArgument(objectValueWithVariableContext, "minimum")
+                .ifPresent(minimum -> jsonObject.addProperty("minimum", minimum));
+        getValidationFloatArgument(objectValueWithVariableContext, "exclusiveMinimum")
+                .ifPresent(exclusiveMinimum -> jsonObject.addProperty("exclusiveMinimum", exclusiveMinimum));
+        getValidationFloatArgument(objectValueWithVariableContext, "maximum")
+                .ifPresent(maximum -> jsonObject.addProperty("maximum", maximum));
+        getValidationFloatArgument(objectValueWithVariableContext, "exclusiveMaximum")
+                .ifPresent(exclusiveMaximum -> jsonObject.addProperty("exclusiveMaximum", exclusiveMaximum));
+        getValidationFloatArgument(objectValueWithVariableContext, "multipleOf")
+                .ifPresent(multipleOf -> jsonObject.addProperty("multipleOf", multipleOf));
+
+        getValidationStringArgument(objectValueWithVariableContext, "const")
+                .ifPresent(constValue -> jsonObject.addProperty("const", constValue));
+
+        getValidationArrayArgument(objectValueWithVariableContext, "allOf")
+                .ifPresent(arrayValueWithVariableContext -> {
+                            JsonArray allOf = new JsonArray();
+                            arrayValueWithVariableContext.valueWithVariable().stream()
+                                    .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                    .forEach(valueWithVariableContext -> allOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            jsonObject.add("allOf", allOf);
+                        }
+                );
+
+        getValidationArrayArgument(objectValueWithVariableContext, "anyOf")
+                .ifPresent(arrayValueWithVariableContext -> {
+                            JsonArray anyOf = new JsonArray();
+                            arrayValueWithVariableContext.valueWithVariable().stream()
+                                    .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                    .forEach(valueWithVariableContext -> anyOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            jsonObject.add("anyOf", anyOf);
+                        }
+                );
+
+        getValidationArrayArgument(objectValueWithVariableContext, "oneOf")
+                .ifPresent(arrayValueWithVariableContext -> {
+                            JsonArray oneOf = new JsonArray();
+                            arrayValueWithVariableContext.valueWithVariable().stream()
+                                    .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                                    .forEach(valueWithVariableContext -> oneOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            jsonObject.add("oneOf", oneOf);
+                        }
+                );
+
+        getValidationObjectArgument(objectValueWithVariableContext, "not")
+                .ifPresent(not -> jsonObject.add("not", buildValidation(not)));
+
+        return jsonObject;
     }
+
 
     protected Optional<GraphqlParser.DirectiveContext> getValidationDirectiveContext(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()

@@ -20,6 +20,8 @@ input Validation {
     anyOf: [Validation]
     oneOf: [Validation]
     not: Validation
+    items: Validation
+    properties: [Property]
     if: Property
     then: Property
     else: Property
