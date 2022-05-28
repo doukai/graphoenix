@@ -21,9 +21,9 @@ input Validation {
     oneOf: [Validation]
     not: Validation
     properties: [Property]
-    if: [Property]
-    then: [Property]
-    else: [Property]
+    if: Validation
+    then: Validation
+    else: Validation
     dependentRequired: [Property]
 }
 
@@ -56,8 +56,8 @@ directive @validation(
     oneOf: [Validation]
     not: Validation
     properties: [Property]
-    if: [Property]
-    then: [Property]
-    else: [Property]
+    if: Validation
+    then: Validation
+    else: Validation
     dependentRequired: [Property]
 ) on OBJECT | FIELD_DEFINITION

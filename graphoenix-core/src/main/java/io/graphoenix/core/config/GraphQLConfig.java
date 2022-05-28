@@ -62,6 +62,9 @@ public class GraphQLConfig {
     @Optional
     private String outputPath;
 
+    @Optional
+    private String schema = "https://json-schema.org/draft/2020-12/schema";
+
     public String getGraphQL() {
         return graphQL;
     }
@@ -212,5 +215,13 @@ public class GraphQLConfig {
 
     public void setOutputPath(String outputPath) {
         this.outputPath = outputPath;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 }

@@ -1,4 +1,4 @@
-package io.graphoenix.json.schema.translator;
+package io.graphoenix.core.schema;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import java.util.Optional;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 
 @ApplicationScoped
 public class JsonSchemaTranslator {
@@ -36,6 +37,7 @@ public class JsonSchemaTranslator {
         JsonObject jsonSchema = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
                 .orElseGet(JsonObject::new);
+        jsonSchema.addProperty("$schema", graphQLConfig.getSchema());
         jsonSchema.addProperty("$id", "/schema/".concat(objectTypeDefinitionContext.name().getText()));
         jsonSchema.addProperty("type", "object");
         jsonSchema.add("properties", objectToProperties(objectTypeDefinitionContext));
@@ -54,7 +56,11 @@ public class JsonSchemaTranslator {
 
     protected JsonObject objectToProperties(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         JsonObject properties = new JsonObject();
-        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
+        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .forEach(fieldDefinitionContext ->
                         properties.add(fieldDefinitionContext.name().getText(), fieldToProperty(fieldDefinitionContext))
                 );
@@ -109,6 +115,8 @@ public class JsonSchemaTranslator {
                                 jsonObject.add("enum", enumValues);
                             }
                     );
+        } else if (manager.isObject(fieldTypeName)) {
+            jsonObject.addProperty("$ref", "/schema/".concat(fieldTypeName));
         }
         return jsonObject;
     }
@@ -179,14 +187,14 @@ public class JsonSchemaTranslator {
         getValidationArrayArgument(directiveContext, "properties")
                 .ifPresent(arrayValueWithVariableContext -> validation.add("properties", buildProperties(arrayValueWithVariableContext)));
 
-        getValidationArrayArgument(directiveContext, "if")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("if", buildProperties(arrayValueWithVariableContext)));
+        getValidationObjectArgument(directiveContext, "if")
+                .ifPresent(ifValidation -> validation.add("if", buildValidation(ifValidation)));
 
-        getValidationArrayArgument(directiveContext, "then")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("then", buildProperties(arrayValueWithVariableContext)));
+        getValidationObjectArgument(directiveContext, "then")
+                .ifPresent(thenValidation -> validation.add("then", buildValidation(thenValidation)));
 
-        getValidationArrayArgument(directiveContext, "else")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("else", buildProperties(arrayValueWithVariableContext)));
+        getValidationObjectArgument(directiveContext, "else")
+                .ifPresent(elseValidation -> validation.add("else", buildValidation(elseValidation)));
 
         getValidationArrayArgument(directiveContext, "dependentRequired")
                 .ifPresent(arrayValueWithVariableContext -> validation.add("dependentRequired", buildDependentRequired(arrayValueWithVariableContext)));
@@ -260,14 +268,14 @@ public class JsonSchemaTranslator {
         getValidationArrayArgument(objectValueWithVariableContext, "properties")
                 .ifPresent(arrayValueWithVariableContext -> validation.add("properties", buildProperties(arrayValueWithVariableContext)));
 
-        getValidationArrayArgument(objectValueWithVariableContext, "if")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("if", buildProperties(arrayValueWithVariableContext)));
+        getValidationObjectArgument(objectValueWithVariableContext, "if")
+                .ifPresent(ifValidation -> validation.add("if", buildValidation(ifValidation)));
 
-        getValidationArrayArgument(objectValueWithVariableContext, "then")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("then", buildProperties(arrayValueWithVariableContext)));
+        getValidationObjectArgument(objectValueWithVariableContext, "then")
+                .ifPresent(thenValidation -> validation.add("then", buildValidation(thenValidation)));
 
-        getValidationArrayArgument(objectValueWithVariableContext, "else")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("else", buildProperties(arrayValueWithVariableContext)));
+        getValidationObjectArgument(objectValueWithVariableContext, "else")
+                .ifPresent(elseValidation -> validation.add("else", buildValidation(elseValidation)));
 
         getValidationArrayArgument(objectValueWithVariableContext, "dependentRequired")
                 .ifPresent(arrayValueWithVariableContext -> validation.add("dependentRequired", buildDependentRequired(arrayValueWithVariableContext)));

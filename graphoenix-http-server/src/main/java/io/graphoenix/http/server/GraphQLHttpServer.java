@@ -3,6 +3,7 @@ package io.graphoenix.http.server;
 import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.handler.GetRequestHandler;
 import io.graphoenix.http.handler.PostRequestHandler;
+import io.graphoenix.http.handler.SchemaRequestHandler;
 import io.graphoenix.spi.handler.BootstrapHandler;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -15,17 +16,21 @@ import jakarta.inject.Inject;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
+import static io.graphoenix.http.handler.SchemaRequestHandler.SCHEMA_PARAM_NAME;
+
 @ApplicationScoped
 public class GraphQLHttpServer {
 
     private final HttpServerConfig httpServerConfig;
+    private final SchemaRequestHandler schemaRequestHandler;
     private final GetRequestHandler getRequestHandler;
     private final PostRequestHandler postRequestHandler;
     private final BootstrapHandler bootstrapHandler;
 
     @Inject
-    public GraphQLHttpServer(HttpServerConfig httpServerConfig, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, BootstrapHandler bootstrapHandler) {
+    public GraphQLHttpServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, BootstrapHandler bootstrapHandler) {
         this.httpServerConfig = httpServerConfig;
+        this.schemaRequestHandler = schemaRequestHandler;
         this.getRequestHandler = getRequestHandler;
         this.postRequestHandler = postRequestHandler;
         this.bootstrapHandler = bootstrapHandler;
@@ -47,6 +52,7 @@ public class GraphQLHttpServer {
                 .doOnConnection(connection -> connection.addHandlerLast("cors", new CorsHandler(corsConfig)))
                 .route(httpServerRoutes ->
                         httpServerRoutes
+                                .get(httpServerConfig.getSchemaContextPath().concat("/{").concat(SCHEMA_PARAM_NAME).concat("}"), schemaRequestHandler::handle)
                                 .get(httpServerConfig.getGraphqlContextPath(), getRequestHandler::handle)
                                 .post(httpServerConfig.getGraphqlContextPath(), postRequestHandler::handle)
                 )

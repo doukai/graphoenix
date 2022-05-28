@@ -10,6 +10,9 @@ public class HttpServerConfig {
     private String graphqlContextPath = "graphql";
 
     @Optional
+    private String schemaContextPath = "schema";
+
+    @Optional
     private Boolean ssl = false;
 
     @Optional
@@ -34,6 +37,18 @@ public class HttpServerConfig {
 
     public void setGraphqlContextPath(String graphqlContextPath) {
         this.graphqlContextPath = graphqlContextPath;
+    }
+
+    public String getSchemaContextPath() {
+        if (schemaContextPath.startsWith("/")) {
+            return schemaContextPath;
+        } else {
+            return "/".concat(schemaContextPath);
+        }
+    }
+
+    public void setSchemaContextPath(String schemaContextPath) {
+        this.schemaContextPath = schemaContextPath;
     }
 
     public Boolean getSsl() {

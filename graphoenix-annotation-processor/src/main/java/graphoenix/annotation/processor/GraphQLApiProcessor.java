@@ -7,6 +7,7 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
+import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.ObjectType;
@@ -19,7 +20,6 @@ import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
 import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
-import io.graphoenix.json.schema.translator.JsonSchemaTranslator;
 import io.graphoenix.spi.annotation.SchemaBean;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
@@ -53,6 +53,7 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -181,14 +182,18 @@ public class GraphQLApiProcessor extends AbstractProcessor {
             FileObject fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
             Writer writer = fileObject.openWriter();
             writer.write(documentBuilder.getDocument().toString());
-            for (GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext : manager.getObjects()
+            writer.close();
+
+            List<GraphqlParser.ObjectTypeDefinitionContext> schemaObjectList = manager.getObjects()
                     .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
-                    .collect(Collectors.toList())) {
+                    .collect(Collectors.toList());
+
+            for (GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext : schemaObjectList) {
                 fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText()).concat(".json"));
                 writer = fileObject.openWriter();
                 writer.write(jsonSchemaTranslator.objectToJsonSchemaString(objectTypeDefinitionContext));
+                writer.close();
             }
-            writer.close();
 
             invokeHandlerBuilder
                     .setConfiguration(graphQLConfig)
