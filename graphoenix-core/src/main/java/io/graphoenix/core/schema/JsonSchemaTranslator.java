@@ -37,8 +37,7 @@ public class JsonSchemaTranslator {
         JsonObject jsonSchema = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
                 .orElseGet(JsonObject::new);
-        jsonSchema.addProperty("$schema", graphQLConfig.getSchema());
-        jsonSchema.addProperty("$id", "/schema/".concat(objectTypeDefinitionContext.name().getText()));
+        jsonSchema.addProperty("$id", objectTypeDefinitionContext.name().getText());
         jsonSchema.addProperty("type", "object");
         jsonSchema.add("properties", objectToProperties(objectTypeDefinitionContext));
         jsonSchema.add("required", buildRequired(objectTypeDefinitionContext));
@@ -58,7 +57,7 @@ public class JsonSchemaTranslator {
         JsonObject properties = new JsonObject();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+//                .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .forEach(fieldDefinitionContext ->
@@ -106,7 +105,6 @@ public class JsonSchemaTranslator {
                     break;
             }
         } else if (manager.isEnum(fieldTypeName)) {
-            jsonObject.addProperty("type", "string");
             JsonArray enumValues = new JsonArray();
             manager.getEnum(fieldTypeName)
                     .ifPresent(enumTypeDefinitionContext -> {
@@ -116,7 +114,7 @@ public class JsonSchemaTranslator {
                             }
                     );
         } else if (manager.isObject(fieldTypeName)) {
-            jsonObject.addProperty("$ref", "/schema/".concat(fieldTypeName));
+            jsonObject.addProperty("$ref", fieldTypeName);
         }
         return jsonObject;
     }
