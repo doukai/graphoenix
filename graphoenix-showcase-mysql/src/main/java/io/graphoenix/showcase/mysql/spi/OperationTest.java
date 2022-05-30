@@ -60,7 +60,9 @@ public interface OperationTest {
             password = "password1",
             $organization = "organization",
             $roles = "roles",
-            $phones = "phones"
+            $phones = "phones",
+            $test1 = "test1",
+            $test2 = "test2"
     )
-    User mutationUser(Sex sex, String name, String orgName, List<RoleInput> roles, OrganizationInput organization, List<String> phones) throws Exception;
+    User mutationUser(Sex sex, String name, String orgName, List<RoleInput> roles, OrganizationInput organization, List<String> phones, List<Integer> test1, List<Boolean> test2) throws Exception;
 }
