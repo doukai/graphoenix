@@ -11,11 +11,13 @@ public interface IGraphQLFieldMapManager {
     void registerMap(String objectTypeName,
                      String fieldName,
                      GraphqlParser.FieldDefinitionContext from,
+                     Boolean anchor,
                      GraphqlParser.FieldDefinitionContext to);
 
     void registerMap(String objectTypeName,
                      String fieldName,
                      GraphqlParser.FieldDefinitionContext from,
+                     Boolean anchor,
                      GraphqlParser.ObjectTypeDefinitionContext withType,
                      GraphqlParser.FieldDefinitionContext withFrom,
                      GraphqlParser.FieldDefinitionContext withTo,
@@ -24,6 +26,8 @@ public interface IGraphQLFieldMapManager {
     Optional<GraphqlParser.FieldDefinitionContext> getFromFieldDefinition(String objectTypeName, String fieldName);
 
     Optional<GraphqlParser.FieldDefinitionContext> getToFieldDefinition(String objectTypeName, String fieldName);
+
+    boolean anchor(String objectTypeName, String fieldName);
 
     boolean mapWithType(String objectTypeName, String fieldName);
 

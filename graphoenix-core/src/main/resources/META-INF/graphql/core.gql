@@ -132,6 +132,7 @@ directive @dataType(
 
 directive @map(
     from: String
+    anchor: Boolean
     with: MapWith
     to: String
 ) on FIELD_DEFINITION

@@ -14,12 +14,12 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.JdbcNamedParameter;
 import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.InExpression;
-import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
@@ -1026,23 +1026,18 @@ public class GraphQLMutationToStatements {
                 idEqualsTo.setLeftExpression(idColumn);
                 idEqualsTo.setRightExpression(idValueExpression);
 
-                if (fromValueExpression != null && toValueExpression == null) {
-                    return Stream.of(updateExpression(table, Collections.singletonList(column), Collections.singletonList(fromValueExpression), idEqualsTo));
-                } else if (fromValueExpression == null && toValueExpression != null) {
-                    return Stream.of(updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(toValueExpression), parentIdEqualsTo));
+                if (mapper.anchor(parentFieldTypeName, fieldName)) {
+                    if (toValueExpression != null) {
+                        return Stream.of(updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(toValueExpression), parentIdEqualsTo));
+                    } else {
+                        return Stream.of(updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(columnExpression), parentIdEqualsTo));
+                    }
                 } else {
-                    IsNullExpression columnIsNotNull = new IsNullExpression();
-                    columnIsNotNull.setNot(true);
-                    columnIsNotNull.setLeftExpression(columnExpression);
-
-                    IsNullExpression parentColumnIsNotNull = new IsNullExpression();
-                    parentColumnIsNotNull.setNot(true);
-                    parentColumnIsNotNull.setLeftExpression(parentColumnExpression);
-
-                    return Stream.of(
-                            updateExpression(parentTable, Collections.singletonList(parentColumn), Collections.singletonList(columnExpression), new MultiAndExpression(Arrays.asList(columnIsNotNull, parentIdEqualsTo))),
-                            updateExpression(table, Collections.singletonList(column), Collections.singletonList(parentColumnExpression), new MultiAndExpression(Arrays.asList(parentColumnIsNotNull, idEqualsTo)))
-                    );
+                    if (fromValueExpression != null) {
+                        return Stream.of(updateExpression(table, Collections.singletonList(column), Collections.singletonList(fromValueExpression), idEqualsTo));
+                    } else {
+                        return Stream.of(updateExpression(table, Collections.singletonList(column), Collections.singletonList(parentColumnExpression), idEqualsTo));
+                    }
                 }
             }
         } else {
@@ -1278,6 +1273,7 @@ public class GraphQLMutationToStatements {
             Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = manager.getObjectTypeIDFieldDefinition(fieldTypeName);
             Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentFieldTypeName, fieldName);
             Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentFieldTypeName, fieldName);
+            boolean anchor = mapper.anchor(parentFieldTypeName, fieldName);
 
             if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent() && idFieldDefinition.isPresent()) {
                 Table parentTable = typeToTable(parentFieldDefinitionContext);
@@ -1307,9 +1303,30 @@ public class GraphQLMutationToStatements {
                     idColumnNotIn.setLeftExpression(idColumn);
                     idColumnNotIn.setNot(true);
                     idColumnNotIn.setRightItemsList(new ExpressionList(idValueExpressionList));
-                    return Stream.of(removeExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn))));
+
+                    if (anchor) {
+                        return Stream.of(
+                                updateExpression(parentTable, new UpdateSet(parentColumn, new NullValue()), parentIdColumn, parentIdValueExpression),
+                                removeExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn)))
+                        );
+                    } else {
+                        return Stream.of(
+                                updateExpression(table, new UpdateSet(column, new NullValue()), new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn))),
+                                removeExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn)))
+                        );
+                    }
                 } else {
-                    return Stream.of(removeExpression(table, parentColumnEqualsTo));
+                    if (anchor) {
+                        return Stream.of(
+                                updateExpression(parentTable, new UpdateSet(parentColumn, new NullValue()), parentIdColumn, parentIdValueExpression),
+                                removeExpression(table, parentColumnEqualsTo)
+                        );
+                    } else {
+                        return Stream.of(
+                                updateExpression(table, new UpdateSet(column, new NullValue()), parentColumnEqualsTo),
+                                removeExpression(table, parentColumnEqualsTo)
+                        );
+                    }
                 }
             } else {
                 GraphQLErrors graphQLErrors = new GraphQLErrors();
@@ -1866,11 +1883,35 @@ public class GraphQLMutationToStatements {
     }
 
     protected Update updateExpression(Table table,
+                                      UpdateSet updateSet,
+                                      Column idColumn,
+                                      Expression idValue) {
+        Update update = new Update();
+        update.setTable(table);
+        update.addUpdateSet(updateSet);
+        EqualsTo equalsTo = new EqualsTo();
+        equalsTo.setLeftExpression(idColumn);
+        equalsTo.setRightExpression(idValue);
+        update.setWhere(equalsTo);
+        return update;
+    }
+
+    protected Update updateExpression(Table table,
                                       List<UpdateSet> updateSetList,
                                       Expression where) {
         Update update = new Update();
         update.setTable(table);
         updateSetList.forEach(update::addUpdateSet);
+        update.setWhere(where);
+        return update;
+    }
+
+    protected Update updateExpression(Table table,
+                                      UpdateSet updateSet,
+                                      Expression where) {
+        Update update = new Update();
+        update.setTable(table);
+        update.addUpdateSet(updateSet);
         update.setWhere(where);
         return update;
     }

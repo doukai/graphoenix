@@ -76,6 +76,13 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                         throw new GraphQLErrors(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
                                                     }
 
+                                                    Boolean anchor = mapDirective.get().arguments().argument().stream()
+                                                            .filter(argumentContext -> argumentContext.name().getText().equals("anchor"))
+                                                            .filter(argumentContext -> argumentContext.valueWithVariable().BooleanValue() != null)
+                                                            .findFirst()
+                                                            .map(argumentContext -> Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
+                                                            .orElse(false);
+
                                                     Optional<GraphqlParser.ArgumentContext> withArgument = mapDirective.get().arguments().argument()
                                                             .stream()
                                                             .filter(argumentContext -> argumentContext.name().getText().equals("with"))
@@ -134,6 +141,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                         registerMap(objectTypeDefinitionContext.name().getText(),
                                                                 fieldDefinitionContext.name().getText(),
                                                                 fromFieldDefinition.get(),
+                                                                anchor,
                                                                 withObjectTypeDefinition.get(),
                                                                 withFromFieldDefinition.get(),
                                                                 withToFieldDefinition.get(),
@@ -144,6 +152,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                         registerMap(objectTypeDefinitionContext.name().getText(),
                                                                 fieldDefinitionContext.name().getText(),
                                                                 fromFieldDefinition.get(),
+                                                                anchor,
                                                                 getToFieldDefinition(mapDirective.get(), fieldDefinitionContext));
                                                     }
                                                 }
@@ -178,12 +187,13 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     public void registerMap(String objectTypeName,
                             String fieldName,
                             GraphqlParser.FieldDefinitionContext from,
+                            Boolean anchor,
                             GraphqlParser.FieldDefinitionContext to) {
         Map<String, FieldMap> fieldMap = fieldMapTree.get(objectTypeName);
         if (fieldMap == null) {
             fieldMap = new HashMap<>();
         }
-        fieldMap.put(fieldName, new FieldMap(from, to));
+        fieldMap.put(fieldName, new FieldMap(from, anchor, to));
         fieldMapTree.put(objectTypeName, fieldMap);
         Logger.info("map {}.{} from {}.{} to {}.{}",
                 objectTypeName,
@@ -199,6 +209,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     public void registerMap(String objectTypeName,
                             String fieldName,
                             GraphqlParser.FieldDefinitionContext from,
+                            Boolean anchor,
                             GraphqlParser.ObjectTypeDefinitionContext withType,
                             GraphqlParser.FieldDefinitionContext withFrom,
                             GraphqlParser.FieldDefinitionContext withTo,
@@ -207,7 +218,7 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
         if (fieldMap == null) {
             fieldMap = new HashMap<>();
         }
-        fieldMap.put(fieldName, new FieldMap(from, new FieldMapWith(withType, withFrom, withTo), to));
+        fieldMap.put(fieldName, new FieldMap(from, anchor, new FieldMapWith(withType, withFrom, withTo), to));
         fieldMapTree.put(objectTypeName, fieldMap);
         Logger.info("map {}.{} from {}.{} with {}.{} and {}.{} to {}.{}",
                 objectTypeName,
@@ -247,6 +258,11 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     @Override
     public Optional<GraphqlParser.FieldDefinitionContext> getToFieldDefinition(String objectTypeName, String fieldName) {
         return getFieldMap(objectTypeName, fieldName).map(FieldMap::getTo);
+    }
+
+    @Override
+    public boolean anchor(String objectTypeName, String fieldName) {
+        return getFieldMap(objectTypeName, fieldName).map(FieldMap::getAnchor).orElse(false);
     }
 
     @Override

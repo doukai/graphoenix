@@ -7,7 +7,7 @@ type User @table(engine: "InnoDB") {
     disable: Boolean
     sex: Sex
     organizationId: Int
-    organization: Organization @map(from: "organizationId" to: "id")
+    organization: Organization @map(from: "organizationId" to: "id" anchor: true)
     roles: [Role!] @map(from: "id" with: {type: "UserRole" from: "userId" to: "roleId"} to: "id")
     phones: [String!]! @map(from: "id" with: {type: "UserPhones" from: "userId" to: "phone"})
     test1: [Int!]! @map(from: "id" with: {type: "UserTest1" from: "userId" to: "test1"})
@@ -46,7 +46,7 @@ type UserRole @table(engine: "InnoDB") {
 type Role @table(engine: "InnoDB") {
     id: ID @dataType(type: "int") @column(autoIncrement: true)
     name: String!
-    type: [RoleType] @map(from: "id" with: {type: "RoleRoleType" from: "roleId" to: "type"})
+    type: [RoleType]! @map(from: "id" with: {type: "RoleRoleType" from: "roleId" to: "type"})
     users: [User!] @map(from: "id" with: {type: "UserRole" from: "roleId" to: "userId"} to: "id")
 }
 
@@ -65,7 +65,7 @@ type RoleRoleType @table(engine: "InnoDB") {
 type Organization @table(engine: "InnoDB") {
     id: ID @dataType(type: "int") @column(autoIncrement: true)
     aboveId: Int
-    above: Organization @map(from: "aboveId" to: "id")
+    above: Organization @map(from: "aboveId" to: "id" anchor: true)
     users: [User!] @map(from: "id" to: "organizationId")
     name: String!
 }
