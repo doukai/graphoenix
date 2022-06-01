@@ -11,6 +11,8 @@ public class GraphQLError {
 
     private String path;
 
+    private String schemaPath;
+
     public GraphQLError() {
     }
 
@@ -43,23 +45,35 @@ public class GraphQLError {
         return message;
     }
 
-    public void setMessage(String message) {
+    public GraphQLError setMessage(String message) {
         this.message = message;
+        return this;
     }
 
     public List<GraphQLLocation> getLocations() {
         return locations;
     }
 
-    public void setLocations(List<GraphQLLocation> locations) {
+    public GraphQLError setLocations(List<GraphQLLocation> locations) {
         this.locations = locations;
+        return this;
     }
 
     public String getPath() {
         return path;
     }
 
-    public void setPath(String path) {
+    public GraphQLError setPath(String path) {
         this.path = path;
+        return this;
+    }
+
+    public String getSchemaPath() {
+        return schemaPath;
+    }
+
+    public GraphQLError setSchemaPath(String schemaPath) {
+        this.schemaPath = schemaPath;
+        return this;
     }
 }

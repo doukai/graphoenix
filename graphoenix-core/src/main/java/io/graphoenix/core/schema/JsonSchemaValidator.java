@@ -52,7 +52,13 @@ public class JsonSchemaValidator {
 
         if (messageSet.size() > 0) {
             GraphQLErrors graphQLErrors = new GraphQLErrors();
-            messageSet.forEach(validationMessage -> graphQLErrors.add(new GraphQLError(validationMessage.getMessage())));
+            messageSet.forEach(validationMessage ->
+                    graphQLErrors.add(
+                            new GraphQLError(validationMessage.getMessage())
+                                    .setPath(validationMessage.getPath())
+                                    .setSchemaPath(validationMessage.getSchemaPath())
+                    )
+            );
             throw graphQLErrors;
         }
     }
