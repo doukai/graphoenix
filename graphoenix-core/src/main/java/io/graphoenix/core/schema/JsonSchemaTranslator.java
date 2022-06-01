@@ -37,7 +37,7 @@ public class JsonSchemaTranslator {
         JsonObject jsonSchema = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
                 .orElseGet(JsonObject::new);
-        jsonSchema.addProperty("$id", objectTypeDefinitionContext.name().getText());
+        jsonSchema.addProperty("$id", "#".concat(objectTypeDefinitionContext.name().getText()));
         jsonSchema.addProperty("type", "object");
         jsonSchema.add("properties", objectToProperties(objectTypeDefinitionContext));
         jsonSchema.add("required", buildRequired(objectTypeDefinitionContext));

@@ -23,6 +23,7 @@ import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.BaseOperationHandler;
 import io.graphoenix.core.handler.GraphQLVariablesProcessor;
+import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
 import io.graphoenix.spi.handler.MutationHandler;
@@ -115,7 +116,7 @@ public class OperationHandlerImplementer {
                 throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
 
-        return TypeSpec.classBuilder(className)
+        TypeSpec.Builder builder = TypeSpec.classBuilder(className)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .superclass(BaseOperationHandler.class)
@@ -179,8 +180,19 @@ public class OperationHandlerImplementer {
                 .addMethod(buildOperationMethod(type))
                 .addFields(buildFields(type))
                 .addMethod(buildConstructor(type))
-                .addMethods(buildMethods(type))
-                .build();
+                .addMethods(buildMethods(type));
+
+        if (type.equals(MUTATION)) {
+            builder.addField(
+                    FieldSpec.builder(
+                            ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
+                            "validator",
+                            Modifier.PRIVATE,
+                            Modifier.FINAL
+                    ).build()
+            );
+        }
+        return builder.build();
     }
 
     private Set<MethodSpec> buildMethods(OperationType type) {
@@ -228,21 +240,24 @@ public class OperationHandlerImplementer {
                 throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
 
-        return MethodSpec.methodBuilder(operationName)
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(operationName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
                 .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonElement.class), "variables").build())
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonElement.class)))
                 .addStatement("manager.get().registerFragment(graphQL)")
-                .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class))
-                .addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> $T.parseString(jsonString))",
+                .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class));
+        if (type.equals(MUTATION)) {
+            builder.addStatement("validator.get().validateOperation(operationDefinitionContext)");
+        }
+        builder.addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> $T.parseString(jsonString))",
                         ParameterizedTypeName.get(Mono.class, JsonElement.class),
                         operationName,
                         ClassName.get(JsonParser.class)
                 )
-                .addStatement("return result.map(jsonElement -> invoke(connectionHandler.get().$L(jsonElement, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName)
-                .build();
+                .addStatement("return result.map(jsonElement -> invoke(connectionHandler.get().$L(jsonElement, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName);
+        return builder.build();
     }
 
     private MethodSpec buildMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType type) {
@@ -301,15 +316,15 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                            "$T type = new $T<$T>() {}.getType()",
-                            ClassName.get(Type.class),
-                            ClassName.get(TypeToken.class),
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement(
-                            "$T result = $L.create().fromJson(jsonElement, type)",
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                            "gsonBuilder"
-                    ).beginControlFlow("if(result == null)")
+                                    "$T type = new $T<$T>() {}.getType()",
+                                    ClassName.get(Type.class),
+                                    ClassName.get(TypeToken.class),
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).addStatement(
+                                    "$T result = $L.create().fromJson(jsonElement, type)",
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                    "gsonBuilder"
+                            ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
                             .endControlFlow()
                             .addStatement(
@@ -353,7 +368,10 @@ public class OperationHandlerImplementer {
                 .addStatement("this.invokeHandler = invokeHandler")
                 .addStatement("this.connectionHandler = connectionHandler")
                 .addStatement("this.selectionFilter = selectionFilter");
-
+        if (type.equals(MUTATION)) {
+            builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
+                    .addStatement("this.validator = validator");
+        }
         invokeMethods.stream()
                 .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
                 .map(Tuple2::_1)
