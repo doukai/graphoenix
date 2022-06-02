@@ -75,10 +75,7 @@ public class JsonSchemaValidator {
         JsonObject jsonObject = new JsonObject();
         if (argumentsContext != null) {
             argumentsContext.argument()
-                    .forEach(argumentContext -> {
-                                jsonObject.add(argumentContext.name().getText(), valueWithVariableToJsonElement(argumentContext.valueWithVariable()));
-                            }
-                    );
+                    .forEach(argumentContext -> jsonObject.add(argumentContext.name().getText(), valueWithVariableToJsonElement(argumentContext.valueWithVariable())));
         }
         return jsonObject;
     }
@@ -87,10 +84,7 @@ public class JsonSchemaValidator {
         JsonObject jsonObject = new JsonObject();
         if (objectValueWithVariableContext.objectFieldWithVariable() != null) {
             objectValueWithVariableContext.objectFieldWithVariable()
-                    .forEach(objectFieldWithVariableContext -> {
-                                jsonObject.add(objectFieldWithVariableContext.name().getText(), valueWithVariableToJsonElement(objectFieldWithVariableContext.valueWithVariable()));
-                            }
-                    );
+                    .forEach(objectFieldWithVariableContext -> jsonObject.add(objectFieldWithVariableContext.name().getText(), valueWithVariableToJsonElement(objectFieldWithVariableContext.valueWithVariable())));
         }
         return jsonObject;
     }
