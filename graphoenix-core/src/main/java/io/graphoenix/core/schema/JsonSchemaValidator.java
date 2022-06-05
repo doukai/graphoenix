@@ -74,7 +74,8 @@ public class JsonSchemaValidator {
     protected JsonElement argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {
         JsonObject jsonObject = new JsonObject();
         if (argumentsContext != null) {
-            argumentsContext.argument()
+            argumentsContext.argument().stream()
+                    .filter(argumentContext -> argumentContext.valueWithVariable().NullValue() == null)
                     .forEach(argumentContext -> jsonObject.add(argumentContext.name().getText(), valueWithVariableToJsonElement(argumentContext.valueWithVariable())));
         }
         return jsonObject;
@@ -83,7 +84,8 @@ public class JsonSchemaValidator {
     protected JsonElement objectValueWithVariableToJsonElement(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         JsonObject jsonObject = new JsonObject();
         if (objectValueWithVariableContext.objectFieldWithVariable() != null) {
-            objectValueWithVariableContext.objectFieldWithVariable()
+            objectValueWithVariableContext.objectFieldWithVariable().stream()
+                    .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
                     .forEach(objectFieldWithVariableContext -> jsonObject.add(objectFieldWithVariableContext.name().getText(), valueWithVariableToJsonElement(objectFieldWithVariableContext.valueWithVariable())));
         }
         return jsonObject;
@@ -104,7 +106,8 @@ public class JsonSchemaValidator {
             return objectValueWithVariableToJsonElement(valueWithVariableContext.objectValueWithVariable());
         } else if (valueWithVariableContext.arrayValueWithVariable() != null) {
             JsonArray jsonArray = new JsonArray();
-            valueWithVariableContext.arrayValueWithVariable().valueWithVariable()
+            valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+                    .filter(subValueWithVariableContext -> subValueWithVariableContext.NullValue() == null)
                     .forEach(subValueWithVariableContext -> jsonArray.add(valueWithVariableToJsonElement(subValueWithVariableContext)));
             return jsonArray;
         } else if (valueWithVariableContext.NullValue() != null) {
