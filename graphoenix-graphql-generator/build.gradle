@@ -1,7 +1,7 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
+    id 'java'
 }
+apply plugin: 'maven'
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    api project(":graphoenix-core")
+    compile project(":graphoenix-core")
 
     implementation 'org.antlr:ST4:4.3.2'
 

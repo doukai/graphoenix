@@ -1,7 +1,7 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
+    id 'java'
 }
+apply plugin: 'maven'
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -12,9 +12,9 @@ repositories {
 }
 
 dependencies {
-    api project(":graphoenix-spi")
-    api project(":graphoenix-inject")
-    api 'com.typesafe:config:1.4.2'
+    compile project(":graphoenix-spi")
+    compile project(":graphoenix-inject")
+    compile 'com.typesafe:config:1.4.2'
 
     implementation "com.google.auto.service:auto-service:1.0.1"
     implementation "org.tinylog:tinylog-impl:2.4.1"

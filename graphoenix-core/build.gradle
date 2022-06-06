@@ -1,7 +1,7 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
+    id 'java'
 }
+apply plugin: 'maven'
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -12,13 +12,13 @@ repositories {
 }
 
 dependencies {
-    api project(":graphoenix-spi")
-    api project(":graphoenix-config")
-    api 'com.google.guava:guava:31.1-jre'
-    api 'com.networknt:json-schema-validator:1.0.70'
-    api "org.tinylog:tinylog-impl:2.4.1"
-    api "org.tinylog:slf4j-tinylog:2.4.1"
-    api "org.tinylog:jcl-tinylog:2.4.1"
+    compile project(":graphoenix-spi")
+    compile project(":graphoenix-config")
+    compile 'com.google.guava:guava:31.1-jre'
+    compile 'com.networknt:json-schema-validator:1.0.70'
+    compile "org.tinylog:tinylog-impl:2.4.1"
+    compile "org.tinylog:slf4j-tinylog:2.4.1"
+    compile "org.tinylog:jcl-tinylog:2.4.1"
 
     annotationProcessor project(":graphoenix-inject")
     annotationProcessor project(":graphoenix-interceptor")

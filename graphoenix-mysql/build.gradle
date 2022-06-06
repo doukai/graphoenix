@@ -1,7 +1,7 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
+    id 'java'
 }
+apply plugin: 'maven'
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -12,8 +12,8 @@ repositories {
 }
 
 dependencies {
-    api project(":graphoenix-mysql-translator")
-    api project(":graphoenix-r2dbc-connector")
+    compile project(":graphoenix-mysql-translator")
+    compile project(":graphoenix-r2dbc-connector")
 
     implementation project(":graphoenix-core")
     implementation project(":graphoenix-graphql-builder")

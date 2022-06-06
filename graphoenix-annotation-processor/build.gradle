@@ -1,7 +1,7 @@
 plugins {
-    id 'java-library'
-    id 'maven-publish'
+    id 'java'
 }
+apply plugin: 'maven'
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -12,8 +12,8 @@ repositories {
 }
 
 dependencies {
-    api 'com.google.dagger:dagger:2.41'
-    api "com.google.auto.service:auto-service:1.0.1"
+    compile 'com.google.dagger:dagger:2.41'
+    compile "com.google.auto.service:auto-service:1.0.1"
 
     implementation project(":graphoenix-core")
     implementation project(":graphoenix-config")

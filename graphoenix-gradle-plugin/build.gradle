@@ -1,7 +1,7 @@
 plugins {
     id 'java-gradle-plugin'
-    id 'maven-publish'
 }
+apply plugin: 'maven'
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -12,8 +12,8 @@ repositories {
 }
 
 dependencies {
-    api project(":graphoenix-core")
-    api 'org.antlr:antlr4:4.9.3'
+    compile project(":graphoenix-core")
+    compile 'org.antlr:antlr4:4.9.3'
 
     implementation project(":graphoenix-java-generator")
     implementation project(":graphoenix-graphql-builder")

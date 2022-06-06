@@ -9,7 +9,7 @@ buildscript {
 }
 
 plugins {
-    id 'java-library'
+    id 'java'
 }
 
 compileJava.options.sourcepath = files('src/main/resources')
@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    api project(":graphoenix-mysql")
+    compile project(":graphoenix-mysql")
 
     implementation project(":graphoenix-core")
     implementation project(":graphoenix-http-server")

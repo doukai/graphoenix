@@ -1,8 +1,8 @@
 plugins {
-    id 'java-library'
+    id 'java'
     id 'antlr'
-    id 'maven-publish'
 }
+apply plugin: 'maven'
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -15,19 +15,19 @@ repositories {
 dependencies {
     antlr 'org.antlr:antlr4:4.9.3'
 
-    api 'io.projectreactor:reactor-core:3.4.16'
-    api "io.vavr:vavr:0.10.4"
-    api 'com.google.code.gson:gson:2.9.0'
-    api 'io.r2dbc:r2dbc-spi:0.9.1.RELEASE'
-    api 'com.google.dagger:dagger-spi:2.41'
-    api 'org.eclipse.microprofile.graphql:microprofile-graphql-api:1.1.0'
-    api 'org.eclipse.microprofile.config:microprofile-config-api:3.0.1'
-    api 'jakarta.annotation:jakarta.annotation-api:2.0.0'
-    api 'jakarta.inject:jakarta.inject-api:2.0.1'
-    api 'jakarta.enterprise:jakarta.enterprise.cdi-api:3.0.1'
-    api 'jakarta.interceptor:jakarta.interceptor-api:2.0.1'
-    api 'jakarta.validation:jakarta.validation-api:3.0.1'
-    api "org.tinylog:tinylog-api:2.4.1"
+    compile 'io.projectreactor:reactor-core:3.4.16'
+    compile "io.vavr:vavr:0.10.4"
+    compile 'com.google.code.gson:gson:2.9.0'
+    compile 'io.r2dbc:r2dbc-spi:0.9.1.RELEASE'
+    compile 'com.google.dagger:dagger-spi:2.41'
+    compile 'org.eclipse.microprofile.graphql:microprofile-graphql-api:1.1.0'
+    compile 'org.eclipse.microprofile.config:microprofile-config-api:3.0.1'
+    compile 'jakarta.annotation:jakarta.annotation-api:2.0.0'
+    compile 'jakarta.inject:jakarta.inject-api:2.0.1'
+    compile 'jakarta.enterprise:jakarta.enterprise.cdi-api:3.0.1'
+    compile 'jakarta.interceptor:jakarta.interceptor-api:2.0.1'
+    compile 'jakarta.validation:jakarta.validation-api:3.0.1'
+    compile "org.tinylog:tinylog-api:2.4.1"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
