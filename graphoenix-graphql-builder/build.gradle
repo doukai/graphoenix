@@ -1,11 +1,10 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
 group 'io.graphoenix'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'maven'
+version '0.0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -13,8 +12,9 @@ repositories {
 }
 
 dependencies {
+    api project(":graphoenix-graphql-generator")
+
     implementation project(":graphoenix-core")
-    compile project(":graphoenix-graphql-generator")
     implementation 'org.atteo:evo-inflector:1.3'
 
     annotationProcessor project(":graphoenix-core")

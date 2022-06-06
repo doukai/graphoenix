@@ -1,11 +1,10 @@
 plugins {
     id 'java-gradle-plugin'
+    id 'maven-publish'
 }
 
 group 'io.graphoenix'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'maven'
+version '0.0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -13,12 +12,13 @@ repositories {
 }
 
 dependencies {
-    compile project(":graphoenix-core")
+    api project(":graphoenix-core")
+    api 'org.antlr:antlr4:4.9.3'
+
     implementation project(":graphoenix-java-generator")
     implementation project(":graphoenix-graphql-builder")
     implementation project(":graphoenix-mysql-translator")
     implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.24.2'
-    compile 'org.antlr:antlr4:4.9.3'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'

@@ -4,12 +4,12 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'io.graphoenix:graphoenix-gradle-plugin:1.0-SNAPSHOT'
+        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
     }
 }
 
 plugins {
-    id 'java'
+    id 'java-library'
 }
 
 compileJava.options.sourcepath = files('src/main/resources')
@@ -23,7 +23,7 @@ graphql {
 }
 
 group 'io.graphoenix'
-version '1.0-SNAPSHOT'
+version '0.0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -31,9 +31,10 @@ repositories {
 }
 
 dependencies {
+    api project(":graphoenix-mysql")
+
     implementation project(":graphoenix-core")
     implementation project(":graphoenix-http-server")
-    compile project(":graphoenix-mysql")
 
     annotationProcessor project(":graphoenix-annotation-processor")
     annotationProcessor project(":graphoenix-inject")

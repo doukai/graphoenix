@@ -1,11 +1,10 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
 group 'io.graphoenix'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'maven'
+version '0.0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -13,11 +12,12 @@ repositories {
 }
 
 dependencies {
-    compile project(":graphoenix-spi")
-    compile 'com.github.javaparser:javaparser-symbol-solver-core:3.24.2'
+    api project(":graphoenix-spi")
+    api 'com.github.javaparser:javaparser-symbol-solver-core:3.24.2'
+    api 'com.google.dagger:dagger-compiler:2.41'
+    api "com.google.auto.service:auto-service:1.0.1"
+
     implementation 'org.jd:jd-core:1.1.3'
-    compile 'com.google.dagger:dagger-compiler:2.41'
-    compile "com.google.auto.service:auto-service:1.0.1"
     implementation "org.tinylog:tinylog-impl:2.4.1"
     implementation "org.tinylog:slf4j-tinylog:2.4.1"
     implementation "org.tinylog:jcl-tinylog:2.4.1"
