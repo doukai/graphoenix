@@ -47,6 +47,8 @@ public @interface __FieldInput2 {
 
   String $ofTypeName() default "";
 
+  String $ofType() default "";
+
   String $description() default "";
 
   String $args() default "";

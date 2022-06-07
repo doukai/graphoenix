@@ -23,6 +23,7 @@ public class Role implements Meta {
   @NonNull
   private String name;
 
+  @NonNull
   private Collection<RoleType> type;
 
   private Collection<User> users;

@@ -13,13 +13,9 @@ import java.lang.annotation.Target;
 @SchemaBean
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD})
-public @interface map {
-  String from();
+@Target(ElementType.ANNOTATION_TYPE)
+public @interface Property {
+  String name();
 
-  boolean anchor();
-
-  MapWith with();
-
-  String to();
+  String[] required();
 }

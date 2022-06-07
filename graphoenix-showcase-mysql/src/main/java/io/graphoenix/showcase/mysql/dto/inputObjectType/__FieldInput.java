@@ -22,6 +22,9 @@ public class __FieldInput {
 
   private String ofTypeName;
 
+  @NonNull
+  private __TypeInput ofType;
+
   private String description;
 
   @NonNull
@@ -80,6 +83,14 @@ public class __FieldInput {
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeInput getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__TypeInput ofType) {
+    this.ofType = ofType;
   }
 
   public String getDescription() {

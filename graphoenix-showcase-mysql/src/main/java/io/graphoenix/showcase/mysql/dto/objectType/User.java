@@ -41,10 +41,13 @@ public class User implements Meta {
 
   private Collection<Role> roles;
 
+  @NonNull
   private Collection<String> phones;
 
+  @NonNull
   private Collection<Integer> test1;
 
+  @NonNull
   private Collection<Boolean> test2;
 
   private Integer version;

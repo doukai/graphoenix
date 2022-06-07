@@ -20,6 +20,8 @@ public class __FieldExpression {
 
   private StringExpression ofTypeName;
 
+  private __TypeExpression ofType;
+
   private StringExpression description;
 
   private __InputValueExpression args;
@@ -80,6 +82,14 @@ public class __FieldExpression {
 
   public void setOfTypeName(StringExpression ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeExpression getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__TypeExpression ofType) {
+    this.ofType = ofType;
   }
 
   public StringExpression getDescription() {

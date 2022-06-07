@@ -47,6 +47,8 @@ public @interface __FieldInput0 {
 
   String $ofTypeName() default "";
 
+  String $ofType() default "";
+
   String $description() default "";
 
   String $args() default "";
@@ -74,6 +76,8 @@ public @interface __FieldInput0 {
   String $argsAggregate() default "";
 
   String $argsConnection() default "";
+
+  __TypeInput1 ofType() default @__TypeInput1;
 
   __InputValueInput1[] args() default {};
 

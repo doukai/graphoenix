@@ -19,6 +19,9 @@ public class __EnumValueInput {
 
   private String ofTypeName;
 
+  @NonNull
+  private __TypeInput ofType;
+
   private String description;
 
   private String deprecationReason;
@@ -53,6 +56,14 @@ public class __EnumValueInput {
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeInput getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__TypeInput ofType) {
+    this.ofType = ofType;
   }
 
   public String getDescription() {

@@ -45,4 +45,6 @@ public @interface __EnumValueExpression1 {
   String[] $isDeprecated() default {};
 
   String[] $__typename() default {};
+
+  __TypeExpressions2[] ofType() default {};
 }

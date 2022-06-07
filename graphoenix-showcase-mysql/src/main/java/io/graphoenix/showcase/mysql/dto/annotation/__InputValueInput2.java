@@ -41,6 +41,8 @@ public @interface __InputValueInput2 {
 
   String $ofTypeName() default "";
 
+  String $ofType() default "";
+
   String $fieldId() default "";
 
   String $directiveName() default "";

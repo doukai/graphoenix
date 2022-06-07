@@ -20,6 +20,7 @@ public class RoleInput {
   @NonNull
   private String name;
 
+  @NonNull
   private Collection<RoleType> type;
 
   private Collection<UserInput> users;

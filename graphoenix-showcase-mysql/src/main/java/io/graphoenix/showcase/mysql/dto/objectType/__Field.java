@@ -25,6 +25,9 @@ public class __Field implements Meta {
 
   private String ofTypeName;
 
+  @NonNull
+  private __Type ofType;
+
   private String description;
 
   @NonNull
@@ -153,6 +156,14 @@ public class __Field implements Meta {
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __Type getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__Type ofType) {
+    this.ofType = ofType;
   }
 
   public String getDescription() {

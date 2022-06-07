@@ -15,12 +15,11 @@ dependencies {
     compile project(":graphoenix-spi")
     compile project(":graphoenix-config")
     compile 'com.google.guava:guava:31.1-jre'
+    compile 'org.antlr:antlr4-runtime:4.9.3'
     compile 'com.networknt:json-schema-validator:1.0.70'
     compile "org.tinylog:tinylog-impl:2.4.1"
     compile "org.tinylog:slf4j-tinylog:2.4.1"
     compile "org.tinylog:jcl-tinylog:2.4.1"
-
-    runtimeOnly 'org.antlr:antlr4-runtime:4.9.3'
 
     annotationProcessor project(":graphoenix-inject")
     annotationProcessor project(":graphoenix-interceptor")

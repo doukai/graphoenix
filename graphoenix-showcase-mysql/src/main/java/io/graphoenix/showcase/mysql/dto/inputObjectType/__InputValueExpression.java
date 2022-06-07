@@ -20,6 +20,8 @@ public class __InputValueExpression {
 
   private StringExpression ofTypeName;
 
+  private __TypeExpression ofType;
+
   private IntExpression fieldId;
 
   private StringExpression directiveName;
@@ -72,6 +74,14 @@ public class __InputValueExpression {
 
   public void setOfTypeName(StringExpression ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeExpression getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__TypeExpression ofType) {
+    this.ofType = ofType;
   }
 
   public IntExpression getFieldId() {

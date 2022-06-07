@@ -33,6 +33,8 @@ public @interface __EnumValueInput2 {
 
   String $ofTypeName() default "";
 
+  String $ofType() default "";
+
   String $description() default "";
 
   String $deprecationReason() default "";

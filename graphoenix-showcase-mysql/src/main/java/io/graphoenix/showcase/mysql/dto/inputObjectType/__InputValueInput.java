@@ -21,6 +21,9 @@ public class __InputValueInput {
 
   private String ofTypeName;
 
+  @NonNull
+  private __TypeInput ofType;
+
   private Integer fieldId;
 
   private String directiveName;
@@ -70,6 +73,14 @@ public class __InputValueInput {
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeInput getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__TypeInput ofType) {
+    this.ofType = ofType;
   }
 
   public Integer getFieldId() {

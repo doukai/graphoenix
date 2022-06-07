@@ -8,6 +8,7 @@ import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Id;
+import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
@@ -20,6 +21,9 @@ public class __EnumValue implements Meta {
   private String name;
 
   private String ofTypeName;
+
+  @NonNull
+  private __Type ofType;
 
   private String description;
 
@@ -85,6 +89,14 @@ public class __EnumValue implements Meta {
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __Type getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__Type ofType) {
+    this.ofType = ofType;
   }
 
   public String getDescription() {

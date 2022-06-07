@@ -18,6 +18,8 @@ public class __EnumValueExpression {
 
   private StringExpression ofTypeName;
 
+  private __TypeExpression ofType;
+
   private StringExpression description;
 
   private StringExpression deprecationReason;
@@ -56,6 +58,14 @@ public class __EnumValueExpression {
 
   public void setOfTypeName(StringExpression ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __TypeExpression getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__TypeExpression ofType) {
+    this.ofType = ofType;
   }
 
   public StringExpression getDescription() {

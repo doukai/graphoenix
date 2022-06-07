@@ -58,5 +58,7 @@ public @interface __InputValueExpression1 {
 
   String[] $__typename() default {};
 
+  __TypeExpressions2[] ofType() default {};
+
   __TypeExpressions2[] type() default {};
 }

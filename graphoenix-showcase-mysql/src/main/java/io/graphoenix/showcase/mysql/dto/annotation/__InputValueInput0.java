@@ -41,6 +41,8 @@ public @interface __InputValueInput0 {
 
   String $ofTypeName() default "";
 
+  String $ofType() default "";
+
   String $fieldId() default "";
 
   String $directiveName() default "";
@@ -56,6 +58,8 @@ public @interface __InputValueInput0 {
   String $isDeprecated() default "";
 
   String $__typename() default "";
+
+  __TypeInput1 ofType() default @__TypeInput1;
 
   __TypeInput1 type() default @__TypeInput1;
 }

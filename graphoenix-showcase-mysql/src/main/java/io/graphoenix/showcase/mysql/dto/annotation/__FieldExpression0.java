@@ -70,6 +70,8 @@ public @interface __FieldExpression0 {
 
   String[] $__typename() default {};
 
+  __TypeExpressions1[] ofType() default {};
+
   __InputValueExpressions1[] args() default {};
 
   __TypeExpressions1[] type() default {};

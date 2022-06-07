@@ -24,6 +24,9 @@ public class __InputValue implements Meta {
 
   private String ofTypeName;
 
+  @NonNull
+  private __Type ofType;
+
   private Integer fieldId;
 
   private String directiveName;
@@ -125,6 +128,14 @@ public class __InputValue implements Meta {
 
   public void setOfTypeName(String ofTypeName) {
     this.ofTypeName = ofTypeName;
+  }
+
+  public __Type getOfType() {
+    return this.ofType;
+  }
+
+  public void setOfType(__Type ofType) {
+    this.ofType = ofType;
   }
 
   public Integer getFieldId() {
