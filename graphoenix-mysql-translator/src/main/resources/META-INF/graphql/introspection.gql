@@ -4,9 +4,9 @@ type __Schema {
     mutationTypeName: String
     subscriptionTypeName: String
     types: [__Type!]! @map(from: "id" to: "schemaId")
-    queryType: __Type! @map(from: "queryTypeName" to: "name")
-    mutationType: __Type @map(from: "mutationTypeName" to: "name")
-    subscriptionType: __Type @map(from: "subscriptionTypeName" to: "name")
+    queryType: __Type! @map(from: "queryTypeName" to: "name" anchor: true)
+    mutationType: __Type @map(from: "mutationTypeName" to: "name" anchor: true)
+    subscriptionType: __Type @map(from: "subscriptionTypeName" to: "name" anchor: true)
     directives: [__Directive!]! @map(from: "id" to: "schemaId")
 }
 
@@ -33,7 +33,7 @@ type __Type {
 
     # NON_NULL and LIST only
     ofTypeName: String
-    ofType: __Type @map(from: "ofTypeName" to: "name")
+    ofType: __Type @map(from: "ofTypeName" to: "name" anchor: true)
 }
 
 type __TypeInterfaces {
@@ -53,9 +53,10 @@ type __Field {
     name: String
     typeName: String
     ofTypeName: String
+    ofType: __Type! @map(from: "ofTypeName" to: "name" anchor: true)
     description: String
     args: [__InputValue!]! @map(from: "id" to: "fieldId")
-    type: __Type! @map(from: "typeName" to: "name")
+    type: __Type! @map(from: "typeName" to: "name" anchor: true)
     deprecationReason: String
     from: String
     to: String
@@ -69,10 +70,11 @@ type __InputValue {
     name: String
     typeName: String
     ofTypeName: String
+    ofType: __Type! @map(from: "ofTypeName" to: "name" anchor: true)
     fieldId: Int
     directiveName: String
     description: String
-    type: __Type! @map(from: "typeName" to: "name")
+    type: __Type! @map(from: "typeName" to: "name" anchor: true)
     defaultValue: String
 }
 
@@ -80,6 +82,7 @@ type __EnumValue {
     id: ID @dataType(type: "int") @column(autoIncrement: true)
     name: String
     ofTypeName: String
+    ofType: __Type! @map(from: "ofTypeName" to: "name" anchor: true)
     description: String
     deprecationReason: String
 }

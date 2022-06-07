@@ -1,4 +1,4 @@
-input Validation {
+input ValidationInput {
     minLength: Int
     maxLength: Int
     pattern: String
@@ -12,24 +12,24 @@ input Validation {
     multipleOf: Float
     const: String
     enum: [String]
-    items: Validation
+    items: ValidationInput
     minItems: Int
     maxItems: Int
     uniqueItems: Boolean
-    allOf: [Validation]
-    anyOf: [Validation]
-    oneOf: [Validation]
-    not: Validation
+    allOf: [ValidationInput]
+    anyOf: [ValidationInput]
+    oneOf: [ValidationInput]
+    not: ValidationInput
     properties: [Property]
-    if: Validation
-    then: Validation
-    else: Validation
+    if: ValidationInput
+    then: ValidationInput
+    else: ValidationInput
     dependentRequired: [Property]
 }
 
 input Property {
     name: String!
-    validation: Validation
+    validation: ValidationInput
     required: [String]
 }
 
@@ -47,17 +47,17 @@ directive @validation(
     multipleOf: Float
     const: String
     enum: [String]
-    items: Validation
+    items: ValidationInput
     minItems: Int
     maxItems: Int
     uniqueItems: Boolean
-    allOf: [Validation]
-    anyOf: [Validation]
-    oneOf: [Validation]
-    not: Validation
+    allOf: [ValidationInput]
+    anyOf: [ValidationInput]
+    oneOf: [ValidationInput]
+    not: ValidationInput
     properties: [Property]
-    if: Validation
-    then: Validation
-    else: Validation
+    if: ValidationInput
+    then: ValidationInput
+    else: ValidationInput
     dependentRequired: [Property]
 ) on OBJECT | FIELD_DEFINITION

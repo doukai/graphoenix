@@ -20,6 +20,8 @@ dependencies {
     compile "org.tinylog:slf4j-tinylog:2.4.1"
     compile "org.tinylog:jcl-tinylog:2.4.1"
 
+    runtimeOnly 'org.antlr:antlr4-runtime:4.9.3'
+
     annotationProcessor project(":graphoenix-inject")
     annotationProcessor project(":graphoenix-interceptor")
     annotationProcessor project(":graphoenix-config")
