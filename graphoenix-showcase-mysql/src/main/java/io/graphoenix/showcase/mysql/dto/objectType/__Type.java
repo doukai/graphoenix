@@ -8,6 +8,7 @@ import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.Override;
 import java.lang.String;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
@@ -42,9 +43,21 @@ public class __Type implements Meta {
 
   private __Type ofType;
 
-  private Integer version;
+  private String domainId;
 
   private Boolean isDeprecated;
+
+  private Integer version;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createOrganizationId;
 
   private String __typename;
 
@@ -187,13 +200,13 @@ public class __Type implements Meta {
   }
 
   @Override
-  public Integer getVersion() {
-    return this.version;
+  public String getDomainId() {
+    return this.domainId;
   }
 
   @Override
-  public void setVersion(Integer version) {
-    this.version = version;
+  public void setDomainId(String domainId) {
+    this.domainId = domainId;
   }
 
   @Override
@@ -204,6 +217,66 @@ public class __Type implements Meta {
   @Override
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  @Override
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  @Override
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  @Override
+  public String getCreateUserId() {
+    return this.createUserId;
+  }
+
+  @Override
+  public void setCreateUserId(String createUserId) {
+    this.createUserId = createUserId;
+  }
+
+  @Override
+  public LocalDateTime getCreateTime() {
+    return this.createTime;
+  }
+
+  @Override
+  public void setCreateTime(LocalDateTime createTime) {
+    this.createTime = createTime;
+  }
+
+  @Override
+  public String getUpdateUserId() {
+    return this.updateUserId;
+  }
+
+  @Override
+  public void setUpdateUserId(String updateUserId) {
+    this.updateUserId = updateUserId;
+  }
+
+  @Override
+  public LocalDateTime getUpdateTime() {
+    return this.updateTime;
+  }
+
+  @Override
+  public void setUpdateTime(LocalDateTime updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  @Override
+  public String getCreateOrganizationId() {
+    return this.createOrganizationId;
+  }
+
+  @Override
+  public void setCreateOrganizationId(String createOrganizationId) {
+    this.createOrganizationId = createOrganizationId;
   }
 
   public String get__Typename() {

@@ -12,7 +12,7 @@ import org.eclipse.microprofile.graphql.Input;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @SchemaBean
 public class __TypeExpression {
-  private IDExpression name;
+  private StringExpression name;
 
   private IntExpression schemaId;
 
@@ -34,10 +34,22 @@ public class __TypeExpression {
 
   private __TypeExpression ofType;
 
-  private IntExpression version;
+  private StringExpression domainId;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
+
+  private IntExpression version;
+
+  private StringExpression createUserId;
+
+  private StringExpression createTime;
+
+  private StringExpression updateUserId;
+
+  private StringExpression updateTime;
+
+  private StringExpression createOrganizationId;
 
   private StringExpression __typename;
 
@@ -46,11 +58,11 @@ public class __TypeExpression {
 
   private Collection<__TypeExpression> exs;
 
-  public IDExpression getName() {
+  public StringExpression getName() {
     return this.name;
   }
 
-  public void setName(IDExpression name) {
+  public void setName(StringExpression name) {
     this.name = name;
   }
 
@@ -134,12 +146,12 @@ public class __TypeExpression {
     this.ofType = ofType;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public StringExpression getDomainId() {
+    return this.domainId;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setDomainId(StringExpression domainId) {
+    this.domainId = domainId;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -148,6 +160,54 @@ public class __TypeExpression {
 
   public void setIncludeDeprecated(Boolean includeDeprecated) {
     this.includeDeprecated = includeDeprecated;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public StringExpression getCreateUserId() {
+    return this.createUserId;
+  }
+
+  public void setCreateUserId(StringExpression createUserId) {
+    this.createUserId = createUserId;
+  }
+
+  public StringExpression getCreateTime() {
+    return this.createTime;
+  }
+
+  public void setCreateTime(StringExpression createTime) {
+    this.createTime = createTime;
+  }
+
+  public StringExpression getUpdateUserId() {
+    return this.updateUserId;
+  }
+
+  public void setUpdateUserId(StringExpression updateUserId) {
+    this.updateUserId = updateUserId;
+  }
+
+  public StringExpression getUpdateTime() {
+    return this.updateTime;
+  }
+
+  public void setUpdateTime(StringExpression updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  public StringExpression getCreateOrganizationId() {
+    return this.createOrganizationId;
+  }
+
+  public void setCreateOrganizationId(StringExpression createOrganizationId) {
+    this.createOrganizationId = createOrganizationId;
   }
 
   public StringExpression get__Typename() {

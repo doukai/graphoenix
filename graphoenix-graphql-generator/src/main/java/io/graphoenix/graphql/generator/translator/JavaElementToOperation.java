@@ -50,11 +50,11 @@ public class JavaElementToOperation {
     private String executableElementToOperation(ExecutableElement executableElement) {
         QueryOperation queryOperation = executableElement.getAnnotation(QueryOperation.class);
         if (queryOperation != null) {
-            return methodToQueryOperation.executableElementToQuery(queryOperation.value(), executableElement, queryOperation.layers());
+            return methodToQueryOperation.executableElementToQuery(queryOperation.value(), executableElement, queryOperation.selectionSet(), queryOperation.layers());
         }
         MutationOperation mutationOperation = executableElement.getAnnotation(MutationOperation.class);
         if (mutationOperation != null) {
-            return methodToMutationOperation.executableElementToMutation(mutationOperation.value(), executableElement, mutationOperation.layers());
+            return methodToMutationOperation.executableElementToMutation(mutationOperation.value(), executableElement, mutationOperation.selectionSet(), mutationOperation.layers());
         }
         throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
     }

@@ -12,16 +12,28 @@ import org.eclipse.microprofile.graphql.Input;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @SchemaBean
 public class UserTest1Expression {
-  private IDExpression id;
+  private StringExpression id;
 
   private IntExpression userId;
 
   private IntExpression test1;
 
-  private IntExpression version;
+  private StringExpression domainId;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
+
+  private IntExpression version;
+
+  private StringExpression createUserId;
+
+  private StringExpression createTime;
+
+  private StringExpression updateUserId;
+
+  private StringExpression updateTime;
+
+  private StringExpression createOrganizationId;
 
   private StringExpression __typename;
 
@@ -30,11 +42,11 @@ public class UserTest1Expression {
 
   private Collection<UserTest1Expression> exs;
 
-  public IDExpression getId() {
+  public StringExpression getId() {
     return this.id;
   }
 
-  public void setId(IDExpression id) {
+  public void setId(StringExpression id) {
     this.id = id;
   }
 
@@ -54,12 +66,12 @@ public class UserTest1Expression {
     this.test1 = test1;
   }
 
-  public IntExpression getVersion() {
-    return this.version;
+  public StringExpression getDomainId() {
+    return this.domainId;
   }
 
-  public void setVersion(IntExpression version) {
-    this.version = version;
+  public void setDomainId(StringExpression domainId) {
+    this.domainId = domainId;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -68,6 +80,54 @@ public class UserTest1Expression {
 
   public void setIncludeDeprecated(Boolean includeDeprecated) {
     this.includeDeprecated = includeDeprecated;
+  }
+
+  public IntExpression getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(IntExpression version) {
+    this.version = version;
+  }
+
+  public StringExpression getCreateUserId() {
+    return this.createUserId;
+  }
+
+  public void setCreateUserId(StringExpression createUserId) {
+    this.createUserId = createUserId;
+  }
+
+  public StringExpression getCreateTime() {
+    return this.createTime;
+  }
+
+  public void setCreateTime(StringExpression createTime) {
+    this.createTime = createTime;
+  }
+
+  public StringExpression getUpdateUserId() {
+    return this.updateUserId;
+  }
+
+  public void setUpdateUserId(StringExpression updateUserId) {
+    this.updateUserId = updateUserId;
+  }
+
+  public StringExpression getUpdateTime() {
+    return this.updateTime;
+  }
+
+  public void setUpdateTime(StringExpression updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  public StringExpression getCreateOrganizationId() {
+    return this.createOrganizationId;
+  }
+
+  public void setCreateOrganizationId(StringExpression createOrganizationId) {
+    this.createOrganizationId = createOrganizationId;
   }
 
   public StringExpression get__Typename() {

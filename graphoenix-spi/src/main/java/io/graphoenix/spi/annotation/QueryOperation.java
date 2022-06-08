@@ -8,5 +8,7 @@ import java.lang.annotation.*;
 public @interface QueryOperation {
     String value();
 
+    String selectionSet() default "";
+
     int layers() default 0;
 }

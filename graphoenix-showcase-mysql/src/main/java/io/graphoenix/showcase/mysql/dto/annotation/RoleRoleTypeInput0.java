@@ -18,9 +18,21 @@ public @interface RoleRoleTypeInput0 {
 
   RoleType type() default RoleType.ADMIN;
 
-  int version() default 0;
+  String domainId() default "";
 
   boolean isDeprecated() default false;
+
+  int version() default 0;
+
+  String createUserId() default "";
+
+  String createTime() default "";
+
+  String updateUserId() default "";
+
+  String updateTime() default "";
+
+  String createOrganizationId() default "";
 
   String __typename() default "";
 
@@ -30,9 +42,21 @@ public @interface RoleRoleTypeInput0 {
 
   String $type() default "";
 
-  String $version() default "";
+  String $domainId() default "";
 
   String $isDeprecated() default "";
+
+  String $version() default "";
+
+  String $createUserId() default "";
+
+  String $createTime() default "";
+
+  String $updateUserId() default "";
+
+  String $updateTime() default "";
+
+  String $createOrganizationId() default "";
 
   String $__typename() default "";
 }

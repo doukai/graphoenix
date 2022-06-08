@@ -1,6 +1,7 @@
 package io.graphoenix.r2dbc.connector.dao;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
@@ -8,11 +9,9 @@ import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
 import io.graphoenix.spi.dao.BaseOperationDAO;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
+import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import static io.graphoenix.core.utils.ObjectCastUtil.OBJECT_CAST_UTIL;
 
 public class R2DBCOperationDAO extends BaseOperationDAO {
 
@@ -30,11 +29,15 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
     }
 
     @Override
-    public <T> List<T> findAll(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        List<?> list = gsonBuilder.create().fromJson(queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters)).block(), List.class);
-        return list.stream()
-                .map(item -> OBJECT_CAST_UTIL.cast(item, beanClass))
-                .collect(Collectors.toList());
+    public <T> T findAll(String sql, Map<String, Object> parameters, Type type) {
+        return gsonBuilder.create().fromJson(queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters)).block(), type);
+    }
+
+    @Override
+    public <T> Collection<T> findAll(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+        Type type = (new TypeToken<Collection<T>>() {
+        }).getType();
+        return findAll(sql, parameters, type);
     }
 
     @Override
@@ -48,11 +51,16 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
     }
 
     @Override
-    public <T> Mono<List<T>> findAllAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+    public <T> Mono<T> findAllAsync(String sql, Map<String, Object> parameters, Type type) {
         Mono<String> jsonMono = queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters));
-        return jsonMono
-                .map(json -> gsonBuilder.create().fromJson(json, List.class))
-                .map(list -> OBJECT_CAST_UTIL.castToList(list, beanClass));
+        return jsonMono.map(json -> gsonBuilder.create().fromJson(json, type));
+    }
+
+    @Override
+    public <T> Mono<Collection<T>> findAllAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+        Type type = (new TypeToken<Collection<T>>() {
+        }).getType();
+        return findAllAsync(sql, parameters, type);
     }
 
     @Override

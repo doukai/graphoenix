@@ -1,5 +1,6 @@
 package io.graphoenix.java.generator.implementer;
 
+import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -12,7 +13,6 @@ import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
-import io.vavr.CheckedFunction0;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
@@ -26,10 +26,9 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
-import java.util.Collection;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.ElementProcessErrorType.UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE;
@@ -98,35 +97,56 @@ public class OperationInterfaceImplementer {
     }
 
     private MethodSpec executableElementToMethodSpec(TypeElement typeElement, ExecutableElement executableElement) {
-        return MethodSpec.methodBuilder(executableElement.getSimpleName().toString())
+        TypeName typeName = ClassName.get(executableElement.getReturnType());
+        CodeBlock mapOf = CodeBlock.join(
+                executableElement.getParameters().stream()
+                        .map(parameter ->
+                                CodeBlock.of(
+                                        "$S, $L",
+                                        parameter.getSimpleName().toString(),
+                                        parameter.getSimpleName().toString()
+                                )
+                        )
+                        .collect(Collectors.toList()),
+                ", ");
+
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(executableElement.getSimpleName().toString())
                 .addModifiers(Modifier.PUBLIC)
                 .addParameters(
                         executableElement.getParameters().stream()
                                 .map(variableElement -> ParameterSpec.builder(TypeName.get(variableElement.asType()), variableElement.getSimpleName().toString()).build())
                                 .collect(Collectors.toList())
                 )
-                .returns(TypeName.get(executableElement.getReturnType()))
-                .addException(ClassName.get(Exception.class))
-                .addStatement(
-                        "return $L($L, $T.of($L), $T.class)",
-                        getMethodName(executableElement),
-                        executableElement.getSimpleName().toString()
-                                .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                        ClassName.get(Map.class),
-                        CodeBlock.join(
-                                executableElement.getParameters().stream()
-                                        .map(parameter ->
-                                                CodeBlock.of(
-                                                        "$S, $L",
-                                                        parameter.getSimpleName().toString(),
-                                                        parameter.getSimpleName().toString()
-                                                )
-                                        )
-                                        .collect(Collectors.toList()),
-                                ", "),
-                        getGenericType(ClassName.get(executableElement.getReturnType()))
-                )
-                .build();
+                .returns(typeName)
+                .addException(ClassName.get(Exception.class));
+
+        if (isReturnCollection(executableElement)) {
+            builder.addStatement(
+                            "$T type = new $T<$T>() {}.getType()",
+                            ClassName.get(Type.class),
+                            ClassName.get(TypeToken.class),
+                            typeName
+                    )
+                    .addStatement(
+                            "return $L($L, $T.of($L), type)",
+                            getMethodName(executableElement),
+                            executableElement.getSimpleName().toString()
+                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
+                            ClassName.get(Map.class),
+                            mapOf
+                    );
+        } else {
+            builder.addStatement(
+                    "return $L($L, $T.of($L), $T.class)",
+                    getMethodName(executableElement),
+                    executableElement.getSimpleName().toString()
+                            .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
+                    ClassName.get(Map.class),
+                    mapOf,
+                    getGenericType(typeName)
+            );
+        }
+        return builder.build();
     }
 
     private TypeName getGenericType(TypeName typeName) {
@@ -140,15 +160,11 @@ public class OperationInterfaceImplementer {
     private String getMethodName(ExecutableElement executableElement) {
         TypeName typeName0 = ClassName.get(executableElement.getReturnType());
         if (typeName0 instanceof ParameterizedTypeName) {
-            Class<?> class0 = CheckedFunction0.of(() -> Class.forName(((ParameterizedTypeName) typeName0).rawType.toString())).unchecked().get();
-            if (class0.isAssignableFrom(Mono.class)) {
+            if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(Mono.class.getCanonicalName())) {
                 TypeName typeName1 = ((ParameterizedTypeName) typeName0).typeArguments.get(0);
                 if (typeName1 instanceof ParameterizedTypeName) {
-                    Class<?> class1 = CheckedFunction0.of(() -> Class.forName(((ParameterizedTypeName) typeName1).rawType.toString())).unchecked().get();
-                    if (class1.isAssignableFrom(List.class) || class1.isAssignableFrom(Set.class) || class1.isAssignableFrom(Collection.class)) {
-                        if (executableElement.getAnnotation(QueryOperation.class) != null) {
-                            return "findAllAsync";
-                        }
+                    if (executableElement.getAnnotation(QueryOperation.class) != null) {
+                        return "findAllAsync";
                     }
                 } else {
                     if (executableElement.getAnnotation(QueryOperation.class) != null) {
@@ -157,7 +173,7 @@ public class OperationInterfaceImplementer {
                         return "saveAsync";
                     }
                 }
-            } else if (class0.isAssignableFrom(List.class) || class0.isAssignableFrom(Set.class) || class0.isAssignableFrom(Collection.class)) {
+            } else {
                 if (executableElement.getAnnotation(QueryOperation.class) != null) {
                     return "findAll";
                 }
@@ -170,5 +186,18 @@ public class OperationInterfaceImplementer {
             }
         }
         throw new ElementProcessException(UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE.bind(executableElement.getReturnType().toString()));
+    }
+
+    private boolean isReturnCollection(ExecutableElement executableElement) {
+        TypeName typeName0 = ClassName.get(executableElement.getReturnType());
+        if (typeName0 instanceof ParameterizedTypeName) {
+            if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(Mono.class.getCanonicalName())) {
+                TypeName typeName1 = ((ParameterizedTypeName) typeName0).typeArguments.get(0);
+                return typeName1 instanceof ParameterizedTypeName;
+            } else {
+                return true;
+            }
+        }
+        return false;
     }
 }

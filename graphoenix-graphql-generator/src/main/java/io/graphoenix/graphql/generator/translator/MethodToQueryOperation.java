@@ -51,7 +51,7 @@ public class MethodToQueryOperation {
         this.operatorName = graphQLConfig.getOperatorInputName();
     }
 
-    public String executableElementToQuery(String queryFieldName, ExecutableElement executableElement, int layers) {
+    public String executableElementToQuery(String queryFieldName, ExecutableElement executableElement, String selectionSet, int layers) {
         Operation operation = new Operation()
                 .setName(executableElement.getSimpleName().toString())
                 .setOperationType("query");
@@ -80,7 +80,11 @@ public class MethodToQueryOperation {
                             )
                     );
         }
-        field.setFields(elementManager.buildFields(getQueryTypeName(queryFieldName), 0, layers));
+        if (selectionSet != null && !selectionSet.equals("")) {
+            field.setFields(elementManager.buildFields(getQueryTypeName(queryFieldName), selectionSet));
+        } else {
+            field.setFields(elementManager.buildFields(getQueryTypeName(queryFieldName), 0, layers));
+        }
         String query = operation.addField(field).toString();
         Logger.info("build query success:\r\n{}", query);
         return query;

@@ -36,7 +36,7 @@ public class MethodToMutationOperation {
         this.elementManager = elementManager;
     }
 
-    public String executableElementToMutation(String mutationFieldName, ExecutableElement executableElement, int layers) {
+    public String executableElementToMutation(String mutationFieldName, ExecutableElement executableElement, String selectionSet, int layers) {
         Operation operation = new Operation()
                 .setName(executableElement.getSimpleName().toString())
                 .setOperationType("mutation");
@@ -53,7 +53,11 @@ public class MethodToMutationOperation {
                             )
             );
         }
-        field.setFields(elementManager.buildFields(getMutationTypeName(mutationFieldName), 0, layers));
+        if (selectionSet != null && !selectionSet.equals("")) {
+            field.setFields(elementManager.buildFields(getMutationTypeName(mutationFieldName), selectionSet));
+        } else {
+            field.setFields(elementManager.buildFields(getMutationTypeName(mutationFieldName), 0, layers));
+        }
         String mutation = operation.addField(field).toString();
         Logger.info("build mutation success:\r\n{}", mutation);
         return mutation;

@@ -462,8 +462,32 @@ public class DocumentBuilder {
             if (fieldDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME)) {
                 return new InputValue().setName(DEPRECATED_INPUT_NAME).setTypeName("Boolean").setDefaultValue("false");
             }
-            return new InputValue().setName(fieldDefinitionContext.name().getText())
-                    .setTypeName(fieldTypeName.concat(fieldTypeName.equals("Boolean") ? "" : InputType.EXPRESSION.toString()));
+            String argumentTypeName;
+            switch (fieldTypeName) {
+                case "Boolean":
+                    argumentTypeName = "Boolean";
+                    break;
+                case "ID":
+                case "String":
+                case "Date":
+                case "Time":
+                case "DateTime":
+                case "Timestamp":
+                    argumentTypeName = "String".concat(InputType.EXPRESSION.toString());
+                    break;
+                case "Int":
+                case "BigInteger":
+                    argumentTypeName = "Int".concat(InputType.EXPRESSION.toString());
+                    break;
+                case "Float":
+                case "BigDecimal":
+                    argumentTypeName = "Float".concat(InputType.EXPRESSION.toString());
+                    break;
+                default:
+                    argumentTypeName = fieldTypeName.concat(InputType.EXPRESSION.toString());
+                    break;
+            }
+            return new InputValue().setName(fieldDefinitionContext.name().getText()).setTypeName(argumentTypeName);
         } else {
             return new InputValue().setName(fieldDefinitionContext.name().getText()).setTypeName("Sort");
         }

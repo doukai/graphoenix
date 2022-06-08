@@ -6,6 +6,7 @@ import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
 import java.lang.String;
+import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
@@ -22,9 +23,21 @@ public class __DirectiveLocationsInput {
   @NonNull
   private __DirectiveLocation directiveLocation;
 
-  private Integer version;
+  private String domainId;
 
   private Boolean isDeprecated;
+
+  private Integer version;
+
+  private String createUserId;
+
+  private LocalDateTime createTime;
+
+  private String updateUserId;
+
+  private LocalDateTime updateTime;
+
+  private String createOrganizationId;
 
   @DefaultValue("\"__DirectiveLocations\"")
   @NonNull
@@ -54,12 +67,12 @@ public class __DirectiveLocationsInput {
     this.directiveLocation = directiveLocation;
   }
 
-  public Integer getVersion() {
-    return this.version;
+  public String getDomainId() {
+    return this.domainId;
   }
 
-  public void setVersion(Integer version) {
-    this.version = version;
+  public void setDomainId(String domainId) {
+    this.domainId = domainId;
   }
 
   public Boolean getIsDeprecated() {
@@ -68,6 +81,54 @@ public class __DirectiveLocationsInput {
 
   public void setIsDeprecated(Boolean isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public Integer getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
+
+  public String getCreateUserId() {
+    return this.createUserId;
+  }
+
+  public void setCreateUserId(String createUserId) {
+    this.createUserId = createUserId;
+  }
+
+  public LocalDateTime getCreateTime() {
+    return this.createTime;
+  }
+
+  public void setCreateTime(LocalDateTime createTime) {
+    this.createTime = createTime;
+  }
+
+  public String getUpdateUserId() {
+    return this.updateUserId;
+  }
+
+  public void setUpdateUserId(String updateUserId) {
+    this.updateUserId = updateUserId;
+  }
+
+  public LocalDateTime getUpdateTime() {
+    return this.updateTime;
+  }
+
+  public void setUpdateTime(LocalDateTime updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  public String getCreateOrganizationId() {
+    return this.createOrganizationId;
+  }
+
+  public void setCreateOrganizationId(String createOrganizationId) {
+    this.createOrganizationId = createOrganizationId;
   }
 
   public String get__Typename() {

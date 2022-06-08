@@ -17,9 +17,21 @@ public class __TypeOrderBy {
 
   private Sort ofTypeName;
 
-  private Sort version;
+  private Sort domainId;
 
   private Sort isDeprecated;
+
+  private Sort version;
+
+  private Sort createUserId;
+
+  private Sort createTime;
+
+  private Sort updateUserId;
+
+  private Sort updateTime;
+
+  private Sort createOrganizationId;
 
   private Sort __typename;
 
@@ -55,12 +67,12 @@ public class __TypeOrderBy {
     this.ofTypeName = ofTypeName;
   }
 
-  public Sort getVersion() {
-    return this.version;
+  public Sort getDomainId() {
+    return this.domainId;
   }
 
-  public void setVersion(Sort version) {
-    this.version = version;
+  public void setDomainId(Sort domainId) {
+    this.domainId = domainId;
   }
 
   public Sort getIsDeprecated() {
@@ -69,6 +81,54 @@ public class __TypeOrderBy {
 
   public void setIsDeprecated(Sort isDeprecated) {
     this.isDeprecated = isDeprecated;
+  }
+
+  public Sort getVersion() {
+    return this.version;
+  }
+
+  public void setVersion(Sort version) {
+    this.version = version;
+  }
+
+  public Sort getCreateUserId() {
+    return this.createUserId;
+  }
+
+  public void setCreateUserId(Sort createUserId) {
+    this.createUserId = createUserId;
+  }
+
+  public Sort getCreateTime() {
+    return this.createTime;
+  }
+
+  public void setCreateTime(Sort createTime) {
+    this.createTime = createTime;
+  }
+
+  public Sort getUpdateUserId() {
+    return this.updateUserId;
+  }
+
+  public void setUpdateUserId(Sort updateUserId) {
+    this.updateUserId = updateUserId;
+  }
+
+  public Sort getUpdateTime() {
+    return this.updateTime;
+  }
+
+  public void setUpdateTime(Sort updateTime) {
+    this.updateTime = updateTime;
+  }
+
+  public Sort getCreateOrganizationId() {
+    return this.createOrganizationId;
+  }
+
+  public void setCreateOrganizationId(Sort createOrganizationId) {
+    this.createOrganizationId = createOrganizationId;
   }
 
   public Sort get__Typename() {

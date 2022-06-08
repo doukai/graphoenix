@@ -30,9 +30,21 @@ public @interface __InputValueExpression0 {
 
   String[] defaultValue() default {};
 
-  int[] version() default {};
+  String[] domainId() default {};
 
   boolean[] isDeprecated() default {};
+
+  int[] version() default {};
+
+  String[] createUserId() default {};
+
+  String[] createTime() default {};
+
+  String[] updateUserId() default {};
+
+  String[] updateTime() default {};
+
+  String[] createOrganizationId() default {};
 
   String[] __typename() default {};
 
@@ -52,9 +64,21 @@ public @interface __InputValueExpression0 {
 
   String[] $defaultValue() default {};
 
-  String[] $version() default {};
+  String[] $domainId() default {};
 
   String[] $isDeprecated() default {};
+
+  String[] $version() default {};
+
+  String[] $createUserId() default {};
+
+  String[] $createTime() default {};
+
+  String[] $updateUserId() default {};
+
+  String[] $updateTime() default {};
+
+  String[] $createOrganizationId() default {};
 
   String[] $__typename() default {};
 

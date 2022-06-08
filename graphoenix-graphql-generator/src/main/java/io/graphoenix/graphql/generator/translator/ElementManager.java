@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.ElementProcessErrorType.EXPRESSION_VARIABLE_PARAMETER_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
 
@@ -60,6 +61,10 @@ public class ElementManager {
                         }
                 )
                 .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public Set<Field> buildFields(String typeName, String selectionSet) {
+        return DOCUMENT_UTIL.graphqlToSelectionSet(selectionSet).selection().stream().map(Field::new).collect(Collectors.toSet());
     }
 
     public Stream<GraphqlParser.FieldDefinitionContext> getFields(String typeName, int level, int layers) {
