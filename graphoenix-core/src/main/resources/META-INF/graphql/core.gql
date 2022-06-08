@@ -159,3 +159,5 @@ directive @connection(field: String agg: String) on FIELD_DEFINITION
 directive @update on FIELD
 
 directive @delete on FIELD
+
+directive @format(value: String locale: String) on FIELD | FIELD_DEFINITION

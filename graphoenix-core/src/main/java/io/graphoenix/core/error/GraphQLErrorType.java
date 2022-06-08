@@ -10,6 +10,7 @@ public enum GraphQLErrorType {
     TYPE_NOT_EXIST(-14, "type definition not exist: %s"),
     INPUT_OBJECT_NOT_EXIST(-15, "input object definition not exist: %s"),
     META_INTERFACE_NOT_EXIST(-16, "meta interface definition not exist"),
+    ARGUMENT_NOT_EXIST(-17, "argument not exist: %s"),
 
     FIELD_NOT_EXIST(-21, "field definition not exist in type %s: %s"),
     TYPE_ID_FIELD_NOT_EXIST(-22, "input object definition not exist: %s"),

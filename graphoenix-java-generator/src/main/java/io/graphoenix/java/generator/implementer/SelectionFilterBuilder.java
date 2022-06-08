@@ -12,6 +12,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.handler.GraphQLFieldFormatter;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,6 +24,7 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -66,6 +68,14 @@ public class SelectionFilterBuilder {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFieldFormatter.class)),
+                                "formatter",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
                 .addMethods(buildListTypeMethods())
@@ -77,7 +87,9 @@ public class SelectionFilterBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFieldFormatter.class)), "formatter")
                 .addStatement("this.manager = manager")
+                .addStatement("this.formatter = formatter")
                 .build();
     }
 
@@ -126,10 +138,28 @@ public class SelectionFilterBuilder {
                                 fieldGetterMethodName
                         );
                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item))",
-                            typeParameterName,
-                            fieldGetterMethodName
-                    );
+                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
+                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
+                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
+                    if (value.isPresent() && locale.isPresent()) {
+                        builder.addStatement("$L.$L().forEach(item -> formatter.get().addFormat(jsonArray, $S, $S, item))",
+                                typeParameterName,
+                                fieldGetterMethodName,
+                                value.get(),
+                                locale.get()
+                        );
+                    } else if (value.isPresent()) {
+                        builder.addStatement("$L.$L().forEach(item -> formatter.get().addFormat(jsonArray, $S, null, item))",
+                                typeParameterName,
+                                fieldGetterMethodName,
+                                value.get()
+                        );
+                    } else {
+                        builder.addStatement("$L.$L().forEach(item -> formatter.get().addFormat(jsonArray, null, null, item))",
+                                typeParameterName,
+                                fieldGetterMethodName
+                        );
+                    }
                 } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item.name()))",
                             typeParameterName,
@@ -148,10 +178,28 @@ public class SelectionFilterBuilder {
                         .endControlFlow();
             } else {
                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("jsonObject.addProperty(selectionName, $L.$L())",
-                            typeParameterName,
-                            fieldGetterMethodName
-                    );
+                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
+                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
+                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
+                    if (value.isPresent() && locale.isPresent()) {
+                        builder.addStatement("formatter.get().format(jsonObject, selectionName, $S, $S, $L.$L()))",
+                                value.get(),
+                                locale.get(),
+                                typeParameterName,
+                                fieldGetterMethodName
+                        );
+                    } else if (value.isPresent()) {
+                        builder.addStatement("formatter.get().format(jsonObject, selectionName, $S, null, $L.$L()))",
+                                value.get(),
+                                typeParameterName,
+                                fieldGetterMethodName
+                        );
+                    } else {
+                        builder.addStatement("formatter.get().format(jsonObject, selectionName, null, null, $L.$L())",
+                                typeParameterName,
+                                fieldGetterMethodName
+                        );
+                    }
                 } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     builder.addStatement("jsonObject.addProperty(selectionName, $L.$L() == null ? null : $L.$L().name())",
                             typeParameterName,

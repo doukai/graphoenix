@@ -23,6 +23,7 @@ import java.util.Optional;
 
 import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.METHOD_NAME_ARGUMENT_NOT_EXIST;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 
 @ApplicationScoped
@@ -51,7 +52,6 @@ public class TypeManager {
             return methodName;
         }
     }
-
 
     public String getFieldGetterMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return getFieldGetterMethodName(fieldDefinitionContext.name().getText());
@@ -145,5 +145,34 @@ public class TypeManager {
         } else {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
         }
+    }    protected Optional<GraphqlParser.DirectiveContext> getFormat(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        if (fieldDefinitionContext.directives() == null) {
+            return Optional.empty();
+        }
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("format"))
+                .findFirst();
+    }
+
+    protected Optional<String> getFormatValue(GraphqlParser.DirectiveContext directiveContext) {
+        if (directiveContext.arguments() == null) {
+            return Optional.empty();
+        }
+        return directiveContext.arguments().argument().stream()
+                .filter(argumentContext -> argumentContext.name().getText().equals("value"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    protected Optional<String> getFormatLocale(GraphqlParser.DirectiveContext directiveContext) {
+        if (directiveContext.arguments() == null) {
+            return Optional.empty();
+        }
+        return directiveContext.arguments().argument().stream()
+                .filter(argumentContext -> argumentContext.name().getText().equals("locale"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
     }
 }
