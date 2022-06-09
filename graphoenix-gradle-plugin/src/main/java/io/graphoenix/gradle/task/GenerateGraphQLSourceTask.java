@@ -40,6 +40,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
+
 public class GenerateGraphQLSourceTask extends BaseTask {
 
     @TaskAction
@@ -78,7 +80,7 @@ public class GenerateGraphQLSourceTask extends BaseTask {
                                         .asClassOrInterfaceType()
                                         .getNameAsString();
 
-                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(typeName).orElseThrow();
+                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(typeName)));
 
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
                                         .addField(
