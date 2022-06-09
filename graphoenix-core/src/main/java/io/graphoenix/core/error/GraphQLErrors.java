@@ -6,6 +6,7 @@ import org.eclipse.microprofile.graphql.GraphQLException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GraphQLErrors extends RuntimeException {
 
@@ -83,5 +84,18 @@ public class GraphQLErrors extends RuntimeException {
 
     public List<GraphQLError> getErrors() {
         return errors;
+    }
+
+    @Override
+    public String getMessage() {
+        return this.errors.stream().map(GraphQLError::getMessage).collect(Collectors.joining("\r\n"));
+    }
+
+    @Override
+    public String toString() {
+        return "GraphQLErrors{" +
+                "data=" + data +
+                ", errors=" + errors +
+                '}';
     }
 }

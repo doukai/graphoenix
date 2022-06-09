@@ -128,20 +128,21 @@ public class GenerateGraphQLSourceTask extends BaseTask {
                     classOrInterfaceType.getName().getIdentifier().equals(Double.class.getSimpleName())) {
                 typeName = "Float";
             } else if (classOrInterfaceType.getName().getIdentifier().equals(String.class.getSimpleName()) ||
+                    classOrInterfaceType.getName().getIdentifier().equals(char.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(Character.class.getSimpleName())) {
                 typeName = "String";
             } else if (classOrInterfaceType.getName().getIdentifier().equals(boolean.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(Boolean.class.getSimpleName())) {
                 typeName = "Boolean";
-            } else if (classOrInterfaceType.getName().getIdentifier().equals(BigInteger.class.getName())) {
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(BigInteger.class.getSimpleName())) {
                 typeName = "BigInteger";
-            } else if (classOrInterfaceType.getName().getIdentifier().equals(BigDecimal.class.getName())) {
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(BigDecimal.class.getSimpleName())) {
                 typeName = "BigDecimal";
-            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalDate.class.getName())) {
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalDate.class.getSimpleName())) {
                 typeName = "Date";
-            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalTime.class.getName())) {
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalTime.class.getSimpleName())) {
                 typeName = "Time";
-            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalDateTime.class.getName())) {
+            } else if (classOrInterfaceType.getName().getIdentifier().equals(LocalDateTime.class.getSimpleName())) {
                 typeName = "DateTime";
             } else if (classOrInterfaceType.getName().getIdentifier().equals(Collection.class.getSimpleName()) ||
                     classOrInterfaceType.getName().getIdentifier().equals(List.class.getSimpleName()) ||
@@ -150,7 +151,6 @@ public class GenerateGraphQLSourceTask extends BaseTask {
             } else {
                 typeName = classOrInterfaceType.getName().getIdentifier();
             }
-
             if (classOrInterfaceType.isAnnotationPresent(NonNull.class)) {
                 typeName = typeName.concat("!");
             }
