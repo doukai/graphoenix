@@ -20,11 +20,11 @@ public @interface UserTest1Expression1 {
 
   int[] test1() default {};
 
-  String[] domainId() default {};
-
   boolean[] isDeprecated() default {};
 
   int[] version() default {};
+
+  String[] realmId() default {};
 
   String[] createUserId() default {};
 
@@ -34,7 +34,7 @@ public @interface UserTest1Expression1 {
 
   String[] updateTime() default {};
 
-  String[] createOrganizationId() default {};
+  String[] createGroupId() default {};
 
   String[] __typename() default {};
 
@@ -44,11 +44,11 @@ public @interface UserTest1Expression1 {
 
   String[] $test1() default {};
 
-  String[] $domainId() default {};
-
   String[] $isDeprecated() default {};
 
   String[] $version() default {};
+
+  String[] $realmId() default {};
 
   String[] $createUserId() default {};
 
@@ -58,7 +58,7 @@ public @interface UserTest1Expression1 {
 
   String[] $updateTime() default {};
 
-  String[] $createOrganizationId() default {};
+  String[] $createGroupId() default {};
 
   String[] $__typename() default {};
 }

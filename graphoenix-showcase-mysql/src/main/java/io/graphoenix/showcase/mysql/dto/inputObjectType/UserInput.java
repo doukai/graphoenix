@@ -48,11 +48,11 @@ public class UserInput {
   @NonNull
   private Collection<Boolean> test2;
 
-  private String domainId;
-
   private Boolean isDeprecated;
 
   private Integer version;
+
+  private String realmId;
 
   private String createUserId;
 
@@ -62,7 +62,7 @@ public class UserInput {
 
   private LocalDateTime updateTime;
 
-  private String createOrganizationId;
+  private String createGroupId;
 
   @DefaultValue("\"User\"")
   @NonNull
@@ -172,14 +172,6 @@ public class UserInput {
     this.test2 = test2;
   }
 
-  public String getDomainId() {
-    return this.domainId;
-  }
-
-  public void setDomainId(String domainId) {
-    this.domainId = domainId;
-  }
-
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -194,6 +186,14 @@ public class UserInput {
 
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  public String getRealmId() {
+    return this.realmId;
+  }
+
+  public void setRealmId(String realmId) {
+    this.realmId = realmId;
   }
 
   public String getCreateUserId() {
@@ -228,12 +228,12 @@ public class UserInput {
     this.updateTime = updateTime;
   }
 
-  public String getCreateOrganizationId() {
-    return this.createOrganizationId;
+  public String getCreateGroupId() {
+    return this.createGroupId;
   }
 
-  public void setCreateOrganizationId(String createOrganizationId) {
-    this.createOrganizationId = createOrganizationId;
+  public void setCreateGroupId(String createGroupId) {
+    this.createGroupId = createGroupId;
   }
 
   public String get__Typename() {

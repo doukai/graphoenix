@@ -11,14 +11,14 @@ scalar DateTime
 scalar Timestamp
 
 interface Meta {
-    domainId: String
     isDeprecated: Boolean
     version: Int
+    realmId: String
     createUserId: String
     createTime: Timestamp
     updateUserId: String
     updateTime: Timestamp
-    createOrganizationId: String
+    createGroupId: String
 }
 
 enum Operator {

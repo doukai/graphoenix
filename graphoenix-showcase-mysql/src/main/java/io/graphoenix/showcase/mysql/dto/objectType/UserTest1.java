@@ -22,11 +22,11 @@ public class UserTest1 implements Meta {
 
   private Integer test1;
 
-  private String domainId;
-
   private Boolean isDeprecated;
 
   private Integer version;
+
+  private String realmId;
 
   private String createUserId;
 
@@ -36,7 +36,7 @@ public class UserTest1 implements Meta {
 
   private LocalDateTime updateTime;
 
-  private String createOrganizationId;
+  private String createGroupId;
 
   private String __typename;
 
@@ -93,16 +93,6 @@ public class UserTest1 implements Meta {
   }
 
   @Override
-  public String getDomainId() {
-    return this.domainId;
-  }
-
-  @Override
-  public void setDomainId(String domainId) {
-    this.domainId = domainId;
-  }
-
-  @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -120,6 +110,16 @@ public class UserTest1 implements Meta {
   @Override
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  @Override
+  public String getRealmId() {
+    return this.realmId;
+  }
+
+  @Override
+  public void setRealmId(String realmId) {
+    this.realmId = realmId;
   }
 
   @Override
@@ -163,13 +163,13 @@ public class UserTest1 implements Meta {
   }
 
   @Override
-  public String getCreateOrganizationId() {
-    return this.createOrganizationId;
+  public String getCreateGroupId() {
+    return this.createGroupId;
   }
 
   @Override
-  public void setCreateOrganizationId(String createOrganizationId) {
-    this.createOrganizationId = createOrganizationId;
+  public void setCreateGroupId(String createGroupId) {
+    this.createGroupId = createGroupId;
   }
 
   public String get__Typename() {

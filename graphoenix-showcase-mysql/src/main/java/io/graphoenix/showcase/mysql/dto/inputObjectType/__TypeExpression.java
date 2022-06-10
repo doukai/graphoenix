@@ -34,12 +34,12 @@ public class __TypeExpression {
 
   private __TypeExpression ofType;
 
-  private StringExpression domainId;
-
   @DefaultValue("false")
   private Boolean includeDeprecated;
 
   private IntExpression version;
+
+  private StringExpression realmId;
 
   private StringExpression createUserId;
 
@@ -49,7 +49,7 @@ public class __TypeExpression {
 
   private StringExpression updateTime;
 
-  private StringExpression createOrganizationId;
+  private StringExpression createGroupId;
 
   private StringExpression __typename;
 
@@ -146,14 +146,6 @@ public class __TypeExpression {
     this.ofType = ofType;
   }
 
-  public StringExpression getDomainId() {
-    return this.domainId;
-  }
-
-  public void setDomainId(StringExpression domainId) {
-    this.domainId = domainId;
-  }
-
   public Boolean getIncludeDeprecated() {
     return this.includeDeprecated;
   }
@@ -168,6 +160,14 @@ public class __TypeExpression {
 
   public void setVersion(IntExpression version) {
     this.version = version;
+  }
+
+  public StringExpression getRealmId() {
+    return this.realmId;
+  }
+
+  public void setRealmId(StringExpression realmId) {
+    this.realmId = realmId;
   }
 
   public StringExpression getCreateUserId() {
@@ -202,12 +202,12 @@ public class __TypeExpression {
     this.updateTime = updateTime;
   }
 
-  public StringExpression getCreateOrganizationId() {
-    return this.createOrganizationId;
+  public StringExpression getCreateGroupId() {
+    return this.createGroupId;
   }
 
-  public void setCreateOrganizationId(StringExpression createOrganizationId) {
-    this.createOrganizationId = createOrganizationId;
+  public void setCreateGroupId(StringExpression createGroupId) {
+    this.createGroupId = createGroupId;
   }
 
   public StringExpression get__Typename() {

@@ -3,11 +3,14 @@ package io.graphoenix.showcase.mysql.dto.objectType;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
-
-import java.time.LocalDateTime;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
@@ -22,11 +25,11 @@ public class __TypeInterfaces implements Meta {
   @NonNull
   private String interfaceName;
 
-  private String domainId;
-
   private Boolean isDeprecated;
 
   private Integer version;
+
+  private String realmId;
 
   private String createUserId;
 
@@ -36,7 +39,7 @@ public class __TypeInterfaces implements Meta {
 
   private LocalDateTime updateTime;
 
-  private String createOrganizationId;
+  private String createGroupId;
 
   private String __typename;
 
@@ -85,16 +88,6 @@ public class __TypeInterfaces implements Meta {
   }
 
   @Override
-  public String getDomainId() {
-    return this.domainId;
-  }
-
-  @Override
-  public void setDomainId(String domainId) {
-    this.domainId = domainId;
-  }
-
-  @Override
   public Boolean getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -112,6 +105,16 @@ public class __TypeInterfaces implements Meta {
   @Override
   public void setVersion(Integer version) {
     this.version = version;
+  }
+
+  @Override
+  public String getRealmId() {
+    return this.realmId;
+  }
+
+  @Override
+  public void setRealmId(String realmId) {
+    this.realmId = realmId;
   }
 
   @Override
@@ -155,13 +158,13 @@ public class __TypeInterfaces implements Meta {
   }
 
   @Override
-  public String getCreateOrganizationId() {
-    return this.createOrganizationId;
+  public String getCreateGroupId() {
+    return this.createGroupId;
   }
 
   @Override
-  public void setCreateOrganizationId(String createOrganizationId) {
-    this.createOrganizationId = createOrganizationId;
+  public void setCreateGroupId(String createGroupId) {
+    this.createGroupId = createGroupId;
   }
 
   public String get__Typename() {

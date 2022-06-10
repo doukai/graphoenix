@@ -12,11 +12,11 @@ import org.eclipse.microprofile.graphql.Interface;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @SchemaBean
 public interface Meta {
-  String domainId = null;
-
   Boolean isDeprecated = null;
 
   Integer version = null;
+
+  String realmId = null;
 
   String createUserId = null;
 
@@ -26,11 +26,7 @@ public interface Meta {
 
   LocalDateTime updateTime = null;
 
-  String createOrganizationId = null;
-
-  String getDomainId();
-
-  void setDomainId(String domainId);
+  String createGroupId = null;
 
   Boolean getIsDeprecated();
 
@@ -39,6 +35,10 @@ public interface Meta {
   Integer getVersion();
 
   void setVersion(Integer version);
+
+  String getRealmId();
+
+  void setRealmId(String realmId);
 
   String getCreateUserId();
 
@@ -56,7 +56,7 @@ public interface Meta {
 
   void setUpdateTime(LocalDateTime updateTime);
 
-  String getCreateOrganizationId();
+  String getCreateGroupId();
 
-  void setCreateOrganizationId(String createOrganizationId);
+  void setCreateGroupId(String createGroupId);
 }

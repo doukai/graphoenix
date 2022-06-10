@@ -21,11 +21,11 @@ public class __DirectiveOrderBy {
 
   private Sort onField;
 
-  private Sort domainId;
-
   private Sort isDeprecated;
 
   private Sort version;
+
+  private Sort realmId;
 
   private Sort createUserId;
 
@@ -35,7 +35,7 @@ public class __DirectiveOrderBy {
 
   private Sort updateTime;
 
-  private Sort createOrganizationId;
+  private Sort createGroupId;
 
   private Sort __typename;
 
@@ -87,14 +87,6 @@ public class __DirectiveOrderBy {
     this.onField = onField;
   }
 
-  public Sort getDomainId() {
-    return this.domainId;
-  }
-
-  public void setDomainId(Sort domainId) {
-    this.domainId = domainId;
-  }
-
   public Sort getIsDeprecated() {
     return this.isDeprecated;
   }
@@ -109,6 +101,14 @@ public class __DirectiveOrderBy {
 
   public void setVersion(Sort version) {
     this.version = version;
+  }
+
+  public Sort getRealmId() {
+    return this.realmId;
+  }
+
+  public void setRealmId(Sort realmId) {
+    this.realmId = realmId;
   }
 
   public Sort getCreateUserId() {
@@ -143,12 +143,12 @@ public class __DirectiveOrderBy {
     this.updateTime = updateTime;
   }
 
-  public Sort getCreateOrganizationId() {
-    return this.createOrganizationId;
+  public Sort getCreateGroupId() {
+    return this.createGroupId;
   }
 
-  public void setCreateOrganizationId(Sort createOrganizationId) {
-    this.createOrganizationId = createOrganizationId;
+  public void setCreateGroupId(Sort createGroupId) {
+    this.createGroupId = createGroupId;
   }
 
   public Sort get__Typename() {

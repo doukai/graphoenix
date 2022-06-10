@@ -21,11 +21,11 @@ public @interface __DirectiveLocationsExpression0 {
 
   __DirectiveLocation[] directiveLocation() default {};
 
-  String[] domainId() default {};
-
   boolean[] isDeprecated() default {};
 
   int[] version() default {};
+
+  String[] realmId() default {};
 
   String[] createUserId() default {};
 
@@ -35,7 +35,7 @@ public @interface __DirectiveLocationsExpression0 {
 
   String[] updateTime() default {};
 
-  String[] createOrganizationId() default {};
+  String[] createGroupId() default {};
 
   String[] __typename() default {};
 
@@ -45,11 +45,11 @@ public @interface __DirectiveLocationsExpression0 {
 
   String[] $directiveLocation() default {};
 
-  String[] $domainId() default {};
-
   String[] $isDeprecated() default {};
 
   String[] $version() default {};
+
+  String[] $realmId() default {};
 
   String[] $createUserId() default {};
 
@@ -59,7 +59,7 @@ public @interface __DirectiveLocationsExpression0 {
 
   String[] $updateTime() default {};
 
-  String[] $createOrganizationId() default {};
+  String[] $createGroupId() default {};
 
   String[] $__typename() default {};
 }

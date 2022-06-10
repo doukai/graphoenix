@@ -22,11 +22,11 @@ public @interface __TypeInput0 {
 
   String ofTypeName() default "";
 
-  String domainId() default "";
-
   boolean isDeprecated() default false;
 
   int version() default 0;
+
+  String realmId() default "";
 
   String createUserId() default "";
 
@@ -36,7 +36,7 @@ public @interface __TypeInput0 {
 
   String updateTime() default "";
 
-  String createOrganizationId() default "";
+  String createGroupId() default "";
 
   String __typename() default "";
 
@@ -62,11 +62,11 @@ public @interface __TypeInput0 {
 
   String $ofType() default "";
 
-  String $domainId() default "";
-
   String $isDeprecated() default "";
 
   String $version() default "";
+
+  String $realmId() default "";
 
   String $createUserId() default "";
 
@@ -76,7 +76,7 @@ public @interface __TypeInput0 {
 
   String $updateTime() default "";
 
-  String $createOrganizationId() default "";
+  String $createGroupId() default "";
 
   String $__typename() default "";
 
