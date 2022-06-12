@@ -50,8 +50,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
-import static io.graphoenix.spi.constant.Hammurabi.EXPRESSION_SUFFIX;
-import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class TypeSpecBuilder {
@@ -696,6 +695,8 @@ public class TypeSpecBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
+                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals("PageInfo"))
                 .map(objectTypeDefinitionContext -> ObjectTypeToInputExpressionAnnotation(objectTypeDefinitionContext, layer));
     }
 
@@ -760,6 +761,8 @@ public class TypeSpecBuilder {
                             .filter(fieldDefinitionContext ->
                                     manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
                             )
+                            .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                            .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith("Aggregate"))
                             .map(fieldDefinitionContext ->
                                     MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                             .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -787,6 +790,8 @@ public class TypeSpecBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
+                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals("PageInfo"))
                 .map(objectTypeDefinitionContext -> {
                             TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText() + "Expressions" + layer)
                                     .addModifiers(Modifier.PUBLIC)
@@ -814,6 +819,95 @@ public class TypeSpecBuilder {
                                                     .returns(ArrayTypeName.of(ClassName.get("", objectTypeDefinitionContext.name().getText() + EXPRESSION_SUFFIX + layer)))
                                                     .defaultValue("$L", "{}")
                                                     .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder(GROUP_BY_INPUT_NAME)
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(ArrayTypeName.of(String.class))
+                                                    .defaultValue(CodeBlock.of("$L", "{}"))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder(ORDER_BY_INPUT_NAME)
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(ClassName.get(graphQLConfig.getAnnotationPackageName(), objectTypeDefinitionContext.name().getText().concat(ORDER_BY_SUFFIX) + layer))
+                                                    .defaultValue(
+                                                            CodeBlock.of(
+                                                                    "@$T",
+                                                                    ClassName.get(graphQLConfig.getAnnotationPackageName(), objectTypeDefinitionContext.name().getText().concat(ORDER_BY_SUFFIX) + layer)
+                                                            )
+                                                    )
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder(FIRST_INPUT_NAME)
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(int.class)
+                                                    .defaultValue(CodeBlock.of("$L", 0))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder("$".concat(FIRST_INPUT_NAME))
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(String.class)
+                                                    .defaultValue(CodeBlock.of("$S", ""))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder(LAST_INPUT_NAME)
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(int.class)
+                                                    .defaultValue(CodeBlock.of("$L", 0))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder("$".concat(LAST_INPUT_NAME))
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(String.class)
+                                                    .defaultValue(CodeBlock.of("$S", ""))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder(OFFSET_INPUT_NAME)
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(int.class)
+                                                    .defaultValue(CodeBlock.of("$L", 0))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder("$".concat(OFFSET_INPUT_NAME))
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(String.class)
+                                                    .defaultValue(CodeBlock.of("$S", ""))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder(AFTER_INPUT_NAME)
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(int.class)
+                                                    .defaultValue(CodeBlock.of("$L", 0))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder("$".concat(AFTER_INPUT_NAME))
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(String.class)
+                                                    .defaultValue(CodeBlock.of("$S", ""))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder(BEFORE_INPUT_NAME)
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(int.class)
+                                                    .defaultValue(CodeBlock.of("$L", 0))
+                                                    .build()
+                                    )
+                                    .addMethod(
+                                            MethodSpec.methodBuilder("$".concat(BEFORE_INPUT_NAME))
+                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                    .returns(String.class)
+                                                    .defaultValue(CodeBlock.of("$S", ""))
+                                                    .build()
                                     );
                             Logger.info("annotation {}Expressions{} build success", objectTypeDefinitionContext.name().getText(), layer);
                             return builder.build();
@@ -834,6 +928,8 @@ public class TypeSpecBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
+                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals("PageInfo"))
                 .map(objectTypeDefinitionContext -> {
                             TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText().concat(INPUT_SUFFIX) + layer)
                                     .addModifiers(Modifier.PUBLIC)
@@ -882,6 +978,8 @@ public class TypeSpecBuilder {
                                                 .filter(fieldDefinitionContext ->
                                                         manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                 )
+                                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith("Aggregate"))
                                                 .map(fieldDefinitionContext ->
                                                         MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -897,6 +995,79 @@ public class TypeSpecBuilder {
                                 );
                             }
                             Logger.info("annotation {}Input{} build success", objectTypeDefinitionContext.name().getText(), layer);
+                            return builder.build();
+                        }
+                );
+    }
+
+    public Stream<TypeSpec> buildObjectTypeOrderByAnnotations() {
+        return IntStream.range(0, graphQLConfig.getInputLayers())
+                .mapToObj(this::buildObjectTypeOrderByAnnotations)
+                .flatMap(typeSpecStream -> typeSpecStream);
+    }
+
+    public Stream<TypeSpec> buildObjectTypeOrderByAnnotations(int layer) {
+        return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
+                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals("PageInfo"))
+                .map(objectTypeDefinitionContext -> {
+                            TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText().concat(ORDER_BY_SUFFIX) + layer)
+                                    .addModifiers(Modifier.PUBLIC)
+                                    .addAnnotation(
+                                            AnnotationSpec.builder(Retention.class)
+                                                    .addMember("value", "$T.$L", RetentionPolicy.class, RetentionPolicy.SOURCE)
+                                                    .build()
+                                    )
+                                    .addAnnotation(
+                                            AnnotationSpec.builder(Target.class)
+                                                    .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
+                                                    .build()
+                                    )
+                                    .addMethods(
+                                            manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                    .filter(fieldDefinitionContext ->
+                                                            manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
+                                                                    manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                    )
+                                                    .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                    .map(fieldDefinitionContext ->
+                                                            MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                    .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Sort"))
+                                                                    .defaultValue(CodeBlock.of("Sort.ASC"))
+                                                                    .build()
+                                                    )
+                                                    .collect(Collectors.toList())
+                                    );
+                            if (layer < graphQLConfig.getInputLayers() - 1) {
+                                builder.addMethods(
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext ->
+                                                        manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                )
+                                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith("Aggregate"))
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(ORDER_BY_SUFFIX) + (layer + 1)))
+                                                                .defaultValue(CodeBlock.of(
+                                                                        "@$T",
+                                                                        ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(ORDER_BY_SUFFIX) + (layer + 1))
+                                                                ))
+                                                                .build()
+
+
+                                                )
+                                                .collect(Collectors.toList())
+                                );
+                            }
+                            Logger.info("annotation {}OrderBy{} build success", objectTypeDefinitionContext.name().getText(), layer);
                             return builder.build();
                         }
                 );

@@ -83,8 +83,4 @@ public @interface __DirectiveInput1 {
   String $argsConnection() default "";
 
   __InputValueInput2[] args() default {};
-
-  __InputValueInput2 argsAggregate() default @__InputValueInput2;
-
-  __InputValueConnectionInput2 argsConnection() default @__InputValueConnectionInput2;
 }

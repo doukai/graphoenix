@@ -99,8 +99,4 @@ public @interface __FieldExpression1 {
   __InputValueExpressions2[] args() default {};
 
   __TypeExpressions2[] type() default {};
-
-  __InputValueExpressions2[] argsAggregate() default {};
-
-  __InputValueConnectionExpressions2[] argsConnection() default {};
 }

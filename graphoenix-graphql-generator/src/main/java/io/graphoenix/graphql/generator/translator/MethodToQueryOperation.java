@@ -1,12 +1,10 @@
 package io.graphoenix.graphql.generator.translator;
 
+import com.google.common.collect.Streams;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.graphql.generator.operation.Argument;
-import io.graphoenix.graphql.generator.operation.Field;
-import io.graphoenix.graphql.generator.operation.Operation;
-import io.graphoenix.graphql.generator.operation.VariableDefinition;
+import io.graphoenix.graphql.generator.operation.*;
 import io.graphoenix.spi.annotation.TypeExpression;
 import io.graphoenix.spi.annotation.TypeExpressions;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -18,6 +16,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +27,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.ElementProcessErrorType.*;
 import static io.graphoenix.core.error.GraphQLErrorType.*;
-import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class MethodToQueryOperation {
@@ -51,35 +50,27 @@ public class MethodToQueryOperation {
         this.operatorName = graphQLConfig.getOperatorInputName();
     }
 
-    public String executableElementToQuery(String queryFieldName, ExecutableElement executableElement, String selectionSet, int layers) {
+    public String executableElementToQuery(String queryFieldName, ExecutableElement executableElement, String selectionSet, int layers, Types typeUtils) {
         Operation operation = new Operation()
                 .setName(executableElement.getSimpleName().toString())
                 .setOperationType("query");
         Field field = new Field().setName(queryFieldName);
 
         Optional<? extends AnnotationMirror> expressions = getExpressionsAnnotation(executableElement);
-        if (expressions.isPresent()) {
-            field.addArguments(expressionsAnnotationArguments(executableElement, expressions.get()));
-            operation.addVariableDefinitions(
-                    getVariableArgumentNames(expressions.get())
-                            .flatMap(argumentName ->
-                                    getExpressionsVariableNamesByArgumentName(expressions.get(), argumentName)
-                                            .map(variableName -> buildVariableDefinition(queryFieldName, argumentName.substring(1), variableName))
-                            )
-            );
-        }
+        expressions.ifPresent(annotationMirror -> field.addArguments(expressionsAnnotationArguments(executableElement, annotationMirror)));
 
         Optional<? extends AnnotationMirror> expression = getExpressionAnnotation(executableElement);
-        if (expression.isPresent()) {
-            field.addArgument(expressionAnnotationToArgument(executableElement, expression.get()));
-            getVariableArgumentName(expression.get())
-                    .ifPresent(argumentName ->
-                            operation.addVariableDefinitions(
-                                    getExpressionVariableNamesByArgumentName(expression.get(), argumentName)
-                                            .map(variableName -> buildVariableDefinition(queryFieldName, argumentName.substring(1), variableName))
-                            )
-                    );
-        }
+        expression.ifPresent(annotationMirror -> field.addArgument(expressionAnnotationToArgument(executableElement, annotationMirror)));
+
+        operation.addVariableDefinitions(
+                executableElement.getParameters().stream()
+                        .map(parameter ->
+                                new VariableDefinition()
+                                        .setVariable(parameter.getSimpleName().toString())
+                                        .setTypeName(elementManager.variableElementToInputTypeName(parameter, typeUtils))
+                        )
+        );
+
         if (selectionSet != null && !selectionSet.equals("")) {
             field.setFields(elementManager.buildFields(getQueryTypeName(queryFieldName), selectionSet));
         } else {
@@ -151,11 +142,11 @@ public class MethodToQueryOperation {
                                 )
                 );
 
-        Stream<Argument> argumentStream = getValueArguments(executableElement, expressions);
-
-        return Stream.concat(
+        return Streams.concat(
                 Stream.of(conditionalArgument),
-                argumentStream
+                getValueArguments(executableElement, expressions),
+                getArguments(expressions),
+                getVariables(executableElement, expressions)
         );
     }
 
@@ -174,7 +165,11 @@ public class MethodToQueryOperation {
                 .forEach(expression ->
                         expressionsMap.put(
                                 getValueArgumentName(expression)
-                                        .orElseThrow(() -> new ElementProcessException(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName()))),
+                                        .orElseGet(() ->
+                                                getVariableArgumentName(expression)
+                                                        .map(argumentName -> argumentName.substring(1))
+                                                        .orElseThrow(() -> new ElementProcessException(EXPRESSION_VALUE_OR_VARIABLE_FIELD_NOT_EXIST.bind(expression.getAnnotationType().asElement().getSimpleName())))
+                                        ),
                                 expressionAnnotationToMap(executableElement, expression)
                         )
                 );
@@ -196,6 +191,48 @@ public class MethodToQueryOperation {
 
     private Stream<Argument> getValueArguments(ExecutableElement executableElement, AnnotationMirror expressions) {
         return getValueExpression(expressions).map(expression -> expressionAnnotationToArgument(executableElement, expression));
+    }
+
+    private Stream<Argument> getArguments(AnnotationMirror expressions) {
+        return Streams
+                .concat(
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals(FIRST_INPUT_NAME)),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals(LAST_INPUT_NAME)),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals(OFFSET_INPUT_NAME)),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals(AFTER_INPUT_NAME)),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals(BEFORE_INPUT_NAME)),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals(GROUP_BY_INPUT_NAME)),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals(ORDER_BY_INPUT_NAME))
+                )
+                .map(entry -> new Argument().setName(entry.getKey().getSimpleName().toString()).setValueWithVariable(entry.getValue()));
+    }
+
+    private Stream<Argument> getVariables(ExecutableElement executableElement, AnnotationMirror expressions) {
+        return Streams
+                .concat(
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals("$".concat(FIRST_INPUT_NAME))),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals("$".concat(LAST_INPUT_NAME))),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals("$".concat(OFFSET_INPUT_NAME))),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals("$".concat(AFTER_INPUT_NAME))),
+                        expressions.getElementValues().entrySet().stream()
+                                .filter(entry -> entry.getKey().getSimpleName().toString().equals("$".concat(BEFORE_INPUT_NAME)))
+                )
+                .map(entry ->
+                        new Argument()
+                                .setName(entry.getKey().getSimpleName().toString().substring(1))
+                                .setValueWithVariable(elementManager.getParameterFromExecutableElement(executableElement, entry.getValue().getValue().toString()))
+                );
     }
 
     private String getConditionalArgumentName(AnnotationMirror expressions) {
@@ -258,43 +295,12 @@ public class MethodToQueryOperation {
                 .map(annotationValue -> annotationValue.getSimpleName().toString());
     }
 
-    private Stream<String> getVariableArgumentNames(AnnotationMirror expressions) {
-        return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
-                .filter(entry -> entry.getKey().getSimpleName().toString().equals("value"))
-                .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
-                .map(entry -> (Collection<?>) entry.getValue().getValue())
-                .flatMap(collection ->
-                        collection.stream()
-                                .filter(expression -> expression instanceof AnnotationValue)
-                                .map(expression -> (AnnotationMirror) expression)
-                                .map(this::getVariableArgumentName)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                );
-    }
-
     private Stream<String> getExpressionVariableNamesByArgumentName(AnnotationMirror expression, String variableArgumentName) {
         return expression.getElementValues().entrySet().stream()
                 .filter(entry -> entry.getKey().getSimpleName().toString().equals(variableArgumentName))
                 .filter(entry -> entry.getValue().getValue() instanceof List<?>)
                 .map(entry -> (List<?>) entry.getValue().getValue())
                 .flatMap(list -> list.stream().map(value -> ((AnnotationValue) value).getValue().toString()));
-    }
-
-
-    private Stream<String> getExpressionsVariableNamesByArgumentName(AnnotationMirror expressions, String variableArgumentName) {
-        return expressions.getElementValues().entrySet().stream()
-                .filter(entry -> !entry.getKey().getReturnType().toString().equals(conditionalName))
-                .filter(entry -> entry.getKey().getSimpleName().toString().equals("value"))
-                .filter(entry -> entry.getValue().getValue() instanceof Collection<?>)
-                .map(entry -> (Collection<?>) entry.getValue().getValue())
-                .flatMap(collection ->
-                        collection.stream()
-                                .filter(expression -> expression instanceof AnnotationValue)
-                                .map(expression -> (AnnotationMirror) expression)
-                                .flatMap(expression -> getExpressionVariableNamesByArgumentName(expression, variableArgumentName))
-                );
     }
 
     private Optional<List<?>> getListVariable(AnnotationMirror expression) {
@@ -356,12 +362,6 @@ public class MethodToQueryOperation {
     private Optional<String> getValueName(AnnotationMirror expression) {
         return getListValue(expression)
                 .map(values -> values.size() == 1 ? "val" : "in");
-    }
-
-    private VariableDefinition buildVariableDefinition(String queryFieldName, String argumentName, String variableName) {
-        return new VariableDefinition()
-                .setVariable(variableName)
-                .setTypeName(getTypeName(queryFieldName, argumentName));
     }
 
     private String getTypeName(String queryFieldName, String argumentName) {

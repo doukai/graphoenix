@@ -75,12 +75,4 @@ public @interface __SchemaExpression1 {
   __TypeExpressions2[] subscriptionType() default {};
 
   __DirectiveExpressions2[] directives() default {};
-
-  __TypeExpressions2[] typesAggregate() default {};
-
-  __DirectiveExpressions2[] directivesAggregate() default {};
-
-  __TypeConnectionExpressions2[] typesConnection() default {};
-
-  __DirectiveConnectionExpressions2[] directivesConnection() default {};
 }

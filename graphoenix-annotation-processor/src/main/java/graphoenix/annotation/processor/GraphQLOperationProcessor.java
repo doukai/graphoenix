@@ -34,6 +34,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -57,12 +58,14 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
     private JavaElementToOperation javaElementToOperation;
     private OperationInterfaceImplementer operationInterfaceImplementer;
     private Elements elementUtils;
+    private Types typeUtils;
     private Filer filer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         this.elementUtils = processingEnv.getElementUtils();
+        this.typeUtils = processingEnv.getTypeUtils();
         this.filer = processingEnv.getFiler();
         BeanContext.load(GraphQLOperationProcessor.class.getClassLoader());
         this.operationRouter = BeanContext.get(GraphQLOperationRouter.class);
@@ -118,19 +121,19 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
 
                     try {
                         Logger.info("start build operation resource for interface {}", typeElement.getQualifiedName().toString());
-                        Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement);
+                        Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement, typeUtils);
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors.toMap(
-                                                Map.Entry::getKey,
-                                                entry -> {
-                                                    switch (operationRouter.getType(entry.getValue())) {
-                                                        case QUERY:
-                                                            return generatorHandler.query(entry.getValue());
-                                                        case MUTATION:
-                                                            return generatorHandler.mutation(entry.getValue());
-                                                    }
-                                                    throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
-                                                }
+                                        Map.Entry::getKey,
+                                        entry -> {
+                                            switch (operationRouter.getType(entry.getValue())) {
+                                                case QUERY:
+                                                    return generatorHandler.query(entry.getValue());
+                                                case MUTATION:
+                                                    return generatorHandler.mutation(entry.getValue());
+                                            }
+                                            throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                                        }
                                         )
                                 )
                                 .forEach((key, value) ->

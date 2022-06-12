@@ -111,24 +111,4 @@ public @interface __TypeInput0 {
   __InputValueInput1[] inputFields() default {};
 
   __TypeInput1 ofType() default @__TypeInput1;
-
-  __FieldInput1 fieldsAggregate() default @__FieldInput1;
-
-  __TypeInput1 interfacesAggregate() default @__TypeInput1;
-
-  __TypeInput1 possibleTypesAggregate() default @__TypeInput1;
-
-  __EnumValueInput1 enumValuesAggregate() default @__EnumValueInput1;
-
-  __InputValueInput1 inputFieldsAggregate() default @__InputValueInput1;
-
-  __FieldConnectionInput1 fieldsConnection() default @__FieldConnectionInput1;
-
-  __TypeConnectionInput1 interfacesConnection() default @__TypeConnectionInput1;
-
-  __TypeConnectionInput1 possibleTypesConnection() default @__TypeConnectionInput1;
-
-  __EnumValueConnectionInput1 enumValuesConnection() default @__EnumValueConnectionInput1;
-
-  __InputValueConnectionInput1 inputFieldsConnection() default @__InputValueConnectionInput1;
 }

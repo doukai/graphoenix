@@ -87,10 +87,6 @@ public @interface OrganizationInput1 {
 
   UserInput2[] users() default {};
 
-  UserInput2 usersAggregate() default @UserInput2;
-
-  UserConnectionInput2 usersConnection() default @UserConnectionInput2;
-
   UserInput2[] userByOrg() default {};
 
   OrganizationInput2 parent() default @OrganizationInput2;

@@ -14,8 +14,8 @@ import org.tinylog.Logger;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.util.Types;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,23 +36,24 @@ public class MethodToMutationOperation {
         this.elementManager = elementManager;
     }
 
-    public String executableElementToMutation(String mutationFieldName, ExecutableElement executableElement, String selectionSet, int layers) {
+    public String executableElementToMutation(String mutationFieldName, ExecutableElement executableElement, String selectionSet, int layers, Types typeUtils) {
         Operation operation = new Operation()
                 .setName(executableElement.getSimpleName().toString())
                 .setOperationType("mutation");
         Field field = new Field().setName(mutationFieldName);
 
         Optional<? extends AnnotationMirror> expression = getInputAnnotation(executableElement);
-        if (expression.isPresent()) {
-            field.addArguments(inputAnnotationToArgument(executableElement, expression.get()));
-            operation.addVariableDefinitions(
-                    getVariableArgumentNames(expression.get())
-                            .flatMap(argumentName ->
-                                    getInputVariableNamesByArgumentName(expression.get(), argumentName)
-                                            .map(variableName -> buildVariableDefinition(mutationFieldName, argumentName.substring(1), variableName))
-                            )
-            );
-        }
+        expression.ifPresent(annotationMirror -> field.addArguments(inputAnnotationToArgument(executableElement, annotationMirror)));
+
+        operation.addVariableDefinitions(
+                executableElement.getParameters().stream()
+                        .map(parameter ->
+                                new VariableDefinition()
+                                        .setVariable(parameter.getSimpleName().toString())
+                                        .setTypeName(elementManager.variableElementToInputTypeName(parameter, typeUtils))
+                        )
+        );
+
         if (selectionSet != null && !selectionSet.equals("")) {
             field.setFields(elementManager.buildFields(getMutationTypeName(mutationFieldName), selectionSet));
         } else {
@@ -136,32 +137,6 @@ public class MethodToMutationOperation {
                                 }
                         )
                 );
-    }
-
-    private Stream<String> getVariableArgumentNames(AnnotationMirror inputs) {
-        return inputs.getElementValues().keySet().stream()
-                .filter(annotationValue -> annotationValue.getSimpleName().toString().startsWith("$"))
-                .map(annotationValue -> annotationValue.getSimpleName().toString());
-    }
-
-    private Stream<String> getInputVariableNamesByArgumentName(AnnotationMirror input, String variableArgumentName) {
-        return input.getElementValues().entrySet().stream()
-                .filter(entry -> entry.getKey().getSimpleName().toString().equals(variableArgumentName))
-                .map(entry -> entry.getValue().getValue())
-                .flatMap(value -> {
-                            if (value instanceof List<?>) {
-                                return ((List<?>) value).stream().map(item -> ((AnnotationValue) item).getValue().toString());
-                            } else {
-                                return Stream.of(value.toString());
-                            }
-                        }
-                );
-    }
-
-    private VariableDefinition buildVariableDefinition(String mutationFieldName, String argumentName, String variableName) {
-        return new VariableDefinition()
-                .setVariable(variableName)
-                .setTypeName(getTypeName(mutationFieldName, argumentName));
     }
 
     private String getTypeName(String mutationFieldName, String argumentName) {

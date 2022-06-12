@@ -90,12 +90,4 @@ public @interface __SchemaInput0 {
   __TypeInput1 subscriptionType() default @__TypeInput1;
 
   __DirectiveInput1[] directives() default {};
-
-  __TypeInput1 typesAggregate() default @__TypeInput1;
-
-  __DirectiveInput1 directivesAggregate() default @__DirectiveInput1;
-
-  __TypeConnectionInput1 typesConnection() default @__TypeConnectionInput1;
-
-  __DirectiveConnectionInput1 directivesConnection() default @__DirectiveConnectionInput1;
 }

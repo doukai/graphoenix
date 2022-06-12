@@ -131,17 +131,26 @@ public class ElementManager {
         String typeName;
         if (element.getAnnotation(Id.class) != null) {
             typeName = "ID";
-        } else if (typeElement.getQualifiedName().toString().equals(Integer.class.getName()) ||
+        } else if (element.asType().toString().equals(int.class.getName()) ||
+                element.asType().toString().equals(long.class.getName()) ||
+                element.asType().toString().equals(short.class.getName()) ||
+                element.asType().toString().equals(byte.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Integer.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Long.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Short.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Byte.class.getName())) {
             typeName = "Int";
-        } else if (typeElement.getQualifiedName().toString().equals(Float.class.getName()) ||
+        } else if (element.asType().toString().equals(float.class.getName()) ||
+                element.asType().toString().equals(double.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Float.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Double.class.getName())) {
             typeName = "Float";
-        } else if (typeElement.getQualifiedName().toString().equals(String.class.getName()) ||
+        } else if (element.asType().toString().equals(char.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(String.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Character.class.getName())) {
             typeName = "String";
-        } else if (typeElement.getQualifiedName().toString().equals(Boolean.class.getName())) {
+        } else if (element.asType().toString().equals(boolean.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Boolean.class.getName())) {
             typeName = "Boolean";
         } else if (typeElement.getQualifiedName().toString().equals(BigInteger.class.getName())) {
             typeName = "BigInteger";
@@ -159,7 +168,7 @@ public class ElementManager {
 
             if (element.getKind().equals(ElementKind.METHOD)) {
                 typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0)), types)).concat("]");
-            } else if (element.getKind().equals(ElementKind.FIELD)) {
+            } else if (element.getKind().equals(ElementKind.FIELD) || element.getKind().equals(ElementKind.PARAMETER)) {
                 typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
             } else {
                 throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
@@ -189,17 +198,26 @@ public class ElementManager {
         String typeName;
         if (element.getAnnotation(Id.class) != null) {
             typeName = "ID";
-        } else if (typeElement.getQualifiedName().toString().equals(Integer.class.getName()) ||
+        } else if (element.asType().toString().equals(int.class.getName()) ||
+                element.asType().toString().equals(long.class.getName()) ||
+                element.asType().toString().equals(short.class.getName()) ||
+                element.asType().toString().equals(byte.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Integer.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Long.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Short.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Byte.class.getName())) {
             typeName = "Int";
-        } else if (typeElement.getQualifiedName().toString().equals(Float.class.getName()) ||
+        } else if (element.asType().toString().equals(float.class.getName()) ||
+                element.asType().toString().equals(double.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Float.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Double.class.getName())) {
             typeName = "Float";
-        } else if (typeElement.getQualifiedName().toString().equals(String.class.getName()) ||
+        } else if (element.asType().toString().equals(char.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(String.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Character.class.getName())) {
             typeName = "String";
-        } else if (typeElement.getQualifiedName().toString().equals(Boolean.class.getName())) {
+        } else if (element.asType().toString().equals(boolean.class.getName()) ||
+                typeElement.getQualifiedName().toString().equals(Boolean.class.getName())) {
             typeName = "Boolean";
         } else if (typeElement.getQualifiedName().toString().equals(BigInteger.class.getName())) {
             typeName = "BigInteger";
@@ -211,13 +229,15 @@ public class ElementManager {
             typeName = "Time";
         } else if (typeElement.getQualifiedName().toString().equals(LocalDateTime.class.getName())) {
             typeName = "DateTime";
+        } else if (typeElement.getKind().equals(ElementKind.ENUM)) {
+            typeName = typeElement.getSimpleName().toString();
         } else if (typeElement.getQualifiedName().toString().equals(Collection.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(List.class.getName()) ||
                 typeElement.getQualifiedName().toString().equals(Set.class.getName())) {
 
             if (element.getKind().equals(ElementKind.METHOD)) {
                 typeName = "[".concat(elementToInputTypeName(element, (TypeElement) types.asElement(((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0)), types)).concat("]");
-            } else if (element.getKind().equals(ElementKind.FIELD)) {
+            } else if (element.getKind().equals(ElementKind.FIELD) || element.getKind().equals(ElementKind.PARAMETER)) {
                 typeName = "[".concat(elementToInputTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
             } else {
                 throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));

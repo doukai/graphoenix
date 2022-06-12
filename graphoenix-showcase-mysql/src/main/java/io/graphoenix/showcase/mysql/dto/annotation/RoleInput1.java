@@ -67,8 +67,4 @@ public @interface RoleInput1 {
   String $usersConnection() default "";
 
   UserInput2[] users() default {};
-
-  UserInput2 usersAggregate() default @UserInput2;
-
-  UserConnectionInput2 usersConnection() default @UserConnectionInput2;
 }

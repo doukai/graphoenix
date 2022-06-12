@@ -107,8 +107,4 @@ public @interface UserInput0 {
   OrganizationInput1 organization() default @OrganizationInput1;
 
   RoleInput1[] roles() default {};
-
-  RoleInput1 rolesAggregate() default @RoleInput1;
-
-  RoleConnectionInput1 rolesConnection() default @RoleConnectionInput1;
 }

@@ -102,8 +102,4 @@ public @interface UserExpression0 {
   OrganizationExpressions1[] organization() default {};
 
   RoleExpressions1[] roles() default {};
-
-  RoleExpressions1[] rolesAggregate() default {};
-
-  RoleConnectionExpressions1[] rolesConnection() default {};
 }

@@ -2,6 +2,7 @@ package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import io.graphoenix.spi.annotation.TypeExpressions;
+import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -14,4 +15,28 @@ public @interface RoleRoleTypeExpressions2 {
   Conditional cond() default Conditional.AND;
 
   RoleRoleTypeExpression2[] value() default {};
+
+  String[] groupBy() default {};
+
+  RoleRoleTypeOrderBy2 orderBy() default @RoleRoleTypeOrderBy2;
+
+  int first() default 0;
+
+  String $first() default "";
+
+  int last() default 0;
+
+  String $last() default "";
+
+  int offset() default 0;
+
+  String $offset() default "";
+
+  int after() default 0;
+
+  String $after() default "";
+
+  int before() default 0;
+
+  String $before() default "";
 }

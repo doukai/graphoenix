@@ -1,12 +1,9 @@
 package io.graphoenix.showcase.mysql.spi;
 
 import io.graphoenix.r2dbc.connector.dao.R2DBCOperationDAO;
-import io.graphoenix.showcase.mysql.dto.annotation.RoleExpression1;
-import io.graphoenix.showcase.mysql.dto.annotation.RoleExpressions1;
-import io.graphoenix.showcase.mysql.dto.annotation.UserExpression0;
-import io.graphoenix.showcase.mysql.dto.annotation.UserExpressions0;
-import io.graphoenix.showcase.mysql.dto.annotation.UserInput0;
+import io.graphoenix.showcase.mysql.dto.annotation.*;
 import io.graphoenix.showcase.mysql.dto.enumType.Sex;
+import io.graphoenix.showcase.mysql.dto.enumType.Sort;
 import io.graphoenix.showcase.mysql.dto.inputObjectType.OrganizationInput;
 import io.graphoenix.showcase.mysql.dto.inputObjectType.RoleInput;
 import io.graphoenix.showcase.mysql.dto.objectType.User;
@@ -34,16 +31,24 @@ public interface OperationTest {
     List<User> queryUserList(Sex sex) throws Exception;
 
     @QueryOperation("userList")
-    @UserExpressions0({
-            @UserExpression0($name = "name"),
-            @UserExpression0(roles = {
-                    @RoleExpressions1({
-                            @RoleExpression1(name = "role1111"),
-                            @RoleExpression1(id = "role1112")
-                    }),
-            })
-    })
-    Mono<User> queryUserAsync(String name, Sex sex, String roleName) throws Exception;
+    @UserExpressions0(
+            value = {
+                    @UserExpression0($name = "name"),
+                    @UserExpression0(
+                            roles = {
+                                    @RoleExpressions1({
+                                            @RoleExpression1(name = "role1111"),
+                                            @RoleExpression1($id = "name")
+                                    }),
+                            }
+                    )
+            },
+            orderBy = @UserOrderBy0(age = Sort.DESC),
+            $offset = "offset",
+            first = 20,
+            groupBy = {"name", "id"}
+    )
+    Mono<User> queryUserAsync(String name, Sex sex, String roleName, int offset) throws Exception;
 
     @QueryOperation("userList")
     @UserExpressions0({

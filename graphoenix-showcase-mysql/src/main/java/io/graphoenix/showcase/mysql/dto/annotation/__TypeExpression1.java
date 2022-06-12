@@ -82,24 +82,4 @@ public @interface __TypeExpression1 {
   __InputValueExpressions2[] inputFields() default {};
 
   __TypeExpressions2[] ofType() default {};
-
-  __FieldExpressions2[] fieldsAggregate() default {};
-
-  __TypeExpressions2[] interfacesAggregate() default {};
-
-  __TypeExpressions2[] possibleTypesAggregate() default {};
-
-  __EnumValueExpressions2[] enumValuesAggregate() default {};
-
-  __InputValueExpressions2[] inputFieldsAggregate() default {};
-
-  __FieldConnectionExpressions2[] fieldsConnection() default {};
-
-  __TypeConnectionExpressions2[] interfacesConnection() default {};
-
-  __TypeConnectionExpressions2[] possibleTypesConnection() default {};
-
-  __EnumValueConnectionExpressions2[] enumValuesConnection() default {};
-
-  __InputValueConnectionExpressions2[] inputFieldsConnection() default {};
 }
