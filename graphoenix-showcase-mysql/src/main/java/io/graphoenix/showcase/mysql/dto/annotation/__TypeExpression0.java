@@ -1,8 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.Operator;
-import io.graphoenix.showcase.mysql.dto.enumType.__TypeKind;
-import io.graphoenix.spi.annotation.TypeExpression;
+import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,75 +9,102 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-@TypeExpression
 public @interface __TypeExpression0 {
-  Operator opr() default Operator.EQ;
+  Conditional cond() default Conditional.AND;
 
-  String[] name() default {};
+  IDExpression name() default @IDExpression;
 
-  int[] schemaId() default {};
+  IntExpression schemaId() default @IntExpression;
 
-  __TypeKind[] kind() default {};
+  __TypeKindExpression kind() default @__TypeKindExpression;
 
-  String[] description() default {};
+  StringExpression description() default @StringExpression;
 
-  String[] ofTypeName() default {};
+  StringExpression ofTypeName() default @StringExpression;
 
-  boolean[] isDeprecated() default {};
+  boolean isDeprecated() default false;
 
-  int[] version() default {};
+  IntExpression version() default @IntExpression;
 
-  String[] realmId() default {};
+  StringExpression realmId() default @StringExpression;
 
-  String[] createUserId() default {};
+  StringExpression createUserId() default @StringExpression;
 
-  String[] createTime() default {};
+  TimestampExpression createTime() default @TimestampExpression;
 
-  String[] updateUserId() default {};
+  StringExpression updateUserId() default @StringExpression;
 
-  String[] updateTime() default {};
+  TimestampExpression updateTime() default @TimestampExpression;
 
-  String[] createGroupId() default {};
+  StringExpression createGroupId() default @StringExpression;
 
-  String[] __typename() default {};
+  StringExpression __typename() default @StringExpression;
 
-  String[] $name() default {};
+  String $name() default "";
 
-  String[] $schemaId() default {};
+  String $schemaId() default "";
 
-  String[] $kind() default {};
+  String $kind() default "";
 
-  String[] $description() default {};
+  String $description() default "";
 
-  String[] $ofTypeName() default {};
+  String $ofTypeName() default "";
 
-  String[] $isDeprecated() default {};
+  String $isDeprecated() default "";
 
-  String[] $version() default {};
+  String $version() default "";
 
-  String[] $realmId() default {};
+  String $realmId() default "";
 
-  String[] $createUserId() default {};
+  String $createUserId() default "";
 
-  String[] $createTime() default {};
+  String $createTime() default "";
 
-  String[] $updateUserId() default {};
+  String $updateUserId() default "";
 
-  String[] $updateTime() default {};
+  String $updateTime() default "";
 
-  String[] $createGroupId() default {};
+  String $createGroupId() default "";
 
-  String[] $__typename() default {};
+  String $__typename() default "";
 
-  __FieldExpressions1[] fields() default {};
+  String[] groupBy() default {};
 
-  __TypeExpressions1[] interfaces() default {};
+  String $groupBy() default "";
 
-  __TypeExpressions1[] possibleTypes() default {};
+  __TypeOrderBy0 orderBy() default @__TypeOrderBy0;
 
-  __EnumValueExpressions1[] enumValues() default {};
+  String $orderBy() default "";
 
-  __InputValueExpressions1[] inputFields() default {};
+  int first() default 0;
 
-  __TypeExpressions1[] ofType() default {};
+  String $first() default "";
+
+  int last() default 0;
+
+  String $last() default "";
+
+  int offset() default 0;
+
+  String $offset() default "";
+
+  int after() default 0;
+
+  String $after() default "";
+
+  int before() default 0;
+
+  String $before() default "";
+
+  __FieldExpression1 fields() default @__FieldExpression1;
+
+  __TypeExpression1 interfaces() default @__TypeExpression1;
+
+  __TypeExpression1 possibleTypes() default @__TypeExpression1;
+
+  __EnumValueExpression1 enumValues() default @__EnumValueExpression1;
+
+  __InputValueExpression1 inputFields() default @__InputValueExpression1;
+
+  __TypeExpression1 ofType() default @__TypeExpression1;
 }

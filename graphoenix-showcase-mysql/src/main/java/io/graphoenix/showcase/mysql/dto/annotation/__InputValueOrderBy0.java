@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Sort;
-import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,44 +42,6 @@ public @interface __InputValueOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  String $id() default "";
-
-  String $name() default "";
-
-  String $typeName() default "";
-
-  String $ofTypeName() default "";
-
-  String $ofType() default "";
-
-  String $fieldId() default "";
-
-  String $directiveName() default "";
-
-  String $description() default "";
-
-  String $type() default "";
-
-  String $defaultValue() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
-
-  String $__typename() default "";
 
   __TypeOrderBy1 ofType() default @__TypeOrderBy1;
 

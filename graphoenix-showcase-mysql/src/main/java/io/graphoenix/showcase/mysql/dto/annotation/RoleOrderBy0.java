@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Sort;
-import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,36 +32,6 @@ public @interface RoleOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  String $id() default "";
-
-  String $name() default "";
-
-  String $type() default "";
-
-  String $users() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
-
-  String $__typename() default "";
-
-  String $usersAggregate() default "";
-
-  String $usersConnection() default "";
 
   UserOrderBy1 users() default @UserOrderBy1;
 }

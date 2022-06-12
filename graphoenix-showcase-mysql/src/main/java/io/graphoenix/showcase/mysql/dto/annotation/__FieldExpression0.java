@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.Operator;
-import io.graphoenix.spi.annotation.TypeExpression;
+import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,93 +9,120 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-@TypeExpression
 public @interface __FieldExpression0 {
-  Operator opr() default Operator.EQ;
+  Conditional cond() default Conditional.AND;
 
-  String[] id() default {};
+  IDExpression id() default @IDExpression;
 
-  String[] name() default {};
+  StringExpression name() default @StringExpression;
 
-  String[] typeName() default {};
+  StringExpression typeName() default @StringExpression;
 
-  String[] ofTypeName() default {};
+  StringExpression ofTypeName() default @StringExpression;
 
-  String[] description() default {};
+  StringExpression description() default @StringExpression;
 
-  String[] deprecationReason() default {};
+  StringExpression deprecationReason() default @StringExpression;
 
-  String[] from() default {};
+  StringExpression from() default @StringExpression;
 
-  String[] to() default {};
+  StringExpression to() default @StringExpression;
 
-  String[] withType() default {};
+  StringExpression withType() default @StringExpression;
 
-  String[] withFrom() default {};
+  StringExpression withFrom() default @StringExpression;
 
-  String[] withTo() default {};
+  StringExpression withTo() default @StringExpression;
 
-  boolean[] isDeprecated() default {};
+  boolean isDeprecated() default false;
 
-  int[] version() default {};
+  IntExpression version() default @IntExpression;
 
-  String[] realmId() default {};
+  StringExpression realmId() default @StringExpression;
 
-  String[] createUserId() default {};
+  StringExpression createUserId() default @StringExpression;
 
-  String[] createTime() default {};
+  TimestampExpression createTime() default @TimestampExpression;
 
-  String[] updateUserId() default {};
+  StringExpression updateUserId() default @StringExpression;
 
-  String[] updateTime() default {};
+  TimestampExpression updateTime() default @TimestampExpression;
 
-  String[] createGroupId() default {};
+  StringExpression createGroupId() default @StringExpression;
 
-  String[] __typename() default {};
+  StringExpression __typename() default @StringExpression;
 
-  String[] $id() default {};
+  String $id() default "";
 
-  String[] $name() default {};
+  String $name() default "";
 
-  String[] $typeName() default {};
+  String $typeName() default "";
 
-  String[] $ofTypeName() default {};
+  String $ofTypeName() default "";
 
-  String[] $description() default {};
+  String $description() default "";
 
-  String[] $deprecationReason() default {};
+  String $deprecationReason() default "";
 
-  String[] $from() default {};
+  String $from() default "";
 
-  String[] $to() default {};
+  String $to() default "";
 
-  String[] $withType() default {};
+  String $withType() default "";
 
-  String[] $withFrom() default {};
+  String $withFrom() default "";
 
-  String[] $withTo() default {};
+  String $withTo() default "";
 
-  String[] $isDeprecated() default {};
+  String $isDeprecated() default "";
 
-  String[] $version() default {};
+  String $version() default "";
 
-  String[] $realmId() default {};
+  String $realmId() default "";
 
-  String[] $createUserId() default {};
+  String $createUserId() default "";
 
-  String[] $createTime() default {};
+  String $createTime() default "";
 
-  String[] $updateUserId() default {};
+  String $updateUserId() default "";
 
-  String[] $updateTime() default {};
+  String $updateTime() default "";
 
-  String[] $createGroupId() default {};
+  String $createGroupId() default "";
 
-  String[] $__typename() default {};
+  String $__typename() default "";
 
-  __TypeExpressions1[] ofType() default {};
+  String[] groupBy() default {};
 
-  __InputValueExpressions1[] args() default {};
+  String $groupBy() default "";
 
-  __TypeExpressions1[] type() default {};
+  __FieldOrderBy0 orderBy() default @__FieldOrderBy0;
+
+  String $orderBy() default "";
+
+  int first() default 0;
+
+  String $first() default "";
+
+  int last() default 0;
+
+  String $last() default "";
+
+  int offset() default 0;
+
+  String $offset() default "";
+
+  int after() default 0;
+
+  String $after() default "";
+
+  int before() default 0;
+
+  String $before() default "";
+
+  __TypeExpression1 ofType() default @__TypeExpression1;
+
+  __InputValueExpression1 args() default @__InputValueExpression1;
+
+  __TypeExpression1 type() default @__TypeExpression1;
 }

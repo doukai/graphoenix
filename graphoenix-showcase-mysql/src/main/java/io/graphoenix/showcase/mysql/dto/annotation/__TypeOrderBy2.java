@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Sort;
-import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,64 +36,4 @@ public @interface __TypeOrderBy2 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  String $name() default "";
-
-  String $schemaId() default "";
-
-  String $kind() default "";
-
-  String $description() default "";
-
-  String $fields() default "";
-
-  String $interfaces() default "";
-
-  String $possibleTypes() default "";
-
-  String $enumValues() default "";
-
-  String $inputFields() default "";
-
-  String $ofTypeName() default "";
-
-  String $ofType() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
-
-  String $__typename() default "";
-
-  String $fieldsAggregate() default "";
-
-  String $interfacesAggregate() default "";
-
-  String $possibleTypesAggregate() default "";
-
-  String $enumValuesAggregate() default "";
-
-  String $inputFieldsAggregate() default "";
-
-  String $fieldsConnection() default "";
-
-  String $interfacesConnection() default "";
-
-  String $possibleTypesConnection() default "";
-
-  String $enumValuesConnection() default "";
-
-  String $inputFieldsConnection() default "";
 }

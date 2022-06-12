@@ -1,8 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.Operator;
-import io.graphoenix.showcase.mysql.dto.enumType.Sex;
-import io.graphoenix.spi.annotation.TypeExpression;
+import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,95 +9,122 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-@TypeExpression
 public @interface UserExpression0 {
-  Operator opr() default Operator.EQ;
+  Conditional cond() default Conditional.AND;
 
-  String[] id() default {};
+  IDExpression id() default @IDExpression;
 
-  String[] login() default {};
+  StringExpression login() default @StringExpression;
 
-  String[] password() default {};
+  StringExpression password() default @StringExpression;
 
-  String[] name() default {};
+  StringExpression name() default @StringExpression;
 
-  int[] age() default {};
+  IntExpression age() default @IntExpression;
 
-  boolean[] disable() default {};
+  boolean disable() default false;
 
-  Sex[] sex() default {};
+  SexExpression sex() default @SexExpression;
 
-  int[] organizationId() default {};
+  IntExpression organizationId() default @IntExpression;
 
-  String[] phones() default {};
+  StringExpression phones() default @StringExpression;
 
-  int[] test1() default {};
+  IntExpression test1() default @IntExpression;
 
-  boolean[] test2() default {};
+  boolean test2() default false;
 
-  boolean[] isDeprecated() default {};
+  boolean isDeprecated() default false;
 
-  int[] version() default {};
+  IntExpression version() default @IntExpression;
 
-  String[] realmId() default {};
+  StringExpression realmId() default @StringExpression;
 
-  String[] createUserId() default {};
+  StringExpression createUserId() default @StringExpression;
 
-  String[] createTime() default {};
+  TimestampExpression createTime() default @TimestampExpression;
 
-  String[] updateUserId() default {};
+  StringExpression updateUserId() default @StringExpression;
 
-  String[] updateTime() default {};
+  TimestampExpression updateTime() default @TimestampExpression;
 
-  String[] createGroupId() default {};
+  StringExpression createGroupId() default @StringExpression;
 
-  String[] __typename() default {};
+  StringExpression __typename() default @StringExpression;
 
-  String[] userDetail2() default {};
+  StringExpression userDetail2() default @StringExpression;
 
-  String[] $id() default {};
+  String $id() default "";
 
-  String[] $login() default {};
+  String $login() default "";
 
-  String[] $password() default {};
+  String $password() default "";
 
-  String[] $name() default {};
+  String $name() default "";
 
-  String[] $age() default {};
+  String $age() default "";
 
-  String[] $disable() default {};
+  String $disable() default "";
 
-  String[] $sex() default {};
+  String $sex() default "";
 
-  String[] $organizationId() default {};
+  String $organizationId() default "";
 
-  String[] $phones() default {};
+  String $phones() default "";
 
-  String[] $test1() default {};
+  String $test1() default "";
 
-  String[] $test2() default {};
+  String $test2() default "";
 
-  String[] $isDeprecated() default {};
+  String $isDeprecated() default "";
 
-  String[] $version() default {};
+  String $version() default "";
 
-  String[] $realmId() default {};
+  String $realmId() default "";
 
-  String[] $createUserId() default {};
+  String $createUserId() default "";
 
-  String[] $createTime() default {};
+  String $createTime() default "";
 
-  String[] $updateUserId() default {};
+  String $updateUserId() default "";
 
-  String[] $updateTime() default {};
+  String $updateTime() default "";
 
-  String[] $createGroupId() default {};
+  String $createGroupId() default "";
 
-  String[] $__typename() default {};
+  String $__typename() default "";
 
-  String[] $userDetail2() default {};
+  String $userDetail2() default "";
 
-  OrganizationExpressions1[] organization() default {};
+  String[] groupBy() default {};
 
-  RoleExpressions1[] roles() default {};
+  String $groupBy() default "";
+
+  UserOrderBy0 orderBy() default @UserOrderBy0;
+
+  String $orderBy() default "";
+
+  int first() default 0;
+
+  String $first() default "";
+
+  int last() default 0;
+
+  String $last() default "";
+
+  int offset() default 0;
+
+  String $offset() default "";
+
+  int after() default 0;
+
+  String $after() default "";
+
+  int before() default 0;
+
+  String $before() default "";
+
+  OrganizationExpression1 organization() default @OrganizationExpression1;
+
+  RoleExpression1 roles() default @RoleExpression1;
 }

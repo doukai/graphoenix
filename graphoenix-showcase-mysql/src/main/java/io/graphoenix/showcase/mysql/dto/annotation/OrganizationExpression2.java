@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.Operator;
-import io.graphoenix.spi.annotation.TypeExpression;
+import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,67 +9,94 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-@TypeExpression
 public @interface OrganizationExpression2 {
-  Operator opr() default Operator.EQ;
+  Conditional cond() default Conditional.AND;
 
-  String[] id() default {};
+  IDExpression id() default @IDExpression;
 
-  int[] aboveId() default {};
+  IntExpression aboveId() default @IntExpression;
 
-  String[] name() default {};
+  StringExpression name() default @StringExpression;
 
-  boolean[] isDeprecated() default {};
+  boolean isDeprecated() default false;
 
-  int[] version() default {};
+  IntExpression version() default @IntExpression;
 
-  String[] realmId() default {};
+  StringExpression realmId() default @StringExpression;
 
-  String[] createUserId() default {};
+  StringExpression createUserId() default @StringExpression;
 
-  String[] createTime() default {};
+  TimestampExpression createTime() default @TimestampExpression;
 
-  String[] updateUserId() default {};
+  StringExpression updateUserId() default @StringExpression;
 
-  String[] updateTime() default {};
+  TimestampExpression updateTime() default @TimestampExpression;
 
-  String[] createGroupId() default {};
+  StringExpression createGroupId() default @StringExpression;
 
-  String[] __typename() default {};
+  StringExpression __typename() default @StringExpression;
 
-  int[] orgLevel2() default {};
+  IntExpression orgLevel2() default @IntExpression;
 
-  int[] orgLevel3() default {};
+  IntExpression orgLevel3() default @IntExpression;
 
-  boolean[] roleDisable() default {};
+  boolean roleDisable() default false;
 
-  String[] $id() default {};
+  String $id() default "";
 
-  String[] $aboveId() default {};
+  String $aboveId() default "";
 
-  String[] $name() default {};
+  String $name() default "";
 
-  String[] $isDeprecated() default {};
+  String $isDeprecated() default "";
 
-  String[] $version() default {};
+  String $version() default "";
 
-  String[] $realmId() default {};
+  String $realmId() default "";
 
-  String[] $createUserId() default {};
+  String $createUserId() default "";
 
-  String[] $createTime() default {};
+  String $createTime() default "";
 
-  String[] $updateUserId() default {};
+  String $updateUserId() default "";
 
-  String[] $updateTime() default {};
+  String $updateTime() default "";
 
-  String[] $createGroupId() default {};
+  String $createGroupId() default "";
 
-  String[] $__typename() default {};
+  String $__typename() default "";
 
-  String[] $orgLevel2() default {};
+  String $orgLevel2() default "";
 
-  String[] $orgLevel3() default {};
+  String $orgLevel3() default "";
 
-  String[] $roleDisable() default {};
+  String $roleDisable() default "";
+
+  String[] groupBy() default {};
+
+  String $groupBy() default "";
+
+  OrganizationOrderBy2 orderBy() default @OrganizationOrderBy2;
+
+  String $orderBy() default "";
+
+  int first() default 0;
+
+  String $first() default "";
+
+  int last() default 0;
+
+  String $last() default "";
+
+  int offset() default 0;
+
+  String $offset() default "";
+
+  int after() default 0;
+
+  String $after() default "";
+
+  int before() default 0;
+
+  String $before() default "";
 }
