@@ -18,31 +18,17 @@ import java.util.List;
 public interface OperationTest {
 
     @QueryOperation(value = "userList", layers = 1)
-    @UserExpression0($name = "name")
+    @UserExpression0(name = @StringExpression(val = "name"))
     User queryUser(String name) throws Exception;
 
     @QueryOperation(value = "userList", layers = 1)
-    @UserExpression0(roles = {
-            @RoleExpressions1({
-                    @RoleExpression1(name = "role1111"),
-                    @RoleExpression1(id = "role1112")
-            }),
-    })
+    @UserExpression0(roles = @RoleExpression1(name = @StringExpression(val = "role1111"), id = @IDExpression(val = "role1112")))
     List<User> queryUserList(Sex sex) throws Exception;
 
     @QueryOperation("userList")
-    @UserExpressions0(
-            value = {
-                    @UserExpression0($name = "name"),
-                    @UserExpression0(
-                            roles = {
-                                    @RoleExpressions1({
-                                            @RoleExpression1(name = "role1111"),
-                                            @RoleExpression1($id = "name")
-                                    }),
-                            }
-                    )
-            },
+    @UserExpression0(
+            name = @StringExpression($val = "name"),
+            roles = @RoleExpression1(name = @StringExpression(val = "role1111"), id = @IDExpression($val = "name")),
             orderBy = @UserOrderBy0(age = Sort.DESC),
             $offset = "offset",
             first = 20,
@@ -51,10 +37,10 @@ public interface OperationTest {
     Mono<User> queryUserAsync(String name, Sex sex, String roleName, int offset) throws Exception;
 
     @QueryOperation("userList")
-    @UserExpressions0({
-            @UserExpression0($name = "name"),
-            @UserExpression0($sex = "sex")
-    })
+    @UserExpression0(
+            name = @StringExpression($val = "name"),
+            sex = @SexExpression($val = "sex")
+    )
     Mono<List<User>> queryUserListAsync(String name, Sex sex, String roleName) throws Exception;
 
     @MutationOperation("user")

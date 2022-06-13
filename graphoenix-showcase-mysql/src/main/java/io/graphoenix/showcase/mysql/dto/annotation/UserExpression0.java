@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
+import io.graphoenix.spi.annotation.Arguments;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
+@Arguments
 public @interface UserExpression0 {
   Conditional cond() default Conditional.AND;
 
@@ -54,55 +56,9 @@ public @interface UserExpression0 {
 
   StringExpression userDetail2() default @StringExpression;
 
-  String $id() default "";
-
-  String $login() default "";
-
-  String $password() default "";
-
-  String $name() default "";
-
-  String $age() default "";
-
-  String $disable() default "";
-
-  String $sex() default "";
-
-  String $organizationId() default "";
-
-  String $phones() default "";
-
-  String $test1() default "";
-
-  String $test2() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
-
-  String $__typename() default "";
-
-  String $userDetail2() default "";
-
   String[] groupBy() default {};
 
-  String $groupBy() default "";
-
   UserOrderBy0 orderBy() default @UserOrderBy0;
-
-  String $orderBy() default "";
 
   int first() default 0;
 
@@ -127,4 +83,6 @@ public @interface UserExpression0 {
   OrganizationExpression1 organization() default @OrganizationExpression1;
 
   RoleExpression1 roles() default @RoleExpression1;
+
+  UserExpression1[] exs() default {};
 }

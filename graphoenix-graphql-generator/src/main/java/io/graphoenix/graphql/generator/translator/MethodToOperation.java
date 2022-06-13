@@ -5,8 +5,9 @@ import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.graphql.generator.operation.VariableDefinition;
-import io.graphoenix.spi.annotation.TypeInput;
+import io.graphoenix.spi.annotation.Arguments;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.dto.type.OperationType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.tinylog.Logger;
@@ -20,27 +21,43 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
-import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 
 @ApplicationScoped
-public class MethodToMutationOperation {
+public class MethodToOperation {
 
     private final IGraphQLDocumentManager manager;
     private final ElementManager elementManager;
 
     @Inject
-    public MethodToMutationOperation(IGraphQLDocumentManager manager, ElementManager elementManager) {
+    public MethodToOperation(IGraphQLDocumentManager manager, ElementManager elementManager) {
         this.manager = manager;
         this.elementManager = elementManager;
     }
 
-    public String executableElementToMutation(String mutationFieldName, ExecutableElement executableElement, String selectionSet, int layers, Types typeUtils) {
+    public String executableElementToOperation(OperationType operationType, String fieldName, ExecutableElement executableElement, String selectionSet, int layers, Types typeUtils) {
+
+        String operationName;
+        String typeName;
+        switch (operationType) {
+            case QUERY:
+                operationName = "query";
+                typeName = getQueryTypeName(fieldName);
+                break;
+            case MUTATION:
+                operationName = "mutation";
+                typeName = getMutationTypeName(fieldName);
+                break;
+            default:
+                throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
+        }
+
         Operation operation = new Operation()
                 .setName(executableElement.getSimpleName().toString())
-                .setOperationType("mutation");
-        Field field = new Field().setName(mutationFieldName);
+                .setOperationType(operationName);
+        Field field = new Field().setName(fieldName);
 
         Optional<? extends AnnotationMirror> expression = getInputAnnotation(executableElement);
         expression.ifPresent(annotationMirror -> field.addArguments(inputAnnotationToArgument(executableElement, annotationMirror)));
@@ -55,18 +72,18 @@ public class MethodToMutationOperation {
         );
 
         if (selectionSet != null && !selectionSet.equals("")) {
-            field.setFields(elementManager.buildFields(getMutationTypeName(mutationFieldName), selectionSet));
+            field.setFields(elementManager.buildFields(selectionSet));
         } else {
-            field.setFields(elementManager.buildFields(getMutationTypeName(mutationFieldName), 0, layers));
+            field.setFields(elementManager.buildFields(typeName, 0, layers));
         }
-        String mutation = operation.addField(field).toString();
-        Logger.info("build mutation success:\r\n{}", mutation);
-        return mutation;
+        String operationString = operation.addField(field).toString();
+        Logger.info("build operation success:\r\n{}", operationString);
+        return operationString;
     }
 
     private Optional<? extends AnnotationMirror> getInputAnnotation(ExecutableElement executableElement) {
         return executableElement.getAnnotationMirrors().stream()
-                .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getAnnotation(TypeInput.class) != null)
+                .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getAnnotation(Arguments.class) != null)
                 .findFirst();
     }
 
@@ -139,25 +156,17 @@ public class MethodToMutationOperation {
                 );
     }
 
-    private String getTypeName(String mutationFieldName, String argumentName) {
-        String mutationTypeName = getMutationTypeName(mutationFieldName);
-        return manager.getField(mutationTypeName, argumentName)
-                .map(fieldDefinitionContext -> {
-                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                            if (manager.isObject(fieldTypeName)) {
-                                return fieldDefinitionContext.type().getText().replace(fieldTypeName, fieldTypeName.concat(INPUT_SUFFIX));
-                            } else {
-                                return fieldDefinitionContext.type().getText();
-                            }
-                        }
-                )
-                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(mutationTypeName, argumentName)));
-    }
-
     private String getMutationTypeName(String mutationFieldName) {
         return manager.getMutationOperationTypeName()
                 .flatMap(mutationTypeName -> manager.getField(mutationTypeName, mutationFieldName))
                 .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
                 .orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+    }
+
+    private String getQueryTypeName(String queryFieldName) {
+        return manager.getQueryOperationTypeName()
+                .flatMap(queryTypeName -> manager.getField(queryTypeName, queryFieldName))
+                .map(fieldDefinitionContext -> manager.getFieldTypeName(fieldDefinitionContext.type()))
+                .orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
     }
 }

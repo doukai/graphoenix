@@ -63,7 +63,7 @@ public class ElementManager {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public Set<Field> buildFields(String typeName, String selectionSet) {
+    public Set<Field> buildFields(String selectionSet) {
         return DOCUMENT_UTIL.graphqlToSelectionSet(selectionSet).selection().stream().map(Field::new).collect(Collectors.toSet());
     }
 
@@ -243,7 +243,11 @@ public class ElementManager {
                 throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
             }
         } else {
-            typeName = typeElement.getSimpleName().toString().concat(INPUT_SUFFIX);
+            if (typeElement.getQualifiedName().toString().endsWith(INPUT_SUFFIX)) {
+                typeName = typeElement.getSimpleName().toString();
+            } else {
+                typeName = typeElement.getSimpleName().toString().concat(INPUT_SUFFIX);
+            }
         }
 
         if (element.getAnnotation(NonNull.class) != null) {

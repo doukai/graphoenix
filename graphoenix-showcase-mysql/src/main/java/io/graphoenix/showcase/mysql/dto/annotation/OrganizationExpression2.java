@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
+import io.graphoenix.spi.annotation.Arguments;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
+@Arguments
 public @interface OrganizationExpression2 {
   Conditional cond() default Conditional.AND;
 
@@ -42,43 +44,9 @@ public @interface OrganizationExpression2 {
 
   boolean roleDisable() default false;
 
-  String $id() default "";
-
-  String $aboveId() default "";
-
-  String $name() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
-
-  String $__typename() default "";
-
-  String $orgLevel2() default "";
-
-  String $orgLevel3() default "";
-
-  String $roleDisable() default "";
-
   String[] groupBy() default {};
 
-  String $groupBy() default "";
-
   OrganizationOrderBy2 orderBy() default @OrganizationOrderBy2;
-
-  String $orderBy() default "";
 
   int first() default 0;
 

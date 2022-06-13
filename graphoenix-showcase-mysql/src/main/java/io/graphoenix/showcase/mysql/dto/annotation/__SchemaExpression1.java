@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
+import io.graphoenix.spi.annotation.Arguments;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
+@Arguments
 public @interface __SchemaExpression1 {
   Conditional cond() default Conditional.AND;
 
@@ -38,39 +40,9 @@ public @interface __SchemaExpression1 {
 
   StringExpression __typename() default @StringExpression;
 
-  String $id() default "";
-
-  String $queryTypeName() default "";
-
-  String $mutationTypeName() default "";
-
-  String $subscriptionTypeName() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
-
-  String $__typename() default "";
-
   String[] groupBy() default {};
 
-  String $groupBy() default "";
-
   __SchemaOrderBy1 orderBy() default @__SchemaOrderBy1;
-
-  String $orderBy() default "";
 
   int first() default 0;
 
@@ -101,4 +73,6 @@ public @interface __SchemaExpression1 {
   __TypeExpression2 subscriptionType() default @__TypeExpression2;
 
   __DirectiveExpression2 directives() default @__DirectiveExpression2;
+
+  __SchemaExpression2[] exs() default {};
 }

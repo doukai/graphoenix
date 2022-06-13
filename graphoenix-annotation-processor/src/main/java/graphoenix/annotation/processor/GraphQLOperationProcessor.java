@@ -77,7 +77,6 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
-        this.javaElementToOperation.setGraphQLConfig(graphQLConfig);
 
         try {
             manager.clearAll();
@@ -121,7 +120,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
 
                     try {
                         Logger.info("start build operation resource for interface {}", typeElement.getQualifiedName().toString());
-                        Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(packageElement, typeElement, typeUtils);
+                        Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(typeElement, typeUtils);
                         operationResourcesContent.entrySet().stream()
                                 .collect(Collectors.toMap(
                                         Map.Entry::getKey,

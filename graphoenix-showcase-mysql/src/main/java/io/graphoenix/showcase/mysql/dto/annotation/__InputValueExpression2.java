@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
+import io.graphoenix.spi.annotation.Arguments;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
+@Arguments
 public @interface __InputValueExpression2 {
   Conditional cond() default Conditional.AND;
 
@@ -46,47 +48,9 @@ public @interface __InputValueExpression2 {
 
   StringExpression __typename() default @StringExpression;
 
-  String $id() default "";
-
-  String $name() default "";
-
-  String $typeName() default "";
-
-  String $ofTypeName() default "";
-
-  String $fieldId() default "";
-
-  String $directiveName() default "";
-
-  String $description() default "";
-
-  String $defaultValue() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
-
-  String $__typename() default "";
-
   String[] groupBy() default {};
 
-  String $groupBy() default "";
-
   __InputValueOrderBy2 orderBy() default @__InputValueOrderBy2;
-
-  String $orderBy() default "";
 
   int first() default 0;
 

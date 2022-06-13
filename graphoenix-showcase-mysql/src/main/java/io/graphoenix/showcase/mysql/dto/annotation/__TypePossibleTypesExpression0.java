@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
+import io.graphoenix.spi.annotation.Arguments;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,6 +10,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
+@Arguments
 public @interface __TypePossibleTypesExpression0 {
   Conditional cond() default Conditional.AND;
 
@@ -36,37 +38,9 @@ public @interface __TypePossibleTypesExpression0 {
 
   StringExpression __typename() default @StringExpression;
 
-  String $id() default "";
-
-  String $typeName() default "";
-
-  String $possibleTypeName() default "";
-
-  String $isDeprecated() default "";
-
-  String $version() default "";
-
-  String $realmId() default "";
-
-  String $createUserId() default "";
-
-  String $createTime() default "";
-
-  String $updateUserId() default "";
-
-  String $updateTime() default "";
-
-  String $createGroupId() default "";
-
-  String $__typename() default "";
-
   String[] groupBy() default {};
 
-  String $groupBy() default "";
-
   __TypePossibleTypesOrderBy0 orderBy() default @__TypePossibleTypesOrderBy0;
-
-  String $orderBy() default "";
 
   int first() default 0;
 
@@ -87,4 +61,6 @@ public @interface __TypePossibleTypesExpression0 {
   int before() default 0;
 
   String $before() default "";
+
+  __TypePossibleTypesExpression1[] exs() default {};
 }

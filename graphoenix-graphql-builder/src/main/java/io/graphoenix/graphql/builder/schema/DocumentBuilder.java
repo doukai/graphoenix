@@ -404,6 +404,7 @@ public class DocumentBuilder {
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"))
+                    .addArgument(new InputValue().setName("exs").setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat(InputType.EXPRESSION.toString()).concat("]")))
                     .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
                     .addArgument(new InputValue().setName(LAST_INPUT_NAME).setTypeName("Int"))
                     .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"));
