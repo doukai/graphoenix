@@ -62,11 +62,11 @@ public @interface __DirectiveExpression2 {
 
   String $offset() default "";
 
-  int after() default 0;
+  String after() default "";
+
+  String before() default "";
 
   String $after() default "";
-
-  int before() default 0;
 
   String $before() default "";
 }

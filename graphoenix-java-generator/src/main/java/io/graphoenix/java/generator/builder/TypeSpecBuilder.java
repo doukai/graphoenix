@@ -592,6 +592,10 @@ public class TypeSpecBuilder {
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(name));
     }
 
+    public CodeBlock buildAnnotationDefaultValue(GraphqlParser.TypeContext typeContext) {
+        return buildAnnotationDefaultValue(typeContext, 0);
+    }
+
     public CodeBlock buildAnnotationDefaultValue(GraphqlParser.TypeContext typeContext, int layer) {
         if (manager.fieldTypeIsList(typeContext)) {
             return CodeBlock.of("$L", "{}");
@@ -940,65 +944,67 @@ public class TypeSpecBuilder {
                                                     .returns(String.class)
                                                     .defaultValue(CodeBlock.of("$S", ""))
                                                     .build()
-                                    )
-                                    .addMethod(
-                                            MethodSpec.methodBuilder(AFTER_INPUT_NAME)
-                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                    .returns(int.class)
-                                                    .defaultValue(CodeBlock.of("$L", 0))
-                                                    .build()
-                                    )
-                                    .addMethod(
-                                            MethodSpec.methodBuilder("$".concat(AFTER_INPUT_NAME))
-                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                    .returns(String.class)
-                                                    .defaultValue(CodeBlock.of("$S", ""))
-                                                    .build()
-                                    )
-                                    .addMethod(
-                                            MethodSpec.methodBuilder(BEFORE_INPUT_NAME)
-                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                    .returns(int.class)
-                                                    .defaultValue(CodeBlock.of("$L", 0))
-                                                    .build()
-                                    )
-                                    .addMethod(
-                                            MethodSpec.methodBuilder("$".concat(BEFORE_INPUT_NAME))
-                                                    .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                    .returns(String.class)
-                                                    .defaultValue(CodeBlock.of("$S", ""))
-                                                    .build()
+                                    );
+
+                            manager.getFieldByDirective(objectTypeDefinitionContext.name().getText(), "cursor")
+                                    .findFirst()
+                                    .or(() -> manager.getObjectTypeIDFieldDefinition(objectTypeDefinitionContext.name().getText()))
+                                    .ifPresent(cursorFieldDefinitionContext ->
+                                            builder.addMethod(
+                                                    MethodSpec.methodBuilder(AFTER_INPUT_NAME)
+                                                            .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                            .returns(buildType(cursorFieldDefinitionContext.type(), true))
+                                                            .defaultValue(buildAnnotationDefaultValue(cursorFieldDefinitionContext.type()))
+                                                            .build()
+                                            ).addMethod(
+                                                    MethodSpec.methodBuilder(BEFORE_INPUT_NAME)
+                                                            .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                            .returns(buildType(cursorFieldDefinitionContext.type(), true))
+                                                            .defaultValue(buildAnnotationDefaultValue(cursorFieldDefinitionContext.type()))
+                                                            .build()
+                                            ).addMethod(
+                                                    MethodSpec.methodBuilder("$".concat(AFTER_INPUT_NAME))
+                                                            .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                            .returns(String.class)
+                                                            .defaultValue(CodeBlock.of("$S", ""))
+                                                            .build()
+                                            ).addMethod(
+                                                    MethodSpec.methodBuilder("$".concat(BEFORE_INPUT_NAME))
+                                                            .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                            .returns(String.class)
+                                                            .defaultValue(CodeBlock.of("$S", ""))
+                                                            .build()
+                                            )
                                     );
 
                             if (layer < graphQLConfig.getInputLayers() - 1) {
                                 builder.addMethods(
-                                                manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                        .filter(fieldDefinitionContext ->
-                                                                manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                                        )
-                                                        .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                                                        .map(fieldDefinitionContext ->
-                                                                MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                        .returns(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(EXPRESSION_SUFFIX) + (layer + 1)))
-                                                                        .defaultValue(
-                                                                                CodeBlock.of(
-                                                                                        "@$T",
-                                                                                        ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(EXPRESSION_SUFFIX) + (layer + 1))
-                                                                                )
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext ->
+                                                        manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                )
+                                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(EXPRESSION_SUFFIX) + (layer + 1)))
+                                                                .defaultValue(
+                                                                        CodeBlock.of(
+                                                                                "@$T",
+                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(EXPRESSION_SUFFIX) + (layer + 1))
                                                                         )
-                                                                        .build()
-                                                        )
-                                                        .collect(Collectors.toList())
-                                        )
-                                        .addMethod(
-                                                MethodSpec.methodBuilder("exs")
-                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                        .returns(ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), objectTypeDefinitionContext.name().getText().concat(EXPRESSION_SUFFIX) + (layer + 1))))
-                                                        .defaultValue(CodeBlock.of("$L", "{}"))
-                                                        .build()
-                                        );
+                                                                )
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                ).addMethod(
+                                        MethodSpec.methodBuilder("exs")
+                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                .returns(ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), objectTypeDefinitionContext.name().getText().concat(EXPRESSION_SUFFIX) + (layer + 1))))
+                                                .defaultValue(CodeBlock.of("$L", "{}"))
+                                                .build()
+                                );
                             }
                             Logger.info("annotation {}Expression{} build success", objectTypeDefinitionContext.name().getText(), layer);
                             return builder.build();
