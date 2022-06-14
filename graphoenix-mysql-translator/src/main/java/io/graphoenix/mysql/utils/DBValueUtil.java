@@ -35,11 +35,14 @@ public class DBValueUtil {
     }
 
     public Expression scalarValueToDBValue(GraphqlParser.ValueContext valueContext) {
-        return scalarValueToDBValue(valueContext.StringValue(),
+        return scalarValueToDBValue(
+                valueContext.StringValue(),
                 valueContext.IntValue(),
                 valueContext.FloatValue(),
                 valueContext.BooleanValue(),
-                valueContext.NullValue());
+                valueContext.NullValue(),
+                null
+        );
     }
 
     public Expression scalarValueWithVariableToDBValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
@@ -47,11 +50,14 @@ public class DBValueUtil {
             return variableToJdbcNamedParameter(valueWithVariableContext.variable());
         }
 
-        return scalarValueToDBValue(valueWithVariableContext.StringValue(),
+        return scalarValueToDBValue(
+                valueWithVariableContext.StringValue(),
                 valueWithVariableContext.IntValue(),
                 valueWithVariableContext.FloatValue(),
                 valueWithVariableContext.BooleanValue(),
-                valueWithVariableContext.NullValue());
+                valueWithVariableContext.NullValue(),
+                valueWithVariableContext.variable()
+        );
     }
 
     public Expression objectFieldVariableToDBValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
@@ -75,6 +81,9 @@ public class DBValueUtil {
     }
 
     public Expression enumValueToDBValue(GraphqlParser.ValueContext valueContext) {
+        if (valueContext.NullValue() != null) {
+            return new NullValue();
+        }
         if (valueContext.StringValue() != null) {
             return new StringValue(DOCUMENT_UTIL.getStringValue(valueContext.StringValue()));
         }
@@ -100,7 +109,7 @@ public class DBValueUtil {
         throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueWithVariableContext.getText()));
     }
 
-    public Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue) {
+    public Expression scalarValueToDBValue(TerminalNode stringValue, TerminalNode intValue, TerminalNode floatValue, TerminalNode booleanValue, TerminalNode nullValue, GraphqlParser.VariableContext variableContext) {
         if (stringValue != null) {
             return new StringValue(CharMatcher.is('"').trimFrom(stringValue.getText()));
         } else if (intValue != null) {
@@ -111,6 +120,8 @@ public class DBValueUtil {
             return booleanValue.getText().equals("true") ? new LongValue(1) : new LongValue(0);
         } else if (nullValue != null) {
             return new NullValue();
+        } else if (variableContext != null) {
+            return variableToJdbcNamedParameter(variableContext);
         }
         return null;
     }

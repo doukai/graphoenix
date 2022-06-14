@@ -70,6 +70,11 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                     Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = manager.getField(
                                                             objectTypeDefinitionContext.name().getText(),
                                                             DOCUMENT_UTIL.getStringValue(fromArgument.get().valueWithVariable().StringValue())
+                                                    ).or(() ->
+                                                            manager.getInterface("Meta").stream()
+                                                                    .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                                                                    .filter(metaFieldDefinitionContext -> metaFieldDefinitionContext.name().getText().equals(DOCUMENT_UTIL.getStringValue(fromArgument.get().valueWithVariable().StringValue())))
+                                                                    .findFirst()
                                                     );
 
                                                     if (fromFieldDefinition.isEmpty()) {
@@ -123,6 +128,11 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                         Optional<GraphqlParser.FieldDefinitionContext> withFromFieldDefinition = manager.getField(
                                                                 DOCUMENT_UTIL.getStringValue(withTypeArgument.get().valueWithVariable().StringValue()),
                                                                 DOCUMENT_UTIL.getStringValue(withFromArgument.get().valueWithVariable().StringValue())
+                                                        ).or(() ->
+                                                                manager.getInterface("Meta").stream()
+                                                                        .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                                                                        .filter(metaFieldDefinitionContext -> metaFieldDefinitionContext.name().getText().equals(DOCUMENT_UTIL.getStringValue(withFromArgument.get().valueWithVariable().StringValue())))
+                                                                        .findFirst()
                                                         );
 
                                                         if (withFromFieldDefinition.isEmpty()) {
@@ -132,6 +142,11 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                                                         Optional<GraphqlParser.FieldDefinitionContext> withToFieldDefinition = manager.getField(
                                                                 DOCUMENT_UTIL.getStringValue(withTypeArgument.get().valueWithVariable().StringValue()),
                                                                 DOCUMENT_UTIL.getStringValue(withToArgument.get().valueWithVariable().StringValue())
+                                                        ).or(() ->
+                                                                manager.getInterface("Meta").stream()
+                                                                        .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                                                                        .filter(metaFieldDefinitionContext -> metaFieldDefinitionContext.name().getText().equals(DOCUMENT_UTIL.getStringValue(withToArgument.get().valueWithVariable().StringValue())))
+                                                                        .findFirst()
                                                         );
 
                                                         if (withToFieldDefinition.isEmpty()) {
@@ -173,6 +188,11 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
             Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = manager.getField(
                     manager.getFieldTypeName(fieldDefinitionContext.type()),
                     DOCUMENT_UTIL.getStringValue(toArgument.get().valueWithVariable().StringValue())
+            ).or(() ->
+                    manager.getInterface("Meta").stream()
+                            .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                            .filter(metaFieldDefinitionContext -> metaFieldDefinitionContext.name().getText().equals(DOCUMENT_UTIL.getStringValue(toArgument.get().valueWithVariable().StringValue())))
+                            .findFirst()
             );
             if (toFieldDefinition.isEmpty()) {
                 throw new GraphQLErrors(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
