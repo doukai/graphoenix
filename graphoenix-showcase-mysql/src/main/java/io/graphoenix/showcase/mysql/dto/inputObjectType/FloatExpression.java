@@ -3,6 +3,7 @@ package io.graphoenix.showcase.mysql.dto.inputObjectType;
 import io.graphoenix.showcase.mysql.dto.enumType.Operator;
 import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
 import java.lang.Float;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
@@ -18,6 +19,9 @@ public class FloatExpression {
   private Float val;
 
   private Collection<Float> in;
+
+  @DefaultValue("false")
+  private Boolean skipNull;
 
   public Operator getOpr() {
     return this.opr;
@@ -41,5 +45,13 @@ public class FloatExpression {
 
   public void setIn(Collection<Float> in) {
     this.in = in;
+  }
+
+  public Boolean getSkipNull() {
+    return this.skipNull;
+  }
+
+  public void setSkipNull(Boolean skipNull) {
+    this.skipNull = skipNull;
   }
 }

@@ -103,24 +103,28 @@ input IDExpression {
     opr: Operator = EQ
     val: ID
     in: [ID]
+    skipNull: Boolean = false
 }
 
 input StringExpression {
     opr: Operator = EQ
     val: String
     in: [String]
+    skipNull: Boolean = false
 }
 
 input IntExpression {
     opr: Operator = EQ
     val: Int
     in: [Int]
+    skipNull: Boolean = false
 }
 
 input FloatExpression {
     opr: Operator = EQ
     val: Float
     in: [Float]
+    skipNull: Boolean = false
 }
 
 input MapWith {

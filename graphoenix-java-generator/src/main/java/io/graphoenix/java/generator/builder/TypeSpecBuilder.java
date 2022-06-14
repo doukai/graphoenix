@@ -575,16 +575,19 @@ public class TypeSpecBuilder {
                 case "Boolean":
                     return TypeName.get(boolean.class);
                 case "ID":
+                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), "ID".concat(EXPRESSION_SUFFIX));
                 case "String":
                 case "Date":
                 case "Time":
                 case "DateTime":
                 case "Timestamp":
+                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), "String".concat(EXPRESSION_SUFFIX));
                 case "Int":
                 case "BigInteger":
+                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), "Int".concat(EXPRESSION_SUFFIX));
                 case "Float":
                 case "BigDecimal":
-                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), name.concat(EXPRESSION_SUFFIX));
+                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), "Float".concat(EXPRESSION_SUFFIX));
             }
         } else if (manager.isEnum(name)) {
             return ClassName.get(graphQLConfig.getAnnotationPackageName(), name.concat(EXPRESSION_SUFFIX));
@@ -710,6 +713,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildScalarTypeExpressionAnnotations() {
         return manager.getScalars()
+                .filter(scalarTypeDefinitionContext -> manager.isInnerScalar(scalarTypeDefinitionContext.name().getText()))
                 .filter(scalarTypeDefinitionContext -> !scalarTypeDefinitionContext.name().getText().equals("Boolean"))
                 .map(this::scalarTypeToInputExpressionAnnotation);
     }
@@ -760,6 +764,13 @@ public class TypeSpecBuilder {
                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                                 .returns(String.class)
                                 .defaultValue(CodeBlock.of("$S", ""))
+                                .build()
+                )
+                .addMethod(
+                        MethodSpec.methodBuilder("skipNull")
+                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                .returns(boolean.class)
+                                .defaultValue(CodeBlock.of("$L", false))
                                 .build()
                 );
 

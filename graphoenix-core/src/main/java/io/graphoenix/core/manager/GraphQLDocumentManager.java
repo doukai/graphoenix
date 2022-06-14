@@ -213,6 +213,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean isInnerScalar(String name) {
+        return graphQLScalarManager.isInnerScalar(name);
+    }
+
+    @Override
     public boolean isEnum(String name) {
         return graphQLEnumManager.isEnum(name);
     }

@@ -3,6 +3,7 @@ package io.graphoenix.showcase.mysql.dto.inputObjectType;
 import io.graphoenix.showcase.mysql.dto.enumType.Operator;
 import io.graphoenix.spi.annotation.SchemaBean;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
 import java.lang.String;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
@@ -18,6 +19,9 @@ public class IDExpression {
   private String val;
 
   private Collection<String> in;
+
+  @DefaultValue("false")
+  private Boolean skipNull;
 
   public Operator getOpr() {
     return this.opr;
@@ -41,5 +45,13 @@ public class IDExpression {
 
   public void setIn(Collection<String> in) {
     this.in = in;
+  }
+
+  public Boolean getSkipNull() {
+    return this.skipNull;
+  }
+
+  public void setSkipNull(Boolean skipNull) {
+    this.skipNull = skipNull;
   }
 }

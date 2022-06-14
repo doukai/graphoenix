@@ -19,4 +19,6 @@ public @interface FloatExpression {
   String $val() default "";
 
   String $in() default "";
+
+  boolean skipNull() default false;
 }

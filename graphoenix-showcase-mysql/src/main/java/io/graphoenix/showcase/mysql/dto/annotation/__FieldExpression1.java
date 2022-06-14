@@ -44,11 +44,11 @@ public @interface __FieldExpression1 {
 
   StringExpression createUserId() default @StringExpression;
 
-  TimestampExpression createTime() default @TimestampExpression;
+  StringExpression createTime() default @StringExpression;
 
   StringExpression updateUserId() default @StringExpression;
 
-  TimestampExpression updateTime() default @TimestampExpression;
+  StringExpression updateTime() default @StringExpression;
 
   StringExpression createGroupId() default @StringExpression;
 

@@ -57,7 +57,8 @@ public class IntrospectionMutationBuilder {
         subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
 
         arguments.add(
-                new Argument().setName("types")
+                new Argument()
+                        .setName("types")
                         .setValueWithVariable(
                                 new ArrayValueWithVariable(
                                         Stream.concat(
@@ -76,7 +77,8 @@ public class IntrospectionMutationBuilder {
         );
 
         arguments.add(
-                new Argument().setName("directives")
+                new Argument()
+                        .setName("directives")
                         .setValueWithVariable(
                                 new ArrayValueWithVariable(
                                         manager.getDirectives()
@@ -99,14 +101,17 @@ public class IntrospectionMutationBuilder {
     public __Schema buildIntrospectionSchema() {
         __Schema schema = new __Schema();
         schema.setTypes(
-                Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType),
-                        Stream.concat(manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
+                Stream.concat(
+                        manager.getObjects().map(this::objectTypeDefinitionContextToType),
+                        Stream.concat(
+                                manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
                                 Stream.concat(
                                         manager.getEnums().map(this::enumTypeDefinitionContextToType),
                                         manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
                                 )
                         )
-                ).collect(Collectors.toCollection(LinkedHashSet::new)));
+                ).collect(Collectors.toCollection(LinkedHashSet::new))
+        );
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
         queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> schema.setQueryType(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext)));
@@ -146,10 +151,12 @@ public class IntrospectionMutationBuilder {
             if (objectTypeDefinitionContext.description() != null) {
                 type.setDescription(objectTypeDefinitionContext.description().getText());
             }
-            type.setFields(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                    .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
-                    .collect(Collectors.toCollection(LinkedHashSet::new)));
+            type.setFields(
+                    objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
+                            .map(fieldDefinitionContext -> fieldDefinitionContextToField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
+                            .collect(Collectors.toCollection(LinkedHashSet::new))
+            );
         }
         return type;
     }
@@ -179,10 +186,12 @@ public class IntrospectionMutationBuilder {
             if (interfaceTypeDefinitionContext.description() != null) {
                 type.setDescription(interfaceTypeDefinitionContext.description().getText());
             }
-            type.setFields(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                    .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
-                    .map(fieldDefinitionContext -> fieldDefinitionContextToField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
-                    .collect(Collectors.toCollection(LinkedHashSet::new)));
+            type.setFields(
+                    interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
+                            .map(fieldDefinitionContext -> fieldDefinitionContextToField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
+                            .collect(Collectors.toCollection(LinkedHashSet::new))
+            );
         }
         return type;
     }
