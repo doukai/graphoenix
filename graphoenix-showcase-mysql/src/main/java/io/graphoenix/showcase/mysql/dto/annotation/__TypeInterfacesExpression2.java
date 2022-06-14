@@ -20,7 +20,7 @@ public @interface __TypeInterfacesExpression2 {
 
   StringExpression interfaceName() default @StringExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

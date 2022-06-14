@@ -466,7 +466,7 @@ public class DocumentBuilder {
             String argumentTypeName;
             switch (fieldTypeName) {
                 case "Boolean":
-                    argumentTypeName = "Boolean";
+                    argumentTypeName = "Boolean".concat(InputType.EXPRESSION.toString());
                     break;
                 case "ID":
                 case "String":

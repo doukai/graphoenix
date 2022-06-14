@@ -113,6 +113,13 @@ input StringExpression {
     skipNull: Boolean = false
 }
 
+input BooleanExpression {
+    opr: Operator = EQ
+    val: Boolean
+    in: [Boolean]
+    skipNull: Boolean = false
+}
+
 input IntExpression {
     opr: Operator = EQ
     val: Int

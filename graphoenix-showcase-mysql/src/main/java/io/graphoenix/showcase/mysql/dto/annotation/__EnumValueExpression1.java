@@ -24,7 +24,7 @@ public @interface __EnumValueExpression1 {
 
   StringExpression deprecationReason() default @StringExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

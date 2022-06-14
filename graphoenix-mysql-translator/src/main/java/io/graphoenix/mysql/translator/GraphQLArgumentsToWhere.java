@@ -387,9 +387,6 @@ public class GraphQLArgumentsToWhere {
                     if (manager.fieldTypeIsList(fieldDefinitionContext.get().type())) {
                         if (isOperatorObject(inputValueDefinitionContext)) {
                             return operatorArgumentToMapWithToExpression(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), inputValueDefinitionContext, argumentContext, level + 1);
-                        } else if (fieldTypeName.equals("Boolean")) {
-                            return isBooleanExpression(mapWithToColumn(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), level + 1), argumentContext.valueWithVariable(), inputValueDefinitionContext)
-                                    .map(expression -> existsExpression(mapWithTypeToFieldPlainSelect(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), expression, level + 1)));
                         } else if (isConditionalObject(inputValueDefinitionContext)) {
                             return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable(), level);
                         } else if (manager.isScalar(fieldTypeName)) {
@@ -404,8 +401,6 @@ public class GraphQLArgumentsToWhere {
                     } else {
                         if (isOperatorObject(inputValueDefinitionContext)) {
                             return operatorArgumentToExpression(argumentToColumn(typeContext, argumentContext, level), inputValueDefinitionContext, argumentContext);
-                        } else if (fieldTypeName.equals("Boolean")) {
-                            return isBooleanExpression(argumentToColumn(typeContext, argumentContext, level), argumentContext.valueWithVariable(), inputValueDefinitionContext);
                         } else if (isConditionalObject(inputValueDefinitionContext)) {
                             return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, argumentContext.valueWithVariable().objectValueWithVariable(), level);
                         } else if (manager.isScalar(fieldTypeName)) {
@@ -455,9 +450,6 @@ public class GraphQLArgumentsToWhere {
                     if (manager.fieldTypeIsList(fieldDefinitionContext.get().type())) {
                         if (isOperatorObject(inputValueDefinitionContext)) {
                             return operatorObjectFieldWithVariableToMapWithToExpression(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), inputValueDefinitionContext, objectFieldWithVariableContext, level + 1);
-                        } else if (fieldTypeName.equals("Boolean")) {
-                            return isBooleanExpression(mapWithToColumn(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), level + 1), objectFieldWithVariableContext.valueWithVariable(), inputValueDefinitionContext)
-                                    .map(expression -> existsExpression(mapWithTypeToFieldPlainSelect(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), expression, level + 1)));
                         } else if (isConditionalObject(inputValueDefinitionContext)) {
                             return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(), level);
                         } else if (manager.isScalar(fieldTypeName)) {
@@ -472,8 +464,6 @@ public class GraphQLArgumentsToWhere {
                     } else {
                         if (isOperatorObject(inputValueDefinitionContext)) {
                             return operatorObjectFieldWithVariableToExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), inputValueDefinitionContext, objectFieldWithVariableContext);
-                        } else if (fieldTypeName.equals("Boolean")) {
-                            return isBooleanExpression(objectFieldWithVariableToColumn(typeContext, objectFieldWithVariableContext, level), objectFieldWithVariableContext.valueWithVariable(), inputValueDefinitionContext);
                         } else if (isConditionalObject(inputValueDefinitionContext)) {
                             return objectValueWithVariableToMultipleExpression(typeContext, inputValueDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(), level);
                         } else if (manager.isScalar(fieldTypeName)) {
@@ -522,9 +512,6 @@ public class GraphQLArgumentsToWhere {
                     if (manager.fieldTypeIsList(fieldDefinitionContext.get().type())) {
                         if (isOperatorObject(inputValueDefinitionContext)) {
                             return operatorObjectFieldToMapWithToExpression(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), inputValueDefinitionContext, objectFieldContext, level + 1);
-                        } else if (fieldTypeName.equals("Boolean")) {
-                            return isBooleanExpression(mapWithToColumn(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), level + 1), objectFieldContext.value(), inputValueDefinitionContext)
-                                    .map(expression -> existsExpression(mapWithTypeToFieldPlainSelect(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), expression, level + 1)));
                         } else if (isConditionalObject(inputValueDefinitionContext)) {
                             return objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue(), level);
                         } else if (manager.isScalar(fieldTypeName)) {
@@ -539,8 +526,6 @@ public class GraphQLArgumentsToWhere {
                     } else {
                         if (isOperatorObject(inputValueDefinitionContext)) {
                             return operatorObjectFieldToExpression(objectFieldToColumn(typeContext, objectFieldContext, level), inputValueDefinitionContext, objectFieldContext);
-                        } else if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean")) {
-                            return isBooleanExpression(objectFieldToColumn(typeContext, objectFieldContext, level), objectFieldContext.value(), inputValueDefinitionContext);
                         } else if (isConditionalObject(inputValueDefinitionContext)) {
                             return objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, objectFieldContext.value().objectValue(), level);
                         } else if (manager.isScalar(fieldTypeName)) {
@@ -588,9 +573,6 @@ public class GraphQLArgumentsToWhere {
                     if (manager.fieldTypeIsList(fieldDefinitionContext.get().type())) {
                         if (isOperatorObject(inputValueDefinitionContext)) {
                             return operatorInputValueToMapWithToExpression(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), inputValueDefinitionContext, level + 1);
-                        } else if (fieldTypeName.equals("Boolean")) {
-                            return isBooleanExpression(mapWithToColumn(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), level + 1), inputValueDefinitionContext)
-                                    .map(expression -> existsExpression(mapWithTypeToFieldPlainSelect(objectTypeDefinitionContext.get(), fieldDefinitionContext.get(), expression, level + 1)));
                         } else if (isConditionalObject(inputValueDefinitionContext)) {
                             return objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue(), level);
                         } else if (manager.isScalar(fieldTypeName)) {
@@ -605,8 +587,6 @@ public class GraphQLArgumentsToWhere {
                     } else {
                         if (isOperatorObject(inputValueDefinitionContext)) {
                             return operatorInputValueToExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level), inputValueDefinitionContext);
-                        } else if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("Boolean")) {
-                            return isBooleanExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level), inputValueDefinitionContext);
                         } else if (isConditionalObject(inputValueDefinitionContext)) {
                             return objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, inputValueDefinitionContext.defaultValue().value().objectValue(), level);
                         } else if (manager.isScalar(fieldTypeName)) {

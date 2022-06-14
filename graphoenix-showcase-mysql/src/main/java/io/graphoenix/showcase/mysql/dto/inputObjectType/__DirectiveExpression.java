@@ -22,11 +22,11 @@ public class __DirectiveExpression {
 
   private __InputValueExpression args;
 
-  private Boolean onOperation;
+  private BooleanExpression onOperation;
 
-  private Boolean onFragment;
+  private BooleanExpression onFragment;
 
-  private Boolean onField;
+  private BooleanExpression onField;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -92,27 +92,27 @@ public class __DirectiveExpression {
     this.args = args;
   }
 
-  public Boolean getOnOperation() {
+  public BooleanExpression getOnOperation() {
     return this.onOperation;
   }
 
-  public void setOnOperation(Boolean onOperation) {
+  public void setOnOperation(BooleanExpression onOperation) {
     this.onOperation = onOperation;
   }
 
-  public Boolean getOnFragment() {
+  public BooleanExpression getOnFragment() {
     return this.onFragment;
   }
 
-  public void setOnFragment(Boolean onFragment) {
+  public void setOnFragment(BooleanExpression onFragment) {
     this.onFragment = onFragment;
   }
 
-  public Boolean getOnField() {
+  public BooleanExpression getOnField() {
     return this.onField;
   }
 
-  public void setOnField(Boolean onField) {
+  public void setOnField(BooleanExpression onField) {
     this.onField = onField;
   }
 

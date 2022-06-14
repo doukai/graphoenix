@@ -30,7 +30,7 @@ public @interface __InputValueExpression1 {
 
   StringExpression defaultValue() default @StringExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

@@ -20,7 +20,7 @@ public @interface OrganizationExpression2 {
 
   StringExpression name() default @StringExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 
@@ -42,7 +42,7 @@ public @interface OrganizationExpression2 {
 
   IntExpression orgLevel3() default @IntExpression;
 
-  boolean roleDisable() default false;
+  BooleanExpression roleDisable() default @BooleanExpression;
 
   String[] groupBy() default {};
 

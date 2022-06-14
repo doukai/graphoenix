@@ -36,7 +36,7 @@ public @interface __FieldExpression1 {
 
   StringExpression withTo() default @StringExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

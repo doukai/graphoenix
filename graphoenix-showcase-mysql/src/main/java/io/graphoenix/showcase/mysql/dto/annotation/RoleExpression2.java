@@ -20,7 +20,7 @@ public @interface RoleExpression2 {
 
   RoleTypeExpression type() default @RoleTypeExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

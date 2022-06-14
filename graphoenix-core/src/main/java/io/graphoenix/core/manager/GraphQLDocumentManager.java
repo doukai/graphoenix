@@ -22,15 +22,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 @ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
@@ -101,7 +101,10 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         if (Files.exists(Path.of(graphqlFileName))) {
             registerFile(new File(graphqlFileName));
         } else {
-            registerInputStream(this.getClass().getClassLoader().getResourceAsStream(graphqlFileName));
+            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(graphqlFileName);
+            if (inputStream != null) {
+                registerInputStream(inputStream);
+            }
         }
     }
 
@@ -115,7 +118,10 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         if (Files.exists(Path.of(graphqlPathName))) {
             registerPath(Path.of(graphqlPathName));
         } else {
-            registerPath(Path.of(Objects.requireNonNull(this.getClass().getClassLoader().getResource(graphqlPathName)).toURI()));
+            URL resource = this.getClass().getClassLoader().getResource(graphqlPathName);
+            if (resource != null) {
+                registerPath(Path.of(resource.toURI()));
+            }
         }
     }
 

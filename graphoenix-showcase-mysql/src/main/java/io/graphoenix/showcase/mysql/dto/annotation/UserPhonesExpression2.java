@@ -20,7 +20,7 @@ public @interface UserPhonesExpression2 {
 
   StringExpression phone() default @StringExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

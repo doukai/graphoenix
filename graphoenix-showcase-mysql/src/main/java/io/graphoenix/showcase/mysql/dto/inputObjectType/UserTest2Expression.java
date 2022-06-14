@@ -16,7 +16,7 @@ public class UserTest2Expression {
 
   private IntExpression userId;
 
-  private Boolean test2;
+  private BooleanExpression test2;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -58,11 +58,11 @@ public class UserTest2Expression {
     this.userId = userId;
   }
 
-  public Boolean getTest2() {
+  public BooleanExpression getTest2() {
     return this.test2;
   }
 
-  public void setTest2(Boolean test2) {
+  public void setTest2(BooleanExpression test2) {
     this.test2 = test2;
   }
 

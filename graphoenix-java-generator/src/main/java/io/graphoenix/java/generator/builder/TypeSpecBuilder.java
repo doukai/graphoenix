@@ -573,7 +573,7 @@ public class TypeSpecBuilder {
         if (manager.isScalar(name)) {
             switch (name) {
                 case "Boolean":
-                    return TypeName.get(boolean.class);
+                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), "Boolean".concat(EXPRESSION_SUFFIX));
                 case "ID":
                     return ClassName.get(graphQLConfig.getAnnotationPackageName(), "ID".concat(EXPRESSION_SUFFIX));
                 case "String":
@@ -714,7 +714,6 @@ public class TypeSpecBuilder {
     public Stream<TypeSpec> buildScalarTypeExpressionAnnotations() {
         return manager.getScalars()
                 .filter(scalarTypeDefinitionContext -> manager.isInnerScalar(scalarTypeDefinitionContext.name().getText()))
-                .filter(scalarTypeDefinitionContext -> !scalarTypeDefinitionContext.name().getText().equals("Boolean"))
                 .map(this::scalarTypeToInputExpressionAnnotation);
     }
 
@@ -886,11 +885,7 @@ public class TypeSpecBuilder {
                                                             MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
                                                                     .returns(buildScalarOrEnumExpressionAnnotationType(fieldDefinitionContext))
-                                                                    .defaultValue(
-                                                                            manager.getFieldTypeName(fieldDefinitionContext.type()).equals("Boolean") ?
-                                                                                    CodeBlock.of("$L", "false") :
-                                                                                    CodeBlock.of("@$T", buildScalarOrEnumExpressionAnnotationType(fieldDefinitionContext))
-                                                                    )
+                                                                    .defaultValue(CodeBlock.of("@$T", buildScalarOrEnumExpressionAnnotationType(fieldDefinitionContext)))
                                                                     .build()
                                                     )
                                                     .collect(Collectors.toList())

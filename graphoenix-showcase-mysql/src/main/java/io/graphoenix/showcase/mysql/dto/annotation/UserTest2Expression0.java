@@ -18,9 +18,9 @@ public @interface UserTest2Expression0 {
 
   IntExpression userId() default @IntExpression;
 
-  boolean test2() default false;
+  BooleanExpression test2() default @BooleanExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

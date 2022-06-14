@@ -20,7 +20,7 @@ public @interface __DirectiveLocationsExpression2 {
 
   __DirectiveLocationExpression directiveLocation() default @__DirectiveLocationExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

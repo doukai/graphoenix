@@ -22,13 +22,13 @@ public @interface __DirectiveExpression2 {
 
   __DirectiveLocationExpression locations() default @__DirectiveLocationExpression;
 
-  boolean onOperation() default false;
+  BooleanExpression onOperation() default @BooleanExpression;
 
-  boolean onFragment() default false;
+  BooleanExpression onFragment() default @BooleanExpression;
 
-  boolean onField() default false;
+  BooleanExpression onField() default @BooleanExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

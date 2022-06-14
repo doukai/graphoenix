@@ -20,7 +20,7 @@ public @interface UserTest1Expression1 {
 
   IntExpression test1() default @IntExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

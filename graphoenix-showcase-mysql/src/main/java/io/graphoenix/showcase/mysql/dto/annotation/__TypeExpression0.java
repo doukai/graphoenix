@@ -24,7 +24,7 @@ public @interface __TypeExpression0 {
 
   StringExpression ofTypeName() default @StringExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

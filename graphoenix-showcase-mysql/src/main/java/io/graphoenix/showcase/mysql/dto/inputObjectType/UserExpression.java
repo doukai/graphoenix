@@ -22,7 +22,7 @@ public class UserExpression {
 
   private IntExpression age;
 
-  private Boolean disable;
+  private BooleanExpression disable;
 
   private SexExpression sex;
 
@@ -36,7 +36,7 @@ public class UserExpression {
 
   private IntExpression test1;
 
-  private Boolean test2;
+  private BooleanExpression test2;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -102,11 +102,11 @@ public class UserExpression {
     this.age = age;
   }
 
-  public Boolean getDisable() {
+  public BooleanExpression getDisable() {
     return this.disable;
   }
 
-  public void setDisable(Boolean disable) {
+  public void setDisable(BooleanExpression disable) {
     this.disable = disable;
   }
 
@@ -158,11 +158,11 @@ public class UserExpression {
     this.test1 = test1;
   }
 
-  public Boolean getTest2() {
+  public BooleanExpression getTest2() {
     return this.test2;
   }
 
-  public void setTest2(Boolean test2) {
+  public void setTest2(BooleanExpression test2) {
     this.test2 = test2;
   }
 

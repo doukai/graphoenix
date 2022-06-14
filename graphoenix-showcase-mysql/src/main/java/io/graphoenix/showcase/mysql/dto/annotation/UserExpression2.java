@@ -24,7 +24,7 @@ public @interface UserExpression2 {
 
   IntExpression age() default @IntExpression;
 
-  boolean disable() default false;
+  BooleanExpression disable() default @BooleanExpression;
 
   SexExpression sex() default @SexExpression;
 
@@ -34,9 +34,9 @@ public @interface UserExpression2 {
 
   IntExpression test1() default @IntExpression;
 
-  boolean test2() default false;
+  BooleanExpression test2() default @BooleanExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 

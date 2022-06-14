@@ -22,7 +22,7 @@ public @interface __SchemaExpression2 {
 
   StringExpression subscriptionTypeName() default @StringExpression;
 
-  boolean isDeprecated() default false;
+  BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
 
