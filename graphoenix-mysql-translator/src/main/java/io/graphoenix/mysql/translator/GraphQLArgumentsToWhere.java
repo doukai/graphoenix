@@ -761,8 +761,10 @@ public class GraphQLArgumentsToWhere {
             if (valueWithVariableContext.arrayValueWithVariable() != null) {
                 InExpression inExpression = new InExpression();
                 inExpression.setLeftExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level));
-                inExpression.setRightItemsList(new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                        .map(dbValueUtil::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
+                inExpression.setRightItemsList(
+                        new ExpressionList(valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+                                .map(dbValueUtil::scalarValueWithVariableToDBValue).collect(Collectors.toList()))
+                );
                 return Optional.of(inExpression);
             }
         }
@@ -777,7 +779,10 @@ public class GraphQLArgumentsToWhere {
             if (valueContext.arrayValue() != null) {
                 InExpression inExpression = new InExpression();
                 inExpression.setLeftExpression(inputValueToColumn(typeContext, inputValueDefinitionContext, level));
-                inExpression.setRightItemsList(new ExpressionList(valueContext.arrayValue().value().stream().map(dbValueUtil::scalarValueToDBValue).collect(Collectors.toList())));
+                inExpression.setRightItemsList(
+                        new ExpressionList(valueContext.arrayValue().value().stream()
+                                .map(dbValueUtil::scalarValueToDBValue).collect(Collectors.toList()))
+                );
                 return Optional.of(inExpression);
             }
         }
@@ -1121,26 +1126,24 @@ public class GraphQLArgumentsToWhere {
                                                                        boolean skipNull) {
 
         if (manager.fieldTypeIsList(inputValueDefinitionContext.type()) && valueWithVariableContext.variable() != null) {
-            return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, inputValueDefinitionContext, valueWithVariableContext));
+            return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, inputValueDefinitionContext, valueWithVariableContext, skipNull));
         }
         if (valueWithVariableContext.arrayValueWithVariable() != null) {
-            return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, inputValueDefinitionContext, valueWithVariableContext));
+            return Optional.of(operatorValueWithVariableToInExpression(leftExpression, enumValueContext, inputValueDefinitionContext, valueWithVariableContext, skipNull));
         }
         if (valueWithVariableContext.enumValue() != null) {
-            return Optional.ofNullable(operatorEnumValueWithVariableToExpression(leftExpression, enumValueContext, valueWithVariableContext, skipNull));
+            return operatorEnumValueWithVariableToExpression(leftExpression, enumValueContext, valueWithVariableContext, skipNull);
         }
-        return Optional.ofNullable(
-                operatorScalarValueToExpression(
-                        leftExpression,
-                        enumValueContext,
-                        valueWithVariableContext.StringValue(),
-                        valueWithVariableContext.IntValue(),
-                        valueWithVariableContext.FloatValue(),
-                        valueWithVariableContext.BooleanValue(),
-                        valueWithVariableContext.NullValue(),
-                        valueWithVariableContext.variable(),
-                        skipNull
-                )
+        return operatorScalarValueToExpression(
+                leftExpression,
+                enumValueContext,
+                valueWithVariableContext.StringValue(),
+                valueWithVariableContext.IntValue(),
+                valueWithVariableContext.FloatValue(),
+                valueWithVariableContext.BooleanValue(),
+                valueWithVariableContext.NullValue(),
+                valueWithVariableContext.variable(),
+                skipNull
         );
     }
 
@@ -1150,29 +1153,28 @@ public class GraphQLArgumentsToWhere {
                                                            GraphqlParser.ValueContext valueContext,
                                                            boolean skipNull) {
         if (valueContext.arrayValue() != null) {
-            return Optional.of(operatorValueToInExpression(leftExpression, enumValueContext, valueContext));
+            return Optional.of(operatorValueToInExpression(leftExpression, enumValueContext, valueContext, skipNull));
         }
         if (valueContext.enumValue() != null) {
-            return Optional.ofNullable(operatorEnumValueToExpression(leftExpression, enumValueContext, valueContext));
+            return operatorEnumValueToExpression(leftExpression, enumValueContext, valueContext, skipNull);
         }
-        return Optional.ofNullable(
-                operatorScalarValueToExpression(
-                        leftExpression,
-                        enumValueContext,
-                        valueContext.StringValue(),
-                        valueContext.IntValue(),
-                        valueContext.FloatValue(),
-                        valueContext.BooleanValue(),
-                        valueContext.NullValue(),
-                        null,
-                        skipNull
-                )
+        return operatorScalarValueToExpression(
+                leftExpression,
+                enumValueContext,
+                valueContext.StringValue(),
+                valueContext.IntValue(),
+                valueContext.FloatValue(),
+                valueContext.BooleanValue(),
+                valueContext.NullValue(),
+                null,
+                skipNull
         );
     }
 
     private Expression operatorValueToInExpression(Expression leftExpression,
                                                    GraphqlParser.EnumValueContext enumValueContext,
-                                                   GraphqlParser.ValueContext valueContext) {
+                                                   GraphqlParser.ValueContext valueContext,
+                                                   boolean skipNull) {
 
         if ("BT".equals(enumValueContext.enumValueName().getText()) || "NBT".equals(enumValueContext.enumValueName().getText())) {
             List<List<GraphqlParser.ValueContext>> betweenGroup = Lists.partition(valueContext.arrayValue().value(), 2);
@@ -1222,11 +1224,18 @@ public class GraphQLArgumentsToWhere {
             InExpression inExpression = new InExpression();
             inExpression.setLeftExpression(leftExpression);
             inExpression.setRightItemsList(
-                    new ExpressionList(
-                            valueContext.arrayValue().value().stream()
-                                    .map(dbValueUtil::valueToDBValue)
-                                    .collect(Collectors.toList())
-                    )
+                    skipNull ?
+                            new ExpressionList(
+                                    valueContext.arrayValue().value().stream()
+                                            .filter(item -> item.NullValue() == null)
+                                            .map(dbValueUtil::valueToDBValue)
+                                            .collect(Collectors.toList())
+                            ) :
+                            new ExpressionList(
+                                    valueContext.arrayValue().value().stream()
+                                            .map(dbValueUtil::valueToDBValue)
+                                            .collect(Collectors.toList())
+                            )
             );
             if ("NIN".equals(enumValueContext.enumValueName().getText())) {
                 inExpression.setNot(true);
@@ -1238,11 +1247,12 @@ public class GraphQLArgumentsToWhere {
     private Expression operatorValueWithVariableToInExpression(Expression leftExpression,
                                                                GraphqlParser.EnumValueContext enumValueContext,
                                                                GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext,
-                                                               GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+                                                               GraphqlParser.ValueWithVariableContext valueWithVariableContext,
+                                                               boolean skipNull) {
         if ("BT".equals(enumValueContext.enumValueName().getText()) || "NBT".equals(enumValueContext.enumValueName().getText())) {
             if (valueWithVariableContext.variable() != null) {
                 if ("BT".equals(enumValueContext.enumValueName().getText())) {
-                    return new MultiAndExpression(
+                    MultiAndExpression multiAndExpression = new MultiAndExpression(
                             Arrays.asList(
                                     new GreaterThanEquals()
                                             .withLeftExpression(leftExpression)
@@ -1252,8 +1262,9 @@ public class GraphQLArgumentsToWhere {
                                             .withRightExpression(dbValueUtil.arrayFieldVariableToDBValue(1, valueWithVariableContext))
                             )
                     );
+                    return skipNull ? skipNullExpression(dbValueUtil.variableToJdbcNamedParameter(valueWithVariableContext.variable()), multiAndExpression) : multiAndExpression;
                 } else {
-                    return new MultiAndExpression(
+                    MultiAndExpression multiAndExpression = new MultiAndExpression(
                             Arrays.asList(
                                     new MinorThanEquals()
                                             .withLeftExpression(leftExpression)
@@ -1263,6 +1274,7 @@ public class GraphQLArgumentsToWhere {
                                             .withRightExpression(dbValueUtil.arrayFieldVariableToDBValue(1, valueWithVariableContext))
                             )
                     );
+                    return skipNull ? skipNullExpression(dbValueUtil.variableToJdbcNamedParameter(valueWithVariableContext.variable()), multiAndExpression) : multiAndExpression;
                 }
             } else {
                 List<List<GraphqlParser.ValueWithVariableContext>> betweenGroup = Lists.partition(valueWithVariableContext.arrayValueWithVariable().valueWithVariable(), 2);
@@ -1312,85 +1324,112 @@ public class GraphQLArgumentsToWhere {
         } else {
             InExpression inExpression = new InExpression();
             inExpression.setLeftExpression(leftExpression);
-            if (valueWithVariableContext.variable() != null) {
-                inExpression.setRightExpression(selectVariablesFromJsonArray(inputValueDefinitionContext, valueWithVariableContext));
-            } else {
-                inExpression.setRightItemsList(
-                        new ExpressionList(
-                                valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
-                                        .map(dbValueUtil::valueWithVariableToDBValue)
-                                        .collect(Collectors.toList())
-                        )
-                );
-            }
             if ("NIN".equals(enumValueContext.enumValueName().getText())) {
                 inExpression.setNot(true);
             }
-            return inExpression;
+            if (valueWithVariableContext.variable() != null) {
+                inExpression.setRightExpression(selectVariablesFromJsonArray(inputValueDefinitionContext, valueWithVariableContext));
+                return skipNull ? skipNullExpression(dbValueUtil.variableToJdbcNamedParameter(valueWithVariableContext.variable()), inExpression) : inExpression;
+            } else {
+                inExpression.setRightItemsList(
+                        skipNull ?
+                                new ExpressionList(
+                                        valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+                                                .filter(item -> item.NullValue() == null)
+                                                .map(dbValueUtil::valueWithVariableToDBValue)
+                                                .collect(Collectors.toList())
+                                ) :
+                                new ExpressionList(
+                                        valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
+                                                .map(dbValueUtil::valueWithVariableToDBValue)
+                                                .collect(Collectors.toList())
+                                )
+                );
+                return inExpression;
+            }
         }
     }
 
-    private Expression operatorEnumValueToExpression(Expression leftExpression,
-                                                     GraphqlParser.EnumValueContext operator,
-                                                     GraphqlParser.ValueContext valueContext) {
+    private Optional<Expression> operatorEnumValueToExpression(Expression leftExpression,
+                                                               GraphqlParser.EnumValueContext operator,
+                                                               GraphqlParser.ValueContext valueContext,
+                                                               boolean skipNull) {
+        if (skipNull && valueContext.NullValue() != null) {
+            return Optional.empty();
+        }
+        Expression expression;
         switch (operator.enumValueName().getText()) {
             case "EQ":
-                return enumValueToExpression(leftExpression, valueContext.enumValue());
+                expression = enumValueToExpression(leftExpression, valueContext.enumValue());
+                break;
             case "NEQ":
-                return new NotExpression(enumValueToExpression(leftExpression, valueContext.enumValue()));
+                expression = new NotExpression(enumValueToExpression(leftExpression, valueContext.enumValue()));
+                break;
             case "LK":
                 LikeExpression likeExpression = new LikeExpression();
                 likeExpression.setLeftExpression(leftExpression);
                 likeExpression.setRightExpression(dbValueUtil.enumValueToDBValue(valueContext));
-                return likeExpression;
+                expression = likeExpression;
+                break;
             case "NLK":
                 LikeExpression notLikeExpression = new LikeExpression();
                 notLikeExpression.setNot(true);
                 notLikeExpression.setLeftExpression(leftExpression);
                 notLikeExpression.setRightExpression(dbValueUtil.enumValueToDBValue(valueContext));
-                return notLikeExpression;
+                expression = notLikeExpression;
+                break;
             case "GT":
             case "NLTE":
                 GreaterThan greaterThan = new GreaterThan();
                 greaterThan.setLeftExpression(leftExpression);
                 greaterThan.setRightExpression(dbValueUtil.enumValueToDBValue(valueContext));
-                return greaterThan;
+                expression = greaterThan;
+                break;
             case "GTE":
             case "NLT":
                 GreaterThanEquals greaterThanEquals = new GreaterThanEquals();
                 greaterThanEquals.setLeftExpression(leftExpression);
                 greaterThanEquals.setRightExpression(dbValueUtil.enumValueToDBValue(valueContext));
-                return greaterThanEquals;
+                expression = greaterThanEquals;
+                break;
             case "LT":
             case "NGTE":
                 MinorThan minorThan = new MinorThan();
                 minorThan.setLeftExpression(leftExpression);
                 minorThan.setRightExpression(dbValueUtil.enumValueToDBValue(valueContext));
-                return minorThan;
+                expression = minorThan;
+                break;
             case "LTE":
             case "NGT":
                 MinorThanEquals minorThanEquals = new MinorThanEquals();
                 minorThanEquals.setLeftExpression(leftExpression);
                 minorThanEquals.setRightExpression(dbValueUtil.enumValueToDBValue(valueContext));
-                return minorThanEquals;
+                expression = minorThanEquals;
+                break;
             case "NIL":
                 IsNullExpression isNullExpression = new IsNullExpression();
                 isNullExpression.setLeftExpression(leftExpression);
-                return isNullExpression;
+                expression = isNullExpression;
+                break;
             case "NNIL":
                 IsNullExpression isNotNullExpression = new IsNullExpression();
                 isNotNullExpression.setNot(true);
                 isNotNullExpression.setLeftExpression(leftExpression);
-                return isNotNullExpression;
+                expression = isNotNullExpression;
+                break;
             default:
                 throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
         }
+        return Optional.of(expression);
     }
 
-    private Expression operatorEnumValueWithVariableToExpression(Expression leftExpression,
-                                                                 GraphqlParser.EnumValueContext operator,
-                                                                 GraphqlParser.ValueWithVariableContext valueWithVariableContext,
-                                                                 boolean skipNull) {
+    private Optional<Expression> operatorEnumValueWithVariableToExpression(Expression leftExpression,
+                                                                           GraphqlParser.EnumValueContext operator,
+                                                                           GraphqlParser.ValueWithVariableContext valueWithVariableContext,
+                                                                           boolean skipNull) {
+        if (skipNull && valueWithVariableContext.NullValue() != null) {
+            return Optional.empty();
+        }
         Expression expression;
         switch (operator.enumValueName().getText()) {
             case "EQ":
@@ -1455,21 +1494,24 @@ public class GraphQLArgumentsToWhere {
                 throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
         }
         if (skipNull) {
-            return skipNullExpression(dbValueUtil.enumValueWithVariableToDBValue(valueWithVariableContext), expression);
+            return Optional.of(skipNullExpression(dbValueUtil.enumValueWithVariableToDBValue(valueWithVariableContext), expression));
         } else {
-            return expression;
+            return Optional.of(expression);
         }
     }
 
-    private Expression operatorScalarValueToExpression(Expression leftExpression,
-                                                       GraphqlParser.EnumValueContext operator,
-                                                       TerminalNode stringValue,
-                                                       TerminalNode intValue,
-                                                       TerminalNode floatValue,
-                                                       TerminalNode booleanValue,
-                                                       TerminalNode nullValue,
-                                                       GraphqlParser.VariableContext variableContext,
-                                                       boolean skipNull) {
+    private Optional<Expression> operatorScalarValueToExpression(Expression leftExpression,
+                                                                 GraphqlParser.EnumValueContext operator,
+                                                                 TerminalNode stringValue,
+                                                                 TerminalNode intValue,
+                                                                 TerminalNode floatValue,
+                                                                 TerminalNode booleanValue,
+                                                                 TerminalNode nullValue,
+                                                                 GraphqlParser.VariableContext variableContext,
+                                                                 boolean skipNull) {
+        if (skipNull && nullValue != null) {
+            return Optional.empty();
+        }
         Expression expression;
         switch (operator.enumValueName().getText()) {
             case "EQ":
@@ -1534,9 +1576,9 @@ public class GraphQLArgumentsToWhere {
                 throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(operator.enumValueName().getText()));
         }
         if (skipNull) {
-            return skipNullExpression(dbValueUtil.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue, variableContext), expression);
+            return Optional.of(skipNullExpression(dbValueUtil.scalarValueToDBValue(stringValue, intValue, floatValue, booleanValue, nullValue, variableContext), expression));
         } else {
-            return expression;
+            return Optional.of(expression);
         }
     }
 

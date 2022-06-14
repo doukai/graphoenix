@@ -103,6 +103,9 @@ public class DBValueUtil {
         if (valueWithVariableContext.StringValue() != null) {
             return new StringValue(DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
         }
+        if (valueWithVariableContext.IntValue() != null) {
+            return new LongValue(valueWithVariableContext.IntValue().getText());
+        }
         if (valueWithVariableContext.enumValue() != null) {
             return new StringValue(valueWithVariableContext.enumValue().enumValueName().getText());
         }
