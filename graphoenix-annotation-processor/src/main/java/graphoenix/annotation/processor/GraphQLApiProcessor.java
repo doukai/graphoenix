@@ -107,7 +107,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
-        graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
+        graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
 
         try {
             manager.clearAll();
@@ -125,11 +125,9 @@ public class GraphQLApiProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
         if (annotations.isEmpty()) {
             return false;
         }
-
         roundEnv.getElementsAnnotatedWith(Enum.class).stream()
                 .filter(element -> element.getAnnotation(SchemaBean.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.ENUM))
@@ -179,8 +177,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
         try {
-            FileObject fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
-            Writer writer = fileObject.openWriter();
+            FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
+            Writer writer = mainGraphQL.openWriter();
             writer.write(documentBuilder.getDocument().toString());
             writer.close();
 
@@ -189,8 +187,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .collect(Collectors.toList());
 
             for (GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext : schemaObjectList) {
-                fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText()).concat(".json"));
-                writer = fileObject.openWriter();
+                FileObject schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText()).concat(".json"));
+                writer = schema.openWriter();
                 writer.write(jsonSchemaTranslator.objectToJsonSchemaString(objectTypeDefinitionContext));
                 writer.close();
             }
@@ -200,25 +198,25 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                     .setInvokeMethods(
                             manager.getObjects()
                                     .collect(Collectors.toMap(
-                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                            objectTypeDefinitionContext ->
-                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                                            .collect(Collectors.toMap(
-                                                                    element -> (TypeElement) element,
-                                                                    element -> element.getEnclosedElements().stream()
-                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
-                                                                            .map(subElement -> (ExecutableElement) subElement)
-                                                                            .filter(executableElement ->
-                                                                                    executableElement.getAnnotation(Query.class) == null &&
-                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
-                                                                                            executableElement.getParameters().stream().anyMatch(
-                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
-                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                                    objectTypeDefinitionContext ->
+                                                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                                    .collect(Collectors.toMap(
+                                                                                    element -> (TypeElement) element,
+                                                                                    element -> element.getEnclosedElements().stream()
+                                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                                            .filter(executableElement ->
+                                                                                                    executableElement.getAnnotation(Query.class) == null &&
+                                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
+                                                                                                            executableElement.getParameters().stream().anyMatch(
+                                                                                                                    variableElement -> variableElement.getAnnotation(Source.class) != null &&
+                                                                                                                            variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                                                                            )
                                                                                             )
+                                                                                            .collect(Collectors.toList())
                                                                             )
-                                                                            .collect(Collectors.toList())
                                                                     )
-                                                            )
                                             )
                                     )
                     )
@@ -246,7 +244,6 @@ public class GraphQLApiProcessor extends AbstractProcessor {
             selectionFilterBuilder
                     .setConfiguration(graphQLConfig)
                     .writeToFiler(filer);
-
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

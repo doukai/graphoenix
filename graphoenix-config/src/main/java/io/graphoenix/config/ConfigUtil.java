@@ -36,7 +36,7 @@ public enum ConfigUtil {
 
     public ConfigUtil scan(Filer filer) {
         this.config = Stream.of(configNames)
-                .map(configName -> CheckedFunction3.of(filer::getResource).unchecked().apply(StandardLocation.SOURCE_PATH, "", configName))
+                .map(configName -> CheckedFunction3.lift(filer::getResource).apply(StandardLocation.SOURCE_PATH, "", configName).getOrElse(() -> null))
                 .filter(Objects::nonNull)
                 .map(fileObject -> CheckedFunction0.of(fileObject.toUri()::toURL).unchecked().get())
                 .map(ConfigFactory::parseURL)
@@ -60,7 +60,7 @@ public enum ConfigUtil {
     }
 
     public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-        if (config.hasPath(propertyName)) {
+        if (config != null && config.hasPath(propertyName)) {
             return Optional.of(ConfigBeanFactory.create(config.getConfig(propertyName), propertyType));
         }
         return Optional.empty();

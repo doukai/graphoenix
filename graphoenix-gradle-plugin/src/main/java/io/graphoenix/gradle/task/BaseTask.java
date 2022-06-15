@@ -54,9 +54,6 @@ public class BaseTask extends DefaultTask {
                 for (File classesDir : sourceSet.getOutput().getClassesDirs()) {
                     urls.add(classesDir.toURI().toURL());
                 }
-                for (File resourcesDir : sourceSet.getResources().getSrcDirs()) {
-                    urls.add(resourcesDir.toURI().toURL());
-                }
             }
         } catch (MalformedURLException e) {
             Logger.error(e);

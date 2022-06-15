@@ -53,7 +53,7 @@ type __Field {
     name: String
     typeName: String
     ofTypeName: String
-    ofType: __Type! @map(from: "ofTypeName" to: "name" anchor: true)
+    ofType: __Type @map(from: "ofTypeName" to: "name" anchor: true)
     description: String
     args: [__InputValue!]! @map(from: "id" to: "fieldId")
     type: __Type! @map(from: "typeName" to: "name" anchor: true)
@@ -70,7 +70,7 @@ type __InputValue {
     name: String
     typeName: String
     ofTypeName: String
-    ofType: __Type! @map(from: "ofTypeName" to: "name" anchor: true)
+    ofType: __Type @map(from: "ofTypeName" to: "name" anchor: true)
     fieldId: Int
     directiveName: String
     description: String
@@ -82,7 +82,7 @@ type __EnumValue {
     id: ID @dataType(type: "int") @column(autoIncrement: true)
     name: String
     ofTypeName: String
-    ofType: __Type! @map(from: "ofTypeName" to: "name" anchor: true)
+    ofType: __Type @map(from: "ofTypeName" to: "name" anchor: true)
     description: String
     deprecationReason: String
 }

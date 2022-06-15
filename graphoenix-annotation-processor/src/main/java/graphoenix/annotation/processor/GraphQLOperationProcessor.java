@@ -76,7 +76,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
-        GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getValue(GraphQLConfig.class);
+        GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
 
         try {
             manager.clearAll();
@@ -94,11 +94,9 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
         if (annotations.isEmpty()) {
             return false;
         }
-
         for (TypeElement annotation : annotations) {
             Set<? extends Element> bundleClasses = roundEnv.getElementsAnnotatedWith(annotation);
 
@@ -122,17 +120,18 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                         Logger.info("start build operation resource for interface {}", typeElement.getQualifiedName().toString());
                         Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(typeElement, typeUtils);
                         operationResourcesContent.entrySet().stream()
-                                .collect(Collectors.toMap(
-                                        Map.Entry::getKey,
-                                        entry -> {
-                                            switch (operationRouter.getType(entry.getValue())) {
-                                                case QUERY:
-                                                    return generatorHandler.query(entry.getValue());
-                                                case MUTATION:
-                                                    return generatorHandler.mutation(entry.getValue());
-                                            }
-                                            throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
-                                        }
+                                .collect(
+                                        Collectors.toMap(
+                                                Map.Entry::getKey,
+                                                entry -> {
+                                                    switch (operationRouter.getType(entry.getValue())) {
+                                                        case QUERY:
+                                                            return generatorHandler.query(entry.getValue());
+                                                        case MUTATION:
+                                                            return generatorHandler.mutation(entry.getValue());
+                                                    }
+                                                    throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                                                }
                                         )
                                 )
                                 .forEach((key, value) ->
