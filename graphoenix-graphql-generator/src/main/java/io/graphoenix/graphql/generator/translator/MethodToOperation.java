@@ -41,14 +41,17 @@ public class MethodToOperation {
 
         String operationName;
         String typeName;
+        String typeInputName;
         switch (operationType) {
             case QUERY:
                 operationName = "query";
                 typeName = getQueryTypeName(fieldName);
+                typeInputName = typeName.concat("Expression");
                 break;
             case MUTATION:
                 operationName = "mutation";
                 typeName = getMutationTypeName(fieldName);
+                typeInputName = typeName.concat("Input");
                 break;
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
@@ -59,7 +62,7 @@ public class MethodToOperation {
                 .setOperationType(operationName);
         Field field = new Field().setName(fieldName);
 
-        Optional<? extends AnnotationMirror> expression = getInputAnnotation(executableElement);
+        Optional<? extends AnnotationMirror> expression = getInputAnnotation(executableElement, typeInputName);
         expression.ifPresent(annotationMirror -> field.addArguments(inputAnnotationToArgument(executableElement, annotationMirror)));
 
         operation.addVariableDefinitions(
@@ -81,9 +84,9 @@ public class MethodToOperation {
         return operationString;
     }
 
-    private Optional<? extends AnnotationMirror> getInputAnnotation(ExecutableElement executableElement) {
+    private Optional<? extends AnnotationMirror> getInputAnnotation(ExecutableElement executableElement, String typeInputName) {
         return executableElement.getAnnotationMirrors().stream()
-                .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getAnnotation(Arguments.class) != null)
+                .filter(annotationMirror -> annotationMirror.getAnnotationType().asElement().getSimpleName().toString().startsWith(typeInputName))
                 .findFirst();
     }
 

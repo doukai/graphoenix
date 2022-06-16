@@ -13,7 +13,6 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.java.generator.implementer.TypeManager;
-import io.graphoenix.spi.annotation.Arguments;
 import io.graphoenix.spi.annotation.SchemaBean;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.annotation.Generated;
@@ -866,7 +865,6 @@ public class TypeSpecBuilder {
                                                     .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
                                                     .build()
                                     )
-                                    .addAnnotation(AnnotationSpec.builder(Arguments.class).build())
                                     .addMethod(
                                             MethodSpec.methodBuilder("cond")
                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -1046,7 +1044,6 @@ public class TypeSpecBuilder {
                                                     .addMember("value", "$T.$L", ElementType.class, ElementType.METHOD)
                                                     .build()
                                     )
-                                    .addAnnotation(AnnotationSpec.builder(Arguments.class).build())
                                     .addMethods(
                                             manager.getFields(objectTypeDefinitionContext.name().getText())
                                                     .filter(fieldDefinitionContext ->
