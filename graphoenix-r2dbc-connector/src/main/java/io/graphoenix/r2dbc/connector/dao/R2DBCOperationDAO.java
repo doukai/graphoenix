@@ -15,13 +15,27 @@ import java.util.Map;
 
 public class R2DBCOperationDAO extends BaseOperationDAO {
 
-    private final GsonBuilder gsonBuilder = new GsonBuilder();
+    private final GsonBuilder gsonBuilder;
 
-    private final QueryExecutor queryExecutor = BeanContext.get(QueryExecutor.class);
+    private final QueryExecutor queryExecutor;
 
-    private final MutationExecutor mutationExecutor = BeanContext.get(MutationExecutor.class);
+    private final MutationExecutor mutationExecutor;
 
-    private final R2dbcParameterProcessor r2dbcParameterProcessor = BeanContext.get(R2dbcParameterProcessor.class);
+    private final R2dbcParameterProcessor r2dbcParameterProcessor;
+
+    public R2DBCOperationDAO() {
+        this.gsonBuilder = new GsonBuilder();
+        this.queryExecutor = BeanContext.get(QueryExecutor.class);
+        this.mutationExecutor = BeanContext.get(MutationExecutor.class);
+        this.r2dbcParameterProcessor = BeanContext.get(R2dbcParameterProcessor.class);
+    }
+
+    public R2DBCOperationDAO(QueryExecutor queryExecutor, MutationExecutor mutationExecutor) {
+        this.gsonBuilder = new GsonBuilder();
+        this.queryExecutor = queryExecutor;
+        this.mutationExecutor = mutationExecutor;
+        this.r2dbcParameterProcessor = BeanContext.get(R2dbcParameterProcessor.class);
+    }
 
     @Override
     public <T> T findOne(String sql, Map<String, Object> parameters, Class<T> beanClass) {

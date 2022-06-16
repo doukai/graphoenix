@@ -1,17 +1,17 @@
 package io.graphoenix.spi.dao;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
 import io.vavr.CheckedFunction0;
 
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public abstract class BaseOperationDAO implements OperationDAO {
 
     protected static <T> String fileToString(Class<T> beanClass, String fileName) {
-        URL fileURL = beanClass.getResource(fileName);
-        assert fileURL != null;
-        return CheckedFunction0.of(() -> Files.readString(Path.of(fileURL.toURI()), StandardCharsets.UTF_8)).unchecked().get();
+        InputStream resourceAsStream = beanClass.getResourceAsStream(fileName);
+        assert resourceAsStream != null;
+        return CheckedFunction0.of(() -> CharStreams.toString(new InputStreamReader(resourceAsStream, Charsets.UTF_8))).unchecked().get();
     }
 }
