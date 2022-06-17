@@ -30,13 +30,6 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
         this.r2dbcParameterProcessor = BeanContext.get(R2dbcParameterProcessor.class);
     }
 
-    public R2DBCOperationDAO(QueryExecutor queryExecutor, MutationExecutor mutationExecutor) {
-        this.gsonBuilder = new GsonBuilder();
-        this.queryExecutor = queryExecutor;
-        this.mutationExecutor = mutationExecutor;
-        this.r2dbcParameterProcessor = BeanContext.get(R2dbcParameterProcessor.class);
-    }
-
     @Override
     public <T> T findOne(String sql, Map<String, Object> parameters, Class<T> beanClass) {
         return gsonBuilder.create().fromJson(queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters)).block(), beanClass);

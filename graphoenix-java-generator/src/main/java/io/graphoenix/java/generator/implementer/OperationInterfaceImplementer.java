@@ -13,6 +13,7 @@ import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
+import io.vavr.collection.HashMap;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
@@ -28,7 +29,6 @@ import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.ElementProcessErrorType.UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE;
@@ -102,7 +102,7 @@ public class OperationInterfaceImplementer {
                 executableElement.getParameters().stream()
                         .map(parameter ->
                                 CodeBlock.of(
-                                        "$S, $L",
+                                        "$S, (Object)$L",
                                         parameter.getSimpleName().toString(),
                                         parameter.getSimpleName().toString()
                                 )
@@ -122,29 +122,50 @@ public class OperationInterfaceImplementer {
 
         if (isReturnCollection(executableElement)) {
             builder.addStatement(
-                            "$T type = new $T<$T>() {}.getType()",
-                            ClassName.get(Type.class),
-                            ClassName.get(TypeToken.class),
-                            typeName
-                    )
-                    .addStatement(
-                            "return $L($L, $T.of($L), type)",
-                            getMethodName(executableElement),
-                            executableElement.getSimpleName().toString()
-                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                            ClassName.get(Map.class),
-                            mapOf
-                    );
-        } else {
-            builder.addStatement(
-                    "return $L($L, $T.of($L), $T.class)",
-                    getMethodName(executableElement),
-                    executableElement.getSimpleName().toString()
-                            .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                    ClassName.get(Map.class),
-                    mapOf,
-                    getGenericType(typeName)
+                    "$T type = new $T<$T>() {}.getType()",
+                    ClassName.get(Type.class),
+                    ClassName.get(TypeToken.class),
+                    typeName
             );
+            if (executableElement.getParameters().size() == 0) {
+                builder.addStatement(
+                        "return $L($L, new $T<>(), type)",
+                        getMethodName(executableElement),
+                        executableElement.getSimpleName().toString()
+                                .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
+                        ClassName.get(java.util.HashMap.class)
+                );
+            } else {
+                builder.addStatement(
+                        "return $L($L, $T.of($L).toJavaMap(), type)",
+                        getMethodName(executableElement),
+                        executableElement.getSimpleName().toString()
+                                .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
+                        ClassName.get(HashMap.class),
+                        mapOf
+                );
+            }
+        } else {
+            if (executableElement.getParameters().size() == 0) {
+                builder.addStatement(
+                        "return $L($L, new $T<>(), $T.class)",
+                        getMethodName(executableElement),
+                        executableElement.getSimpleName().toString()
+                                .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
+                        ClassName.get(java.util.HashMap.class),
+                        getGenericType(typeName)
+                );
+            } else {
+                builder.addStatement(
+                        "return $L($L, $T.of($L).toJavaMap(), $T.class)",
+                        getMethodName(executableElement),
+                        executableElement.getSimpleName().toString()
+                                .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
+                        ClassName.get(HashMap.class),
+                        mapOf,
+                        getGenericType(typeName)
+                );
+            }
         }
         return builder.build();
     }
