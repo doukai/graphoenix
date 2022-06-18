@@ -4,6 +4,7 @@ import io.graphoenix.r2dbc.connector.config.R2DBCConfig;
 import io.r2dbc.spi.Connection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
 @ApplicationScoped
@@ -21,6 +22,11 @@ public class ConnectionCreator {
     }
 
     public Mono<Connection> createConnection() {
+        Logger.info(r2DBCConfig.getHost());
+        Logger.info(r2DBCConfig.getPort());
+        Logger.info(r2DBCConfig.getDatabase());
+        Logger.info(r2DBCConfig.getUser());
+        Logger.info(r2DBCConfig.getPassword());
         if (r2DBCConfig.getUsePool()) {
             return connectionPoolCreator.getConnectionPool().create();
         } else {
