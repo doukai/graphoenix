@@ -23,6 +23,7 @@ dependencies {
     compile 'io.jsonwebtoken:jjwt-api:0.11.5'
     compile 'org.eclipse.microprofile.graphql:microprofile-graphql-api:1.1.0'
     compile 'org.eclipse.microprofile.config:microprofile-config-api:3.0.1'
+    compile 'org.eclipse.microprofile.jwt:microprofile-jwt-auth-api:2.0'
     compile 'jakarta.annotation:jakarta.annotation-api:2.0.0'
     compile 'jakarta.inject:jakarta.inject-api:2.0.1'
     compile 'jakarta.enterprise:jakarta.enterprise.cdi-api:3.0.1'
