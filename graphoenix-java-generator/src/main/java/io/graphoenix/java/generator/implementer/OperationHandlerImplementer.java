@@ -36,12 +36,14 @@ import jakarta.inject.Provider;
 import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Query;
 import org.tinylog.Logger;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Types;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -64,6 +66,7 @@ public class OperationHandlerImplementer {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
+    private Types typeUtils;
     private List<Tuple2<TypeElement, ExecutableElement>> invokeMethods;
 
     @Inject
@@ -75,6 +78,11 @@ public class OperationHandlerImplementer {
     public OperationHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
+        return this;
+    }
+
+    public OperationHandlerImplementer setTypes(Types typeUtils) {
+        this.typeUtils = typeUtils;
         return this;
     }
 
@@ -252,11 +260,11 @@ public class OperationHandlerImplementer {
             builder.addStatement("validator.get().validateOperation(operationDefinitionContext)");
         }
         builder.addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> $T.parseString(jsonString))",
-                        ParameterizedTypeName.get(Mono.class, JsonElement.class),
-                        operationName,
-                        ClassName.get(JsonParser.class)
-                )
-                .addStatement("return result.map(jsonElement -> invoke(connectionHandler.get().$L(jsonElement, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName);
+                ParameterizedTypeName.get(Mono.class, JsonElement.class),
+                operationName,
+                ClassName.get(JsonParser.class)
+        )
+                .addStatement("return result.flatMap(jsonElement -> invoke(connectionHandler.get().$L(jsonElement, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName);
         return builder.build();
     }
 
@@ -265,8 +273,7 @@ public class OperationHandlerImplementer {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ClassName.get(JsonElement.class), "jsonElement")
-                .addParameter(ClassName.get(GraphqlParser.SelectionContext.class), "selectionContext")
-                .returns(ClassName.get(JsonElement.class));
+                .addParameter(ClassName.get(GraphqlParser.SelectionContext.class), "selectionContext");
 
         Optional<Tuple2<String, String>> invokeDirective = typeManager.getInvokeDirective(fieldDefinitionContext);
         boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
@@ -274,6 +281,7 @@ public class OperationHandlerImplementer {
         String fieldTypeParameterName = typeManager.typeToLowerCamelName(manager.getFieldTypeName(fieldDefinitionContext.type()));
 
         if (invokeDirective.isPresent()) {
+            builder.returns(ParameterizedTypeName.get(ClassName.get(Flux.class), ClassName.get(JsonElement.class)));
             Tuple2<TypeElement, ExecutableElement> method = invokeMethods.stream()
                     .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
                     .filter(tuple2 -> typeManager.getInvokeFieldName(tuple2._2().getSimpleName().toString()).equals(fieldDefinitionContext.name().getText()))
@@ -281,7 +289,7 @@ public class OperationHandlerImplementer {
                     .orElseThrow(() -> new ElementProcessException(INVOKE_METHOD_NOT_EXIST.bind(type.name(), fieldDefinitionContext.name().getText())));
 
             builder.addStatement("$T result = $L.get().$L($L)",
-                    typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                    ClassName.get(method._2().getReturnType()),
                     typeManager.typeToLowerCamelName(method._1().getSimpleName().toString()),
                     method._2().getSimpleName().toString(),
                     CodeBlock.join(method._2().getParameters().stream()
@@ -295,36 +303,48 @@ public class OperationHandlerImplementer {
             );
 
             if (manager.isObject(fieldTypeName)) {
+                String filterMethodName;
                 if (fieldTypeIsList) {
-                    builder.addStatement("return selectionFilter.get().$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName.concat("List"));
+                    filterMethodName = fieldTypeParameterName.concat("List");
                 } else {
-                    builder.addStatement("return selectionFilter.get().$L(result, selectionContext.field().selectionSet())", fieldTypeParameterName);
+                    filterMethodName = fieldTypeParameterName;
+                }
+                if (typeUtils.asElement(method._2().getReturnType()).getSimpleName().contentEquals(Flux.class.getSimpleName())) {
+                    builder.addStatement("return result.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
+                } else if (typeUtils.asElement(method._2().getReturnType()).getSimpleName().contentEquals(Mono.class.getSimpleName())) {
+                    builder.addStatement("return $T.from(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Flux.class), filterMethodName);
+                } else {
+                    builder.addStatement("return $T.just(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Flux.class), filterMethodName);
                 }
             } else {
+                String filterMethodName;
                 if (fieldTypeIsList) {
-                    builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class))
-                            .beginControlFlow("if(result == null)")
-                            .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
-                            .endControlFlow()
-                            .addStatement("result.stream().forEach(item -> jsonArray.add(new $T(item)))", ClassName.get(JsonPrimitive.class))
-                            .addStatement("return jsonArray");
+                    filterMethodName = "toJsonPrimitiveList";
                 } else {
-                    builder.addStatement("return new $T(result)", ClassName.get(JsonPrimitive.class));
+                    filterMethodName = "toJsonPrimitive";
+                }
+                if (typeUtils.asElement(method._2().getReturnType()).getSimpleName().contentEquals(Flux.class.getSimpleName())) {
+                    builder.addStatement("return result.map(item-> $L(item))", filterMethodName);
+                } else if (typeUtils.asElement(method._2().getReturnType()).getSimpleName().contentEquals(Mono.class.getSimpleName())) {
+                    builder.addStatement("return $T.from(result).map(item-> $L(item))", ClassName.get(Flux.class), filterMethodName);
+                } else {
+                    builder.addStatement("return $T.just(result).map(item-> $L(item))", ClassName.get(Flux.class), filterMethodName);
                 }
             }
         } else {
+            builder.returns(ClassName.get(JsonElement.class));
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                                    "$T type = new $T<$T>() {}.getType()",
-                                    ClassName.get(Type.class),
-                                    ClassName.get(TypeToken.class),
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            ).addStatement(
-                                    "$T result = $L.create().fromJson(jsonElement, type)",
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                                    "gsonBuilder"
-                            ).beginControlFlow("if(result == null)")
+                            "$T type = new $T<$T>() {}.getType()",
+                            ClassName.get(Type.class),
+                            ClassName.get(TypeToken.class),
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                    ).addStatement(
+                            "$T result = $L.create().fromJson(jsonElement, type)",
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                            "gsonBuilder"
+                    ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
                             .endControlFlow()
                             .addStatement(
@@ -389,8 +409,17 @@ public class OperationHandlerImplementer {
         switch (type) {
             case QUERY:
                 manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                        .filter(fieldDefinitionContext -> typeManager.getInvokeDirective(fieldDefinitionContext).isEmpty())
                         .forEach(fieldDefinitionContext ->
                                 builder.addStatement("put($S, this::$L)",
+                                        fieldDefinitionContext.name().getText(),
+                                        fieldDefinitionContext.name().getText()
+                                )
+                        );
+                manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                        .filter(fieldDefinitionContext -> typeManager.getInvokeDirective(fieldDefinitionContext).isPresent())
+                        .forEach(fieldDefinitionContext ->
+                                builder.addStatement("putFlux($S, this::$L)",
                                         fieldDefinitionContext.name().getText(),
                                         fieldDefinitionContext.name().getText()
                                 )
@@ -398,8 +427,17 @@ public class OperationHandlerImplementer {
                 break;
             case MUTATION:
                 manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
+                        .filter(fieldDefinitionContext -> typeManager.getInvokeDirective(fieldDefinitionContext).isEmpty())
                         .forEach(fieldDefinitionContext ->
                                 builder.addStatement("put($S, this::$L)",
+                                        fieldDefinitionContext.name().getText(),
+                                        fieldDefinitionContext.name().getText()
+                                )
+                        );
+                manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
+                        .filter(fieldDefinitionContext -> typeManager.getInvokeDirective(fieldDefinitionContext).isPresent())
+                        .forEach(fieldDefinitionContext ->
+                                builder.addStatement("putFlux($S, this::$L)",
                                         fieldDefinitionContext.name().getText(),
                                         fieldDefinitionContext.name().getText()
                                 )

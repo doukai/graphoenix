@@ -1,6 +1,7 @@
 package io.graphoenix.graphql.generator.translator;
 
 import com.google.common.base.CaseFormat;
+import com.squareup.javapoet.ClassName;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrors;
@@ -15,6 +16,8 @@ import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Source;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -118,7 +121,14 @@ public class ElementManager {
     }
 
     public String executableElementToTypeName(ExecutableElement executableElement, Types types) {
-        TypeElement typeElement = (TypeElement) types.asElement(executableElement.getReturnType());
+        TypeElement typeElement;
+        if (types.asElement(executableElement.getReturnType()).getSimpleName().contentEquals(Flux.class.getSimpleName())) {
+            typeElement = (TypeElement) types.asElement(((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0));
+        } else if (types.asElement(executableElement.getReturnType()).getSimpleName().contentEquals(Mono.class.getSimpleName())) {
+            typeElement = (TypeElement) types.asElement(((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0));
+        } else {
+            typeElement = (TypeElement) types.asElement(executableElement.getReturnType());
+        }
         return elementToTypeName(executableElement, typeElement, types);
     }
 

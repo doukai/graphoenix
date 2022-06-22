@@ -2,18 +2,15 @@ package io.graphoenix.r2dbc.connector.dao;
 
 import com.google.gson.reflect.TypeToken;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
 import io.graphoenix.spi.dao.BaseOperationDAO;
-import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class R2DBCOperationDAO extends BaseOperationDAO {
 
@@ -31,23 +28,13 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> T findOne(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        try {
-            return findOneAsync(sql, parameters, beanClass).toFuture().get();
-        } catch (InterruptedException | ExecutionException e) {
-            Logger.error(e);
-            throw new GraphQLErrors(e);
-        }
+        return findOneAsync(sql, parameters, beanClass).block();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T findAll(String sql, Map<String, Object> parameters, Type type) {
-        try {
-            return (T) findAllAsync(sql, parameters, type).toFuture().get();
-        } catch (InterruptedException | ExecutionException e) {
-            Logger.error(e);
-            throw new GraphQLErrors(e);
-        }
+        return (T) findAllAsync(sql, parameters, type).block();
     }
 
     @Override
@@ -59,12 +46,7 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> T save(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        try {
-            return saveAsync(sql, parameters, beanClass).toFuture().get();
-        } catch (InterruptedException | ExecutionException e) {
-            Logger.error(e);
-            throw new GraphQLErrors(e);
-        }
+        return saveAsync(sql, parameters, beanClass).block();
     }
 
     @Override
