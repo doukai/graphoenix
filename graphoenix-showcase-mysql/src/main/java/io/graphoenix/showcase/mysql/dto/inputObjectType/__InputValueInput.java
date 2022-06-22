@@ -22,7 +22,6 @@ public class __InputValueInput {
 
   private String ofTypeName;
 
-  @NonNull
   private __TypeInput ofType;
 
   private Integer fieldId;

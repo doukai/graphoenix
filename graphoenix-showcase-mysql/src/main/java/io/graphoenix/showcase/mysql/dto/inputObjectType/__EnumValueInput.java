@@ -20,7 +20,6 @@ public class __EnumValueInput {
 
   private String ofTypeName;
 
-  @NonNull
   private __TypeInput ofType;
 
   private String description;

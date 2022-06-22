@@ -66,8 +66,11 @@ public class IntrospectionMutationBuilder {
                                                 Stream.concat(
                                                         manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
                                                         Stream.concat(
-                                                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
-                                                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
+                                                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType),
+                                                                Stream.concat(
+                                                                        manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                                                        manager.getScalars().map(this::scalarTypeDefinitionContextToType)
+                                                                )
                                                         )
                                                 )
                                         ).collect(Collectors.toList()),
@@ -106,8 +109,11 @@ public class IntrospectionMutationBuilder {
                         Stream.concat(
                                 manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
                                 Stream.concat(
-                                        manager.getEnums().map(this::enumTypeDefinitionContextToType),
-                                        manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType)
+                                        manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType),
+                                        Stream.concat(
+                                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                                manager.getScalars().map(this::scalarTypeDefinitionContextToType)
+                                        )
                                 )
                         )
                 ).collect(Collectors.toCollection(LinkedHashSet::new))
@@ -343,6 +349,10 @@ public class IntrospectionMutationBuilder {
                     .collect(Collectors.toCollection(LinkedHashSet::new)));
         }
         return type;
+    }
+
+    private __Type scalarTypeDefinitionContextToType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
+        return scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, 0);
     }
 
     private __Type scalarTypeDefinitionContextToType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext, int level) {

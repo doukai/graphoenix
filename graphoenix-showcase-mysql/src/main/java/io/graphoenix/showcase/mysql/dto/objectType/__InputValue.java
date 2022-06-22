@@ -25,7 +25,6 @@ public class __InputValue implements Meta {
 
   private String ofTypeName;
 
-  @NonNull
   private __Type ofType;
 
   private Integer fieldId;

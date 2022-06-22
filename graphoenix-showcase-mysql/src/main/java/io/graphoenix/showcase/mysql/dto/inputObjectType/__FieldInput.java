@@ -23,7 +23,6 @@ public class __FieldInput {
 
   private String ofTypeName;
 
-  @NonNull
   private __TypeInput ofType;
 
   private String description;

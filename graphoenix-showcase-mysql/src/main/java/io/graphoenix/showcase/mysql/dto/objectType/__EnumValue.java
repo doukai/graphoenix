@@ -9,7 +9,6 @@ import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.Id;
-import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
@@ -23,7 +22,6 @@ public class __EnumValue implements Meta {
 
   private String ofTypeName;
 
-  @NonNull
   private __Type ofType;
 
   private String description;

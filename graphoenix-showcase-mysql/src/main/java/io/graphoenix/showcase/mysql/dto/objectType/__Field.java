@@ -26,7 +26,6 @@ public class __Field implements Meta {
 
   private String ofTypeName;
 
-  @NonNull
   private __Type ofType;
 
   private String description;

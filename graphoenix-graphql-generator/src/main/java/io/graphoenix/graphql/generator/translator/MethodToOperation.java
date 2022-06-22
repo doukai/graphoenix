@@ -5,7 +5,6 @@ import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.Field;
 import io.graphoenix.graphql.generator.operation.Operation;
 import io.graphoenix.graphql.generator.operation.VariableDefinition;
-import io.graphoenix.spi.annotation.Arguments;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
 import jakarta.enterprise.context.ApplicationScoped;
