@@ -61,12 +61,12 @@ public abstract class BaseOperationHandler {
                 .flatMap(selectionContext ->
                         getOperationHandler(selectionContext.field().name().getText())
                                 .apply(jsonElement.getAsJsonObject().get(selectionContext.field().name().getText()), selectionContext)
-                                .map(jsonElement1 -> new AbstractMap.SimpleEntry<>(selectionContext.field().name().getText(), jsonElement1))
+                                .map(subJsonElement -> new AbstractMap.SimpleEntry<>(selectionContext.field().name().getText(), subJsonElement))
                 )
                 .collectList()
                 .map(entryList -> {
                             JsonObject jsonObject = new JsonObject();
-                            entryList.forEach(item -> jsonObject.add(item.getKey(), item.getValue()));
+                            entryList.forEach(entry -> jsonObject.add(entry.getKey(), entry.getValue()));
                             return jsonObject;
                         }
                 );
@@ -81,12 +81,18 @@ public abstract class BaseOperationHandler {
     }
 
     protected JsonElement toJsonPrimitiveList(Collection<?> collection) {
+        if (collection == null) {
+            return JsonNull.INSTANCE;
+        }
         JsonArray jsonArray = new JsonArray();
-        collection.forEach(item -> gsonBuilder.create().toJsonTree(item));
+        collection.forEach(item -> jsonArray.add(toJsonPrimitive(item)));
         return jsonArray;
     }
 
     protected JsonElement toJsonPrimitive(Object object) {
+        if (object == null) {
+            return JsonNull.INSTANCE;
+        }
         return gsonBuilder.create().toJsonTree(object);
     }
 }
