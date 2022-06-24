@@ -1,5 +1,6 @@
 package io.graphoenix.http.handler;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
@@ -12,10 +13,12 @@ import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
+import reactor.util.context.Context;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 
+import static io.graphoenix.core.context.RequestScope.REQUEST_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
@@ -52,6 +55,7 @@ public class GetRequestHandler {
                                         }
                                 )
                 )
-                .then();
+                .then()
+                .contextWrite(Context.of(REQUEST_ID, NanoIdUtils.randomNanoId()));
     }
 }

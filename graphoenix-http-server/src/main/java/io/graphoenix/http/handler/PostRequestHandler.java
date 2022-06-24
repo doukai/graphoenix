@@ -1,5 +1,6 @@
 package io.graphoenix.http.handler;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.gson.GsonBuilder;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
@@ -11,7 +12,9 @@ import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
+import reactor.util.context.Context;
 
+import static io.graphoenix.core.context.RequestScope.REQUEST_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
@@ -43,7 +46,8 @@ public class PostRequestHandler {
                                             }
                                     )
                     )
-                    .then();
+                    .then()
+                    .contextWrite(Context.of(REQUEST_ID, NanoIdUtils.randomNanoId()));
         } else if (contentType.contentEquals(MimeType.Application.GRAPHQL)) {
             return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
@@ -58,14 +62,16 @@ public class PostRequestHandler {
                                             }
                                     )
                     )
-                    .then();
+                    .then()
+                    .contextWrite(Context.of(REQUEST_ID, NanoIdUtils.randomNanoId()));
         } else {
             IllegalArgumentException illegalArgumentException = new IllegalArgumentException("unsupported content-type: ".concat(contentType));
             Logger.error(illegalArgumentException);
             return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .status(HttpResponseStatus.BAD_REQUEST)
                     .sendString(Mono.just(GRAPHQL_RESPONSE_UTIL.error(illegalArgumentException)))
-                    .then();
+                    .then()
+                    .contextWrite(Context.of(REQUEST_ID, NanoIdUtils.randomNanoId()));
         }
     }
 }
