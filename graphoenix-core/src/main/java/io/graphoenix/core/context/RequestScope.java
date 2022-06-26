@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RequestScope {
     public static final String REQUEST_ID = "requestId";
 
-    private static final Map<String, ClassValue<Map<String, Object>>> REQUEST_SCOPE_CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, RequestInstances> REQUEST_SCOPE_CACHE = new ConcurrentHashMap<>();
 
     private RequestScope() {
     }
@@ -50,5 +50,22 @@ public class RequestScope {
                             return (T) REQUEST_SCOPE_CACHE.get(requestId).get(beanClass).get(name);
                         }
                 );
+    }
+
+    public static <T> void put(String requestId, Class<T> beanClass, T instance) {
+        put(requestId, beanClass, beanClass.getName(), instance);
+    }
+
+    public static <T> void put(String requestId, Class<T> beanClass, String name, T instance) {
+        if (!REQUEST_SCOPE_CACHE.containsKey(requestId)) {
+            REQUEST_SCOPE_CACHE.putIfAbsent(requestId, new RequestInstances());
+        }
+        if (!REQUEST_SCOPE_CACHE.get(requestId).get(beanClass).containsKey(name)) {
+            REQUEST_SCOPE_CACHE.get(requestId).get(beanClass).putIfAbsent(name, instance);
+        }
+    }
+
+    public static <T> void remove(String requestId) {
+        REQUEST_SCOPE_CACHE.remove(requestId);
     }
 }

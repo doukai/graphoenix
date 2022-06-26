@@ -3,6 +3,7 @@ package io.graphoenix.http.handler;
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import io.graphoenix.core.context.RequestScope;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -34,6 +35,8 @@ public class GetRequestHandler {
     }
 
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
+        String requestId = NanoIdUtils.randomNanoId();
+        RequestScope.put(requestId, HttpServerRequest.class, request);
 
         Type type = new TypeToken<Map<String, String>>() {
         }.getType();
@@ -56,6 +59,7 @@ public class GetRequestHandler {
                                 )
                 )
                 .then()
-                .contextWrite(Context.of(REQUEST_ID, NanoIdUtils.randomNanoId()));
+                .contextWrite(Context.of(REQUEST_ID, requestId))
+                .doFinally(signalType -> RequestScope.remove(requestId));
     }
 }

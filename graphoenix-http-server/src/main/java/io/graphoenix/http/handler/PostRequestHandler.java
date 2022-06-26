@@ -2,6 +2,7 @@ package io.graphoenix.http.handler;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.gson.GsonBuilder;
+import io.graphoenix.core.context.RequestScope;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -30,6 +31,8 @@ public class PostRequestHandler {
     }
 
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
+        String requestId = NanoIdUtils.randomNanoId();
+        RequestScope.put(requestId, HttpServerRequest.class, request);
 
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
         if (contentType.contentEquals(MimeType.Application.JSON)) {
@@ -47,7 +50,8 @@ public class PostRequestHandler {
                                     )
                     )
                     .then()
-                    .contextWrite(Context.of(REQUEST_ID, NanoIdUtils.randomNanoId()));
+                    .contextWrite(Context.of(REQUEST_ID, requestId))
+                    .doFinally(signalType -> RequestScope.remove(requestId));
         } else if (contentType.contentEquals(MimeType.Application.GRAPHQL)) {
             return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
@@ -63,7 +67,8 @@ public class PostRequestHandler {
                                     )
                     )
                     .then()
-                    .contextWrite(Context.of(REQUEST_ID, NanoIdUtils.randomNanoId()));
+                    .contextWrite(Context.of(REQUEST_ID, requestId))
+                    .doFinally(signalType -> RequestScope.remove(requestId));
         } else {
             IllegalArgumentException illegalArgumentException = new IllegalArgumentException("unsupported content-type: ".concat(contentType));
             Logger.error(illegalArgumentException);
@@ -71,7 +76,8 @@ public class PostRequestHandler {
                     .status(HttpResponseStatus.BAD_REQUEST)
                     .sendString(Mono.just(GRAPHQL_RESPONSE_UTIL.error(illegalArgumentException)))
                     .then()
-                    .contextWrite(Context.of(REQUEST_ID, NanoIdUtils.randomNanoId()));
+                    .contextWrite(Context.of(REQUEST_ID, requestId))
+                    .doFinally(signalType -> RequestScope.remove(requestId));
         }
     }
 }

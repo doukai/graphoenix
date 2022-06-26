@@ -5,7 +5,6 @@ import io.graphoenix.spi.context.ModuleContext;
 import jakarta.inject.Provider;
 import org.tinylog.Logger;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -16,7 +15,7 @@ public class BeanContext {
 
     private static Set<ModuleContext> moduleContexts;
 
-    private static final ClassValue<Map<String, Supplier<?>>> CONTEXT_CACHE = new BeanProviders();
+    private static final BeanProviders CONTEXT_CACHE = new BeanProviders();
 
     static {
         Logger.info("load ModuleContext from {}", BeanContext.class.getClassLoader().getName());
