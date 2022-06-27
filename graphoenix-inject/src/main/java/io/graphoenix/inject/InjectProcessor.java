@@ -601,16 +601,33 @@ public class InjectProcessor extends AbstractProcessor {
                 );
         MethodCallExpr methodCallExpr;
         if (processorManager.getQualifiedNameByType(classOrInterfaceType).equals(Provider.class.getName())) {
-            methodCallExpr = new MethodCallExpr()
-                    .setName("getProvider")
-                    .setScope(new NameExpr().setName("BeanContext"))
-                    .addArgument(new ClassExpr().setType(classOrInterfaceType.getTypeArguments().orElseThrow(() -> new InjectionProcessException(PROVIDER_TYPE_NOT_EXIST)).get(0)));
+            Type type = classOrInterfaceType.getTypeArguments().orElseThrow(() -> new InjectionProcessException(PROVIDER_TYPE_NOT_EXIST)).get(0);
+            if (type.isClassOrInterfaceType() && type.asClassOrInterfaceType().getNameAsString().equals(Mono.class.getSimpleName())) {
+                methodCallExpr = new MethodCallExpr()
+                        .setName("getMonoProvider")
+                        .setScope(new NameExpr().setName("BeanContext"))
+                        .addArgument(new ClassExpr().setType(classOrInterfaceType.getTypeArguments().orElseThrow(() -> new InjectionProcessException(PROVIDER_TYPE_NOT_EXIST)).get(0)));
+
+            } else {
+                methodCallExpr = new MethodCallExpr()
+                        .setName("getProvider")
+                        .setScope(new NameExpr().setName("BeanContext"))
+                        .addArgument(new ClassExpr().setType(type));
+            }
             belongCompilationUnit.addImport(Provider.class);
         } else {
-            methodCallExpr = new MethodCallExpr()
-                    .setName("get")
-                    .setScope(new NameExpr().setName("BeanContext"))
-                    .addArgument(new ClassExpr().setType(classOrInterfaceType));
+            if (classOrInterfaceType.getNameAsString().equals(Mono.class.getSimpleName())) {
+                methodCallExpr = new MethodCallExpr()
+                        .setName("getMono")
+                        .setScope(new NameExpr().setName("BeanContext"))
+                        .addArgument(new ClassExpr().setType(classOrInterfaceType.getTypeArguments().orElseThrow(() -> new InjectionProcessException(PROVIDER_TYPE_NOT_EXIST)).get(0)));
+            } else {
+                methodCallExpr = new MethodCallExpr()
+                        .setName("get")
+                        .setScope(new NameExpr().setName("BeanContext"))
+                        .addArgument(new ClassExpr().setType(classOrInterfaceType));
+
+            }
         }
         nameStringExpr.ifPresent(methodCallExpr::addArgument);
         return methodCallExpr;
@@ -861,24 +878,30 @@ public class InjectProcessor extends AbstractProcessor {
 
                                                                                                             if (producesMethodDeclaration.isAnnotationPresent(RequestScoped.class)) {
                                                                                                                 moduleCompilationUnit.addImport("io.graphoenix.core.context.RequestCache");
+                                                                                                                MethodCallExpr methodCallExpr = new MethodCallExpr();
+                                                                                                                Expression expressClone = expression.clone();
+                                                                                                                expressClone.setParentNode(methodCallExpr);
 
                                                                                                                 statement.asReturnStmt().setExpression(
-                                                                                                                        new MethodCallExpr()
+                                                                                                                        methodCallExpr
                                                                                                                                 .setName("putIfAbsent")
                                                                                                                                 .addArgument(new ClassExpr().setType(originalType))
-                                                                                                                                .addArgument(expression)
+                                                                                                                                .addArgument(expressClone)
                                                                                                                                 .setScope(new NameExpr("RequestCache"))
                                                                                                                 );
                                                                                                             }
 
                                                                                                             if (producesMethodDeclaration.isAnnotationPresent(SessionScoped.class)) {
                                                                                                                 moduleCompilationUnit.addImport("io.graphoenix.core.context.SessionCache");
+                                                                                                                MethodCallExpr methodCallExpr = new MethodCallExpr();
+                                                                                                                Expression expressClone = expression.clone();
+                                                                                                                expressClone.setParentNode(methodCallExpr);
 
                                                                                                                 statement.asReturnStmt().setExpression(
-                                                                                                                        new MethodCallExpr()
+                                                                                                                        methodCallExpr
                                                                                                                                 .setName("putIfAbsent")
                                                                                                                                 .addArgument(new ClassExpr().setType(originalType))
-                                                                                                                                .addArgument(expression)
+                                                                                                                                .addArgument(expressClone)
                                                                                                                                 .setScope(new NameExpr("SessionCache"))
                                                                                                                 );
                                                                                                             }
@@ -915,10 +938,19 @@ public class InjectProcessor extends AbstractProcessor {
                     .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodCallExpr.getNameAsString()))
                     .findAny()
                     .ifPresent(methodDeclaration -> {
-                                MethodCallExpr beanGetMethodCallExpr = new MethodCallExpr()
-                                        .setName("get")
-                                        .setScope(new NameExpr().setName("BeanContext"))
-                                        .addArgument(new ClassExpr().setType(methodDeclaration.getType()));
+                                MethodCallExpr beanGetMethodCallExpr;
+                                Type type = methodDeclaration.getType();
+                                if (type.isClassOrInterfaceType() && type.asClassOrInterfaceType().getNameAsString().equals(Mono.class.getSimpleName())) {
+                                    beanGetMethodCallExpr = new MethodCallExpr()
+                                            .setName("getMono")
+                                            .setScope(new NameExpr().setName("BeanContext"))
+                                            .addArgument(new ClassExpr().setType(type.asClassOrInterfaceType().getTypeArguments().orElseThrow(() -> new InjectionProcessException(PROVIDER_TYPE_NOT_EXIST)).get(0)));
+                                } else {
+                                    beanGetMethodCallExpr = new MethodCallExpr()
+                                            .setName("get")
+                                            .setScope(new NameExpr().setName("BeanContext"))
+                                            .addArgument(new ClassExpr().setType(type));
+                                }
 
                                 methodDeclaration.getAnnotationByClass(Named.class)
                                         .flatMap(annotationExpr ->
@@ -942,10 +974,19 @@ public class InjectProcessor extends AbstractProcessor {
                     .filter(methodDeclaration -> methodDeclaration.getNameAsString().equals(methodReferenceExpr.getIdentifier()))
                     .findAny()
                     .ifPresent(methodDeclaration -> {
-                                MethodCallExpr beanProviderGetMethodCallExpr = new MethodCallExpr()
-                                        .setName("getProvider")
-                                        .setScope(new NameExpr().setName("BeanContext"))
-                                        .addArgument(new ClassExpr().setType(methodDeclaration.getType()));
+                                MethodCallExpr beanProviderGetMethodCallExpr;
+                                Type type = methodDeclaration.getType();
+                                if (type.isClassOrInterfaceType() && type.asClassOrInterfaceType().getNameAsString().equals(Mono.class.getSimpleName())) {
+                                    beanProviderGetMethodCallExpr = new MethodCallExpr()
+                                            .setName("getMonoProvider")
+                                            .setScope(new NameExpr().setName("BeanContext"))
+                                            .addArgument(new ClassExpr().setType(type.asClassOrInterfaceType().getTypeArguments().orElseThrow(() -> new InjectionProcessException(PROVIDER_TYPE_NOT_EXIST)).get(0)));
+                                } else {
+                                    beanProviderGetMethodCallExpr = new MethodCallExpr()
+                                            .setName("getProvider")
+                                            .setScope(new NameExpr().setName("BeanContext"))
+                                            .addArgument(new ClassExpr().setType(type));
+                                }
 
                                 methodDeclaration.getAnnotationByClass(Named.class)
                                         .flatMap(annotationExpr ->
@@ -984,15 +1025,22 @@ public class InjectProcessor extends AbstractProcessor {
                 .setName(componentProxyClassDeclaration.getNameAsString() + "_Component")
                 .addAnnotation(new NormalAnnotationExpr().addPair("modules", modules).setName(Component.class.getSimpleName()));
 
-        MethodDeclaration providesMethodDeclaration = moduleClassDeclaration.getMembers().stream()
-                .filter(BodyDeclaration::isMethodDeclaration)
-                .map(BodyDeclaration::asMethodDeclaration)
-                .filter(methodDeclaration ->
-                        processorManager.getMethodReturnReferenceType(methodDeclaration)
-                                .anyMatch(resolvedReferenceType ->
-                                        //TODO
-                                        resolvedReferenceType.getQualifiedName().equals(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration)) ||
-                                                componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> processorManager.getQualifiedNameByType(extendType).equals(resolvedReferenceType.getQualifiedName())))
+        MethodDeclaration providesMethodDeclaration = moduleClassDeclaration.getMethods().stream()
+                .filter(methodDeclaration -> {
+                            if (methodDeclaration.getType().isClassOrInterfaceType() && methodDeclaration.getType().asClassOrInterfaceType().getNameAsString().equals(Mono.class.getSimpleName())) {
+                                return processorManager.getMethodReturnReferenceType(methodDeclaration)
+                                        .map(resolvedReferenceType -> resolvedReferenceType.getTypeParametersMap().get(0).b.asReferenceType())
+                                        .anyMatch(resolvedReferenceType ->
+                                                resolvedReferenceType.getQualifiedName().equals(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration)) ||
+                                                        componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> processorManager.getQualifiedNameByType(extendType).equals(resolvedReferenceType.getQualifiedName())));
+
+                            } else {
+                                return processorManager.getMethodReturnReferenceType(methodDeclaration)
+                                        .anyMatch(resolvedReferenceType ->
+                                                resolvedReferenceType.getQualifiedName().equals(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration)) ||
+                                                        componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> processorManager.getQualifiedNameByType(extendType).equals(resolvedReferenceType.getQualifiedName())));
+                            }
+                        }
                 )
                 .findFirst()
                 .orElseThrow(() -> new InjectionProcessException(MODULE_PROVIDERS_METHOD_NOT_EXIST.bind(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration))));
@@ -1021,8 +1069,7 @@ public class InjectProcessor extends AbstractProcessor {
                 );
 
         componentProxyCompilationUnit.getPackageDeclaration()
-                .ifPresent(packageDeclaration -> componentProxyComponentCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString())
-                );
+                .ifPresent(packageDeclaration -> componentProxyComponentCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
 
         componentProxyComponentCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(moduleClassDeclaration));
 
@@ -1060,9 +1107,7 @@ public class InjectProcessor extends AbstractProcessor {
 
         componentProxyComponentCompilationUnits.forEach(
                 componentProxyComponentCompilationUnit -> {
-
                     ClassOrInterfaceDeclaration componentProxyComponentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyComponentCompilationUnit);
-
                     String daggerClassName = "Dagger".concat(componentProxyComponentClassDeclaration.getNameAsString());
                     String daggerVariableName = "dagger".concat(componentProxyComponentClassDeclaration.getNameAsString());
 
@@ -1076,6 +1121,14 @@ public class InjectProcessor extends AbstractProcessor {
                             .findFirst()
                             .orElseThrow(() -> new InjectionProcessException(COMPONENT_GET_METHOD_NOT_EXIST.bind(componentProxyComponentClassDeclaration.getNameAsString())));
 
+                    if (componentType.getNameAsString().equals(Mono.class.getSimpleName())) {
+                        Optional<NodeList<Type>> typeArguments = componentType.getTypeArguments();
+                        if (typeArguments.isPresent()) {
+                            if (typeArguments.get().get(0) != null && typeArguments.get().get(0).isClassOrInterfaceType()) {
+                                componentType = typeArguments.get().get(0).asClassOrInterfaceType();
+                            }
+                        }
+                    }
                     moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(componentType));
 
                     blockStmt.addStatement(new VariableDeclarationExpr()
@@ -1090,7 +1143,6 @@ public class InjectProcessor extends AbstractProcessor {
                                             )
                             )
                     );
-
                     Optional<StringLiteralExpr> nameStringExpr = componentProxyComponentClassDeclaration.getAnnotationByClass(Named.class)
                             .flatMap(annotationExpr ->
                                     annotationExpr.asNormalAnnotationExpr().getPairs().stream()

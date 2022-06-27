@@ -49,7 +49,7 @@ public class SessionCache {
         return putIfAbsent(requestId, beanClass, beanClass.getName(), instance);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
     public static <T> Mono<T> putIfAbsent(String requestId, Class<T> beanClass, String name, T instance) {
         return Mono.fromFuture(SESSION_CACHE.get(requestId))
                 .mapNotNull(requestInstances -> (T) requestInstances.get(beanClass).putIfAbsent(name, instance));
@@ -59,7 +59,7 @@ public class SessionCache {
         return putIfAbsent(beanClass, beanClass.getName(), instance);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
     public static <T> Mono<T> putIfAbsent(Class<T> beanClass, String name, T instance) {
         return Mono.deferContextual(contextView -> Mono.fromFuture(SESSION_CACHE.get(contextView.get(SESSION_ID))))
                 .mapNotNull(requestInstances -> (T) requestInstances.get(beanClass).putIfAbsent(name, instance));
