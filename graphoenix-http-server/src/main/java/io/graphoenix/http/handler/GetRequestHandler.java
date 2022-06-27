@@ -3,7 +3,7 @@ package io.graphoenix.http.handler;
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import io.graphoenix.core.context.RequestScope;
+import io.graphoenix.core.context.RequestCache;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -19,7 +19,7 @@ import reactor.util.context.Context;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import static io.graphoenix.core.context.RequestScope.REQUEST_ID;
+import static io.graphoenix.core.context.RequestCache.REQUEST_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
@@ -36,30 +36,28 @@ public class GetRequestHandler {
 
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
         String requestId = NanoIdUtils.randomNanoId();
-        RequestScope.put(requestId, HttpServerRequest.class, request);
-
         Type type = new TypeToken<Map<String, String>>() {
         }.getType();
-
         GraphQLRequest graphQLRequest = new GraphQLRequest(
                 request.param("query"),
                 request.param("operationName"),
                 gsonBuilder.create().fromJson(request.param("variables"), type)
         );
-
-        return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
-                .sendString(
-                        graphQLRequestHandler.handle(graphQLRequest)
-                                .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
-                                .onErrorResume(throwable -> {
-                                            Logger.error(throwable);
-                                            response.status(HttpResponseStatus.BAD_REQUEST);
-                                            return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
-                                        }
+        return RequestCache.putIfAbsent(requestId, HttpServerRequest.class, request)
+                .thenEmpty(
+                        response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
+                                .sendString(
+                                        graphQLRequestHandler.handle(graphQLRequest)
+                                                .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
+                                                .onErrorResume(throwable -> {
+                                                            Logger.error(throwable);
+                                                            response.status(HttpResponseStatus.BAD_REQUEST);
+                                                            return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
+                                                        }
+                                                )
                                 )
-                )
-                .then()
-                .contextWrite(Context.of(REQUEST_ID, requestId))
-                .doFinally(signalType -> RequestScope.remove(requestId));
+                                .then()
+                                .contextWrite(Context.of(REQUEST_ID, requestId))
+                );
     }
 }

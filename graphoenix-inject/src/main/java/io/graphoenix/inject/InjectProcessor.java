@@ -43,12 +43,15 @@ import io.graphoenix.spi.context.ModuleContext;
 import jakarta.annotation.Generated;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
 import org.tinylog.Logger;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -77,7 +80,9 @@ import static javax.lang.model.SourceVersion.RELEASE_11;
 @SupportedAnnotationTypes({
         "jakarta.inject.Singleton",
         "jakarta.enterprise.context.Dependent",
-        "jakarta.enterprise.context.ApplicationScoped"
+        "jakarta.enterprise.context.ApplicationScoped",
+        "jakarta.enterprise.context.RequestScoped",
+        "jakarta.enterprise.context.SessionScoped"
 })
 @SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
@@ -112,8 +117,10 @@ public class InjectProcessor extends AbstractProcessor {
         Set<? extends Element> singletonSet = roundEnv.getElementsAnnotatedWith(Singleton.class);
         Set<? extends Element> dependentSet = roundEnv.getElementsAnnotatedWith(Dependent.class);
         Set<? extends Element> applicationScopedSet = roundEnv.getElementsAnnotatedWith(ApplicationScoped.class);
+        Set<? extends Element> requestScopedSet = roundEnv.getElementsAnnotatedWith(RequestScoped.class);
+        Set<? extends Element> sessionScopedSet = roundEnv.getElementsAnnotatedWith(SessionScoped.class);
 
-        List<TypeElement> typeElements = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream())
+        List<TypeElement> typeElements = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
@@ -140,7 +147,7 @@ public class InjectProcessor extends AbstractProcessor {
         componentProxyCompilationUnits.forEach(compilationUnit -> processorManager.writeToFiler(compilationUnit));
         Logger.debug("all proxy class build success");
 
-        CompilationUnit moduleCompilationUnit = buildModule(singletonSet, dependentSet, applicationScopedSet, componentProxyCompilationUnits);
+        CompilationUnit moduleCompilationUnit = buildModule(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, componentProxyCompilationUnits);
         processorManager.writeToFiler(moduleCompilationUnit);
         Logger.debug("module class build success");
 
@@ -154,7 +161,7 @@ public class InjectProcessor extends AbstractProcessor {
         processorManager.writeToFiler(moduleContextCompilationUnit);
         Logger.debug("module context class build success");
 
-        List<CompilationUnit> producesComponentProxyCompilationUnits = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream())
+        List<CompilationUnit> producesComponentProxyCompilationUnits = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
@@ -164,7 +171,7 @@ public class InjectProcessor extends AbstractProcessor {
         producesComponentProxyCompilationUnits.forEach(compilationUnit -> processorManager.writeToFiler(compilationUnit));
         Logger.debug("all produces method proxy class build success");
 
-        buildProducesModuleStream(singletonSet, dependentSet, applicationScopedSet, producesComponentProxyCompilationUnits)
+        buildProducesModuleStream(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, producesComponentProxyCompilationUnits)
                 .forEach(producesModuleCompilationUnit -> {
                             processorManager.writeToFiler(producesModuleCompilationUnit);
 
@@ -295,6 +302,8 @@ public class InjectProcessor extends AbstractProcessor {
     private CompilationUnit buildModule(Set<? extends Element> singletonSet,
                                         Set<? extends Element> dependentSet,
                                         Set<? extends Element> applicationScopedSet,
+                                        Set<? extends Element> requestScopedSet,
+                                        Set<? extends Element> sessionScopedSet,
                                         List<CompilationUnit> componentProxyCompilationUnits) {
 
         ClassOrInterfaceDeclaration moduleClassDeclaration = new ClassOrInterfaceDeclaration()
@@ -317,6 +326,20 @@ public class InjectProcessor extends AbstractProcessor {
                 .map(element -> (TypeElement) element)
                 .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
                 .forEach(componentCompilationUnit -> buildProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, true, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
+
+        requestScopedSet.stream()
+                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getKind().isClass())
+                .map(element -> (TypeElement) element)
+                .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
+                .forEach(componentCompilationUnit -> buildRequestScopeProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
+
+        sessionScopedSet.stream()
+                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getKind().isClass())
+                .map(element -> (TypeElement) element)
+                .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
+                .forEach(componentCompilationUnit -> buildSessionScopeProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
 
         dependentSet.stream()
                 .filter(element -> element.getAnnotation(Generated.class) == null)
@@ -349,6 +372,36 @@ public class InjectProcessor extends AbstractProcessor {
         }
 
         methodDeclaration.createBody().addStatement(buildProvidesMethodReturnStmt(moduleCompilationUnit, componentProxyClassDeclaration));
+        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
+        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
+    }
+
+    private void buildRequestScopeProvidesMethod(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, CompilationUnit componentCompilationUnit, CompilationUnit componentProxyCompilationUnit) {
+        ClassOrInterfaceDeclaration componentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
+        ClassOrInterfaceDeclaration componentProxyClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit);
+
+        moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
+
+        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
+                .addAnnotation(Provides.class)
+                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getName())));
+
+        methodDeclaration.createBody().addStatement(buildRequestScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
+        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
+        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
+    }
+
+    private void buildSessionScopeProvidesMethod(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, CompilationUnit componentCompilationUnit, CompilationUnit componentProxyCompilationUnit) {
+        ClassOrInterfaceDeclaration componentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
+        ClassOrInterfaceDeclaration componentProxyClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit);
+
+        moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
+
+        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
+                .addAnnotation(Provides.class)
+                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getName())));
+
+        methodDeclaration.createBody().addStatement(buildSessionScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
         processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
         processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
     }
@@ -401,6 +454,142 @@ public class InjectProcessor extends AbstractProcessor {
         );
     }
 
+    private ReturnStmt buildRequestScopeProvidesMethodReturnStmt(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
+        moduleCompilationUnit.addImport(Mono.class);
+        moduleCompilationUnit.addImport("io.graphoenix.core.context.RequestCache");
+        return new ReturnStmt(
+                componentProxyClassDeclaration.getMembers().stream()
+                        .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
+                        .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
+                        .findFirst()
+                        .map(bodyDeclaration -> {
+                                    if (bodyDeclaration.isConstructorDeclaration()) {
+                                        return new MethodCallExpr()
+                                                .setName("putIfAbsent")
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(
+                                                        new ObjectCreationExpr()
+                                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                .setArguments(
+                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
+                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                )
+                                                )
+                                                .setScope(new NameExpr("RequestCache"));
+                                    } else {
+                                        moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
+                                        return new MethodCallExpr()
+                                                .setName("putIfAbsent")
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(
+                                                        new MethodCallExpr()
+                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
+                                                                .setArguments(
+                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
+                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                )
+                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
+                                                )
+                                                .setScope(new NameExpr("RequestCache"));
+                                    }
+                                }
+                        )
+                        .orElseGet(() ->
+                                new MethodCallExpr()
+                                        .setName("putIfAbsent")
+                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                        .addArgument(
+                                                new ObjectCreationExpr()
+                                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                                        .setArguments(
+                                                                componentProxyClassDeclaration.getConstructors().stream()
+                                                                        .findFirst()
+                                                                        .map(constructorDeclaration ->
+                                                                                constructorDeclaration.getParameters().stream()
+                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                                        )
+                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
+                                                        )
+                                        )
+                                        .setScope(new NameExpr("RequestCache"))
+                        )
+        );
+    }
+
+    private ReturnStmt buildSessionScopeProvidesMethodReturnStmt(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
+        moduleCompilationUnit.addImport(Mono.class);
+        moduleCompilationUnit.addImport("io.graphoenix.core.context.SessionCache");
+        return new ReturnStmt(
+                componentProxyClassDeclaration.getMembers().stream()
+                        .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
+                        .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
+                        .findFirst()
+                        .map(bodyDeclaration -> {
+                                    if (bodyDeclaration.isConstructorDeclaration()) {
+                                        return new MethodCallExpr()
+                                                .setName("putIfAbsent")
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(
+                                                        new ObjectCreationExpr()
+                                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                .setArguments(
+                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
+                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                )
+                                                )
+                                                .setScope(new NameExpr("SessionCache"));
+                                    } else {
+                                        moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
+                                        return new MethodCallExpr()
+                                                .setName("putIfAbsent")
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(
+                                                        new MethodCallExpr()
+                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
+                                                                .setArguments(
+                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
+                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                )
+                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
+                                                )
+                                                .setScope(new NameExpr("SessionCache"));
+                                    }
+                                }
+                        )
+                        .orElseGet(() ->
+                                new MethodCallExpr()
+                                        .setName("putIfAbsent")
+                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                        .addArgument(
+                                                new ObjectCreationExpr()
+                                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                                        .setArguments(
+                                                                componentProxyClassDeclaration.getConstructors().stream()
+                                                                        .findFirst()
+                                                                        .map(constructorDeclaration ->
+                                                                                constructorDeclaration.getParameters().stream()
+                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                                        )
+                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
+                                                        )
+                                        )
+                                        .setScope(new NameExpr("SessionCache"))
+                        )
+        );
+    }
+
     private MethodCallExpr getBeanGetMethodCallExpr(NodeWithAnnotations<?> nodeWithAnnotations, CompilationUnit belongCompilationUnit, ClassOrInterfaceType classOrInterfaceType) {
         Optional<StringLiteralExpr> nameStringExpr = nodeWithAnnotations.getAnnotationByClass(Named.class)
                 .map(Expression::asNormalAnnotationExpr)
@@ -440,9 +629,11 @@ public class InjectProcessor extends AbstractProcessor {
     private Stream<CompilationUnit> buildProducesModuleStream(Set<? extends Element> singletonSet,
                                                               Set<? extends Element> dependentSet,
                                                               Set<? extends Element> applicationScopedSet,
+                                                              Set<? extends Element> requestScopedSet,
+                                                              Set<? extends Element> sessionScopedSet,
                                                               List<CompilationUnit> producesComponentProxyCompilationUnits) {
 
-        return Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream())
+        return Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
@@ -624,6 +815,7 @@ public class InjectProcessor extends AbstractProcessor {
                             moduleClassDeclaration.getMethods().stream()
                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
                                     .forEach(producesMethodDeclaration -> {
+                                                Type originalType = producesMethodDeclaration.getType().clone();
                                                 producesMethodDeclaration.addAnnotation(Provides.class);
                                                 if (producesMethodDeclaration.isAnnotationPresent(ApplicationScoped.class)) {
                                                     producesMethodDeclaration.addAnnotation(javax.inject.Singleton.class);
@@ -635,6 +827,11 @@ public class InjectProcessor extends AbstractProcessor {
                                                 producesMethodDeclaration.getAnnotationByClass(ApplicationScoped.class).ifPresent(Node::remove);
                                                 producesMethodDeclaration.getAnnotationByClass(Singleton.class).ifPresent(Node::remove);
                                                 producesMethodDeclaration.getAnnotationByClass(Dependent.class).ifPresent(Node::remove);
+
+                                                if (producesMethodDeclaration.isAnnotationPresent(RequestScoped.class) || producesMethodDeclaration.isAnnotationPresent(SessionScoped.class)) {
+                                                    moduleCompilationUnit.addImport(Mono.class);
+                                                    producesMethodDeclaration.setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(originalType));
+                                                }
 
                                                 producesMethodDeclaration.getBody()
                                                         .ifPresent(blockStmt ->
@@ -660,7 +857,30 @@ public class InjectProcessor extends AbstractProcessor {
                                                                                                                         .filter(Expression::isMethodReferenceExpr)
                                                                                                                         .map(Expression::asMethodReferenceExpr)
                                                                                                                         .forEach(methodReferenceExpr -> replaceComponentMethod(objectCreationExpr.getArguments(), methodReferenceExpr, moduleClassDeclaration));
+                                                                                                            }
 
+                                                                                                            if (producesMethodDeclaration.isAnnotationPresent(RequestScoped.class)) {
+                                                                                                                moduleCompilationUnit.addImport("io.graphoenix.core.context.RequestCache");
+
+                                                                                                                statement.asReturnStmt().setExpression(
+                                                                                                                        new MethodCallExpr()
+                                                                                                                                .setName("putIfAbsent")
+                                                                                                                                .addArgument(new ClassExpr().setType(originalType))
+                                                                                                                                .addArgument(expression)
+                                                                                                                                .setScope(new NameExpr("RequestCache"))
+                                                                                                                );
+                                                                                                            }
+
+                                                                                                            if (producesMethodDeclaration.isAnnotationPresent(SessionScoped.class)) {
+                                                                                                                moduleCompilationUnit.addImport("io.graphoenix.core.context.SessionCache");
+
+                                                                                                                statement.asReturnStmt().setExpression(
+                                                                                                                        new MethodCallExpr()
+                                                                                                                                .setName("putIfAbsent")
+                                                                                                                                .addArgument(new ClassExpr().setType(originalType))
+                                                                                                                                .addArgument(expression)
+                                                                                                                                .setScope(new NameExpr("SessionCache"))
+                                                                                                                );
                                                                                                             }
                                                                                                         }
                                                                                                 );
@@ -770,6 +990,7 @@ public class InjectProcessor extends AbstractProcessor {
                 .filter(methodDeclaration ->
                         processorManager.getMethodReturnReferenceType(methodDeclaration)
                                 .anyMatch(resolvedReferenceType ->
+                                        //TODO
                                         resolvedReferenceType.getQualifiedName().equals(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration)) ||
                                                 componentProxyClassDeclaration.getExtendedTypes().stream().anyMatch(extendType -> processorManager.getQualifiedNameByType(extendType).equals(resolvedReferenceType.getQualifiedName())))
                 )
