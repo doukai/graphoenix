@@ -32,6 +32,6 @@ public class Class3 {
     @Produces
     @Dependent
     public Class5 class5() {
-        return new Class5(class6(), class1.get());
+        return new Class5(this::class6, class1);
     }
 }

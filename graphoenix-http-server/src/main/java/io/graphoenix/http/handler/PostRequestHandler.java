@@ -5,15 +5,22 @@ import com.google.gson.GsonBuilder;
 import io.graphoenix.core.context.RequestCache;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
+import io.graphoenix.http.context.HttpRequestContext;
+import io.graphoenix.http.context.HttpResponseContext;
 import io.graphoenix.spi.dto.GraphQLRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.vavr.CheckedRunnable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.ContainerResponseFilter;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
 import reactor.util.context.Context;
+
+import java.util.ServiceLoader;
 
 import static io.graphoenix.core.context.RequestCache.REQUEST_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
@@ -33,10 +40,20 @@ public class PostRequestHandler {
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
         String requestId = NanoIdUtils.randomNanoId();
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
+
+        ServiceLoader.load(ContainerRequestFilter.class, this.getClass().getClassLoader()).stream()
+                .map(ServiceLoader.Provider::get)
+                .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request))).unchecked().run());
+
         if (contentType.contentEquals(MimeType.Application.JSON)) {
             return RequestCache.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
+                                    .then(subscriber ->
+                                            ServiceLoader.load(ContainerResponseFilter.class, this.getClass().getClassLoader()).stream()
+                                                    .map(ServiceLoader.Provider::get)
+                                                    .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request), new HttpResponseContext(response))).unchecked().run())
+                                    )
                                     .sendString(
                                             request.receive().aggregate().asString()
                                                     .map(content -> gsonBuilder.create().fromJson(content, GraphQLRequest.class))
@@ -56,6 +73,11 @@ public class PostRequestHandler {
             return RequestCache.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
+                                    .then(subscriber ->
+                                            ServiceLoader.load(ContainerResponseFilter.class, this.getClass().getClassLoader()).stream()
+                                                    .map(ServiceLoader.Provider::get)
+                                                    .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request), new HttpResponseContext(response))).unchecked().run())
+                                    )
                                     .sendString(
                                             request.receive().aggregate().asString()
                                                     .map(GraphQLRequest::new)
