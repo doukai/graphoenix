@@ -7,12 +7,13 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
+import reactor.core.publisher.Mono;
 
 @ApplicationScoped
 public class Class3 {
 
     @Inject
-    public Provider<Class1> class1;
+    public Provider<Mono<Class1>> class1;
 
     private Provider<Class2> class2;
 
@@ -24,13 +25,13 @@ public class Class3 {
     @Produces
     @RequestScoped
     @Named("no")
-    public Class6 class6() {
-        return new Class6();
+    public Mono<Class6> class6() {
+        return Mono.just(new Class6());
     }
 
     @Produces
     @Dependent
     public Class5 class5() {
-        return new Class5(class6());
+        return new Class5(class6(), class1.get());
     }
 }

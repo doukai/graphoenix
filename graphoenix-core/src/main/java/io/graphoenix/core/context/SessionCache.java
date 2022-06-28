@@ -45,13 +45,13 @@ public class SessionCache {
                 .mapNotNull(requestInstances -> (T) requestInstances.get(beanClass).get(name));
     }
 
-    public static <T> Mono<T> putIfAbsent(String requestId, Class<T> beanClass, T instance) {
-        return putIfAbsent(requestId, beanClass, beanClass.getName(), instance);
+    public static <T> Mono<T> putIfAbsent(String sessionId, Class<T> beanClass, T instance) {
+        return putIfAbsent(sessionId, beanClass, beanClass.getName(), instance);
     }
 
     @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
-    public static <T> Mono<T> putIfAbsent(String requestId, Class<T> beanClass, String name, T instance) {
-        return Mono.fromFuture(SESSION_CACHE.get(requestId))
+    public static <T> Mono<T> putIfAbsent(String sessionId, Class<T> beanClass, String name, T instance) {
+        return Mono.fromFuture(SESSION_CACHE.get(sessionId))
                 .mapNotNull(requestInstances -> (T) requestInstances.get(beanClass).putIfAbsent(name, instance));
     }
 
