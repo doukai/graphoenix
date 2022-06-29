@@ -7,7 +7,6 @@ import reactor.netty.http.server.HttpServerRequest;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class HttpRequestContext implements ContainerRequestContext {
@@ -15,9 +14,9 @@ public class HttpRequestContext implements ContainerRequestContext {
     private final HttpServerRequest httpServerRequest;
     private final Map<String, Object> properties;
 
-    public HttpRequestContext(HttpServerRequest httpServerRequest) {
+    public HttpRequestContext(HttpServerRequest httpServerRequest, Map<String, Object> properties) {
         this.httpServerRequest = httpServerRequest;
-        this.properties = new ConcurrentHashMap<>();
+        this.properties = properties;
         if (httpServerRequest.params() != null) {
             this.properties.putAll(Objects.requireNonNull(httpServerRequest.params()));
         }
@@ -36,17 +35,11 @@ public class HttpRequestContext implements ContainerRequestContext {
     @Override
     public void setProperty(String name, Object object) {
         properties.put(name, object);
-        if (httpServerRequest.params() != null) {
-            Objects.requireNonNull(httpServerRequest.params()).put(name, String.valueOf(object));
-        }
     }
 
     @Override
     public void removeProperty(String name) {
         properties.remove(name);
-        if (httpServerRequest.params() != null) {
-            Objects.requireNonNull(httpServerRequest.params()).remove(name);
-        }
     }
 
     @Override

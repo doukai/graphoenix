@@ -25,4 +25,6 @@ public class Hammurabi {
     public static final String EDGE_SUFFIX = "Edge";
     public static final String EXPRESSION_SUFFIX = "Expression";
     public static final String[] INVOKE_DIRECTIVES = {"invoke"};
+    public static final String GRAPHQL_REQUEST_KEY = "graphQLRequest";
+    public static final String RESULT_CONTENT_KEY = "resultContent";
 }

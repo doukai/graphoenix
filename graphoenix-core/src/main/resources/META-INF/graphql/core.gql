@@ -172,3 +172,9 @@ directive @update on FIELD
 directive @delete on FIELD
 
 directive @format(value: String locale: String) on FIELD | FIELD_DEFINITION
+
+directive @permitAll on FIELD | OBJECT
+
+directive @denyAll on FIELD | OBJECT
+
+directive @hasAnyRole(roles: [String]) on FIELD | OBJECT
