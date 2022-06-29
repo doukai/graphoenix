@@ -19,7 +19,7 @@ public class HttpRequestContext implements ContainerRequestContext {
         this.httpServerRequest = httpServerRequest;
         this.properties = new ConcurrentHashMap<>();
         if (httpServerRequest.params() != null) {
-            Objects.requireNonNull(httpServerRequest.params()).forEach(this.properties::put);
+            this.properties.putAll(Objects.requireNonNull(httpServerRequest.params()));
         }
     }
 
@@ -36,11 +36,17 @@ public class HttpRequestContext implements ContainerRequestContext {
     @Override
     public void setProperty(String name, Object object) {
         properties.put(name, object);
+        if (httpServerRequest.params() != null) {
+            Objects.requireNonNull(httpServerRequest.params()).put(name, String.valueOf(object));
+        }
     }
 
     @Override
     public void removeProperty(String name) {
         properties.remove(name);
+        if (httpServerRequest.params() != null) {
+            Objects.requireNonNull(httpServerRequest.params()).remove(name);
+        }
     }
 
     @Override

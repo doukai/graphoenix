@@ -22,12 +22,11 @@ public class SessionCache {
                 .evictionListener((key, value, cause) -> Logger.info("session id: {} eviction", key))
                 .removalListener((key, value, cause) -> Logger.info("session id: {} removed", key));
         Config config = ConfigFactory.load();
-        builder.expireAfterWrite(new TimeoutConfig().getSession(), TimeUnit.SECONDS);
-        if (config != null) {
+        if (config != null && config.hasPath("timeout")) {
             TimeoutConfig timeout = ConfigBeanFactory.create(config.getConfig("timeout"), TimeoutConfig.class);
-            if (timeout != null) {
-                builder.expireAfterWrite(timeout.getSession(), TimeUnit.SECONDS);
-            }
+            builder.expireAfterWrite(timeout.getSession(), TimeUnit.SECONDS);
+        } else {
+            builder.expireAfterWrite(new TimeoutConfig().getSession(), TimeUnit.SECONDS);
         }
         return builder.buildAsync(key -> new ScopeInstances());
     }

@@ -20,10 +20,13 @@ import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
 import reactor.util.context.Context;
 
+import java.util.Objects;
 import java.util.ServiceLoader;
 
 import static io.graphoenix.core.context.RequestCache.REQUEST_ID;
+import static io.graphoenix.core.context.SessionCache.SESSION_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
+import static io.graphoenix.http.error.HttpErrorStatusUtil.HTTP_ERROR_STATUS_UTIL;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped
@@ -41,29 +44,45 @@ public class PostRequestHandler {
         String requestId = NanoIdUtils.randomNanoId();
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
 
-        ServiceLoader.load(ContainerRequestFilter.class, this.getClass().getClassLoader()).stream()
-                .map(ServiceLoader.Provider::get)
-                .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request))).unchecked().run());
-
         if (contentType.contentEquals(MimeType.Application.JSON)) {
             return RequestCache.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
-                                    .then(subscriber ->
-                                            ServiceLoader.load(ContainerResponseFilter.class, this.getClass().getClassLoader()).stream()
-                                                    .map(ServiceLoader.Provider::get)
-                                                    .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request), new HttpResponseContext(response))).unchecked().run())
-                                    )
                                     .sendString(
                                             request.receive().aggregate().asString()
-                                                    .map(content -> gsonBuilder.create().fromJson(content, GraphQLRequest.class))
-                                                    .flatMap(graphQLRequestHandler::handle)
-                                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
-                                                    .onErrorResume(throwable -> {
-                                                                Logger.error(throwable);
-                                                                response.status(HttpResponseStatus.BAD_REQUEST);
-                                                                return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
-                                                            }
+                                                    .flatMap(content ->
+                                                            Mono.just(gsonBuilder.create().fromJson(content, GraphQLRequest.class))
+                                                                    .flatMap(graphQLRequestHandler::handle)
+                                                                    .doOnNext(jsonString ->
+                                                                            ServiceLoader.load(ContainerResponseFilter.class, this.getClass().getClassLoader()).stream()
+                                                                                    .map(ServiceLoader.Provider::get)
+                                                                                    .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request), new HttpResponseContext(response))).unchecked().run())
+                                                                    )
+                                                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
+                                                                    .onErrorResume(throwable -> {
+                                                                                Logger.error(throwable);
+                                                                                response.status(HTTP_ERROR_STATUS_UTIL.getStatus(throwable.getClass()));
+                                                                                return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
+                                                                            }
+                                                                    )
+                                                                    .transformDeferredContextual((mono, context) ->
+                                                                            mono.contextWrite(
+                                                                                    request.param(SESSION_ID) == null ?
+                                                                                            Context.empty() :
+                                                                                            Context.of(SESSION_ID, Objects.requireNonNull(request.param(SESSION_ID)))
+                                                                            )
+                                                                    )
+                                                                    .doFirst(() ->
+                                                                            ServiceLoader.load(ContainerRequestFilter.class, this.getClass().getClassLoader()).stream()
+                                                                                    .map(ServiceLoader.Provider::get)
+                                                                                    .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request))).unchecked().run())
+                                                                    )
+                                                                    .onErrorResume(throwable -> {
+                                                                                Logger.error(throwable);
+                                                                                response.status(HTTP_ERROR_STATUS_UTIL.getStatus(throwable.getClass()));
+                                                                                return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
+                                                                            }
+                                                                    )
                                                     )
                                     )
                                     .then()
@@ -73,21 +92,41 @@ public class PostRequestHandler {
             return RequestCache.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
-                                    .then(subscriber ->
-                                            ServiceLoader.load(ContainerResponseFilter.class, this.getClass().getClassLoader()).stream()
-                                                    .map(ServiceLoader.Provider::get)
-                                                    .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request), new HttpResponseContext(response))).unchecked().run())
-                                    )
                                     .sendString(
                                             request.receive().aggregate().asString()
-                                                    .map(GraphQLRequest::new)
-                                                    .flatMap(graphQLRequestHandler::handle)
-                                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
-                                                    .onErrorResume(throwable -> {
-                                                                Logger.error(throwable);
-                                                                response.status(HttpResponseStatus.BAD_REQUEST);
-                                                                return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
-                                                            }
+                                                    .flatMap(content ->
+                                                            Mono.just(new GraphQLRequest(content))
+                                                                    .flatMap(graphQLRequestHandler::handle)
+                                                                    .doOnNext(jsonString ->
+                                                                            ServiceLoader.load(ContainerResponseFilter.class, this.getClass().getClassLoader()).stream()
+                                                                                    .map(ServiceLoader.Provider::get)
+                                                                                    .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request), new HttpResponseContext(response))).unchecked().run())
+                                                                    )
+                                                                    .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
+                                                                    .onErrorResume(throwable -> {
+                                                                                Logger.error(throwable);
+                                                                                response.status(HTTP_ERROR_STATUS_UTIL.getStatus(throwable.getClass()));
+                                                                                return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
+                                                                            }
+                                                                    )
+                                                                    .transformDeferredContextual((mono, context) ->
+                                                                            mono.contextWrite(
+                                                                                    request.param(SESSION_ID) == null ?
+                                                                                            Context.empty() :
+                                                                                            Context.of(SESSION_ID, Objects.requireNonNull(request.param(SESSION_ID)))
+                                                                            )
+                                                                    )
+                                                                    .doFirst(() ->
+                                                                            ServiceLoader.load(ContainerRequestFilter.class, this.getClass().getClassLoader()).stream()
+                                                                                    .map(ServiceLoader.Provider::get)
+                                                                                    .forEach(containerRequestFilter -> CheckedRunnable.of(() -> containerRequestFilter.filter(new HttpRequestContext(request))).unchecked().run())
+                                                                    )
+                                                                    .onErrorResume(throwable -> {
+                                                                                Logger.error(throwable);
+                                                                                response.status(HTTP_ERROR_STATUS_UTIL.getStatus(throwable.getClass()));
+                                                                                return Mono.just(GRAPHQL_RESPONSE_UTIL.error(throwable));
+                                                                            }
+                                                                    )
                                                     )
                                     )
                                     .then()
