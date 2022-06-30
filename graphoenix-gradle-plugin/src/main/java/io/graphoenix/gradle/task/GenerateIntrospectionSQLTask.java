@@ -25,7 +25,9 @@ public class GenerateIntrospectionSQLTask extends BaseTask {
         final GraphQLMutationToStatements mutationToStatements = BeanContext.get(GraphQLMutationToStatements.class);
 
         GraphQLConfig graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
-        assert graphQLConfig != null;
+        if (graphQLConfig == null) {
+            graphQLConfig = new GraphQLConfig();
+        }
 
         try {
             init();

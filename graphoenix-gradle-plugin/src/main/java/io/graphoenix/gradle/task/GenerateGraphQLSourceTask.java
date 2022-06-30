@@ -51,7 +51,9 @@ public class GenerateGraphQLSourceTask extends BaseTask {
         final JavaFileBuilder javaFileBuilder = BeanContext.get(JavaFileBuilder.class);
 
         GraphQLConfig graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
-        assert graphQLConfig != null;
+        if (graphQLConfig == null) {
+            graphQLConfig = new GraphQLConfig();
+        }
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String javaPath = sourceSet.getJava().getSourceDirectories().getAsPath();
 
