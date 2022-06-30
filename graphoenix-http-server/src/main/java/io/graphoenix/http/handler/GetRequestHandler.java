@@ -49,16 +49,15 @@ public class GetRequestHandler extends BaseRequestHandler {
                 .thenEmpty(
                         response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                                 .sendString(
-                                        graphQLRequestHandler.handle(graphQLRequest)
+                                        Mono.just(graphQLRequest)
+                                                .flatMap(graphQLRequestHandler::handle)
                                                 .doOnNext(jsonString -> this.afterHandler(request, response, properties, jsonString))
                                                 .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                                 .onErrorResume(throwable -> this.errorHandler(throwable, response))
                                                 .transformDeferredContextual((mono, context) ->
-                                                        mono.contextWrite(
-                                                                properties.containsKey(SESSION_ID) ?
-                                                                        Context.empty() :
-                                                                        Context.of(SESSION_ID, properties.get(SESSION_ID))
-                                                        )
+                                                        properties.containsKey(SESSION_ID) ?
+                                                                mono.contextWrite(Context.of(SESSION_ID, properties.get(SESSION_ID))) :
+                                                                mono
                                                 )
                                                 .doFirst(() -> this.beforeHandler(request, properties, graphQLRequest))
                                                 .onErrorResume(throwable -> this.errorHandler(throwable, response))

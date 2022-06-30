@@ -137,30 +137,22 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public GraphqlParser.OperationTypeContext getOperationType(String graphql) {
-        return getOperationType(DOCUMENT_UTIL.graphqlToDocument(graphql));
+        return getOperationType(DOCUMENT_UTIL.graphqlToOperation(graphql));
     }
 
     @Override
     public Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(String graphql) {
-        return getOperationTypeVariables(DOCUMENT_UTIL.graphqlToDocument(graphql));
+        return getOperationTypeVariables(DOCUMENT_UTIL.graphqlToOperation(graphql));
     }
 
     @Override
-    public GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.DocumentContext documentContext) {
-        return documentContext.definition().stream()
-                .filter(definitionContext -> definitionContext.operationDefinition() != null)
-                .findFirst()
-                .map(definitionContext -> definitionContext.operationDefinition().operationType())
-                .orElse(null);
+    public GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return operationDefinitionContext.operationType();
     }
 
     @Override
-    public Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.DocumentContext documentContext) {
-        return documentContext.definition().stream()
-                .filter(definitionContext -> definitionContext.operationDefinition() != null)
-                .findFirst()
-                .map(definitionContext -> definitionContext.operationDefinition().variableDefinitions().variableDefinition().stream())
-                .orElse(Stream.empty());
+    public Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return operationDefinitionContext.variableDefinitions().variableDefinition().stream();
     }
 
     @Override

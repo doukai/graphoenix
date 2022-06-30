@@ -8,6 +8,9 @@ import io.graphoenix.graphql.generator.operation.Argument;
 import io.graphoenix.graphql.generator.operation.StringValue;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Source;
@@ -31,7 +34,7 @@ public class GraphQLApiBuilder {
     }
 
     public Field variableElementToField(ExecutableElement executableElement, Types typeUtils) {
-        return new Field()
+        Field field = new Field()
                 .setName(elementManager.getNameFromElement(executableElement))
                 .setDescription(elementManager.getDescriptionFromElement(executableElement))
                 .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
@@ -61,6 +64,19 @@ public class GraphQLApiBuilder {
                                                 .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
                                 )
                 );
+        if (executableElement.getAnnotation(PermitAll.class) != null) {
+            field.addStringDirective("permitAll");
+        }
+        if (executableElement.getAnnotation(DenyAll.class) != null) {
+            field.addStringDirective("denyAll");
+        }
+        if (executableElement.getAnnotation(RolesAllowed.class) != null) {
+            Directive directive = new Directive()
+                    .setName("rolesAllowed")
+                    .addArgument(new Argument().setName("roles").setValueWithVariable(executableElement.getAnnotation(RolesAllowed.class).value()));
+            field.addDirective(directive);
+        }
+        return field;
     }
 
     public Tuple2<String, Field> variableElementToObjectField(ExecutableElement executableElement, Types typeUtils) {

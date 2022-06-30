@@ -30,9 +30,9 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(String graphql);
 
-    GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.DocumentContext documentContext);
+    GraphqlParser.OperationTypeContext getOperationType(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
-    Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.DocumentContext documentContext);
+    Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
     void registerFragment(String graphql);
 

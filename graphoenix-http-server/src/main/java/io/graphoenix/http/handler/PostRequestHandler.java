@@ -47,16 +47,15 @@ public class PostRequestHandler extends BaseRequestHandler {
                                             request.receive().aggregate().asString()
                                                     .map(content -> gsonBuilder.create().fromJson(content, GraphQLRequest.class))
                                                     .flatMap(graphQLRequest ->
-                                                            graphQLRequestHandler.handle(graphQLRequest)
+                                                            Mono.just(graphQLRequest)
+                                                                    .flatMap(graphQLRequestHandler::handle)
                                                                     .doOnNext(jsonString -> this.afterHandler(request, response, properties, jsonString))
                                                                     .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                                                     .onErrorResume(throwable -> this.errorHandler(throwable, response))
                                                                     .transformDeferredContextual((mono, context) ->
-                                                                            mono.contextWrite(
-                                                                                    properties.containsKey(SESSION_ID) ?
-                                                                                            Context.empty() :
-                                                                                            Context.of(SESSION_ID, properties.get(SESSION_ID))
-                                                                            )
+                                                                            properties.containsKey(SESSION_ID) ?
+                                                                                    mono.contextWrite(Context.of(SESSION_ID, properties.get(SESSION_ID))) :
+                                                                                    mono
                                                                     )
                                                                     .doFirst(() -> this.beforeHandler(request, properties, graphQLRequest))
                                                                     .onErrorResume(throwable -> this.errorHandler(throwable, response))
@@ -73,16 +72,15 @@ public class PostRequestHandler extends BaseRequestHandler {
                                             request.receive().aggregate().asString()
                                                     .map(GraphQLRequest::new)
                                                     .flatMap(graphQLRequest ->
-                                                            graphQLRequestHandler.handle(graphQLRequest)
+                                                            Mono.just(graphQLRequest)
+                                                                    .flatMap(graphQLRequestHandler::handle)
                                                                     .doOnNext(jsonString -> this.afterHandler(request, response, properties, jsonString))
                                                                     .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                                                     .onErrorResume(throwable -> this.errorHandler(throwable, response))
                                                                     .transformDeferredContextual((mono, context) ->
-                                                                            mono.contextWrite(
-                                                                                    properties.containsKey(SESSION_ID) ?
-                                                                                            Context.empty() :
-                                                                                            Context.of(SESSION_ID, properties.get(SESSION_ID))
-                                                                            )
+                                                                            properties.containsKey(SESSION_ID) ?
+                                                                                    mono.contextWrite(Context.of(SESSION_ID, properties.get(SESSION_ID))) :
+                                                                                    mono
                                                                     )
                                                                     .doFirst(() -> this.beforeHandler(request, properties, graphQLRequest))
                                                                     .onErrorResume(throwable -> this.errorHandler(throwable, response))

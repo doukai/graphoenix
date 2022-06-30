@@ -52,13 +52,13 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
     @Override
     public <T> Mono<T> findOneAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
         return queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters))
-                .map(jsonString -> jsonToType(jsonString, beanClass));
+                .mapNotNull(jsonString -> jsonToType(jsonString, beanClass));
     }
 
     @Override
     public <T> Mono<T> findAllAsync(String sql, Map<String, Object> parameters, Type type) {
         return queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters))
-                .map(jsonString -> jsonToType(jsonString, type));
+                .mapNotNull(jsonString -> jsonToType(jsonString, type));
     }
 
     @Override
@@ -71,6 +71,6 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
     @Override
     public <T> Mono<T> saveAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
         return mutationExecutor.executeMutations(sql, r2dbcParameterProcessor.process(parameters))
-                .map(jsonString -> jsonToType(jsonString, beanClass));
+                .mapNotNull(jsonString -> jsonToType(jsonString, beanClass));
     }
 }

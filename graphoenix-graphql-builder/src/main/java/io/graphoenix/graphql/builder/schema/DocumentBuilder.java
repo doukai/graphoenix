@@ -359,10 +359,10 @@ public class DocumentBuilder {
                 .setTypeName(objectTypeDefinitionContext.name().getText())
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
                 .addArgument(new InputValue("where").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.EXPRESSION.toString())));
-
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
         }
+        buildSecurity(objectTypeDefinitionContext, field);
         return field;
     }
 
@@ -387,6 +387,7 @@ public class DocumentBuilder {
                                     .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                     );
         }
+        buildSecurity(objectTypeDefinitionContext, field);
         return field;
     }
 
@@ -417,7 +418,21 @@ public class DocumentBuilder {
                                     .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                     );
         }
+        buildSecurity(objectTypeDefinitionContext, field);
         return field;
+    }
+
+    public void buildSecurity(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, Field field) {
+        if (objectTypeDefinitionContext.directives() != null) {
+            objectTypeDefinitionContext.directives().directive().stream()
+                    .filter(directiveContext ->
+                            directiveContext.name().getText().equals("permitAll") ||
+                                    directiveContext.name().getText().equals("denyAll") ||
+                                    directiveContext.name().getText().equals("rolesAllowed")
+                    )
+                    .findAny()
+                    .ifPresent(directiveContext -> field.addStringDirective(directiveContext.getText()));
+        }
     }
 
     private String getSchemaFieldName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
