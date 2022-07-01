@@ -19,6 +19,7 @@ dependencies {
 
     implementation 'com.networknt:json-schema-validator:1.0.70'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1'
+    implementation 'com.jcabi:jcabi-manifests:1.2.1'
     implementation "org.tinylog:tinylog-impl:2.4.1"
     implementation "org.tinylog:slf4j-tinylog:2.4.1"
     implementation "org.tinylog:jcl-tinylog:2.4.1"
@@ -36,4 +37,12 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes(
+                "Graphoenix-Version": project.version
+        )
+    }
 }

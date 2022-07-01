@@ -13,9 +13,11 @@ import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
+import static io.graphoenix.core.utils.BannerUtil.BANNER_UTIL;
 import static io.graphoenix.http.handler.SchemaRequestHandler.SCHEMA_PARAM_NAME;
 
 @ApplicationScoped
@@ -37,6 +39,7 @@ public class GraphQLHttpServer {
     }
 
     public void run() {
+        BANNER_UTIL.getBanner().ifPresent(Logger::info);
         bootstrapHandler.bootstrap();
 
         CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()

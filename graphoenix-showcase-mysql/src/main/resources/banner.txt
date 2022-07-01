@@ -5,3 +5,6 @@
 [34m'  '--'  ||  |  \ '-'  ||  | --' |  | |  |' '-' '\   --.|  ||  ||  | /  /.  \  [0m
 [34m `------' `--'   `--`--'`--'     `--' `--' `---'  `----'`--''--'`--''--'  '--' [0m
 [34m                                                                               [0m
+[34mDatabase : ${Graphoenix-Database}[0m
+[34mProtocol : ${Graphoenix-Protocol}[0m
+[34mPowered by Graphoenix ${Graphoenix-Version}[0m

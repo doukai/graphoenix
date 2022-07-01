@@ -32,3 +32,11 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+jar {
+    manifest {
+        attributes(
+                "Graphoenix-Database": "MySQL"
+        )
+    }
+}

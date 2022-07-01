@@ -10,6 +10,9 @@ public class BannerConfig {
     private String text = "GraPhoenix";
 
     @Optional
+    private String[] lines = {"Database : ${Graphoenix-Database}", "Protocol : ${Graphoenix-Protocol}", "Powered by Graphoenix ${Graphoenix-Version}"};
+
+    @Optional
     private String font = "Soft";
 
     @Optional
@@ -19,26 +22,31 @@ public class BannerConfig {
         return text;
     }
 
-    public BannerConfig setText(String text) {
+    public void setText(String text) {
         this.text = text;
-        return this;
+    }
+
+    public String[] getLines() {
+        return lines;
+    }
+
+    public void setLines(String[] lines) {
+        this.lines = lines;
     }
 
     public String getFont() {
         return font;
     }
 
-    public BannerConfig setFont(String font) {
+    public void setFont(String font) {
         this.font = font;
-        return this;
     }
 
     public String[] getArgs() {
         return args;
     }
 
-    public BannerConfig setArgs(String[] args) {
+    public void setArgs(String[] args) {
         this.args = args;
-        return this;
     }
 }

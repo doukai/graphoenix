@@ -10,7 +10,6 @@ public class Application {
     }
 
     private void run() throws Exception {
-
         GraphQLHttpServer graphqlHttpServer = BeanContext.get(GraphQLHttpServer.class);
         graphqlHttpServer.run();
     }

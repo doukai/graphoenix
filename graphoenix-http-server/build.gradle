@@ -29,3 +29,11 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+jar {
+    manifest {
+        attributes(
+                "Graphoenix-Protocol": "HTTP"
+        )
+    }
+}
