@@ -27,4 +27,5 @@ public class Hammurabi {
     public static final String[] INVOKE_DIRECTIVES = {"invoke"};
     public static final String GRAPHQL_REQUEST_KEY = "graphQLRequest";
     public static final String RESULT_CONTENT_KEY = "resultContent";
+    public static final String CURRENT_USER_KEY = "currentUser";
 }
