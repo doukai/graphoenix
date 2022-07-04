@@ -2,6 +2,9 @@ package io.graphoenix.showcase.test;
 
 import io.graphoenix.core.config.GraphQLConfig;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+
+import java.util.stream.Stream;
 
 public class MonoTest {
 
@@ -33,13 +36,23 @@ public class MonoTest {
 //                )
 //                .contextWrite(Context.of(key, "myValue"))
 //                .block();
-        GraphQLConfig object = new GraphQLConfig();
-        Package objPackage = MonoTest.class.getPackage();
-        //examine the package object
-        String name = objPackage.getSpecificationTitle();
-        String version = objPackage.getSpecificationVersion();
-        //some jars may use 'Implementation Version' entries in the manifest instead
-        System.out.println("Package name: " + name);
-        System.out.println("Package version: " + version);
+//        GraphQLConfig object = new GraphQLConfig();
+//        Package objPackage = MonoTest.class.getPackage();
+//        //examine the package object
+//        String name = objPackage.getSpecificationTitle();
+//        String version = objPackage.getSpecificationVersion();
+//        //some jars may use 'Implementation Version' entries in the manifest instead
+//        System.out.println("Package name: " + name);
+//        System.out.println("Package version: " + version);
+
+        String[] a = {"a", "b", "c", "d"};
+        System.out.println(
+                Flux.fromArray(a)
+                        .map(item -> Flux.fromStream(Stream.of(a)).last().block())
+//                .flatMap(stream -> Flux.fromIterable(stream))
+                        .last()
+                        .block()
+        );
+
     }
 }
