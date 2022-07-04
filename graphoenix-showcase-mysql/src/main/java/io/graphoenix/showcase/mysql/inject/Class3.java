@@ -1,19 +1,20 @@
 package io.graphoenix.showcase.mysql.inject;
 
+import io.graphoenix.core.context.RequestInstanceFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
-import reactor.core.publisher.Mono;
 
 @ApplicationScoped
 public class Class3 {
 
     @Inject
-    public Provider<Mono<Class1>> class1;
+    public Instance<Class1> class1;
 
     private Provider<Class2> class2;
 
@@ -25,13 +26,13 @@ public class Class3 {
     @Produces
     @RequestScoped
     @Named("no")
-    public Mono<Class6> class6() {
-        return Mono.just(new Class6());
+    public Instance<Class6> class6() {
+        return RequestInstanceFactory.getInstance(new Class6());
     }
 
     @Produces
     @Dependent
     public Class5 class5() {
-        return new Class5(this::class6, class1);
+        return new Class5(class6(), class1);
     }
 }

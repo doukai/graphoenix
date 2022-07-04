@@ -2,9 +2,9 @@ package io.graphoenix.core.context;
 
 import io.graphoenix.spi.context.BeanProviders;
 import io.graphoenix.spi.context.ModuleContext;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Provider;
 import org.tinylog.Logger;
-import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 import java.util.ServiceLoader;
@@ -45,12 +45,12 @@ public class BeanContext {
         return getSupplier(beanClass, name).get();
     }
 
-    public static <T> Mono<T> getMono(Class<T> beanClass) {
-        return getMono(beanClass, beanClass.getName());
+    public static <T> Instance<T> getInstance(Class<T> beanClass) {
+        return getInstance(beanClass, beanClass.getName());
     }
 
-    public static <T> Mono<T> getMono(Class<T> beanClass, String name) {
-        return getMonoSupplier(beanClass, name).get();
+    public static <T> Instance<T> getInstance(Class<T> beanClass, String name) {
+        return getInstanceSupplier(beanClass, name).get();
     }
 
     public static <T> Provider<T> getProvider(Class<T> beanClass) {
@@ -61,12 +61,12 @@ public class BeanContext {
         return getSupplier(beanClass, name)::get;
     }
 
-    public static <T> Provider<Mono<T>> getMonoProvider(Class<T> beanClass) {
-        return getMonoProvider(beanClass, beanClass.getName());
+    public static <T> Provider<Instance<T>> getInstanceProvider(Class<T> beanClass) {
+        return getInstanceProvider(beanClass, beanClass.getName());
     }
 
-    public static <T> Provider<Mono<T>> getMonoProvider(Class<T> beanClass, String name) {
-        return getMonoSupplier(beanClass, name)::get;
+    public static <T> Provider<Instance<T>> getInstanceProvider(Class<T> beanClass, String name) {
+        return getInstanceSupplier(beanClass, name)::get;
     }
 
     public static <T> Optional<T> getOptional(Class<T> beanClass) {
@@ -77,12 +77,12 @@ public class BeanContext {
         return getSupplierOptional(beanClass, name).map(Supplier::get);
     }
 
-    public static <T> Optional<Mono<T>> getMonoOptional(Class<T> beanClass) {
-        return getMonoOptional(beanClass, beanClass.getName());
+    public static <T> Optional<Instance<T>> getInstanceOptional(Class<T> beanClass) {
+        return getInstanceOptional(beanClass, beanClass.getName());
     }
 
-    public static <T> Optional<Mono<T>> getMonoOptional(Class<T> beanClass, String name) {
-        return getMonoSupplierOptional(beanClass, name).map(Supplier::get);
+    public static <T> Optional<Instance<T>> getInstanceOptional(Class<T> beanClass, String name) {
+        return getInstanceSupplierOptional(beanClass, name).map(Supplier::get);
     }
 
     public static <T> Optional<Provider<T>> getProviderOptional(Class<T> beanClass) {
@@ -93,12 +93,12 @@ public class BeanContext {
         return getSupplierOptional(beanClass, name).map(supplier -> supplier::get);
     }
 
-    public static <T> Optional<Provider<Mono<T>>> getMonoProviderOptional(Class<T> beanClass) {
-        return getMonoProviderOptional(beanClass, beanClass.getName());
+    public static <T> Optional<Provider<Instance<T>>> getInstanceProviderOptional(Class<T> beanClass) {
+        return getInstanceProviderOptional(beanClass, beanClass.getName());
     }
 
-    public static <T> Optional<Provider<Mono<T>>> getMonoProviderOptional(Class<T> beanClass, String name) {
-        return getMonoSupplierOptional(beanClass, name).map(supplier -> supplier::get);
+    public static <T> Optional<Provider<Instance<T>>> getInstanceProviderOptional(Class<T> beanClass, String name) {
+        return getInstanceSupplierOptional(beanClass, name).map(supplier -> supplier::get);
     }
 
     private static <T> Supplier<T> getSupplier(Class<T> beanClass, String name) {
@@ -106,9 +106,9 @@ public class BeanContext {
                 .orElseGet(() -> getAndCacheSupplier(beanClass, name).orElse(null));
     }
 
-    private static <T> Supplier<Mono<T>> getMonoSupplier(Class<T> beanClass, String name) {
-        return getMonoSupplierOptional(beanClass, name)
-                .orElseGet(() -> getAndCacheMonoSupplier(beanClass, name).orElse(null));
+    private static <T> Supplier<Instance<T>> getInstanceSupplier(Class<T> beanClass, String name) {
+        return getInstanceSupplierOptional(beanClass, name)
+                .orElseGet(() -> getAndCacheInstanceSupplier(beanClass, name).orElse(null));
     }
 
     @SuppressWarnings("unchecked")
@@ -121,10 +121,10 @@ public class BeanContext {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Optional<Supplier<Mono<T>>> getMonoSupplierOptional(Class<T> beanClass, String name) {
+    private static <T> Optional<Supplier<Instance<T>>> getInstanceSupplierOptional(Class<T> beanClass, String name) {
         Supplier<?> supplier = CONTEXT_CACHE.get(beanClass).get(name);
         if (supplier != null) {
-            return Optional.of((Supplier<Mono<T>>) supplier);
+            return Optional.of((Supplier<Instance<T>>) supplier);
         }
         return Optional.empty();
     }
@@ -141,13 +141,13 @@ public class BeanContext {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Optional<Supplier<Mono<T>>> getAndCacheMonoSupplier(Class<T> beanClass, String name) {
+    private static <T> Optional<Supplier<Instance<T>>> getAndCacheInstanceSupplier(Class<T> beanClass, String name) {
         Logger.debug("search bean instance for class {} name {}", beanClass.getName(), name);
         return moduleContexts.stream()
                 .map(moduleContext -> moduleContext.getOptional(beanClass, name))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
-                .map(supplier -> (Supplier<Mono<T>>) CONTEXT_CACHE.get(beanClass).putIfAbsent(name, supplier));
+                .map(supplier -> (Supplier<Instance<T>>) CONTEXT_CACHE.get(beanClass).putIfAbsent(name, supplier));
     }
 }

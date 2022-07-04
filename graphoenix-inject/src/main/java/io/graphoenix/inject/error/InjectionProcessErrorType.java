@@ -9,7 +9,7 @@ public enum InjectionProcessErrorType {
     PUBLIC_ANNOTATION_NOT_EXIST(-105, "public annotation not exist in: %s"),
     CONSTRUCTOR_NOT_EXIST(-106, "can't find constructor of %s"),
     PROVIDER_TYPE_NOT_EXIST(-107, "can't find type argument of provider"),
-    MONO_TYPE_NOT_EXIST(-108, "can't find type argument of mono"),
+    INSTANCE_TYPE_NOT_EXIST(-108, "can't find type argument of instance"),
     MODULE_PROVIDERS_METHOD_NOT_EXIST(-109, "can't find module class providers method of %s"),
     COMPONENT_GET_METHOD_NOT_EXIST(-110, "can't find component class get method of %s"),
 

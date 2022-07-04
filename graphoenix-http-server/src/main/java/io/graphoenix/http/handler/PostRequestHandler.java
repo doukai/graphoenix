@@ -2,7 +2,7 @@ package io.graphoenix.http.handler;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.gson.GsonBuilder;
-import io.graphoenix.core.context.RequestCache;
+import io.graphoenix.core.context.RequestInstanceFactory;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -18,8 +18,8 @@ import reactor.util.context.Context;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.graphoenix.core.context.RequestCache.REQUEST_ID;
-import static io.graphoenix.core.context.SessionCache.SESSION_ID;
+import static io.graphoenix.core.context.RequestInstanceFactory.REQUEST_ID;
+import static io.graphoenix.core.context.SessionInstanceFactory.SESSION_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
@@ -40,7 +40,7 @@ public class PostRequestHandler extends BaseRequestHandler {
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
 
         if (contentType.contentEquals(MimeType.Application.JSON)) {
-            return RequestCache.putIfAbsent(requestId, HttpServerRequest.class, request)
+            return RequestInstanceFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                                     .sendString(
@@ -65,7 +65,7 @@ public class PostRequestHandler extends BaseRequestHandler {
                                     .contextWrite(Context.of(REQUEST_ID, requestId))
                     );
         } else if (contentType.contentEquals(MimeType.Application.GRAPHQL)) {
-            return RequestCache.putIfAbsent(requestId, HttpServerRequest.class, request)
+            return RequestInstanceFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                                     .sendString(
@@ -92,7 +92,7 @@ public class PostRequestHandler extends BaseRequestHandler {
         } else {
             IllegalArgumentException illegalArgumentException = new IllegalArgumentException("unsupported content-type: ".concat(contentType));
             Logger.error(illegalArgumentException);
-            return RequestCache.putIfAbsent(requestId, HttpServerRequest.class, request)
+            return RequestInstanceFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                                     .status(HttpResponseStatus.BAD_REQUEST)
