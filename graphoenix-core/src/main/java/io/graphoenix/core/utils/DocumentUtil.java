@@ -72,6 +72,12 @@ public enum DocumentUtil {
         return graphqlToSelectionSet(charStream);
     }
 
+    public GraphqlParser.ObjectTypeDefinitionContext graphqlToObjectTypeDefinition(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToObjectTypeDefinition(charStream);
+    }
+
     public GraphqlParser.FieldDefinitionContext graphqlToFieldDefinition(String graphql) {
         CodePointCharStream charStream;
         charStream = CharStreams.fromString(graphql);
@@ -92,6 +98,10 @@ public enum DocumentUtil {
 
     public GraphqlParser.SelectionSetContext graphqlToSelectionSet(CharStream charStream) {
         return getGraphqlParser(charStream).selectionSet();
+    }
+
+    public GraphqlParser.ObjectTypeDefinitionContext graphqlToObjectTypeDefinition(CharStream charStream) {
+        return getGraphqlParser(charStream).objectTypeDefinition();
     }
 
     public GraphqlParser.FieldDefinitionContext graphqlToFieldDefinition(CharStream charStream) {

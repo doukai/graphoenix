@@ -31,6 +31,7 @@ dependencies {
     compile 'jakarta.json:jakarta.json-api:2.0.1'
     compile 'jakarta.validation:jakarta.validation-api:3.0.1'
     compile 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+    compile 'jakarta.ejb:jakarta.ejb-api:3.2.6'
     compile "org.tinylog:tinylog-api:2.4.1"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'

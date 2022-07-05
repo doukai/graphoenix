@@ -11,11 +11,7 @@ import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.ObjectType;
-import io.graphoenix.graphql.generator.translator.GraphQLApiBuilder;
-import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
-import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
-import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
-import io.graphoenix.graphql.generator.translator.JavaElementToObject;
+import io.graphoenix.graphql.generator.translator.*;
 import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
@@ -26,22 +22,10 @@ import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import org.eclipse.microprofile.graphql.Enum;
-import org.eclipse.microprofile.graphql.GraphQLApi;
-import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.Interface;
-import org.eclipse.microprofile.graphql.Mutation;
-import org.eclipse.microprofile.graphql.Query;
-import org.eclipse.microprofile.graphql.Source;
-import org.eclipse.microprofile.graphql.Type;
+import org.eclipse.microprofile.graphql.*;
 import org.tinylog.Logger;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -60,16 +44,10 @@ import java.util.stream.Collectors;
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
-@SupportedAnnotationTypes({
-        "org.eclipse.microprofile.graphql.GraphQLApi",
-        "org.eclipse.microprofile.graphql.Type",
-        "org.eclipse.microprofile.graphql.Enum",
-        "org.eclipse.microprofile.graphql.Interface",
-        "org.eclipse.microprofile.graphql.Input"
-})
+@SupportedAnnotationTypes("javax.ejb.Startup")
 @SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
-public class GraphQLApiProcessor extends AbstractProcessor {
+public class StartupProcessor extends AbstractProcessor {
 
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
@@ -92,7 +70,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         super.init(processingEnv);
         this.typeUtils = processingEnv.getTypeUtils();
         this.filer = processingEnv.getFiler();
-        BeanContext.load(GraphQLApiProcessor.class.getClassLoader());
+        BeanContext.load(StartupProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.documentBuilder = BeanContext.get(DocumentBuilder.class);
         this.javaElementToEnum = BeanContext.get(JavaElementToEnum.class);
@@ -111,7 +89,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
 
         try {
             manager.clearAll();
-            configRegister.registerPreset(GraphQLApiProcessor.class.getClassLoader());
+            configRegister.registerPreset(StartupProcessor.class.getClassLoader());
             configRegister.registerConfig(graphQLConfig, filer);
             mapper.registerFieldMaps();
             if (graphQLConfig.getBuild()) {
@@ -177,11 +155,75 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
         try {
-            FileObject microprofileGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/microprofile.gql");
-            Writer writer = microprofileGraphQL.openWriter();
+            FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
+            Writer writer = mainGraphQL.openWriter();
             writer.write(documentBuilder.getDocument().toString());
             writer.close();
 
+            List<GraphqlParser.ObjectTypeDefinitionContext> schemaObjectList = manager.getObjects()
+                    .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                    .collect(Collectors.toList());
+
+            for (GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext : schemaObjectList) {
+                FileObject schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText()).concat(".json"));
+                writer = schema.openWriter();
+                writer.write(jsonSchemaTranslator.objectToJsonSchemaString(objectTypeDefinitionContext));
+                writer.close();
+            }
+
+            invokeHandlerBuilder
+                    .setConfiguration(graphQLConfig)
+                    .setInvokeMethods(
+                            manager.getObjects()
+                                    .collect(Collectors.toMap(
+                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                            objectTypeDefinitionContext ->
+                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                                            .collect(Collectors.toMap(
+                                                                    element -> (TypeElement) element,
+                                                                    element -> element.getEnclosedElements().stream()
+                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
+                                                                            .map(subElement -> (ExecutableElement) subElement)
+                                                                            .filter(executableElement ->
+                                                                                    executableElement.getAnnotation(Query.class) == null &&
+                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
+                                                                                            executableElement.getParameters().stream().anyMatch(
+                                                                                                    variableElement ->
+                                                                                                            variableElement.getAnnotation(Source.class) != null &&
+                                                                                                                    variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                                                            )
+                                                                            )
+                                                                            .collect(Collectors.toList())
+                                                                    )
+                                                            )
+                                            )
+                                    )
+                    )
+                    .writeToFiler(filer);
+
+            connectionHandlerBuilder
+                    .setConfiguration(graphQLConfig)
+                    .writeToFiler(filer);
+
+            operationHandlerImplementer
+                    .setConfiguration(graphQLConfig)
+                    .setTypes(typeUtils)
+                    .setInvokeMethods(
+                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
+                                    .map(element -> (TypeElement) element)
+                                    .flatMap(typeElement ->
+                                            typeElement.getEnclosedElements().stream()
+                                                    .filter(element -> element.getKind().equals(ElementKind.METHOD))
+                                                    .map(element -> (ExecutableElement) element)
+                                                    .map(executableElement -> Tuple.of(typeElement, executableElement))
+                                    )
+                                    .collect(Collectors.toList())
+                    )
+                    .writeToFiler(filer);
+
+            selectionFilterBuilder
+                    .setConfiguration(graphQLConfig)
+                    .writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

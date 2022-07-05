@@ -17,6 +17,7 @@ import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
 import io.graphoenix.spi.antlr.IGraphQLUnionManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.antlr.v4.runtime.RuleContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
@@ -192,8 +194,54 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeDefinitionContext.enumTypeDefinition() != null) {
             graphQLEnumManager.register(typeDefinitionContext.enumTypeDefinition());
         } else if (typeDefinitionContext.objectTypeDefinition() != null) {
-            graphQLObjectManager.register(typeDefinitionContext.objectTypeDefinition());
-            graphQLFieldManager.register(typeDefinitionContext.objectTypeDefinition());
+            if (typeDefinitionContext.objectTypeDefinition().name().getText().equals("QueryType") && getObject("QueryType").isPresent()) {
+                Optional<GraphqlParser.ObjectTypeDefinitionContext> object = getObject("QueryType");
+                if (object.isPresent()) {
+                    String objectType = (object.get().description() == null ? "" : object.get().description().getText().concat(" "))
+                            .concat("type ")
+                            .concat(object.get().name().getText())
+                            .concat(" ")
+                            .concat(object.get().implementsInterfaces() == null ? "" : object.get().implementsInterfaces().getText().concat(" "))
+                            .concat(object.get().directives() == null ? "" : object.get().directives().getText().concat(" "))
+                            .concat("{")
+                            .concat(
+                                    Stream.concat(
+                                            object.get().fieldsDefinition().fieldDefinition().stream(),
+                                            typeDefinitionContext.objectTypeDefinition().fieldsDefinition().fieldDefinition().stream()
+                                    ).map(RuleContext::getText)
+                                            .collect(Collectors.joining(" "))
+                            )
+                            .concat("}");
+                    GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = DOCUMENT_UTIL.graphqlToObjectTypeDefinition(objectType);
+                    graphQLObjectManager.register(objectTypeDefinitionContext);
+                    graphQLFieldManager.register(objectTypeDefinitionContext);
+                }
+            } else if (typeDefinitionContext.objectTypeDefinition().name().getText().equals("MutationType") && getObject("MutationType").isPresent()) {
+                Optional<GraphqlParser.ObjectTypeDefinitionContext> object = getObject("MutationType");
+                if (object.isPresent()) {
+                    String objectType = (object.get().description() == null ? "" : object.get().description().getText().concat(" "))
+                            .concat("type ")
+                            .concat(object.get().name().getText())
+                            .concat(" ")
+                            .concat(object.get().implementsInterfaces() == null ? "" : object.get().implementsInterfaces().getText().concat(" "))
+                            .concat(object.get().directives() == null ? "" : object.get().directives().getText().concat(" "))
+                            .concat("{")
+                            .concat(
+                                    Stream.concat(
+                                            object.get().fieldsDefinition().fieldDefinition().stream(),
+                                            typeDefinitionContext.objectTypeDefinition().fieldsDefinition().fieldDefinition().stream()
+                                    ).map(RuleContext::getText)
+                                            .collect(Collectors.joining(" "))
+                            )
+                            .concat("}");
+                    GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = DOCUMENT_UTIL.graphqlToObjectTypeDefinition(objectType);
+                    graphQLObjectManager.register(objectTypeDefinitionContext);
+                    graphQLFieldManager.register(objectTypeDefinitionContext);
+                }
+            } else {
+                graphQLObjectManager.register(typeDefinitionContext.objectTypeDefinition());
+                graphQLFieldManager.register(typeDefinitionContext.objectTypeDefinition());
+            }
         } else if (typeDefinitionContext.interfaceTypeDefinition() != null) {
             graphQLInterfaceManager.register(typeDefinitionContext.interfaceTypeDefinition());
             graphQLFieldManager.register(typeDefinitionContext.interfaceTypeDefinition());
