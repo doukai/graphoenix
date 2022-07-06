@@ -45,6 +45,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
@@ -52,14 +53,11 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
-import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
-import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes("javax.ejb.Startup")
@@ -189,57 +187,11 @@ public class StartupProcessor extends AbstractProcessor {
                 writer.close();
             }
 
-            invokeHandlerBuilder
-                    .setConfiguration(graphQLConfig)
-                    .setInvokeMethods(
-                            manager.getObjects()
-                                    .collect(Collectors.toMap(
-                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                                    objectTypeDefinitionContext ->
-                                                            objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                                    .filter(fieldDefinitionContext -> manager.isInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                                                    .flatMap(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("invoke")))
-                                                                    .map(directiveContext ->
-                                                                            new AbstractMap.SimpleEntry<>(
-                                                                                    directiveContext.arguments().argument().stream()
-                                                                                            .filter(argumentContext -> argumentContext.name().getText().equals("className"))
-                                                                                            .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
-                                                                                            .findFirst()
-                                                                                            .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
-                                                                                            .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("className"))),
-                                                                                    directiveContext.arguments().argument().stream()
-                                                                                            .filter(argumentContext -> argumentContext.name().getText().equals("methodName"))
-                                                                                            .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
-                                                                                            .findFirst()
-                                                                                            .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
-                                                                                            .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("methodName")))
-                                                                            )
-                                                                    )
-                                                                    .collect(
-                                                                            Collectors.groupingBy(
-                                                                                    AbstractMap.SimpleEntry<String,String>::getKey,
-                                                                                    Collectors.mapping(
-                                                                                            AbstractMap.SimpleEntry<String,String>::getValue,
-                                                                                            Collectors.toList()
-                                                                                    )
-                                                                            )
-                                                                    )
-                                            )
-                                    )
-                    )
-                    .writeToFiler(filer);
+            invokeHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            connectionHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            operationHandlerImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
+            selectionFilterBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
 
-            connectionHandlerBuilder
-                    .setConfiguration(graphQLConfig)
-                    .writeToFiler(filer);
-
-            operationHandlerImplementer
-                    .setConfiguration(graphQLConfig)
-                    .writeToFiler(filer);
-
-            selectionFilterBuilder
-                    .setConfiguration(graphQLConfig)
-                    .writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

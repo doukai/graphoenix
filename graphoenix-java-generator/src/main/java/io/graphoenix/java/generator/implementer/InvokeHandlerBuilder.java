@@ -9,6 +9,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,10 +19,14 @@ import org.tinylog.Logger;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 @ApplicationScoped
 public class InvokeHandlerBuilder {
@@ -29,22 +34,51 @@ public class InvokeHandlerBuilder {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
-    private Map<String, Map<String, List<String>>> invokeMethods;
+    private final Map<String, Map<String, List<String>>> invokeMethods;
 
     @Inject
     public InvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
+        this.invokeMethods = manager.getObjects()
+                .collect(Collectors.toMap(
+                        objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                        objectTypeDefinitionContext ->
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .filter(fieldDefinitionContext -> manager.isInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                        .flatMap(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                                        .map(directiveContext ->
+                                                new AbstractMap.SimpleEntry<>(
+                                                        directiveContext.arguments().argument().stream()
+                                                                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                                                                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                                                                .findFirst()
+                                                                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                                                                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("className"))),
+                                                        directiveContext.arguments().argument().stream()
+                                                                .filter(argumentContext -> argumentContext.name().getText().equals("methodName"))
+                                                                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                                                                .findFirst()
+                                                                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                                                                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("methodName")))
+                                                )
+                                        )
+                                        .collect(
+                                                Collectors.groupingBy(
+                                                        AbstractMap.SimpleEntry<String, String>::getKey,
+                                                        Collectors.mapping(
+                                                                AbstractMap.SimpleEntry<String, String>::getValue,
+                                                                Collectors.toList()
+                                                        )
+                                                )
+                                        )
+                        )
+                );
     }
 
     public InvokeHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
-    }
-
-    public InvokeHandlerBuilder setInvokeMethods(Map<String, Map<String, List<String>>> invokeMethods) {
-        this.invokeMethods = invokeMethods;
         return this;
     }
 

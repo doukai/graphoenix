@@ -18,10 +18,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GraphQLConfigRegister {
@@ -89,12 +87,17 @@ public class GraphQLConfigRegister {
             URI uri = urlIterator.next().toURI();
             Map<String, String> env = new HashMap<>();
             try (FileSystem fileSystem = FileSystems.newFileSystem(uri, env)) {
-                Files.list(fileSystem.getPath("META-INF/graphql"))
-                        .forEach(path -> {
-                                    Try.run(() -> manager.registerPath(path));
-                                    Logger.info("registered preset path {} from {}", path, classLoader.getName());
-                                }
-                        );
+                List<Path> pathList = Files.list(fileSystem.getPath("META-INF/graphql")).collect(Collectors.toList());
+                Optional<Path> microprofile = pathList.stream().filter(path -> path.getFileName().getFileName().toString().equals("microprofile.gql")).findFirst();
+                if (microprofile.isPresent()) {
+                    manager.registerPath(microprofile.get());
+                } else {
+                    pathList.forEach(path -> {
+                                Try.run(() -> manager.registerPath(path));
+                                Logger.info("registered preset path {} from {}", path, classLoader.getName());
+                            }
+                    );
+                }
             } catch (IllegalArgumentException e) {
                 Logger.warn(e);
             }

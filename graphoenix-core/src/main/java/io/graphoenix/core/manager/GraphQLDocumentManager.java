@@ -1,6 +1,5 @@
 package io.graphoenix.core.manager;
 
-import com.google.common.base.Strings;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
@@ -18,7 +17,6 @@ import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
 import io.graphoenix.spi.antlr.IGraphQLUnionManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.antlr.v4.runtime.RuleContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -195,24 +193,8 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeDefinitionContext.enumTypeDefinition() != null) {
             graphQLEnumManager.register(typeDefinitionContext.enumTypeDefinition());
         } else if (typeDefinitionContext.objectTypeDefinition() != null) {
-            if (typeDefinitionContext.objectTypeDefinition().name().getText().equals("QueryType") && getObject("QueryType").isPresent()) {
-                Optional<GraphqlParser.ObjectTypeDefinitionContext> object = getObject("QueryType");
-                if (object.isPresent()) {
-                    GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = mergeObject(getObject("QueryType").get(), typeDefinitionContext.objectTypeDefinition());
-                    graphQLObjectManager.register(objectTypeDefinitionContext);
-                    graphQLFieldManager.register(objectTypeDefinitionContext);
-                }
-            } else if (typeDefinitionContext.objectTypeDefinition().name().getText().equals("MutationType") && getObject("MutationType").isPresent()) {
-                Optional<GraphqlParser.ObjectTypeDefinitionContext> object = getObject("MutationType");
-                if (object.isPresent()) {
-                    GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = mergeObject(getObject("MutationType").get(), typeDefinitionContext.objectTypeDefinition());
-                    graphQLObjectManager.register(objectTypeDefinitionContext);
-                    graphQLFieldManager.register(objectTypeDefinitionContext);
-                }
-            } else {
-                graphQLObjectManager.register(typeDefinitionContext.objectTypeDefinition());
-                graphQLFieldManager.register(typeDefinitionContext.objectTypeDefinition());
-            }
+            graphQLObjectManager.register(typeDefinitionContext.objectTypeDefinition());
+            graphQLFieldManager.register(typeDefinitionContext.objectTypeDefinition());
         } else if (typeDefinitionContext.interfaceTypeDefinition() != null) {
             graphQLInterfaceManager.register(typeDefinitionContext.interfaceTypeDefinition());
             graphQLFieldManager.register(typeDefinitionContext.interfaceTypeDefinition());
@@ -222,50 +204,6 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             graphQLInputObjectManager.register(typeDefinitionContext.inputObjectTypeDefinition());
             graphQLInputValueManager.register(typeDefinitionContext.inputObjectTypeDefinition());
         }
-    }
-
-    protected GraphqlParser.ObjectTypeDefinitionContext mergeObject(GraphqlParser.ObjectTypeDefinitionContext source, GraphqlParser.ObjectTypeDefinitionContext target) {
-        String description = Stream.concat(
-                        Stream.ofNullable(source.description()),
-                        Stream.ofNullable(target.description())
-                )
-                .map(descriptionContext -> descriptionContext.StringValue().getText())
-                .collect(Collectors.joining(" "));
-
-        String interfaces = Stream.concat(
-                        Stream.ofNullable(source.implementsInterfaces()),
-                        Stream.ofNullable(target.implementsInterfaces())
-                )
-                .flatMap(implementsInterfacesContext -> implementsInterfacesContext.typeName().stream())
-                .map(RuleContext::getText)
-                .collect(Collectors.joining(" & "));
-
-        String directives = Stream.concat(
-                        Stream.ofNullable(source.directives()),
-                        Stream.ofNullable(target.directives())
-                )
-                .flatMap(directivesContext -> directivesContext.directive().stream())
-                .map(RuleContext::getText)
-                .collect(Collectors.joining(" "));
-
-        String fields = Stream.concat(
-                        Stream.ofNullable(source.fieldsDefinition()),
-                        Stream.ofNullable(target.fieldsDefinition())
-                )
-                .flatMap(fieldsDefinitionContext -> fieldsDefinitionContext.fieldDefinition().stream())
-                .map(RuleContext::getText)
-                .collect(Collectors.joining(" "));
-
-        String objectType = (Strings.isNullOrEmpty(description) ? "" : "\"".concat(directives).concat("\""))
-                .concat("type ").concat(source.name().getText())
-                .concat(" ")
-                .concat(Strings.isNullOrEmpty(interfaces) ? "" : "implements ".concat(interfaces))
-                .concat(Strings.isNullOrEmpty(directives) ? "" : directives)
-                .concat("{")
-                .concat(Strings.isNullOrEmpty(fields) ? "" : fields)
-                .concat("}");
-
-        return DOCUMENT_UTIL.graphqlToObjectTypeDefinition(objectType);
     }
 
     @Override

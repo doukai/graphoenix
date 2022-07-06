@@ -92,12 +92,8 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         try {
             manager.clearAll();
             configRegister.registerConfig(graphQLConfig, filer);
-            FileObject resource = filer.getResource(StandardLocation.SOURCE_PATH, "", "META-INF/graphql");
-            if (resource != null) {
-                manager.registerPath(Path.of(resource.toUri()));
-            }
-        } catch (FileNotFoundException e) {
-            Logger.info(e);
+            manager.registerPath(Path.of(filer.getResource(StandardLocation.SOURCE_PATH, "", "META-INF/graphql").toUri()));
+        } catch (FileNotFoundException ignored) {
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

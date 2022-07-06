@@ -58,6 +58,10 @@ public class ApiTest {
     public List<Integer> getOrgLevel3(@Source Organization organization) {
         return null;
     }
+    @Query
+    public List<Integer> getOrgLevel5(@Source Organization organization) {
+        return null;
+    }
 
     public Boolean getRoleDisable(@Source Organization organization) {
         return false;

@@ -4,7 +4,6 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.Streams;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.generator.document.Directive;
@@ -98,8 +97,9 @@ public class DocumentBuilder {
     }
 
     public Document getDocument() {
-        return new Document()
-                .addDefinition(buildSchema().toString())
+        Document document = new Document();
+        buildSchema().ifPresent(schema -> document.addDefinition(schema.toString()));
+        return document
                 .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getEnums().map(this::buildEnum).map(EnumType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
@@ -109,10 +109,27 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
-    public Schema buildSchema() {
-        return new Schema()
-                .setQuery(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.QUERY_TYPE_NOT_EXIST)))
-                .setMutation(manager.getMutationOperationTypeName().orElse(null));
+    public Optional<Schema> buildSchema() {
+        Optional<String> queryOperationTypeName = manager.getQueryOperationTypeName();
+        Optional<String> mutationOperationTypeName = manager.getMutationOperationTypeName();
+        if (queryOperationTypeName.isPresent() && mutationOperationTypeName.isPresent()) {
+            return Optional.of(
+                    new Schema()
+                            .setQuery(queryOperationTypeName.get())
+                            .setMutation(mutationOperationTypeName.get())
+            );
+        } else if (queryOperationTypeName.isPresent()) {
+            return Optional.of(
+                    new Schema()
+                            .setQuery(queryOperationTypeName.get())
+            );
+        } else if (mutationOperationTypeName.isPresent()) {
+            return Optional.of(
+                    new Schema()
+                            .setMutation(mutationOperationTypeName.get())
+            );
+        }
+        return Optional.empty();
     }
 
     public ScalarType buildScalarType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {

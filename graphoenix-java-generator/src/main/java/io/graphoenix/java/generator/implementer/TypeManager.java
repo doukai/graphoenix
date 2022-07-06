@@ -18,10 +18,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.AbstractMap;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
@@ -247,5 +244,29 @@ public class TypeManager {
                 )
                 .findFirst()
                 .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("returnClassName")));
+    }
+
+    public TypeName getTypeNameByString(String className) {
+        if (className.contains("<")) {
+            int index = className.indexOf('<');
+            String className1 = className.substring(0, index);
+            String className2 = className.substring(index + 1, className.length() - 1);
+            if (className2.contains(",")) {
+                return ParameterizedTypeName.get(ClassName.bestGuess(className1), Arrays.stream(className2.split(",")).map(this::getTypeNameByString).toArray(TypeName[]::new));
+            } else {
+                return ParameterizedTypeName.get(ClassName.bestGuess(className1), getTypeNameByString(className2));
+            }
+        } else {
+            return ClassName.bestGuess(className);
+        }
+    }
+
+    public ClassName getClassNameByString(String className) {
+        if (className.contains("<")) {
+            int index = className.indexOf('<');
+            return ClassName.bestGuess(className.substring(0, index));
+        } else {
+            return ClassName.bestGuess(className);
+        }
     }
 }
