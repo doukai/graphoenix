@@ -16,9 +16,7 @@ import jakarta.inject.Provider;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +29,7 @@ public class InvokeHandlerBuilder {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
-    private Map<String, Map<TypeElement, List<ExecutableElement>>> invokeMethods;
+    private Map<String, Map<String, List<String>>> invokeMethods;
 
     @Inject
     public InvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
@@ -45,7 +43,7 @@ public class InvokeHandlerBuilder {
         return this;
     }
 
-    public InvokeHandlerBuilder setInvokeMethods(Map<String, Map<TypeElement, List<ExecutableElement>>> invokeMethods) {
+    public InvokeHandlerBuilder setInvokeMethods(Map<String, Map<String, List<String>>> invokeMethods) {
         this.invokeMethods = invokeMethods;
         return this;
     }
@@ -72,10 +70,10 @@ public class InvokeHandlerBuilder {
 
     private Set<FieldSpec> buildFields() {
         return this.invokeMethods.values().stream()
-                .flatMap(typeElementListMap ->
-                        typeElementListMap.keySet().stream()
-                                .map(typeElement ->
-                                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)), typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString()))
+                .flatMap(classMap ->
+                        classMap.keySet().stream()
+                                .map(className ->
+                                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()))
                                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                                 .build()
                                 )
@@ -84,27 +82,27 @@ public class InvokeHandlerBuilder {
     }
 
     private MethodSpec buildConstructor() {
-        Set<TypeElement> invokeElement = invokeMethods.values().stream()
+        Set<String> classNameSet = invokeMethods.values().stream()
                 .flatMap(value -> value.keySet().stream())
                 .collect(Collectors.toSet());
 
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
-                .addParameters(invokeElement.stream()
-                        .map(typeElement ->
+                .addParameters(classNameSet.stream()
+                        .map(className ->
                                 ParameterSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)),
-                                        typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString())
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)),
+                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())
                                 ).build()
                         )
                         .collect(Collectors.toList())
                 );
 
-        invokeElement.forEach(typeElement ->
+        classNameSet.forEach(className ->
                 builder.addStatement("this.$L = $L",
-                        typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString()),
-                        typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString())
+                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
+                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())
                 )
         );
 
@@ -130,13 +128,13 @@ public class InvokeHandlerBuilder {
         if (invokeMethods.get(objectTypeDefinitionContext.name().getText()) != null) {
             builder.beginControlFlow("if ($L != null)", getParameterName(objectTypeDefinitionContext));
             invokeMethods.get(objectTypeDefinitionContext.name().getText())
-                    .forEach((key, value) ->
-                            value.forEach(executableElement ->
+                    .forEach((className, methodNames) ->
+                            methodNames.forEach(methodName ->
                                     builder.addStatement("$L.$L($L.get().$L($L))",
                                             getParameterName(objectTypeDefinitionContext),
-                                            typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(executableElement.getSimpleName().toString())),
-                                            typeManager.typeToLowerCamelName(key.getSimpleName().toString()),
-                                            executableElement.getSimpleName().toString(),
+                                            typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodName)),
+                                            typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
+                                            methodName,
                                             getParameterName(objectTypeDefinitionContext)
                                     )
                             )

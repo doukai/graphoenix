@@ -11,7 +11,11 @@ import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.ObjectType;
-import io.graphoenix.graphql.generator.translator.*;
+import io.graphoenix.graphql.generator.translator.GraphQLApiBuilder;
+import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
+import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
+import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
+import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
@@ -19,13 +23,24 @@ import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
 import io.graphoenix.spi.annotation.SchemaBean;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import org.eclipse.microprofile.graphql.Enum;
-import org.eclipse.microprofile.graphql.*;
+import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.Interface;
+import org.eclipse.microprofile.graphql.Mutation;
+import org.eclipse.microprofile.graphql.Query;
+import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.graphql.Type;
 import org.tinylog.Logger;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -37,11 +52,14 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
+import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes("javax.ejb.Startup")
@@ -176,26 +194,36 @@ public class StartupProcessor extends AbstractProcessor {
                     .setInvokeMethods(
                             manager.getObjects()
                                     .collect(Collectors.toMap(
-                                            objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                            objectTypeDefinitionContext ->
-                                                    roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                                            .collect(Collectors.toMap(
-                                                                    element -> (TypeElement) element,
-                                                                    element -> element.getEnclosedElements().stream()
-                                                                            .filter(subElement -> subElement.getKind().equals(ElementKind.METHOD))
-                                                                            .map(subElement -> (ExecutableElement) subElement)
-                                                                            .filter(executableElement ->
-                                                                                    executableElement.getAnnotation(Query.class) == null &&
-                                                                                            executableElement.getAnnotation(Mutation.class) == null &&
-                                                                                            executableElement.getParameters().stream().anyMatch(
-                                                                                                    variableElement ->
-                                                                                                            variableElement.getAnnotation(Source.class) != null &&
-                                                                                                                    variableElement.asType().toString().equals(graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
-                                                                                            )
+                                                    objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                                    objectTypeDefinitionContext ->
+                                                            objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                    .filter(fieldDefinitionContext -> manager.isInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                                    .flatMap(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                                                                    .map(directiveContext ->
+                                                                            new AbstractMap.SimpleEntry<>(
+                                                                                    directiveContext.arguments().argument().stream()
+                                                                                            .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                                                                                            .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                                                                                            .findFirst()
+                                                                                            .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                                                                                            .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("className"))),
+                                                                                    directiveContext.arguments().argument().stream()
+                                                                                            .filter(argumentContext -> argumentContext.name().getText().equals("methodName"))
+                                                                                            .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                                                                                            .findFirst()
+                                                                                            .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                                                                                            .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("methodName")))
                                                                             )
-                                                                            .collect(Collectors.toList())
                                                                     )
-                                                            )
+                                                                    .collect(
+                                                                            Collectors.groupingBy(
+                                                                                    AbstractMap.SimpleEntry<String,String>::getKey,
+                                                                                    Collectors.mapping(
+                                                                                            AbstractMap.SimpleEntry<String,String>::getValue,
+                                                                                            Collectors.toList()
+                                                                                    )
+                                                                            )
+                                                                    )
                                             )
                                     )
                     )
@@ -207,18 +235,6 @@ public class StartupProcessor extends AbstractProcessor {
 
             operationHandlerImplementer
                     .setConfiguration(graphQLConfig)
-                    .setTypes(typeUtils)
-                    .setInvokeMethods(
-                            roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
-                                    .map(element -> (TypeElement) element)
-                                    .flatMap(typeElement ->
-                                            typeElement.getEnclosedElements().stream()
-                                                    .filter(element -> element.getKind().equals(ElementKind.METHOD))
-                                                    .map(element -> (ExecutableElement) element)
-                                                    .map(executableElement -> Tuple.of(typeElement, executableElement))
-                                    )
-                                    .collect(Collectors.toList())
-                    )
                     .writeToFiler(filer);
 
             selectionFilterBuilder

@@ -140,6 +140,11 @@ input MapWith {
     to: String
 }
 
+input InvokeParameter {
+    name: String
+    className: String
+}
+
 directive @dataType(
     type: String
     length: Int
@@ -157,6 +162,8 @@ directive @map(
 directive @invoke(
     className: String
     methodName: String
+    parameters: [InvokeParameter]
+    returnClassName: String
 ) on FIELD_DEFINITION
 
 directive @cursor on FIELD_DEFINITION

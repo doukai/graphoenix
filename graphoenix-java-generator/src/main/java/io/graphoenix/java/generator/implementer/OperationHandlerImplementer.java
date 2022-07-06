@@ -1,11 +1,9 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -18,7 +16,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.BaseOperationHandler;
@@ -29,34 +26,27 @@ import io.graphoenix.spi.dto.type.OperationType;
 import io.graphoenix.spi.handler.MutationHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.graphoenix.spi.handler.QueryHandler;
-import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import org.eclipse.microprofile.graphql.Mutation;
-import org.eclipse.microprofile.graphql.Query;
 import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Types;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.core.error.ElementProcessErrorType.INVOKE_METHOD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
@@ -66,8 +56,6 @@ public class OperationHandlerImplementer {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
-    private Types typeUtils;
-    private List<Tuple2<TypeElement, ExecutableElement>> invokeMethods;
 
     @Inject
     public OperationHandlerImplementer(IGraphQLDocumentManager manager, TypeManager typeManager) {
@@ -78,16 +66,6 @@ public class OperationHandlerImplementer {
     public OperationHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
-    }
-
-    public OperationHandlerImplementer setTypes(Types typeUtils) {
-        this.typeUtils = typeUtils;
-        return this;
-    }
-
-    public OperationHandlerImplementer setInvokeMethods(List<Tuple2<TypeElement, ExecutableElement>> invokeMethods) {
-        this.invokeMethods = invokeMethods;
         return this;
     }
 
@@ -186,19 +164,23 @@ public class OperationHandlerImplementer {
                         ).build()
                 )
                 .addMethod(buildOperationMethod(type))
-                .addFields(buildFields(type))
                 .addMethod(buildConstructor(type))
                 .addMethods(buildMethods(type));
 
-        if (type.equals(MUTATION)) {
-            builder.addField(
-                    FieldSpec.builder(
-                            ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
-                            "validator",
-                            Modifier.PRIVATE,
-                            Modifier.FINAL
-                    ).build()
-            );
+        if (type.equals(QUERY)) {
+            builder.addFields(buildQueryFields());
+        } else if (type.equals(MUTATION)) {
+            builder.addFields(buildMutationFields())
+                    .addField(
+                            FieldSpec.builder(
+                                    ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
+                                    "validator",
+                                    Modifier.PRIVATE,
+                                    Modifier.FINAL
+                            ).build()
+                    );
+        } else {
+            throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
         return builder.build();
     }
@@ -207,25 +189,37 @@ public class OperationHandlerImplementer {
         switch (type) {
             case QUERY:
                 return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
-                        .map(fieldDefinitionContext -> buildMethod(fieldDefinitionContext, type))
+                        .map(this::buildMethod)
                         .collect(Collectors.toCollection(LinkedHashSet::new));
             case MUTATION:
                 return manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
-                        .map(fieldDefinitionContext -> buildMethod(fieldDefinitionContext, type))
+                        .map(this::buildMethod)
                         .collect(Collectors.toCollection(LinkedHashSet::new));
             default:
                 throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
     }
 
-    private Set<FieldSpec> buildFields(OperationType type) {
-        return this.invokeMethods.stream()
-                .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
-                .map(Tuple2::_1)
-                .collect(Collectors.toCollection(LinkedHashSet::new))
-                .stream()
-                .map(typeElement ->
-                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)), typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString()))
+    private Set<FieldSpec> buildQueryFields() {
+        return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                .map(typeManager::getClassName)
+                .distinct()
+                .map(className ->
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()))
+                                .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
+                                .build()
+                )
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private Set<FieldSpec> buildMutationFields() {
+        return manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                .map(typeManager::getClassName)
+                .distinct()
+                .map(className ->
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -260,43 +254,40 @@ public class OperationHandlerImplementer {
             builder.addStatement("validator.get().validateOperation(operationDefinitionContext)");
         }
         builder.addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> $T.parseString(jsonString))",
-                ParameterizedTypeName.get(Mono.class, JsonElement.class),
-                operationName,
-                ClassName.get(JsonParser.class)
-        )
+                        ParameterizedTypeName.get(Mono.class, JsonElement.class),
+                        operationName,
+                        ClassName.get(JsonParser.class)
+                )
                 .addStatement("return result.flatMap(jsonElement -> invoke(connectionHandler.get().$L(jsonElement, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName);
         return builder.build();
     }
 
-    private MethodSpec buildMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType type) {
+    private MethodSpec buildMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ClassName.get(JsonElement.class), "jsonElement")
                 .addParameter(ClassName.get(GraphqlParser.SelectionContext.class), "selectionContext");
 
-        Optional<Tuple2<String, String>> invokeDirective = typeManager.getInvokeDirective(fieldDefinitionContext);
         boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         String fieldTypeParameterName = typeManager.typeToLowerCamelName(manager.getFieldTypeName(fieldDefinitionContext.type()));
 
-        if (invokeDirective.isPresent()) {
+        if (manager.isInvokeField(fieldDefinitionContext)) {
             builder.returns(ParameterizedTypeName.get(ClassName.get(Flux.class), ClassName.get(JsonElement.class)));
-            Tuple2<TypeElement, ExecutableElement> method = invokeMethods.stream()
-                    .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
-                    .filter(tuple2 -> typeManager.getInvokeFieldName(tuple2._2().getSimpleName().toString()).equals(fieldDefinitionContext.name().getText()))
-                    .findFirst()
-                    .orElseThrow(() -> new ElementProcessException(INVOKE_METHOD_NOT_EXIST.bind(type.name(), fieldDefinitionContext.name().getText())));
+            String methodName = typeManager.getMethodName(fieldDefinitionContext);
+            List<AbstractMap.SimpleEntry<String, String>> parameters = typeManager.getParameters(fieldDefinitionContext);
+            String returnClassName = typeManager.getReturnClassName(fieldDefinitionContext);
 
             builder.addStatement("$T result = $L.get().$L($L)",
-                    ClassName.get(method._2().getReturnType()),
-                    typeManager.typeToLowerCamelName(method._1().getSimpleName().toString()),
-                    method._2().getSimpleName().toString(),
-                    CodeBlock.join(method._2().getParameters().stream()
-                            .map(variableElement ->
+                    ClassName.bestGuess(returnClassName),
+                    typeManager.typeToLowerCamelName(methodName),
+                    methodName,
+                    CodeBlock.join(parameters.stream()
+                            .map(parameter ->
                                     CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
-                                            variableElement.getSimpleName().toString(),
-                                            ClassName.get(variableElement.asType())
+                                            parameter.getKey(),
+                                            ClassName.bestGuess(parameter.getValue())
                                     )
                             )
                             .collect(Collectors.toList()), ",")
@@ -309,9 +300,9 @@ public class OperationHandlerImplementer {
                 } else {
                     filterMethodName = fieldTypeParameterName;
                 }
-                if (typeUtils.asElement(method._2().getReturnType()).getSimpleName().contentEquals(Flux.class.getSimpleName())) {
+                if (returnClassName.equals(Flux.class.getName())) {
                     builder.addStatement("return result.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
-                } else if (typeUtils.asElement(method._2().getReturnType()).getSimpleName().contentEquals(Mono.class.getSimpleName())) {
+                } else if (returnClassName.equals(Mono.class.getName())) {
                     builder.addStatement("return $T.from(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Flux.class), filterMethodName);
                 } else {
                     builder.addStatement("return $T.just(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Flux.class), filterMethodName);
@@ -323,9 +314,9 @@ public class OperationHandlerImplementer {
                 } else {
                     filterMethodName = "toJsonPrimitive";
                 }
-                if (typeUtils.asElement(method._2().getReturnType()).getSimpleName().contentEquals(Flux.class.getSimpleName())) {
+                if (returnClassName.equals(Flux.class.getName())) {
                     builder.addStatement("return result.map(item-> $L(item))", filterMethodName);
-                } else if (typeUtils.asElement(method._2().getReturnType()).getSimpleName().contentEquals(Mono.class.getSimpleName())) {
+                } else if (returnClassName.equals(Mono.class.getName())) {
                     builder.addStatement("return $T.from(result).map(item-> $L(item))", ClassName.get(Flux.class), filterMethodName);
                 } else {
                     builder.addStatement("return $T.just(result).map(item-> $L(item))", ClassName.get(Flux.class), filterMethodName);
@@ -336,15 +327,15 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                            "$T type = new $T<$T>() {}.getType()",
-                            ClassName.get(Type.class),
-                            ClassName.get(TypeToken.class),
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement(
-                            "$T result = $L.create().fromJson(jsonElement, type)",
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                            "gsonBuilder"
-                    ).beginControlFlow("if(result == null)")
+                                    "$T type = new $T<$T>() {}.getType()",
+                                    ClassName.get(Type.class),
+                                    ClassName.get(TypeToken.class),
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).addStatement(
+                                    "$T result = $L.create().fromJson(jsonElement, type)",
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                    "gsonBuilder"
+                            ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class))
                             .endControlFlow()
                             .addStatement(
@@ -392,22 +383,20 @@ public class OperationHandlerImplementer {
             builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
                     .addStatement("this.validator = validator");
         }
-        invokeMethods.stream()
-                .filter(tuple2 -> tuple2._2().getAnnotation(getAnnotationByType(type)) != null)
-                .map(Tuple2::_1)
-                .collect(Collectors.toCollection(LinkedHashSet::new))
-                .forEach(typeElement ->
-                        builder.addParameter(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(typeElement)),
-                                typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString())
-                        ).addStatement("this.$L = $L",
-                                typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString()),
-                                typeManager.typeToLowerCamelName(typeElement.getSimpleName().toString())
-                        )
-                );
-
         switch (type) {
             case QUERY:
+                manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                        .map(typeManager::getClassName)
+                        .forEach(className ->
+                                builder.addParameter(
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)),
+                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())
+                                ).addStatement("this.$L = $L",
+                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
+                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())
+                                )
+                        );
                 manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
                         .filter(fieldDefinitionContext -> typeManager.getInvokeDirective(fieldDefinitionContext).isEmpty())
                         .forEach(fieldDefinitionContext ->
@@ -426,6 +415,18 @@ public class OperationHandlerImplementer {
                         );
                 break;
             case MUTATION:
+                manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
+                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                        .map(typeManager::getClassName)
+                        .forEach(className ->
+                                builder.addParameter(
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)),
+                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())
+                                ).addStatement("this.$L = $L",
+                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
+                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())
+                                )
+                        );
                 manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
                         .filter(fieldDefinitionContext -> typeManager.getInvokeDirective(fieldDefinitionContext).isEmpty())
                         .forEach(fieldDefinitionContext ->
@@ -447,16 +448,5 @@ public class OperationHandlerImplementer {
                 throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
         return builder.build();
-    }
-
-    private Class<? extends Annotation> getAnnotationByType(OperationType type) {
-        switch (type) {
-            case QUERY:
-                return Query.class;
-            case MUTATION:
-                return Mutation.class;
-            default:
-                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
-        }
     }
 }

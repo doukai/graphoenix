@@ -15,30 +15,11 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> fieldDefinitionTree = new LinkedHashMap<>();
 
-    private final Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> invokeFieldDefinitionTree = new LinkedHashMap<>();
-
     @Override
     public Map<String, Map<String, GraphqlParser.FieldDefinitionContext>> register(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         Map<String, GraphqlParser.FieldDefinitionContext> fieldMap = new LinkedHashMap<>();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().forEach(fieldDefinitionContext -> fieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext));
         fieldDefinitionTree.put(objectTypeDefinitionContext.name().getText(), fieldMap);
-
-        Map<String, GraphqlParser.FieldDefinitionContext> invokeFieldMap = new LinkedHashMap<>();
-        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                .filter(fieldDefinitionContext ->
-                        fieldDefinitionContext.directives().directive().stream()
-                                .anyMatch(directiveContext ->
-                                        Arrays.stream(INVOKE_DIRECTIVES)
-                                                .anyMatch(name -> directiveContext.name().getText().equals(name))
-                                )
-                )
-                .forEach(fieldDefinitionContext -> {
-                            invokeFieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext);
-                            Logger.info("registered object {} field {}", objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
-                        }
-                );
-        invokeFieldDefinitionTree.put(objectTypeDefinitionContext.name().getText(), invokeFieldMap);
         return fieldDefinitionTree;
     }
 
@@ -47,23 +28,6 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
         Map<String, GraphqlParser.FieldDefinitionContext> fieldMap = new LinkedHashMap<>();
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().forEach(fieldDefinitionContext -> fieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext));
         fieldDefinitionTree.put(interfaceTypeDefinitionContext.name().getText(), fieldMap);
-
-        Map<String, GraphqlParser.FieldDefinitionContext> invokeFieldMap = new LinkedHashMap<>();
-        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                .filter(fieldDefinitionContext ->
-                        fieldDefinitionContext.directives().directive().stream()
-                                .anyMatch(directiveContext ->
-                                        Arrays.stream(INVOKE_DIRECTIVES)
-                                                .anyMatch(name -> directiveContext.name().getText().equals(name))
-                                )
-                )
-                .forEach(fieldDefinitionContext -> {
-                            invokeFieldMap.put(fieldDefinitionContext.name().getText(), fieldDefinitionContext);
-                            Logger.info("registered interface {} field {}", interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
-                        }
-                );
-        invokeFieldDefinitionTree.put(interfaceTypeDefinitionContext.name().getText(), invokeFieldMap);
         return fieldDefinitionTree;
     }
 
@@ -102,7 +66,8 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     @Override
     public boolean isInvokeField(String objectTypeName, String fieldName) {
-        return invokeFieldDefinitionTree.get(objectTypeName).containsKey(fieldName);
+        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
+        return fieldDefinitionContext.directives() != null && isInvokeField(fieldDefinitionContext);
     }
 
     @Override
@@ -113,7 +78,7 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     @Override
     public boolean isFunctionField(String objectTypeName, String fieldName) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME));
+        return fieldDefinitionContext.directives() != null && isFunctionField(fieldDefinitionContext);
     }
 
     @Override
@@ -124,7 +89,7 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     @Override
     public boolean isConnectionField(String objectTypeName, String fieldName) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME));
+        return fieldDefinitionContext.directives() != null && isConnectionField(fieldDefinitionContext);
     }
 
     @Override
@@ -133,9 +98,38 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
+    public boolean isInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> Arrays.stream(INVOKE_DIRECTIVES).anyMatch(name -> directiveContext.name().getText().equals(name)));
+    }
+
+    @Override
+    public boolean isNotInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return !isInvokeField(fieldDefinitionContext);
+    }
+
+    @Override
+    public boolean isFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME));
+    }
+
+    @Override
+    public boolean isNotFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return !isFunctionField(fieldDefinitionContext);
+    }
+
+    @Override
+    public boolean isConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME));
+    }
+
+    @Override
+    public boolean isNotConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return !isConnectionField(fieldDefinitionContext);
+    }
+
+    @Override
     public void clear() {
         fieldDefinitionTree.clear();
-        invokeFieldDefinitionTree.clear();
         Logger.debug("clear all field");
     }
 }

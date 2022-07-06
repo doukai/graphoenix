@@ -18,9 +18,13 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.METHOD_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
@@ -145,7 +149,9 @@ public class TypeManager {
         } else {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
         }
-    }    protected Optional<GraphqlParser.DirectiveContext> getFormat(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    }
+
+    protected Optional<GraphqlParser.DirectiveContext> getFormat(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         if (fieldDefinitionContext.directives() == null) {
             return Optional.empty();
         }
@@ -174,5 +180,72 @@ public class TypeManager {
                 .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                 .findFirst()
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    public String getClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .flatMap(directiveContext ->
+                        directiveContext.arguments().argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                )
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("className")));
+    }
+
+    public String getMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .flatMap(directiveContext ->
+                        directiveContext.arguments().argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals("methodName"))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                )
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("methodName")));
+    }
+
+    public List<AbstractMap.SimpleEntry<String, String>> getParameters(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .flatMap(directiveContext ->
+                        directiveContext.arguments().argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals("parameters"))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable() != null)
+                                .flatMap(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream())
+                )
+                .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
+                .map(valueWithVariableContext ->
+                        new AbstractMap.SimpleEntry<>(
+                                valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable().stream()
+                                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("name"))
+                                        .findFirst()
+                                        .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                                        .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("name"))),
+
+                                valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable().stream()
+                                        .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals("className"))
+                                        .findFirst()
+                                        .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
+                                        .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("className")))
+                        )
+                )
+                .collect(Collectors.toList());
+    }
+
+    public String getReturnClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .flatMap(directiveContext ->
+                        directiveContext.arguments().argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals("returnClassName"))
+                                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                )
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("returnClassName")));
     }
 }

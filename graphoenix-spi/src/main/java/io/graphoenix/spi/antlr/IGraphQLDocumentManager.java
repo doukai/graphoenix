@@ -68,6 +68,18 @@ public interface IGraphQLDocumentManager {
 
     boolean isNotConnectionField(String objectTypeName, String name);
 
+    boolean isInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean isNotInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean isFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean isNotFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean isConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean isNotConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
     GraphqlParser.SchemaDefinitionContext getSchema();
 
     Optional<GraphqlParser.DirectiveDefinitionContext> getDirective(String name);

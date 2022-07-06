@@ -7,7 +7,6 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
-import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.ObjectType;
@@ -16,14 +15,8 @@ import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
-import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
-import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
-import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
-import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
 import io.graphoenix.spi.annotation.SchemaBean;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import org.eclipse.microprofile.graphql.Enum;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -50,12 +43,12 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.util.List;
+import java.nio.file.Path;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static javax.lang.model.SourceVersion.RELEASE_11;
@@ -78,12 +71,6 @@ public class GraphQLApiProcessor extends AbstractProcessor {
     private JavaElementToInterface javaElementToInterface;
     private JavaElementToInputType javaElementToInputType;
     private GraphQLApiBuilder graphQLApiBuilder;
-    private InvokeHandlerBuilder invokeHandlerBuilder;
-    private ConnectionHandlerBuilder connectionHandlerBuilder;
-    private SelectionFilterBuilder selectionFilterBuilder;
-    private OperationHandlerImplementer operationHandlerImplementer;
-    private JsonSchemaTranslator jsonSchemaTranslator;
-    private GraphQLConfig graphQLConfig;
     private Types typeUtils;
     private Filer filer;
 
@@ -100,23 +87,17 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
-        this.invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
-        this.connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
-        this.selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
-        this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
-        this.jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
-        graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
-
+        GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
         try {
             manager.clearAll();
-            configRegister.registerPreset(GraphQLApiProcessor.class.getClassLoader());
             configRegister.registerConfig(graphQLConfig, filer);
-            mapper.registerFieldMaps();
-            if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            FileObject resource = filer.getResource(StandardLocation.SOURCE_PATH, "", "META-INF/graphql");
+            if (resource != null) {
+                manager.registerPath(Path.of(resource.toUri()));
             }
+        } catch (FileNotFoundException e) {
+            Logger.info(e);
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
@@ -193,12 +174,16 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         element.getEnclosedElements()
                 .forEach(subElement -> {
                             if (subElement.getAnnotation(Query.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.QUERY_TYPE_NOT_EXIST));
-                                ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
+                                ObjectType objectType = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name))
+                                        .map(objectTypeDefinitionContext -> documentBuilder.buildObject(objectTypeDefinitionContext))
+                                        .orElseGet(() -> new ObjectType().setName("QueryType"));
+                                objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.registerGraphQL(objectType.toString());
                             } else if (subElement.getAnnotation(Mutation.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.MUTATION_TYPE_NOT_EXIST));
-                                ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
+                                ObjectType objectType = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name))
+                                        .map(objectTypeDefinitionContext -> documentBuilder.buildObject(objectTypeDefinitionContext))
+                                        .orElseGet(() -> new ObjectType().setName("MutationType"));
+                                objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.registerGraphQL(objectType.toString());
                             } else if (subElement.getKind().equals(ElementKind.METHOD) && ((ExecutableElement) subElement).getParameters().stream().anyMatch(variableElement -> variableElement.getAnnotation(Source.class) != null)) {
                                 Tuple2<String, Field> objectField = graphQLApiBuilder.variableElementToObjectField((ExecutableElement) subElement, typeUtils);

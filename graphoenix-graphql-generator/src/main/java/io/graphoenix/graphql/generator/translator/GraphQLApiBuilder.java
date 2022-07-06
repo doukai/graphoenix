@@ -5,6 +5,7 @@ import io.graphoenix.graphql.generator.document.Directive;
 import io.graphoenix.graphql.generator.document.Field;
 import io.graphoenix.graphql.generator.document.InputValue;
 import io.graphoenix.graphql.generator.operation.Argument;
+import io.graphoenix.graphql.generator.operation.ArrayValueWithVariable;
 import io.graphoenix.graphql.generator.operation.StringValue;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -18,6 +19,7 @@ import org.eclipse.microprofile.graphql.Source;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,6 +65,23 @@ public class GraphQLApiBuilder {
                                                 .setName("methodName")
                                                 .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
                                 )
+                                .addArgument(
+                                        new Argument()
+                                                .setName("parameters")
+                                                .setValueWithVariable(
+                                                        new ArrayValueWithVariable(
+                                                                executableElement.getParameters().stream()
+                                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
+                                                                        .collect(Collectors.toList()),
+                                                                true
+                                                        )
+                                                )
+                                )
+                                .addArgument(
+                                        new Argument()
+                                                .setName("returnClassName")
+                                                .setValueWithVariable(new StringValue(executableElement.getReturnType().toString()))
+                                )
                 );
         if (executableElement.getAnnotation(PermitAll.class) != null) {
             field.addStringDirective("permitAll");
@@ -105,6 +124,23 @@ public class GraphQLApiBuilder {
                                                         new Argument()
                                                                 .setName("methodName")
                                                                 .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
+                                                )
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName("parameters")
+                                                                .setValueWithVariable(
+                                                                        new ArrayValueWithVariable(
+                                                                                executableElement.getParameters().stream()
+                                                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
+                                                                                        .collect(Collectors.toList()),
+                                                                                true
+                                                                        )
+                                                                )
+                                                )
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName("returnClassName")
+                                                                .setValueWithVariable(new StringValue(executableElement.getReturnType().toString()))
                                                 )
                                         )
                                         .map(Directive::toString)
