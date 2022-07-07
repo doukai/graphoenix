@@ -2,7 +2,7 @@ package io.graphoenix.product.handler;
 
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.graphql.generator.operation.Operation;
+import io.graphoenix.core.operation.Operation;
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.translator.GraphQLTypeToTable;
 import io.graphoenix.product.config.MysqlConfig;

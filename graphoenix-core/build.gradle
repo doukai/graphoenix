@@ -17,6 +17,7 @@ dependencies {
     compile 'com.google.guava:guava:31.1-jre'
     compile 'org.antlr:antlr4-runtime:4.9.3'
 
+    implementation 'org.antlr:ST4:4.3.2'
     implementation 'com.networknt:json-schema-validator:1.0.70'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1'
     implementation 'com.jcabi:jcabi-manifests:1.2.1'

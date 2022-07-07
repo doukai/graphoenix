@@ -6,20 +6,20 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
-import io.graphoenix.graphql.generator.document.Directive;
-import io.graphoenix.graphql.generator.document.DirectiveDefinition;
-import io.graphoenix.graphql.generator.document.Document;
-import io.graphoenix.graphql.generator.document.EnumType;
-import io.graphoenix.graphql.generator.document.EnumValue;
-import io.graphoenix.graphql.generator.document.Field;
-import io.graphoenix.graphql.generator.document.InputObjectType;
-import io.graphoenix.graphql.generator.document.InputValue;
-import io.graphoenix.graphql.generator.document.InterfaceType;
-import io.graphoenix.graphql.generator.document.ObjectType;
-import io.graphoenix.graphql.generator.document.ScalarType;
-import io.graphoenix.graphql.generator.document.Schema;
-import io.graphoenix.graphql.generator.operation.Argument;
-import io.graphoenix.graphql.generator.operation.StringValue;
+import io.graphoenix.core.operation.EnumValue;
+import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.document.DirectiveDefinition;
+import io.graphoenix.core.document.Document;
+import io.graphoenix.core.document.EnumType;
+import io.graphoenix.core.document.Field;
+import io.graphoenix.core.document.InputObjectType;
+import io.graphoenix.core.document.InputValue;
+import io.graphoenix.core.document.InterfaceType;
+import io.graphoenix.core.document.ObjectType;
+import io.graphoenix.core.document.ScalarType;
+import io.graphoenix.core.document.Schema;
+import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.StringValue;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -320,8 +320,8 @@ public class DocumentBuilder {
                 );
     }
 
-    public EnumValue buildEnumValue(GraphqlParser.EnumValueDefinitionContext enumValueDefinitionContext) {
-        return new EnumValue().setName(enumValueDefinitionContext.enumValue().enumValueName().getText())
+    public io.graphoenix.core.document.EnumValue buildEnumValue(GraphqlParser.EnumValueDefinitionContext enumValueDefinitionContext) {
+        return new io.graphoenix.core.document.EnumValue().setName(enumValueDefinitionContext.enumValue().enumValueName().getText())
                 .setDescription(enumValueDefinitionContext.description() == null ? null : enumValueDefinitionContext.description().getText())
                 .setDirectives(enumValueDefinitionContext.directives() == null ? null : enumValueDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
@@ -739,7 +739,7 @@ public class DocumentBuilder {
                                     .addArgument(
                                             new Argument()
                                                     .setName("name")
-                                                    .setValueWithVariable(new io.graphoenix.graphql.generator.operation.EnumValue(this.name()))
+                                                    .setValueWithVariable(new EnumValue(this.name()))
                                     )
                                     .addArgument(
                                             new Argument()

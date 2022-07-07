@@ -3,7 +3,7 @@ package io.graphoenix.gradle.task;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
-import io.graphoenix.graphql.generator.operation.Operation;
+import io.graphoenix.core.operation.Operation;
 import io.graphoenix.mysql.translator.GraphQLMutationToStatements;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskExecutionException;

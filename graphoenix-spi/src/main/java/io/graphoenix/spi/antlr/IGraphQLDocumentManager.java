@@ -24,7 +24,11 @@ public interface IGraphQLDocumentManager {
 
     void registerPath(Path graphqlPath) throws IOException;
 
+    void mergePath(Path graphqlPath) throws IOException;
+
     void registerDocument(GraphqlParser.DocumentContext documentContext);
+
+    void mergeDocument(GraphqlParser.DocumentContext documentContext);
 
     GraphqlParser.OperationTypeContext getOperationType(String graphql);
 

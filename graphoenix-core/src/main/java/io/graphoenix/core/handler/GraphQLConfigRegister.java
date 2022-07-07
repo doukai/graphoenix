@@ -90,10 +90,10 @@ public class GraphQLConfigRegister {
                 List<Path> pathList = Files.list(fileSystem.getPath("META-INF/graphql")).collect(Collectors.toList());
                 Optional<Path> microprofile = pathList.stream().filter(path -> path.getFileName().getFileName().toString().equals("microprofile.gql")).findFirst();
                 if (microprofile.isPresent()) {
-                    manager.registerPath(microprofile.get());
+                    manager.mergePath(microprofile.get());
                 } else {
                     pathList.forEach(path -> {
-                                Try.run(() -> manager.registerPath(path));
+                                Try.run(() -> manager.mergePath(path));
                                 Logger.info("registered preset path {} from {}", path, classLoader.getName());
                             }
                     );

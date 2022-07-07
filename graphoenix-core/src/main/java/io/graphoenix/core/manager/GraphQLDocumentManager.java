@@ -1,6 +1,10 @@
 package io.graphoenix.core.manager;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.document.EnumType;
+import io.graphoenix.core.document.InputObjectType;
+import io.graphoenix.core.document.InterfaceType;
+import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -26,7 +30,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
@@ -132,8 +135,18 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public void mergePath(Path graphqlPath) throws IOException {
+        mergeDocument(DOCUMENT_UTIL.graphqlPathToDocument(graphqlPath));
+    }
+
+    @Override
     public void registerDocument(GraphqlParser.DocumentContext documentContext) {
         documentContext.definition().forEach(this::registerDefinition);
+    }
+
+    @Override
+    public void mergeDocument(GraphqlParser.DocumentContext documentContext) {
+        documentContext.definition().forEach(this::mergeDefinition);
     }
 
     @Override
@@ -171,6 +184,14 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         }
     }
 
+    protected void mergeDefinition(GraphqlParser.DefinitionContext definitionContext) {
+        if (definitionContext.typeSystemDefinition() != null) {
+            mergeSystemDefinition(definitionContext.typeSystemDefinition());
+        } else if (definitionContext.fragmentDefinition() != null) {
+            graphQLFragmentManager.register(definitionContext.fragmentDefinition());
+        }
+    }
+
     protected void registerSystemDefinition(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
         if (typeSystemDefinitionContext.schemaDefinition() != null) {
             typeSystemDefinitionContext.schemaDefinition().operationTypeDefinition().forEach(this::registerOperationType);
@@ -182,12 +203,22 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         }
     }
 
+    protected void mergeSystemDefinition(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext) {
+        if (typeSystemDefinitionContext.schemaDefinition() != null) {
+            typeSystemDefinitionContext.schemaDefinition().operationTypeDefinition().forEach(this::registerOperationType);
+            graphQLSchemaManager.register(typeSystemDefinitionContext.schemaDefinition());
+        } else if (typeSystemDefinitionContext.typeDefinition() != null) {
+            mergeTypeDefinition(typeSystemDefinitionContext.typeDefinition());
+        } else if (typeSystemDefinitionContext.directiveDefinition() != null) {
+            graphQLDirectiveManager.register(typeSystemDefinitionContext.directiveDefinition());
+        }
+    }
+
     protected void registerOperationType(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
         graphQLOperationManager.register(operationTypeDefinitionContext);
     }
 
     protected void registerTypeDefinition(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
-
         if (typeDefinitionContext.scalarTypeDefinition() != null) {
             graphQLScalarManager.register(typeDefinitionContext.scalarTypeDefinition());
         } else if (typeDefinitionContext.enumTypeDefinition() != null) {
@@ -203,6 +234,52 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else if (typeDefinitionContext.inputObjectTypeDefinition() != null) {
             graphQLInputObjectManager.register(typeDefinitionContext.inputObjectTypeDefinition());
             graphQLInputValueManager.register(typeDefinitionContext.inputObjectTypeDefinition());
+        }
+    }
+
+    protected void mergeTypeDefinition(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
+        if (typeDefinitionContext.scalarTypeDefinition() != null) {
+            graphQLScalarManager.register(typeDefinitionContext.scalarTypeDefinition());
+        } else if (typeDefinitionContext.enumTypeDefinition() != null) {
+            Optional<GraphqlParser.EnumTypeDefinitionContext> original = getEnum(typeDefinitionContext.enumTypeDefinition().name().getText());
+            if (original.isPresent()) {
+                GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext = DOCUMENT_UTIL.graphqlToEnumTypeDefinition(EnumType.merge(original.get(), typeDefinitionContext.enumTypeDefinition()).toString());
+                graphQLEnumManager.register(enumTypeDefinitionContext);
+            } else {
+                graphQLEnumManager.register(typeDefinitionContext.enumTypeDefinition());
+            }
+        } else if (typeDefinitionContext.objectTypeDefinition() != null) {
+            Optional<GraphqlParser.ObjectTypeDefinitionContext> original = getObject(typeDefinitionContext.objectTypeDefinition().name().getText());
+            if (original.isPresent()) {
+                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = DOCUMENT_UTIL.graphqlToObjectTypeDefinition(ObjectType.merge(original.get(), typeDefinitionContext.objectTypeDefinition()).toString());
+                graphQLObjectManager.register(objectTypeDefinitionContext);
+                graphQLFieldManager.register(objectTypeDefinitionContext);
+            } else {
+                graphQLObjectManager.register(typeDefinitionContext.objectTypeDefinition());
+                graphQLFieldManager.register(typeDefinitionContext.objectTypeDefinition());
+            }
+        } else if (typeDefinitionContext.interfaceTypeDefinition() != null) {
+            Optional<GraphqlParser.InterfaceTypeDefinitionContext> original = getInterface(typeDefinitionContext.interfaceTypeDefinition().name().getText());
+            if (original.isPresent()) {
+                GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext = DOCUMENT_UTIL.graphqlToInterfaceTypeDefinition(InterfaceType.merge(original.get(), typeDefinitionContext.interfaceTypeDefinition()).toString());
+                graphQLInterfaceManager.register(interfaceTypeDefinitionContext);
+                graphQLFieldManager.register(interfaceTypeDefinitionContext);
+            } else {
+                graphQLInterfaceManager.register(typeDefinitionContext.interfaceTypeDefinition());
+                graphQLFieldManager.register(typeDefinitionContext.interfaceTypeDefinition());
+            }
+        } else if (typeDefinitionContext.unionTypeDefinition() != null) {
+            graphQLUnionManager.register(typeDefinitionContext.unionTypeDefinition());
+        } else if (typeDefinitionContext.inputObjectTypeDefinition() != null) {
+            Optional<GraphqlParser.InputObjectTypeDefinitionContext> original = getInputObject(typeDefinitionContext.inputObjectTypeDefinition().name().getText());
+            if (original.isPresent()) {
+                GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext = DOCUMENT_UTIL.graphqlToInputObjectTypeDefinition(InputObjectType.merge(original.get(), typeDefinitionContext.inputObjectTypeDefinition()).toString());
+                graphQLInputObjectManager.register(inputObjectTypeDefinitionContext);
+                graphQLInputValueManager.register(inputObjectTypeDefinitionContext);
+            } else {
+                graphQLInputObjectManager.register(typeDefinitionContext.inputObjectTypeDefinition());
+                graphQLInputValueManager.register(typeDefinitionContext.inputObjectTypeDefinition());
+            }
         }
     }
 

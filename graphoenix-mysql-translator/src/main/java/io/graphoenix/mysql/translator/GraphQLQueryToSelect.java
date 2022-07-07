@@ -2,9 +2,9 @@ package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.graphql.generator.operation.Argument;
-import io.graphoenix.graphql.generator.operation.Field;
-import io.graphoenix.graphql.generator.operation.IntValue;
+import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.Field;
+import io.graphoenix.core.operation.IntValue;
 import io.graphoenix.mysql.expression.JsonArrayAggregateFunction;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.mysql.utils.DBValueUtil;

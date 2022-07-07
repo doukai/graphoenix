@@ -78,10 +78,40 @@ public enum DocumentUtil {
         return graphqlToObjectTypeDefinition(charStream);
     }
 
+    public GraphqlParser.InterfaceTypeDefinitionContext graphqlToInterfaceTypeDefinition(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToInterfaceTypeDefinition(charStream);
+    }
+
+    public GraphqlParser.EnumTypeDefinitionContext graphqlToEnumTypeDefinition(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToEnumTypeDefinition(charStream);
+    }
+
+    public GraphqlParser.InputObjectTypeDefinitionContext graphqlToInputObjectTypeDefinition(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToInputObjectTypeDefinition(charStream);
+    }
+
     public GraphqlParser.FieldDefinitionContext graphqlToFieldDefinition(String graphql) {
         CodePointCharStream charStream;
         charStream = CharStreams.fromString(graphql);
         return graphqlToFieldDefinition(charStream);
+    }
+
+    public GraphqlParser.EnumValueDefinitionContext graphqlToEnumValueDefinition(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToEnumValueDefinition(charStream);
+    }
+
+    public GraphqlParser.InputValueDefinitionContext graphqlToInputValueDefinition(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToInputValueDefinition(charStream);
     }
 
     public GraphqlParser.DocumentContext graphqlToDocument(CharStream charStream) {
@@ -104,8 +134,28 @@ public enum DocumentUtil {
         return getGraphqlParser(charStream).objectTypeDefinition();
     }
 
+    public GraphqlParser.InterfaceTypeDefinitionContext graphqlToInterfaceTypeDefinition(CharStream charStream) {
+        return getGraphqlParser(charStream).interfaceTypeDefinition();
+    }
+
+    public GraphqlParser.EnumTypeDefinitionContext graphqlToEnumTypeDefinition(CharStream charStream) {
+        return getGraphqlParser(charStream).enumTypeDefinition();
+    }
+
+    public GraphqlParser.InputObjectTypeDefinitionContext graphqlToInputObjectTypeDefinition(CharStream charStream) {
+        return getGraphqlParser(charStream).inputObjectTypeDefinition();
+    }
+
     public GraphqlParser.FieldDefinitionContext graphqlToFieldDefinition(CharStream charStream) {
         return getGraphqlParser(charStream).fieldDefinition();
+    }
+
+    public GraphqlParser.EnumValueDefinitionContext graphqlToEnumValueDefinition(CharStream charStream) {
+        return getGraphqlParser(charStream).enumValueDefinition();
+    }
+
+    public GraphqlParser.InputValueDefinitionContext graphqlToInputValueDefinition(CharStream charStream) {
+        return getGraphqlParser(charStream).inputValueDefinition();
     }
 
     public String getStringValue(TerminalNode stringValue) {

@@ -13,7 +13,6 @@ repositories {
 
 dependencies {
     implementation project(":graphoenix-core")
-    implementation project(":graphoenix-graphql-generator")
     implementation 'com.github.jsqlparser:jsqlparser:4.3'
     implementation 'com.github.vertical-blank:sql-formatter:2.0.3'
 

@@ -1,9 +1,9 @@
 package io.graphoenix.graphql.generator.translator;
 
-import io.graphoenix.graphql.generator.document.Directive;
-import io.graphoenix.graphql.generator.document.Field;
-import io.graphoenix.graphql.generator.document.ObjectType;
-import io.graphoenix.graphql.generator.operation.Argument;
+import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.document.Field;
+import io.graphoenix.core.document.ObjectType;
+import io.graphoenix.core.operation.Argument;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.DateFormat;
@@ -14,7 +14,6 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Types;
-import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 

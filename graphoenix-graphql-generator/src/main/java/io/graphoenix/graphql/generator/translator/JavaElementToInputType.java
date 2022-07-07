@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.generator.translator;
 
-import io.graphoenix.graphql.generator.document.InputObjectType;
-import io.graphoenix.graphql.generator.document.InputValue;
+import io.graphoenix.core.document.InputObjectType;
+import io.graphoenix.core.document.InputValue;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Ignore;

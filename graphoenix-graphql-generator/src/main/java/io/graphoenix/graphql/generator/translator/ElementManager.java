@@ -1,12 +1,11 @@
 package io.graphoenix.graphql.generator.translator;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.ClassName;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.graphql.generator.document.InputValue;
-import io.graphoenix.graphql.generator.operation.Field;
+import io.graphoenix.core.document.InputValue;
+import io.graphoenix.core.operation.Field;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

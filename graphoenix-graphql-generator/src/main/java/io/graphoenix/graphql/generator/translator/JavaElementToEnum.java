@@ -1,7 +1,7 @@
 package io.graphoenix.graphql.generator.translator;
 
-import io.graphoenix.graphql.generator.document.EnumType;
-import io.graphoenix.graphql.generator.document.EnumValue;
+import io.graphoenix.core.document.EnumType;
+import io.graphoenix.core.document.EnumValue;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Ignore;

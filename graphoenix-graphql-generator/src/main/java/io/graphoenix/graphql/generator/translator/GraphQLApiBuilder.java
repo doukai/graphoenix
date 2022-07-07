@@ -1,12 +1,12 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.error.ElementProcessException;
-import io.graphoenix.graphql.generator.document.Directive;
-import io.graphoenix.graphql.generator.document.Field;
-import io.graphoenix.graphql.generator.document.InputValue;
-import io.graphoenix.graphql.generator.operation.Argument;
-import io.graphoenix.graphql.generator.operation.ArrayValueWithVariable;
-import io.graphoenix.graphql.generator.operation.StringValue;
+import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.document.Field;
+import io.graphoenix.core.document.InputValue;
+import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.ArrayValueWithVariable;
+import io.graphoenix.core.operation.StringValue;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.annotation.security.DenyAll;

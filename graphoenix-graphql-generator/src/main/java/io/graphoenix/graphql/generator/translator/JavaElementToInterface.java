@@ -1,9 +1,9 @@
 package io.graphoenix.graphql.generator.translator;
 
-import io.graphoenix.graphql.generator.document.Directive;
-import io.graphoenix.graphql.generator.document.Field;
-import io.graphoenix.graphql.generator.document.InterfaceType;
-import io.graphoenix.graphql.generator.operation.Argument;
+import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.document.Field;
+import io.graphoenix.core.document.InterfaceType;
+import io.graphoenix.core.operation.Argument;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.DateFormat;
