@@ -111,7 +111,7 @@ public class ConnectionHandlerBuilder {
 
         if (objectTypeDefinitionContext.name().getText().endsWith(CONNECTION_SUFFIX)) {
             String typeName = objectTypeDefinitionContext.name().getText().substring(0, objectTypeDefinitionContext.name().getText().length() - CONNECTION_SUFFIX.length());
-            builder.beginControlFlow("if (!jsonElement.isJsonNull() && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
+            builder.beginControlFlow("if (jsonElement != null && !jsonElement.isJsonNull() && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
                     .addStatement("jsonElement.getAsJsonObject().add(selectionContext.field().name().getText(), builder.build(jsonElement, typeName, selectionContext))")
                     .beginControlFlow("for ($T subSelectionContext : selectionContext.field().selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
                             ClassName.get(GraphqlParser.SelectionContext.class),
@@ -128,7 +128,6 @@ public class ConnectionHandlerBuilder {
                     .endControlFlow()
                     .endControlFlow();
         } else {
-
             if (manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) ||
                     manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) ||
                     manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())) {
@@ -139,7 +138,7 @@ public class ConnectionHandlerBuilder {
                                 ClassName.get(Collectors.class)
                         );
             } else {
-                builder.beginControlFlow("if (!jsonElement.isJsonNull() && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
+                builder.beginControlFlow("if (jsonElement != null && !jsonElement.isJsonNull() && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
                         .beginControlFlow("for ($T subSelectionContext : selectionContext.field().selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
                                 ClassName.get(GraphqlParser.SelectionContext.class),
                                 objectTypeDefinitionContext.name().getText(),
