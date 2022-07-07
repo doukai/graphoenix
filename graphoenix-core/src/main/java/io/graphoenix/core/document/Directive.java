@@ -16,6 +16,13 @@ public class Directive {
         return name;
     }
 
+    public Directive() {
+    }
+
+    public Directive(String name) {
+        this.name = name;
+    }
+
     public Directive setName(String name) {
         this.name = name;
         return this;

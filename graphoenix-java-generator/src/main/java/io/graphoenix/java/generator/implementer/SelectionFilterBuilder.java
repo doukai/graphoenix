@@ -106,10 +106,17 @@ public class SelectionFilterBuilder {
 
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
+        ClassName typeClassName;
+        Optional<String> className = typeManager.getClassName(objectTypeDefinitionContext);
+        if (className.isPresent()) {
+            typeClassName = ClassName.bestGuess(className.get());
+        } else {
+            typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
+        }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonElement.class))
-                .addParameter(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), typeParameterName)
+                .addParameter(typeClassName, typeParameterName)
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
 
         builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName)
@@ -241,8 +248,13 @@ public class SelectionFilterBuilder {
     private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         String listTypeParameterName = typeParameterName.concat("List");
-        ClassName typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
-
+        ClassName typeClassName;
+        Optional<String> className = typeManager.getClassName(objectTypeDefinitionContext);
+        if (className.isPresent()) {
+            typeClassName = ClassName.bestGuess(className.get());
+        } else {
+            typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
+        }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonElement.class))

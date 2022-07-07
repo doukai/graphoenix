@@ -38,7 +38,8 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
                 .forEach(objectTypeDefinitionContext ->
                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))

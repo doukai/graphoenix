@@ -269,4 +269,18 @@ public class TypeManager {
             return ClassName.bestGuess(className);
         }
     }
+
+    public Optional<String> getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        if (objectTypeDefinitionContext.directives() == null) {
+            return Optional.empty();
+        }
+        return objectTypeDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals("containerType"))
+                .filter(directiveContext -> directiveContext.arguments() != null)
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
 }

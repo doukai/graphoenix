@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -145,20 +146,27 @@ public class InvokeHandlerBuilder {
     }
 
     private MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        ClassName typeClassName;
+        Optional<String> className = typeManager.getClassName(objectTypeDefinitionContext);
+        if (className.isPresent()) {
+            typeClassName = ClassName.bestGuess(className.get());
+        } else {
+            typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
+        }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()))
-                .addParameter(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), getParameterName(objectTypeDefinitionContext));
+                .returns(typeClassName)
+                .addParameter(typeClassName, getParameterName(objectTypeDefinitionContext));
 
         if (invokeMethods.get(objectTypeDefinitionContext.name().getText()) != null) {
             builder.beginControlFlow("if ($L != null)", getParameterName(objectTypeDefinitionContext));
             invokeMethods.get(objectTypeDefinitionContext.name().getText())
-                    .forEach((className, methodNames) ->
+                    .forEach((returnClassName, methodNames) ->
                             methodNames.forEach(methodName ->
                                     builder.addStatement("$L.$L($L.get().$L($L))",
                                             getParameterName(objectTypeDefinitionContext),
                                             typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodName)),
-                                            typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
+                                            typeManager.typeToLowerCamelName(ClassName.bestGuess(returnClassName).simpleName()),
                                             methodName,
                                             getParameterName(objectTypeDefinitionContext)
                                     )
@@ -193,7 +201,6 @@ public class InvokeHandlerBuilder {
             builder.endControlFlow();
         }
         builder.addStatement("return $L", getParameterName(objectTypeDefinitionContext));
-
         return builder.build();
     }
 

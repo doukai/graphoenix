@@ -4,12 +4,12 @@ import com.google.auto.service.AutoService;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.document.Field;
+import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.core.document.Field;
-import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.graphql.generator.translator.GraphQLApiBuilder;
 import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
@@ -43,11 +43,9 @@ import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.Set;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
@@ -92,8 +90,6 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         try {
             manager.clearAll();
             configRegister.registerConfig(graphQLConfig, filer);
-            manager.registerPath(Path.of(filer.getResource(StandardLocation.SOURCE_PATH, "", "META-INF/graphql").toUri()));
-        } catch (FileNotFoundException ignored) {
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

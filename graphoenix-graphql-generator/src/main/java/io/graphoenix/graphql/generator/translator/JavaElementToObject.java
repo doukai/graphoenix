@@ -4,6 +4,7 @@ import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.StringValue;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.DateFormat;
@@ -67,6 +68,16 @@ public class JavaElementToObject {
                         typeElement.getInterfaces().stream()
                                 .map(typeMirror -> typeUtils.asElement(typeMirror).getSimpleName().toString())
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
+                .addDirective(
+                        new Directive("containerType")
+                                .addArgument(
+                                        new Argument()
+                                                .setName("className")
+                                                .setValueWithVariable(
+                                                        new StringValue(typeElement.getQualifiedName().toString())
+                                                )
+                                )
                 );
     }
 }
