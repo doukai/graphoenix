@@ -267,7 +267,6 @@ public class OperationHandlerImplementer {
     }
 
     private MethodSpec buildMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-
         MethodSpec.Builder builder = MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ClassName.get(JsonElement.class), "jsonElement")
@@ -295,7 +294,7 @@ public class OperationHandlerImplementer {
                                             typeManager.getClassNameByString(parameter.getValue())
                                     )
                             )
-                            .collect(Collectors.toList()), ",")
+                            .collect(Collectors.toList()), ", ")
             );
 
             if (manager.isObject(fieldTypeName)) {
