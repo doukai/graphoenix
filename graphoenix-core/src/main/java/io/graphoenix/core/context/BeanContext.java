@@ -2,8 +2,8 @@ package io.graphoenix.core.context;
 
 import io.graphoenix.spi.context.BeanProviders;
 import io.graphoenix.spi.context.ModuleContext;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Provider;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.tinylog.Logger;
 
 import java.util.Optional;
@@ -45,12 +45,12 @@ public class BeanContext {
         return getSupplier(beanClass, name).get();
     }
 
-    public static <T> Instance<T> getInstance(Class<T> beanClass) {
-        return getInstance(beanClass, beanClass.getName());
+    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass) {
+        return getPublisherBuilder(beanClass, beanClass.getName());
     }
 
-    public static <T> Instance<T> getInstance(Class<T> beanClass, String name) {
-        return getInstanceSupplier(beanClass, name).get();
+    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, String name) {
+        return getPublisherBuilderSupplier(beanClass, name).get();
     }
 
     public static <T> Provider<T> getProvider(Class<T> beanClass) {
@@ -61,12 +61,12 @@ public class BeanContext {
         return getSupplier(beanClass, name)::get;
     }
 
-    public static <T> Provider<Instance<T>> getInstanceProvider(Class<T> beanClass) {
-        return getInstanceProvider(beanClass, beanClass.getName());
+    public static <T> Provider<PublisherBuilder<T>> getPublisherBuilderProvider(Class<T> beanClass) {
+        return getPublisherBuilderProvider(beanClass, beanClass.getName());
     }
 
-    public static <T> Provider<Instance<T>> getInstanceProvider(Class<T> beanClass, String name) {
-        return getInstanceSupplier(beanClass, name)::get;
+    public static <T> Provider<PublisherBuilder<T>> getPublisherBuilderProvider(Class<T> beanClass, String name) {
+        return getPublisherBuilderSupplier(beanClass, name)::get;
     }
 
     public static <T> Optional<T> getOptional(Class<T> beanClass) {
@@ -77,12 +77,12 @@ public class BeanContext {
         return getSupplierOptional(beanClass, name).map(Supplier::get);
     }
 
-    public static <T> Optional<Instance<T>> getInstanceOptional(Class<T> beanClass) {
-        return getInstanceOptional(beanClass, beanClass.getName());
+    public static <T> Optional<PublisherBuilder<T>> getPublisherBuilderOptional(Class<T> beanClass) {
+        return getPublisherBuilderOptional(beanClass, beanClass.getName());
     }
 
-    public static <T> Optional<Instance<T>> getInstanceOptional(Class<T> beanClass, String name) {
-        return getInstanceSupplierOptional(beanClass, name).map(Supplier::get);
+    public static <T> Optional<PublisherBuilder<T>> getPublisherBuilderOptional(Class<T> beanClass, String name) {
+        return getPublisherBuilderSupplierOptional(beanClass, name).map(Supplier::get);
     }
 
     public static <T> Optional<Provider<T>> getProviderOptional(Class<T> beanClass) {
@@ -93,12 +93,12 @@ public class BeanContext {
         return getSupplierOptional(beanClass, name).map(supplier -> supplier::get);
     }
 
-    public static <T> Optional<Provider<Instance<T>>> getInstanceProviderOptional(Class<T> beanClass) {
-        return getInstanceProviderOptional(beanClass, beanClass.getName());
+    public static <T> Optional<Provider<PublisherBuilder<T>>> getPublisherBuilderProviderOptional(Class<T> beanClass) {
+        return getPublisherBuilderProviderOptional(beanClass, beanClass.getName());
     }
 
-    public static <T> Optional<Provider<Instance<T>>> getInstanceProviderOptional(Class<T> beanClass, String name) {
-        return getInstanceSupplierOptional(beanClass, name).map(supplier -> supplier::get);
+    public static <T> Optional<Provider<PublisherBuilder<T>>> getPublisherBuilderProviderOptional(Class<T> beanClass, String name) {
+        return getPublisherBuilderSupplierOptional(beanClass, name).map(supplier -> supplier::get);
     }
 
     private static <T> Supplier<T> getSupplier(Class<T> beanClass, String name) {
@@ -106,9 +106,9 @@ public class BeanContext {
                 .orElseGet(() -> getAndCacheSupplier(beanClass, name).orElse(null));
     }
 
-    private static <T> Supplier<Instance<T>> getInstanceSupplier(Class<T> beanClass, String name) {
-        return getInstanceSupplierOptional(beanClass, name)
-                .orElseGet(() -> getAndCacheInstanceSupplier(beanClass, name).orElse(null));
+    private static <T> Supplier<PublisherBuilder<T>> getPublisherBuilderSupplier(Class<T> beanClass, String name) {
+        return getPublisherBuilderSupplierOptional(beanClass, name)
+                .orElseGet(() -> getAndCachePublisherBuilderSupplier(beanClass, name).orElse(null));
     }
 
     @SuppressWarnings("unchecked")
@@ -121,10 +121,10 @@ public class BeanContext {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Optional<Supplier<Instance<T>>> getInstanceSupplierOptional(Class<T> beanClass, String name) {
+    private static <T> Optional<Supplier<PublisherBuilder<T>>> getPublisherBuilderSupplierOptional(Class<T> beanClass, String name) {
         Supplier<?> supplier = CONTEXT_CACHE.get(beanClass).get(name);
         if (supplier != null) {
-            return Optional.of((Supplier<Instance<T>>) supplier);
+            return Optional.of((Supplier<PublisherBuilder<T>>) supplier);
         }
         return Optional.empty();
     }
@@ -141,13 +141,13 @@ public class BeanContext {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Optional<Supplier<Instance<T>>> getAndCacheInstanceSupplier(Class<T> beanClass, String name) {
+    private static <T> Optional<Supplier<PublisherBuilder<T>>> getAndCachePublisherBuilderSupplier(Class<T> beanClass, String name) {
         Logger.debug("search bean instance for class {} name {}", beanClass.getName(), name);
         return moduleContexts.stream()
                 .map(moduleContext -> moduleContext.getOptional(beanClass, name))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
-                .map(supplier -> (Supplier<Instance<T>>) CONTEXT_CACHE.get(beanClass).putIfAbsent(name, supplier));
+                .map(supplier -> (Supplier<PublisherBuilder<T>>) CONTEXT_CACHE.get(beanClass).putIfAbsent(name, supplier));
     }
 }

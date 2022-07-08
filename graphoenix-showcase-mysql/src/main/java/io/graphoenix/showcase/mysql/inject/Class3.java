@@ -1,20 +1,20 @@
 package io.graphoenix.showcase.mysql.inject;
 
-import io.graphoenix.core.context.RequestInstanceFactory;
+import io.graphoenix.core.context.RequestPublisherBuilderFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 
 @ApplicationScoped
 public class Class3 {
 
     @Inject
-    public Instance<Class1> class1;
+    public PublisherBuilder<Class1> class1;
 
     private Provider<Class2> class2;
 
@@ -26,8 +26,8 @@ public class Class3 {
     @Produces
     @RequestScoped
     @Named("no")
-    public Instance<Class6> class6() {
-        return RequestInstanceFactory.getInstance(new Class6());
+    public PublisherBuilder<Class6> class6() {
+        return RequestPublisherBuilderFactory.getPublisherBuilder(new Class6());
     }
 
     @Produces

@@ -24,6 +24,7 @@ dependencies {
     implementation "org.tinylog:tinylog-impl:2.4.1"
     implementation "org.tinylog:slf4j-tinylog:2.4.1"
     implementation "org.tinylog:jcl-tinylog:2.4.1"
+    implementation 'org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-core:2.0'
 
     annotationProcessor project(":graphoenix-inject")
     annotationProcessor project(":graphoenix-interceptor")
