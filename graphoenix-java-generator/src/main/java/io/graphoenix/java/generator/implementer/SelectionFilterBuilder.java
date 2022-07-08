@@ -78,7 +78,6 @@ public class SelectionFilterBuilder {
                 )
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
-                .addMethods(buildListTypeMethods())
                 .build();
     }
 
@@ -232,17 +231,6 @@ public class SelectionFilterBuilder {
                 .endControlFlow()
                 .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class));
         return builder.build();
-    }
-
-    private List<MethodSpec> buildListTypeMethods() {
-        return manager.getObjects()
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                )
-                .map(this::buildListTypeMethod)
-                .collect(Collectors.toList());
     }
 
     private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

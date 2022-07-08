@@ -4,6 +4,7 @@ import com.google.gson.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,7 +19,7 @@ public abstract class BaseOperationHandler {
 
     private final GsonBuilder gsonBuilder;
 
-    private final Map<String, BiFunction<JsonElement, GraphqlParser.SelectionContext, Flux<JsonElement>>> operationHandlers;
+    private final Map<String, BiFunction<JsonElement, GraphqlParser.SelectionContext, PublisherBuilder<JsonElement>>> operationHandlers;
 
     public BaseOperationHandler() {
         this.gsonBuilder = new GsonBuilder()
@@ -40,20 +41,12 @@ public abstract class BaseOperationHandler {
         this.operationHandlers = new HashMap<>();
     }
 
-    private BiFunction<JsonElement, GraphqlParser.SelectionContext, Flux<JsonElement>> getOperationHandler(String name) {
+    private BiFunction<JsonElement, GraphqlParser.SelectionContext, PublisherBuilder<JsonElement>> getOperationHandler(String name) {
         return operationHandlers.get(name);
     }
 
-    protected void put(String name, BiFunction<JsonElement, GraphqlParser.SelectionContext, JsonElement> biFunction) {
-        operationHandlers.put(name, (jsonElement, selectionContext) -> Flux.just(biFunction.apply(jsonElement, selectionContext)));
-    }
-
-    protected void putMono(String name, BiFunction<JsonElement, GraphqlParser.SelectionContext, Mono<JsonElement>> biMonoFunction) {
-        operationHandlers.put(name, (jsonElement, selectionContext) -> Flux.from(biMonoFunction.apply(jsonElement, selectionContext)));
-    }
-
-    protected void putFlux(String name, BiFunction<JsonElement, GraphqlParser.SelectionContext, Flux<JsonElement>> biFluxFunction) {
-        operationHandlers.put(name, biFluxFunction);
+    protected void put(String name, BiFunction<JsonElement, GraphqlParser.SelectionContext, PublisherBuilder<JsonElement>> biFunction) {
+        operationHandlers.put(name, biFunction);
     }
 
     protected Mono<JsonElement> invoke(JsonElement jsonElement, GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
@@ -62,6 +55,7 @@ public abstract class BaseOperationHandler {
                         getOperationHandler(selectionContext.field().name().getText())
                                 .apply(jsonElement.getAsJsonObject().get(selectionContext.field().name().getText()), selectionContext)
                                 .map(subJsonElement -> new AbstractMap.SimpleEntry<>(selectionContext.field().name().getText(), subJsonElement))
+                                .buildRs()
                 )
                 .collectList()
                 .map(entryList -> {

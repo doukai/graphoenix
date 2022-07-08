@@ -13,6 +13,9 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsFactoryResolver;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -53,26 +56,26 @@ public class InvokeHandlerBuilder {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .collect(Collectors.toMap(
-                                objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                                objectTypeDefinitionContext ->
-                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                                                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
-                                                .map(fieldDefinitionContext ->
-                                                        new AbstractMap.SimpleEntry<>(
-                                                                typeManager.getClassName(fieldDefinitionContext),
-                                                                typeManager.getMethodName(fieldDefinitionContext)
+                        objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                        objectTypeDefinitionContext ->
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
+                                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                                        .map(fieldDefinitionContext ->
+                                                new AbstractMap.SimpleEntry<>(
+                                                        typeManager.getClassName(fieldDefinitionContext),
+                                                        typeManager.getMethodName(fieldDefinitionContext)
+                                                )
+                                        )
+                                        .collect(
+                                                Collectors.groupingBy(
+                                                        AbstractMap.SimpleEntry<String, String>::getKey,
+                                                        Collectors.mapping(
+                                                                AbstractMap.SimpleEntry<String, String>::getValue,
+                                                                Collectors.toList()
                                                         )
                                                 )
-                                                .collect(
-                                                        Collectors.groupingBy(
-                                                                AbstractMap.SimpleEntry<String, String>::getKey,
-                                                                Collectors.mapping(
-                                                                        AbstractMap.SimpleEntry<String, String>::getValue,
-                                                                        Collectors.toList()
-                                                                )
-                                                        )
-                                                )
+                                        )
                         )
                 );
         this.buildClass().writeTo(filer);
@@ -91,6 +94,14 @@ public class InvokeHandlerBuilder {
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeInvokeMethods())
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(ReactiveStreamsFactory.class),
+                                "reactiveStreamsFactory",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .build();
     }
 
@@ -123,7 +134,8 @@ public class InvokeHandlerBuilder {
                                 ).build()
                         )
                         .collect(Collectors.toList())
-                );
+                )
+                .addStatement("this.reactiveStreamsFactory = $T.instance()", ClassName.get(ReactiveStreamsFactoryResolver.class));
 
         classNameSet.forEach(className ->
                 builder.addStatement("this.$L = $L",
@@ -155,7 +167,7 @@ public class InvokeHandlerBuilder {
         }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(typeClassName)
+                .returns(ParameterizedTypeName.get(ClassName.get(PublisherBuilder.class), typeClassName))
                 .addParameter(typeClassName, getParameterName(objectTypeDefinitionContext));
 
         if (invokeMethods.get(objectTypeDefinitionContext.name().getText()) != null) {
