@@ -1,12 +1,7 @@
 package io.graphoenix.java.generator.implementer;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.google.common.collect.Streams;
+import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -27,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class InvokeHandlerBuilder {
@@ -165,55 +161,51 @@ public class InvokeHandlerBuilder {
         } else {
             typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
         }
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()))
+        return MethodSpec.methodBuilder(typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(ClassName.get(PublisherBuilder.class), typeClassName))
-                .addParameter(typeClassName, getParameterName(objectTypeDefinitionContext));
-
-        if (invokeMethods.get(objectTypeDefinitionContext.name().getText()) != null) {
-            builder.beginControlFlow("if ($L != null)", getParameterName(objectTypeDefinitionContext));
-            invokeMethods.get(objectTypeDefinitionContext.name().getText())
-                    .forEach((returnClassName, methodNames) ->
-                            methodNames.forEach(methodName ->
-                                    builder.addStatement("$L.$L($L.get().$L($L))",
-                                            getParameterName(objectTypeDefinitionContext),
-                                            typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodName)),
-                                            typeManager.typeToLowerCamelName(ClassName.bestGuess(returnClassName).simpleName()),
-                                            methodName,
-                                            getParameterName(objectTypeDefinitionContext)
-                                    )
-                            )
-                    );
-
-            manager.getFields(objectTypeDefinitionContext.name().getText())
-                    .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                    .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                    .forEach(fieldDefinitionContext ->
-                            builder.addStatement("$L($L.$L())",
-                                    getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                    getParameterName(objectTypeDefinitionContext),
-                                    typeManager.getFieldGetterMethodName(fieldDefinitionContext)
-                            )
-                    );
-
-            manager.getFields(objectTypeDefinitionContext.name().getText())
-                    .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                    .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                    .forEach(fieldDefinitionContext ->
-                            builder.beginControlFlow("if ($L.$L() != null)",
-                                    getParameterName(objectTypeDefinitionContext),
-                                    typeManager.getFieldGetterMethodName(fieldDefinitionContext)
-                            ).addStatement("$L.$L().forEach(this::$L)",
-                                    getParameterName(objectTypeDefinitionContext),
-                                    typeManager.getFieldGetterMethodName(fieldDefinitionContext),
-                                    getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                            ).endControlFlow().build()
-                    );
-
-            builder.endControlFlow();
-        }
-        builder.addStatement("return $L", getParameterName(objectTypeDefinitionContext));
-        return builder.build();
+                .addParameter(typeClassName, getParameterName(objectTypeDefinitionContext))
+                .addStatement(
+                        CodeBlock.join(
+                                Streams.concat(
+                                        Stream.of(CodeBlock.of("return reactiveStreamsFactory.ofNullable($L)", getParameterName(objectTypeDefinitionContext))),
+                                        Stream.ofNullable(invokeMethods.get(objectTypeDefinitionContext.name().getText()))
+                                                .flatMap(map -> map.entrySet().stream())
+                                                .flatMap(entry ->
+                                                        entry.getValue().stream()
+                                                                .map(methodName ->
+                                                                        CodeBlock.of(".peek(next -> $L.$L($L.get().$L($L)))",
+                                                                                getParameterName(objectTypeDefinitionContext),
+                                                                                typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodName)),
+                                                                                typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
+                                                                                methodName,
+                                                                                getParameterName(objectTypeDefinitionContext)
+                                                                        )
+                                                                )
+                                                ),
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                                                .map(fieldDefinitionContext ->
+                                                        CodeBlock.of(".peek(next -> $L(next.$L()))",
+                                                                getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                                                typeManager.getFieldGetterMethodName(fieldDefinitionContext)
+                                                        )
+                                                ),
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                                                .map(fieldDefinitionContext ->
+                                                        CodeBlock.of(".peek(next -> reactiveStreamsFactory.ofNullable(next.$L()).flatMap(reactiveStreamsFactory::fromIterable).forEach(this::$L))",
+                                                                typeManager.getFieldGetterMethodName(fieldDefinitionContext),
+                                                                getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                        )
+                                                )
+                                ).collect(Collectors.toList()),
+                                System.lineSeparator()
+                        )
+                )
+                .build();
     }
 
     private String getParameterName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

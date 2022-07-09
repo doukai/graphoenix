@@ -10,7 +10,7 @@ import io.graphoenix.showcase.mysql.dto.objectType.User;
 import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.annotation.MutationOperation;
 import io.graphoenix.spi.annotation.QueryOperation;
-import reactor.core.publisher.Mono;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 
 import java.util.List;
 
@@ -34,14 +34,14 @@ public interface OperationTest {
             first = 20,
             groupBy = {"name", "id"}
     )
-    Mono<User> queryUserAsync(String name, Sex sex, String roleName, int offset) throws Exception;
+    PublisherBuilder<User> queryUserAsync(String name, Sex sex, String roleName, int offset) throws Exception;
 
     @QueryOperation("userList")
     @UserExpression0(
             name = @StringExpression($val = "name"),
             sex = @SexExpression($val = "sex")
     )
-    Mono<List<User>> queryUserListAsync(String name, Sex sex, String roleName) throws Exception;
+    PublisherBuilder<List<User>> queryUserListAsync(String name, Sex sex, String roleName) throws Exception;
 
     @MutationOperation("user")
     @UserInput0(

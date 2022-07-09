@@ -297,7 +297,7 @@ public class OperationHandlerImplementer {
                     typeManager.getTypeNameByString(returnClassName),
                     typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
                     methodName,
-                    CodeBlock.join(parameters.stream()
+                    CodeBlock.join (parameters.stream()
                             .map(parameter ->
                                     CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
                                             parameter.getKey(),

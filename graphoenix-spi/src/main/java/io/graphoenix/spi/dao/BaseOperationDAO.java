@@ -7,6 +7,10 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import io.vavr.CheckedFunction0;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
+import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsFactoryResolver;
+import org.reactivestreams.Publisher;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 public abstract class BaseOperationDAO implements OperationDAO {
 
     private final GsonBuilder gsonBuilder;
+    private final ReactiveStreamsFactory reactiveStreamsFactory;
 
     public BaseOperationDAO() {
         this.gsonBuilder = new GsonBuilder()
@@ -37,6 +42,7 @@ public abstract class BaseOperationDAO implements OperationDAO {
                         (JsonDeserializer<LocalTime>) (json, type, jsonDeserializationContext) ->
                                 LocalTime.parse(json.getAsJsonPrimitive().getAsString(), DateTimeFormatter.ofPattern("HH:mm:ss"))
                 );
+        this.reactiveStreamsFactory = ReactiveStreamsFactoryResolver.instance();
     }
 
     protected static <T> String fileToString(Class<T> beanClass, String fileName) {
@@ -55,5 +61,9 @@ public abstract class BaseOperationDAO implements OperationDAO {
         JsonElement jsonElement = JsonParser.parseString(jsonString);
         String key = (String) jsonElement.getAsJsonObject().keySet().toArray()[0];
         return gsonBuilder.create().fromJson(jsonElement.getAsJsonObject().get(key), type);
+    }
+
+    protected <T> PublisherBuilder<T> toBuilder(Publisher<T> publisher) {
+        return reactiveStreamsFactory.fromPublisher(publisher);
     }
 }
