@@ -17,6 +17,7 @@ import io.vavr.collection.HashMap;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.tinylog.Logger;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
@@ -181,7 +182,7 @@ public class OperationInterfaceImplementer {
     private String getMethodName(ExecutableElement executableElement) {
         TypeName typeName0 = ClassName.get(executableElement.getReturnType());
         if (typeName0 instanceof ParameterizedTypeName) {
-            if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
+            if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(Mono.class.getCanonicalName())) {
                 TypeName typeName1 = ((ParameterizedTypeName) typeName0).typeArguments.get(0);
                 if (typeName1 instanceof ParameterizedTypeName) {
                     if (executableElement.getAnnotation(QueryOperation.class) != null) {
@@ -192,6 +193,19 @@ public class OperationInterfaceImplementer {
                         return "findOneAsync";
                     } else if (executableElement.getAnnotation(MutationOperation.class) != null) {
                         return "saveAsync";
+                    }
+                }
+            } else if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
+                TypeName typeName1 = ((ParameterizedTypeName) typeName0).typeArguments.get(0);
+                if (typeName1 instanceof ParameterizedTypeName) {
+                    if (executableElement.getAnnotation(QueryOperation.class) != null) {
+                        return "findAllAsyncBuilder";
+                    }
+                } else {
+                    if (executableElement.getAnnotation(QueryOperation.class) != null) {
+                        return "findOneAsyncBuilder";
+                    } else if (executableElement.getAnnotation(MutationOperation.class) != null) {
+                        return "saveAsyncBuilder";
                     }
                 }
             } else {
@@ -212,7 +226,10 @@ public class OperationInterfaceImplementer {
     private boolean isReturnCollection(ExecutableElement executableElement) {
         TypeName typeName0 = ClassName.get(executableElement.getReturnType());
         if (typeName0 instanceof ParameterizedTypeName) {
-            if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
+            if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(Mono.class.getCanonicalName())) {
+                TypeName typeName1 = ((ParameterizedTypeName) typeName0).typeArguments.get(0);
+                return typeName1 instanceof ParameterizedTypeName;
+            } else if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
                 TypeName typeName1 = ((ParameterizedTypeName) typeName0).typeArguments.get(0);
                 return typeName1 instanceof ParameterizedTypeName;
             } else {

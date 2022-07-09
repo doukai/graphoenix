@@ -196,7 +196,7 @@ public class InvokeHandlerBuilder {
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                 .map(fieldDefinitionContext ->
-                                                        CodeBlock.of(".peek(next -> reactiveStreamsFactory.ofNullable(next.$L()).flatMap(reactiveStreamsFactory::fromIterable).peek(this::$L))",
+                                                        CodeBlock.of(".peek(next -> reactiveStreamsFactory.ofNullable(next.$L()).flatMap(reactiveStreamsFactory::fromIterable).forEach(this::$L))",
                                                                 typeManager.getFieldGetterMethodName(fieldDefinitionContext),
                                                                 getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
                                                         )

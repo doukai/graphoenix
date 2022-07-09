@@ -29,13 +29,13 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> T findOne(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        return Mono.from(findOneAsync(sql, parameters, beanClass).buildRs()).block();
+        return findOneAsync(sql, parameters, beanClass).block();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T findAll(String sql, Map<String, Object> parameters, Type type) {
-        return (T) Mono.from(findAllAsync(sql, parameters, type).buildRs()).block();
+        return (T) findAllAsync(sql, parameters, type).block();
     }
 
     @Override
@@ -47,37 +47,53 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> T save(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        return Mono.from(saveAsync(sql, parameters, beanClass).buildRs()).block();
+        return saveAsync(sql, parameters, beanClass).block();
     }
 
     @Override
-    public <T> PublisherBuilder<T> findOneAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        return toBuilder(
-                queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters))
-                        .mapNotNull(jsonString -> jsonToType(jsonString, beanClass))
-        );
+    public <T> Mono<T> findOneAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+        return queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters))
+                .mapNotNull(jsonString -> jsonToType(jsonString, beanClass));
     }
 
     @Override
-    public <T> PublisherBuilder<T> findAllAsync(String sql, Map<String, Object> parameters, Type type) {
-        return toBuilder(
-                queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters))
-                        .mapNotNull(jsonString -> jsonToType(jsonString, type))
-        );
+    public <T> Mono<T> findAllAsync(String sql, Map<String, Object> parameters, Type type) {
+        return queryExecutor.executeQuery(sql, r2dbcParameterProcessor.process(parameters))
+                .mapNotNull(jsonString -> jsonToType(jsonString, type));
     }
 
     @Override
-    public <T> PublisherBuilder<Collection<T>> findAllAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+    public <T> Mono<Collection<T>> findAllAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
         Type type = (new TypeToken<Collection<T>>() {
         }).getType();
         return findAllAsync(sql, parameters, type);
     }
 
     @Override
-    public <T> PublisherBuilder<T> saveAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        return toBuilder(
-                mutationExecutor.executeMutations(sql, r2dbcParameterProcessor.process(parameters))
-                        .mapNotNull(jsonString -> jsonToType(jsonString, beanClass))
-        );
+    public <T> Mono<T> saveAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+        return mutationExecutor.executeMutations(sql, r2dbcParameterProcessor.process(parameters))
+                .mapNotNull(jsonString -> jsonToType(jsonString, beanClass));
+    }
+
+    @Override
+    public <T> PublisherBuilder<T> findOneAsyncBuilder(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+        return toBuilder(findOneAsync(sql, parameters, beanClass));
+    }
+
+    @Override
+    public <T> PublisherBuilder<T> findAllAsyncBuilder(String sql, Map<String, Object> parameters, Type type) {
+        return toBuilder(findAllAsync(sql, parameters, type));
+    }
+
+    @Override
+    public <T> PublisherBuilder<Collection<T>> findAllAsyncBuilder(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+        Type type = (new TypeToken<Collection<T>>() {
+        }).getType();
+        return findAllAsyncBuilder(sql, parameters, type);
+    }
+
+    @Override
+    public <T> PublisherBuilder<T> saveAsyncBuilder(String sql, Map<String, Object> parameters, Class<T> beanClass) {
+        return toBuilder(saveAsync(sql, parameters, beanClass));
     }
 }
