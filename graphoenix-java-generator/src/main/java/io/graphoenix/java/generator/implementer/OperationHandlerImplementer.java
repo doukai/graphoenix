@@ -33,6 +33,7 @@ import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
 import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsFactoryResolver;
 import org.tinylog.Logger;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
@@ -297,7 +298,7 @@ public class OperationHandlerImplementer {
                     typeManager.getTypeNameByString(returnClassName),
                     typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
                     methodName,
-                    CodeBlock.join (parameters.stream()
+                    CodeBlock.join(parameters.stream()
                             .map(parameter ->
                                     CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
                                             parameter.getKey(),
@@ -316,6 +317,9 @@ public class OperationHandlerImplementer {
                 }
                 if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
                     builder.addStatement("return result.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
+                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName()) ||
+                        typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
+                    builder.addStatement("return reactiveStreamsFactory.fromPublisher(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
                 } else {
                     builder.addStatement("return reactiveStreamsFactory.of(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
                 }
@@ -328,6 +332,9 @@ public class OperationHandlerImplementer {
                 }
                 if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
                     builder.addStatement("return result.map(item-> $L(item))", filterMethodName);
+                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName()) ||
+                        typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
+                    builder.addStatement("return reactiveStreamsFactory.fromPublisher(result).map(item-> $L(item))", filterMethodName);
                 } else {
                     builder.addStatement("return reactiveStreamsFactory.of(result).map(item-> $L(item))", filterMethodName);
                 }

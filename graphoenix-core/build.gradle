@@ -12,8 +12,8 @@ repositories {
 }
 
 dependencies {
-    compile project(":graphoenix-spi")
-    compile project(":graphoenix-config")
+    compile project(':graphoenix-spi')
+    compile project(':graphoenix-config')
     compile 'com.google.guava:guava:31.1-jre'
     compile 'org.antlr:antlr4-runtime:4.9.3'
 
@@ -21,14 +21,15 @@ dependencies {
     implementation 'com.networknt:json-schema-validator:1.0.70'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1'
     implementation 'com.jcabi:jcabi-manifests:1.2.1'
-    implementation "org.tinylog:tinylog-impl:2.4.1"
-    implementation "org.tinylog:slf4j-tinylog:2.4.1"
-    implementation "org.tinylog:jcl-tinylog:2.4.1"
+    implementation 'org.tinylog:tinylog-impl:2.4.1'
+    implementation 'org.tinylog:slf4j-tinylog:2.4.1'
+    implementation 'org.tinylog:jcl-tinylog:2.4.1'
     implementation 'org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-core:2.0'
+    implementation 'com.lightbend.microprofile.reactive.streams:lightbend-microprofile-reactive-streams-zerodep:1.0.0'
 
-    annotationProcessor project(":graphoenix-inject")
-    annotationProcessor project(":graphoenix-interceptor")
-    annotationProcessor project(":graphoenix-config")
+    annotationProcessor project(':graphoenix-inject')
+    annotationProcessor project(':graphoenix-interceptor')
+    annotationProcessor project(':graphoenix-config')
     annotationProcessor 'com.networknt:json-schema-validator:1.0.70'
 
     testImplementation 'io.projectreactor:reactor-test:3.4.16'

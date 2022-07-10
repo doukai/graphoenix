@@ -851,7 +851,6 @@ public class InjectProcessor extends AbstractProcessor {
                             moduleClassDeclaration.getMethods().stream()
                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Produces.class))
                                     .forEach(producesMethodDeclaration -> {
-                                                Type originalType = producesMethodDeclaration.getType().clone();
                                                 producesMethodDeclaration.addAnnotation(Provides.class);
                                                 if (producesMethodDeclaration.isAnnotationPresent(ApplicationScoped.class)) {
                                                     producesMethodDeclaration.addAnnotation(javax.inject.Singleton.class);
