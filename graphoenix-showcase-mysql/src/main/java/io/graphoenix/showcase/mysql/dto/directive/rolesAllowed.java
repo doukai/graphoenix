@@ -13,13 +13,7 @@ import java.lang.annotation.Target;
 @Skip
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD})
-public @interface invoke {
-  String className();
-
-  String methodName();
-
-  InvokeParameter[] parameters();
-
-  String returnClassName();
+@Target({ElementType.TYPE})
+public @interface rolesAllowed {
+  String[] roles();
 }

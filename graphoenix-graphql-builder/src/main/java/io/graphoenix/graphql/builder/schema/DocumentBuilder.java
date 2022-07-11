@@ -162,7 +162,7 @@ public class DocumentBuilder {
                 .setStringDirectives(objectTypeDefinitionContext.directives() == null ? null : objectTypeDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
 
         if (buildInterface) {
-            objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+            objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields().stream().filter(metaField -> objectType.getFields().stream().noneMatch(field -> field.getName().equals(metaField.getName()))).collect(Collectors.toList()));
         }
         if (buildField) {
             objectType.addField(buildTypeNameField(objectTypeDefinitionContext));

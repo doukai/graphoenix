@@ -5,12 +5,15 @@ import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 
 public class InterfaceType {
 
@@ -47,9 +50,15 @@ public class InterfaceType {
         InterfaceType interfaceType = new InterfaceType();
         interfaceType.name = interfaceTypes[0].getName();
         interfaceType.description = interfaceTypes[0].getDescription();
-        interfaceType.interfaces = Stream.of(interfaceTypes).flatMap(item -> item.getInterfaces().stream()).collect(Collectors.toSet());
-        interfaceType.directives = Stream.of(interfaceTypes).flatMap(item -> item.getDirectives().stream()).collect(Collectors.toSet());
-        interfaceType.fields = Stream.of(interfaceTypes).flatMap(item -> item.getFields().stream()).collect(Collectors.toSet());
+        interfaceType.interfaces = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        interfaceType.directives = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        for (InterfaceType item : interfaceTypes) {
+            for (Field itemField : item.getFields()) {
+                if (interfaceType.fields.stream().noneMatch(field -> field.getName().equals(itemField.getName()))) {
+                    interfaceType.fields.add(itemField);
+                }
+            }
+        }
         return interfaceType;
     }
 

@@ -13,7 +13,7 @@ public enum HttpErrorStatusUtil {
                 .map(ServiceLoader.Provider::get)
                 .flatMap(httpErrorStatus -> httpErrorStatus.getStatus(type).stream())
                 .findFirst()
-                .map(status -> HttpResponseStatus.valueOf(status.getStatusCode()))
+                .map(HttpResponseStatus::valueOf)
                 .orElse(HttpResponseStatus.BAD_REQUEST);
     }
 }

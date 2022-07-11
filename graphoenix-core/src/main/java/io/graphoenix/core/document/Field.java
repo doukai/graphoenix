@@ -24,7 +24,7 @@ public class Field {
 
     public Field(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         this.name = fieldDefinitionContext.name().getText();
-        this.typeName = fieldDefinitionContext.type().typeName().getText();
+        this.typeName = fieldDefinitionContext.type().getText();
         if (fieldDefinitionContext.description() != null) {
             this.description = DOCUMENT_UTIL.getStringValue(fieldDefinitionContext.description().StringValue());
         }

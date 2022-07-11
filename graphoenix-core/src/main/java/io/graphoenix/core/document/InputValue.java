@@ -23,7 +23,7 @@ public class InputValue {
 
     public InputValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         this.name = inputValueDefinitionContext.name().getText();
-        this.typeName = inputValueDefinitionContext.type().typeName().getText();
+        this.typeName = inputValueDefinitionContext.type().getText();
         this.defaultValue = inputValueDefinitionContext.defaultValue().value().getText();
         if (inputValueDefinitionContext.directives() != null) {
             this.directives = inputValueDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toSet());

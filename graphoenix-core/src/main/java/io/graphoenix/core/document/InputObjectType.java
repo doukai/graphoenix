@@ -5,8 +5,7 @@ import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,8 +42,14 @@ public class InputObjectType {
         InputObjectType inputObjectType = new InputObjectType();
         inputObjectType.name = inputObjectTypes[0].getName();
         inputObjectType.description = inputObjectTypes[0].getDescription();
-        inputObjectType.directives = Stream.of(inputObjectTypes).flatMap(item -> item.getDirectives().stream()).collect(Collectors.toSet());
-        inputObjectType.inputValues = Stream.of(inputObjectTypes).flatMap(item -> item.getInputValues().stream()).collect(Collectors.toSet());
+        inputObjectType.directives = Stream.of(inputObjectTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        for (InputObjectType item : inputObjectTypes) {
+            for (InputValue itemInputValue : item.getInputValues()) {
+                if (inputObjectType.inputValues.stream().noneMatch(inputValue -> inputValue.getName().equals(itemInputValue.getName()))) {
+                    inputObjectType.inputValues.add(itemInputValue);
+                }
+            }
+        }
         return inputObjectType;
     }
 

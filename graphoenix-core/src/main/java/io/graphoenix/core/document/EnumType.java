@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,8 +42,14 @@ public class EnumType {
         EnumType enumType = new EnumType();
         enumType.name = enumTypes[0].getName();
         enumType.description = enumTypes[0].getDescription();
-        enumType.directives = Stream.of(enumTypes).flatMap(item -> item.getDirectives().stream()).collect(Collectors.toSet());
-        enumType.enumValues = Stream.of(enumTypes).flatMap(item -> item.getEnumValues().stream()).collect(Collectors.toSet());
+        enumType.directives = Stream.of(enumTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        for (EnumType item : enumTypes) {
+            for (EnumValue itemEnumValue : item.getEnumValues()) {
+                if (enumType.enumValues.stream().noneMatch(enumValue -> enumValue.getName().equals(itemEnumValue.getName()))) {
+                    enumType.enumValues.add(itemEnumValue);
+                }
+            }
+        }
         return enumType;
     }
 

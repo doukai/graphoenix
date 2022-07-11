@@ -5,9 +5,7 @@ import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,9 +46,15 @@ public class ObjectType {
         ObjectType objectType = new ObjectType();
         objectType.name = objectTypes[0].getName();
         objectType.description = objectTypes[0].getDescription();
-        objectType.interfaces = Stream.of(objectTypes).flatMap(item -> item.getInterfaces().stream()).collect(Collectors.toSet());
-        objectType.directives = Stream.of(objectTypes).flatMap(item -> item.getDirectives().stream()).collect(Collectors.toSet());
-        objectType.fields = Stream.of(objectTypes).flatMap(item -> item.getFields().stream()).collect(Collectors.toSet());
+        objectType.interfaces = Stream.of(objectTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        objectType.directives = Stream.of(objectTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        for (ObjectType item : objectTypes) {
+            for (Field itemField : item.getFields()) {
+                if (objectType.fields.stream().noneMatch(field -> field.getName().equals(itemField.getName()))) {
+                    objectType.fields.add(itemField);
+                }
+            }
+        }
         return objectType;
     }
 
