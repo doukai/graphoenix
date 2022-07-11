@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.mysql.inject;
 
-import io.graphoenix.core.context.RequestPublisherBuilderFactory;
+import io.graphoenix.core.context.RequestScopeInstanceFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.RequestScoped;
@@ -27,7 +27,7 @@ public class Class3 {
     @RequestScoped
     @Named("no")
     public PublisherBuilder<Class6> class6() {
-        return RequestPublisherBuilderFactory.getPublisherBuilder(new Class6());
+        return RequestScopeInstanceFactory.getPublisherBuilder(new Class6());
     }
 
     @Produces

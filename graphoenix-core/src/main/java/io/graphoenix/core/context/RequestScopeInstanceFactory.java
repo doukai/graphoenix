@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.concurrent.TimeUnit;
 
-public class RequestPublisherBuilderFactory {
+public class RequestScopeInstanceFactory {
     public static final String REQUEST_ID = "requestId";
 
     private static final AsyncLoadingCache<String, ScopeInstances> REQUEST_CACHE = buildCache();
@@ -35,7 +35,7 @@ public class RequestPublisherBuilderFactory {
         return builder.buildAsync(key -> new ScopeInstances());
     }
 
-    private RequestPublisherBuilderFactory() {
+    private RequestScopeInstanceFactory() {
     }
 
     public static <T> Mono<ScopeInstances> getScopeInstances() {
@@ -64,8 +64,18 @@ public class RequestPublisherBuilderFactory {
         return getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> Mono<T> get(T instance) {
+        return get((Class<T>) instance.getClass(), instance.getClass().getName(), instance);
+    }
+
     public static <T> Mono<T> get(Class<T> beanClass, T instance) {
         return get(beanClass, beanClass.getName(), instance);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Mono<T> get(String name, T instance) {
+        return get((Class<T>) instance.getClass(), name, instance);
     }
 
     @SuppressWarnings("unchecked")
@@ -87,14 +97,6 @@ public class RequestPublisherBuilderFactory {
         return reactiveStreamsFactory.fromPublisher(get(beanClass, name));
     }
 
-    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, T instance) {
-        return getPublisherBuilder(beanClass, beanClass.getName(), instance);
-    }
-
-    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, String name, T instance) {
-        return reactiveStreamsFactory.fromPublisher(get(beanClass, name, instance));
-    }
-
     public static <T> PublisherBuilder<T> getPublisherBuilder(T instance) {
         return getPublisherBuilder(instance.getClass().getName(), instance);
     }
@@ -102,6 +104,14 @@ public class RequestPublisherBuilderFactory {
     @SuppressWarnings("unchecked")
     public static <T> PublisherBuilder<T> getPublisherBuilder(String name, T instance) {
         return getPublisherBuilder((Class<T>) instance.getClass(), name, instance);
+    }
+
+    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, T instance) {
+        return getPublisherBuilder(beanClass, beanClass.getName(), instance);
+    }
+
+    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, String name, T instance) {
+        return reactiveStreamsFactory.fromPublisher(get(beanClass, name, instance));
     }
 
     public static <T> Mono<T> putIfAbsent(String requestId, Class<T> beanClass, T instance) {

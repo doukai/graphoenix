@@ -2,7 +2,7 @@ package io.graphoenix.http.handler;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.gson.GsonBuilder;
-import io.graphoenix.core.context.RequestPublisherBuilderFactory;
+import io.graphoenix.core.context.RequestScopeInstanceFactory;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -18,8 +18,8 @@ import reactor.util.context.Context;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.graphoenix.core.context.RequestPublisherBuilderFactory.REQUEST_ID;
-import static io.graphoenix.core.context.SessionPublisherBuilderFactory.SESSION_ID;
+import static io.graphoenix.core.context.RequestScopeInstanceFactory.REQUEST_ID;
+import static io.graphoenix.core.context.SessionScopeInstanceFactory.SESSION_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
@@ -40,7 +40,7 @@ public class PostRequestHandler extends BaseRequestHandler {
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
 
         if (contentType.contentEquals(MimeType.Application.JSON)) {
-            return RequestPublisherBuilderFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
+            return RequestScopeInstanceFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                                     .sendString(
@@ -65,7 +65,7 @@ public class PostRequestHandler extends BaseRequestHandler {
                                     .contextWrite(Context.of(REQUEST_ID, requestId))
                     );
         } else if (contentType.contentEquals(MimeType.Application.GRAPHQL)) {
-            return RequestPublisherBuilderFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
+            return RequestScopeInstanceFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                                     .sendString(
@@ -92,7 +92,7 @@ public class PostRequestHandler extends BaseRequestHandler {
         } else {
             IllegalArgumentException illegalArgumentException = new IllegalArgumentException("unsupported content-type: ".concat(contentType));
             Logger.error(illegalArgumentException);
-            return RequestPublisherBuilderFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
+            return RequestScopeInstanceFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
                     .thenEmpty(
                             response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                                     .status(HttpResponseStatus.BAD_REQUEST)

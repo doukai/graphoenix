@@ -3,7 +3,7 @@ package io.graphoenix.http.handler;
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import io.graphoenix.core.context.RequestPublisherBuilderFactory;
+import io.graphoenix.core.context.RequestScopeInstanceFactory;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -19,8 +19,8 @@ import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.graphoenix.core.context.RequestPublisherBuilderFactory.REQUEST_ID;
-import static io.graphoenix.core.context.SessionPublisherBuilderFactory.SESSION_ID;
+import static io.graphoenix.core.context.RequestScopeInstanceFactory.REQUEST_ID;
+import static io.graphoenix.core.context.SessionScopeInstanceFactory.SESSION_ID;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped
@@ -45,7 +45,7 @@ public class GetRequestHandler extends BaseRequestHandler {
                 gsonBuilder.create().fromJson(request.param("variables"), type)
         );
 
-        return RequestPublisherBuilderFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
+        return RequestScopeInstanceFactory.putIfAbsent(requestId, HttpServerRequest.class, request)
                 .thenEmpty(
                         response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                                 .sendString(
