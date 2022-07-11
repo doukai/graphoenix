@@ -5,6 +5,7 @@ import io.graphoenix.http.handler.GetRequestHandler;
 import io.graphoenix.http.handler.PostRequestHandler;
 import io.graphoenix.http.handler.SchemaRequestHandler;
 import io.graphoenix.spi.handler.BootstrapHandler;
+import io.graphoenix.spi.handler.ScopeEventResolver;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
@@ -27,7 +28,6 @@ public class GraphQLHttpServer {
     private final SchemaRequestHandler schemaRequestHandler;
     private final GetRequestHandler getRequestHandler;
     private final PostRequestHandler postRequestHandler;
-    private final BootstrapHandler bootstrapHandler;
 
     @Inject
     public GraphQLHttpServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, BootstrapHandler bootstrapHandler) {
@@ -35,12 +35,10 @@ public class GraphQLHttpServer {
         this.schemaRequestHandler = schemaRequestHandler;
         this.getRequestHandler = getRequestHandler;
         this.postRequestHandler = postRequestHandler;
-        this.bootstrapHandler = bootstrapHandler;
     }
 
     public void run() {
         BANNER_UTIL.getBanner().ifPresent(Logger::info);
-        bootstrapHandler.bootstrap();
 
         CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
                 .allowedRequestHeaders(HttpHeaderNames.CONTENT_TYPE)
@@ -62,6 +60,6 @@ public class GraphQLHttpServer {
                 .port(httpServerConfig.getPort())
                 .bindNow();
 
-        server.onDispose().block();
+        ScopeEventResolver.initialized(ApplicationScoped.class).then(server.onDispose()).block();
     }
 }

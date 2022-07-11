@@ -2,7 +2,7 @@ package io.graphoenix.showcase.mysql.dto.objectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
-import io.graphoenix.spi.annotation.SchemaBean;
+import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
@@ -13,7 +13,7 @@ import java.util.Collection;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@SchemaBean
+@Skip
 public class User implements Meta {
   @Id
   private String id;

@@ -20,7 +20,7 @@ import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
 import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
-import io.graphoenix.spi.annotation.SchemaBean;
+import io.graphoenix.spi.annotation.Skip;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.vavr.Tuple2;
@@ -59,10 +59,10 @@ import java.util.stream.Collectors;
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
-@SupportedAnnotationTypes("javax.ejb.Startup")
+@SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphoenixApplication")
 @SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
-public class StartupProcessor extends AbstractProcessor {
+public class ApplicationProcessor extends AbstractProcessor {
 
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
@@ -85,7 +85,7 @@ public class StartupProcessor extends AbstractProcessor {
         super.init(processingEnv);
         this.typeUtils = processingEnv.getTypeUtils();
         this.filer = processingEnv.getFiler();
-        BeanContext.load(StartupProcessor.class.getClassLoader());
+        BeanContext.load(ApplicationProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.documentBuilder = BeanContext.get(DocumentBuilder.class);
         this.javaElementToEnum = BeanContext.get(JavaElementToEnum.class);
@@ -104,7 +104,7 @@ public class StartupProcessor extends AbstractProcessor {
 
         try {
             manager.clearAll();
-            configRegister.registerPreset(StartupProcessor.class.getClassLoader());
+            configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
             configRegister.registerConfig(graphQLConfig, filer);
             mapper.registerFieldMaps();
             if (graphQLConfig.getBuild()) {
@@ -122,17 +122,17 @@ public class StartupProcessor extends AbstractProcessor {
             return false;
         }
         roundEnv.getElementsAnnotatedWith(Enum.class).stream()
-                .filter(element -> element.getAnnotation(SchemaBean.class) == null)
+                .filter(element -> element.getAnnotation(Skip.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.ENUM))
                 .forEach(element -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) element).toString()));
 
         roundEnv.getElementsAnnotatedWith(Interface.class).stream()
-                .filter(element -> element.getAnnotation(SchemaBean.class) == null)
+                .filter(element -> element.getAnnotation(Skip.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
                 .forEach(element -> {
                             manager.registerGraphQL(javaElementToInterface.buildInterface((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
-                                    .filter(subElement -> subElement.getAnnotation(SchemaBean.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(Skip.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
                                     .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
@@ -140,12 +140,12 @@ public class StartupProcessor extends AbstractProcessor {
                 );
 
         roundEnv.getElementsAnnotatedWith(Type.class).stream()
-                .filter(element -> element.getAnnotation(SchemaBean.class) == null)
+                .filter(element -> element.getAnnotation(Skip.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> {
                             manager.registerGraphQL(javaElementToObject.buildObject((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
-                                    .filter(subElement -> subElement.getAnnotation(SchemaBean.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(Skip.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
                                     .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
@@ -153,12 +153,12 @@ public class StartupProcessor extends AbstractProcessor {
                 );
 
         roundEnv.getElementsAnnotatedWith(Input.class).stream()
-                .filter(element -> element.getAnnotation(SchemaBean.class) == null)
+                .filter(element -> element.getAnnotation(Skip.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> {
                             manager.registerGraphQL(javaElementToInputType.buildInputType((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
-                                    .filter(subElement -> subElement.getAnnotation(SchemaBean.class) == null)
+                                    .filter(subElement -> subElement.getAnnotation(Skip.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
                                     .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));

@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.interfaceType;
 
-import io.graphoenix.spi.annotation.SchemaBean;
+import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -10,7 +10,7 @@ import org.eclipse.microprofile.graphql.Interface;
 
 @Interface
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@SchemaBean
+@Skip
 public interface Meta {
   Boolean isDeprecated = null;
 

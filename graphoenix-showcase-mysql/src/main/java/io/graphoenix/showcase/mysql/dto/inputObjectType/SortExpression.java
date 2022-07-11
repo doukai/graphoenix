@@ -2,7 +2,7 @@ package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import io.graphoenix.showcase.mysql.dto.enumType.Operator;
 import io.graphoenix.showcase.mysql.dto.enumType.Sort;
-import io.graphoenix.spi.annotation.SchemaBean;
+import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
@@ -10,7 +10,7 @@ import org.eclipse.microprofile.graphql.Input;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@SchemaBean
+@Skip
 public class SortExpression {
   @DefaultValue("EQ")
   private Operator opr;

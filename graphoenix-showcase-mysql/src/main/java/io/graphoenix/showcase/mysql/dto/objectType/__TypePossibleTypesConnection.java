@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
-import io.graphoenix.spi.annotation.SchemaBean;
+import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Integer;
 import java.util.Collection;
@@ -9,7 +9,7 @@ import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@SchemaBean
+@Skip
 public class __TypePossibleTypesConnection {
   private Integer totalCount;
 

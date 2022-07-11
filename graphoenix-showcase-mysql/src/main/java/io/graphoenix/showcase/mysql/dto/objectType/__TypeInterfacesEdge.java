@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
-import io.graphoenix.spi.annotation.SchemaBean;
+import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Id;
@@ -8,7 +8,7 @@ import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@SchemaBean
+@Skip
 public class __TypeInterfacesEdge {
   private __TypeInterfaces node;
 

@@ -13,7 +13,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.java.generator.implementer.TypeManager;
-import io.graphoenix.spi.annotation.SchemaBean;
+import io.graphoenix.spi.annotation.Skip;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.annotation.Generated;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -75,7 +75,7 @@ public class TypeSpecBuilder {
     }
 
     private AnnotationSpec getSchemaBeanAnnotationSpec() {
-        return AnnotationSpec.builder(SchemaBean.class)
+        return AnnotationSpec.builder(Skip.class)
                 .build();
     }
 

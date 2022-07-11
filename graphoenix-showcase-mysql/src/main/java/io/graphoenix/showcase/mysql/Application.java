@@ -2,10 +2,9 @@ package io.graphoenix.showcase.mysql;
 
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.http.server.GraphQLHttpServer;
+import io.graphoenix.spi.annotation.GraphoenixApplication;
 
-import javax.ejb.Startup;
-
-@Startup
+@GraphoenixApplication
 public class Application {
 
     public static void main(String[] args) throws Exception {

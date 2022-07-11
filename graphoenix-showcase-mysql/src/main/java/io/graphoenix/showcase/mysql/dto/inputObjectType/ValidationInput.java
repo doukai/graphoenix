@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
-import io.graphoenix.spi.annotation.SchemaBean;
+import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Float;
@@ -12,7 +12,7 @@ import org.eclipse.microprofile.graphql.Name;
 
 @Input
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@SchemaBean
+@Skip
 public class ValidationInput {
   private Integer minLength;
 

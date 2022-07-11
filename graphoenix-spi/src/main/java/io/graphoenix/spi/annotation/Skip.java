@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.SOURCE)
 @Documented
-public @interface SchemaBean {
+public @interface Skip {
 }
