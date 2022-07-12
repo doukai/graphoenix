@@ -44,8 +44,6 @@ public class MysqlIntrospectionBuildEvent implements ScopeEvent {
             return mutationExecutor.executeMutationsInBatchByGroup(introspectionMutationSQLStream, sqlCount)
                     .doOnNext(count -> Logger.info(count + " introspection data SQL insert success"))
                     .doOnComplete(() -> Logger.info("all introspection data SQL insert success"))
-                    .reduce(0, Integer::sum)
-                    .doOnSuccess(totalCount -> Logger.info("introspection insert total:\r\n{}", totalCount))
                     .then();
         }
         return Mono.empty();

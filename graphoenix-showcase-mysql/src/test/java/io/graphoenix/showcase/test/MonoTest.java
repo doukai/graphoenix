@@ -1,41 +1,22 @@
 package io.graphoenix.showcase.test;
 
-import io.graphoenix.core.config.GraphQLConfig;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
-
-import java.util.stream.Stream;
+import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 public class MonoTest {
 
     @Test
     void test1() {
-//        String key = "key";
+        String key = "key";
 //        String key2 = "key2";
 //        Map<String, Object> p = new HashMap<>();
-//        Mono.just("anything")
-//                .transform(s -> {
-//                    p.put(key2, "test");
-//                    return s;
-//                })
-//                .flatMap(s -> Mono.deferContextual(ctx ->
-//                        Mono.just(s + "$" + ctx.get(key2)))) // <1>
-//                .publishOn(Schedulers.newSingle("a")) // <3>
-//                .doOnNext(System.out::println)
-//                .map(a -> a.toUpperCase(Locale.ROOT))
-//                .doOnNext(System.out::println)
-////                .transformDeferredContextual( // <2>
-////                        (mono, context) -> mono.contextWrite(Context.of(key2, p.get(key2)))
-////                )
-////                .doFirst(() -> {
-////                            p.put(key2, "test");
-////                        }
-////                )
-//                .transformDeferredContextual( // <2>
-//                        (mono, context) -> mono.contextWrite(Context.of(key2, p.get(key2)))
-//                )
-//                .contextWrite(Context.of(key, "myValue"))
-//                .block();
+        String block = Mono.from(Mono.deferContextual(ctx ->
+                        Mono.just("$" + ctx.get(key))))
+                .contextWrite(Context.of(key, "myValue"))
+                .block();
+
+        System.out.println(block);
 //        GraphQLConfig object = new GraphQLConfig();
 //        Package objPackage = MonoTest.class.getPackage();
 //        //examine the package object
@@ -45,14 +26,14 @@ public class MonoTest {
 //        System.out.println("Package name: " + name);
 //        System.out.println("Package version: " + version);
 
-        String[] a = {"a", "b", "c", "d"};
-        System.out.println(
-                Flux.fromArray(a)
-                        .map(item -> Flux.fromStream(Stream.of(a)).last().block())
-//                .flatMap(stream -> Flux.fromIterable(stream))
-                        .last()
-                        .block()
-        );
+//        String[] a = {"a", "b", "c", "d"};
+//        System.out.println(
+//                Flux.fromArray(a)
+//                        .map(item -> Flux.fromStream(Stream.of(a)).last().block())
+////                .flatMap(stream -> Flux.fromIterable(stream))
+//                        .last()
+//                        .block()
+//        );
 
     }
 }

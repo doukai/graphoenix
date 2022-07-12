@@ -14,9 +14,9 @@ import static io.graphoenix.http.error.HttpErrorStatusUtil.HTTP_ERROR_STATUS_UTI
 
 public abstract class BaseRequestHandler {
 
-    protected Mono<Void> sessionHandler(Map<String, Object> properties, Mono<Void> mono, ContextView contextView) {
-        return properties.containsKey(SESSION_ID) ?
-                mono.contextWrite(Context.of(SESSION_ID, properties.get(SESSION_ID))) :
+    protected Mono<Void> sessionHandler(Map<String, Object> context, Mono<Void> mono, ContextView contextView) {
+        return context.containsKey(SESSION_ID) ?
+                mono.contextWrite(Context.of(SESSION_ID, context.get(SESSION_ID))) :
                 mono;
     }
 

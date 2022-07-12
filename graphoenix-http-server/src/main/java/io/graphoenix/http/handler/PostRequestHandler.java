@@ -21,6 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static io.graphoenix.core.context.RequestScopeInstanceFactory.REQUEST_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.GRAPHQL_REQUEST_KEY;
+import static io.graphoenix.spi.constant.Hammurabi.REQUEST_KEY;
+import static io.graphoenix.spi.constant.Hammurabi.RESPONSE_KEY;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped
@@ -36,17 +39,21 @@ public class PostRequestHandler extends BaseRequestHandler {
 
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
         String requestId = NanoIdUtils.randomNanoId();
-        Map<String, Object> properties = new ConcurrentHashMap<>();
+        Map<String, Object> context = new ConcurrentHashMap<>();
+        context.put(REQUEST_KEY, request);
+        context.put(RESPONSE_KEY, response);
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
 
         if (contentType.contentEquals(MimeType.Application.JSON)) {
             return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
-                            ScopeEventResolver.initialized(properties, RequestScoped.class)
-                                    .transformDeferredContextual((mono, context) -> this.sessionHandler(properties, mono, context))
-                                    .then(request.receive().aggregate().asString()
-                                            .map(content -> gsonBuilder.create().fromJson(content, GraphQLRequest.class))
-                                            .flatMap(graphQLRequestHandler::handle)
+                            request.receive().aggregate().asString()
+                                    .map(content -> gsonBuilder.create().fromJson(content, GraphQLRequest.class))
+                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST_KEY, graphQLRequest))
+                                    .flatMap(graphQLRequest ->
+                                            ScopeEventResolver.initialized(context, RequestScoped.class)
+                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
+                                                    .then(graphQLRequestHandler.handle(graphQLRequest))
                                     )
                                     .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                     .onErrorResume(throwable -> this.errorHandler(throwable, response))
@@ -56,11 +63,13 @@ public class PostRequestHandler extends BaseRequestHandler {
         } else if (contentType.contentEquals(MimeType.Application.GRAPHQL)) {
             return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
-                            ScopeEventResolver.initialized(properties, RequestScoped.class)
-                                    .transformDeferredContextual((mono, context) -> this.sessionHandler(properties, mono, context))
-                                    .then(request.receive().aggregate().asString()
-                                            .map(GraphQLRequest::new)
-                                            .flatMap(graphQLRequestHandler::handle)
+                            request.receive().aggregate().asString()
+                                    .map(GraphQLRequest::new)
+                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST_KEY, graphQLRequest))
+                                    .flatMap(graphQLRequest ->
+                                            ScopeEventResolver.initialized(context, RequestScoped.class)
+                                                    .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
+                                                    .then(graphQLRequestHandler.handle(graphQLRequest))
                                     )
                                     .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                     .onErrorResume(throwable -> this.errorHandler(throwable, response))

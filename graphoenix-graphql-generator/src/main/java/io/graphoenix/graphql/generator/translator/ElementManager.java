@@ -15,6 +15,7 @@ import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -124,6 +125,8 @@ public class ElementManager {
         if (types.asElement(executableElement.getReturnType()).getSimpleName().contentEquals(Flux.class.getSimpleName())) {
             typeElement = (TypeElement) types.asElement(((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0));
         } else if (types.asElement(executableElement.getReturnType()).getSimpleName().contentEquals(Mono.class.getSimpleName())) {
+            typeElement = (TypeElement) types.asElement(((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0));
+        } else if (types.asElement(executableElement.getReturnType()).getSimpleName().contentEquals(PublisherBuilder.class.getSimpleName())) {
             typeElement = (TypeElement) types.asElement(((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0));
         } else {
             typeElement = (TypeElement) types.asElement(executableElement.getReturnType());

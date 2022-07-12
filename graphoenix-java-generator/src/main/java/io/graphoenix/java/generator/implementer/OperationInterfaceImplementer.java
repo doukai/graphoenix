@@ -126,7 +126,7 @@ public class OperationInterfaceImplementer {
                     "$T type = new $T<$T>() {}.getType()",
                     ClassName.get(Type.class),
                     ClassName.get(TypeToken.class),
-                    typeName
+                    getReturnType(executableElement)
             );
             if (executableElement.getParameters().size() == 0) {
                 builder.addStatement(
@@ -154,7 +154,7 @@ public class OperationInterfaceImplementer {
                         executableElement.getSimpleName().toString()
                                 .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
                         ClassName.get(java.util.HashMap.class),
-                        getGenericType(typeName)
+                        getReturnType(executableElement)
                 );
             } else {
                 builder.addStatement(
@@ -164,19 +164,11 @@ public class OperationInterfaceImplementer {
                                 .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
                         ClassName.get(HashMap.class),
                         mapOf,
-                        getGenericType(typeName)
+                        getReturnType(executableElement)
                 );
             }
         }
         return builder.build();
-    }
-
-    private TypeName getGenericType(TypeName typeName) {
-        if (typeName instanceof ParameterizedTypeName) {
-            return getGenericType(((ParameterizedTypeName) typeName).typeArguments.get(0));
-        } else {
-            return typeName;
-        }
     }
 
     private String getMethodName(ExecutableElement executableElement) {
@@ -237,5 +229,19 @@ public class OperationInterfaceImplementer {
             }
         }
         return false;
+    }
+
+    private TypeName getReturnType(ExecutableElement executableElement) {
+        TypeName typeName0 = ClassName.get(executableElement.getReturnType());
+        if (typeName0 instanceof ParameterizedTypeName) {
+            if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(Mono.class.getCanonicalName())) {
+                return ((ParameterizedTypeName) typeName0).typeArguments.get(0);
+            } else if (((ParameterizedTypeName) typeName0).rawType.canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
+                return ((ParameterizedTypeName) typeName0).typeArguments.get(0);
+            } else {
+                return typeName0;
+            }
+        }
+        return typeName0;
     }
 }
