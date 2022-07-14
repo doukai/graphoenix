@@ -1,127 +1,224 @@
 package io.graphoenix.core.handler;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Formatter;
+import java.util.Locale;
+
+import static jakarta.json.JsonValue.FALSE;
+import static jakarta.json.JsonValue.TRUE;
+import static jakarta.json.JsonValue.NULL;
 
 @ApplicationScoped
 public class GraphQLFieldFormatter {
 
-    public void format(JsonObject jsonObject, String selectionName, String value, String locale, LocalDateTime localDateTime) throws ClassCastException {
+    private final JsonProvider jsonProvider;
+
+    @Inject
+    public GraphQLFieldFormatter(JsonProvider jsonProvider) {
+        this.jsonProvider = jsonProvider;
+    }
+
+    public JsonValue format(String value, String locale, LocalDateTime localDateTime) throws ClassCastException {
+        if (localDateTime == null) {
+            return NULL;
+        }
         if (value != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonObject.addProperty(selectionName, localDateTime.format(formatter));
+            return jsonProvider.createValue(localDateTime.format(formatter));
         } else {
-            jsonObject.addProperty(selectionName, localDateTime.toString());
+            return jsonProvider.createValue(localDateTime.toString());
         }
     }
 
-    public void format(JsonObject jsonObject, String selectionName, String value, String locale, LocalDate localDate) throws ClassCastException {
+    public JsonValue format(String value, String locale, LocalDate localDate) throws ClassCastException {
+        if (localDate == null) {
+            return NULL;
+        }
         if (value != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonObject.addProperty(selectionName, localDate.format(formatter));
+            return jsonProvider.createValue(localDate.format(formatter));
         } else {
-            jsonObject.addProperty(selectionName, localDate.toString());
+            return jsonProvider.createValue(localDate.toString());
         }
     }
 
-    public void format(JsonObject jsonObject, String selectionName, String value, String locale, LocalTime localTime) throws ClassCastException {
+    public JsonValue format(String value, String locale, LocalTime localTime) throws ClassCastException {
+        if (localTime == null) {
+            return NULL;
+        }
         if (value != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonObject.addProperty(selectionName, localTime.format(formatter));
+            return jsonProvider.createValue(localTime.format(formatter));
         } else {
-            jsonObject.addProperty(selectionName, localTime.toString());
+            return jsonProvider.createValue(localTime.toString());
         }
     }
 
-    public void format(JsonObject jsonObject, String selectionName, String value, String locale, Number number) throws ClassCastException {
+    public JsonValue format(String value, String locale, Integer number) throws ClassCastException {
+        if (number == null) {
+            return NULL;
+        }
         if (value != null) {
             DecimalFormat decimalFormat = new DecimalFormat(value);
             decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale)));
-            jsonObject.addProperty(selectionName, decimalFormat.format(number));
+            return jsonProvider.createValue(decimalFormat.format(number));
         } else {
-            jsonObject.addProperty(selectionName, number);
+            return jsonProvider.createValue(number);
         }
     }
 
-    public void format(JsonObject jsonObject, String selectionName, String value, String locale, String string) throws ClassCastException {
-        if (value != null) {
-            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonObject.addProperty(selectionName, formatter.format(value, string).toString());
-        } else {
-            jsonObject.addProperty(selectionName, string);
+    public JsonValue format(String value, String locale, Long number) throws ClassCastException {
+        if (number == null) {
+            return NULL;
         }
-    }
-
-    public void format(JsonObject jsonObject, String selectionName, String value, String locale, Boolean bool) throws ClassCastException {
-        if (value != null) {
-            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonObject.addProperty(selectionName, formatter.format(value, bool).toString());
-        } else {
-            jsonObject.addProperty(selectionName, bool);
-        }
-    }
-
-    public void addFormat(JsonArray jsonArray, String value, String locale, LocalDateTime localDateTime) throws ClassCastException {
-        if (value != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonArray.add(localDateTime.format(formatter));
-        } else {
-            jsonArray.add(localDateTime.toString());
-        }
-    }
-
-    public void addFormat(JsonArray jsonArray, String value, String locale, LocalDate localDate) throws ClassCastException {
-        if (value != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonArray.add(localDate.format(formatter));
-        } else {
-            jsonArray.add(localDate.toString());
-        }
-    }
-
-    public void addFormat(JsonArray jsonArray, String value, String locale, LocalTime localTime) throws ClassCastException {
-        if (value != null) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonArray.add(localTime.format(formatter));
-        } else {
-            jsonArray.add(localTime.toString());
-        }
-    }
-
-    public void addFormat(JsonArray jsonArray, String value, String locale, Number number) throws ClassCastException {
         if (value != null) {
             DecimalFormat decimalFormat = new DecimalFormat(value);
             decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale)));
-            jsonArray.add(decimalFormat.format(number));
+            return jsonProvider.createValue(decimalFormat.format(number));
         } else {
-            jsonArray.add(number);
+            return jsonProvider.createValue(number);
         }
     }
 
-    public void addFormat(JsonArray jsonArray, String value, String locale, String string) throws ClassCastException {
+    public JsonValue format(String value, String locale, Double number) throws ClassCastException {
+        if (number == null) {
+            return NULL;
+        }
         if (value != null) {
-            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonArray.add(formatter.format(value, string).toString());
+            DecimalFormat decimalFormat = new DecimalFormat(value);
+            decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale)));
+            return jsonProvider.createValue(decimalFormat.format(number));
         } else {
-            jsonArray.add(string);
+            return jsonProvider.createValue(number);
         }
     }
 
-    public void addFormat(JsonArray jsonArray, String value, String locale, Boolean bool) throws ClassCastException {
+    public JsonValue format(String value, String locale, BigInteger number) throws ClassCastException {
+        if (number == null) {
+            return NULL;
+        }
         if (value != null) {
-            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
-            jsonArray.add(formatter.format(value, bool).toString());
+            DecimalFormat decimalFormat = new DecimalFormat(value);
+            decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale)));
+            return jsonProvider.createValue(decimalFormat.format(number));
         } else {
-            jsonArray.add(bool);
+            return jsonProvider.createValue(number);
         }
     }
+
+    public JsonValue format(String value, String locale, BigDecimal number) throws ClassCastException {
+        if (number == null) {
+            return NULL;
+        }
+        if (value != null) {
+            DecimalFormat decimalFormat = new DecimalFormat(value);
+            decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale)));
+            return jsonProvider.createValue(decimalFormat.format(number));
+        } else {
+            return jsonProvider.createValue(number);
+        }
+    }
+
+    public JsonValue format(String value, String locale, String string) throws ClassCastException {
+        if (string == null) {
+            return NULL;
+        }
+        if (value != null) {
+            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
+            return jsonProvider.createValue(formatter.format(value, string).toString());
+        } else {
+            return jsonProvider.createValue(string);
+        }
+    }
+
+    public JsonValue format(String value, String locale, Boolean bool) throws ClassCastException {
+        if (bool == null) {
+            return NULL;
+        }
+        if (value != null) {
+            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
+            return jsonProvider.createValue(formatter.format(value, bool).toString());
+        } else {
+            return bool ? TRUE : FALSE;
+        }
+    }
+
+    public JsonValue format(String value, String locale, Enum<?> enumValue) throws ClassCastException {
+        if (enumValue == null) {
+            return NULL;
+        }
+        if (value != null) {
+            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
+            return jsonProvider.createValue(formatter.format(value, enumValue.name()).toString());
+        } else {
+            return jsonProvider.createValue(enumValue.name());
+        }
+    }
+
+//    public void addFormat(JsonArray jsonArray, String value, String locale, LocalDateTime localDateTime) throws ClassCastException {
+//        if (value != null) {
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
+//            jsonArray.add(localDateTime.format(formatter));
+//        } else {
+//            jsonArray.add(localDateTime.toString());
+//        }
+//    }
+//
+//    public void addFormat(JsonArray jsonArray, String value, String locale, LocalDate localDate) throws ClassCastException {
+//        if (value != null) {
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
+//            jsonArray.add(localDate.format(formatter));
+//        } else {
+//            jsonArray.add(localDate.toString());
+//        }
+//    }
+//
+//    public void addFormat(JsonArray jsonArray, String value, String locale, LocalTime localTime) throws ClassCastException {
+//        if (value != null) {
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(value, locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
+//            jsonArray.add(localTime.format(formatter));
+//        } else {
+//            jsonArray.add(localTime.toString());
+//        }
+//    }
+//
+//    public void addFormat(JsonArray jsonArray, String value, String locale, Number number) throws ClassCastException {
+//        if (value != null) {
+//            DecimalFormat decimalFormat = new DecimalFormat(value);
+//            decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale)));
+//            jsonArray.add(decimalFormat.format(number));
+//        } else {
+//            jsonArray.add(number);
+//        }
+//    }
+//
+//    public void addFormat(JsonArray jsonArray, String value, String locale, String string) throws ClassCastException {
+//        if (value != null) {
+//            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
+//            jsonArray.add(formatter.format(value, string).toString());
+//        } else {
+//            jsonArray.add(string);
+//        }
+//    }
+//
+//    public void addFormat(JsonArray jsonArray, String value, String locale, Boolean bool) throws ClassCastException {
+//        if (value != null) {
+//            Formatter formatter = new Formatter(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale));
+//            jsonArray.add(formatter.format(value, bool).toString());
+//        } else {
+//            jsonArray.add(bool);
+//        }
+//    }
 }

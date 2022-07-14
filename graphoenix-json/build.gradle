@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group 'io.graphoenix'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation project(":graphoenix-core")
+    implementation 'org.eclipse.parsson:jakarta.json:1.1.0'
+    compile 'com.dslplatform:dsl-json-java8:1.9.9'
+
+    annotationProcessor project(':graphoenix-inject')
+    annotationProcessor project(':graphoenix-interceptor')
+    annotationProcessor project(':graphoenix-config')
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+}
+
+test {
+    useJUnitPlatform()
+}

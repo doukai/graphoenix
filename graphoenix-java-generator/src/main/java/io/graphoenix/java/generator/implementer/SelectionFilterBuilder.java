@@ -1,9 +1,5 @@
 package io.graphoenix.java.generator.implementer;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
@@ -17,6 +13,10 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -76,6 +76,14 @@ public class SelectionFilterBuilder {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
+                                "jsonProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
                 .addMethods(buildListTypeMethods())
@@ -88,8 +96,10 @@ public class SelectionFilterBuilder {
                 .addAnnotation(Inject.class)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFieldFormatter.class)), "formatter")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addStatement("this.manager = manager")
                 .addStatement("this.formatter = formatter")
+                .addStatement("this.jsonProvider = jsonProvider")
                 .build();
     }
 
@@ -115,12 +125,12 @@ public class SelectionFilterBuilder {
         }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(JsonElement.class))
+                .returns(ClassName.get(JsonValue.class))
                 .addParameter(typeClassName, typeParameterName)
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
 
         builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName)
-                .addStatement("$T jsonObject = new $T()", ClassName.get(JsonObject.class), ClassName.get(JsonObject.class))
+                .addStatement("$T objectBuilder = jsonProvider.get().createObjectBuilder()", ClassName.get(JsonObjectBuilder.class))
                 .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
                         ClassName.get(GraphqlParser.SelectionContext.class),
                         objectTypeDefinitionContext.name().getText(),
@@ -139,83 +149,71 @@ public class SelectionFilterBuilder {
                 builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
             }
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                builder.addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class))
+                builder.addStatement("$T arrayBuilder = jsonProvider.get().createArrayBuilder()", ClassName.get(JsonArrayBuilder.class))
                         .beginControlFlow("if ($L.$L() != null)",
                                 typeParameterName,
                                 fieldGetterMethodName
                         );
-                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
                     Optional<String> value = format.flatMap(typeManager::getFormatValue);
                     Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
                     if (value.isPresent() && locale.isPresent()) {
-                        builder.addStatement("$L.$L().forEach(item -> formatter.get().addFormat(jsonArray, $S, $S, item))",
+                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, $S, item)))",
                                 typeParameterName,
                                 fieldGetterMethodName,
                                 value.get(),
                                 locale.get()
                         );
                     } else if (value.isPresent()) {
-                        builder.addStatement("$L.$L().forEach(item -> formatter.get().addFormat(jsonArray, $S, null, item))",
+                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, null, item)))",
                                 typeParameterName,
                                 fieldGetterMethodName,
                                 value.get()
                         );
                     } else {
-                        builder.addStatement("$L.$L().forEach(item -> formatter.get().addFormat(jsonArray, null, null, item))",
+                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format(null, null, item)))",
                                 typeParameterName,
                                 fieldGetterMethodName
                         );
                     }
-                } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add(item.name()))",
-                            typeParameterName,
-                            fieldGetterMethodName
-                    );
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L.$L().forEach(item -> jsonArray.add($L(item, selectionContext.field().selectionSet())))",
+                    builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add($L(item, selectionContext.field().selectionSet())))",
                             typeParameterName,
                             fieldGetterMethodName,
                             fieldParameterName
                     );
                 }
-                builder.addStatement("jsonObject.add(selectionName, jsonArray)")
+                builder.addStatement("objectBuilder.add(selectionName, arrayBuilder)")
                         .nextControlFlow("else")
-                        .addStatement("jsonObject.add(selectionName, $T.INSTANCE)", ClassName.get(JsonNull.class))
+                        .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
                         .endControlFlow();
             } else {
-                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
                     Optional<String> value = format.flatMap(typeManager::getFormatValue);
                     Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
                     if (value.isPresent() && locale.isPresent()) {
-                        builder.addStatement("formatter.get().format(jsonObject, selectionName, $S, $S, $L.$L()))",
+                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format($S, $S, $L.$L()))",
                                 value.get(),
                                 locale.get(),
                                 typeParameterName,
                                 fieldGetterMethodName
                         );
                     } else if (value.isPresent()) {
-                        builder.addStatement("formatter.get().format(jsonObject, selectionName, $S, null, $L.$L()))",
+                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format($S, null, $L.$L()))",
                                 value.get(),
                                 typeParameterName,
                                 fieldGetterMethodName
                         );
                     } else {
-                        builder.addStatement("formatter.get().format(jsonObject, selectionName, null, null, $L.$L())",
+                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format(null, null, $L.$L()))",
                                 typeParameterName,
                                 fieldGetterMethodName
                         );
                     }
-                } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("jsonObject.addProperty(selectionName, $L.$L() == null ? null : $L.$L().name())",
-                            typeParameterName,
-                            fieldGetterMethodName,
-                            typeParameterName,
-                            fieldGetterMethodName
-                    );
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("jsonObject.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",
+                    builder.addStatement("objectBuilder.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",
                             fieldParameterName,
                             typeParameterName,
                             fieldGetterMethodName
@@ -228,9 +226,9 @@ public class SelectionFilterBuilder {
             index++;
         }
         builder.endControlFlow()
-                .addStatement("return jsonObject")
+                .addStatement("return objectBuilder.build()")
                 .endControlFlow()
-                .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class));
+                .addStatement("return $T.NULL", ClassName.get(JsonValue.class));
         return builder.build();
     }
 
@@ -257,19 +255,19 @@ public class SelectionFilterBuilder {
         }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(JsonElement.class))
+                .returns(ClassName.get(JsonValue.class))
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Collection.class), typeClassName), listTypeParameterName)
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
 
         builder.beginControlFlow("if (selectionSet != null && $L != null)", listTypeParameterName)
-                .addStatement("$T jsonArray = new $T()", ClassName.get(JsonArray.class), ClassName.get(JsonArray.class))
-                .addStatement("$L.forEach(item -> jsonArray.add($L(item, selectionSet)))",
+                .addStatement("$T arrayBuilder = jsonProvider.get().createArrayBuilder()", ClassName.get(JsonArrayBuilder.class))
+                .addStatement("$L.forEach(item -> arrayBuilder.add($L(item, selectionSet)))",
                         listTypeParameterName,
                         typeParameterName
                 )
-                .addStatement("return jsonArray")
+                .addStatement("return arrayBuilder.build()")
                 .endControlFlow()
-                .addStatement("return $T.INSTANCE", ClassName.get(JsonNull.class));
+                .addStatement("return $T.NULL", ClassName.get(JsonValue.class));
         return builder.build();
     }
 }
