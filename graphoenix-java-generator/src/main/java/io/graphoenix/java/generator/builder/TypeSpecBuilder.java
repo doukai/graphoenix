@@ -1,5 +1,7 @@
 package io.graphoenix.java.generator.builder;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -41,13 +43,27 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.EXPRESSION_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
 
 @ApplicationScoped
 public class TypeSpecBuilder {
@@ -83,6 +99,7 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.classBuilder(objectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Type.class)
+                .addAnnotation(CompiledJson.class)
                 .addAnnotation(getGeneratedAnnotationSpec())
                 .addAnnotation(getSchemaBeanAnnotationSpec());
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition()
@@ -115,6 +132,7 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.classBuilder(inputObjectTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Input.class)
+                .addAnnotation(CompiledJson.class)
                 .addAnnotation(getGeneratedAnnotationSpec())
                 .addAnnotation(getSchemaBeanAnnotationSpec());
         inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition()
@@ -160,6 +178,7 @@ public class TypeSpecBuilder {
         TypeSpec.Builder builder = TypeSpec.interfaceBuilder(interfaceTypeDefinitionContext.name().getText())
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Interface.class)
+                .addAnnotation(CompiledJson.class)
                 .addAnnotation(getGeneratedAnnotationSpec())
                 .addAnnotation(getSchemaBeanAnnotationSpec());
         interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition()
@@ -304,6 +323,11 @@ public class TypeSpecBuilder {
         }
         if (fieldDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NonNull.class);
+            builder.addAnnotation(
+                    AnnotationSpec.builder(JsonAttribute.class)
+                            .addMember("nullable", "false")
+                            .build()
+            );
         }
         if (fieldDefinitionContext.description() != null) {
             builder.addJavadoc("$S", fieldDefinitionContext.description().getText());
@@ -354,6 +378,11 @@ public class TypeSpecBuilder {
         }
         if (inputValueDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NonNull.class);
+            builder.addAnnotation(
+                    AnnotationSpec.builder(JsonAttribute.class)
+                            .addMember("nullable", "false")
+                            .build()
+            );
         }
         if (inputValueDefinitionContext.description() != null) {
             builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());

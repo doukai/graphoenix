@@ -1,5 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -12,6 +14,7 @@ import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class __SchemaInput {
@@ -24,9 +27,15 @@ public class __SchemaInput {
   private String subscriptionTypeName;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<__TypeInput> types;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private __TypeInput queryType;
 
   private __TypeInput mutationType;
@@ -34,6 +43,9 @@ public class __SchemaInput {
   private __TypeInput subscriptionType;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<__DirectiveInput> directives;
 
   private Boolean isDeprecated;
@@ -54,6 +66,9 @@ public class __SchemaInput {
 
   @DefaultValue("\"__Schema\"")
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String __typename;
 
   public String getId() {

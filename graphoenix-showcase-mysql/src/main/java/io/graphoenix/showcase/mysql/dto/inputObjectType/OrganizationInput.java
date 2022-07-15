@@ -1,5 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -12,6 +14,7 @@ import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class OrganizationInput {
@@ -24,6 +27,9 @@ public class OrganizationInput {
   private Collection<UserInput> users;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String name;
 
   private Boolean isDeprecated;
@@ -44,6 +50,9 @@ public class OrganizationInput {
 
   @DefaultValue("\"Organization\"")
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String __typename;
 
   public String getId() {

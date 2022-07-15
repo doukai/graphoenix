@@ -1,5 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -14,6 +16,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class __Schema implements Meta {
@@ -27,9 +30,15 @@ public class __Schema implements Meta {
   private String subscriptionTypeName;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<__Type> types;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private __Type queryType;
 
   private __Type mutationType;
@@ -37,6 +46,9 @@ public class __Schema implements Meta {
   private __Type subscriptionType;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<__Directive> directives;
 
   private Boolean isDeprecated;

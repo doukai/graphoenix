@@ -34,6 +34,7 @@ dependencies {
     compile project(":graphoenix-mysql")
 
     implementation project(":graphoenix-core")
+    implementation project(":graphoenix-json")
     implementation project(":graphoenix-http-server")
 
     annotationProcessor project(":graphoenix-annotation-processor")

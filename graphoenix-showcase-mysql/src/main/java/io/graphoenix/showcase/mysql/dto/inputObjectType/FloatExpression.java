@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import com.dslplatform.json.CompiledJson;
 import io.graphoenix.showcase.mysql.dto.enumType.Operator;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -10,6 +11,7 @@ import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
 @Input
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class FloatExpression {

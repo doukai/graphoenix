@@ -1,5 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -13,6 +15,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class __TypePossibleTypes implements Meta {
@@ -20,9 +23,15 @@ public class __TypePossibleTypes implements Meta {
   private String id;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String typeName;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String possibleTypeName;
 
   private Boolean isDeprecated;

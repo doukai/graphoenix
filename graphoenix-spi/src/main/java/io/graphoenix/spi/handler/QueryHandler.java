@@ -1,11 +1,12 @@
 package io.graphoenix.spi.handler;
 
 import com.google.gson.JsonElement;
-import reactor.core.publisher.Mono;
+import jakarta.json.JsonValue;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 
 import java.util.Map;
 
 public interface QueryHandler {
 
-    Mono<JsonElement> query(String graphQL, Map<String, JsonElement> variables);
+    PublisherBuilder<JsonValue> query(String graphQL, Map<String, JsonElement> variables);
 }

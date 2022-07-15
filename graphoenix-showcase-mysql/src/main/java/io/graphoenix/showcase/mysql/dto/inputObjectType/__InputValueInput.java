@@ -1,5 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -11,6 +13,7 @@ import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class __InputValueInput {
@@ -31,6 +34,9 @@ public class __InputValueInput {
   private String description;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private __TypeInput type;
 
   private String defaultValue;
@@ -53,6 +59,9 @@ public class __InputValueInput {
 
   @DefaultValue("\"__InputValue\"")
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String __typename;
 
   public String getId() {

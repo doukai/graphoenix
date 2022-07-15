@@ -1,5 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -13,18 +15,28 @@ import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class UserInput {
   private String id;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String login;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String password;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String name;
 
   private Integer age;
@@ -40,12 +52,21 @@ public class UserInput {
   private Collection<RoleInput> roles;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<String> phones;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<Integer> test1;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<Boolean> test2;
 
   private Boolean isDeprecated;
@@ -66,6 +87,9 @@ public class UserInput {
 
   @DefaultValue("\"User\"")
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String __typename;
 
   public String getId() {

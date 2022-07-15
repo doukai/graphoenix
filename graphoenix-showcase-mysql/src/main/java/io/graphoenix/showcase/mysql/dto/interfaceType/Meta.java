@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.interfaceType;
 
+import com.dslplatform.json.CompiledJson;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.Interface;
 
 @Interface
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public interface Meta {

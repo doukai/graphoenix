@@ -1,5 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.RoleType;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -13,15 +15,22 @@ import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class RoleInput {
   private String id;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String name;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<RoleType> type;
 
   private Collection<UserInput> users;
@@ -44,6 +53,9 @@ public class RoleInput {
 
   @DefaultValue("\"Role\"")
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String __typename;
 
   public String getId() {

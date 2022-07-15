@@ -1,5 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
+import com.dslplatform.json.CompiledJson;
+import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -13,6 +15,7 @@ import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
+@CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class __DirectiveInput {
@@ -23,9 +26,15 @@ public class __DirectiveInput {
   private String description;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<__DirectiveLocation> locations;
 
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private Collection<__InputValueInput> args;
 
   private Boolean onOperation;
@@ -52,6 +61,9 @@ public class __DirectiveInput {
 
   @DefaultValue("\"__Directive\"")
   @NonNull
+  @JsonAttribute(
+      nullable = false
+  )
   private String __typename;
 
   public String getName() {
