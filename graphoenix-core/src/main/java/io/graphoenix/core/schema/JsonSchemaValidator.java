@@ -2,11 +2,6 @@ package io.graphoenix.core.schema;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.networknt.schema.JsonMetaSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.ValidationMessage;
@@ -17,6 +12,8 @@ import io.graphoenix.spi.dto.GraphQLError;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.*;
+import jakarta.json.spi.JsonProvider;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,19 +21,22 @@ import java.util.stream.Collectors;
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static jakarta.json.JsonValue.*;
 
 @ApplicationScoped
 public class JsonSchemaValidator {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final GraphQLDocumentManager manager;
+    private final JsonProvider jsonProvider;
     private final JsonSchemaManager jsonSchemaManager;
     private final JsonSchemaFactory factory;
 
     @Inject
-    public JsonSchemaValidator(JsonSchemaManager jsonSchemaManager, GraphQLDocumentManager manager, JsonSchemaResourceURNFactory jsonSchemaResourceURNFactory) {
+    public JsonSchemaValidator(JsonSchemaManager jsonSchemaManager, GraphQLDocumentManager manager, JsonProvider jsonProvider, JsonSchemaResourceURNFactory jsonSchemaResourceURNFactory) {
         this.manager = manager;
         this.jsonSchemaManager = jsonSchemaManager;
+        this.jsonProvider = jsonProvider;
         JsonMetaSchema jsonMetaSchema = JsonMetaSchema.getV201909();
         this.factory = new JsonSchemaFactory.Builder().defaultMetaSchemaURI(jsonMetaSchema.getUri()).addMetaSchema(jsonMetaSchema).addUrnFactory(jsonSchemaResourceURNFactory).build();
     }
@@ -71,47 +71,47 @@ public class JsonSchemaValidator {
         return validate(fieldTypeName, argumentsToJsonElement(selectionContext.field().arguments()).toString());
     }
 
-    protected JsonElement argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {
-        JsonObject jsonObject = new JsonObject();
+    protected JsonValue argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {
+        JsonObjectBuilder jsonObjectBuilder = jsonProvider.createObjectBuilder();
         if (argumentsContext != null) {
             argumentsContext.argument().stream()
                     .filter(argumentContext -> argumentContext.valueWithVariable().NullValue() == null)
-                    .forEach(argumentContext -> jsonObject.add(argumentContext.name().getText(), valueWithVariableToJsonElement(argumentContext.valueWithVariable())));
+                    .forEach(argumentContext -> jsonObjectBuilder.add(argumentContext.name().getText(), valueWithVariableToJsonElement(argumentContext.valueWithVariable())));
         }
-        return jsonObject;
+        return jsonObjectBuilder.build();
     }
 
-    protected JsonElement objectValueWithVariableToJsonElement(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        JsonObject jsonObject = new JsonObject();
+    protected JsonValue objectValueWithVariableToJsonElement(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        JsonObjectBuilder jsonObjectBuilder = jsonProvider.createObjectBuilder();
         if (objectValueWithVariableContext.objectFieldWithVariable() != null) {
             objectValueWithVariableContext.objectFieldWithVariable().stream()
                     .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
-                    .forEach(objectFieldWithVariableContext -> jsonObject.add(objectFieldWithVariableContext.name().getText(), valueWithVariableToJsonElement(objectFieldWithVariableContext.valueWithVariable())));
+                    .forEach(objectFieldWithVariableContext -> jsonObjectBuilder.add(objectFieldWithVariableContext.name().getText(), valueWithVariableToJsonElement(objectFieldWithVariableContext.valueWithVariable())));
         }
-        return jsonObject;
+        return jsonObjectBuilder.build();
     }
 
-    protected JsonElement valueWithVariableToJsonElement(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+    protected JsonValue valueWithVariableToJsonElement(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         if (valueWithVariableContext.BooleanValue() != null) {
-            return new JsonPrimitive(Boolean.parseBoolean(valueWithVariableContext.BooleanValue().getText()));
+            return Boolean.parseBoolean(valueWithVariableContext.BooleanValue().getText()) ? TRUE : FALSE;
         } else if (valueWithVariableContext.IntValue() != null) {
-            return new JsonPrimitive(Integer.parseInt(valueWithVariableContext.IntValue().getText()));
+            return jsonProvider.createValue(Integer.parseInt(valueWithVariableContext.IntValue().getText()));
         } else if (valueWithVariableContext.FloatValue() != null) {
-            return new JsonPrimitive(Float.parseFloat(valueWithVariableContext.FloatValue().getText()));
+            return jsonProvider.createValue(Float.parseFloat(valueWithVariableContext.FloatValue().getText()));
         } else if (valueWithVariableContext.StringValue() != null) {
-            return new JsonPrimitive(DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
+            return jsonProvider.createValue((DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue())));
         } else if (valueWithVariableContext.enumValue() != null) {
-            return new JsonPrimitive(valueWithVariableContext.enumValue().getText());
+            return jsonProvider.createValue(valueWithVariableContext.enumValue().getText());
         } else if (valueWithVariableContext.objectValueWithVariable() != null) {
             return objectValueWithVariableToJsonElement(valueWithVariableContext.objectValueWithVariable());
         } else if (valueWithVariableContext.arrayValueWithVariable() != null) {
-            JsonArray jsonArray = new JsonArray();
+            JsonArrayBuilder jsonArrayBuilder = jsonProvider.createArrayBuilder();
             valueWithVariableContext.arrayValueWithVariable().valueWithVariable().stream()
                     .filter(subValueWithVariableContext -> subValueWithVariableContext.NullValue() == null)
-                    .forEach(subValueWithVariableContext -> jsonArray.add(valueWithVariableToJsonElement(subValueWithVariableContext)));
-            return jsonArray;
+                    .forEach(subValueWithVariableContext -> jsonArrayBuilder.add(valueWithVariableToJsonElement(subValueWithVariableContext)));
+            return jsonArrayBuilder.build();
         } else if (valueWithVariableContext.NullValue() != null) {
-            return JsonNull.INSTANCE;
+            return NULL;
         }
         return null;
     }

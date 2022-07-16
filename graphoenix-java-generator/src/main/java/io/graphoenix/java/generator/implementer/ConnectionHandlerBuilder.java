@@ -111,7 +111,7 @@ public class ConnectionHandlerBuilder {
 
         if (objectTypeDefinitionContext.name().getText().endsWith(CONNECTION_SUFFIX)) {
             String typeName = objectTypeDefinitionContext.name().getText().substring(0, objectTypeDefinitionContext.name().getText().length() - CONNECTION_SUFFIX.length());
-            builder.beginControlFlow("if (jsonValue != null && !jsonValue.equals(JsonValue.NULL) && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
+            builder.beginControlFlow("if (jsonValue != null && !jsonValue.getValueType().equals($L.NULL) && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)", ClassName.get(JsonValue.ValueType.class))
                     .addStatement("jsonValue.asJsonObject().put(selectionContext.field().name().getText(), builder.build(jsonValue, typeName, selectionContext))")
                     .beginControlFlow("for ($T subSelectionContext : selectionContext.field().selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
                             ClassName.get(GraphqlParser.SelectionContext.class),
@@ -138,7 +138,7 @@ public class ConnectionHandlerBuilder {
                                 ClassName.get(Collectors.class)
                         );
             } else {
-                builder.beginControlFlow("if (jsonValue != null && !jsonValue.equals(JsonValue.NULL) && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)")
+                builder.beginControlFlow("if (jsonValue != null && !jsonValue.getValueType().equals($L.NULL) && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)", ClassName.get(JsonValue.ValueType.class))
                         .beginControlFlow("for ($T subSelectionContext : selectionContext.field().selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
                                 ClassName.get(GraphqlParser.SelectionContext.class),
                                 objectTypeDefinitionContext.name().getText(),

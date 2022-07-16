@@ -4,10 +4,8 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.mysql.handler.OperationToSQLConvertHandler;
 import io.graphoenix.r2dbc.connector.handler.OperationSQLExecuteHandler;
 import io.graphoenix.spi.handler.OperationHandler;
-import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Stream;
@@ -28,12 +26,6 @@ public class MysqlR2dbcHandler implements OperationHandler {
     public Mono<String> query(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         String select = operationToSQLConvertHandler.queryToSelect(operationDefinitionContext);
         return operationSQLExecuteHandler.query(select);
-    }
-
-    @Override
-    public Flux<Tuple2<String, String>> querySelections(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        Stream<Tuple2<String, String>> selects = operationToSQLConvertHandler.querySelectionsToSelects(operationDefinitionContext);
-        return operationSQLExecuteHandler.querySelections(selects);
     }
 
     @Override

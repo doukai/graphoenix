@@ -36,6 +36,7 @@ dependencies {
     implementation project(":graphoenix-core")
     implementation project(":graphoenix-json")
     implementation project(":graphoenix-http-server")
+    implementation project(":graphoenix-interceptor")
 
     annotationProcessor project(":graphoenix-annotation-processor")
     annotationProcessor project(":graphoenix-inject")

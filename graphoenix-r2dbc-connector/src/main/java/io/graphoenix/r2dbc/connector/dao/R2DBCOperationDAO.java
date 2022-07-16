@@ -1,11 +1,11 @@
 package io.graphoenix.r2dbc.connector.dao;
 
-import com.google.gson.reflect.TypeToken;
+import com.google.common.reflect.TypeToken;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
-import io.graphoenix.spi.dao.BaseOperationDAO;
+import io.graphoenix.core.dao.BaseOperationDAO;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import reactor.core.publisher.Mono;
 

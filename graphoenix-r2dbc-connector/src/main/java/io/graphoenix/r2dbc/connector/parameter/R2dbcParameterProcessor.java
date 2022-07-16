@@ -1,7 +1,8 @@
 package io.graphoenix.r2dbc.connector.parameter;
 
-import com.google.gson.GsonBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,7 +13,12 @@ import java.util.Map;
 @ApplicationScoped
 public class R2dbcParameterProcessor {
 
-    private final GsonBuilder jsonBuilder = new GsonBuilder();
+    private final Jsonb jsonb;
+
+    @Inject
+    public R2dbcParameterProcessor(Jsonb jsonb) {
+        this.jsonb = jsonb;
+    }
 
     public Map<String, Object> process(Map<String, Object> parameters) {
         return parameters.entrySet().stream()
@@ -35,6 +41,6 @@ public class R2dbcParameterProcessor {
         } else if (value.getClass().isEnum()) {
             return ((Enum<?>) value).name();
         }
-        return jsonBuilder.create().toJson(value);
+        return jsonb.toJson(value);
     }
 }

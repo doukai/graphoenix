@@ -1,4 +1,4 @@
-package io.graphoenix.spi.interceptor;
+package io.graphoenix.aop;
 
 import io.vavr.CheckedConsumer;
 import io.vavr.CheckedFunction1;

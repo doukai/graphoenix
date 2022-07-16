@@ -14,8 +14,11 @@ repositories {
 dependencies {
     compile project(':graphoenix-spi')
     compile project(':graphoenix-config')
+    compile project(':graphoenix-json')
     compile 'com.google.guava:guava:31.1-jre'
+    compile 'io.vavr:vavr:0.10.4'
     compile 'org.antlr:antlr4-runtime:4.9.3'
+    compile "com.google.auto.service:auto-service:1.0.1"
 
     implementation 'org.antlr:ST4:4.3.2'
     implementation 'com.networknt:json-schema-validator:1.0.70'

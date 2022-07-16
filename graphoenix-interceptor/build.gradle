@@ -12,7 +12,8 @@ repositories {
 }
 
 dependencies {
-    compile project(":graphoenix-spi")
+    implementation project(":graphoenix-spi")
+    implementation 'io.vavr:vavr:0.10.4'
 
     implementation project(":graphoenix-inject")
     implementation "com.google.auto.service:auto-service:1.0.1"

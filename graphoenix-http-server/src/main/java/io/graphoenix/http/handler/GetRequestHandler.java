@@ -1,8 +1,7 @@
 package io.graphoenix.http.handler;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import com.google.common.reflect.TypeToken;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -11,6 +10,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
@@ -29,12 +29,13 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 @ApplicationScoped
 public class GetRequestHandler extends BaseRequestHandler {
 
-    private final GsonBuilder gsonBuilder = new GsonBuilder();
     private final GraphQLRequestHandler graphQLRequestHandler;
+    private final Jsonb jsonb;
 
     @Inject
-    public GetRequestHandler(GraphQLRequestHandler graphQLRequestHandler) {
+    public GetRequestHandler(GraphQLRequestHandler graphQLRequestHandler, Jsonb jsonb) {
         this.graphQLRequestHandler = graphQLRequestHandler;
+        this.jsonb = jsonb;
     }
 
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
@@ -47,7 +48,7 @@ public class GetRequestHandler extends BaseRequestHandler {
         GraphQLRequest graphQLRequest = new GraphQLRequest(
                 request.param("query"),
                 request.param("operationName"),
-                gsonBuilder.create().fromJson(request.param("variables"), type)
+                jsonb.fromJson(request.param("variables"), type)
         );
         context.put(GRAPHQL_REQUEST_KEY, graphQLRequest);
 
@@ -55,7 +56,7 @@ public class GetRequestHandler extends BaseRequestHandler {
                 .sendString(
                         ScopeEventResolver.initialized(context, RequestScoped.class)
                                 .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
-                                .then(Mono.just(graphQLRequest).flatMap(graphQLRequestHandler::handle))
+                                .then(graphQLRequestHandler.handle(graphQLRequest))
                                 .doOnSuccess(jsonString -> response.status(HttpResponseStatus.OK))
                                 .onErrorResume(throwable -> this.errorHandler(throwable, response))
                 )

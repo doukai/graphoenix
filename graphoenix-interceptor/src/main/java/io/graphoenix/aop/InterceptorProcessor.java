@@ -31,7 +31,6 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.Streams;
 import io.graphoenix.inject.ComponentProxyProcessor;
 import io.graphoenix.inject.ProcessorManager;
-import io.graphoenix.spi.interceptor.InvocationContextProxy;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import io.vavr.Tuple3;

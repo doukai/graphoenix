@@ -16,8 +16,6 @@ dependencies {
     antlr 'org.antlr:antlr4:4.9.3'
 
     compile 'io.projectreactor:reactor-core:3.4.16'
-    compile 'io.vavr:vavr:0.10.4'
-    compile 'com.google.code.gson:gson:2.9.0'
     compile 'io.r2dbc:r2dbc-spi:0.9.1.RELEASE'
     compile 'com.google.dagger:dagger-spi:2.41'
     compile 'io.jsonwebtoken:jjwt-api:0.11.5'

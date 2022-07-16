@@ -1,50 +1,75 @@
 package io.graphoenix.core.utils;
 
-import com.google.gson.*;
+import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.spi.JsonProvider;
 import org.eclipse.microprofile.graphql.GraphQLException;
+
+import java.io.StringReader;
+import java.io.StringWriter;
 
 public enum GraphQLResponseUtil {
     GRAPHQL_RESPONSE_UTIL;
 
-    private final GsonBuilder gsonBuilder = new GsonBuilder();
+    private final JsonProvider jsonProvider;
 
-    public String success(String jsonString) {
-        JsonObject response = new JsonObject();
-        response.add("data", JsonParser.parseString(jsonString));
-        return response.toString();
+    private final Jsonb jsonb;
+
+    GraphQLResponseUtil() {
+        this.jsonProvider = BeanContext.get(JsonProvider.class);
+        this.jsonb = BeanContext.get(Jsonb.class);
     }
 
-    public String success(JsonElement jsonElement) {
-        JsonObject response = new JsonObject();
-        response.add("data", jsonElement);
-        return response.toString();
+    public String success(String jsonString) {
+        JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
+        responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonString)).readValue());
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
+        return stringWriter.toString();
+    }
+
+    public String success(JsonValue jsonValue) {
+        JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
+        responseBuilder.add("data", jsonValue);
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
+        return stringWriter.toString();
     }
 
     public String success(Object object) {
-        JsonObject response = new JsonObject();
-        response.add("data", gsonBuilder.create().toJsonTree(object));
-        return response.toString();
+        JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
+        responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(object))).readObject());
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
+        return stringWriter.toString();
     }
 
     public String error(GraphQLErrors graphQLErrors) {
-        JsonObject response = new JsonObject();
+        JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
         if (graphQLErrors.getData() != null) {
-            response.add("data", gsonBuilder.create().toJsonTree(graphQLErrors.getData()));
+            responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLErrors.getData()))).readObject());
         }
-        response.add("errors", gsonBuilder.create().toJsonTree(graphQLErrors.getErrors()));
-        return response.toString();
+        responseBuilder.add("errors", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLErrors.getErrors()))).readObject());
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
+        return stringWriter.toString();
     }
 
     public String error(GraphQLException graphQLException) {
-        JsonObject response = new JsonObject();
+        JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
         if (graphQLException.getPartialResults() != null) {
-            response.add("data", gsonBuilder.create().toJsonTree(graphQLException.getPartialResults()));
+            responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLException.getPartialResults()))).readObject());
         }
-        JsonArray errors = new JsonArray();
-        errors.add(graphQLException.getMessage());
-        response.add("errors", errors);
-        return response.toString();
+        JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
+        errorsBuilder.add(graphQLException.getMessage());
+        responseBuilder.add("errors", errorsBuilder);
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
+        return stringWriter.toString();
     }
 
     public String error(Throwable throwable) {
@@ -53,11 +78,13 @@ public enum GraphQLResponseUtil {
         } else if (throwable instanceof GraphQLException) {
             return error((GraphQLException) throwable);
         } else {
-            JsonObject response = new JsonObject();
-            JsonArray errors = new JsonArray();
-            errors.add(throwable.getMessage());
-            response.add("errors", errors);
-            return response.toString();
+            JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
+            JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
+            errorsBuilder.add(throwable.getMessage());
+            responseBuilder.add("errors", errorsBuilder);
+            StringWriter stringWriter = new StringWriter();
+            jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
+            return stringWriter.toString();
         }
     }
 }

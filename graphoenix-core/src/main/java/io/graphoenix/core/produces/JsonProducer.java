@@ -1,4 +1,4 @@
-package io.graphoenix.json.produces;
+package io.graphoenix.core.produces;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;

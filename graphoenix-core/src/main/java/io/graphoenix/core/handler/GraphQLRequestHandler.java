@@ -7,6 +7,7 @@ import io.graphoenix.spi.handler.MutationHandler;
 import io.graphoenix.spi.handler.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 

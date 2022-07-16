@@ -4,7 +4,6 @@ import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.handler.GetRequestHandler;
 import io.graphoenix.http.handler.PostRequestHandler;
 import io.graphoenix.http.handler.SchemaRequestHandler;
-import io.graphoenix.spi.handler.BootstrapHandler;
 import io.graphoenix.spi.handler.ScopeEventResolver;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -30,7 +29,7 @@ public class GraphQLHttpServer {
     private final PostRequestHandler postRequestHandler;
 
     @Inject
-    public GraphQLHttpServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler, BootstrapHandler bootstrapHandler) {
+    public GraphQLHttpServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler) {
         this.httpServerConfig = httpServerConfig;
         this.schemaRequestHandler = schemaRequestHandler;
         this.getRequestHandler = getRequestHandler;

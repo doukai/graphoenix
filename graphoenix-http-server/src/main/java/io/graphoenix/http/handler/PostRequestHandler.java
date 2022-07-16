@@ -1,7 +1,6 @@
 package io.graphoenix.http.handler;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
-import com.google.gson.GsonBuilder;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
 import io.graphoenix.spi.dto.GraphQLRequest;
@@ -10,6 +9,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.json.bind.Jsonb;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
@@ -29,12 +29,13 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 @ApplicationScoped
 public class PostRequestHandler extends BaseRequestHandler {
 
-    private final GsonBuilder gsonBuilder = new GsonBuilder();
     private final GraphQLRequestHandler graphQLRequestHandler;
+    private final Jsonb jsonb;
 
     @Inject
-    public PostRequestHandler(GraphQLRequestHandler graphQLRequestHandler) {
+    public PostRequestHandler(GraphQLRequestHandler graphQLRequestHandler, Jsonb jsonb) {
         this.graphQLRequestHandler = graphQLRequestHandler;
+        this.jsonb = jsonb;
     }
 
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
@@ -48,7 +49,7 @@ public class PostRequestHandler extends BaseRequestHandler {
             return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
                             request.receive().aggregate().asString()
-                                    .map(content -> gsonBuilder.create().fromJson(content, GraphQLRequest.class))
+                                    .map(content -> jsonb.fromJson(content, GraphQLRequest.class))
                                     .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST_KEY, graphQLRequest))
                                     .flatMap(graphQLRequest ->
                                             ScopeEventResolver.initialized(context, RequestScoped.class)

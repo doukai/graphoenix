@@ -1,13 +1,12 @@
 package io.graphoenix.core.handler;
 
 import com.google.common.collect.Streams;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonValue;
 import org.tinylog.Logger;
 
 import java.util.Map;
@@ -16,6 +15,7 @@ import java.util.stream.Collectors;
 import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static jakarta.json.JsonValue.ValueType.*;
 
 @ApplicationScoped
 public class GraphQLVariablesProcessor {
@@ -27,18 +27,18 @@ public class GraphQLVariablesProcessor {
         this.manager = manager;
     }
 
-    public GraphqlParser.OperationDefinitionContext buildVariables(String graphQL, Map<String, JsonElement> variables) {
+    public GraphqlParser.OperationDefinitionContext buildVariables(String graphQL, Map<String, JsonValue> variables) {
         return buildVariables(DOCUMENT_UTIL.graphqlToOperation(graphQL), variables);
     }
 
-    public GraphqlParser.OperationDefinitionContext buildVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonElement> variables) {
+    public GraphqlParser.OperationDefinitionContext buildVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         if (operationDefinitionContext.variableDefinitions() != null) {
             operationDefinitionContext.selectionSet().selection().forEach(selectionContext -> processSelection(selectionContext, operationDefinitionContext, variables));
         }
         return operationDefinitionContext;
     }
 
-    private void processSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonElement> variables) {
+    private void processSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         if (selectionContext.field() != null && selectionContext.field().arguments() != null) {
             selectionContext.field().arguments().argument().forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
         }
@@ -47,7 +47,7 @@ public class GraphQLVariablesProcessor {
         }
     }
 
-    private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonElement> variables) {
+    private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         if (valueWithVariableContext.variable() != null) {
             GraphqlParser.ValueWithVariableContext valueContext = getValueByVariable(valueWithVariableContext.variable(), operationDefinitionContext, variables);
             Logger.debug("replace variable {} to {}", valueWithVariableContext.getChild(valueWithVariableContext.getChildCount() - 1).getText(), valueContext.getText());
@@ -86,7 +86,7 @@ public class GraphQLVariablesProcessor {
         }
     }
 
-    private GraphqlParser.ValueWithVariableContext getValueByVariable(GraphqlParser.VariableContext variableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonElement> variables) {
+    private GraphqlParser.ValueWithVariableContext getValueByVariable(GraphqlParser.VariableContext variableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         return operationDefinitionContext.variableDefinitions().variableDefinition().stream()
                 .filter(variableDefinitionContext -> variableDefinitionContext.variable().name().getText().equals(variableContext.name().getText()))
                 .map(variableDefinitionContext -> variableToValue(variableDefinitionContext, variables.get(variableDefinitionContext.variable().name().getText())))
@@ -94,15 +94,15 @@ public class GraphQLVariablesProcessor {
                 .orElseThrow(() -> new GraphQLErrors(OPERATION_VARIABLE_NOT_EXIST.bind(variableContext.name().getText(), operationDefinitionContext.name().getText())));
     }
 
-    private GraphqlParser.ValueWithVariableContext variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, JsonElement variable) {
+    private GraphqlParser.ValueWithVariableContext variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, JsonValue variable) {
         if (variable == null) {
             if (variableDefinitionContext.type().nonNullType() != null) {
                 throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
             } else {
-                variable = JsonNull.INSTANCE;
+                variable = JsonValue.NULL;
             }
         } else {
-            if (variable.isJsonNull()) {
+            if (variable.getValueType().equals(NULL)) {
                 if (variableDefinitionContext.type().nonNullType() != null) {
                     throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
                 }
@@ -111,19 +111,19 @@ public class GraphQLVariablesProcessor {
         return DOCUMENT_UTIL.getGraphqlParser(jsonElementToVariableString(variable)).valueWithVariable();
     }
 
-    public String jsonElementToVariableString(JsonElement element) {
-        if (element.isJsonObject()) {
+    public String jsonElementToVariableString(JsonValue element) {
+        if (element.getValueType().equals(OBJECT)) {
             return "{"
                     .concat(
-                            element.getAsJsonObject().entrySet().stream()
+                            element.asJsonObject().entrySet().stream()
                                     .map(entry -> entry.getKey().concat(": ").concat(jsonElementToVariableString(entry.getValue())))
                                     .collect(Collectors.joining(" "))
                     )
                     .concat("}");
-        } else if (element.isJsonArray()) {
+        } else if (element.getValueType().equals(ARRAY)) {
             return "["
                     .concat(
-                            Streams.stream(element.getAsJsonArray()).map(this::jsonElementToVariableString).collect(Collectors.joining(", "))
+                            element.asJsonArray().stream().map(this::jsonElementToVariableString).collect(Collectors.joining(", "))
                     )
                     .concat("]");
         } else {

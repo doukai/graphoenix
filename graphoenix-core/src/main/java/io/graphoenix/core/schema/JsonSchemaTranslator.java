@@ -1,82 +1,86 @@
 package io.graphoenix.core.schema;
 
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.*;
+import jakarta.json.spi.JsonProvider;
 
+import java.io.StringWriter;
 import java.util.Optional;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
+import static jakarta.json.JsonValue.TRUE;
 
 @ApplicationScoped
 public class JsonSchemaTranslator {
 
     private final GraphQLConfig graphQLConfig;
-    private final GsonBuilder gsonBuilder;
+    private final JsonProvider jsonProvider;
     private final IGraphQLDocumentManager manager;
 
     @Inject
     public JsonSchemaTranslator(GraphQLConfig graphQLConfig,
-                                IGraphQLDocumentManager manager) {
+                                IGraphQLDocumentManager manager,
+                                JsonProvider jsonProvider) {
         this.graphQLConfig = graphQLConfig;
         this.manager = manager;
-        this.gsonBuilder = new GsonBuilder().setPrettyPrinting();
+        this.jsonProvider = jsonProvider;
     }
 
     public String objectToJsonSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return this.gsonBuilder.create().toJson(objectToJsonSchema(objectTypeDefinitionContext));
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(objectToJsonSchema(objectTypeDefinitionContext));
+        return stringWriter.toString();
     }
 
-    public JsonObject objectToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    public JsonValue objectToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         JsonObject jsonSchema = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
-                .orElseGet(JsonObject::new);
-        jsonSchema.addProperty("$id", "#".concat(objectTypeDefinitionContext.name().getText()));
-        jsonSchema.addProperty("type", "object");
-        jsonSchema.add("properties", objectToProperties(objectTypeDefinitionContext));
-        jsonSchema.add("required", buildRequired(objectTypeDefinitionContext));
-        jsonSchema.addProperty("additionalProperties", false);
+                .orElseGet(() -> jsonProvider.createObjectBuilder().build());
+        jsonSchema.put("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText())));
+        jsonSchema.put("type", jsonProvider.createValue("object"));
+        jsonSchema.put("properties", objectToProperties(objectTypeDefinitionContext));
+        jsonSchema.put("required", buildRequired(objectTypeDefinitionContext));
+        jsonSchema.put("additionalProperties", TRUE);
         return jsonSchema;
     }
 
     protected JsonArray buildRequired(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        JsonArray required = new JsonArray();
+        JsonArrayBuilder requiredBuilder = jsonProvider.createArrayBuilder();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.type().nonNullType() != null)
-                .forEach(fieldDefinitionContext -> required.add(fieldDefinitionContext.name().getText()));
-        return required;
+                .forEach(fieldDefinitionContext -> requiredBuilder.add(fieldDefinitionContext.name().getText()));
+        return requiredBuilder.build();
     }
 
     protected JsonObject objectToProperties(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        JsonObject properties = new JsonObject();
+        JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
 //                .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .forEach(fieldDefinitionContext ->
-                        properties.add(fieldDefinitionContext.name().getText(), fieldToProperty(fieldDefinitionContext))
+                        propertiesBuilder.add(fieldDefinitionContext.name().getText(), fieldToProperty(fieldDefinitionContext))
                 );
-        return properties;
+        return propertiesBuilder.build();
     }
 
     protected JsonObject fieldToProperty(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         JsonObject property = getValidationDirectiveContext(fieldDefinitionContext.directives())
                 .map(this::buildValidation)
-                .orElseGet(JsonObject::new);
+                .orElseGet(() -> jsonProvider.createObjectBuilder().build());
         if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-            property.addProperty("type", "array");
+            property.put("type", jsonProvider.createValue("array"));
             JsonObject items = getValidationDirectiveContext(fieldDefinitionContext.directives())
                     .flatMap(directiveContext -> getValidationObjectArgument(directiveContext, "items"))
                     .map(this::buildValidation)
-                    .orElseGet(JsonObject::new);
-            property.add("items", buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), items));
+                    .orElseGet(() -> jsonProvider.createObjectBuilder().build());
+            property.put("items", buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), items));
             return property;
         } else {
             return buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), property);
@@ -92,197 +96,197 @@ public class JsonSchemaTranslator {
                 case "Time":
                 case "DateTime":
                 case "Timestamp":
-                    jsonObject.addProperty("type", "string");
+                    jsonObject.put("type", jsonProvider.createValue("string"));
                     break;
                 case "Boolean":
-                    jsonObject.addProperty("type", "boolean");
+                    jsonObject.put("type", jsonProvider.createValue("boolean"));
                     break;
                 case "Int":
                 case "BigInteger":
                 case "Float":
                 case "BigDecimal":
-                    jsonObject.addProperty("type", "number");
+                    jsonObject.put("type", jsonProvider.createValue("number"));
                     break;
             }
         } else if (manager.isEnum(fieldTypeName)) {
-            JsonArray enumValues = new JsonArray();
+            JsonArrayBuilder enumValuesBuilder = jsonProvider.createArrayBuilder();
             manager.getEnum(fieldTypeName)
                     .ifPresent(enumTypeDefinitionContext -> {
                                 enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
-                                        .forEach(enumValueDefinitionContext -> enumValues.add(enumValueDefinitionContext.enumValue().getText()));
-                                jsonObject.add("enum", enumValues);
+                                        .forEach(enumValueDefinitionContext -> enumValuesBuilder.add(enumValueDefinitionContext.enumValue().getText()));
+                                jsonObject.put("enum", enumValuesBuilder.build());
                             }
                     );
         } else if (manager.isObject(fieldTypeName)) {
-            jsonObject.addProperty("$ref", fieldTypeName);
+            jsonObject.put("$ref", jsonProvider.createValue(fieldTypeName));
         }
         return jsonObject;
     }
 
     protected JsonObject buildValidation(GraphqlParser.DirectiveContext directiveContext) {
-        JsonObject validation = new JsonObject();
+        JsonObjectBuilder validationBuilder = jsonProvider.createObjectBuilder();
 
         getValidationIntArgument(directiveContext, "minLength")
-                .ifPresent(minLength -> validation.addProperty("minLength", minLength));
+                .ifPresent(minLength -> validationBuilder.add("minLength", minLength));
         getValidationIntArgument(directiveContext, "maxLength")
-                .ifPresent(maxLength -> validation.addProperty("maxLength", maxLength));
+                .ifPresent(maxLength -> validationBuilder.add("maxLength", maxLength));
         getValidationStringArgument(directiveContext, "pattern")
-                .ifPresent(pattern -> validation.addProperty("pattern", pattern));
+                .ifPresent(pattern -> validationBuilder.add("pattern", pattern));
         getValidationStringArgument(directiveContext, "format")
-                .ifPresent(format -> validation.addProperty("format", format));
+                .ifPresent(format -> validationBuilder.add("format", format));
         getValidationStringArgument(directiveContext, "contentMediaType")
-                .ifPresent(contentMediaType -> validation.addProperty("contentMediaType", contentMediaType));
+                .ifPresent(contentMediaType -> validationBuilder.add("contentMediaType", contentMediaType));
         getValidationStringArgument(directiveContext, "contentEncoding")
-                .ifPresent(contentEncoding -> validation.addProperty("contentEncoding", contentEncoding));
+                .ifPresent(contentEncoding -> validationBuilder.add("contentEncoding", contentEncoding));
 
         getValidationFloatArgument(directiveContext, "minimum")
-                .ifPresent(minimum -> validation.addProperty("minimum", minimum));
+                .ifPresent(minimum -> validationBuilder.add("minimum", minimum));
         getValidationFloatArgument(directiveContext, "exclusiveMinimum")
-                .ifPresent(exclusiveMinimum -> validation.addProperty("exclusiveMinimum", exclusiveMinimum));
+                .ifPresent(exclusiveMinimum -> validationBuilder.add("exclusiveMinimum", exclusiveMinimum));
         getValidationFloatArgument(directiveContext, "maximum")
-                .ifPresent(maximum -> validation.addProperty("maximum", maximum));
+                .ifPresent(maximum -> validationBuilder.add("maximum", maximum));
         getValidationFloatArgument(directiveContext, "exclusiveMaximum")
-                .ifPresent(exclusiveMaximum -> validation.addProperty("exclusiveMaximum", exclusiveMaximum));
+                .ifPresent(exclusiveMaximum -> validationBuilder.add("exclusiveMaximum", exclusiveMaximum));
         getValidationFloatArgument(directiveContext, "multipleOf")
-                .ifPresent(multipleOf -> validation.addProperty("multipleOf", multipleOf));
+                .ifPresent(multipleOf -> validationBuilder.add("multipleOf", multipleOf));
 
         getValidationStringArgument(directiveContext, "const")
-                .ifPresent(constValue -> validation.addProperty("const", constValue));
+                .ifPresent(constValue -> validationBuilder.add("const", constValue));
 
         getValidationArrayArgument(directiveContext, "allOf")
                 .ifPresent(arrayValueWithVariableContext -> {
-                            JsonArray allOf = new JsonArray();
+                            JsonArrayBuilder allOfBuilder = jsonProvider.createArrayBuilder();
                             arrayValueWithVariableContext.valueWithVariable().stream()
                                     .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                    .forEach(valueWithVariableContext -> allOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
-                            validation.add("allOf", allOf);
+                                    .forEach(valueWithVariableContext -> allOfBuilder.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            validationBuilder.add("allOf", allOfBuilder);
                         }
                 );
 
         getValidationArrayArgument(directiveContext, "anyOf")
                 .ifPresent(arrayValueWithVariableContext -> {
-                            JsonArray anyOf = new JsonArray();
+                            JsonArrayBuilder anyOfBuilder = jsonProvider.createArrayBuilder();
                             arrayValueWithVariableContext.valueWithVariable().stream()
                                     .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                    .forEach(valueWithVariableContext -> anyOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
-                            validation.add("anyOf", anyOf);
+                                    .forEach(valueWithVariableContext -> anyOfBuilder.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            validationBuilder.add("anyOf", anyOfBuilder);
                         }
                 );
 
         getValidationArrayArgument(directiveContext, "oneOf")
                 .ifPresent(arrayValueWithVariableContext -> {
-                            JsonArray oneOf = new JsonArray();
+                            JsonArrayBuilder oneOfBuilder = jsonProvider.createArrayBuilder();
                             arrayValueWithVariableContext.valueWithVariable().stream()
                                     .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                    .forEach(valueWithVariableContext -> oneOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
-                            validation.add("oneOf", oneOf);
+                                    .forEach(valueWithVariableContext -> oneOfBuilder.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            validationBuilder.add("oneOf", oneOfBuilder);
                         }
                 );
 
         getValidationObjectArgument(directiveContext, "not")
-                .ifPresent(not -> validation.add("not", buildValidation(not)));
+                .ifPresent(not -> validationBuilder.add("not", buildValidation(not)));
 
         getValidationArrayArgument(directiveContext, "properties")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("properties", buildProperties(arrayValueWithVariableContext)));
+                .ifPresent(arrayValueWithVariableContext -> validationBuilder.add("properties", buildProperties(arrayValueWithVariableContext)));
 
         getValidationObjectArgument(directiveContext, "if")
-                .ifPresent(ifValidation -> validation.add("if", buildValidation(ifValidation)));
+                .ifPresent(ifValidation -> validationBuilder.add("if", buildValidation(ifValidation)));
 
         getValidationObjectArgument(directiveContext, "then")
-                .ifPresent(thenValidation -> validation.add("then", buildValidation(thenValidation)));
+                .ifPresent(thenValidation -> validationBuilder.add("then", buildValidation(thenValidation)));
 
         getValidationObjectArgument(directiveContext, "else")
-                .ifPresent(elseValidation -> validation.add("else", buildValidation(elseValidation)));
+                .ifPresent(elseValidation -> validationBuilder.add("else", buildValidation(elseValidation)));
 
         getValidationArrayArgument(directiveContext, "dependentRequired")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("dependentRequired", buildDependentRequired(arrayValueWithVariableContext)));
+                .ifPresent(arrayValueWithVariableContext -> validationBuilder.add("dependentRequired", buildDependentRequired(arrayValueWithVariableContext)));
 
-        return validation;
+        return validationBuilder.build();
     }
 
     protected JsonObject buildValidation(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
-        JsonObject validation = new JsonObject();
+        JsonObjectBuilder validationBuilder = jsonProvider.createObjectBuilder();
 
         getValidationIntArgument(objectValueWithVariableContext, "minLength")
-                .ifPresent(minLength -> validation.addProperty("minLength", minLength));
+                .ifPresent(minLength -> validationBuilder.add("minLength", minLength));
         getValidationIntArgument(objectValueWithVariableContext, "maxLength")
-                .ifPresent(maxLength -> validation.addProperty("maxLength", maxLength));
+                .ifPresent(maxLength -> validationBuilder.add("maxLength", maxLength));
         getValidationStringArgument(objectValueWithVariableContext, "pattern")
-                .ifPresent(pattern -> validation.addProperty("pattern", pattern));
+                .ifPresent(pattern -> validationBuilder.add("pattern", pattern));
         getValidationStringArgument(objectValueWithVariableContext, "format")
-                .ifPresent(format -> validation.addProperty("format", format));
+                .ifPresent(format -> validationBuilder.add("format", format));
         getValidationStringArgument(objectValueWithVariableContext, "contentMediaType")
-                .ifPresent(contentMediaType -> validation.addProperty("contentMediaType", contentMediaType));
+                .ifPresent(contentMediaType -> validationBuilder.add("contentMediaType", contentMediaType));
         getValidationStringArgument(objectValueWithVariableContext, "contentEncoding")
-                .ifPresent(contentEncoding -> validation.addProperty("contentEncoding", contentEncoding));
+                .ifPresent(contentEncoding -> validationBuilder.add("contentEncoding", contentEncoding));
 
         getValidationFloatArgument(objectValueWithVariableContext, "minimum")
-                .ifPresent(minimum -> validation.addProperty("minimum", minimum));
+                .ifPresent(minimum -> validationBuilder.add("minimum", minimum));
         getValidationFloatArgument(objectValueWithVariableContext, "exclusiveMinimum")
-                .ifPresent(exclusiveMinimum -> validation.addProperty("exclusiveMinimum", exclusiveMinimum));
+                .ifPresent(exclusiveMinimum -> validationBuilder.add("exclusiveMinimum", exclusiveMinimum));
         getValidationFloatArgument(objectValueWithVariableContext, "maximum")
-                .ifPresent(maximum -> validation.addProperty("maximum", maximum));
+                .ifPresent(maximum -> validationBuilder.add("maximum", maximum));
         getValidationFloatArgument(objectValueWithVariableContext, "exclusiveMaximum")
-                .ifPresent(exclusiveMaximum -> validation.addProperty("exclusiveMaximum", exclusiveMaximum));
+                .ifPresent(exclusiveMaximum -> validationBuilder.add("exclusiveMaximum", exclusiveMaximum));
         getValidationFloatArgument(objectValueWithVariableContext, "multipleOf")
-                .ifPresent(multipleOf -> validation.addProperty("multipleOf", multipleOf));
+                .ifPresent(multipleOf -> validationBuilder.add("multipleOf", multipleOf));
 
         getValidationStringArgument(objectValueWithVariableContext, "const")
-                .ifPresent(constValue -> validation.addProperty("const", constValue));
+                .ifPresent(constValue -> validationBuilder.add("const", constValue));
 
         getValidationArrayArgument(objectValueWithVariableContext, "allOf")
                 .ifPresent(arrayValueWithVariableContext -> {
-                            JsonArray allOf = new JsonArray();
+                            JsonArrayBuilder allOfBuilder = jsonProvider.createArrayBuilder();
                             arrayValueWithVariableContext.valueWithVariable().stream()
                                     .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                    .forEach(valueWithVariableContext -> allOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
-                            validation.add("allOf", allOf);
+                                    .forEach(valueWithVariableContext -> allOfBuilder.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            validationBuilder.add("allOf", allOfBuilder);
                         }
                 );
 
         getValidationArrayArgument(objectValueWithVariableContext, "anyOf")
                 .ifPresent(arrayValueWithVariableContext -> {
-                            JsonArray anyOf = new JsonArray();
+                            JsonArrayBuilder anyOfBuilder = jsonProvider.createArrayBuilder();
                             arrayValueWithVariableContext.valueWithVariable().stream()
                                     .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                    .forEach(valueWithVariableContext -> anyOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
-                            validation.add("anyOf", anyOf);
+                                    .forEach(valueWithVariableContext -> anyOfBuilder.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            validationBuilder.add("anyOf", anyOfBuilder);
                         }
                 );
 
         getValidationArrayArgument(objectValueWithVariableContext, "oneOf")
                 .ifPresent(arrayValueWithVariableContext -> {
-                            JsonArray oneOf = new JsonArray();
+                            JsonArrayBuilder oneOfBuilder = jsonProvider.createArrayBuilder();
                             arrayValueWithVariableContext.valueWithVariable().stream()
                                     .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
-                                    .forEach(valueWithVariableContext -> oneOf.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
-                            validation.add("oneOf", oneOf);
+                                    .forEach(valueWithVariableContext -> oneOfBuilder.add(buildValidation(valueWithVariableContext.objectValueWithVariable())));
+                            validationBuilder.add("oneOf", oneOfBuilder);
                         }
                 );
 
         getValidationObjectArgument(objectValueWithVariableContext, "not")
-                .ifPresent(not -> validation.add("not", buildValidation(not)));
+                .ifPresent(not -> validationBuilder.add("not", buildValidation(not)));
 
         getValidationArrayArgument(objectValueWithVariableContext, "properties")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("properties", buildProperties(arrayValueWithVariableContext)));
+                .ifPresent(arrayValueWithVariableContext -> validationBuilder.add("properties", buildProperties(arrayValueWithVariableContext)));
 
         getValidationObjectArgument(objectValueWithVariableContext, "if")
-                .ifPresent(ifValidation -> validation.add("if", buildValidation(ifValidation)));
+                .ifPresent(ifValidation -> validationBuilder.add("if", buildValidation(ifValidation)));
 
         getValidationObjectArgument(objectValueWithVariableContext, "then")
-                .ifPresent(thenValidation -> validation.add("then", buildValidation(thenValidation)));
+                .ifPresent(thenValidation -> validationBuilder.add("then", buildValidation(thenValidation)));
 
         getValidationObjectArgument(objectValueWithVariableContext, "else")
-                .ifPresent(elseValidation -> validation.add("else", buildValidation(elseValidation)));
+                .ifPresent(elseValidation -> validationBuilder.add("else", buildValidation(elseValidation)));
 
         getValidationArrayArgument(objectValueWithVariableContext, "dependentRequired")
-                .ifPresent(arrayValueWithVariableContext -> validation.add("dependentRequired", buildDependentRequired(arrayValueWithVariableContext)));
+                .ifPresent(arrayValueWithVariableContext -> validationBuilder.add("dependentRequired", buildDependentRequired(arrayValueWithVariableContext)));
 
-        return validation;
+        return validationBuilder.build();
     }
 
     protected JsonObject buildProperties(GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext) {
-        JsonObject properties = new JsonObject();
+        JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
         arrayValueWithVariableContext.valueWithVariable().stream()
                 .filter(property -> property.objectValueWithVariable() != null)
                 .forEach(property ->
@@ -290,15 +294,15 @@ public class JsonSchemaTranslator {
                                 .ifPresent(name ->
                                         getValidationObjectArgument(property.objectValueWithVariable(), "validation")
                                                 .ifPresent(validation ->
-                                                        properties.add(name, buildValidation(validation))
+                                                        propertiesBuilder.add(name, buildValidation(validation))
                                                 )
                                 )
                 );
-        return properties;
+        return propertiesBuilder.build();
     }
 
     protected JsonObject buildDependentRequired(GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext) {
-        JsonObject dependentRequired = new JsonObject();
+        JsonObjectBuilder dependentRequiredBuilder = jsonProvider.createObjectBuilder();
         arrayValueWithVariableContext.valueWithVariable().stream()
                 .filter(property -> property.objectValueWithVariable() != null)
                 .forEach(property ->
@@ -306,16 +310,16 @@ public class JsonSchemaTranslator {
                                 .ifPresent(name ->
                                         getValidationArrayArgument(property.objectValueWithVariable(), "required")
                                                 .ifPresent(required -> {
-                                                            JsonArray jsonArray = new JsonArray();
+                                                            JsonArrayBuilder jsonArrayBuilder = jsonProvider.createArrayBuilder();
                                                             required.valueWithVariable().stream()
                                                                     .filter(item -> item.StringValue() != null)
-                                                                    .forEach(item -> jsonArray.add(DOCUMENT_UTIL.getStringValue(item.StringValue())));
-                                                            dependentRequired.add(name, jsonArray);
+                                                                    .forEach(item -> jsonArrayBuilder.add(DOCUMENT_UTIL.getStringValue(item.StringValue())));
+                                                            dependentRequiredBuilder.add(name, jsonArrayBuilder);
                                                         }
                                                 )
                                 )
                 );
-        return dependentRequired;
+        return dependentRequiredBuilder.build();
     }
 
     protected Optional<GraphqlParser.DirectiveContext> getValidationDirectiveContext(GraphqlParser.DirectivesContext directivesContext) {
