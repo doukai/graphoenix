@@ -11,10 +11,11 @@ repositories {
 }
 
 dependencies {
-    implementation project(":graphoenix-spi")
-    implementation 'org.eclipse.parsson:jakarta.json:1.1.0'
+    compile 'org.eclipse.parsson:jakarta.json:1.1.0'
     compile 'com.dslplatform:dsl-json-java8:1.9.9'
-    compile "com.google.auto.service:auto-service:1.0.1"
+
+    implementation project(':graphoenix-spi')
+    implementation 'com.google.auto.service:auto-service:1.0.1'
 
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')

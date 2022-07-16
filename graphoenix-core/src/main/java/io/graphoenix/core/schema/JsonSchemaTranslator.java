@@ -38,26 +38,26 @@ public class JsonSchemaTranslator {
     }
 
     public JsonValue objectToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        JsonObject jsonSchema = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
+        JsonObjectBuilder jsonSchemaBuilder = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
-                .orElseGet(() -> jsonProvider.createObjectBuilder().build());
-        jsonSchema.put("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText())));
-        jsonSchema.put("type", jsonProvider.createValue("object"));
-        jsonSchema.put("properties", objectToProperties(objectTypeDefinitionContext));
-        jsonSchema.put("required", buildRequired(objectTypeDefinitionContext));
-        jsonSchema.put("additionalProperties", TRUE);
-        return jsonSchema;
+                .orElseGet(jsonProvider::createObjectBuilder);
+        jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText())));
+        jsonSchemaBuilder.add("type", jsonProvider.createValue("object"));
+        jsonSchemaBuilder.add("properties", objectToProperties(objectTypeDefinitionContext));
+        jsonSchemaBuilder.add("required", buildRequired(objectTypeDefinitionContext));
+        jsonSchemaBuilder.add("additionalProperties", TRUE);
+        return jsonSchemaBuilder.build();
     }
 
-    protected JsonArray buildRequired(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    protected JsonArrayBuilder buildRequired(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         JsonArrayBuilder requiredBuilder = jsonProvider.createArrayBuilder();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.type().nonNullType() != null)
                 .forEach(fieldDefinitionContext -> requiredBuilder.add(fieldDefinitionContext.name().getText()));
-        return requiredBuilder.build();
+        return requiredBuilder;
     }
 
-    protected JsonObject objectToProperties(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    protected JsonObjectBuilder objectToProperties(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
@@ -67,27 +67,27 @@ public class JsonSchemaTranslator {
                 .forEach(fieldDefinitionContext ->
                         propertiesBuilder.add(fieldDefinitionContext.name().getText(), fieldToProperty(fieldDefinitionContext))
                 );
-        return propertiesBuilder.build();
+        return propertiesBuilder;
     }
 
-    protected JsonObject fieldToProperty(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        JsonObject property = getValidationDirectiveContext(fieldDefinitionContext.directives())
+    protected JsonObjectBuilder fieldToProperty(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        JsonObjectBuilder propertyBuilder = getValidationDirectiveContext(fieldDefinitionContext.directives())
                 .map(this::buildValidation)
-                .orElseGet(() -> jsonProvider.createObjectBuilder().build());
+                .orElseGet(jsonProvider::createObjectBuilder);
         if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-            property.put("type", jsonProvider.createValue("array"));
-            JsonObject items = getValidationDirectiveContext(fieldDefinitionContext.directives())
+            propertyBuilder.add("type", jsonProvider.createValue("array"));
+            JsonObjectBuilder itemsBuilder = getValidationDirectiveContext(fieldDefinitionContext.directives())
                     .flatMap(directiveContext -> getValidationObjectArgument(directiveContext, "items"))
                     .map(this::buildValidation)
-                    .orElseGet(() -> jsonProvider.createObjectBuilder().build());
-            property.put("items", buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), items));
-            return property;
+                    .orElseGet(jsonProvider::createObjectBuilder);
+            propertyBuilder.add("items", buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), itemsBuilder));
+            return propertyBuilder;
         } else {
-            return buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), property);
+            return buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), propertyBuilder);
         }
     }
 
-    protected JsonObject buildType(String fieldTypeName, JsonObject jsonObject) {
+    protected JsonObjectBuilder buildType(String fieldTypeName, JsonObjectBuilder jsonObjectBuilder) {
         if (manager.isScalar(fieldTypeName)) {
             switch (fieldTypeName) {
                 case "ID":
@@ -96,16 +96,16 @@ public class JsonSchemaTranslator {
                 case "Time":
                 case "DateTime":
                 case "Timestamp":
-                    jsonObject.put("type", jsonProvider.createValue("string"));
+                    jsonObjectBuilder.add("type", jsonProvider.createValue("string"));
                     break;
                 case "Boolean":
-                    jsonObject.put("type", jsonProvider.createValue("boolean"));
+                    jsonObjectBuilder.add("type", jsonProvider.createValue("boolean"));
                     break;
                 case "Int":
                 case "BigInteger":
                 case "Float":
                 case "BigDecimal":
-                    jsonObject.put("type", jsonProvider.createValue("number"));
+                    jsonObjectBuilder.add("type", jsonProvider.createValue("number"));
                     break;
             }
         } else if (manager.isEnum(fieldTypeName)) {
@@ -114,16 +114,16 @@ public class JsonSchemaTranslator {
                     .ifPresent(enumTypeDefinitionContext -> {
                                 enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
                                         .forEach(enumValueDefinitionContext -> enumValuesBuilder.add(enumValueDefinitionContext.enumValue().getText()));
-                                jsonObject.put("enum", enumValuesBuilder.build());
+                                jsonObjectBuilder.add("enum", enumValuesBuilder.build());
                             }
                     );
         } else if (manager.isObject(fieldTypeName)) {
-            jsonObject.put("$ref", jsonProvider.createValue(fieldTypeName));
+            jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
         }
-        return jsonObject;
+        return jsonObjectBuilder;
     }
 
-    protected JsonObject buildValidation(GraphqlParser.DirectiveContext directiveContext) {
+    protected JsonObjectBuilder buildValidation(GraphqlParser.DirectiveContext directiveContext) {
         JsonObjectBuilder validationBuilder = jsonProvider.createObjectBuilder();
 
         getValidationIntArgument(directiveContext, "minLength")
@@ -201,10 +201,10 @@ public class JsonSchemaTranslator {
         getValidationArrayArgument(directiveContext, "dependentRequired")
                 .ifPresent(arrayValueWithVariableContext -> validationBuilder.add("dependentRequired", buildDependentRequired(arrayValueWithVariableContext)));
 
-        return validationBuilder.build();
+        return validationBuilder;
     }
 
-    protected JsonObject buildValidation(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+    protected JsonObjectBuilder buildValidation(GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
         JsonObjectBuilder validationBuilder = jsonProvider.createObjectBuilder();
 
         getValidationIntArgument(objectValueWithVariableContext, "minLength")
@@ -282,10 +282,10 @@ public class JsonSchemaTranslator {
         getValidationArrayArgument(objectValueWithVariableContext, "dependentRequired")
                 .ifPresent(arrayValueWithVariableContext -> validationBuilder.add("dependentRequired", buildDependentRequired(arrayValueWithVariableContext)));
 
-        return validationBuilder.build();
+        return validationBuilder;
     }
 
-    protected JsonObject buildProperties(GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext) {
+    protected JsonObjectBuilder buildProperties(GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
         arrayValueWithVariableContext.valueWithVariable().stream()
                 .filter(property -> property.objectValueWithVariable() != null)
@@ -298,10 +298,10 @@ public class JsonSchemaTranslator {
                                                 )
                                 )
                 );
-        return propertiesBuilder.build();
+        return propertiesBuilder;
     }
 
-    protected JsonObject buildDependentRequired(GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext) {
+    protected JsonObjectBuilder buildDependentRequired(GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext) {
         JsonObjectBuilder dependentRequiredBuilder = jsonProvider.createObjectBuilder();
         arrayValueWithVariableContext.valueWithVariable().stream()
                 .filter(property -> property.objectValueWithVariable() != null)
@@ -319,7 +319,7 @@ public class JsonSchemaTranslator {
                                                 )
                                 )
                 );
-        return dependentRequiredBuilder.build();
+        return dependentRequiredBuilder;
     }
 
     protected Optional<GraphqlParser.DirectiveContext> getValidationDirectiveContext(GraphqlParser.DirectivesContext directivesContext) {

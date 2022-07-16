@@ -12,13 +12,14 @@ repositories {
 }
 
 dependencies {
-    implementation project(":graphoenix-core")
+    implementation project(':graphoenix-core')
+    implementation project(':graphoenix-config')
     implementation 'org.mariadb:r2dbc-mariadb:1.0.3'
-    implementation "io.r2dbc:r2dbc-pool:0.9.0.RELEASE"
+    implementation 'io.r2dbc:r2dbc-pool:0.9.0.RELEASE'
 
-    annotationProcessor project(":graphoenix-inject")
-    annotationProcessor project(":graphoenix-interceptor")
-    annotationProcessor project(":graphoenix-config")
+    annotationProcessor project(':graphoenix-inject')
+    annotationProcessor project(':graphoenix-interceptor')
+    annotationProcessor project(':graphoenix-config')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'

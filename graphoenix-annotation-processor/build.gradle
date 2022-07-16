@@ -12,17 +12,15 @@ repositories {
 }
 
 dependencies {
-    compile 'com.google.dagger:dagger:2.41'
-    compile "com.google.auto.service:auto-service:1.0.1"
-
-    implementation project(":graphoenix-core")
-    implementation project(":graphoenix-config")
-    implementation project(":graphoenix-graphql-builder")
-    implementation project(":graphoenix-java-generator")
-    implementation project(":graphoenix-graphql-generator")
-    implementation "com.google.auto.service:auto-service:1.0.1"
+    implementation project(':graphoenix-core')
+    implementation project(':graphoenix-config')
+    implementation project(':graphoenix-graphql-builder')
+    implementation project(':graphoenix-java-generator')
+    implementation project(':graphoenix-graphql-generator')
+    implementation 'com.google.dagger:dagger:2.41'
 
     annotationProcessor "com.google.auto.service:auto-service:1.0.1"
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }
