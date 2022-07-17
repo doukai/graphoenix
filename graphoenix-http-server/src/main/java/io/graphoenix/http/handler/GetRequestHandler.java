@@ -4,7 +4,7 @@ import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.google.common.reflect.TypeToken;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
-import io.graphoenix.spi.dto.GraphQLRequest;
+import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.spi.handler.ScopeEventResolver;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;

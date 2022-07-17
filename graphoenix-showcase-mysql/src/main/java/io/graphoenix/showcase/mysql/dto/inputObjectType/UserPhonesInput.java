@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -41,9 +40,6 @@ public class UserPhonesInput {
 
   @DefaultValue("\"UserPhones\"")
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String __typename;
 
   public String getId() {

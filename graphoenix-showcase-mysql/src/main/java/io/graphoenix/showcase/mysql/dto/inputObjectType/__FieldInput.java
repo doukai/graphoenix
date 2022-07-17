@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -31,15 +30,9 @@ public class __FieldInput {
   private String description;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Collection<__InputValueInput> args;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private __TypeInput type;
 
   private String deprecationReason;
@@ -72,9 +65,6 @@ public class __FieldInput {
 
   @DefaultValue("\"__Field\"")
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String __typename;
 
   public String getId() {

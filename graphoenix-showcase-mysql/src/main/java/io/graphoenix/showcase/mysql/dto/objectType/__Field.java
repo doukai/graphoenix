@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -34,15 +33,9 @@ public class __Field implements Meta {
   private String description;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Collection<__InputValue> args;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private __Type type;
 
   private String deprecationReason;

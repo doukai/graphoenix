@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Integer;
@@ -17,9 +16,6 @@ public class UserRoleConnection {
   private Integer totalCount;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private PageInfo pageInfo;
 
   private Collection<UserRoleEdge> edges;

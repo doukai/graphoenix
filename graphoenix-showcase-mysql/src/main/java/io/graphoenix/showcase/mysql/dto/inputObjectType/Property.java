@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.String;
@@ -15,9 +14,6 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Skip
 public class Property {
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String name;
 
   private ValidationInput validation;

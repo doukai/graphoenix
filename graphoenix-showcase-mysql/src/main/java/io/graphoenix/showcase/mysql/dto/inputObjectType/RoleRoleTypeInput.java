@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.RoleType;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -42,9 +41,6 @@ public class RoleRoleTypeInput {
 
   @DefaultValue("\"RoleRoleType\"")
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String __typename;
 
   public String getId() {

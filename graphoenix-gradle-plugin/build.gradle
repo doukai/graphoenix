@@ -16,10 +16,12 @@ dependencies {
     implementation project(':graphoenix-java-generator')
     implementation project(':graphoenix-graphql-builder')
     implementation project(':graphoenix-mysql-translator')
-    implementation 'org.antlr:antlr4:4.9.3'
+    implementation('org.antlr:antlr4:4.9.3') {
+        exclude group: 'org.glassfish', module: 'javax.json'
+    }
     implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.24.2'
     implementation 'io.leego:banana:2.1.0'
-    
+
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }

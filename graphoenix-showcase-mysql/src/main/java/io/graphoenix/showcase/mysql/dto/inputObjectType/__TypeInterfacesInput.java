@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -20,15 +19,9 @@ public class __TypeInterfacesInput {
   private String id;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String typeName;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String interfaceName;
 
   private Boolean isDeprecated;
@@ -49,9 +42,6 @@ public class __TypeInterfacesInput {
 
   @DefaultValue("\"__TypeInterfaces\"")
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String __typename;
 
   public String getId() {

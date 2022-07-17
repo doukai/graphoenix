@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -23,15 +22,9 @@ public class __TypePossibleTypes implements Meta {
   private String id;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String typeName;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String possibleTypeName;
 
   private Boolean isDeprecated;

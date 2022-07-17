@@ -822,7 +822,12 @@ public class GraphQLQueryToSelect {
 
     protected Expression scalarFieldToExpression(Table table, GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (fieldTypeName.equals("Boolean")) {
+        if (fieldTypeName.equals("ID")) {
+            Function function = new Function();
+            function.setName("CONVERT");
+            function.setParameters(new ExpressionList(Arrays.asList(fieldToColumn(table, fieldDefinitionContext), new HexValue("CHAR"))));
+            return function;
+        } else if (fieldTypeName.equals("Boolean")) {
             Function function = new Function();
             function.setName("IF");
             function.setParameters(new ExpressionList(Arrays.asList(fieldToColumn(table, fieldDefinitionContext), new HexValue("TRUE"), new HexValue("FALSE"))));

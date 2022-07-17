@@ -1,7 +1,6 @@
 package io.graphoenix.java.generator.builder;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
@@ -323,11 +322,6 @@ public class TypeSpecBuilder {
         }
         if (fieldDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NonNull.class);
-            builder.addAnnotation(
-                    AnnotationSpec.builder(JsonAttribute.class)
-                            .addMember("nullable", "false")
-                            .build()
-            );
         }
         if (fieldDefinitionContext.description() != null) {
             builder.addJavadoc("$S", fieldDefinitionContext.description().getText());
@@ -378,11 +372,6 @@ public class TypeSpecBuilder {
         }
         if (inputValueDefinitionContext.type().nonNullType() != null) {
             builder.addAnnotation(NonNull.class);
-            builder.addAnnotation(
-                    AnnotationSpec.builder(JsonAttribute.class)
-                            .addMember("nullable", "false")
-                            .build()
-            );
         }
         if (inputValueDefinitionContext.description() != null) {
             builder.addJavadoc("$S", inputValueDefinitionContext.description().getText());

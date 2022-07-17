@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.RoleType;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
@@ -25,15 +24,9 @@ public class Role implements Meta {
   private String id;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String name;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Collection<RoleType> type;
 
   private Collection<User> users;

@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -15,27 +14,15 @@ import org.eclipse.microprofile.graphql.Type;
 @Skip
 public class PageInfo {
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Boolean hasNextPage;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Boolean hasPreviousPage;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String startCursor;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String endCursor;
 
   public Boolean getHasNextPage() {

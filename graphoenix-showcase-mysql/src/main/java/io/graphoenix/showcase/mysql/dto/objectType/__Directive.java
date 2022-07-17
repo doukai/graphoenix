@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
@@ -29,15 +28,9 @@ public class __Directive implements Meta {
   private String description;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Collection<__DirectiveLocation> locations;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Collection<__InputValue> args;
 
   private Boolean onOperation;

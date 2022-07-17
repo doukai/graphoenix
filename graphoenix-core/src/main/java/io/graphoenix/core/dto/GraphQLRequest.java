@@ -1,9 +1,11 @@
-package io.graphoenix.spi.dto;
+package io.graphoenix.core.dto;
 
+import com.dslplatform.json.CompiledJson;
 import jakarta.json.JsonValue;
 
 import java.util.Map;
 
+@CompiledJson
 public class GraphQLRequest {
 
     private String query;
@@ -11,6 +13,9 @@ public class GraphQLRequest {
     private String operationName;
 
     private Map<String, JsonValue> variables;
+
+    public GraphQLRequest() {
+    }
 
     public GraphQLRequest(String query) {
         this.query = query;

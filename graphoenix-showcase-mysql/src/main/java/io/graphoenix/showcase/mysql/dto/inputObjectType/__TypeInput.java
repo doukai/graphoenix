@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.__TypeKind;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -20,17 +19,11 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Skip
 public class __TypeInput {
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String name;
 
   private Integer schemaId;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private __TypeKind kind;
 
   private String description;
@@ -67,9 +60,6 @@ public class __TypeInput {
 
   @DefaultValue("\"__Type\"")
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String __typename;
 
   public String getName() {

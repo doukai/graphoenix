@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -30,9 +29,6 @@ public class Organization implements Meta {
   private Collection<User> users;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String name;
 
   private Boolean isDeprecated;

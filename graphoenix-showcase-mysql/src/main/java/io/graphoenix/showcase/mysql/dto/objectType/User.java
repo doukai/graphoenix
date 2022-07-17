@@ -1,17 +1,19 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
 
 @Type
 @CompiledJson
@@ -22,21 +24,12 @@ public class User implements Meta {
   private String id;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String login;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String password;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String name;
 
   private Integer age;
@@ -52,21 +45,12 @@ public class User implements Meta {
   private Collection<Role> roles;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Collection<String> phones;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Collection<Integer> test1;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private Collection<Boolean> test2;
 
   private Boolean isDeprecated;

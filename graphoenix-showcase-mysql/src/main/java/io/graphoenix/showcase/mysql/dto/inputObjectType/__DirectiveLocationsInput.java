@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import com.dslplatform.json.JsonAttribute;
 import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -21,15 +20,9 @@ public class __DirectiveLocationsInput {
   private String id;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String directiveName;
 
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private __DirectiveLocation directiveLocation;
 
   private Boolean isDeprecated;
@@ -50,9 +43,6 @@ public class __DirectiveLocationsInput {
 
   @DefaultValue("\"__DirectiveLocations\"")
   @NonNull
-  @JsonAttribute(
-      nullable = false
-  )
   private String __typename;
 
   public String getId() {
