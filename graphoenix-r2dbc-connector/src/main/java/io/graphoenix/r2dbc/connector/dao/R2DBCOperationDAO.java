@@ -40,8 +40,8 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> Collection<T> findAll(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        Type type = (new TypeToken<Collection<T>>() {
-        }).getType();
+        Type type = new TypeToken<Collection<T>>() {
+        }.getType();
         return findAll(sql, parameters, type);
     }
 
@@ -64,8 +64,8 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> Mono<Collection<T>> findAllAsync(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        Type type = (new TypeToken<Collection<T>>() {
-        }).getType();
+        Type type = new TypeToken<Collection<T>>() {
+        }.getType();
         return findAllAsync(sql, parameters, type);
     }
 
@@ -87,8 +87,8 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> PublisherBuilder<Collection<T>> findAllAsyncBuilder(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        Type type = (new TypeToken<Collection<T>>() {
-        }).getType();
+        Type type = new TypeToken<Collection<T>>() {
+        }.getType();
         return findAllAsyncBuilder(sql, parameters, type);
     }
 

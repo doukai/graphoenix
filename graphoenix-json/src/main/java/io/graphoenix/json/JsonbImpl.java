@@ -48,12 +48,41 @@ public class JsonbImpl implements Jsonb {
 
     @Override
     public <T> T fromJson(Reader reader, Class<T> type) throws JsonbException {
-        return null;
+        try {
+            byte[] bytes = readBytes(reader);
+            return dslJson.deserialize(type, bytes, bytes.length);
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new JsonbException(e.getMessage(), e);
+        }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T fromJson(Reader reader, Type runtimeType) throws JsonbException {
-        return null;
+        try {
+            byte[] bytes = readBytes(reader);
+            return (T) dslJson.deserialize(runtimeType, bytes, bytes.length);
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new JsonbException(e.getMessage(), e);
+        }
+    }
+
+    private byte[] readBytes(Reader reader) {
+        try {
+            char[] charArray = new char[8 * 1024];
+            StringBuilder builder = new StringBuilder();
+            int numCharsRead;
+            while ((numCharsRead = reader.read(charArray, 0, charArray.length)) != -1) {
+                builder.append(charArray, 0, numCharsRead);
+            }
+            reader.close();
+            return builder.toString().getBytes(StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new JsonbException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -98,11 +127,26 @@ public class JsonbImpl implements Jsonb {
 
     @Override
     public void toJson(Object object, Writer writer) throws JsonbException {
-
+        try {
+            JsonWriter jsonWriter = dslJson.newWriter();
+            dslJson.serialize(jsonWriter, object);
+            writer.write(jsonWriter.toString());
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new JsonbException(e.getMessage(), e);
+        }
     }
 
     @Override
     public void toJson(Object object, Type runtimeType, Writer writer) throws JsonbException {
+        try {
+            JsonWriter jsonWriter = dslJson.newWriter();
+            dslJson.serialize(jsonWriter, runtimeType, object);
+            writer.write(jsonWriter.toString());
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new JsonbException(e.getMessage(), e);
+        }
 
     }
 
@@ -118,11 +162,16 @@ public class JsonbImpl implements Jsonb {
 
     @Override
     public void toJson(Object object, Type runtimeType, OutputStream stream) throws JsonbException {
-
+        try {
+            dslJson.serialize(object, stream);
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new JsonbException(e.getMessage(), e);
+        }
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
     }
 }

@@ -8,12 +8,12 @@ import jakarta.json.spi.JsonProvider;
 public class JsonbBuilderImpl implements JsonbBuilder {
     @Override
     public JsonbBuilder withConfig(JsonbConfig config) {
-        return null;
+        return this;
     }
 
     @Override
     public JsonbBuilder withProvider(JsonProvider jsonpProvider) {
-        return null;
+        return this;
     }
 
     @Override
