@@ -11,6 +11,9 @@ import jakarta.inject.Provider;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,28 +46,29 @@ public class ApiTest {
     }
 
     @Query
-    public Boolean getRoleDisable2(@Source Organization organization) {
-        return false;
+    public Flux<Boolean> getRoleDisable2(@Source Organization organization) {
+        return Flux.just(false);
     }
 
     public String getUserDetail2(@Source User user) {
         return "";
     }
 
-    public Integer getOrgLevel2(@Source Organization organization) {
-        return 1;
-    }
-
-    public List<Integer> getOrgLevel3(@Source Organization organization) {
+    public PublisherBuilder<Integer> getOrgLevel2(@Source Organization organization) {
         return null;
     }
+
+    public Mono<List<Integer>> getOrgLevel3(@Source Organization organization) {
+        return null;
+    }
+
     @Query
     public List<Integer> getOrgLevel5(@Source Organization organization) {
         return null;
     }
 
-    public Boolean getRoleDisable(@Source Organization organization) {
-        return false;
+    public Flux<Boolean> getRoleDisable(@Source Organization organization) {
+        return Flux.just(false);
     }
 
     public Collection<User> getUserByOrg(@Source Organization organization) {
@@ -80,8 +84,8 @@ public class ApiTest {
     }
 
     @Query
-    public Collection<User> getUserByOrg2(@Source Organization organization) {
-        return organization.getUsers();
+    public Mono<Collection<User>> getUserByOrg2(@Source Organization organization) {
+        return Mono.just(organization.getUsers());
     }
 
     @Query
@@ -90,7 +94,7 @@ public class ApiTest {
     }
 
     @Query
-    public List<Role> findRole2(String name, Integer type, Boolean disable) {
+    public PublisherBuilder<List<Role>> findRole2(String name, Integer type, Boolean disable) {
         return null;
     }
 }

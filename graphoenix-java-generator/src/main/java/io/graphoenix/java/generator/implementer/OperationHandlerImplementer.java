@@ -29,7 +29,6 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.spi.JsonProvider;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
 import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -173,14 +172,6 @@ public class OperationHandlerImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ReactiveStreamsFactory.class)),
-                                "reactiveStreamsFactory",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
                 .addMethod(buildOperationMethod(type))
                 .addMethod(buildConstructor(type))
                 .addMethods(buildMethods(type));
@@ -288,7 +279,7 @@ public class OperationHandlerImplementer {
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionContext.class), "selectionContext")
-                .returns(ParameterizedTypeName.get(ClassName.get(PublisherBuilder.class), ClassName.get(JsonValue.class)));
+                .returns(ParameterizedTypeName.get(ClassName.get(Flux.class), ClassName.get(JsonValue.class)));
 
         boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
@@ -322,12 +313,13 @@ public class OperationHandlerImplementer {
                     filterMethodName = fieldTypeParameterName;
                 }
                 if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
+                    builder.addStatement("return $T.from(result.buildRs()).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Flux.class), filterMethodName);
+                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
+                    builder.addStatement("return $T.from(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Flux.class), filterMethodName);
+                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName())) {
                     builder.addStatement("return result.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
-                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName()) ||
-                        typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                    builder.addStatement("return reactiveStreamsFactory.get().fromPublisher(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
                 } else {
-                    builder.addStatement("return reactiveStreamsFactory.get().of(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
+                    builder.addStatement("return $T.just(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Flux.class), filterMethodName);
                 }
             } else {
                 String filterMethodName;
@@ -337,30 +329,32 @@ public class OperationHandlerImplementer {
                     filterMethodName = "toJsonValue";
                 }
                 if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
+                    builder.addStatement("return $T.from(result.buildRs()).map(item-> $L(item))", ClassName.get(Flux.class), filterMethodName);
+                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
+                    builder.addStatement("return $T.from(result).map(item-> $L(item))", ClassName.get(Flux.class), filterMethodName);
+                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName())) {
                     builder.addStatement("return result.map(item-> $L(item))", filterMethodName);
-                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName()) ||
-                        typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                    builder.addStatement("return reactiveStreamsFactory.get().fromPublisher(result).map(item-> $L(item))", filterMethodName);
                 } else {
-                    builder.addStatement("return reactiveStreamsFactory.get().of(result).map(item-> $L(item))", filterMethodName);
+                    builder.addStatement("return $T.just(result).map(item-> $L(item))", ClassName.get(Flux.class), filterMethodName);
                 }
             }
         } else {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                            "$T type = new $T<$T>() {}.getType()",
-                            ClassName.get(Type.class),
-                            ClassName.get(TypeToken.class),
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement(
-                            "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).beginControlFlow("if(result == null)")
-                            .addStatement("return reactiveStreamsFactory.get().of($T.NULL)", ClassName.get(JsonValue.class))
+                                    "$T type = new $T<$T>() {}.getType()",
+                                    ClassName.get(Type.class),
+                                    ClassName.get(TypeToken.class),
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).addStatement(
+                                    "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).beginControlFlow("if(result == null)")
+                            .addStatement("return $T.just($T.NULL)", ClassName.get(Flux.class), ClassName.get(JsonValue.class))
                             .endControlFlow()
                             .addStatement(
-                                    "return reactiveStreamsFactory.get().fromIterable(result).flatMap(item -> invokeHandler.get().$L(item)).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
+                                    "return $T.fromIterable(result).flatMap(item -> invokeHandler.get().$L(item)).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
+                                    ClassName.get(Flux.class),
                                     fieldTypeParameterName,
                                     fieldTypeParameterName
                             );
@@ -375,7 +369,7 @@ public class OperationHandlerImplementer {
                     );
                 }
             } else {
-                builder.addStatement("return reactiveStreamsFactory.get().of(jsonValue)");
+                builder.addStatement("return $T.just(jsonValue)", ClassName.get(Flux.class));
             }
         }
         return builder.build();
@@ -393,7 +387,6 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")), "selectionFilter")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(Jsonb.class)), "jsonb")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ReactiveStreamsFactory.class)), "reactiveStreamsFactory")
                 .addStatement("this.manager = manager")
                 .addStatement("this.variablesProcessor = variablesProcessor")
                 .addStatement("this.operationHandler = operationHandler")
@@ -401,8 +394,7 @@ public class OperationHandlerImplementer {
                 .addStatement("this.connectionHandler = connectionHandler")
                 .addStatement("this.selectionFilter = selectionFilter")
                 .addStatement("this.jsonProvider = jsonProvider")
-                .addStatement("this.jsonb = jsonb")
-                .addStatement("this.reactiveStreamsFactory = reactiveStreamsFactory");
+                .addStatement("this.jsonb = jsonb");
         if (type.equals(MUTATION)) {
             builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
                     .addStatement("this.validator = validator");

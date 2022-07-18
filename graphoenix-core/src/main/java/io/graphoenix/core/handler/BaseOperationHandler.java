@@ -8,40 +8,37 @@ import jakarta.json.JsonValue;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
-import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
-import java.util.concurrent.CompletionStage;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 import static jakarta.json.JsonValue.FALSE;
 import static jakarta.json.JsonValue.TRUE;
 
 public abstract class BaseOperationHandler {
 
-    private final Map<String, BiFunction<JsonValue, GraphqlParser.SelectionContext, PublisherBuilder<JsonValue>>> operationHandlers;
+    private final Map<String, BiFunction<JsonValue, GraphqlParser.SelectionContext, Flux<JsonValue>>> operationHandlers;
     private final JsonProvider jsonProvider;
     private final Jsonb jsonb;
-    private final ReactiveStreamsFactory reactiveStreamsFactory;
 
     public BaseOperationHandler() {
         this.operationHandlers = new HashMap<>();
         this.jsonProvider = BeanContext.get(JsonProvider.class);
         this.jsonb = BeanContext.get(Jsonb.class);
-        this.reactiveStreamsFactory = BeanContext.get(ReactiveStreamsFactory.class);
     }
 
-    private BiFunction<JsonValue, GraphqlParser.SelectionContext, PublisherBuilder<JsonValue>> getOperationHandler(String name) {
+    private BiFunction<JsonValue, GraphqlParser.SelectionContext, Flux<JsonValue>> getOperationHandler(String name) {
         return operationHandlers.get(name);
     }
 
-    protected void put(String name, BiFunction<JsonValue, GraphqlParser.SelectionContext, PublisherBuilder<JsonValue>> biFunction) {
+    protected void put(String name, BiFunction<JsonValue, GraphqlParser.SelectionContext, Flux<JsonValue>> biFunction) {
         operationHandlers.put(name, biFunction);
     }
 
@@ -51,7 +48,6 @@ public abstract class BaseOperationHandler {
                         getOperationHandler(selectionContext.field().name().getText())
                                 .apply(jsonValue.asJsonObject().get(selectionContext.field().name().getText()), selectionContext)
                                 .map(subJsonValue -> new AbstractMap.SimpleEntry<>(selectionContext.field().name().getText(), subJsonValue))
-                                .buildRs()
                 )
                 .collectList()
                 .map(list -> list.stream().collect(JsonCollectors.toJsonObject()));

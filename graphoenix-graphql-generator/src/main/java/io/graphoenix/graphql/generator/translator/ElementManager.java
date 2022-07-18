@@ -25,6 +25,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -121,72 +122,75 @@ public class ElementManager {
     }
 
     public String executableElementToTypeName(ExecutableElement executableElement, Types types) {
-        TypeElement typeElement;
-        if (types.asElement(executableElement.getReturnType()).getSimpleName().contentEquals(Flux.class.getSimpleName())) {
-            typeElement = (TypeElement) types.asElement(((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0));
-        } else if (types.asElement(executableElement.getReturnType()).getSimpleName().contentEquals(Mono.class.getSimpleName())) {
-            typeElement = (TypeElement) types.asElement(((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0));
-        } else if (types.asElement(executableElement.getReturnType()).getSimpleName().contentEquals(PublisherBuilder.class.getSimpleName())) {
-            typeElement = (TypeElement) types.asElement(((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0));
+        TypeMirror typeMirror;
+        if (((TypeElement) types.asElement(executableElement.getReturnType())).getQualifiedName().contentEquals(Flux.class.getName())) {
+            typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
+        } else if (((TypeElement) types.asElement(executableElement.getReturnType())).getQualifiedName().contentEquals(Mono.class.getName())) {
+            typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
+        } else if (((TypeElement) types.asElement(executableElement.getReturnType())).getQualifiedName().contentEquals(PublisherBuilder.class.getName())) {
+            typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
         } else {
-            typeElement = (TypeElement) types.asElement(executableElement.getReturnType());
+            typeMirror = executableElement.getReturnType();
         }
-        return elementToTypeName(executableElement, typeElement, types);
+        return elementToTypeName(executableElement, typeMirror, types);
     }
 
     public String variableElementToTypeName(VariableElement variableElement, Types types) {
-        TypeElement typeElement = (TypeElement) types.asElement(variableElement.asType());
-        return elementToTypeName(variableElement, typeElement, types);
+        TypeMirror typeMirror;
+        if (((TypeElement) types.asElement(variableElement.asType())).getQualifiedName().contentEquals(Flux.class.getName())) {
+            typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
+        } else if (((TypeElement) types.asElement(variableElement.asType())).getQualifiedName().contentEquals(Mono.class.getName())) {
+            typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
+        } else if (((TypeElement) types.asElement(variableElement.asType())).getQualifiedName().contentEquals(PublisherBuilder.class.getName())) {
+            typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
+        } else {
+            typeMirror = variableElement.asType();
+        }
+        return elementToTypeName(variableElement, typeMirror, types);
     }
 
-    public String elementToTypeName(Element element, TypeElement typeElement, Types types) {
+    public String elementToTypeName(Element element, TypeMirror typeMirror, Types types) {
         String typeName;
+        String qualifiedName = ((TypeElement) types.asElement(typeMirror)).getQualifiedName().toString();
         if (element.getAnnotation(Id.class) != null) {
             typeName = "ID";
         } else if (element.asType().toString().equals(int.class.getName()) ||
                 element.asType().toString().equals(long.class.getName()) ||
                 element.asType().toString().equals(short.class.getName()) ||
                 element.asType().toString().equals(byte.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Integer.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Long.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Short.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Byte.class.getName())) {
+                qualifiedName.equals(Integer.class.getName()) ||
+                qualifiedName.equals(Long.class.getName()) ||
+                qualifiedName.equals(Short.class.getName()) ||
+                qualifiedName.equals(Byte.class.getName())) {
             typeName = "Int";
         } else if (element.asType().toString().equals(float.class.getName()) ||
                 element.asType().toString().equals(double.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Float.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Double.class.getName())) {
+                qualifiedName.equals(Float.class.getName()) ||
+                qualifiedName.equals(Double.class.getName())) {
             typeName = "Float";
         } else if (element.asType().toString().equals(char.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(String.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Character.class.getName())) {
+                qualifiedName.equals(String.class.getName()) ||
+                qualifiedName.equals(Character.class.getName())) {
             typeName = "String";
         } else if (element.asType().toString().equals(boolean.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Boolean.class.getName())) {
+                qualifiedName.equals(Boolean.class.getName())) {
             typeName = "Boolean";
-        } else if (typeElement.getQualifiedName().toString().equals(BigInteger.class.getName())) {
+        } else if (qualifiedName.equals(BigInteger.class.getName())) {
             typeName = "BigInteger";
-        } else if (typeElement.getQualifiedName().toString().equals(BigDecimal.class.getName())) {
+        } else if (qualifiedName.equals(BigDecimal.class.getName())) {
             typeName = "BigDecimal";
-        } else if (typeElement.getQualifiedName().toString().equals(LocalDate.class.getName())) {
+        } else if (qualifiedName.equals(LocalDate.class.getName())) {
             typeName = "Date";
-        } else if (typeElement.getQualifiedName().toString().equals(LocalTime.class.getName())) {
+        } else if (qualifiedName.equals(LocalTime.class.getName())) {
             typeName = "Time";
-        } else if (typeElement.getQualifiedName().toString().equals(LocalDateTime.class.getName())) {
+        } else if (qualifiedName.equals(LocalDateTime.class.getName())) {
             typeName = "DateTime";
-        } else if (typeElement.getQualifiedName().toString().equals(Collection.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(List.class.getName()) ||
-                typeElement.getQualifiedName().toString().equals(Set.class.getName())) {
-
-            if (element.getKind().equals(ElementKind.METHOD)) {
-                typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) ((ExecutableElement) element).getReturnType()).getTypeArguments().get(0)), types)).concat("]");
-            } else if (element.getKind().equals(ElementKind.FIELD) || element.getKind().equals(ElementKind.PARAMETER)) {
-                typeName = "[".concat(elementToTypeName(element, (TypeElement) types.asElement(((DeclaredType) element.asType()).getTypeArguments().get(0)), types)).concat("]");
-            } else {
-                throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeElement.getQualifiedName().toString()));
-            }
+        } else if (qualifiedName.equals(Collection.class.getName()) ||
+                qualifiedName.equals(List.class.getName()) ||
+                qualifiedName.equals(Set.class.getName())) {
+            typeName = "[".concat(elementToTypeName(element, ((DeclaredType) typeMirror).getTypeArguments().get(0), types)).concat("]");
         } else {
-            typeName = typeElement.getSimpleName().toString();
+            typeName = types.asElement(typeMirror).getSimpleName().toString();
         }
 
         if (element.getAnnotation(NonNull.class) != null) {

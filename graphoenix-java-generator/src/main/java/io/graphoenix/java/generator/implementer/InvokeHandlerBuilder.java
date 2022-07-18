@@ -1,7 +1,14 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.collect.Streams;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -9,9 +16,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
-import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsFactoryResolver;
 import org.tinylog.Logger;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
@@ -30,7 +37,7 @@ public class InvokeHandlerBuilder {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
-    private Map<String, Map<String, List<String>>> invokeMethods;
+    private Map<String, Map<String, List<Map.Entry<String, String>>>> invokeMethods;
 
     @Inject
     public InvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
@@ -52,26 +59,29 @@ public class InvokeHandlerBuilder {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .collect(Collectors.toMap(
-                        objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
-                        objectTypeDefinitionContext ->
-                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
-                                        .map(fieldDefinitionContext ->
-                                                new AbstractMap.SimpleEntry<>(
-                                                        typeManager.getClassName(fieldDefinitionContext),
-                                                        typeManager.getMethodName(fieldDefinitionContext)
-                                                )
-                                        )
-                                        .collect(
-                                                Collectors.groupingBy(
-                                                        AbstractMap.SimpleEntry<String, String>::getKey,
-                                                        Collectors.mapping(
-                                                                AbstractMap.SimpleEntry<String, String>::getValue,
-                                                                Collectors.toList()
+                                objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
+                                objectTypeDefinitionContext ->
+                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
+                                                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                                                .map(fieldDefinitionContext ->
+                                                        new AbstractMap.SimpleEntry<>(
+                                                                typeManager.getClassName(fieldDefinitionContext),
+                                                                new AbstractMap.SimpleEntry<>(
+                                                                        typeManager.getMethodName(fieldDefinitionContext),
+                                                                        typeManager.getReturnClassName(fieldDefinitionContext)
+                                                                )
                                                         )
                                                 )
-                                        )
+                                                .collect(
+                                                        Collectors.groupingBy(
+                                                                AbstractMap.SimpleEntry<String, AbstractMap.SimpleEntry<String, String>>::getKey,
+                                                                Collectors.mapping(
+                                                                        AbstractMap.SimpleEntry<String, AbstractMap.SimpleEntry<String, String>>::getValue,
+                                                                        Collectors.toList()
+                                                                )
+                                                        )
+                                                )
                         )
                 );
         this.buildClass().writeTo(filer);
@@ -90,14 +100,6 @@ public class InvokeHandlerBuilder {
                 .addFields(buildFields())
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeInvokeMethods())
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(ReactiveStreamsFactory.class),
-                                "reactiveStreamsFactory",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
                 .build();
     }
 
@@ -130,8 +132,7 @@ public class InvokeHandlerBuilder {
                                 ).build()
                         )
                         .collect(Collectors.toList())
-                )
-                .addStatement("this.reactiveStreamsFactory = $T.instance()", ClassName.get(ReactiveStreamsFactoryResolver.class));
+                );
 
         classNameSet.forEach(className ->
                 builder.addStatement("this.$L = $L",
@@ -163,42 +164,75 @@ public class InvokeHandlerBuilder {
         }
         return MethodSpec.methodBuilder(typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(ClassName.get(PublisherBuilder.class), typeClassName))
+                .returns(ParameterizedTypeName.get(ClassName.get(Flux.class), typeClassName))
                 .addParameter(typeClassName, getParameterName(objectTypeDefinitionContext))
                 .addStatement(
                         CodeBlock.join(
                                 Streams.concat(
-                                        Stream.of(CodeBlock.of("return reactiveStreamsFactory.ofNullable($L)", getParameterName(objectTypeDefinitionContext))),
+                                        Stream.of(CodeBlock.of("return $T.from($T.justOrEmpty($L))", ClassName.get(Flux.class), ClassName.get(Mono.class), getParameterName(objectTypeDefinitionContext))),
                                         Stream.ofNullable(invokeMethods.get(objectTypeDefinitionContext.name().getText()))
                                                 .flatMap(map -> map.entrySet().stream())
                                                 .flatMap(entry ->
                                                         entry.getValue().stream()
-                                                                .map(methodName ->
-                                                                        CodeBlock.of(".peek(next -> $L.$L($L.get().$L($L)))",
-                                                                                getParameterName(objectTypeDefinitionContext),
-                                                                                typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodName)),
-                                                                                typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
-                                                                                methodName,
-                                                                                getParameterName(objectTypeDefinitionContext)
-                                                                        )
+                                                                .map(methodEntry -> {
+                                                                            if (typeManager.getClassNameByString(methodEntry.getValue()).canonicalName().equals(PublisherBuilder.class.getName())) {
+                                                                                return CodeBlock.of(".flatMap(next -> $T.from($L.get().$L(next).buildRs()).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
+                                                                                        ClassName.get(Flux.class),
+                                                                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
+                                                                                        methodEntry.getKey(),
+                                                                                        typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodEntry.getKey())),
+                                                                                        ClassName.get(Mono.class)
+                                                                                );
+                                                                            } else if (typeManager.getClassNameByString(methodEntry.getValue()).canonicalName().equals(Mono.class.getName())) {
+                                                                                return CodeBlock.of(".flatMap(next -> $T.from($L.get().$L(next)).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
+                                                                                        ClassName.get(Flux.class),
+                                                                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
+                                                                                        methodEntry.getKey(),
+                                                                                        typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodEntry.getKey())),
+                                                                                        ClassName.get(Mono.class)
+                                                                                );
+                                                                            } else if (typeManager.getClassNameByString(methodEntry.getValue()).canonicalName().equals(Flux.class.getName())) {
+                                                                                return CodeBlock.of(".flatMap(next -> $L.get().$L(next).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
+                                                                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
+                                                                                        methodEntry.getKey(),
+                                                                                        typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodEntry.getKey())),
+                                                                                        ClassName.get(Mono.class)
+                                                                                );
+                                                                            } else {
+                                                                                return CodeBlock.of(".flatMap(next -> $T.just($L.get().$L(next)).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
+                                                                                        ClassName.get(Flux.class),
+                                                                                        typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
+                                                                                        methodEntry.getKey(),
+                                                                                        typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodEntry.getKey())),
+                                                                                        ClassName.get(Mono.class)
+                                                                                );
+                                                                            }
+                                                                        }
                                                                 )
                                                 ),
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                 .map(fieldDefinitionContext ->
-                                                        CodeBlock.of(".peek(next -> $L(next.$L()))",
+                                                        CodeBlock.of(".flatMap(next -> $L(next.$L()).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
                                                                 getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                                                                typeManager.getFieldGetterMethodName(fieldDefinitionContext)
+                                                                typeManager.getFieldGetterMethodName(fieldDefinitionContext),
+                                                                typeManager.getFieldSetterMethodName(fieldDefinitionContext),
+                                                                ClassName.get(Mono.class)
                                                         )
                                                 ),
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                 .map(fieldDefinitionContext ->
-                                                        CodeBlock.of(".peek(next -> reactiveStreamsFactory.ofNullable(next.$L()).flatMap(reactiveStreamsFactory::fromIterable).forEach(this::$L))",
+                                                        CodeBlock.of(".flatMap(next -> $T.from($T.justOrEmpty(next.$L())).flatMap($T::fromIterable).flatMap(this::$L).collectList().map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
+                                                                ClassName.get(Flux.class),
+                                                                ClassName.get(Mono.class),
                                                                 typeManager.getFieldGetterMethodName(fieldDefinitionContext),
-                                                                getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                                ClassName.get(Flux.class),
+                                                                getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                                                typeManager.getFieldSetterMethodName(fieldDefinitionContext),
+                                                                ClassName.get(Mono.class)
                                                         )
                                                 )
                                 ).collect(Collectors.toList()),
