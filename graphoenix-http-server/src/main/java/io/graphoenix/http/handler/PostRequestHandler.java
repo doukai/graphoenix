@@ -21,9 +21,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static io.graphoenix.core.context.RequestScopeInstanceFactory.REQUEST_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.GRAPHQL_REQUEST_KEY;
-import static io.graphoenix.spi.constant.Hammurabi.REQUEST_KEY;
-import static io.graphoenix.spi.constant.Hammurabi.RESPONSE_KEY;
+import static io.graphoenix.spi.constant.Hammurabi.GRAPHQL_REQUEST;
+import static io.graphoenix.spi.constant.Hammurabi.REQUEST;
+import static io.graphoenix.spi.constant.Hammurabi.RESPONSE;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped
@@ -41,8 +41,8 @@ public class PostRequestHandler extends BaseRequestHandler {
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
         String requestId = NanoIdUtils.randomNanoId();
         Map<String, Object> context = new ConcurrentHashMap<>();
-        context.put(REQUEST_KEY, request);
-        context.put(RESPONSE_KEY, response);
+        context.put(REQUEST, request);
+        context.put(RESPONSE, response);
         String contentType = request.requestHeaders().get(CONTENT_TYPE);
 
         if (contentType.contentEquals(MimeType.Application.JSON)) {
@@ -50,7 +50,7 @@ public class PostRequestHandler extends BaseRequestHandler {
                     .sendString(
                             request.receive().aggregate().asString()
                                     .map(content -> jsonb.fromJson(content, GraphQLRequest.class))
-                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST_KEY, graphQLRequest))
+                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST, graphQLRequest))
                                     .flatMap(graphQLRequest ->
                                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
@@ -66,7 +66,7 @@ public class PostRequestHandler extends BaseRequestHandler {
                     .sendString(
                             request.receive().aggregate().asString()
                                     .map(GraphQLRequest::new)
-                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST_KEY, graphQLRequest))
+                                    .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST, graphQLRequest))
                                     .flatMap(graphQLRequest ->
                                             ScopeEventResolver.initialized(context, RequestScoped.class)
                                                     .transformDeferredContextual((mono, contextView) -> this.sessionHandler(context, mono, contextView))
