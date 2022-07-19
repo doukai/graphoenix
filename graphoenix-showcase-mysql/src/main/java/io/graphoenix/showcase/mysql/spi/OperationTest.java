@@ -17,7 +17,7 @@ import java.util.List;
 @GraphQLOperation(operationDAO = R2DBCOperationDAO.class)
 public interface OperationTest {
 
-    @QueryOperation(value = "userList", layers = 1)
+    @QueryOperation(value = "user", layers = 1)
     @UserExpression0(name = @StringExpression(val = "name"))
     User queryUser(String name) throws Exception;
 
@@ -25,7 +25,7 @@ public interface OperationTest {
     @UserExpression0(roles = @RoleExpression1(name = @StringExpression(val = "role1111"), id = @IDExpression(val = "role1112")))
     List<User> queryUserList(Sex sex) throws Exception;
 
-    @QueryOperation("userList")
+    @QueryOperation("user")
     @UserExpression0(
             name = @StringExpression($val = "name"),
             roles = @RoleExpression1(name = @StringExpression(val = "role1111"), id = @IDExpression($val = "name")),

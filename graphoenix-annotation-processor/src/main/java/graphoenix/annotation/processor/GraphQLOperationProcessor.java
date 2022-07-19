@@ -60,6 +60,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
     private Elements elementUtils;
     private Types typeUtils;
     private Filer filer;
+    private GraphQLConfig graphQLConfig;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -76,7 +77,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
-        GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
+        graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
 
         try {
             manager.clearAll();
@@ -151,7 +152,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                                         )
                                 );
 
-                        operationInterfaceImplementer.writeToFiler(packageElement, typeElement, operationDAO, generatorHandler.extension(), filer);
+                        operationInterfaceImplementer.setGraphQLConfig(graphQLConfig).writeToFiler(packageElement, typeElement, operationDAO, generatorHandler.extension(), filer);
 
                     } catch (Exception e) {
                         Logger.error(e);

@@ -4,6 +4,7 @@ import io.graphoenix.core.config.BannerConfig;
 import io.leego.banana.Ansi;
 import io.leego.banana.BananaUtils;
 import io.leego.banana.Font;
+import org.gradle.api.DefaultTask;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.BannerUtil.BANNER_FILE_NAME;
 
-public class GenerateBannerTask extends BaseTask {
+public class GenerateBannerTask extends DefaultTask {
 
     @TaskAction
     public void GenerateIntrospectionSQL() {

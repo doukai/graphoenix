@@ -24,12 +24,19 @@ import java.util.List;
 
 public class BaseTask extends DefaultTask {
 
-    protected void init() throws IOException, URISyntaxException {
-        final IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
-        final GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-        final DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
-        final IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
+    private final IGraphQLDocumentManager manager;
+    private final GraphQLConfigRegister configRegister;
+    private final DocumentBuilder documentBuilder;
+    private final IGraphQLFieldMapManager mapper;
 
+    public BaseTask() {
+        manager = BeanContext.get(IGraphQLDocumentManager.class);
+        configRegister = BeanContext.get(GraphQLConfigRegister.class);
+        documentBuilder = BeanContext.get(DocumentBuilder.class);
+        mapper = BeanContext.get(IGraphQLFieldMapManager.class);
+    }
+
+    protected void init() throws IOException, URISyntaxException {
         GraphQLConfig graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
         assert graphQLConfig != null;
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);

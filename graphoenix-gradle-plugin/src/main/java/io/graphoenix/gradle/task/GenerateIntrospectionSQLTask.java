@@ -19,10 +19,16 @@ import java.util.stream.Stream;
 
 public class GenerateIntrospectionSQLTask extends BaseTask {
 
+    private final IntrospectionMutationBuilder introspectionMutationBuilder;
+    private final GraphQLMutationToStatements mutationToStatements;
+
+    public GenerateIntrospectionSQLTask() {
+        this.introspectionMutationBuilder = BeanContext.get(IntrospectionMutationBuilder.class);
+        this.mutationToStatements = BeanContext.get(GraphQLMutationToStatements.class);
+    }
+
     @TaskAction
     public void GenerateIntrospectionSQL() {
-        final IntrospectionMutationBuilder introspectionMutationBuilder = BeanContext.get(IntrospectionMutationBuilder.class);
-        final GraphQLMutationToStatements mutationToStatements = BeanContext.get(GraphQLMutationToStatements.class);
 
         GraphQLConfig graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
         if (graphQLConfig == null) {

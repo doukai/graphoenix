@@ -12,9 +12,10 @@ public enum InjectionProcessErrorType {
     INSTANCE_TYPE_NOT_EXIST(-108, "can't find type argument of instance"),
     MODULE_PROVIDERS_METHOD_NOT_EXIST(-109, "can't find module class providers method of %s"),
     COMPONENT_GET_METHOD_NOT_EXIST(-110, "can't find component class get method of %s"),
+    TYPE_ARGUMENT_NOT_EXIST(-111, "can't find type argument"),
 
-    CONFIG_PROPERTIES_PREFIX_NOT_EXIST(-111, "prefix not exist in @ConfigProperties in: %s"),
-    CONFIG_PROPERTY_NOT_EXIST(-112, "@ConfigProperty not exist on: %s"),
+    CONFIG_PROPERTIES_PREFIX_NOT_EXIST(-121, "prefix not exist in @ConfigProperties in: %s"),
+    CONFIG_PROPERTY_NOT_EXIST(-122, "@ConfigProperty not exist on: %s"),
 
     UNKNOWN(-199, "unknown injection error");
 

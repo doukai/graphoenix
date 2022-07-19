@@ -1,6 +1,7 @@
 package io.graphoenix.gradle.task;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.utils.SourceRoot;
@@ -8,11 +9,11 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.document.Field;
+import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.core.document.Field;
-import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.java.generator.builder.JavaFileBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -21,11 +22,14 @@ import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskExecutionException;
 import org.tinylog.Logger;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,18 +42,25 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 
 public class GenerateGraphQLSourceTask extends BaseTask {
 
+    private final IGraphQLDocumentManager manager;
+    private final DocumentBuilder documentBuilder;
+    private final JavaFileBuilder javaFileBuilder;
+
+    public GenerateGraphQLSourceTask() {
+        this.manager = BeanContext.get(IGraphQLDocumentManager.class);
+        this.documentBuilder = BeanContext.get(DocumentBuilder.class);
+        this.javaFileBuilder = BeanContext.get(JavaFileBuilder.class);
+    }
+
     @TaskAction
     public void generateGraphQLSource() {
-        final IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
-        final DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
-        final JavaFileBuilder javaFileBuilder = BeanContext.get(JavaFileBuilder.class);
-
         GraphQLConfig graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
         if (graphQLConfig == null) {
             graphQLConfig = new GraphQLConfig();
@@ -84,11 +95,22 @@ public class GenerateGraphQLSourceTask extends BaseTask {
 
                                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(typeName)));
 
+                                Type type = methodDeclaration.getType();
+                                if (type.isClassOrInterfaceType()) {
+                                    if (type.asClassOrInterfaceType().getNameAsString().equals(PublisherBuilder.class.getSimpleName()) ||
+                                            type.asClassOrInterfaceType().getNameAsString().equals(Flux.class.getSimpleName()) ||
+                                            type.asClassOrInterfaceType().getNameAsString().equals(Mono.class.getSimpleName())) {
+                                        Optional<NodeList<Type>> typeArguments = type.asClassOrInterfaceType().getTypeArguments();
+                                        if (typeArguments.isPresent()) {
+                                            type = typeArguments.get().get(0);
+                                        }
+                                    }
+                                }
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
                                         .addField(
                                                 new Field()
                                                         .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
-                                                        .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                                        .setTypeName(getInvokeFieldTypeName(type))
                                         );
                                 manager.registerGraphQL(objectType.toString());
                             }
@@ -112,6 +134,7 @@ public class GenerateGraphQLSourceTask extends BaseTask {
     }
 
     private String getInvokeFieldTypeName(Type type) {
+
         String typeName;
         if (type.isClassOrInterfaceType()) {
             ClassOrInterfaceType classOrInterfaceType = type.asClassOrInterfaceType();

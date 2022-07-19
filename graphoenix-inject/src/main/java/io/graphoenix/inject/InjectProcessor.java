@@ -79,6 +79,7 @@ import static io.graphoenix.inject.error.InjectionProcessErrorType.CONSTRUCTOR_N
 import static io.graphoenix.inject.error.InjectionProcessErrorType.INSTANCE_TYPE_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionProcessErrorType.MODULE_PROVIDERS_METHOD_NOT_EXIST;
 import static io.graphoenix.inject.error.InjectionProcessErrorType.PROVIDER_TYPE_NOT_EXIST;
+import static io.graphoenix.inject.error.InjectionProcessErrorType.TYPE_ARGUMENT_NOT_EXIST;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes({
@@ -952,8 +953,14 @@ public class InjectProcessor extends AbstractProcessor {
                             ClassOrInterfaceDeclaration producesComponentInterfaceDeclaration = new ClassOrInterfaceDeclaration()
                                     .setPublic(true)
                                     .setInterface(true)
-                                    .setName(providesMethodDeclaration.getType().asClassOrInterfaceType().getName() + "_Component")
                                     .addAnnotation(new NormalAnnotationExpr().addPair("modules", modules).setName(Component.class.getSimpleName()));
+
+                            String returnTypeName = processorManager.getQualifiedNameByType(providesMethodDeclaration.getType());
+                            if (providesMethodDeclaration.getType().isClassOrInterfaceType() && returnTypeName.equals(PublisherBuilder.class.getName()) || returnTypeName.equals(Mono.class.getName())) {
+                                producesComponentInterfaceDeclaration.setName(providesMethodDeclaration.getType().asClassOrInterfaceType().getTypeArguments().orElseThrow(() -> new InjectionProcessException(TYPE_ARGUMENT_NOT_EXIST)).get(0).toString() + "_Component");
+                            } else {
+                                producesComponentInterfaceDeclaration.setName(providesMethodDeclaration.getType().toString() + "_Component");
+                            }
 
                             Type typeClone = providesMethodDeclaration.getType().clone();
 
