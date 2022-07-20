@@ -1,0 +1,3 @@
+normalFieldDefinition(enumField) ::= <<
+<enumField.ident> = <enumField.number>
+>>

@@ -1,0 +1,5 @@
+serviceDefinition(service) ::= <<
+service <message.name> {
+  <message.fields:{field|<field>};separator=";\n">
+}
+>>

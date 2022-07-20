@@ -1,0 +1,5 @@
+enumDefinition(enum) ::= <<
+enum <enum.name> {
+  <enum.fields:{field|<field>};separator=";\n">
+}
+>>

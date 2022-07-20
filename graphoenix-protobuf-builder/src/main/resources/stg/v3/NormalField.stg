@@ -1,2 +1,3 @@
-objectTypeDefinition(objectType) ::= <<
+normalFieldDefinition(normalField) ::= <<
+<if(normalField.repeated)>repeated <endif><normalField.type> <normalField.name> = <normalField.number>
 >>
