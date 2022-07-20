@@ -1,0 +1,6 @@
+import "stg/operation/Argument.stg"
+directiveDefinition(message) ::= <<
+message <message.name> {
+  <message.fields:{field|<fieldDefinition(field)>};separator="\n">
+}
+>>

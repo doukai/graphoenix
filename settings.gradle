@@ -15,4 +15,5 @@ include 'graphoenix-mysql'
 include 'graphoenix-http-server'
 include 'graphoenix-showcase-mysql'
 include 'graphoenix-json'
+include 'graphoenix-protobuf-builder'
 
