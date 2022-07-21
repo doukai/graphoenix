@@ -1,5 +1,6 @@
+import "Field.stg"
 messageDefinition(message) ::= <<
 message <message.name> {
-  <message.fields:{field|<field>};separator=";\n">
+    <message.fields:{field|<fieldDefinition(field)>};separator="\n">
 }
 >>

@@ -1,5 +1,6 @@
+import "Rpc.stg"
 serviceDefinition(service) ::= <<
-service <message.name> {
-  <message.fields:{field|<field>};separator=";\n">
+service <service.name> {
+    <service.rpcs:{rpc|<rpcDefinition(rpc)>};separator="\n">
 }
 >>

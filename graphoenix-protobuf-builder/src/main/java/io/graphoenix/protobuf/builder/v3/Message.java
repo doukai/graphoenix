@@ -1,5 +1,8 @@
 package io.graphoenix.protobuf.builder.v3;
 
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroupFile;
+
 import java.util.List;
 
 public class Message {
@@ -12,15 +15,27 @@ public class Message {
         return name;
     }
 
-    public void setName(String name) {
+    public Message setName(String name) {
         this.name = name;
+        return this;
     }
 
     public List<Field> getFields() {
         return fields;
     }
 
-    public void setFields(List<Field> fields) {
+    public Message setFields(List<Field> fields) {
         this.fields = fields;
+        return this;
+    }
+
+    @Override
+    public String toString() {
+        STGroupFile stGroupFile = new STGroupFile("stg/v3/Message.stg");
+        ST st = stGroupFile.getInstanceOf("messageDefinition");
+        st.add("message", this);
+        String render = st.render();
+        stGroupFile.unload();
+        return render;
     }
 }

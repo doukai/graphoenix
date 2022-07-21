@@ -1,0 +1,3 @@
+rpcDefinition(rpc) ::= <<
+rpc <rpc.name> (<if(rpc.messageStream)>stream <endif><rpc.messageType>) returns (<if(rpc.returnStream)>stream <endif><rpc.returnType>);
+>>

@@ -1,5 +1,6 @@
+import "EnumField.stg"
 enumDefinition(enum) ::= <<
 enum <enum.name> {
-  <enum.fields:{field|<field>};separator=";\n">
+    <enum.fields:{field|<enumFieldDefinition(field)>};separator="\n">
 }
 >>

@@ -15,6 +15,7 @@ dependencies {
     implementation project(':graphoenix-core')
     implementation project(':graphoenix-java-generator')
     implementation project(':graphoenix-graphql-builder')
+    implementation project(':graphoenix-protobuf-builder')
     implementation project(':graphoenix-mysql-translator')
     implementation('org.antlr:antlr4:4.9.3') {
         exclude group: 'org.glassfish', module: 'javax.json'

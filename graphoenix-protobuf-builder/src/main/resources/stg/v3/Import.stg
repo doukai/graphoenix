@@ -1,0 +1,3 @@
+importDefinition(import) ::= <<
+import <if(import.pub)>public <endif><if(import.weak)>weak <endif>"<import.name>";
+>>

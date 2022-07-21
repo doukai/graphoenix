@@ -1,0 +1,3602 @@
+syntax = "proto3";
+package io.graphoenix.showcase.mysql;
+message __Schema {
+    string id = 1;
+    string query_type_name = 2;
+    string mutation_type_name = 3;
+    string subscription_type_name = 4;
+    repeated __Type types = 5;
+    __Type query_type = 6;
+    __Type mutation_type = 7;
+    __Type subscription_type = 8;
+    repeated __Directive directives = 9;
+    bool is_deprecated = 10;
+    int32 version = 11;
+    string realm_id = 12;
+    string create_user_id = 13;
+    string create_time = 14;
+    string update_user_id = 15;
+    string update_time = 16;
+    string create_group_id = 17;
+    string __typename = 18;
+    int32 id_count = 19;
+    string id_max = 20;
+    string id_min = 21;
+    int32 query_type_name_count = 22;
+    string query_type_name_max = 23;
+    string query_type_name_min = 24;
+    int32 mutation_type_name_count = 25;
+    string mutation_type_name_max = 26;
+    string mutation_type_name_min = 27;
+    int32 subscription_type_name_count = 28;
+    string subscription_type_name_max = 29;
+    string subscription_type_name_min = 30;
+    __Type types_aggregate = 31;
+    __Directive directives_aggregate = 32;
+    __TypeConnection types_connection = 33;
+}
+message __Type {
+    string name = 1;
+    int32 schema_id = 2;
+    __TypeKind kind = 3;
+    string description = 4;
+    repeated __Field fields = 5;
+    repeated __Type interfaces = 6;
+    repeated __Type possible_types = 7;
+    repeated __EnumValue enum_values = 8;
+    repeated __InputValue input_fields = 9;
+    string of_type_name = 10;
+    __Type of_type = 11;
+    bool is_deprecated = 12;
+    int32 version = 13;
+    string realm_id = 14;
+    string create_user_id = 15;
+    string create_time = 16;
+    string update_user_id = 17;
+    string update_time = 18;
+    string create_group_id = 19;
+    string __typename = 20;
+    int32 name_count = 21;
+    string name_max = 22;
+    string name_min = 23;
+    int32 description_count = 24;
+    string description_max = 25;
+    string description_min = 26;
+    int32 of_type_name_count = 27;
+    string of_type_name_max = 28;
+    string of_type_name_min = 29;
+    int32 schema_id_count = 30;
+    int32 schema_id_sum = 31;
+    int32 schema_id_avg = 32;
+    int32 schema_id_max = 33;
+    int32 schema_id_min = 34;
+    __Field fields_aggregate = 35;
+    __Type interfaces_aggregate = 36;
+    __Type possible_types_aggregate = 37;
+    __EnumValue enum_values_aggregate = 38;
+    __InputValue input_fields_aggregate = 39;
+    __FieldConnection fields_connection = 40;
+    __TypeConnection interfaces_connection = 41;
+    __TypeConnection possible_types_connection = 42;
+    __EnumValueConnection enum_values_connection = 43;
+}
+message __TypeInterfaces {
+    string id = 1;
+    string type_name = 2;
+    string interface_name = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+    int32 id_count = 13;
+    string id_max = 14;
+    string id_min = 15;
+    int32 type_name_count = 16;
+    string type_name_max = 17;
+    string type_name_min = 18;
+    int32 interface_name_count = 19;
+    string interface_name_max = 20;
+}
+message __TypePossibleTypes {
+    string id = 1;
+    string type_name = 2;
+    string possible_type_name = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+    int32 id_count = 13;
+    string id_max = 14;
+    string id_min = 15;
+    int32 type_name_count = 16;
+    string type_name_max = 17;
+    string type_name_min = 18;
+    int32 possible_type_name_count = 19;
+    string possible_type_name_max = 20;
+}
+message __Field {
+    string id = 1;
+    string name = 2;
+    string type_name = 3;
+    string of_type_name = 4;
+    __Type of_type = 5;
+    string description = 6;
+    repeated __InputValue args = 7;
+    __Type type = 8;
+    string deprecation_reason = 9;
+    string from = 10;
+    string to = 11;
+    string with_type = 12;
+    string with_from = 13;
+    string with_to = 14;
+    bool is_deprecated = 15;
+    int32 version = 16;
+    string realm_id = 17;
+    string create_user_id = 18;
+    string create_time = 19;
+    string update_user_id = 20;
+    string update_time = 21;
+    string create_group_id = 22;
+    string __typename = 23;
+    int32 id_count = 24;
+    string id_max = 25;
+    string id_min = 26;
+    int32 name_count = 27;
+    string name_max = 28;
+    string name_min = 29;
+    int32 type_name_count = 30;
+    string type_name_max = 31;
+    string type_name_min = 32;
+    int32 of_type_name_count = 33;
+    string of_type_name_max = 34;
+    string of_type_name_min = 35;
+    int32 description_count = 36;
+    string description_max = 37;
+    string description_min = 38;
+    int32 deprecation_reason_count = 39;
+    string deprecation_reason_max = 40;
+    string deprecation_reason_min = 41;
+    int32 from_count = 42;
+    string from_max = 43;
+    string from_min = 44;
+    int32 to_count = 45;
+    string to_max = 46;
+    string to_min = 47;
+    int32 with_type_count = 48;
+    string with_type_max = 49;
+    string with_type_min = 50;
+    int32 with_from_count = 51;
+    string with_from_max = 52;
+    string with_from_min = 53;
+    int32 with_to_count = 54;
+    string with_to_max = 55;
+    string with_to_min = 56;
+    __InputValue args_aggregate = 57;
+}
+message __InputValue {
+    string id = 1;
+    string name = 2;
+    string type_name = 3;
+    string of_type_name = 4;
+    __Type of_type = 5;
+    int32 field_id = 6;
+    string directive_name = 7;
+    string description = 8;
+    __Type type = 9;
+    string default_value = 10;
+    bool is_deprecated = 11;
+    int32 version = 12;
+    string realm_id = 13;
+    string create_user_id = 14;
+    string create_time = 15;
+    string update_user_id = 16;
+    string update_time = 17;
+    string create_group_id = 18;
+    string __typename = 19;
+    int32 id_count = 20;
+    string id_max = 21;
+    string id_min = 22;
+    int32 name_count = 23;
+    string name_max = 24;
+    string name_min = 25;
+    int32 type_name_count = 26;
+    string type_name_max = 27;
+    string type_name_min = 28;
+    int32 of_type_name_count = 29;
+    string of_type_name_max = 30;
+    string of_type_name_min = 31;
+    int32 directive_name_count = 32;
+    string directive_name_max = 33;
+    string directive_name_min = 34;
+    int32 description_count = 35;
+    string description_max = 36;
+    string description_min = 37;
+    int32 default_value_count = 38;
+    string default_value_max = 39;
+    string default_value_min = 40;
+    int32 field_id_count = 41;
+    int32 field_id_sum = 42;
+    int32 field_id_avg = 43;
+    int32 field_id_max = 44;
+}
+message __EnumValue {
+    string id = 1;
+    string name = 2;
+    string of_type_name = 3;
+    __Type of_type = 4;
+    string description = 5;
+    string deprecation_reason = 6;
+    bool is_deprecated = 7;
+    int32 version = 8;
+    string realm_id = 9;
+    string create_user_id = 10;
+    string create_time = 11;
+    string update_user_id = 12;
+    string update_time = 13;
+    string create_group_id = 14;
+    string __typename = 15;
+    int32 id_count = 16;
+    string id_max = 17;
+    string id_min = 18;
+    int32 name_count = 19;
+    string name_max = 20;
+    string name_min = 21;
+    int32 of_type_name_count = 22;
+    string of_type_name_max = 23;
+    string of_type_name_min = 24;
+    int32 description_count = 25;
+    string description_max = 26;
+    string description_min = 27;
+    int32 deprecation_reason_count = 28;
+    string deprecation_reason_max = 29;
+}
+message __Directive {
+    string name = 1;
+    int32 schema_id = 2;
+    string description = 3;
+    repeated __DirectiveLocation locations = 4;
+    repeated __InputValue args = 5;
+    bool on_operation = 6;
+    bool on_fragment = 7;
+    bool on_field = 8;
+    bool is_deprecated = 9;
+    int32 version = 10;
+    string realm_id = 11;
+    string create_user_id = 12;
+    string create_time = 13;
+    string update_user_id = 14;
+    string update_time = 15;
+    string create_group_id = 16;
+    string __typename = 17;
+    int32 name_count = 18;
+    string name_max = 19;
+    string name_min = 20;
+    int32 description_count = 21;
+    string description_max = 22;
+    string description_min = 23;
+    int32 schema_id_count = 24;
+    int32 schema_id_sum = 25;
+    int32 schema_id_avg = 26;
+    int32 schema_id_max = 27;
+    int32 schema_id_min = 28;
+    __InputValue args_aggregate = 29;
+}
+message __DirectiveLocations {
+    string id = 1;
+    string directive_name = 2;
+    __DirectiveLocation directive_location = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+    int32 id_count = 13;
+    string id_max = 14;
+    string id_min = 15;
+    int32 directive_name_count = 16;
+    string directive_name_max = 17;
+}
+message PageInfo {
+    bool has_next_page = 1;
+    bool has_previous_page = 2;
+    string start_cursor = 3;
+}
+message User {
+    string id = 1;
+    string login = 2;
+    string password = 3;
+    string name = 4;
+    int32 age = 5;
+    bool disable = 6;
+    Sex sex = 7;
+    int32 organization_id = 8;
+    Organization organization = 9;
+    repeated Role roles = 10;
+    repeated string phones = 11;
+    repeated int32 test1 = 12;
+    repeated bool test2 = 13;
+    bool is_deprecated = 14;
+    int32 version = 15;
+    string realm_id = 16;
+    string create_user_id = 17;
+    string create_time = 18;
+    string update_user_id = 19;
+    string update_time = 20;
+    string create_group_id = 21;
+    string __typename = 22;
+    int32 id_count = 23;
+    string id_max = 24;
+    string id_min = 25;
+    int32 login_count = 26;
+    string login_max = 27;
+    string login_min = 28;
+    int32 password_count = 29;
+    string password_max = 30;
+    string password_min = 31;
+    int32 name_count = 32;
+    string name_max = 33;
+    string name_min = 34;
+    int32 phones_count = 35;
+    string phones_max = 36;
+    string phones_min = 37;
+    int32 age_count = 38;
+    int32 age_sum = 39;
+    int32 age_avg = 40;
+    int32 age_max = 41;
+    int32 age_min = 42;
+    int32 organization_id_count = 43;
+    int32 organization_id_sum = 44;
+    int32 organization_id_avg = 45;
+    int32 organization_id_max = 46;
+    int32 organization_id_min = 47;
+    int32 test1_count = 48;
+    int32 test1_sum = 49;
+    int32 test1_avg = 50;
+    int32 test1_max = 51;
+    int32 test1_min = 52;
+    Role roles_aggregate = 53;
+    RoleConnection roles_connection = 54;
+}
+message UserPhones {
+    string id = 1;
+    int32 user_id = 2;
+    string phone = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+    int32 id_count = 13;
+    string id_max = 14;
+    string id_min = 15;
+    int32 phone_count = 16;
+    string phone_max = 17;
+    string phone_min = 18;
+    int32 user_id_count = 19;
+    int32 user_id_sum = 20;
+    int32 user_id_avg = 21;
+    int32 user_id_max = 22;
+}
+message UserTest1 {
+    string id = 1;
+    int32 user_id = 2;
+    int32 test1 = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+    int32 id_count = 13;
+    string id_max = 14;
+    string id_min = 15;
+    int32 user_id_count = 16;
+    int32 user_id_sum = 17;
+    int32 user_id_avg = 18;
+    int32 user_id_max = 19;
+    int32 user_id_min = 20;
+    int32 test1_count = 21;
+    int32 test1_sum = 22;
+    int32 test1_avg = 23;
+    int32 test1_max = 24;
+}
+message UserTest2 {
+    string id = 1;
+    int32 user_id = 2;
+    bool test2 = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+    int32 id_count = 13;
+    string id_max = 14;
+    string id_min = 15;
+    int32 user_id_count = 16;
+    int32 user_id_sum = 17;
+    int32 user_id_avg = 18;
+    int32 user_id_max = 19;
+}
+message UserRole {
+    string id = 1;
+    int32 user_id = 2;
+    int32 role_id = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+    int32 id_count = 13;
+    string id_max = 14;
+    string id_min = 15;
+    int32 user_id_count = 16;
+    int32 user_id_sum = 17;
+    int32 user_id_avg = 18;
+    int32 user_id_max = 19;
+    int32 user_id_min = 20;
+    int32 role_id_count = 21;
+    int32 role_id_sum = 22;
+    int32 role_id_avg = 23;
+    int32 role_id_max = 24;
+}
+message Role {
+    string id = 1;
+    string name = 2;
+    repeated RoleType type = 3;
+    repeated User users = 4;
+    bool is_deprecated = 5;
+    int32 version = 6;
+    string realm_id = 7;
+    string create_user_id = 8;
+    string create_time = 9;
+    string update_user_id = 10;
+    string update_time = 11;
+    string create_group_id = 12;
+    string __typename = 13;
+    int32 id_count = 14;
+    string id_max = 15;
+    string id_min = 16;
+    int32 name_count = 17;
+    string name_max = 18;
+    string name_min = 19;
+    User users_aggregate = 20;
+}
+message RoleRoleType {
+    string id = 1;
+    int32 role_id = 2;
+    RoleType type = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+    int32 id_count = 13;
+    string id_max = 14;
+    string id_min = 15;
+    int32 role_id_count = 16;
+    int32 role_id_sum = 17;
+    int32 role_id_avg = 18;
+    int32 role_id_max = 19;
+}
+message Organization {
+    string id = 1;
+    int32 above_id = 2;
+    Organization above = 3;
+    repeated User users = 4;
+    string name = 5;
+    bool is_deprecated = 6;
+    int32 version = 7;
+    string realm_id = 8;
+    string create_user_id = 9;
+    string create_time = 10;
+    string update_user_id = 11;
+    string update_time = 12;
+    string create_group_id = 13;
+    string __typename = 14;
+    int32 id_count = 15;
+    string id_max = 16;
+    string id_min = 17;
+    int32 name_count = 18;
+    string name_max = 19;
+    string name_min = 20;
+    int32 above_id_count = 21;
+    int32 above_id_sum = 22;
+    int32 above_id_avg = 23;
+    int32 above_id_max = 24;
+    int32 above_id_min = 25;
+    User users_aggregate = 26;
+    UserConnection users_connection = 27;
+    int32 org_level2 = 28;
+    repeated int32 org_level3 = 29;
+    bool role_disable = 30;
+    repeated User user_by_org = 31;
+}
+message __SchemaConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __TypeConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __TypeInterfacesConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __TypePossibleTypesConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __FieldConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __InputValueConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __EnumValueConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __DirectiveConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __DirectiveLocationsConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message UserConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message UserPhonesConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message UserTest1Connection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message UserTest2Connection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message UserRoleConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message RoleConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message RoleRoleTypeConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message OrganizationConnection {
+    int32 total_count = 1;
+    PageInfo page_info = 2;
+}
+message __SchemaEdge {
+    __Schema node = 1;
+}
+message __TypeEdge {
+    __Type node = 1;
+}
+message __TypeInterfacesEdge {
+    __TypeInterfaces node = 1;
+}
+message __TypePossibleTypesEdge {
+    __TypePossibleTypes node = 1;
+}
+message __FieldEdge {
+    __Field node = 1;
+}
+message __InputValueEdge {
+    __InputValue node = 1;
+}
+message __EnumValueEdge {
+    __EnumValue node = 1;
+}
+message __DirectiveEdge {
+    __Directive node = 1;
+}
+message __DirectiveLocationsEdge {
+    __DirectiveLocations node = 1;
+}
+message UserEdge {
+    User node = 1;
+}
+message UserPhonesEdge {
+    UserPhones node = 1;
+}
+message UserTest1Edge {
+    UserTest1 node = 1;
+}
+message UserTest2Edge {
+    UserTest2 node = 1;
+}
+message UserRoleEdge {
+    UserRole node = 1;
+}
+message RoleEdge {
+    Role node = 1;
+}
+message RoleRoleTypeEdge {
+    RoleRoleType node = 1;
+}
+message OrganizationEdge {
+    Organization node = 1;
+}
+message QueryType {
+    __Schema __schema = 1;
+    repeated __Schema __schema_list = 2;
+    __SchemaConnection __schema_connection = 3;
+    __Type __type = 4;
+    repeated __Type __type_list = 5;
+    __TypeConnection __type_connection = 6;
+    __TypeInterfaces __type_interfaces = 7;
+    repeated __TypeInterfaces __type_interfaces_list = 8;
+    __TypeInterfacesConnection __type_interfaces_connection = 9;
+    __TypePossibleTypes __type_possible_types = 10;
+    repeated __TypePossibleTypes __type_possible_types_list = 11;
+    __TypePossibleTypesConnection __type_possible_types_connection = 12;
+    __Field __field = 13;
+    repeated __Field __field_list = 14;
+    __FieldConnection __field_connection = 15;
+    __InputValue __input_value = 16;
+    repeated __InputValue __input_value_list = 17;
+    __InputValueConnection __input_value_connection = 18;
+    __EnumValue __enum_value = 19;
+    repeated __EnumValue __enum_value_list = 20;
+    __EnumValueConnection __enum_value_connection = 21;
+    __Directive __directive = 22;
+    repeated __Directive __directive_list = 23;
+    __DirectiveConnection __directive_connection = 24;
+    __DirectiveLocations __directive_locations = 25;
+    repeated __DirectiveLocations __directive_locations_list = 26;
+    __DirectiveLocationsConnection __directive_locations_connection = 27;
+    User user = 28;
+    repeated User user_list = 29;
+    UserConnection user_connection = 30;
+    UserPhones user_phones = 31;
+    repeated UserPhones user_phones_list = 32;
+    UserPhonesConnection user_phones_connection = 33;
+    UserTest1 user_test1 = 34;
+    repeated UserTest1 user_test1_list = 35;
+    UserTest1Connection user_test1_connection = 36;
+    UserTest2 user_test2 = 37;
+    repeated UserTest2 user_test2_list = 38;
+    UserTest2Connection user_test2_connection = 39;
+    UserRole user_role = 40;
+    repeated UserRole user_role_list = 41;
+    UserRoleConnection user_role_connection = 42;
+    Role role = 43;
+    repeated Role role_list = 44;
+    RoleConnection role_connection = 45;
+    RoleRoleType role_role_type = 46;
+    repeated RoleRoleType role_role_type_list = 47;
+    RoleRoleTypeConnection role_role_type_connection = 48;
+    Organization organization = 49;
+    repeated Organization organization_list = 50;
+    OrganizationConnection organization_connection = 51;
+    bool is_deprecated = 52;
+    int32 version = 53;
+    string realm_id = 54;
+    string create_user_id = 55;
+    string create_time = 56;
+    string update_user_id = 57;
+    string update_time = 58;
+    string create_group_id = 59;
+    string get_user_detail = 60;
+    repeated string get_user_detail6 = 61;
+    int32 get_org_level = 62;
+    bool get_role_disable2 = 63;
+    repeated int32 get_org_level5 = 64;
+    repeated User get_user_by_org2 = 65;
+    Organization get_parent2 = 66;
+}
+message MutationType {
+    __Schema __schema = 1;
+    __Type __type = 2;
+    __TypeInterfaces __type_interfaces = 3;
+    __TypePossibleTypes __type_possible_types = 4;
+    __Field __field = 5;
+    __InputValue __input_value = 6;
+    __EnumValue __enum_value = 7;
+    __Directive __directive = 8;
+    __DirectiveLocations __directive_locations = 9;
+    User user = 10;
+    UserPhones user_phones = 11;
+    UserTest1 user_test1 = 12;
+    UserTest2 user_test2 = 13;
+    UserRole user_role = 14;
+    Role role = 15;
+    RoleRoleType role_role_type = 16;
+    Organization organization = 17;
+    bool is_deprecated = 18;
+    int32 version = 19;
+    string realm_id = 20;
+    string create_user_id = 21;
+    string create_time = 22;
+    string update_user_id = 23;
+    string update_time = 24;
+}
+message ValidationInput {
+    int32 min_length = 1;
+    int32 max_length = 2;
+    string pattern = 3;
+    string format = 4;
+    string content_media_type = 5;
+    string content_encoding = 6;
+    float minimum = 7;
+    float exclusive_minimum = 8;
+    float maximum = 9;
+    float exclusive_maximum = 10;
+    float multiple_of = 11;
+    string const = 12;
+    repeated string enum = 13;
+    ValidationInput items = 14;
+    int32 min_items = 15;
+    int32 max_items = 16;
+    bool unique_items = 17;
+    repeated ValidationInput all_of = 18;
+    repeated ValidationInput any_of = 19;
+    repeated ValidationInput one_of = 20;
+    ValidationInput not = 21;
+    repeated Property properties = 22;
+    ValidationInput if = 23;
+    ValidationInput then = 24;
+    ValidationInput else = 25;
+}
+message Property {
+    string name = 1;
+    ValidationInput validation = 2;
+}
+message IDExpression {
+    Operator opr = 1;
+    string val = 2;
+    repeated string in = 3;
+}
+message StringExpression {
+    Operator opr = 1;
+    string val = 2;
+    repeated string in = 3;
+}
+message BooleanExpression {
+    Operator opr = 1;
+    bool val = 2;
+    repeated bool in = 3;
+}
+message IntExpression {
+    Operator opr = 1;
+    int32 val = 2;
+    repeated int32 in = 3;
+}
+message FloatExpression {
+    Operator opr = 1;
+    float val = 2;
+    repeated float in = 3;
+}
+message MapWith {
+    string type = 1;
+    string from = 2;
+}
+message InvokeParameter {
+    string name = 1;
+}
+message __SchemaInput {
+    string id = 1;
+    string query_type_name = 2;
+    string mutation_type_name = 3;
+    string subscription_type_name = 4;
+    repeated __TypeInput types = 5;
+    __TypeInput query_type = 6;
+    __TypeInput mutation_type = 7;
+    __TypeInput subscription_type = 8;
+    repeated __DirectiveInput directives = 9;
+    bool is_deprecated = 10;
+    int32 version = 11;
+    string realm_id = 12;
+    string create_user_id = 13;
+    string create_time = 14;
+    string update_user_id = 15;
+    string update_time = 16;
+    string create_group_id = 17;
+}
+message __TypeInput {
+    string name = 1;
+    int32 schema_id = 2;
+    __TypeKind kind = 3;
+    string description = 4;
+    repeated __FieldInput fields = 5;
+    repeated __TypeInput interfaces = 6;
+    repeated __TypeInput possible_types = 7;
+    repeated __EnumValueInput enum_values = 8;
+    repeated __InputValueInput input_fields = 9;
+    string of_type_name = 10;
+    __TypeInput of_type = 11;
+    bool is_deprecated = 12;
+    int32 version = 13;
+    string realm_id = 14;
+    string create_user_id = 15;
+    string create_time = 16;
+    string update_user_id = 17;
+    string update_time = 18;
+    string create_group_id = 19;
+}
+message __TypeInterfacesInput {
+    string id = 1;
+    string type_name = 2;
+    string interface_name = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+}
+message __TypePossibleTypesInput {
+    string id = 1;
+    string type_name = 2;
+    string possible_type_name = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+}
+message __FieldInput {
+    string id = 1;
+    string name = 2;
+    string type_name = 3;
+    string of_type_name = 4;
+    __TypeInput of_type = 5;
+    string description = 6;
+    repeated __InputValueInput args = 7;
+    __TypeInput type = 8;
+    string deprecation_reason = 9;
+    string from = 10;
+    string to = 11;
+    string with_type = 12;
+    string with_from = 13;
+    string with_to = 14;
+    bool is_deprecated = 15;
+    int32 version = 16;
+    string realm_id = 17;
+    string create_user_id = 18;
+    string create_time = 19;
+    string update_user_id = 20;
+    string update_time = 21;
+    string create_group_id = 22;
+}
+message __InputValueInput {
+    string id = 1;
+    string name = 2;
+    string type_name = 3;
+    string of_type_name = 4;
+    __TypeInput of_type = 5;
+    int32 field_id = 6;
+    string directive_name = 7;
+    string description = 8;
+    __TypeInput type = 9;
+    string default_value = 10;
+    bool is_deprecated = 11;
+    int32 version = 12;
+    string realm_id = 13;
+    string create_user_id = 14;
+    string create_time = 15;
+    string update_user_id = 16;
+    string update_time = 17;
+    string create_group_id = 18;
+}
+message __EnumValueInput {
+    string id = 1;
+    string name = 2;
+    string of_type_name = 3;
+    __TypeInput of_type = 4;
+    string description = 5;
+    string deprecation_reason = 6;
+    bool is_deprecated = 7;
+    int32 version = 8;
+    string realm_id = 9;
+    string create_user_id = 10;
+    string create_time = 11;
+    string update_user_id = 12;
+    string update_time = 13;
+    string create_group_id = 14;
+}
+message __DirectiveInput {
+    string name = 1;
+    int32 schema_id = 2;
+    string description = 3;
+    repeated __DirectiveLocation locations = 4;
+    repeated __InputValueInput args = 5;
+    bool on_operation = 6;
+    bool on_fragment = 7;
+    bool on_field = 8;
+    bool is_deprecated = 9;
+    int32 version = 10;
+    string realm_id = 11;
+    string create_user_id = 12;
+    string create_time = 13;
+    string update_user_id = 14;
+    string update_time = 15;
+    string create_group_id = 16;
+}
+message __DirectiveLocationsInput {
+    string id = 1;
+    string directive_name = 2;
+    __DirectiveLocation directive_location = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+}
+message UserInput {
+    string id = 1;
+    string login = 2;
+    string password = 3;
+    string name = 4;
+    int32 age = 5;
+    bool disable = 6;
+    Sex sex = 7;
+    int32 organization_id = 8;
+    OrganizationInput organization = 9;
+    repeated RoleInput roles = 10;
+    repeated string phones = 11;
+    repeated int32 test1 = 12;
+    repeated bool test2 = 13;
+    bool is_deprecated = 14;
+    int32 version = 15;
+    string realm_id = 16;
+    string create_user_id = 17;
+    string create_time = 18;
+    string update_user_id = 19;
+    string update_time = 20;
+    string create_group_id = 21;
+}
+message UserPhonesInput {
+    string id = 1;
+    int32 user_id = 2;
+    string phone = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+}
+message UserTest1Input {
+    string id = 1;
+    int32 user_id = 2;
+    int32 test1 = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+}
+message UserTest2Input {
+    string id = 1;
+    int32 user_id = 2;
+    bool test2 = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+}
+message UserRoleInput {
+    string id = 1;
+    int32 user_id = 2;
+    int32 role_id = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+}
+message RoleInput {
+    string id = 1;
+    string name = 2;
+    repeated RoleType type = 3;
+    repeated UserInput users = 4;
+    bool is_deprecated = 5;
+    int32 version = 6;
+    string realm_id = 7;
+    string create_user_id = 8;
+    string create_time = 9;
+    string update_user_id = 10;
+    string update_time = 11;
+    string create_group_id = 12;
+}
+message RoleRoleTypeInput {
+    string id = 1;
+    int32 role_id = 2;
+    RoleType type = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+}
+message OrganizationInput {
+    string id = 1;
+    int32 above_id = 2;
+    OrganizationInput above = 3;
+    repeated UserInput users = 4;
+    string name = 5;
+    bool is_deprecated = 6;
+    int32 version = 7;
+    string realm_id = 8;
+    string create_user_id = 9;
+    string create_time = 10;
+    string update_user_id = 11;
+    string update_time = 12;
+    string create_group_id = 13;
+}
+message __SchemaOrderBy {
+    Sort id = 1;
+    Sort query_type_name = 2;
+    Sort mutation_type_name = 3;
+    Sort subscription_type_name = 4;
+    Sort is_deprecated = 5;
+    Sort version = 6;
+    Sort realm_id = 7;
+    Sort create_user_id = 8;
+    Sort create_time = 9;
+    Sort update_user_id = 10;
+    Sort update_time = 11;
+    Sort create_group_id = 12;
+}
+message __TypeOrderBy {
+    Sort name = 1;
+    Sort schema_id = 2;
+    Sort description = 3;
+    Sort of_type_name = 4;
+    Sort is_deprecated = 5;
+    Sort version = 6;
+    Sort realm_id = 7;
+    Sort create_user_id = 8;
+    Sort create_time = 9;
+    Sort update_user_id = 10;
+    Sort update_time = 11;
+    Sort create_group_id = 12;
+}
+message __TypeInterfacesOrderBy {
+    Sort id = 1;
+    Sort type_name = 2;
+    Sort interface_name = 3;
+    Sort is_deprecated = 4;
+    Sort version = 5;
+    Sort realm_id = 6;
+    Sort create_user_id = 7;
+    Sort create_time = 8;
+    Sort update_user_id = 9;
+    Sort update_time = 10;
+    Sort create_group_id = 11;
+}
+message __TypePossibleTypesOrderBy {
+    Sort id = 1;
+    Sort type_name = 2;
+    Sort possible_type_name = 3;
+    Sort is_deprecated = 4;
+    Sort version = 5;
+    Sort realm_id = 6;
+    Sort create_user_id = 7;
+    Sort create_time = 8;
+    Sort update_user_id = 9;
+    Sort update_time = 10;
+    Sort create_group_id = 11;
+}
+message __FieldOrderBy {
+    Sort id = 1;
+    Sort name = 2;
+    Sort type_name = 3;
+    Sort of_type_name = 4;
+    Sort description = 5;
+    Sort deprecation_reason = 6;
+    Sort from = 7;
+    Sort to = 8;
+    Sort with_type = 9;
+    Sort with_from = 10;
+    Sort with_to = 11;
+    Sort is_deprecated = 12;
+    Sort version = 13;
+    Sort realm_id = 14;
+    Sort create_user_id = 15;
+    Sort create_time = 16;
+    Sort update_user_id = 17;
+    Sort update_time = 18;
+    Sort create_group_id = 19;
+}
+message __InputValueOrderBy {
+    Sort id = 1;
+    Sort name = 2;
+    Sort type_name = 3;
+    Sort of_type_name = 4;
+    Sort field_id = 5;
+    Sort directive_name = 6;
+    Sort description = 7;
+    Sort default_value = 8;
+    Sort is_deprecated = 9;
+    Sort version = 10;
+    Sort realm_id = 11;
+    Sort create_user_id = 12;
+    Sort create_time = 13;
+    Sort update_user_id = 14;
+    Sort update_time = 15;
+    Sort create_group_id = 16;
+}
+message __EnumValueOrderBy {
+    Sort id = 1;
+    Sort name = 2;
+    Sort of_type_name = 3;
+    Sort description = 4;
+    Sort deprecation_reason = 5;
+    Sort is_deprecated = 6;
+    Sort version = 7;
+    Sort realm_id = 8;
+    Sort create_user_id = 9;
+    Sort create_time = 10;
+    Sort update_user_id = 11;
+    Sort update_time = 12;
+    Sort create_group_id = 13;
+}
+message __DirectiveOrderBy {
+    Sort name = 1;
+    Sort schema_id = 2;
+    Sort description = 3;
+    Sort on_operation = 4;
+    Sort on_fragment = 5;
+    Sort on_field = 6;
+    Sort is_deprecated = 7;
+    Sort version = 8;
+    Sort realm_id = 9;
+    Sort create_user_id = 10;
+    Sort create_time = 11;
+    Sort update_user_id = 12;
+    Sort update_time = 13;
+    Sort create_group_id = 14;
+}
+message __DirectiveLocationsOrderBy {
+    Sort id = 1;
+    Sort directive_name = 2;
+    Sort is_deprecated = 3;
+    Sort version = 4;
+    Sort realm_id = 5;
+    Sort create_user_id = 6;
+    Sort create_time = 7;
+    Sort update_user_id = 8;
+    Sort update_time = 9;
+    Sort create_group_id = 10;
+}
+message UserOrderBy {
+    Sort id = 1;
+    Sort login = 2;
+    Sort password = 3;
+    Sort name = 4;
+    Sort age = 5;
+    Sort disable = 6;
+    Sort organization_id = 7;
+    Sort is_deprecated = 8;
+    Sort version = 9;
+    Sort realm_id = 10;
+    Sort create_user_id = 11;
+    Sort create_time = 12;
+    Sort update_user_id = 13;
+    Sort update_time = 14;
+    Sort create_group_id = 15;
+}
+message UserPhonesOrderBy {
+    Sort id = 1;
+    Sort user_id = 2;
+    Sort phone = 3;
+    Sort is_deprecated = 4;
+    Sort version = 5;
+    Sort realm_id = 6;
+    Sort create_user_id = 7;
+    Sort create_time = 8;
+    Sort update_user_id = 9;
+    Sort update_time = 10;
+    Sort create_group_id = 11;
+}
+message UserTest1OrderBy {
+    Sort id = 1;
+    Sort user_id = 2;
+    Sort test1 = 3;
+    Sort is_deprecated = 4;
+    Sort version = 5;
+    Sort realm_id = 6;
+    Sort create_user_id = 7;
+    Sort create_time = 8;
+    Sort update_user_id = 9;
+    Sort update_time = 10;
+    Sort create_group_id = 11;
+}
+message UserTest2OrderBy {
+    Sort id = 1;
+    Sort user_id = 2;
+    Sort test2 = 3;
+    Sort is_deprecated = 4;
+    Sort version = 5;
+    Sort realm_id = 6;
+    Sort create_user_id = 7;
+    Sort create_time = 8;
+    Sort update_user_id = 9;
+    Sort update_time = 10;
+    Sort create_group_id = 11;
+}
+message UserRoleOrderBy {
+    Sort id = 1;
+    Sort user_id = 2;
+    Sort role_id = 3;
+    Sort is_deprecated = 4;
+    Sort version = 5;
+    Sort realm_id = 6;
+    Sort create_user_id = 7;
+    Sort create_time = 8;
+    Sort update_user_id = 9;
+    Sort update_time = 10;
+    Sort create_group_id = 11;
+}
+message RoleOrderBy {
+    Sort id = 1;
+    Sort name = 2;
+    Sort is_deprecated = 3;
+    Sort version = 4;
+    Sort realm_id = 5;
+    Sort create_user_id = 6;
+    Sort create_time = 7;
+    Sort update_user_id = 8;
+    Sort update_time = 9;
+    Sort create_group_id = 10;
+}
+message RoleRoleTypeOrderBy {
+    Sort id = 1;
+    Sort role_id = 2;
+    Sort is_deprecated = 3;
+    Sort version = 4;
+    Sort realm_id = 5;
+    Sort create_user_id = 6;
+    Sort create_time = 7;
+    Sort update_user_id = 8;
+    Sort update_time = 9;
+    Sort create_group_id = 10;
+}
+message OrganizationOrderBy {
+    Sort id = 1;
+    Sort above_id = 2;
+    Sort name = 3;
+    Sort is_deprecated = 4;
+    Sort version = 5;
+    Sort realm_id = 6;
+    Sort create_user_id = 7;
+    Sort create_time = 8;
+    Sort update_user_id = 9;
+    Sort update_time = 10;
+    Sort create_group_id = 11;
+}
+message __SchemaExpression {
+    StringExpression id = 1;
+    StringExpression query_type_name = 2;
+    StringExpression mutation_type_name = 3;
+    StringExpression subscription_type_name = 4;
+    __TypeExpression types = 5;
+    __TypeExpression query_type = 6;
+    __TypeExpression mutation_type = 7;
+    __TypeExpression subscription_type = 8;
+    __DirectiveExpression directives = 9;
+    bool include_deprecated = 10;
+    IntExpression version = 11;
+    StringExpression realm_id = 12;
+    StringExpression create_user_id = 13;
+    StringExpression create_time = 14;
+    StringExpression update_user_id = 15;
+    StringExpression update_time = 16;
+    StringExpression create_group_id = 17;
+    StringExpression __typename = 18;
+    Conditional cond = 19;
+}
+message __TypeExpression {
+    StringExpression name = 1;
+    IntExpression schema_id = 2;
+    __TypeKindExpression kind = 3;
+    StringExpression description = 4;
+    __FieldExpression fields = 5;
+    __TypeExpression interfaces = 6;
+    __TypeExpression possible_types = 7;
+    __EnumValueExpression enum_values = 8;
+    __InputValueExpression input_fields = 9;
+    StringExpression of_type_name = 10;
+    __TypeExpression of_type = 11;
+    bool include_deprecated = 12;
+    IntExpression version = 13;
+    StringExpression realm_id = 14;
+    StringExpression create_user_id = 15;
+    StringExpression create_time = 16;
+    StringExpression update_user_id = 17;
+    StringExpression update_time = 18;
+    StringExpression create_group_id = 19;
+    StringExpression __typename = 20;
+    Conditional cond = 21;
+}
+message __TypeInterfacesExpression {
+    StringExpression id = 1;
+    StringExpression type_name = 2;
+    StringExpression interface_name = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    Conditional cond = 13;
+}
+message __TypePossibleTypesExpression {
+    StringExpression id = 1;
+    StringExpression type_name = 2;
+    StringExpression possible_type_name = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    Conditional cond = 13;
+}
+message __FieldExpression {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression type_name = 3;
+    StringExpression of_type_name = 4;
+    __TypeExpression of_type = 5;
+    StringExpression description = 6;
+    __InputValueExpression args = 7;
+    __TypeExpression type = 8;
+    StringExpression deprecation_reason = 9;
+    StringExpression from = 10;
+    StringExpression to = 11;
+    StringExpression with_type = 12;
+    StringExpression with_from = 13;
+    StringExpression with_to = 14;
+    bool include_deprecated = 15;
+    IntExpression version = 16;
+    StringExpression realm_id = 17;
+    StringExpression create_user_id = 18;
+    StringExpression create_time = 19;
+    StringExpression update_user_id = 20;
+    StringExpression update_time = 21;
+    StringExpression create_group_id = 22;
+    StringExpression __typename = 23;
+    Conditional cond = 24;
+}
+message __InputValueExpression {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression type_name = 3;
+    StringExpression of_type_name = 4;
+    __TypeExpression of_type = 5;
+    IntExpression field_id = 6;
+    StringExpression directive_name = 7;
+    StringExpression description = 8;
+    __TypeExpression type = 9;
+    StringExpression default_value = 10;
+    bool include_deprecated = 11;
+    IntExpression version = 12;
+    StringExpression realm_id = 13;
+    StringExpression create_user_id = 14;
+    StringExpression create_time = 15;
+    StringExpression update_user_id = 16;
+    StringExpression update_time = 17;
+    StringExpression create_group_id = 18;
+    StringExpression __typename = 19;
+    Conditional cond = 20;
+}
+message __EnumValueExpression {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression of_type_name = 3;
+    __TypeExpression of_type = 4;
+    StringExpression description = 5;
+    StringExpression deprecation_reason = 6;
+    bool include_deprecated = 7;
+    IntExpression version = 8;
+    StringExpression realm_id = 9;
+    StringExpression create_user_id = 10;
+    StringExpression create_time = 11;
+    StringExpression update_user_id = 12;
+    StringExpression update_time = 13;
+    StringExpression create_group_id = 14;
+    StringExpression __typename = 15;
+    Conditional cond = 16;
+}
+message __DirectiveExpression {
+    StringExpression name = 1;
+    IntExpression schema_id = 2;
+    StringExpression description = 3;
+    __DirectiveLocationExpression locations = 4;
+    __InputValueExpression args = 5;
+    BooleanExpression on_operation = 6;
+    BooleanExpression on_fragment = 7;
+    BooleanExpression on_field = 8;
+    bool include_deprecated = 9;
+    IntExpression version = 10;
+    StringExpression realm_id = 11;
+    StringExpression create_user_id = 12;
+    StringExpression create_time = 13;
+    StringExpression update_user_id = 14;
+    StringExpression update_time = 15;
+    StringExpression create_group_id = 16;
+    StringExpression __typename = 17;
+    Conditional cond = 18;
+}
+message __DirectiveLocationsExpression {
+    StringExpression id = 1;
+    StringExpression directive_name = 2;
+    __DirectiveLocationExpression directive_location = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    Conditional cond = 13;
+}
+message UserExpression {
+    StringExpression id = 1;
+    StringExpression login = 2;
+    StringExpression password = 3;
+    StringExpression name = 4;
+    IntExpression age = 5;
+    BooleanExpression disable = 6;
+    SexExpression sex = 7;
+    IntExpression organization_id = 8;
+    OrganizationExpression organization = 9;
+    RoleExpression roles = 10;
+    StringExpression phones = 11;
+    IntExpression test1 = 12;
+    BooleanExpression test2 = 13;
+    bool include_deprecated = 14;
+    IntExpression version = 15;
+    StringExpression realm_id = 16;
+    StringExpression create_user_id = 17;
+    StringExpression create_time = 18;
+    StringExpression update_user_id = 19;
+    StringExpression update_time = 20;
+    StringExpression create_group_id = 21;
+    StringExpression __typename = 22;
+    Conditional cond = 23;
+}
+message UserPhonesExpression {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    StringExpression phone = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    Conditional cond = 13;
+}
+message UserTest1Expression {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    IntExpression test1 = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    Conditional cond = 13;
+}
+message UserTest2Expression {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    BooleanExpression test2 = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    Conditional cond = 13;
+}
+message UserRoleExpression {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    IntExpression role_id = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    Conditional cond = 13;
+}
+message RoleExpression {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    RoleTypeExpression type = 3;
+    UserExpression users = 4;
+    bool include_deprecated = 5;
+    IntExpression version = 6;
+    StringExpression realm_id = 7;
+    StringExpression create_user_id = 8;
+    StringExpression create_time = 9;
+    StringExpression update_user_id = 10;
+    StringExpression update_time = 11;
+    StringExpression create_group_id = 12;
+    StringExpression __typename = 13;
+    Conditional cond = 14;
+}
+message RoleRoleTypeExpression {
+    StringExpression id = 1;
+    IntExpression role_id = 2;
+    RoleTypeExpression type = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    Conditional cond = 13;
+}
+message OrganizationExpression {
+    StringExpression id = 1;
+    IntExpression above_id = 2;
+    OrganizationExpression above = 3;
+    UserExpression users = 4;
+    StringExpression name = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression __typename = 14;
+    Conditional cond = 15;
+}
+message OperatorExpression {
+    Operator opr = 1;
+    Operator val = 2;
+}
+message ConditionalExpression {
+    Operator opr = 1;
+    Conditional val = 2;
+}
+message SortExpression {
+    Operator opr = 1;
+    Sort val = 2;
+}
+message FunctionExpression {
+    Operator opr = 1;
+    Function val = 2;
+}
+message __TypeKindExpression {
+    Operator opr = 1;
+    __TypeKind val = 2;
+}
+message __DirectiveLocationExpression {
+    Operator opr = 1;
+    __DirectiveLocation val = 2;
+}
+message SexExpression {
+    Operator opr = 1;
+    Sex val = 2;
+}
+message RoleTypeExpression {
+    Operator opr = 1;
+    RoleType val = 2;
+}
+enum Operator {
+    EQ = 0;
+    NEQ = 1;
+    LK = 2;
+    NLK = 3;
+    GT = 4;
+    NLTE = 5;
+    GTE = 6;
+    NLT = 7;
+    LT = 8;
+    NGTE = 9;
+    LTE = 10;
+    NGT = 11;
+    NIL = 12;
+    NNIL = 13;
+    IN = 14;
+    NIN = 15;
+    BT = 16;
+}
+enum Conditional {
+    AND = 0;
+}
+enum Sort {
+    ASC = 0;
+}
+enum Function {
+    COUNT = 0;
+    MAX = 1;
+    MIN = 2;
+    SUM = 3;
+}
+enum __TypeKind {
+    SCALAR = 0;
+    OBJECT = 1;
+    INTERFACE = 2;
+    UNION = 3;
+    ENUM = 4;
+    INPUT_OBJECT = 5;
+    LIST = 6;
+}
+enum __DirectiveLocation {
+    QUERY = 0;
+    MUTATION = 1;
+    SUBSCRIPTION = 2;
+    FIELD = 3;
+    FRAGMENT_DEFINITION = 4;
+    FRAGMENT_SPREAD = 5;
+    INLINE_FRAGMENT = 6;
+    SCHEMA = 7;
+    SCALAR = 8;
+    OBJECT = 9;
+    FIELD_DEFINITION = 10;
+    ARGUMENT_DEFINITION = 11;
+    INTERFACE = 12;
+    UNION = 13;
+    ENUM = 14;
+    ENUM_VALUE = 15;
+    INPUT_OBJECT = 16;
+}
+enum Sex {
+    MAN = 0;
+}
+enum RoleType {
+    ADMIN = 0;
+    USER = 1;
+}
+message Query__SchemaRequest {
+    StringExpression id = 1;
+    StringExpression query_type_name = 2;
+    StringExpression mutation_type_name = 3;
+    StringExpression subscription_type_name = 4;
+    __TypeExpression types = 5;
+    __TypeExpression query_type = 6;
+    __TypeExpression mutation_type = 7;
+    __TypeExpression subscription_type = 8;
+    __DirectiveExpression directives = 9;
+    bool include_deprecated = 10;
+    IntExpression version = 11;
+    StringExpression realm_id = 12;
+    StringExpression create_user_id = 13;
+    StringExpression create_time = 14;
+    StringExpression update_user_id = 15;
+    StringExpression update_time = 16;
+    StringExpression create_group_id = 17;
+    StringExpression __typename = 18;
+    __SchemaExpression where = 19;
+}
+message Query__SchemaListRequest {
+    StringExpression id = 1;
+    StringExpression query_type_name = 2;
+    StringExpression mutation_type_name = 3;
+    StringExpression subscription_type_name = 4;
+    __TypeExpression types = 5;
+    __TypeExpression query_type = 6;
+    __TypeExpression mutation_type = 7;
+    __TypeExpression subscription_type = 8;
+    __DirectiveExpression directives = 9;
+    bool include_deprecated = 10;
+    IntExpression version = 11;
+    StringExpression realm_id = 12;
+    StringExpression create_user_id = 13;
+    StringExpression create_time = 14;
+    StringExpression update_user_id = 15;
+    StringExpression update_time = 16;
+    StringExpression create_group_id = 17;
+    StringExpression __typename = 18;
+    __SchemaOrderBy order_by = 19;
+    repeated string group_by = 20;
+    Conditional cond = 21;
+    int32 first = 22;
+    int32 last = 23;
+    int32 offset = 24;
+    string after = 25;
+}
+message Query__SchemaConnectionRequest {
+    StringExpression id = 1;
+    StringExpression query_type_name = 2;
+    StringExpression mutation_type_name = 3;
+    StringExpression subscription_type_name = 4;
+    __TypeExpression types = 5;
+    __TypeExpression query_type = 6;
+    __TypeExpression mutation_type = 7;
+    __TypeExpression subscription_type = 8;
+    __DirectiveExpression directives = 9;
+    bool include_deprecated = 10;
+    IntExpression version = 11;
+    StringExpression realm_id = 12;
+    StringExpression create_user_id = 13;
+    StringExpression create_time = 14;
+    StringExpression update_user_id = 15;
+    StringExpression update_time = 16;
+    StringExpression create_group_id = 17;
+    StringExpression __typename = 18;
+    __SchemaOrderBy order_by = 19;
+    repeated string group_by = 20;
+    Conditional cond = 21;
+    repeated __SchemaExpression exs = 22;
+    int32 first = 23;
+    int32 last = 24;
+    int32 offset = 25;
+    string after = 26;
+}
+message Query__TypeRequest {
+    StringExpression name = 1;
+    IntExpression schema_id = 2;
+    __TypeKindExpression kind = 3;
+    StringExpression description = 4;
+    __FieldExpression fields = 5;
+    __TypeExpression interfaces = 6;
+    __TypeExpression possible_types = 7;
+    __EnumValueExpression enum_values = 8;
+    __InputValueExpression input_fields = 9;
+    StringExpression of_type_name = 10;
+    __TypeExpression of_type = 11;
+    bool include_deprecated = 12;
+    IntExpression version = 13;
+    StringExpression realm_id = 14;
+    StringExpression create_user_id = 15;
+    StringExpression create_time = 16;
+    StringExpression update_user_id = 17;
+    StringExpression update_time = 18;
+    StringExpression create_group_id = 19;
+    StringExpression __typename = 20;
+    __TypeExpression where = 21;
+}
+message Query__TypeListRequest {
+    StringExpression name = 1;
+    IntExpression schema_id = 2;
+    __TypeKindExpression kind = 3;
+    StringExpression description = 4;
+    __FieldExpression fields = 5;
+    __TypeExpression interfaces = 6;
+    __TypeExpression possible_types = 7;
+    __EnumValueExpression enum_values = 8;
+    __InputValueExpression input_fields = 9;
+    StringExpression of_type_name = 10;
+    __TypeExpression of_type = 11;
+    bool include_deprecated = 12;
+    IntExpression version = 13;
+    StringExpression realm_id = 14;
+    StringExpression create_user_id = 15;
+    StringExpression create_time = 16;
+    StringExpression update_user_id = 17;
+    StringExpression update_time = 18;
+    StringExpression create_group_id = 19;
+    StringExpression __typename = 20;
+    __TypeOrderBy order_by = 21;
+    repeated string group_by = 22;
+    Conditional cond = 23;
+    int32 first = 24;
+    int32 last = 25;
+    int32 offset = 26;
+    string after = 27;
+}
+message Query__TypeConnectionRequest {
+    StringExpression name = 1;
+    IntExpression schema_id = 2;
+    __TypeKindExpression kind = 3;
+    StringExpression description = 4;
+    __FieldExpression fields = 5;
+    __TypeExpression interfaces = 6;
+    __TypeExpression possible_types = 7;
+    __EnumValueExpression enum_values = 8;
+    __InputValueExpression input_fields = 9;
+    StringExpression of_type_name = 10;
+    __TypeExpression of_type = 11;
+    bool include_deprecated = 12;
+    IntExpression version = 13;
+    StringExpression realm_id = 14;
+    StringExpression create_user_id = 15;
+    StringExpression create_time = 16;
+    StringExpression update_user_id = 17;
+    StringExpression update_time = 18;
+    StringExpression create_group_id = 19;
+    StringExpression __typename = 20;
+    __TypeOrderBy order_by = 21;
+    repeated string group_by = 22;
+    Conditional cond = 23;
+    repeated __TypeExpression exs = 24;
+    int32 first = 25;
+    int32 last = 26;
+    int32 offset = 27;
+    string after = 28;
+}
+message Query__TypeInterfacesRequest {
+    StringExpression id = 1;
+    StringExpression type_name = 2;
+    StringExpression interface_name = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __TypeInterfacesExpression where = 13;
+}
+message Query__TypeInterfacesListRequest {
+    StringExpression id = 1;
+    StringExpression type_name = 2;
+    StringExpression interface_name = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __TypeInterfacesOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    int32 first = 16;
+    int32 last = 17;
+    int32 offset = 18;
+    string after = 19;
+}
+message Query__TypeInterfacesConnectionRequest {
+    StringExpression id = 1;
+    StringExpression type_name = 2;
+    StringExpression interface_name = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __TypeInterfacesOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    repeated __TypeInterfacesExpression exs = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message Query__TypePossibleTypesRequest {
+    StringExpression id = 1;
+    StringExpression type_name = 2;
+    StringExpression possible_type_name = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __TypePossibleTypesExpression where = 13;
+}
+message Query__TypePossibleTypesListRequest {
+    StringExpression id = 1;
+    StringExpression type_name = 2;
+    StringExpression possible_type_name = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __TypePossibleTypesOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    int32 first = 16;
+    int32 last = 17;
+    int32 offset = 18;
+    string after = 19;
+}
+message Query__TypePossibleTypesConnectionRequest {
+    StringExpression id = 1;
+    StringExpression type_name = 2;
+    StringExpression possible_type_name = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __TypePossibleTypesOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    repeated __TypePossibleTypesExpression exs = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message Query__FieldRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression type_name = 3;
+    StringExpression of_type_name = 4;
+    __TypeExpression of_type = 5;
+    StringExpression description = 6;
+    __InputValueExpression args = 7;
+    __TypeExpression type = 8;
+    StringExpression deprecation_reason = 9;
+    StringExpression from = 10;
+    StringExpression to = 11;
+    StringExpression with_type = 12;
+    StringExpression with_from = 13;
+    StringExpression with_to = 14;
+    bool include_deprecated = 15;
+    IntExpression version = 16;
+    StringExpression realm_id = 17;
+    StringExpression create_user_id = 18;
+    StringExpression create_time = 19;
+    StringExpression update_user_id = 20;
+    StringExpression update_time = 21;
+    StringExpression create_group_id = 22;
+    StringExpression __typename = 23;
+    __FieldExpression where = 24;
+}
+message Query__FieldListRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression type_name = 3;
+    StringExpression of_type_name = 4;
+    __TypeExpression of_type = 5;
+    StringExpression description = 6;
+    __InputValueExpression args = 7;
+    __TypeExpression type = 8;
+    StringExpression deprecation_reason = 9;
+    StringExpression from = 10;
+    StringExpression to = 11;
+    StringExpression with_type = 12;
+    StringExpression with_from = 13;
+    StringExpression with_to = 14;
+    bool include_deprecated = 15;
+    IntExpression version = 16;
+    StringExpression realm_id = 17;
+    StringExpression create_user_id = 18;
+    StringExpression create_time = 19;
+    StringExpression update_user_id = 20;
+    StringExpression update_time = 21;
+    StringExpression create_group_id = 22;
+    StringExpression __typename = 23;
+    __FieldOrderBy order_by = 24;
+    repeated string group_by = 25;
+    Conditional cond = 26;
+    int32 first = 27;
+    int32 last = 28;
+    int32 offset = 29;
+    string after = 30;
+}
+message Query__FieldConnectionRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression type_name = 3;
+    StringExpression of_type_name = 4;
+    __TypeExpression of_type = 5;
+    StringExpression description = 6;
+    __InputValueExpression args = 7;
+    __TypeExpression type = 8;
+    StringExpression deprecation_reason = 9;
+    StringExpression from = 10;
+    StringExpression to = 11;
+    StringExpression with_type = 12;
+    StringExpression with_from = 13;
+    StringExpression with_to = 14;
+    bool include_deprecated = 15;
+    IntExpression version = 16;
+    StringExpression realm_id = 17;
+    StringExpression create_user_id = 18;
+    StringExpression create_time = 19;
+    StringExpression update_user_id = 20;
+    StringExpression update_time = 21;
+    StringExpression create_group_id = 22;
+    StringExpression __typename = 23;
+    __FieldOrderBy order_by = 24;
+    repeated string group_by = 25;
+    Conditional cond = 26;
+    repeated __FieldExpression exs = 27;
+    int32 first = 28;
+    int32 last = 29;
+    int32 offset = 30;
+    string after = 31;
+}
+message Query__InputValueRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression type_name = 3;
+    StringExpression of_type_name = 4;
+    __TypeExpression of_type = 5;
+    IntExpression field_id = 6;
+    StringExpression directive_name = 7;
+    StringExpression description = 8;
+    __TypeExpression type = 9;
+    StringExpression default_value = 10;
+    bool include_deprecated = 11;
+    IntExpression version = 12;
+    StringExpression realm_id = 13;
+    StringExpression create_user_id = 14;
+    StringExpression create_time = 15;
+    StringExpression update_user_id = 16;
+    StringExpression update_time = 17;
+    StringExpression create_group_id = 18;
+    StringExpression __typename = 19;
+    __InputValueExpression where = 20;
+}
+message Query__InputValueListRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression type_name = 3;
+    StringExpression of_type_name = 4;
+    __TypeExpression of_type = 5;
+    IntExpression field_id = 6;
+    StringExpression directive_name = 7;
+    StringExpression description = 8;
+    __TypeExpression type = 9;
+    StringExpression default_value = 10;
+    bool include_deprecated = 11;
+    IntExpression version = 12;
+    StringExpression realm_id = 13;
+    StringExpression create_user_id = 14;
+    StringExpression create_time = 15;
+    StringExpression update_user_id = 16;
+    StringExpression update_time = 17;
+    StringExpression create_group_id = 18;
+    StringExpression __typename = 19;
+    __InputValueOrderBy order_by = 20;
+    repeated string group_by = 21;
+    Conditional cond = 22;
+    int32 first = 23;
+    int32 last = 24;
+    int32 offset = 25;
+    string after = 26;
+}
+message Query__InputValueConnectionRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression type_name = 3;
+    StringExpression of_type_name = 4;
+    __TypeExpression of_type = 5;
+    IntExpression field_id = 6;
+    StringExpression directive_name = 7;
+    StringExpression description = 8;
+    __TypeExpression type = 9;
+    StringExpression default_value = 10;
+    bool include_deprecated = 11;
+    IntExpression version = 12;
+    StringExpression realm_id = 13;
+    StringExpression create_user_id = 14;
+    StringExpression create_time = 15;
+    StringExpression update_user_id = 16;
+    StringExpression update_time = 17;
+    StringExpression create_group_id = 18;
+    StringExpression __typename = 19;
+    __InputValueOrderBy order_by = 20;
+    repeated string group_by = 21;
+    Conditional cond = 22;
+    repeated __InputValueExpression exs = 23;
+    int32 first = 24;
+    int32 last = 25;
+    int32 offset = 26;
+    string after = 27;
+}
+message Query__EnumValueRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression of_type_name = 3;
+    __TypeExpression of_type = 4;
+    StringExpression description = 5;
+    StringExpression deprecation_reason = 6;
+    bool include_deprecated = 7;
+    IntExpression version = 8;
+    StringExpression realm_id = 9;
+    StringExpression create_user_id = 10;
+    StringExpression create_time = 11;
+    StringExpression update_user_id = 12;
+    StringExpression update_time = 13;
+    StringExpression create_group_id = 14;
+    StringExpression __typename = 15;
+    __EnumValueExpression where = 16;
+}
+message Query__EnumValueListRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression of_type_name = 3;
+    __TypeExpression of_type = 4;
+    StringExpression description = 5;
+    StringExpression deprecation_reason = 6;
+    bool include_deprecated = 7;
+    IntExpression version = 8;
+    StringExpression realm_id = 9;
+    StringExpression create_user_id = 10;
+    StringExpression create_time = 11;
+    StringExpression update_user_id = 12;
+    StringExpression update_time = 13;
+    StringExpression create_group_id = 14;
+    StringExpression __typename = 15;
+    __EnumValueOrderBy order_by = 16;
+    repeated string group_by = 17;
+    Conditional cond = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message Query__EnumValueConnectionRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    StringExpression of_type_name = 3;
+    __TypeExpression of_type = 4;
+    StringExpression description = 5;
+    StringExpression deprecation_reason = 6;
+    bool include_deprecated = 7;
+    IntExpression version = 8;
+    StringExpression realm_id = 9;
+    StringExpression create_user_id = 10;
+    StringExpression create_time = 11;
+    StringExpression update_user_id = 12;
+    StringExpression update_time = 13;
+    StringExpression create_group_id = 14;
+    StringExpression __typename = 15;
+    __EnumValueOrderBy order_by = 16;
+    repeated string group_by = 17;
+    Conditional cond = 18;
+    repeated __EnumValueExpression exs = 19;
+    int32 first = 20;
+    int32 last = 21;
+    int32 offset = 22;
+    string after = 23;
+}
+message Query__DirectiveRequest {
+    StringExpression name = 1;
+    IntExpression schema_id = 2;
+    StringExpression description = 3;
+    __DirectiveLocationExpression locations = 4;
+    __InputValueExpression args = 5;
+    BooleanExpression on_operation = 6;
+    BooleanExpression on_fragment = 7;
+    BooleanExpression on_field = 8;
+    bool include_deprecated = 9;
+    IntExpression version = 10;
+    StringExpression realm_id = 11;
+    StringExpression create_user_id = 12;
+    StringExpression create_time = 13;
+    StringExpression update_user_id = 14;
+    StringExpression update_time = 15;
+    StringExpression create_group_id = 16;
+    StringExpression __typename = 17;
+    __DirectiveExpression where = 18;
+}
+message Query__DirectiveListRequest {
+    StringExpression name = 1;
+    IntExpression schema_id = 2;
+    StringExpression description = 3;
+    __DirectiveLocationExpression locations = 4;
+    __InputValueExpression args = 5;
+    BooleanExpression on_operation = 6;
+    BooleanExpression on_fragment = 7;
+    BooleanExpression on_field = 8;
+    bool include_deprecated = 9;
+    IntExpression version = 10;
+    StringExpression realm_id = 11;
+    StringExpression create_user_id = 12;
+    StringExpression create_time = 13;
+    StringExpression update_user_id = 14;
+    StringExpression update_time = 15;
+    StringExpression create_group_id = 16;
+    StringExpression __typename = 17;
+    __DirectiveOrderBy order_by = 18;
+    repeated string group_by = 19;
+    Conditional cond = 20;
+    int32 first = 21;
+    int32 last = 22;
+    int32 offset = 23;
+    string after = 24;
+}
+message Query__DirectiveConnectionRequest {
+    StringExpression name = 1;
+    IntExpression schema_id = 2;
+    StringExpression description = 3;
+    __DirectiveLocationExpression locations = 4;
+    __InputValueExpression args = 5;
+    BooleanExpression on_operation = 6;
+    BooleanExpression on_fragment = 7;
+    BooleanExpression on_field = 8;
+    bool include_deprecated = 9;
+    IntExpression version = 10;
+    StringExpression realm_id = 11;
+    StringExpression create_user_id = 12;
+    StringExpression create_time = 13;
+    StringExpression update_user_id = 14;
+    StringExpression update_time = 15;
+    StringExpression create_group_id = 16;
+    StringExpression __typename = 17;
+    __DirectiveOrderBy order_by = 18;
+    repeated string group_by = 19;
+    Conditional cond = 20;
+    repeated __DirectiveExpression exs = 21;
+    int32 first = 22;
+    int32 last = 23;
+    int32 offset = 24;
+    string after = 25;
+}
+message Query__DirectiveLocationsRequest {
+    StringExpression id = 1;
+    StringExpression directive_name = 2;
+    __DirectiveLocationExpression directive_location = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __DirectiveLocationsExpression where = 13;
+}
+message Query__DirectiveLocationsListRequest {
+    StringExpression id = 1;
+    StringExpression directive_name = 2;
+    __DirectiveLocationExpression directive_location = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __DirectiveLocationsOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    int32 first = 16;
+    int32 last = 17;
+    int32 offset = 18;
+    string after = 19;
+}
+message Query__DirectiveLocationsConnectionRequest {
+    StringExpression id = 1;
+    StringExpression directive_name = 2;
+    __DirectiveLocationExpression directive_location = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    __DirectiveLocationsOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    repeated __DirectiveLocationsExpression exs = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message QueryUserRequest {
+    StringExpression id = 1;
+    StringExpression login = 2;
+    StringExpression password = 3;
+    StringExpression name = 4;
+    IntExpression age = 5;
+    BooleanExpression disable = 6;
+    SexExpression sex = 7;
+    IntExpression organization_id = 8;
+    OrganizationExpression organization = 9;
+    RoleExpression roles = 10;
+    StringExpression phones = 11;
+    IntExpression test1 = 12;
+    BooleanExpression test2 = 13;
+    bool include_deprecated = 14;
+    IntExpression version = 15;
+    StringExpression realm_id = 16;
+    StringExpression create_user_id = 17;
+    StringExpression create_time = 18;
+    StringExpression update_user_id = 19;
+    StringExpression update_time = 20;
+    StringExpression create_group_id = 21;
+    StringExpression __typename = 22;
+    UserExpression where = 23;
+}
+message QueryUserListRequest {
+    StringExpression id = 1;
+    StringExpression login = 2;
+    StringExpression password = 3;
+    StringExpression name = 4;
+    IntExpression age = 5;
+    BooleanExpression disable = 6;
+    SexExpression sex = 7;
+    IntExpression organization_id = 8;
+    OrganizationExpression organization = 9;
+    RoleExpression roles = 10;
+    StringExpression phones = 11;
+    IntExpression test1 = 12;
+    BooleanExpression test2 = 13;
+    bool include_deprecated = 14;
+    IntExpression version = 15;
+    StringExpression realm_id = 16;
+    StringExpression create_user_id = 17;
+    StringExpression create_time = 18;
+    StringExpression update_user_id = 19;
+    StringExpression update_time = 20;
+    StringExpression create_group_id = 21;
+    StringExpression __typename = 22;
+    UserOrderBy order_by = 23;
+    repeated string group_by = 24;
+    Conditional cond = 25;
+    int32 first = 26;
+    int32 last = 27;
+    int32 offset = 28;
+    string after = 29;
+}
+message QueryUserConnectionRequest {
+    StringExpression id = 1;
+    StringExpression login = 2;
+    StringExpression password = 3;
+    StringExpression name = 4;
+    IntExpression age = 5;
+    BooleanExpression disable = 6;
+    SexExpression sex = 7;
+    IntExpression organization_id = 8;
+    OrganizationExpression organization = 9;
+    RoleExpression roles = 10;
+    StringExpression phones = 11;
+    IntExpression test1 = 12;
+    BooleanExpression test2 = 13;
+    bool include_deprecated = 14;
+    IntExpression version = 15;
+    StringExpression realm_id = 16;
+    StringExpression create_user_id = 17;
+    StringExpression create_time = 18;
+    StringExpression update_user_id = 19;
+    StringExpression update_time = 20;
+    StringExpression create_group_id = 21;
+    StringExpression __typename = 22;
+    UserOrderBy order_by = 23;
+    repeated string group_by = 24;
+    Conditional cond = 25;
+    repeated UserExpression exs = 26;
+    int32 first = 27;
+    int32 last = 28;
+    int32 offset = 29;
+    string after = 30;
+}
+message QueryUserPhonesRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    StringExpression phone = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserPhonesExpression where = 13;
+}
+message QueryUserPhonesListRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    StringExpression phone = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserPhonesOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    int32 first = 16;
+    int32 last = 17;
+    int32 offset = 18;
+    string after = 19;
+}
+message QueryUserPhonesConnectionRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    StringExpression phone = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserPhonesOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    repeated UserPhonesExpression exs = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message QueryUserTest1Request {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    IntExpression test1 = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserTest1Expression where = 13;
+}
+message QueryUserTest1ListRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    IntExpression test1 = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserTest1OrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    int32 first = 16;
+    int32 last = 17;
+    int32 offset = 18;
+    string after = 19;
+}
+message QueryUserTest1ConnectionRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    IntExpression test1 = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserTest1OrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    repeated UserTest1Expression exs = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message QueryUserTest2Request {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    BooleanExpression test2 = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserTest2Expression where = 13;
+}
+message QueryUserTest2ListRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    BooleanExpression test2 = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserTest2OrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    int32 first = 16;
+    int32 last = 17;
+    int32 offset = 18;
+    string after = 19;
+}
+message QueryUserTest2ConnectionRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    BooleanExpression test2 = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserTest2OrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    repeated UserTest2Expression exs = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message QueryUserRoleRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    IntExpression role_id = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserRoleExpression where = 13;
+}
+message QueryUserRoleListRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    IntExpression role_id = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserRoleOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    int32 first = 16;
+    int32 last = 17;
+    int32 offset = 18;
+    string after = 19;
+}
+message QueryUserRoleConnectionRequest {
+    StringExpression id = 1;
+    IntExpression user_id = 2;
+    IntExpression role_id = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    UserRoleOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    repeated UserRoleExpression exs = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message QueryRoleRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    RoleTypeExpression type = 3;
+    UserExpression users = 4;
+    bool include_deprecated = 5;
+    IntExpression version = 6;
+    StringExpression realm_id = 7;
+    StringExpression create_user_id = 8;
+    StringExpression create_time = 9;
+    StringExpression update_user_id = 10;
+    StringExpression update_time = 11;
+    StringExpression create_group_id = 12;
+    StringExpression __typename = 13;
+    RoleExpression where = 14;
+}
+message QueryRoleListRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    RoleTypeExpression type = 3;
+    UserExpression users = 4;
+    bool include_deprecated = 5;
+    IntExpression version = 6;
+    StringExpression realm_id = 7;
+    StringExpression create_user_id = 8;
+    StringExpression create_time = 9;
+    StringExpression update_user_id = 10;
+    StringExpression update_time = 11;
+    StringExpression create_group_id = 12;
+    StringExpression __typename = 13;
+    RoleOrderBy order_by = 14;
+    repeated string group_by = 15;
+    Conditional cond = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message QueryRoleConnectionRequest {
+    StringExpression id = 1;
+    StringExpression name = 2;
+    RoleTypeExpression type = 3;
+    UserExpression users = 4;
+    bool include_deprecated = 5;
+    IntExpression version = 6;
+    StringExpression realm_id = 7;
+    StringExpression create_user_id = 8;
+    StringExpression create_time = 9;
+    StringExpression update_user_id = 10;
+    StringExpression update_time = 11;
+    StringExpression create_group_id = 12;
+    StringExpression __typename = 13;
+    RoleOrderBy order_by = 14;
+    repeated string group_by = 15;
+    Conditional cond = 16;
+    repeated RoleExpression exs = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryRoleRoleTypeRequest {
+    StringExpression id = 1;
+    IntExpression role_id = 2;
+    RoleTypeExpression type = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    RoleRoleTypeExpression where = 13;
+}
+message QueryRoleRoleTypeListRequest {
+    StringExpression id = 1;
+    IntExpression role_id = 2;
+    RoleTypeExpression type = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    RoleRoleTypeOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    int32 first = 16;
+    int32 last = 17;
+    int32 offset = 18;
+    string after = 19;
+}
+message QueryRoleRoleTypeConnectionRequest {
+    StringExpression id = 1;
+    IntExpression role_id = 2;
+    RoleTypeExpression type = 3;
+    bool include_deprecated = 4;
+    IntExpression version = 5;
+    StringExpression realm_id = 6;
+    StringExpression create_user_id = 7;
+    StringExpression create_time = 8;
+    StringExpression update_user_id = 9;
+    StringExpression update_time = 10;
+    StringExpression create_group_id = 11;
+    StringExpression __typename = 12;
+    RoleRoleTypeOrderBy order_by = 13;
+    repeated string group_by = 14;
+    Conditional cond = 15;
+    repeated RoleRoleTypeExpression exs = 16;
+    int32 first = 17;
+    int32 last = 18;
+    int32 offset = 19;
+    string after = 20;
+}
+message QueryOrganizationRequest {
+    StringExpression id = 1;
+    IntExpression above_id = 2;
+    OrganizationExpression above = 3;
+    UserExpression users = 4;
+    StringExpression name = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression __typename = 14;
+    OrganizationExpression where = 15;
+}
+message QueryOrganizationListRequest {
+    StringExpression id = 1;
+    IntExpression above_id = 2;
+    OrganizationExpression above = 3;
+    UserExpression users = 4;
+    StringExpression name = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression __typename = 14;
+    OrganizationOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryOrganizationConnectionRequest {
+    StringExpression id = 1;
+    IntExpression above_id = 2;
+    OrganizationExpression above = 3;
+    UserExpression users = 4;
+    StringExpression name = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression __typename = 14;
+    OrganizationOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    repeated OrganizationExpression exs = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryIsDeprecatedRequest {
+}
+message QueryVersionRequest {
+}
+message QueryRealmIdRequest {
+}
+message QueryCreateUserIdRequest {
+}
+message QueryCreateTimeRequest {
+}
+message QueryUpdateUserIdRequest {
+}
+message QueryUpdateTimeRequest {
+}
+message QueryCreateGroupIdRequest {
+}
+message QueryGetUserDetailRequest {
+}
+message QueryGetUserDetail6Request {
+}
+message QueryGetOrgLevelRequest {
+}
+message QueryGetRoleDisable2Request {
+}
+message QueryGetOrgLevel5Request {
+}
+message QueryGetUserByOrg2Request {
+}
+message QueryGetParent2Request {
+}
+message QueryFindRole2Request {
+    string name = 1;
+    int32 type = 2;
+}
+message Query__SchemaResponse {
+    __Schema __schema = 1;
+}
+message Query__SchemaListResponse {
+    repeated __Schema __schema_list = 1;
+}
+message Query__SchemaConnectionResponse {
+    __SchemaConnection __schema_connection = 1;
+}
+message Query__TypeResponse {
+    __Type __type = 1;
+}
+message Query__TypeListResponse {
+    repeated __Type __type_list = 1;
+}
+message Query__TypeConnectionResponse {
+    __TypeConnection __type_connection = 1;
+}
+message Query__TypeInterfacesResponse {
+    __TypeInterfaces __type_interfaces = 1;
+}
+message Query__TypeInterfacesListResponse {
+    repeated __TypeInterfaces __type_interfaces_list = 1;
+}
+message Query__TypeInterfacesConnectionResponse {
+    __TypeInterfacesConnection __type_interfaces_connection = 1;
+}
+message Query__TypePossibleTypesResponse {
+    __TypePossibleTypes __type_possible_types = 1;
+}
+message Query__TypePossibleTypesListResponse {
+    repeated __TypePossibleTypes __type_possible_types_list = 1;
+}
+message Query__TypePossibleTypesConnectionResponse {
+    __TypePossibleTypesConnection __type_possible_types_connection = 1;
+}
+message Query__FieldResponse {
+    __Field __field = 1;
+}
+message Query__FieldListResponse {
+    repeated __Field __field_list = 1;
+}
+message Query__FieldConnectionResponse {
+    __FieldConnection __field_connection = 1;
+}
+message Query__InputValueResponse {
+    __InputValue __input_value = 1;
+}
+message Query__InputValueListResponse {
+    repeated __InputValue __input_value_list = 1;
+}
+message Query__InputValueConnectionResponse {
+    __InputValueConnection __input_value_connection = 1;
+}
+message Query__EnumValueResponse {
+    __EnumValue __enum_value = 1;
+}
+message Query__EnumValueListResponse {
+    repeated __EnumValue __enum_value_list = 1;
+}
+message Query__EnumValueConnectionResponse {
+    __EnumValueConnection __enum_value_connection = 1;
+}
+message Query__DirectiveResponse {
+    __Directive __directive = 1;
+}
+message Query__DirectiveListResponse {
+    repeated __Directive __directive_list = 1;
+}
+message Query__DirectiveConnectionResponse {
+    __DirectiveConnection __directive_connection = 1;
+}
+message Query__DirectiveLocationsResponse {
+    __DirectiveLocations __directive_locations = 1;
+}
+message Query__DirectiveLocationsListResponse {
+    repeated __DirectiveLocations __directive_locations_list = 1;
+}
+message Query__DirectiveLocationsConnectionResponse {
+    __DirectiveLocationsConnection __directive_locations_connection = 1;
+}
+message QueryUserResponse {
+    User user = 1;
+}
+message QueryUserListResponse {
+    repeated User user_list = 1;
+}
+message QueryUserConnectionResponse {
+    UserConnection user_connection = 1;
+}
+message QueryUserPhonesResponse {
+    UserPhones user_phones = 1;
+}
+message QueryUserPhonesListResponse {
+    repeated UserPhones user_phones_list = 1;
+}
+message QueryUserPhonesConnectionResponse {
+    UserPhonesConnection user_phones_connection = 1;
+}
+message QueryUserTest1Response {
+    UserTest1 user_test1 = 1;
+}
+message QueryUserTest1ListResponse {
+    repeated UserTest1 user_test1_list = 1;
+}
+message QueryUserTest1ConnectionResponse {
+    UserTest1Connection user_test1_connection = 1;
+}
+message QueryUserTest2Response {
+    UserTest2 user_test2 = 1;
+}
+message QueryUserTest2ListResponse {
+    repeated UserTest2 user_test2_list = 1;
+}
+message QueryUserTest2ConnectionResponse {
+    UserTest2Connection user_test2_connection = 1;
+}
+message QueryUserRoleResponse {
+    UserRole user_role = 1;
+}
+message QueryUserRoleListResponse {
+    repeated UserRole user_role_list = 1;
+}
+message QueryUserRoleConnectionResponse {
+    UserRoleConnection user_role_connection = 1;
+}
+message QueryRoleResponse {
+    Role role = 1;
+}
+message QueryRoleListResponse {
+    repeated Role role_list = 1;
+}
+message QueryRoleConnectionResponse {
+    RoleConnection role_connection = 1;
+}
+message QueryRoleRoleTypeResponse {
+    RoleRoleType role_role_type = 1;
+}
+message QueryRoleRoleTypeListResponse {
+    repeated RoleRoleType role_role_type_list = 1;
+}
+message QueryRoleRoleTypeConnectionResponse {
+    RoleRoleTypeConnection role_role_type_connection = 1;
+}
+message QueryOrganizationResponse {
+    Organization organization = 1;
+}
+message QueryOrganizationListResponse {
+    repeated Organization organization_list = 1;
+}
+message QueryOrganizationConnectionResponse {
+    OrganizationConnection organization_connection = 1;
+}
+message QueryIsDeprecatedResponse {
+    bool is_deprecated = 1;
+}
+message QueryVersionResponse {
+    int32 version = 1;
+}
+message QueryRealmIdResponse {
+    string realm_id = 1;
+}
+message QueryCreateUserIdResponse {
+    string create_user_id = 1;
+}
+message QueryCreateTimeResponse {
+    string create_time = 1;
+}
+message QueryUpdateUserIdResponse {
+    string update_user_id = 1;
+}
+message QueryUpdateTimeResponse {
+    string update_time = 1;
+}
+message QueryCreateGroupIdResponse {
+    string create_group_id = 1;
+}
+message QueryGetUserDetailResponse {
+    string get_user_detail = 1;
+}
+message QueryGetUserDetail6Response {
+    repeated string get_user_detail6 = 1;
+}
+message QueryGetOrgLevelResponse {
+    int32 get_org_level = 1;
+}
+message QueryGetRoleDisable2Response {
+    bool get_role_disable2 = 1;
+}
+message QueryGetOrgLevel5Response {
+    repeated int32 get_org_level5 = 1;
+}
+message QueryGetUserByOrg2Response {
+    repeated User get_user_by_org2 = 1;
+}
+message QueryGetParent2Response {
+    Organization get_parent2 = 1;
+}
+message QueryFindRole2Response {
+    repeated Role find_role2 = 1;
+}
+message Mutation__SchemaRequest {
+    string id = 1;
+    string query_type_name = 2;
+    string mutation_type_name = 3;
+    string subscription_type_name = 4;
+    repeated __TypeInput types = 5;
+    __TypeInput query_type = 6;
+    __TypeInput mutation_type = 7;
+    __TypeInput subscription_type = 8;
+    repeated __DirectiveInput directives = 9;
+    bool is_deprecated = 10;
+    int32 version = 11;
+    string realm_id = 12;
+    string create_user_id = 13;
+    string create_time = 14;
+    string update_user_id = 15;
+    string update_time = 16;
+    string create_group_id = 17;
+    string __typename = 18;
+}
+message Mutation__TypeRequest {
+    string name = 1;
+    int32 schema_id = 2;
+    __TypeKind kind = 3;
+    string description = 4;
+    repeated __FieldInput fields = 5;
+    repeated __TypeInput interfaces = 6;
+    repeated __TypeInput possible_types = 7;
+    repeated __EnumValueInput enum_values = 8;
+    repeated __InputValueInput input_fields = 9;
+    string of_type_name = 10;
+    __TypeInput of_type = 11;
+    bool is_deprecated = 12;
+    int32 version = 13;
+    string realm_id = 14;
+    string create_user_id = 15;
+    string create_time = 16;
+    string update_user_id = 17;
+    string update_time = 18;
+    string create_group_id = 19;
+    string __typename = 20;
+}
+message Mutation__TypeInterfacesRequest {
+    string id = 1;
+    string type_name = 2;
+    string interface_name = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+}
+message Mutation__TypePossibleTypesRequest {
+    string id = 1;
+    string type_name = 2;
+    string possible_type_name = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+}
+message Mutation__FieldRequest {
+    string id = 1;
+    string name = 2;
+    string type_name = 3;
+    string of_type_name = 4;
+    __TypeInput of_type = 5;
+    string description = 6;
+    repeated __InputValueInput args = 7;
+    __TypeInput type = 8;
+    string deprecation_reason = 9;
+    string from = 10;
+    string to = 11;
+    string with_type = 12;
+    string with_from = 13;
+    string with_to = 14;
+    bool is_deprecated = 15;
+    int32 version = 16;
+    string realm_id = 17;
+    string create_user_id = 18;
+    string create_time = 19;
+    string update_user_id = 20;
+    string update_time = 21;
+    string create_group_id = 22;
+    string __typename = 23;
+}
+message Mutation__InputValueRequest {
+    string id = 1;
+    string name = 2;
+    string type_name = 3;
+    string of_type_name = 4;
+    __TypeInput of_type = 5;
+    int32 field_id = 6;
+    string directive_name = 7;
+    string description = 8;
+    __TypeInput type = 9;
+    string default_value = 10;
+    bool is_deprecated = 11;
+    int32 version = 12;
+    string realm_id = 13;
+    string create_user_id = 14;
+    string create_time = 15;
+    string update_user_id = 16;
+    string update_time = 17;
+    string create_group_id = 18;
+    string __typename = 19;
+}
+message Mutation__EnumValueRequest {
+    string id = 1;
+    string name = 2;
+    string of_type_name = 3;
+    __TypeInput of_type = 4;
+    string description = 5;
+    string deprecation_reason = 6;
+    bool is_deprecated = 7;
+    int32 version = 8;
+    string realm_id = 9;
+    string create_user_id = 10;
+    string create_time = 11;
+    string update_user_id = 12;
+    string update_time = 13;
+    string create_group_id = 14;
+    string __typename = 15;
+}
+message Mutation__DirectiveRequest {
+    string name = 1;
+    int32 schema_id = 2;
+    string description = 3;
+    repeated __DirectiveLocation locations = 4;
+    repeated __InputValueInput args = 5;
+    bool on_operation = 6;
+    bool on_fragment = 7;
+    bool on_field = 8;
+    bool is_deprecated = 9;
+    int32 version = 10;
+    string realm_id = 11;
+    string create_user_id = 12;
+    string create_time = 13;
+    string update_user_id = 14;
+    string update_time = 15;
+    string create_group_id = 16;
+    string __typename = 17;
+}
+message Mutation__DirectiveLocationsRequest {
+    string id = 1;
+    string directive_name = 2;
+    __DirectiveLocation directive_location = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+}
+message MutationUserRequest {
+    string id = 1;
+    string login = 2;
+    string password = 3;
+    string name = 4;
+    int32 age = 5;
+    bool disable = 6;
+    Sex sex = 7;
+    int32 organization_id = 8;
+    OrganizationInput organization = 9;
+    repeated RoleInput roles = 10;
+    repeated string phones = 11;
+    repeated int32 test1 = 12;
+    repeated bool test2 = 13;
+    bool is_deprecated = 14;
+    int32 version = 15;
+    string realm_id = 16;
+    string create_user_id = 17;
+    string create_time = 18;
+    string update_user_id = 19;
+    string update_time = 20;
+    string create_group_id = 21;
+    string __typename = 22;
+}
+message MutationUserPhonesRequest {
+    string id = 1;
+    int32 user_id = 2;
+    string phone = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+}
+message MutationUserTest1Request {
+    string id = 1;
+    int32 user_id = 2;
+    int32 test1 = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+}
+message MutationUserTest2Request {
+    string id = 1;
+    int32 user_id = 2;
+    bool test2 = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+}
+message MutationUserRoleRequest {
+    string id = 1;
+    int32 user_id = 2;
+    int32 role_id = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+}
+message MutationRoleRequest {
+    string id = 1;
+    string name = 2;
+    repeated RoleType type = 3;
+    repeated UserInput users = 4;
+    bool is_deprecated = 5;
+    int32 version = 6;
+    string realm_id = 7;
+    string create_user_id = 8;
+    string create_time = 9;
+    string update_user_id = 10;
+    string update_time = 11;
+    string create_group_id = 12;
+    string __typename = 13;
+}
+message MutationRoleRoleTypeRequest {
+    string id = 1;
+    int32 role_id = 2;
+    RoleType type = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string __typename = 12;
+}
+message MutationOrganizationRequest {
+    string id = 1;
+    int32 above_id = 2;
+    OrganizationInput above = 3;
+    repeated UserInput users = 4;
+    string name = 5;
+    bool is_deprecated = 6;
+    int32 version = 7;
+    string realm_id = 8;
+    string create_user_id = 9;
+    string create_time = 10;
+    string update_user_id = 11;
+    string update_time = 12;
+    string create_group_id = 13;
+    string __typename = 14;
+}
+message MutationIsDeprecatedRequest {
+}
+message MutationVersionRequest {
+}
+message MutationRealmIdRequest {
+}
+message MutationCreateUserIdRequest {
+}
+message MutationCreateTimeRequest {
+}
+message MutationUpdateUserIdRequest {
+}
+message MutationUpdateTimeRequest {
+}
+message MutationCreateGroupIdRequest {
+}
+message Mutation__SchemaResponse {
+    __Schema __schema = 1;
+}
+message Mutation__TypeResponse {
+    __Type __type = 1;
+}
+message Mutation__TypeInterfacesResponse {
+    __TypeInterfaces __type_interfaces = 1;
+}
+message Mutation__TypePossibleTypesResponse {
+    __TypePossibleTypes __type_possible_types = 1;
+}
+message Mutation__FieldResponse {
+    __Field __field = 1;
+}
+message Mutation__InputValueResponse {
+    __InputValue __input_value = 1;
+}
+message Mutation__EnumValueResponse {
+    __EnumValue __enum_value = 1;
+}
+message Mutation__DirectiveResponse {
+    __Directive __directive = 1;
+}
+message Mutation__DirectiveLocationsResponse {
+    __DirectiveLocations __directive_locations = 1;
+}
+message MutationUserResponse {
+    User user = 1;
+}
+message MutationUserPhonesResponse {
+    UserPhones user_phones = 1;
+}
+message MutationUserTest1Response {
+    UserTest1 user_test1 = 1;
+}
+message MutationUserTest2Response {
+    UserTest2 user_test2 = 1;
+}
+message MutationUserRoleResponse {
+    UserRole user_role = 1;
+}
+message MutationRoleResponse {
+    Role role = 1;
+}
+message MutationRoleRoleTypeResponse {
+    RoleRoleType role_role_type = 1;
+}
+message MutationOrganizationResponse {
+    Organization organization = 1;
+}
+message MutationIsDeprecatedResponse {
+    bool is_deprecated = 1;
+}
+message MutationVersionResponse {
+    int32 version = 1;
+}
+message MutationRealmIdResponse {
+    string realm_id = 1;
+}
+message MutationCreateUserIdResponse {
+    string create_user_id = 1;
+}
+message MutationCreateTimeResponse {
+    string create_time = 1;
+}
+message MutationUpdateUserIdResponse {
+    string update_user_id = 1;
+}
+message MutationUpdateTimeResponse {
+    string update_time = 1;
+}
+message MutationCreateGroupIdResponse {
+    string create_group_id = 1;
+}
+service QueryTypeService {
+    rpc __Schema (Query__SchemaRequest) returns (Query__SchemaResponse);
+    rpc __SchemaList (Query__SchemaListRequest) returns (Query__SchemaListResponse);
+    rpc __SchemaConnection (Query__SchemaConnectionRequest) returns (Query__SchemaConnectionResponse);
+    rpc __Type (Query__TypeRequest) returns (Query__TypeResponse);
+    rpc __TypeList (Query__TypeListRequest) returns (Query__TypeListResponse);
+    rpc __TypeConnection (Query__TypeConnectionRequest) returns (Query__TypeConnectionResponse);
+    rpc __TypeInterfaces (Query__TypeInterfacesRequest) returns (Query__TypeInterfacesResponse);
+    rpc __TypeInterfacesList (Query__TypeInterfacesListRequest) returns (Query__TypeInterfacesListResponse);
+    rpc __TypeInterfacesConnection (Query__TypeInterfacesConnectionRequest) returns (Query__TypeInterfacesConnectionResponse);
+    rpc __TypePossibleTypes (Query__TypePossibleTypesRequest) returns (Query__TypePossibleTypesResponse);
+    rpc __TypePossibleTypesList (Query__TypePossibleTypesListRequest) returns (Query__TypePossibleTypesListResponse);
+    rpc __TypePossibleTypesConnection (Query__TypePossibleTypesConnectionRequest) returns (Query__TypePossibleTypesConnectionResponse);
+    rpc __Field (Query__FieldRequest) returns (Query__FieldResponse);
+    rpc __FieldList (Query__FieldListRequest) returns (Query__FieldListResponse);
+    rpc __FieldConnection (Query__FieldConnectionRequest) returns (Query__FieldConnectionResponse);
+    rpc __InputValue (Query__InputValueRequest) returns (Query__InputValueResponse);
+    rpc __InputValueList (Query__InputValueListRequest) returns (Query__InputValueListResponse);
+    rpc __InputValueConnection (Query__InputValueConnectionRequest) returns (Query__InputValueConnectionResponse);
+    rpc __EnumValue (Query__EnumValueRequest) returns (Query__EnumValueResponse);
+    rpc __EnumValueList (Query__EnumValueListRequest) returns (Query__EnumValueListResponse);
+    rpc __EnumValueConnection (Query__EnumValueConnectionRequest) returns (Query__EnumValueConnectionResponse);
+    rpc __Directive (Query__DirectiveRequest) returns (Query__DirectiveResponse);
+    rpc __DirectiveList (Query__DirectiveListRequest) returns (Query__DirectiveListResponse);
+    rpc __DirectiveConnection (Query__DirectiveConnectionRequest) returns (Query__DirectiveConnectionResponse);
+    rpc __DirectiveLocations (Query__DirectiveLocationsRequest) returns (Query__DirectiveLocationsResponse);
+    rpc __DirectiveLocationsList (Query__DirectiveLocationsListRequest) returns (Query__DirectiveLocationsListResponse);
+    rpc __DirectiveLocationsConnection (Query__DirectiveLocationsConnectionRequest) returns (Query__DirectiveLocationsConnectionResponse);
+    rpc User (QueryUserRequest) returns (QueryUserResponse);
+    rpc UserList (QueryUserListRequest) returns (QueryUserListResponse);
+    rpc UserConnection (QueryUserConnectionRequest) returns (QueryUserConnectionResponse);
+    rpc UserPhones (QueryUserPhonesRequest) returns (QueryUserPhonesResponse);
+    rpc UserPhonesList (QueryUserPhonesListRequest) returns (QueryUserPhonesListResponse);
+    rpc UserPhonesConnection (QueryUserPhonesConnectionRequest) returns (QueryUserPhonesConnectionResponse);
+    rpc UserTest1 (QueryUserTest1Request) returns (QueryUserTest1Response);
+    rpc UserTest1List (QueryUserTest1ListRequest) returns (QueryUserTest1ListResponse);
+    rpc UserTest1Connection (QueryUserTest1ConnectionRequest) returns (QueryUserTest1ConnectionResponse);
+    rpc UserTest2 (QueryUserTest2Request) returns (QueryUserTest2Response);
+    rpc UserTest2List (QueryUserTest2ListRequest) returns (QueryUserTest2ListResponse);
+    rpc UserTest2Connection (QueryUserTest2ConnectionRequest) returns (QueryUserTest2ConnectionResponse);
+    rpc UserRole (QueryUserRoleRequest) returns (QueryUserRoleResponse);
+    rpc UserRoleList (QueryUserRoleListRequest) returns (QueryUserRoleListResponse);
+    rpc UserRoleConnection (QueryUserRoleConnectionRequest) returns (QueryUserRoleConnectionResponse);
+    rpc Role (QueryRoleRequest) returns (QueryRoleResponse);
+    rpc RoleList (QueryRoleListRequest) returns (QueryRoleListResponse);
+    rpc RoleConnection (QueryRoleConnectionRequest) returns (QueryRoleConnectionResponse);
+    rpc RoleRoleType (QueryRoleRoleTypeRequest) returns (QueryRoleRoleTypeResponse);
+    rpc RoleRoleTypeList (QueryRoleRoleTypeListRequest) returns (QueryRoleRoleTypeListResponse);
+    rpc RoleRoleTypeConnection (QueryRoleRoleTypeConnectionRequest) returns (QueryRoleRoleTypeConnectionResponse);
+    rpc Organization (QueryOrganizationRequest) returns (QueryOrganizationResponse);
+    rpc OrganizationList (QueryOrganizationListRequest) returns (QueryOrganizationListResponse);
+    rpc OrganizationConnection (QueryOrganizationConnectionRequest) returns (QueryOrganizationConnectionResponse);
+    rpc IsDeprecated (QueryIsDeprecatedRequest) returns (QueryIsDeprecatedResponse);
+    rpc Version (QueryVersionRequest) returns (QueryVersionResponse);
+    rpc RealmId (QueryRealmIdRequest) returns (QueryRealmIdResponse);
+    rpc CreateUserId (QueryCreateUserIdRequest) returns (QueryCreateUserIdResponse);
+    rpc CreateTime (QueryCreateTimeRequest) returns (QueryCreateTimeResponse);
+    rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
+    rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
+    rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
+    rpc GetUserDetail (QueryGetUserDetailRequest) returns (QueryGetUserDetailResponse);
+    rpc GetUserDetail6 (QueryGetUserDetail6Request) returns (QueryGetUserDetail6Response);
+    rpc GetOrgLevel (QueryGetOrgLevelRequest) returns (QueryGetOrgLevelResponse);
+    rpc GetRoleDisable2 (QueryGetRoleDisable2Request) returns (QueryGetRoleDisable2Response);
+    rpc GetOrgLevel5 (QueryGetOrgLevel5Request) returns (QueryGetOrgLevel5Response);
+    rpc GetUserByOrg2 (QueryGetUserByOrg2Request) returns (QueryGetUserByOrg2Response);
+    rpc GetParent2 (QueryGetParent2Request) returns (QueryGetParent2Response);
+    rpc FindRole2 (QueryFindRole2Request) returns (QueryFindRole2Response);
+}
+service MutationTypeService {
+    rpc __Schema (Mutation__SchemaRequest) returns (Mutation__SchemaResponse);
+    rpc __Type (Mutation__TypeRequest) returns (Mutation__TypeResponse);
+    rpc __TypeInterfaces (Mutation__TypeInterfacesRequest) returns (Mutation__TypeInterfacesResponse);
+    rpc __TypePossibleTypes (Mutation__TypePossibleTypesRequest) returns (Mutation__TypePossibleTypesResponse);
+    rpc __Field (Mutation__FieldRequest) returns (Mutation__FieldResponse);
+    rpc __InputValue (Mutation__InputValueRequest) returns (Mutation__InputValueResponse);
+    rpc __EnumValue (Mutation__EnumValueRequest) returns (Mutation__EnumValueResponse);
+    rpc __Directive (Mutation__DirectiveRequest) returns (Mutation__DirectiveResponse);
+    rpc __DirectiveLocations (Mutation__DirectiveLocationsRequest) returns (Mutation__DirectiveLocationsResponse);
+    rpc User (MutationUserRequest) returns (MutationUserResponse);
+    rpc UserPhones (MutationUserPhonesRequest) returns (MutationUserPhonesResponse);
+    rpc UserTest1 (MutationUserTest1Request) returns (MutationUserTest1Response);
+    rpc UserTest2 (MutationUserTest2Request) returns (MutationUserTest2Response);
+    rpc UserRole (MutationUserRoleRequest) returns (MutationUserRoleResponse);
+    rpc Role (MutationRoleRequest) returns (MutationRoleResponse);
+    rpc RoleRoleType (MutationRoleRoleTypeRequest) returns (MutationRoleRoleTypeResponse);
+    rpc Organization (MutationOrganizationRequest) returns (MutationOrganizationResponse);
+    rpc IsDeprecated (MutationIsDeprecatedRequest) returns (MutationIsDeprecatedResponse);
+    rpc Version (MutationVersionRequest) returns (MutationVersionResponse);
+    rpc RealmId (MutationRealmIdRequest) returns (MutationRealmIdResponse);
+    rpc CreateUserId (MutationCreateUserIdRequest) returns (MutationCreateUserIdResponse);
+    rpc CreateTime (MutationCreateTimeRequest) returns (MutationCreateTimeResponse);
+    rpc UpdateUserId (MutationUpdateUserIdRequest) returns (MutationUpdateUserIdResponse);
+    rpc UpdateTime (MutationUpdateTimeRequest) returns (MutationUpdateTimeResponse);
+    rpc CreateGroupId (MutationCreateGroupIdRequest) returns (MutationCreateGroupIdResponse);
+}

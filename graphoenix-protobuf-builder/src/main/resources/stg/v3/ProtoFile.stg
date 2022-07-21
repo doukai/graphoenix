@@ -1,0 +1,7 @@
+import "Import.stg"
+protoFileDefinition(protoFile) ::= <<
+syntax = "proto3";
+<if(protoFile.pkg)>package <protoFile.pkg>;<endif>
+<protoFile.imports:{import|<importDefinition(import)>};separator="\n">
+<protoFile.topLevelDefs:{topLevelDef|<topLevelDef>};separator="\n">
+>>

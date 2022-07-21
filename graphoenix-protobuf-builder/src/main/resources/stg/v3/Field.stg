@@ -1,0 +1,3 @@
+fieldDefinition(field) ::= <<
+<if(field.repeated)>repeated <endif><field.type> <field.name> = <field.number>;
+>>
