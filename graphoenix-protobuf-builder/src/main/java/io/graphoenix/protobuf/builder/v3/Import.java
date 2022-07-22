@@ -41,8 +41,8 @@ public class Import {
     @Override
     public String toString() {
         STGroupFile stGroupFile = new STGroupFile("stg/v3/Import.stg");
-        ST st = stGroupFile.getInstanceOf("importDefinition");
-        st.add("import", this);
+        ST st = stGroupFile.getInstanceOf("iptDefinition");
+        st.add("ipt", this);
         String render = st.render();
         stGroupFile.unload();
         return render;

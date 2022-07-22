@@ -1,3 +1,3 @@
-importDefinition(import) ::= <<
-import <if(import.pub)>public <endif><if(import.weak)>weak <endif>"<import.name>";
+iptDefinition(ipt) ::= <<
+import <if(ipt.pub)>public <endif><if(ipt.weak)>weak <endif>"<ipt.name>";
 >>

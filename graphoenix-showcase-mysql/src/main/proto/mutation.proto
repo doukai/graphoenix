@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.mysql";
+
+package io.graphoenix.showcase.mysql;
+
+import "enums.proto";
+import "objects.proto";
+import "input_objects.proto";
+import "mutation_requests.proto";
+import "mutation_response.proto";
+
+service MutationTypeService {
+    rpc IntroSchema (MutationIntroSchemaRequest) returns (MutationIntroSchemaResponse);
+    rpc IntroType (MutationIntroTypeRequest) returns (MutationIntroTypeResponse);
+    rpc IntroTypeInterfaces (MutationIntroTypeInterfacesRequest) returns (MutationIntroTypeInterfacesResponse);
+    rpc IntroTypePossibleTypes (MutationIntroTypePossibleTypesRequest) returns (MutationIntroTypePossibleTypesResponse);
+    rpc IntroField (MutationIntroFieldRequest) returns (MutationIntroFieldResponse);
+    rpc IntroInputValue (MutationIntroInputValueRequest) returns (MutationIntroInputValueResponse);
+    rpc IntroEnumValue (MutationIntroEnumValueRequest) returns (MutationIntroEnumValueResponse);
+    rpc IntroDirective (MutationIntroDirectiveRequest) returns (MutationIntroDirectiveResponse);
+    rpc IntroDirectiveLocations (MutationIntroDirectiveLocationsRequest) returns (MutationIntroDirectiveLocationsResponse);
+    rpc User (MutationUserRequest) returns (MutationUserResponse);
+    rpc UserPhones (MutationUserPhonesRequest) returns (MutationUserPhonesResponse);
+    rpc UserTest1 (MutationUserTest1Request) returns (MutationUserTest1Response);
+    rpc UserTest2 (MutationUserTest2Request) returns (MutationUserTest2Response);
+    rpc UserRole (MutationUserRoleRequest) returns (MutationUserRoleResponse);
+    rpc Role (MutationRoleRequest) returns (MutationRoleResponse);
+    rpc RoleRoleType (MutationRoleRoleTypeRequest) returns (MutationRoleRoleTypeResponse);
+    rpc Organization (MutationOrganizationRequest) returns (MutationOrganizationResponse);
+    rpc IsDeprecated (MutationIsDeprecatedRequest) returns (MutationIsDeprecatedResponse);
+    rpc Version (MutationVersionRequest) returns (MutationVersionResponse);
+    rpc RealmId (MutationRealmIdRequest) returns (MutationRealmIdResponse);
+    rpc CreateUserId (MutationCreateUserIdRequest) returns (MutationCreateUserIdResponse);
+    rpc CreateTime (MutationCreateTimeRequest) returns (MutationCreateTimeResponse);
+    rpc UpdateUserId (MutationUpdateUserIdRequest) returns (MutationUpdateUserIdResponse);
+    rpc UpdateTime (MutationUpdateTimeRequest) returns (MutationUpdateTimeResponse);
+    rpc CreateGroupId (MutationCreateGroupIdRequest) returns (MutationCreateGroupIdResponse);
+}

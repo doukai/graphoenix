@@ -3,6 +3,8 @@ package io.graphoenix.protobuf.builder.v3;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.List;
+
 public class Field {
 
     private Boolean repeated;
@@ -12,6 +14,8 @@ public class Field {
     private String type;
 
     private Integer number;
+
+    private List<Option> options;
 
     public Boolean getRepeated() {
         return repeated;
@@ -46,6 +50,15 @@ public class Field {
 
     public Field setNumber(Integer number) {
         this.number = number;
+        return this;
+    }
+
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public Field setOptions(List<Option> options) {
+        this.options = options;
         return this;
     }
 

@@ -11,6 +11,8 @@ public class Message {
 
     private List<Field> fields;
 
+    private List<Option> options;
+
     public String getName() {
         return name;
     }
@@ -26,6 +28,15 @@ public class Message {
 
     public Message setFields(List<Field> fields) {
         this.fields = fields;
+        return this;
+    }
+
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public Message setOptions(List<Option> options) {
+        this.options = options;
         return this;
     }
 

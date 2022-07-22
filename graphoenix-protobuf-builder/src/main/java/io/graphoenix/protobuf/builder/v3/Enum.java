@@ -1,12 +1,9 @@
 package io.graphoenix.protobuf.builder.v3;
 
-import graphql.parser.antlr.GraphqlParser;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Enum {
 
@@ -14,19 +11,7 @@ public class Enum {
 
     private List<EnumField> fields;
 
-    public Enum() {
-    }
-
-    public Enum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        this.name = enumTypeDefinitionContext.name().getText();
-        this.fields = IntStream.range(0, enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().size() - 1)
-                .mapToObj(index ->
-                        new EnumField()
-                                .setName(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().get(index).enumValue().enumValueName().getText())
-                                .setNumber(index)
-                )
-                .collect(Collectors.toList());
-    }
+    private List<Option> options;
 
     public String getName() {
         return name;
@@ -43,6 +28,15 @@ public class Enum {
 
     public Enum setFields(List<EnumField> fields) {
         this.fields = fields;
+        return this;
+    }
+
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public Enum setOptions(List<Option> options) {
+        this.options = options;
         return this;
     }
 

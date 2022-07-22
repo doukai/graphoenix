@@ -2,6 +2,7 @@ buildscript {
     repositories {
         mavenLocal()
         jcenter()
+        gradlePluginPortal()
     }
     dependencies {
         classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
@@ -10,6 +11,7 @@ buildscript {
 
 plugins {
     id 'java'
+    id 'com.google.protobuf' version '0.8.19'
 }
 
 compileJava.options.sourcepath = files('src/main/resources')
@@ -20,6 +22,31 @@ graphql {
     packageName = "io.graphoenix.showcase.mysql"
     inputLayers = 3
     outputPath = "D:/Work"
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.19.2"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.48.0'
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
 }
 
 group 'io.graphoenix'
@@ -33,9 +60,13 @@ repositories {
 dependencies {
     implementation project(':graphoenix-core')
     implementation project(':graphoenix-json')
+    implementation project(':graphoenix-grpc-server')
     implementation project(':graphoenix-http-server')
     implementation project(':graphoenix-interceptor')
     implementation project(":graphoenix-mysql")
+
+    runtimeOnly 'io.grpc:grpc-netty-shaded:1.48.0'
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
 
     annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-inject')

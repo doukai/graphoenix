@@ -31,7 +31,7 @@ public class GenerateGraphQLSourceTask extends BaseTask {
             graphQLConfig = new GraphQLConfig();
         }
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        String javaPath = sourceSet.getJava().getSourceDirectories().getAsPath();
+        String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath();
 
         try {
             init();

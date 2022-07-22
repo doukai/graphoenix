@@ -1,0 +1,318 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.mysql";
+
+package io.graphoenix.showcase.mysql;
+
+import "enums.proto";
+import "objects.proto";
+import "input_objects.proto";
+
+message MutationIntroSchemaRequest {
+    string id = 1;
+    string query_type_name = 2;
+    string mutation_type_name = 3;
+    string subscription_type_name = 4;
+    repeated IntroTypeInput types = 5;
+    IntroTypeInput query_type = 6;
+    IntroTypeInput mutation_type = 7;
+    IntroTypeInput subscription_type = 8;
+    repeated IntroDirectiveInput directives = 9;
+    bool is_deprecated = 10;
+    int32 version = 11;
+    string realm_id = 12;
+    string create_user_id = 13;
+    string create_time = 14;
+    string update_user_id = 15;
+    string update_time = 16;
+    string create_group_id = 17;
+    string intro_typename = 18;
+}
+message MutationIntroTypeRequest {
+    string name = 1;
+    int32 schema_id = 2;
+    IntroTypeKind kind = 3;
+    string description = 4;
+    repeated IntroFieldInput fields = 5;
+    repeated IntroTypeInput interfaces = 6;
+    repeated IntroTypeInput possible_types = 7;
+    repeated IntroEnumValueInput enum_values = 8;
+    repeated IntroInputValueInput input_fields = 9;
+    string of_type_name = 10;
+    IntroTypeInput of_type = 11;
+    bool is_deprecated = 12;
+    int32 version = 13;
+    string realm_id = 14;
+    string create_user_id = 15;
+    string create_time = 16;
+    string update_user_id = 17;
+    string update_time = 18;
+    string create_group_id = 19;
+    string intro_typename = 20;
+}
+message MutationIntroTypeInterfacesRequest {
+    string id = 1;
+    string type_name = 2;
+    string interface_name = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string intro_typename = 12;
+}
+message MutationIntroTypePossibleTypesRequest {
+    string id = 1;
+    string type_name = 2;
+    string possible_type_name = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string intro_typename = 12;
+}
+message MutationIntroFieldRequest {
+    string id = 1;
+    string name = 2;
+    string type_name = 3;
+    string of_type_name = 4;
+    IntroTypeInput of_type = 5;
+    string description = 6;
+    repeated IntroInputValueInput args = 7;
+    IntroTypeInput type = 8;
+    string deprecation_reason = 9;
+    string from = 10;
+    string to = 11;
+    string with_type = 12;
+    string with_from = 13;
+    string with_to = 14;
+    bool is_deprecated = 15;
+    int32 version = 16;
+    string realm_id = 17;
+    string create_user_id = 18;
+    string create_time = 19;
+    string update_user_id = 20;
+    string update_time = 21;
+    string create_group_id = 22;
+    string intro_typename = 23;
+}
+message MutationIntroInputValueRequest {
+    string id = 1;
+    string name = 2;
+    string type_name = 3;
+    string of_type_name = 4;
+    IntroTypeInput of_type = 5;
+    int32 field_id = 6;
+    string directive_name = 7;
+    string description = 8;
+    IntroTypeInput type = 9;
+    string default_value = 10;
+    bool is_deprecated = 11;
+    int32 version = 12;
+    string realm_id = 13;
+    string create_user_id = 14;
+    string create_time = 15;
+    string update_user_id = 16;
+    string update_time = 17;
+    string create_group_id = 18;
+    string intro_typename = 19;
+}
+message MutationIntroEnumValueRequest {
+    string id = 1;
+    string name = 2;
+    string of_type_name = 3;
+    IntroTypeInput of_type = 4;
+    string description = 5;
+    string deprecation_reason = 6;
+    bool is_deprecated = 7;
+    int32 version = 8;
+    string realm_id = 9;
+    string create_user_id = 10;
+    string create_time = 11;
+    string update_user_id = 12;
+    string update_time = 13;
+    string create_group_id = 14;
+    string intro_typename = 15;
+}
+message MutationIntroDirectiveRequest {
+    string name = 1;
+    int32 schema_id = 2;
+    string description = 3;
+    repeated IntroDirectiveLocation locations = 4;
+    repeated IntroInputValueInput args = 5;
+    bool on_operation = 6;
+    bool on_fragment = 7;
+    bool on_field = 8;
+    bool is_deprecated = 9;
+    int32 version = 10;
+    string realm_id = 11;
+    string create_user_id = 12;
+    string create_time = 13;
+    string update_user_id = 14;
+    string update_time = 15;
+    string create_group_id = 16;
+    string intro_typename = 17;
+}
+message MutationIntroDirectiveLocationsRequest {
+    string id = 1;
+    string directive_name = 2;
+    IntroDirectiveLocation directive_location = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string intro_typename = 12;
+}
+message MutationUserRequest {
+    string id = 1;
+    string login = 2;
+    string password = 3;
+    string name = 4;
+    int32 age = 5;
+    bool disable = 6;
+    Sex sex = 7;
+    int32 organization_id = 8;
+    OrganizationInput organization = 9;
+    repeated RoleInput roles = 10;
+    repeated string phones = 11;
+    repeated int32 test1 = 12;
+    repeated bool test2 = 13;
+    bool is_deprecated = 14;
+    int32 version = 15;
+    string realm_id = 16;
+    string create_user_id = 17;
+    string create_time = 18;
+    string update_user_id = 19;
+    string update_time = 20;
+    string create_group_id = 21;
+    string intro_typename = 22;
+}
+message MutationUserPhonesRequest {
+    string id = 1;
+    int32 user_id = 2;
+    string phone = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string intro_typename = 12;
+}
+message MutationUserTest1Request {
+    string id = 1;
+    int32 user_id = 2;
+    int32 test1 = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string intro_typename = 12;
+}
+message MutationUserTest2Request {
+    string id = 1;
+    int32 user_id = 2;
+    bool test2 = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string intro_typename = 12;
+}
+message MutationUserRoleRequest {
+    string id = 1;
+    int32 user_id = 2;
+    int32 role_id = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string intro_typename = 12;
+}
+message MutationRoleRequest {
+    string id = 1;
+    string name = 2;
+    repeated RoleType type = 3;
+    repeated UserInput users = 4;
+    bool is_deprecated = 5;
+    int32 version = 6;
+    string realm_id = 7;
+    string create_user_id = 8;
+    string create_time = 9;
+    string update_user_id = 10;
+    string update_time = 11;
+    string create_group_id = 12;
+    string intro_typename = 13;
+}
+message MutationRoleRoleTypeRequest {
+    string id = 1;
+    int32 role_id = 2;
+    RoleType type = 3;
+    bool is_deprecated = 4;
+    int32 version = 5;
+    string realm_id = 6;
+    string create_user_id = 7;
+    string create_time = 8;
+    string update_user_id = 9;
+    string update_time = 10;
+    string create_group_id = 11;
+    string intro_typename = 12;
+}
+message MutationOrganizationRequest {
+    string id = 1;
+    int32 above_id = 2;
+    OrganizationInput above = 3;
+    repeated UserInput users = 4;
+    string name = 5;
+    bool is_deprecated = 6;
+    int32 version = 7;
+    string realm_id = 8;
+    string create_user_id = 9;
+    string create_time = 10;
+    string update_user_id = 11;
+    string update_time = 12;
+    string create_group_id = 13;
+    string intro_typename = 14;
+}
+message MutationIsDeprecatedRequest {
+}
+message MutationVersionRequest {
+}
+message MutationRealmIdRequest {
+}
+message MutationCreateUserIdRequest {
+}
+message MutationCreateTimeRequest {
+}
+message MutationUpdateUserIdRequest {
+}
+message MutationUpdateTimeRequest {
+}
+message MutationCreateGroupIdRequest {
+}

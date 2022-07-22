@@ -30,7 +30,7 @@ public class GenerateBannerTask extends DefaultTask {
         }
         try {
             SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-            String resourcePath = sourceSet.getResources().getSourceDirectories().getAsPath();
+            String resourcePath = sourceSet.getResources().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\resource")).getAsPath();
             Ansi[] styles = Stream.of(bannerConfig.getArgs()).map(Ansi::get).toArray(Ansi[]::new);
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(

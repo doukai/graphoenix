@@ -1,13 +1,15 @@
 package io.graphoenix.protobuf.builder;
 
 import com.google.common.base.CaseFormat;
-import com.google.common.collect.Streams;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.protobuf.builder.v3.Enum;
+import io.graphoenix.protobuf.builder.v3.EnumField;
 import io.graphoenix.protobuf.builder.v3.Field;
+import io.graphoenix.protobuf.builder.v3.Import;
 import io.graphoenix.protobuf.builder.v3.Message;
+import io.graphoenix.protobuf.builder.v3.Option;
 import io.graphoenix.protobuf.builder.v3.ProtoFile;
 import io.graphoenix.protobuf.builder.v3.Rpc;
 import io.graphoenix.protobuf.builder.v3.Service;
@@ -16,6 +18,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -41,24 +46,160 @@ public class ProtobufFileBuilder {
         return this;
     }
 
-    public String buildProto3() {
-        return new ProtoFile()
-                .setPkg(graphQLConfig.getPackageName())
-                .setTopLevelDefs(
-                        Streams.concat(
-                                        manager.getObjects().map(this::buildMessage).map(Message::toString),
-                                        manager.getInputObjects().map(this::buildMessage).map(Message::toString),
-                                        manager.getEnums().map(this::buildEnum).map(Enum::toString),
-                                        buildQueryRpcRequest().map(Message::toString),
-                                        buildQueryRpcResponse().map(Message::toString),
-                                        buildMutationRpcRequest().map(Message::toString),
-                                        buildMutationRpcResponse().map(Message::toString),
-                                        buildQueryService().stream().map(Service::toString),
-                                        buildMutationService().stream().map(Service::toString)
-                                )
-                                .collect(Collectors.toList())
+    public Map<String, String> buildProto3() {
+        Map<String, String> protoFileMap = new HashMap<>();
+        protoFileMap.put("objects", new ProtoFile()
+                .setImports(
+                        List.of(new Import().setName("enums.proto"))
                 )
-                .toString();
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(manager.getObjects().map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("input_objects", new ProtoFile()
+                .setImports(
+                        List.of(new Import().setName("enums.proto"))
+                )
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(manager.getInputObjects().map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("enums", new ProtoFile()
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(manager.getEnums().map(this::buildEnum).map(Enum::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("query_requests", new ProtoFile()
+                .setImports(
+                        List.of(
+                                new Import().setName("enums.proto"),
+                                new Import().setName("objects.proto"),
+                                new Import().setName("input_objects.proto")
+                        )
+                )
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(buildQueryRpcRequest().map(Message::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("query_response", new ProtoFile()
+                .setImports(
+                        List.of(
+                                new Import().setName("enums.proto"),
+                                new Import().setName("objects.proto"),
+                                new Import().setName("input_objects.proto")
+                        )
+                )
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(buildQueryRpcResponse().map(Message::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("mutation_requests", new ProtoFile()
+                .setImports(
+                        List.of(
+                                new Import().setName("enums.proto"),
+                                new Import().setName("objects.proto"),
+                                new Import().setName("input_objects.proto")
+                        )
+                )
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(buildMutationRpcRequest().map(Message::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("mutation_response", new ProtoFile()
+                .setImports(
+                        List.of(
+                                new Import().setName("enums.proto"),
+                                new Import().setName("objects.proto"),
+                                new Import().setName("input_objects.proto")
+                        )
+                )
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(buildMutationRpcResponse().map(Message::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("query", new ProtoFile()
+                .setImports(
+                        List.of(
+                                new Import().setName("enums.proto"),
+                                new Import().setName("objects.proto"),
+                                new Import().setName("input_objects.proto"),
+                                new Import().setName("query_requests.proto"),
+                                new Import().setName("query_response.proto")
+                        )
+                )
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(buildQueryService().stream().map(Service::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("mutation", new ProtoFile()
+                .setImports(
+                        List.of(
+                                new Import().setName("enums.proto"),
+                                new Import().setName("objects.proto"),
+                                new Import().setName("input_objects.proto"),
+                                new Import().setName("mutation_requests.proto"),
+                                new Import().setName("mutation_response.proto")
+                        )
+                )
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getPackageName())
+                .setTopLevelDefs(buildMutationService().stream().map(Service::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        return protoFileMap;
     }
 
     public Optional<Service> buildQueryService() {
@@ -184,12 +325,26 @@ public class ProtobufFileBuilder {
     }
 
     public Enum buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return new Enum(enumTypeDefinitionContext);
+        return new Enum()
+                .setName(getName(enumTypeDefinitionContext.name().getText()))
+                .setFields(
+                        IntStream.range(0, enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().size() - 1)
+                                .mapToObj(index ->
+                                        new EnumField()
+                                                .setName(
+                                                        getEnumFieldName(enumTypeDefinitionContext.name().getText())
+                                                                .concat("_")
+                                                                .concat(enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().get(index).enumValue().enumValueName().getText())
+                                                )
+                                                .setNumber(index)
+                                )
+                                .collect(Collectors.toList())
+                );
     }
 
     public Message buildMessage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return new Message()
-                .setName(objectTypeDefinitionContext.name().getText())
+                .setName(getName(objectTypeDefinitionContext.name().getText()))
                 .setFields(
                         IntStream.range(0, objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().size() - 1)
                                 .mapToObj(index ->
@@ -205,7 +360,7 @@ public class ProtobufFileBuilder {
 
     public Message buildMessage(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         return new Message()
-                .setName(inputObjectTypeDefinitionContext.name().getText())
+                .setName(getName(inputObjectTypeDefinitionContext.name().getText()))
                 .setFields(
                         IntStream.range(0, inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().size() - 1)
                                 .mapToObj(index ->
@@ -244,21 +399,35 @@ public class ProtobufFileBuilder {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
             }
         } else {
-            return fieldTypeName;
+            return getName(fieldTypeName);
         }
+    }
+
+    public String getName(String fieldName) {
+        if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
+            return fieldName.replace(INTROSPECTION_PREFIX, "Intro");
+        }
+        return fieldName;
     }
 
     public String getMessageFiledName(String fieldName) {
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(getMessageFiledName(fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return "intro_".concat(getMessageFiledName(fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
         }
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
     }
 
     public String getServiceRpcName(String fieldName) {
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return INTROSPECTION_PREFIX.concat(getServiceRpcName(fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return "Intro".concat(getServiceRpcName(fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
         }
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName);
+    }
+
+    public String getEnumFieldName(String fieldName) {
+        if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
+            return "INTRO_".concat(getEnumFieldName(fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
+        }
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, fieldName);
     }
 }

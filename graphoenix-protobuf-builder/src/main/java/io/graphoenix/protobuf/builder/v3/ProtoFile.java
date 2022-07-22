@@ -13,6 +13,8 @@ public class ProtoFile {
 
     private List<String> topLevelDefs;
 
+    private List<Option> options;
+
     public String getPkg() {
         return pkg;
     }
@@ -37,6 +39,15 @@ public class ProtoFile {
 
     public ProtoFile setTopLevelDefs(List<String> topLevelDefs) {
         this.topLevelDefs = topLevelDefs;
+        return this;
+    }
+
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public ProtoFile setOptions(List<Option> options) {
+        this.options = options;
         return this;
     }
 

@@ -11,6 +11,8 @@ public class Service {
 
     private List<Rpc> rpcs;
 
+    private List<Option> options;
+
     public String getName() {
         return name;
     }
@@ -26,6 +28,15 @@ public class Service {
 
     public Service setRpcs(List<Rpc> rpcs) {
         this.rpcs = rpcs;
+        return this;
+    }
+
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public Service setOptions(List<Option> options) {
+        this.options = options;
         return this;
     }
 

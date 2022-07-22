@@ -10,15 +10,14 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskExecutionException;
 import org.tinylog.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Set;
 
 public class GenerateProtobufV3Task extends BaseTask {
-
-    public static final String PROTO3_FILE_NAME = "schema.proto";
 
     private final IGraphQLDocumentManager manager;
     private final ProtobufFileBuilder protobufFileBuilder;
@@ -35,15 +34,20 @@ public class GenerateProtobufV3Task extends BaseTask {
             graphQLConfig = new GraphQLConfig();
         }
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        String resourcePath = sourceSet.getResources().getSourceDirectories().getAsPath();
-
+        Path protoPath = Path.of(sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath()).getParent().resolve("proto");
         try {
             init();
             registerInvoke(manager);
-            Files.writeString(
-                    Path.of(resourcePath.concat(File.separator).concat(PROTO3_FILE_NAME)),
-                    protobufFileBuilder.setGraphQLConfig(graphQLConfig).buildProto3()
-            );
+            if (Files.notExists(protoPath)) {
+                Files.createDirectories(protoPath);
+            }
+            Set<Map.Entry<String, String>> entries = protobufFileBuilder.setGraphQLConfig(graphQLConfig).buildProto3().entrySet();
+            for (Map.Entry<String, String> entry : entries) {
+                Files.writeString(
+                        protoPath.resolve(entry.getKey().concat(".proto")),
+                        entry.getValue()
+                );
+            }
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             throw new TaskExecutionException(this, e);

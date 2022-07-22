@@ -3,6 +3,8 @@ package io.graphoenix.protobuf.builder.v3;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.List;
+
 public class Rpc {
 
     private String name;
@@ -14,6 +16,8 @@ public class Rpc {
     private Boolean returnStream;
 
     private String returnType;
+
+    private List<Option> options;
 
     public String getName() {
         return name;
@@ -57,6 +61,15 @@ public class Rpc {
 
     public Rpc setReturnType(String returnType) {
         this.returnType = returnType;
+        return this;
+    }
+
+    public List<Option> getOptions() {
+        return options;
+    }
+
+    public Rpc setOptions(List<Option> options) {
+        this.options = options;
         return this;
     }
 

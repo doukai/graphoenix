@@ -1,3 +1,6 @@
+import "Option.stg"
 rpcDefinition(rpc) ::= <<
-rpc <rpc.name> (<if(rpc.messageStream)>stream <endif><rpc.messageType>) returns (<if(rpc.returnStream)>stream <endif><rpc.returnType>);
+rpc <rpc.name> (<if(rpc.messageStream)>stream <endif><rpc.messageType>) returns (<if(rpc.returnStream)>stream <endif><rpc.returnType>)<if(rpc.options)> {
+<rpc.options:{option|<optionDefinition(option)>};separator="\n">
+}<endif>;
 >>

@@ -1,7 +1,16 @@
 import "Import.stg"
+import "Option.stg"
 protoFileDefinition(protoFile) ::= <<
 syntax = "proto3";
-<if(protoFile.pkg)>package <protoFile.pkg>;<endif>
-<protoFile.imports:{import|<importDefinition(import)>};separator="\n">
+
+<if(protoFile.options)><protoFile.options:{option|<optionDefinition(option)>};separator="\n">
+
+<endif>
+<if(protoFile.pkg)>package <protoFile.pkg>;
+
+<endif>
+<if(protoFile.imports)><protoFile.imports:{import|<iptDefinition(import)>};separator="\n">
+
+<endif>
 <protoFile.topLevelDefs:{topLevelDef|<topLevelDef>};separator="\n">
 >>

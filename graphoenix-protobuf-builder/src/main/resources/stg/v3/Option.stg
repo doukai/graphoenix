@@ -1,0 +1,3 @@
+optionDefinition(option) ::= <<
+option <option.name> = <option.value>;
+>>
