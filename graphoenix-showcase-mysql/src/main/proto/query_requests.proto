@@ -10,93 +10,40 @@ import "objects.proto";
 import "input_objects.proto";
 
 message QueryIntroSchemaRequest {
-    StringExpression id = 1;
-    StringExpression query_type_name = 2;
-    StringExpression mutation_type_name = 3;
-    StringExpression subscription_type_name = 4;
-    IntroTypeExpression types = 5;
-    IntroTypeExpression query_type = 6;
-    IntroTypeExpression mutation_type = 7;
-    IntroTypeExpression subscription_type = 8;
-    IntroDirectiveExpression directives = 9;
-    bool include_deprecated = 10;
-    IntExpression version = 11;
-    StringExpression realm_id = 12;
-    StringExpression create_user_id = 13;
-    StringExpression create_time = 14;
-    StringExpression update_user_id = 15;
-    StringExpression update_time = 16;
-    StringExpression create_group_id = 17;
-    StringExpression intro_typename = 18;
-    IntroSchemaExpression where = 19;
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression query_type_name = 4;
+    StringExpression mutation_type_name = 5;
+    StringExpression subscription_type_name = 6;
+    IntroTypeExpression types = 7;
+    IntroTypeExpression query_type = 8;
+    IntroTypeExpression mutation_type = 9;
+    IntroTypeExpression subscription_type = 10;
+    IntroDirectiveExpression directives = 11;
+    bool include_deprecated = 12;
+    IntExpression version = 13;
+    StringExpression realm_id = 14;
+    StringExpression create_user_id = 15;
+    StringExpression create_time = 16;
+    StringExpression update_user_id = 17;
+    StringExpression update_time = 18;
+    StringExpression create_group_id = 19;
+    StringExpression intro_typename = 20;
+    IntroSchemaExpression where = 21;
 }
 message QueryIntroSchemaListRequest {
-    StringExpression id = 1;
-    StringExpression query_type_name = 2;
-    StringExpression mutation_type_name = 3;
-    StringExpression subscription_type_name = 4;
-    IntroTypeExpression types = 5;
-    IntroTypeExpression query_type = 6;
-    IntroTypeExpression mutation_type = 7;
-    IntroTypeExpression subscription_type = 8;
-    IntroDirectiveExpression directives = 9;
-    bool include_deprecated = 10;
-    IntExpression version = 11;
-    StringExpression realm_id = 12;
-    StringExpression create_user_id = 13;
-    StringExpression create_time = 14;
-    StringExpression update_user_id = 15;
-    StringExpression update_time = 16;
-    StringExpression create_group_id = 17;
-    StringExpression intro_typename = 18;
-    IntroSchemaOrderBy order_by = 19;
-    repeated string group_by = 20;
-    Conditional cond = 21;
-    int32 first = 22;
-    int32 last = 23;
-    int32 offset = 24;
-    string after = 25;
-}
-message QueryIntroSchemaConnectionRequest {
-    StringExpression id = 1;
-    StringExpression query_type_name = 2;
-    StringExpression mutation_type_name = 3;
-    StringExpression subscription_type_name = 4;
-    IntroTypeExpression types = 5;
-    IntroTypeExpression query_type = 6;
-    IntroTypeExpression mutation_type = 7;
-    IntroTypeExpression subscription_type = 8;
-    IntroDirectiveExpression directives = 9;
-    bool include_deprecated = 10;
-    IntExpression version = 11;
-    StringExpression realm_id = 12;
-    StringExpression create_user_id = 13;
-    StringExpression create_time = 14;
-    StringExpression update_user_id = 15;
-    StringExpression update_time = 16;
-    StringExpression create_group_id = 17;
-    StringExpression intro_typename = 18;
-    IntroSchemaOrderBy order_by = 19;
-    repeated string group_by = 20;
-    Conditional cond = 21;
-    repeated IntroSchemaExpression exs = 22;
-    int32 first = 23;
-    int32 last = 24;
-    int32 offset = 25;
-    string after = 26;
-}
-message QueryIntroTypeRequest {
-    StringExpression name = 1;
-    IntExpression schema_id = 2;
-    IntroTypeKindExpression kind = 3;
-    StringExpression description = 4;
-    IntroFieldExpression fields = 5;
-    IntroTypeExpression interfaces = 6;
-    IntroTypeExpression possible_types = 7;
-    IntroEnumValueExpression enum_values = 8;
-    IntroInputValueExpression input_fields = 9;
-    StringExpression of_type_name = 10;
-    IntroTypeExpression of_type = 11;
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression query_type_name = 4;
+    StringExpression mutation_type_name = 5;
+    StringExpression subscription_type_name = 6;
+    IntroTypeExpression types = 7;
+    IntroTypeExpression query_type = 8;
+    IntroTypeExpression mutation_type = 9;
+    IntroTypeExpression subscription_type = 10;
+    IntroDirectiveExpression directives = 11;
     bool include_deprecated = 12;
     IntExpression version = 13;
     StringExpression realm_id = 14;
@@ -106,30 +53,7 @@ message QueryIntroTypeRequest {
     StringExpression update_time = 18;
     StringExpression create_group_id = 19;
     StringExpression intro_typename = 20;
-    IntroTypeExpression where = 21;
-}
-message QueryIntroTypeListRequest {
-    StringExpression name = 1;
-    IntExpression schema_id = 2;
-    IntroTypeKindExpression kind = 3;
-    StringExpression description = 4;
-    IntroFieldExpression fields = 5;
-    IntroTypeExpression interfaces = 6;
-    IntroTypeExpression possible_types = 7;
-    IntroEnumValueExpression enum_values = 8;
-    IntroInputValueExpression input_fields = 9;
-    StringExpression of_type_name = 10;
-    IntroTypeExpression of_type = 11;
-    bool include_deprecated = 12;
-    IntExpression version = 13;
-    StringExpression realm_id = 14;
-    StringExpression create_user_id = 15;
-    StringExpression create_time = 16;
-    StringExpression update_user_id = 17;
-    StringExpression update_time = 18;
-    StringExpression create_group_id = 19;
-    StringExpression intro_typename = 20;
-    IntroTypeOrderBy order_by = 21;
+    IntroSchemaOrderBy order_by = 21;
     repeated string group_by = 22;
     Conditional cond = 23;
     int32 first = 24;
@@ -137,18 +61,18 @@ message QueryIntroTypeListRequest {
     int32 offset = 26;
     string after = 27;
 }
-message QueryIntroTypeConnectionRequest {
-    StringExpression name = 1;
-    IntExpression schema_id = 2;
-    IntroTypeKindExpression kind = 3;
-    StringExpression description = 4;
-    IntroFieldExpression fields = 5;
-    IntroTypeExpression interfaces = 6;
-    IntroTypeExpression possible_types = 7;
-    IntroEnumValueExpression enum_values = 8;
-    IntroInputValueExpression input_fields = 9;
-    StringExpression of_type_name = 10;
-    IntroTypeExpression of_type = 11;
+message QueryIntroSchemaConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression query_type_name = 4;
+    StringExpression mutation_type_name = 5;
+    StringExpression subscription_type_name = 6;
+    IntroTypeExpression types = 7;
+    IntroTypeExpression query_type = 8;
+    IntroTypeExpression mutation_type = 9;
+    IntroTypeExpression subscription_type = 10;
+    IntroDirectiveExpression directives = 11;
     bool include_deprecated = 12;
     IntExpression version = 13;
     StringExpression realm_id = 14;
@@ -158,513 +82,29 @@ message QueryIntroTypeConnectionRequest {
     StringExpression update_time = 18;
     StringExpression create_group_id = 19;
     StringExpression intro_typename = 20;
-    IntroTypeOrderBy order_by = 21;
+    IntroSchemaOrderBy order_by = 21;
     repeated string group_by = 22;
     Conditional cond = 23;
-    repeated IntroTypeExpression exs = 24;
+    repeated IntroSchemaExpression exs = 24;
     int32 first = 25;
     int32 last = 26;
     int32 offset = 27;
     string after = 28;
 }
-message QueryIntroTypeInterfacesRequest {
-    StringExpression id = 1;
-    StringExpression type_name = 2;
-    StringExpression interface_name = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroTypeInterfacesExpression where = 13;
-}
-message QueryIntroTypeInterfacesListRequest {
-    StringExpression id = 1;
-    StringExpression type_name = 2;
-    StringExpression interface_name = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroTypeInterfacesOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    int32 first = 16;
-    int32 last = 17;
-    int32 offset = 18;
-    string after = 19;
-}
-message QueryIntroTypeInterfacesConnectionRequest {
-    StringExpression id = 1;
-    StringExpression type_name = 2;
-    StringExpression interface_name = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroTypeInterfacesOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    repeated IntroTypeInterfacesExpression exs = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryIntroTypePossibleTypesRequest {
-    StringExpression id = 1;
-    StringExpression type_name = 2;
-    StringExpression possible_type_name = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroTypePossibleTypesExpression where = 13;
-}
-message QueryIntroTypePossibleTypesListRequest {
-    StringExpression id = 1;
-    StringExpression type_name = 2;
-    StringExpression possible_type_name = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroTypePossibleTypesOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    int32 first = 16;
-    int32 last = 17;
-    int32 offset = 18;
-    string after = 19;
-}
-message QueryIntroTypePossibleTypesConnectionRequest {
-    StringExpression id = 1;
-    StringExpression type_name = 2;
-    StringExpression possible_type_name = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroTypePossibleTypesOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    repeated IntroTypePossibleTypesExpression exs = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryIntroFieldRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression type_name = 3;
-    StringExpression of_type_name = 4;
-    IntroTypeExpression of_type = 5;
+message QueryIntroTypeRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression name = 3;
+    IntExpression schema_id = 4;
+    IntroTypeKindExpression kind = 5;
     StringExpression description = 6;
-    IntroInputValueExpression args = 7;
-    IntroTypeExpression type = 8;
-    StringExpression deprecation_reason = 9;
-    StringExpression from = 10;
-    StringExpression to = 11;
-    StringExpression with_type = 12;
-    StringExpression with_from = 13;
-    StringExpression with_to = 14;
-    bool include_deprecated = 15;
-    IntExpression version = 16;
-    StringExpression realm_id = 17;
-    StringExpression create_user_id = 18;
-    StringExpression create_time = 19;
-    StringExpression update_user_id = 20;
-    StringExpression update_time = 21;
-    StringExpression create_group_id = 22;
-    StringExpression intro_typename = 23;
-    IntroFieldExpression where = 24;
-}
-message QueryIntroFieldListRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression type_name = 3;
-    StringExpression of_type_name = 4;
-    IntroTypeExpression of_type = 5;
-    StringExpression description = 6;
-    IntroInputValueExpression args = 7;
-    IntroTypeExpression type = 8;
-    StringExpression deprecation_reason = 9;
-    StringExpression from = 10;
-    StringExpression to = 11;
-    StringExpression with_type = 12;
-    StringExpression with_from = 13;
-    StringExpression with_to = 14;
-    bool include_deprecated = 15;
-    IntExpression version = 16;
-    StringExpression realm_id = 17;
-    StringExpression create_user_id = 18;
-    StringExpression create_time = 19;
-    StringExpression update_user_id = 20;
-    StringExpression update_time = 21;
-    StringExpression create_group_id = 22;
-    StringExpression intro_typename = 23;
-    IntroFieldOrderBy order_by = 24;
-    repeated string group_by = 25;
-    Conditional cond = 26;
-    int32 first = 27;
-    int32 last = 28;
-    int32 offset = 29;
-    string after = 30;
-}
-message QueryIntroFieldConnectionRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression type_name = 3;
-    StringExpression of_type_name = 4;
-    IntroTypeExpression of_type = 5;
-    StringExpression description = 6;
-    IntroInputValueExpression args = 7;
-    IntroTypeExpression type = 8;
-    StringExpression deprecation_reason = 9;
-    StringExpression from = 10;
-    StringExpression to = 11;
-    StringExpression with_type = 12;
-    StringExpression with_from = 13;
-    StringExpression with_to = 14;
-    bool include_deprecated = 15;
-    IntExpression version = 16;
-    StringExpression realm_id = 17;
-    StringExpression create_user_id = 18;
-    StringExpression create_time = 19;
-    StringExpression update_user_id = 20;
-    StringExpression update_time = 21;
-    StringExpression create_group_id = 22;
-    StringExpression intro_typename = 23;
-    IntroFieldOrderBy order_by = 24;
-    repeated string group_by = 25;
-    Conditional cond = 26;
-    repeated IntroFieldExpression exs = 27;
-    int32 first = 28;
-    int32 last = 29;
-    int32 offset = 30;
-    string after = 31;
-}
-message QueryIntroInputValueRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression type_name = 3;
-    StringExpression of_type_name = 4;
-    IntroTypeExpression of_type = 5;
-    IntExpression field_id = 6;
-    StringExpression directive_name = 7;
-    StringExpression description = 8;
-    IntroTypeExpression type = 9;
-    StringExpression default_value = 10;
-    bool include_deprecated = 11;
-    IntExpression version = 12;
-    StringExpression realm_id = 13;
-    StringExpression create_user_id = 14;
-    StringExpression create_time = 15;
-    StringExpression update_user_id = 16;
-    StringExpression update_time = 17;
-    StringExpression create_group_id = 18;
-    StringExpression intro_typename = 19;
-    IntroInputValueExpression where = 20;
-}
-message QueryIntroInputValueListRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression type_name = 3;
-    StringExpression of_type_name = 4;
-    IntroTypeExpression of_type = 5;
-    IntExpression field_id = 6;
-    StringExpression directive_name = 7;
-    StringExpression description = 8;
-    IntroTypeExpression type = 9;
-    StringExpression default_value = 10;
-    bool include_deprecated = 11;
-    IntExpression version = 12;
-    StringExpression realm_id = 13;
-    StringExpression create_user_id = 14;
-    StringExpression create_time = 15;
-    StringExpression update_user_id = 16;
-    StringExpression update_time = 17;
-    StringExpression create_group_id = 18;
-    StringExpression intro_typename = 19;
-    IntroInputValueOrderBy order_by = 20;
-    repeated string group_by = 21;
-    Conditional cond = 22;
-    int32 first = 23;
-    int32 last = 24;
-    int32 offset = 25;
-    string after = 26;
-}
-message QueryIntroInputValueConnectionRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression type_name = 3;
-    StringExpression of_type_name = 4;
-    IntroTypeExpression of_type = 5;
-    IntExpression field_id = 6;
-    StringExpression directive_name = 7;
-    StringExpression description = 8;
-    IntroTypeExpression type = 9;
-    StringExpression default_value = 10;
-    bool include_deprecated = 11;
-    IntExpression version = 12;
-    StringExpression realm_id = 13;
-    StringExpression create_user_id = 14;
-    StringExpression create_time = 15;
-    StringExpression update_user_id = 16;
-    StringExpression update_time = 17;
-    StringExpression create_group_id = 18;
-    StringExpression intro_typename = 19;
-    IntroInputValueOrderBy order_by = 20;
-    repeated string group_by = 21;
-    Conditional cond = 22;
-    repeated IntroInputValueExpression exs = 23;
-    int32 first = 24;
-    int32 last = 25;
-    int32 offset = 26;
-    string after = 27;
-}
-message QueryIntroEnumValueRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression of_type_name = 3;
-    IntroTypeExpression of_type = 4;
-    StringExpression description = 5;
-    StringExpression deprecation_reason = 6;
-    bool include_deprecated = 7;
-    IntExpression version = 8;
-    StringExpression realm_id = 9;
-    StringExpression create_user_id = 10;
-    StringExpression create_time = 11;
-    StringExpression update_user_id = 12;
-    StringExpression update_time = 13;
-    StringExpression create_group_id = 14;
-    StringExpression intro_typename = 15;
-    IntroEnumValueExpression where = 16;
-}
-message QueryIntroEnumValueListRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression of_type_name = 3;
-    IntroTypeExpression of_type = 4;
-    StringExpression description = 5;
-    StringExpression deprecation_reason = 6;
-    bool include_deprecated = 7;
-    IntExpression version = 8;
-    StringExpression realm_id = 9;
-    StringExpression create_user_id = 10;
-    StringExpression create_time = 11;
-    StringExpression update_user_id = 12;
-    StringExpression update_time = 13;
-    StringExpression create_group_id = 14;
-    StringExpression intro_typename = 15;
-    IntroEnumValueOrderBy order_by = 16;
-    repeated string group_by = 17;
-    Conditional cond = 18;
-    int32 first = 19;
-    int32 last = 20;
-    int32 offset = 21;
-    string after = 22;
-}
-message QueryIntroEnumValueConnectionRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    StringExpression of_type_name = 3;
-    IntroTypeExpression of_type = 4;
-    StringExpression description = 5;
-    StringExpression deprecation_reason = 6;
-    bool include_deprecated = 7;
-    IntExpression version = 8;
-    StringExpression realm_id = 9;
-    StringExpression create_user_id = 10;
-    StringExpression create_time = 11;
-    StringExpression update_user_id = 12;
-    StringExpression update_time = 13;
-    StringExpression create_group_id = 14;
-    StringExpression intro_typename = 15;
-    IntroEnumValueOrderBy order_by = 16;
-    repeated string group_by = 17;
-    Conditional cond = 18;
-    repeated IntroEnumValueExpression exs = 19;
-    int32 first = 20;
-    int32 last = 21;
-    int32 offset = 22;
-    string after = 23;
-}
-message QueryIntroDirectiveRequest {
-    StringExpression name = 1;
-    IntExpression schema_id = 2;
-    StringExpression description = 3;
-    IntroDirectiveLocationExpression locations = 4;
-    IntroInputValueExpression args = 5;
-    BooleanExpression on_operation = 6;
-    BooleanExpression on_fragment = 7;
-    BooleanExpression on_field = 8;
-    bool include_deprecated = 9;
-    IntExpression version = 10;
-    StringExpression realm_id = 11;
-    StringExpression create_user_id = 12;
-    StringExpression create_time = 13;
-    StringExpression update_user_id = 14;
-    StringExpression update_time = 15;
-    StringExpression create_group_id = 16;
-    StringExpression intro_typename = 17;
-    IntroDirectiveExpression where = 18;
-}
-message QueryIntroDirectiveListRequest {
-    StringExpression name = 1;
-    IntExpression schema_id = 2;
-    StringExpression description = 3;
-    IntroDirectiveLocationExpression locations = 4;
-    IntroInputValueExpression args = 5;
-    BooleanExpression on_operation = 6;
-    BooleanExpression on_fragment = 7;
-    BooleanExpression on_field = 8;
-    bool include_deprecated = 9;
-    IntExpression version = 10;
-    StringExpression realm_id = 11;
-    StringExpression create_user_id = 12;
-    StringExpression create_time = 13;
-    StringExpression update_user_id = 14;
-    StringExpression update_time = 15;
-    StringExpression create_group_id = 16;
-    StringExpression intro_typename = 17;
-    IntroDirectiveOrderBy order_by = 18;
-    repeated string group_by = 19;
-    Conditional cond = 20;
-    int32 first = 21;
-    int32 last = 22;
-    int32 offset = 23;
-    string after = 24;
-}
-message QueryIntroDirectiveConnectionRequest {
-    StringExpression name = 1;
-    IntExpression schema_id = 2;
-    StringExpression description = 3;
-    IntroDirectiveLocationExpression locations = 4;
-    IntroInputValueExpression args = 5;
-    BooleanExpression on_operation = 6;
-    BooleanExpression on_fragment = 7;
-    BooleanExpression on_field = 8;
-    bool include_deprecated = 9;
-    IntExpression version = 10;
-    StringExpression realm_id = 11;
-    StringExpression create_user_id = 12;
-    StringExpression create_time = 13;
-    StringExpression update_user_id = 14;
-    StringExpression update_time = 15;
-    StringExpression create_group_id = 16;
-    StringExpression intro_typename = 17;
-    IntroDirectiveOrderBy order_by = 18;
-    repeated string group_by = 19;
-    Conditional cond = 20;
-    repeated IntroDirectiveExpression exs = 21;
-    int32 first = 22;
-    int32 last = 23;
-    int32 offset = 24;
-    string after = 25;
-}
-message QueryIntroDirectiveLocationsRequest {
-    StringExpression id = 1;
-    StringExpression directive_name = 2;
-    IntroDirectiveLocationExpression directive_location = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroDirectiveLocationsExpression where = 13;
-}
-message QueryIntroDirectiveLocationsListRequest {
-    StringExpression id = 1;
-    StringExpression directive_name = 2;
-    IntroDirectiveLocationExpression directive_location = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroDirectiveLocationsOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    int32 first = 16;
-    int32 last = 17;
-    int32 offset = 18;
-    string after = 19;
-}
-message QueryIntroDirectiveLocationsConnectionRequest {
-    StringExpression id = 1;
-    StringExpression directive_name = 2;
-    IntroDirectiveLocationExpression directive_location = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    IntroDirectiveLocationsOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    repeated IntroDirectiveLocationsExpression exs = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryUserRequest {
-    StringExpression id = 1;
-    StringExpression login = 2;
-    StringExpression password = 3;
-    StringExpression name = 4;
-    IntExpression age = 5;
-    BooleanExpression disable = 6;
-    SexExpression sex = 7;
-    IntExpression organization_id = 8;
-    OrganizationExpression organization = 9;
-    RoleExpression roles = 10;
-    StringExpression phones = 11;
-    IntExpression test1 = 12;
-    BooleanExpression test2 = 13;
+    IntroFieldExpression fields = 7;
+    IntroTypeExpression interfaces = 8;
+    IntroTypeExpression possible_types = 9;
+    IntroEnumValueExpression enum_values = 10;
+    IntroInputValueExpression input_fields = 11;
+    StringExpression of_type_name = 12;
+    IntroTypeExpression of_type = 13;
     bool include_deprecated = 14;
     IntExpression version = 15;
     StringExpression realm_id = 16;
@@ -674,22 +114,22 @@ message QueryUserRequest {
     StringExpression update_time = 20;
     StringExpression create_group_id = 21;
     StringExpression intro_typename = 22;
-    UserExpression where = 23;
+    IntroTypeExpression where = 23;
 }
-message QueryUserListRequest {
-    StringExpression id = 1;
-    StringExpression login = 2;
-    StringExpression password = 3;
-    StringExpression name = 4;
-    IntExpression age = 5;
-    BooleanExpression disable = 6;
-    SexExpression sex = 7;
-    IntExpression organization_id = 8;
-    OrganizationExpression organization = 9;
-    RoleExpression roles = 10;
-    StringExpression phones = 11;
-    IntExpression test1 = 12;
-    BooleanExpression test2 = 13;
+message QueryIntroTypeListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression name = 3;
+    IntExpression schema_id = 4;
+    IntroTypeKindExpression kind = 5;
+    StringExpression description = 6;
+    IntroFieldExpression fields = 7;
+    IntroTypeExpression interfaces = 8;
+    IntroTypeExpression possible_types = 9;
+    IntroEnumValueExpression enum_values = 10;
+    IntroInputValueExpression input_fields = 11;
+    StringExpression of_type_name = 12;
+    IntroTypeExpression of_type = 13;
     bool include_deprecated = 14;
     IntExpression version = 15;
     StringExpression realm_id = 16;
@@ -699,7 +139,7 @@ message QueryUserListRequest {
     StringExpression update_time = 20;
     StringExpression create_group_id = 21;
     StringExpression intro_typename = 22;
-    UserOrderBy order_by = 23;
+    IntroTypeOrderBy order_by = 23;
     repeated string group_by = 24;
     Conditional cond = 25;
     int32 first = 26;
@@ -707,20 +147,20 @@ message QueryUserListRequest {
     int32 offset = 28;
     string after = 29;
 }
-message QueryUserConnectionRequest {
-    StringExpression id = 1;
-    StringExpression login = 2;
-    StringExpression password = 3;
-    StringExpression name = 4;
-    IntExpression age = 5;
-    BooleanExpression disable = 6;
-    SexExpression sex = 7;
-    IntExpression organization_id = 8;
-    OrganizationExpression organization = 9;
-    RoleExpression roles = 10;
-    StringExpression phones = 11;
-    IntExpression test1 = 12;
-    BooleanExpression test2 = 13;
+message QueryIntroTypeConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression name = 3;
+    IntExpression schema_id = 4;
+    IntroTypeKindExpression kind = 5;
+    StringExpression description = 6;
+    IntroFieldExpression fields = 7;
+    IntroTypeExpression interfaces = 8;
+    IntroTypeExpression possible_types = 9;
+    IntroEnumValueExpression enum_values = 10;
+    IntroInputValueExpression input_fields = 11;
+    StringExpression of_type_name = 12;
+    IntroTypeExpression of_type = 13;
     bool include_deprecated = 14;
     IntExpression version = 15;
     StringExpression realm_id = 16;
@@ -730,372 +170,21 @@ message QueryUserConnectionRequest {
     StringExpression update_time = 20;
     StringExpression create_group_id = 21;
     StringExpression intro_typename = 22;
-    UserOrderBy order_by = 23;
+    IntroTypeOrderBy order_by = 23;
     repeated string group_by = 24;
     Conditional cond = 25;
-    repeated UserExpression exs = 26;
+    repeated IntroTypeExpression exs = 26;
     int32 first = 27;
     int32 last = 28;
     int32 offset = 29;
     string after = 30;
 }
-message QueryUserPhonesRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    StringExpression phone = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserPhonesExpression where = 13;
-}
-message QueryUserPhonesListRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    StringExpression phone = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserPhonesOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    int32 first = 16;
-    int32 last = 17;
-    int32 offset = 18;
-    string after = 19;
-}
-message QueryUserPhonesConnectionRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    StringExpression phone = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserPhonesOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    repeated UserPhonesExpression exs = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryUserTest1Request {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    IntExpression test1 = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserTest1Expression where = 13;
-}
-message QueryUserTest1ListRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    IntExpression test1 = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserTest1OrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    int32 first = 16;
-    int32 last = 17;
-    int32 offset = 18;
-    string after = 19;
-}
-message QueryUserTest1ConnectionRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    IntExpression test1 = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserTest1OrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    repeated UserTest1Expression exs = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryUserTest2Request {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    BooleanExpression test2 = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserTest2Expression where = 13;
-}
-message QueryUserTest2ListRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    BooleanExpression test2 = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserTest2OrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    int32 first = 16;
-    int32 last = 17;
-    int32 offset = 18;
-    string after = 19;
-}
-message QueryUserTest2ConnectionRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    BooleanExpression test2 = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserTest2OrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    repeated UserTest2Expression exs = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryUserRoleRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    IntExpression role_id = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserRoleExpression where = 13;
-}
-message QueryUserRoleListRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    IntExpression role_id = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserRoleOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    int32 first = 16;
-    int32 last = 17;
-    int32 offset = 18;
-    string after = 19;
-}
-message QueryUserRoleConnectionRequest {
-    StringExpression id = 1;
-    IntExpression user_id = 2;
-    IntExpression role_id = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    UserRoleOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    repeated UserRoleExpression exs = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryRoleRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    RoleTypeExpression type = 3;
-    UserExpression users = 4;
-    bool include_deprecated = 5;
-    IntExpression version = 6;
-    StringExpression realm_id = 7;
-    StringExpression create_user_id = 8;
-    StringExpression create_time = 9;
-    StringExpression update_user_id = 10;
-    StringExpression update_time = 11;
-    StringExpression create_group_id = 12;
-    StringExpression intro_typename = 13;
-    RoleExpression where = 14;
-}
-message QueryRoleListRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    RoleTypeExpression type = 3;
-    UserExpression users = 4;
-    bool include_deprecated = 5;
-    IntExpression version = 6;
-    StringExpression realm_id = 7;
-    StringExpression create_user_id = 8;
-    StringExpression create_time = 9;
-    StringExpression update_user_id = 10;
-    StringExpression update_time = 11;
-    StringExpression create_group_id = 12;
-    StringExpression intro_typename = 13;
-    RoleOrderBy order_by = 14;
-    repeated string group_by = 15;
-    Conditional cond = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryRoleConnectionRequest {
-    StringExpression id = 1;
-    StringExpression name = 2;
-    RoleTypeExpression type = 3;
-    UserExpression users = 4;
-    bool include_deprecated = 5;
-    IntExpression version = 6;
-    StringExpression realm_id = 7;
-    StringExpression create_user_id = 8;
-    StringExpression create_time = 9;
-    StringExpression update_user_id = 10;
-    StringExpression update_time = 11;
-    StringExpression create_group_id = 12;
-    StringExpression intro_typename = 13;
-    RoleOrderBy order_by = 14;
-    repeated string group_by = 15;
-    Conditional cond = 16;
-    repeated RoleExpression exs = 17;
-    int32 first = 18;
-    int32 last = 19;
-    int32 offset = 20;
-    string after = 21;
-}
-message QueryRoleRoleTypeRequest {
-    StringExpression id = 1;
-    IntExpression role_id = 2;
-    RoleTypeExpression type = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    RoleRoleTypeExpression where = 13;
-}
-message QueryRoleRoleTypeListRequest {
-    StringExpression id = 1;
-    IntExpression role_id = 2;
-    RoleTypeExpression type = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    RoleRoleTypeOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    int32 first = 16;
-    int32 last = 17;
-    int32 offset = 18;
-    string after = 19;
-}
-message QueryRoleRoleTypeConnectionRequest {
-    StringExpression id = 1;
-    IntExpression role_id = 2;
-    RoleTypeExpression type = 3;
-    bool include_deprecated = 4;
-    IntExpression version = 5;
-    StringExpression realm_id = 6;
-    StringExpression create_user_id = 7;
-    StringExpression create_time = 8;
-    StringExpression update_user_id = 9;
-    StringExpression update_time = 10;
-    StringExpression create_group_id = 11;
-    StringExpression intro_typename = 12;
-    RoleRoleTypeOrderBy order_by = 13;
-    repeated string group_by = 14;
-    Conditional cond = 15;
-    repeated RoleRoleTypeExpression exs = 16;
-    int32 first = 17;
-    int32 last = 18;
-    int32 offset = 19;
-    string after = 20;
-}
-message QueryOrganizationRequest {
-    StringExpression id = 1;
-    IntExpression above_id = 2;
-    OrganizationExpression above = 3;
-    UserExpression users = 4;
-    StringExpression name = 5;
+message QueryIntroTypeInterfacesRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression type_name = 4;
+    StringExpression interface_name = 5;
     bool include_deprecated = 6;
     IntExpression version = 7;
     StringExpression realm_id = 8;
@@ -1105,14 +194,14 @@ message QueryOrganizationRequest {
     StringExpression update_time = 12;
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
-    OrganizationExpression where = 15;
+    IntroTypeInterfacesExpression where = 15;
 }
-message QueryOrganizationListRequest {
-    StringExpression id = 1;
-    IntExpression above_id = 2;
-    OrganizationExpression above = 3;
-    UserExpression users = 4;
-    StringExpression name = 5;
+message QueryIntroTypeInterfacesListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression type_name = 4;
+    StringExpression interface_name = 5;
     bool include_deprecated = 6;
     IntExpression version = 7;
     StringExpression realm_id = 8;
@@ -1122,7 +211,7 @@ message QueryOrganizationListRequest {
     StringExpression update_time = 12;
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
-    OrganizationOrderBy order_by = 15;
+    IntroTypeInterfacesOrderBy order_by = 15;
     repeated string group_by = 16;
     Conditional cond = 17;
     int32 first = 18;
@@ -1130,12 +219,12 @@ message QueryOrganizationListRequest {
     int32 offset = 20;
     string after = 21;
 }
-message QueryOrganizationConnectionRequest {
-    StringExpression id = 1;
-    IntExpression above_id = 2;
-    OrganizationExpression above = 3;
-    UserExpression users = 4;
-    StringExpression name = 5;
+message QueryIntroTypeInterfacesConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression type_name = 4;
+    StringExpression interface_name = 5;
     bool include_deprecated = 6;
     IntExpression version = 7;
     StringExpression realm_id = 8;
@@ -1145,46 +234,1091 @@ message QueryOrganizationConnectionRequest {
     StringExpression update_time = 12;
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
-    OrganizationOrderBy order_by = 15;
+    IntroTypeInterfacesOrderBy order_by = 15;
     repeated string group_by = 16;
     Conditional cond = 17;
-    repeated OrganizationExpression exs = 18;
+    repeated IntroTypeInterfacesExpression exs = 18;
     int32 first = 19;
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
 }
+message QueryIntroTypePossibleTypesRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression type_name = 4;
+    StringExpression possible_type_name = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    IntroTypePossibleTypesExpression where = 15;
+}
+message QueryIntroTypePossibleTypesListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression type_name = 4;
+    StringExpression possible_type_name = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    IntroTypePossibleTypesOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryIntroTypePossibleTypesConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression type_name = 4;
+    StringExpression possible_type_name = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    IntroTypePossibleTypesOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    repeated IntroTypePossibleTypesExpression exs = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryIntroFieldRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression type_name = 5;
+    StringExpression of_type_name = 6;
+    IntroTypeExpression of_type = 7;
+    StringExpression description = 8;
+    IntroInputValueExpression args = 9;
+    IntroTypeExpression type = 10;
+    StringExpression deprecation_reason = 11;
+    StringExpression from = 12;
+    StringExpression to = 13;
+    StringExpression with_type = 14;
+    StringExpression with_from = 15;
+    StringExpression with_to = 16;
+    bool include_deprecated = 17;
+    IntExpression version = 18;
+    StringExpression realm_id = 19;
+    StringExpression create_user_id = 20;
+    StringExpression create_time = 21;
+    StringExpression update_user_id = 22;
+    StringExpression update_time = 23;
+    StringExpression create_group_id = 24;
+    StringExpression intro_typename = 25;
+    IntroFieldExpression where = 26;
+}
+message QueryIntroFieldListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression type_name = 5;
+    StringExpression of_type_name = 6;
+    IntroTypeExpression of_type = 7;
+    StringExpression description = 8;
+    IntroInputValueExpression args = 9;
+    IntroTypeExpression type = 10;
+    StringExpression deprecation_reason = 11;
+    StringExpression from = 12;
+    StringExpression to = 13;
+    StringExpression with_type = 14;
+    StringExpression with_from = 15;
+    StringExpression with_to = 16;
+    bool include_deprecated = 17;
+    IntExpression version = 18;
+    StringExpression realm_id = 19;
+    StringExpression create_user_id = 20;
+    StringExpression create_time = 21;
+    StringExpression update_user_id = 22;
+    StringExpression update_time = 23;
+    StringExpression create_group_id = 24;
+    StringExpression intro_typename = 25;
+    IntroFieldOrderBy order_by = 26;
+    repeated string group_by = 27;
+    Conditional cond = 28;
+    int32 first = 29;
+    int32 last = 30;
+    int32 offset = 31;
+    string after = 32;
+}
+message QueryIntroFieldConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression type_name = 5;
+    StringExpression of_type_name = 6;
+    IntroTypeExpression of_type = 7;
+    StringExpression description = 8;
+    IntroInputValueExpression args = 9;
+    IntroTypeExpression type = 10;
+    StringExpression deprecation_reason = 11;
+    StringExpression from = 12;
+    StringExpression to = 13;
+    StringExpression with_type = 14;
+    StringExpression with_from = 15;
+    StringExpression with_to = 16;
+    bool include_deprecated = 17;
+    IntExpression version = 18;
+    StringExpression realm_id = 19;
+    StringExpression create_user_id = 20;
+    StringExpression create_time = 21;
+    StringExpression update_user_id = 22;
+    StringExpression update_time = 23;
+    StringExpression create_group_id = 24;
+    StringExpression intro_typename = 25;
+    IntroFieldOrderBy order_by = 26;
+    repeated string group_by = 27;
+    Conditional cond = 28;
+    repeated IntroFieldExpression exs = 29;
+    int32 first = 30;
+    int32 last = 31;
+    int32 offset = 32;
+    string after = 33;
+}
+message QueryIntroInputValueRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression type_name = 5;
+    StringExpression of_type_name = 6;
+    IntroTypeExpression of_type = 7;
+    IntExpression field_id = 8;
+    StringExpression directive_name = 9;
+    StringExpression description = 10;
+    IntroTypeExpression type = 11;
+    StringExpression default_value = 12;
+    bool include_deprecated = 13;
+    IntExpression version = 14;
+    StringExpression realm_id = 15;
+    StringExpression create_user_id = 16;
+    StringExpression create_time = 17;
+    StringExpression update_user_id = 18;
+    StringExpression update_time = 19;
+    StringExpression create_group_id = 20;
+    StringExpression intro_typename = 21;
+    IntroInputValueExpression where = 22;
+}
+message QueryIntroInputValueListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression type_name = 5;
+    StringExpression of_type_name = 6;
+    IntroTypeExpression of_type = 7;
+    IntExpression field_id = 8;
+    StringExpression directive_name = 9;
+    StringExpression description = 10;
+    IntroTypeExpression type = 11;
+    StringExpression default_value = 12;
+    bool include_deprecated = 13;
+    IntExpression version = 14;
+    StringExpression realm_id = 15;
+    StringExpression create_user_id = 16;
+    StringExpression create_time = 17;
+    StringExpression update_user_id = 18;
+    StringExpression update_time = 19;
+    StringExpression create_group_id = 20;
+    StringExpression intro_typename = 21;
+    IntroInputValueOrderBy order_by = 22;
+    repeated string group_by = 23;
+    Conditional cond = 24;
+    int32 first = 25;
+    int32 last = 26;
+    int32 offset = 27;
+    string after = 28;
+}
+message QueryIntroInputValueConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression type_name = 5;
+    StringExpression of_type_name = 6;
+    IntroTypeExpression of_type = 7;
+    IntExpression field_id = 8;
+    StringExpression directive_name = 9;
+    StringExpression description = 10;
+    IntroTypeExpression type = 11;
+    StringExpression default_value = 12;
+    bool include_deprecated = 13;
+    IntExpression version = 14;
+    StringExpression realm_id = 15;
+    StringExpression create_user_id = 16;
+    StringExpression create_time = 17;
+    StringExpression update_user_id = 18;
+    StringExpression update_time = 19;
+    StringExpression create_group_id = 20;
+    StringExpression intro_typename = 21;
+    IntroInputValueOrderBy order_by = 22;
+    repeated string group_by = 23;
+    Conditional cond = 24;
+    repeated IntroInputValueExpression exs = 25;
+    int32 first = 26;
+    int32 last = 27;
+    int32 offset = 28;
+    string after = 29;
+}
+message QueryIntroEnumValueRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression of_type_name = 5;
+    IntroTypeExpression of_type = 6;
+    StringExpression description = 7;
+    StringExpression deprecation_reason = 8;
+    bool include_deprecated = 9;
+    IntExpression version = 10;
+    StringExpression realm_id = 11;
+    StringExpression create_user_id = 12;
+    StringExpression create_time = 13;
+    StringExpression update_user_id = 14;
+    StringExpression update_time = 15;
+    StringExpression create_group_id = 16;
+    StringExpression intro_typename = 17;
+    IntroEnumValueExpression where = 18;
+}
+message QueryIntroEnumValueListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression of_type_name = 5;
+    IntroTypeExpression of_type = 6;
+    StringExpression description = 7;
+    StringExpression deprecation_reason = 8;
+    bool include_deprecated = 9;
+    IntExpression version = 10;
+    StringExpression realm_id = 11;
+    StringExpression create_user_id = 12;
+    StringExpression create_time = 13;
+    StringExpression update_user_id = 14;
+    StringExpression update_time = 15;
+    StringExpression create_group_id = 16;
+    StringExpression intro_typename = 17;
+    IntroEnumValueOrderBy order_by = 18;
+    repeated string group_by = 19;
+    Conditional cond = 20;
+    int32 first = 21;
+    int32 last = 22;
+    int32 offset = 23;
+    string after = 24;
+}
+message QueryIntroEnumValueConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    StringExpression of_type_name = 5;
+    IntroTypeExpression of_type = 6;
+    StringExpression description = 7;
+    StringExpression deprecation_reason = 8;
+    bool include_deprecated = 9;
+    IntExpression version = 10;
+    StringExpression realm_id = 11;
+    StringExpression create_user_id = 12;
+    StringExpression create_time = 13;
+    StringExpression update_user_id = 14;
+    StringExpression update_time = 15;
+    StringExpression create_group_id = 16;
+    StringExpression intro_typename = 17;
+    IntroEnumValueOrderBy order_by = 18;
+    repeated string group_by = 19;
+    Conditional cond = 20;
+    repeated IntroEnumValueExpression exs = 21;
+    int32 first = 22;
+    int32 last = 23;
+    int32 offset = 24;
+    string after = 25;
+}
+message QueryIntroDirectiveRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression name = 3;
+    IntExpression schema_id = 4;
+    StringExpression description = 5;
+    IntroDirectiveLocationExpression locations = 6;
+    IntroInputValueExpression args = 7;
+    BooleanExpression on_operation = 8;
+    BooleanExpression on_fragment = 9;
+    BooleanExpression on_field = 10;
+    bool include_deprecated = 11;
+    IntExpression version = 12;
+    StringExpression realm_id = 13;
+    StringExpression create_user_id = 14;
+    StringExpression create_time = 15;
+    StringExpression update_user_id = 16;
+    StringExpression update_time = 17;
+    StringExpression create_group_id = 18;
+    StringExpression intro_typename = 19;
+    IntroDirectiveExpression where = 20;
+}
+message QueryIntroDirectiveListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression name = 3;
+    IntExpression schema_id = 4;
+    StringExpression description = 5;
+    IntroDirectiveLocationExpression locations = 6;
+    IntroInputValueExpression args = 7;
+    BooleanExpression on_operation = 8;
+    BooleanExpression on_fragment = 9;
+    BooleanExpression on_field = 10;
+    bool include_deprecated = 11;
+    IntExpression version = 12;
+    StringExpression realm_id = 13;
+    StringExpression create_user_id = 14;
+    StringExpression create_time = 15;
+    StringExpression update_user_id = 16;
+    StringExpression update_time = 17;
+    StringExpression create_group_id = 18;
+    StringExpression intro_typename = 19;
+    IntroDirectiveOrderBy order_by = 20;
+    repeated string group_by = 21;
+    Conditional cond = 22;
+    int32 first = 23;
+    int32 last = 24;
+    int32 offset = 25;
+    string after = 26;
+}
+message QueryIntroDirectiveConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression name = 3;
+    IntExpression schema_id = 4;
+    StringExpression description = 5;
+    IntroDirectiveLocationExpression locations = 6;
+    IntroInputValueExpression args = 7;
+    BooleanExpression on_operation = 8;
+    BooleanExpression on_fragment = 9;
+    BooleanExpression on_field = 10;
+    bool include_deprecated = 11;
+    IntExpression version = 12;
+    StringExpression realm_id = 13;
+    StringExpression create_user_id = 14;
+    StringExpression create_time = 15;
+    StringExpression update_user_id = 16;
+    StringExpression update_time = 17;
+    StringExpression create_group_id = 18;
+    StringExpression intro_typename = 19;
+    IntroDirectiveOrderBy order_by = 20;
+    repeated string group_by = 21;
+    Conditional cond = 22;
+    repeated IntroDirectiveExpression exs = 23;
+    int32 first = 24;
+    int32 last = 25;
+    int32 offset = 26;
+    string after = 27;
+}
+message QueryIntroDirectiveLocationsRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression directive_name = 4;
+    IntroDirectiveLocationExpression directive_location = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    IntroDirectiveLocationsExpression where = 15;
+}
+message QueryIntroDirectiveLocationsListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression directive_name = 4;
+    IntroDirectiveLocationExpression directive_location = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    IntroDirectiveLocationsOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryIntroDirectiveLocationsConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression directive_name = 4;
+    IntroDirectiveLocationExpression directive_location = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    IntroDirectiveLocationsOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    repeated IntroDirectiveLocationsExpression exs = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryUserRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression login = 4;
+    StringExpression password = 5;
+    StringExpression name = 6;
+    IntExpression age = 7;
+    BooleanExpression disable = 8;
+    SexExpression sex = 9;
+    IntExpression organization_id = 10;
+    OrganizationExpression organization = 11;
+    RoleExpression roles = 12;
+    StringExpression phones = 13;
+    IntExpression test1 = 14;
+    BooleanExpression test2 = 15;
+    bool include_deprecated = 16;
+    IntExpression version = 17;
+    StringExpression realm_id = 18;
+    StringExpression create_user_id = 19;
+    StringExpression create_time = 20;
+    StringExpression update_user_id = 21;
+    StringExpression update_time = 22;
+    StringExpression create_group_id = 23;
+    StringExpression intro_typename = 24;
+    UserExpression where = 25;
+}
+message QueryUserListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression login = 4;
+    StringExpression password = 5;
+    StringExpression name = 6;
+    IntExpression age = 7;
+    BooleanExpression disable = 8;
+    SexExpression sex = 9;
+    IntExpression organization_id = 10;
+    OrganizationExpression organization = 11;
+    RoleExpression roles = 12;
+    StringExpression phones = 13;
+    IntExpression test1 = 14;
+    BooleanExpression test2 = 15;
+    bool include_deprecated = 16;
+    IntExpression version = 17;
+    StringExpression realm_id = 18;
+    StringExpression create_user_id = 19;
+    StringExpression create_time = 20;
+    StringExpression update_user_id = 21;
+    StringExpression update_time = 22;
+    StringExpression create_group_id = 23;
+    StringExpression intro_typename = 24;
+    UserOrderBy order_by = 25;
+    repeated string group_by = 26;
+    Conditional cond = 27;
+    int32 first = 28;
+    int32 last = 29;
+    int32 offset = 30;
+    string after = 31;
+}
+message QueryUserConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression login = 4;
+    StringExpression password = 5;
+    StringExpression name = 6;
+    IntExpression age = 7;
+    BooleanExpression disable = 8;
+    SexExpression sex = 9;
+    IntExpression organization_id = 10;
+    OrganizationExpression organization = 11;
+    RoleExpression roles = 12;
+    StringExpression phones = 13;
+    IntExpression test1 = 14;
+    BooleanExpression test2 = 15;
+    bool include_deprecated = 16;
+    IntExpression version = 17;
+    StringExpression realm_id = 18;
+    StringExpression create_user_id = 19;
+    StringExpression create_time = 20;
+    StringExpression update_user_id = 21;
+    StringExpression update_time = 22;
+    StringExpression create_group_id = 23;
+    StringExpression intro_typename = 24;
+    UserOrderBy order_by = 25;
+    repeated string group_by = 26;
+    Conditional cond = 27;
+    repeated UserExpression exs = 28;
+    int32 first = 29;
+    int32 last = 30;
+    int32 offset = 31;
+    string after = 32;
+}
+message QueryUserPhonesRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    StringExpression phone = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserPhonesExpression where = 15;
+}
+message QueryUserPhonesListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    StringExpression phone = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserPhonesOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryUserPhonesConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    StringExpression phone = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserPhonesOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    repeated UserPhonesExpression exs = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryUserTest1Request {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    IntExpression test1 = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserTest1Expression where = 15;
+}
+message QueryUserTest1ListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    IntExpression test1 = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserTest1OrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryUserTest1ConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    IntExpression test1 = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserTest1OrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    repeated UserTest1Expression exs = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryUserTest2Request {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    BooleanExpression test2 = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserTest2Expression where = 15;
+}
+message QueryUserTest2ListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    BooleanExpression test2 = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserTest2OrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryUserTest2ConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    BooleanExpression test2 = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserTest2OrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    repeated UserTest2Expression exs = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryUserRoleRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    IntExpression role_id = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserRoleExpression where = 15;
+}
+message QueryUserRoleListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    IntExpression role_id = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserRoleOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryUserRoleConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression user_id = 4;
+    IntExpression role_id = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    UserRoleOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    repeated UserRoleExpression exs = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryRoleRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    RoleTypeExpression type = 5;
+    UserExpression users = 6;
+    bool include_deprecated = 7;
+    IntExpression version = 8;
+    StringExpression realm_id = 9;
+    StringExpression create_user_id = 10;
+    StringExpression create_time = 11;
+    StringExpression update_user_id = 12;
+    StringExpression update_time = 13;
+    StringExpression create_group_id = 14;
+    StringExpression intro_typename = 15;
+    RoleExpression where = 16;
+}
+message QueryRoleListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    RoleTypeExpression type = 5;
+    UserExpression users = 6;
+    bool include_deprecated = 7;
+    IntExpression version = 8;
+    StringExpression realm_id = 9;
+    StringExpression create_user_id = 10;
+    StringExpression create_time = 11;
+    StringExpression update_user_id = 12;
+    StringExpression update_time = 13;
+    StringExpression create_group_id = 14;
+    StringExpression intro_typename = 15;
+    RoleOrderBy order_by = 16;
+    repeated string group_by = 17;
+    Conditional cond = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryRoleConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    StringExpression name = 4;
+    RoleTypeExpression type = 5;
+    UserExpression users = 6;
+    bool include_deprecated = 7;
+    IntExpression version = 8;
+    StringExpression realm_id = 9;
+    StringExpression create_user_id = 10;
+    StringExpression create_time = 11;
+    StringExpression update_user_id = 12;
+    StringExpression update_time = 13;
+    StringExpression create_group_id = 14;
+    StringExpression intro_typename = 15;
+    RoleOrderBy order_by = 16;
+    repeated string group_by = 17;
+    Conditional cond = 18;
+    repeated RoleExpression exs = 19;
+    int32 first = 20;
+    int32 last = 21;
+    int32 offset = 22;
+    string after = 23;
+}
+message QueryRoleRoleTypeRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression role_id = 4;
+    RoleTypeExpression type = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    RoleRoleTypeExpression where = 15;
+}
+message QueryRoleRoleTypeListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression role_id = 4;
+    RoleTypeExpression type = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    RoleRoleTypeOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    int32 first = 18;
+    int32 last = 19;
+    int32 offset = 20;
+    string after = 21;
+}
+message QueryRoleRoleTypeConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression role_id = 4;
+    RoleTypeExpression type = 5;
+    bool include_deprecated = 6;
+    IntExpression version = 7;
+    StringExpression realm_id = 8;
+    StringExpression create_user_id = 9;
+    StringExpression create_time = 10;
+    StringExpression update_user_id = 11;
+    StringExpression update_time = 12;
+    StringExpression create_group_id = 13;
+    StringExpression intro_typename = 14;
+    RoleRoleTypeOrderBy order_by = 15;
+    repeated string group_by = 16;
+    Conditional cond = 17;
+    repeated RoleRoleTypeExpression exs = 18;
+    int32 first = 19;
+    int32 last = 20;
+    int32 offset = 21;
+    string after = 22;
+}
+message QueryOrganizationRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression above_id = 4;
+    OrganizationExpression above = 5;
+    UserExpression users = 6;
+    StringExpression name = 7;
+    bool include_deprecated = 8;
+    IntExpression version = 9;
+    StringExpression realm_id = 10;
+    StringExpression create_user_id = 11;
+    StringExpression create_time = 12;
+    StringExpression update_user_id = 13;
+    StringExpression update_time = 14;
+    StringExpression create_group_id = 15;
+    StringExpression intro_typename = 16;
+    OrganizationExpression where = 17;
+}
+message QueryOrganizationListRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression above_id = 4;
+    OrganizationExpression above = 5;
+    UserExpression users = 6;
+    StringExpression name = 7;
+    bool include_deprecated = 8;
+    IntExpression version = 9;
+    StringExpression realm_id = 10;
+    StringExpression create_user_id = 11;
+    StringExpression create_time = 12;
+    StringExpression update_user_id = 13;
+    StringExpression update_time = 14;
+    StringExpression create_group_id = 15;
+    StringExpression intro_typename = 16;
+    OrganizationOrderBy order_by = 17;
+    repeated string group_by = 18;
+    Conditional cond = 19;
+    int32 first = 20;
+    int32 last = 21;
+    int32 offset = 22;
+    string after = 23;
+}
+message QueryOrganizationConnectionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
+    StringExpression id = 3;
+    IntExpression above_id = 4;
+    OrganizationExpression above = 5;
+    UserExpression users = 6;
+    StringExpression name = 7;
+    bool include_deprecated = 8;
+    IntExpression version = 9;
+    StringExpression realm_id = 10;
+    StringExpression create_user_id = 11;
+    StringExpression create_time = 12;
+    StringExpression update_user_id = 13;
+    StringExpression update_time = 14;
+    StringExpression create_group_id = 15;
+    StringExpression intro_typename = 16;
+    OrganizationOrderBy order_by = 17;
+    repeated string group_by = 18;
+    Conditional cond = 19;
+    repeated OrganizationExpression exs = 20;
+    int32 first = 21;
+    int32 last = 22;
+    int32 offset = 23;
+    string after = 24;
+}
 message QueryIsDeprecatedRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryVersionRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryRealmIdRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryCreateUserIdRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryCreateTimeRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryUpdateUserIdRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryUpdateTimeRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryCreateGroupIdRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryGetUserDetailRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryGetUserDetail6Request {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryGetOrgLevelRequest {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryGetRoleDisable2Request {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryGetOrgLevel5Request {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryGetUserByOrg2Request {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryGetParent2Request {
+    string selectionSet = 1;
+    int32 layers = 2;
 }
 message QueryFindRole2Request {
-    string name = 1;
-    int32 type = 2;
+    string selectionSet = 1;
+    int32 layers = 2;
+    string name = 3;
+    int32 type = 4;
 }

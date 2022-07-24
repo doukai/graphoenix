@@ -10,6 +10,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonValue;
 import jakarta.json.bind.Jsonb;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
@@ -43,7 +44,7 @@ public class GetRequestHandler extends BaseRequestHandler {
         Map<String, Object> context = new ConcurrentHashMap<>();
         context.put(REQUEST, request);
         context.put(RESPONSE, response);
-        Type type = new TypeToken<Map<String, String>>() {
+        Type type = new TypeToken<Map<String, JsonValue>>() {
         }.getType();
         GraphQLRequest graphQLRequest = new GraphQLRequest(
                 request.param("query"),
