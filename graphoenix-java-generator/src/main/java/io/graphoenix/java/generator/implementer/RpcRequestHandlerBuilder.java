@@ -188,7 +188,7 @@ public class RpcRequestHandlerBuilder {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-                if (inputValueDefinitionContext.type().nonNullType() != null) {
+                if (inputValueDefinitionContext.type().nonNullType() == null) {
                     builder.beginControlFlow("if ($L.$L() > 0)", typeParameterName, getRpcGetInputValueCountName(inputValueDefinitionContext))
                             .addStatement(codeBlock)
                             .endControlFlow();
@@ -228,7 +228,7 @@ public class RpcRequestHandlerBuilder {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-                if (inputValueDefinitionContext.type().nonNullType() != null) {
+                if (inputValueDefinitionContext.type().nonNullType() == null) {
                     builder.beginControlFlow("if ($L.$L())", typeParameterName, getRpcHasInputValueName(inputValueDefinitionContext))
                             .addStatement(codeBlock)
                             .endControlFlow();

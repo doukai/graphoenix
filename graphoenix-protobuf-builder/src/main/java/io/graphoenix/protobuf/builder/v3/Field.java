@@ -25,6 +25,9 @@ public class Field {
 
     public Field setOptional(Boolean optional) {
         this.optional = optional;
+        if (optional) {
+            this.setRepeated(false);
+        }
         return this;
     }
 

@@ -10,77 +10,77 @@ import "objects.proto";
 import "input_objects.proto";
 
 message MutationIntroSchemaResponse {
-    IntroSchema intro_schema = 1;
+    optional IntroSchema intro_schema = 1;
 }
 message MutationIntroTypeResponse {
-    IntroType intro_type = 1;
+    optional IntroType intro_type = 1;
 }
 message MutationIntroTypeInterfacesResponse {
-    IntroTypeInterfaces intro_type_interfaces = 1;
+    optional IntroTypeInterfaces intro_type_interfaces = 1;
 }
 message MutationIntroTypePossibleTypesResponse {
-    IntroTypePossibleTypes intro_type_possible_types = 1;
+    optional IntroTypePossibleTypes intro_type_possible_types = 1;
 }
 message MutationIntroFieldResponse {
-    IntroField intro_field = 1;
+    optional IntroField intro_field = 1;
 }
 message MutationIntroInputValueResponse {
-    IntroInputValue intro_input_value = 1;
+    optional IntroInputValue intro_input_value = 1;
 }
 message MutationIntroEnumValueResponse {
-    IntroEnumValue intro_enum_value = 1;
+    optional IntroEnumValue intro_enum_value = 1;
 }
 message MutationIntroDirectiveResponse {
-    IntroDirective intro_directive = 1;
+    optional IntroDirective intro_directive = 1;
 }
 message MutationIntroDirectiveLocationsResponse {
-    IntroDirectiveLocations intro_directive_locations = 1;
+    optional IntroDirectiveLocations intro_directive_locations = 1;
 }
 message MutationUserResponse {
-    User user = 1;
+    optional User user = 1;
 }
 message MutationUserPhonesResponse {
-    UserPhones user_phones = 1;
+    optional UserPhones user_phones = 1;
 }
 message MutationUserTest1Response {
-    UserTest1 user_test1 = 1;
+    optional UserTest1 user_test1 = 1;
 }
 message MutationUserTest2Response {
-    UserTest2 user_test2 = 1;
+    optional UserTest2 user_test2 = 1;
 }
 message MutationUserRoleResponse {
-    UserRole user_role = 1;
+    optional UserRole user_role = 1;
 }
 message MutationRoleResponse {
-    Role role = 1;
+    optional Role role = 1;
 }
 message MutationRoleRoleTypeResponse {
-    RoleRoleType role_role_type = 1;
+    optional RoleRoleType role_role_type = 1;
 }
 message MutationOrganizationResponse {
-    Organization organization = 1;
+    optional Organization organization = 1;
 }
 message MutationIsDeprecatedResponse {
-    bool is_deprecated = 1;
+    optional bool is_deprecated = 1;
 }
 message MutationVersionResponse {
-    int32 version = 1;
+    optional int32 version = 1;
 }
 message MutationRealmIdResponse {
-    string realm_id = 1;
+    optional string realm_id = 1;
 }
 message MutationCreateUserIdResponse {
-    string create_user_id = 1;
+    optional string create_user_id = 1;
 }
 message MutationCreateTimeResponse {
-    string create_time = 1;
+    optional string create_time = 1;
 }
 message MutationUpdateUserIdResponse {
-    string update_user_id = 1;
+    optional string update_user_id = 1;
 }
 message MutationUpdateTimeResponse {
-    string update_time = 1;
+    optional string update_time = 1;
 }
 message MutationCreateGroupIdResponse {
-    string create_group_id = 1;
+    optional string create_group_id = 1;
 }
