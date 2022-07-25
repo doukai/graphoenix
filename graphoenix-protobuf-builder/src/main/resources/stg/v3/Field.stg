@@ -1,4 +1,4 @@
 import "Option.stg"
 fieldDefinition(field) ::= <<
-<if(field.repeated)>repeated <endif><field.type> <field.name> = <field.number><if(field.options)> [<field.options:{option|<optionDefinition(option)>};separator=", ">]<endif>;
+<if(field.optional)>optional <endif><if(field.repeated)>repeated <endif><field.type> <field.name> = <field.number><if(field.options)> [<field.options:{option|<optionDefinition(option)>};separator=", ">]<endif>;
 >>

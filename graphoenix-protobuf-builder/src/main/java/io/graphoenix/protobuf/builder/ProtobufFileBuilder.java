@@ -50,7 +50,9 @@ public class ProtobufFileBuilder {
         Map<String, String> protoFileMap = new HashMap<>();
         protoFileMap.put("objects", new ProtoFile()
                 .setImports(
-                        List.of(new Import().setName("enums.proto"))
+                        List.of(
+                                new Import().setName("enums.proto")
+                        )
                 )
                 .setOptions(
                         List.of(
@@ -64,7 +66,9 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("input_objects", new ProtoFile()
                 .setImports(
-                        List.of(new Import().setName("enums.proto"))
+                        List.of(
+                                new Import().setName("enums.proto")
+                        )
                 )
                 .setOptions(
                         List.of(
@@ -250,11 +254,12 @@ public class ProtobufFileBuilder {
                                                 Stream.of(new Field().setName("selectionSet").setType("string").setNumber(1), new Field().setName("layers").setType("int32").setNumber(2)),
                                                 Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
                                                         .flatMap(argumentsDefinitionContext ->
-                                                                IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size() - 1)
+                                                                IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size())
                                                                         .mapToObj(index ->
                                                                                 new Field()
                                                                                         .setName(getMessageFiledName(argumentsDefinitionContext.inputValueDefinition().get(index).name().getText()))
                                                                                         .setType(buildType(argumentsDefinitionContext.inputValueDefinition().get(index).type()))
+                                                                                        .setOptional(argumentsDefinitionContext.inputValueDefinition().get(index).type().nonNullType() != null)
                                                                                         .setRepeated(manager.fieldTypeIsList(argumentsDefinitionContext.inputValueDefinition().get(index).type()))
                                                                                         .setNumber(index + 3)
                                                                         )
@@ -276,6 +281,7 @@ public class ProtobufFileBuilder {
                                                 new Field()
                                                         .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
                                                         .setType(buildType(fieldDefinitionContext.type()))
+                                                        .setOptional(fieldDefinitionContext.type().nonNullType() != null)
                                                         .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                         .setNumber(1)
                                         )
@@ -295,11 +301,12 @@ public class ProtobufFileBuilder {
                                                 Stream.of(new Field().setName("selectionSet").setType("string").setNumber(1), new Field().setName("layers").setType("int32").setNumber(2)),
                                                 Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
                                                         .flatMap(argumentsDefinitionContext ->
-                                                                IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size() - 1)
+                                                                IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size())
                                                                         .mapToObj(index ->
                                                                                 new Field()
                                                                                         .setName(getMessageFiledName(argumentsDefinitionContext.inputValueDefinition().get(index).name().getText()))
                                                                                         .setType(buildType(argumentsDefinitionContext.inputValueDefinition().get(index).type()))
+                                                                                        .setOptional(argumentsDefinitionContext.inputValueDefinition().get(index).type().nonNullType() != null)
                                                                                         .setRepeated(manager.fieldTypeIsList(argumentsDefinitionContext.inputValueDefinition().get(index).type()))
                                                                                         .setNumber(index + 3)
                                                                         )
@@ -321,6 +328,7 @@ public class ProtobufFileBuilder {
                                                 new Field()
                                                         .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
                                                         .setType(buildType(fieldDefinitionContext.type()))
+                                                        .setOptional(fieldDefinitionContext.type().nonNullType() != null)
                                                         .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                         .setNumber(1)
                                         )
@@ -332,7 +340,7 @@ public class ProtobufFileBuilder {
         return new Enum()
                 .setName(getName(enumTypeDefinitionContext.name().getText()))
                 .setFields(
-                        IntStream.range(0, enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().size() - 1)
+                        IntStream.range(0, enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().size())
                                 .mapToObj(index ->
                                         new EnumField()
                                                 .setName(
@@ -350,11 +358,12 @@ public class ProtobufFileBuilder {
         return new Message()
                 .setName(getName(objectTypeDefinitionContext.name().getText()))
                 .setFields(
-                        IntStream.range(0, objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().size() - 1)
+                        IntStream.range(0, objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().size())
                                 .mapToObj(index ->
                                         new Field()
                                                 .setName(getMessageFiledName(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).name().getText()))
                                                 .setType(buildType(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
+                                                .setOptional(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type().nonNullType() != null)
                                                 .setRepeated(manager.fieldTypeIsList(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
                                                 .setNumber(index + 1)
                                 )
@@ -366,11 +375,12 @@ public class ProtobufFileBuilder {
         return new Message()
                 .setName(getName(inputObjectTypeDefinitionContext.name().getText()))
                 .setFields(
-                        IntStream.range(0, inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().size() - 1)
+                        IntStream.range(0, inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().size())
                                 .mapToObj(index ->
                                         new Field()
                                                 .setName(getMessageFiledName(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().get(index).name().getText()))
                                                 .setType(buildType(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().get(index).type()))
+                                                .setOptional(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().get(index).type().nonNullType() != null)
                                                 .setRepeated(manager.fieldTypeIsList(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().get(index).type()))
                                                 .setNumber(index + 1)
                                 )

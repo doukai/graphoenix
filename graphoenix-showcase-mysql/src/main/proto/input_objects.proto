@@ -33,42 +33,51 @@ message ValidationInput {
     ValidationInput if = 23;
     ValidationInput then = 24;
     ValidationInput else = 25;
+    repeated Property dependent_required = 26;
 }
 message Property {
-    string name = 1;
+    optional string name = 1;
     ValidationInput validation = 2;
+    repeated string required = 3;
 }
 message IDExpression {
     Operator opr = 1;
     string val = 2;
     repeated string in = 3;
+    bool skip_null = 4;
 }
 message StringExpression {
     Operator opr = 1;
     string val = 2;
     repeated string in = 3;
+    bool skip_null = 4;
 }
 message BooleanExpression {
     Operator opr = 1;
     bool val = 2;
     repeated bool in = 3;
+    bool skip_null = 4;
 }
 message IntExpression {
     Operator opr = 1;
     int32 val = 2;
     repeated int32 in = 3;
+    bool skip_null = 4;
 }
 message FloatExpression {
     Operator opr = 1;
     float val = 2;
     repeated float in = 3;
+    bool skip_null = 4;
 }
 message MapWith {
     string type = 1;
     string from = 2;
+    string to = 3;
 }
 message InvokeParameter {
     string name = 1;
+    string class_name = 2;
 }
 message IntroSchemaInput {
     string id = 1;
@@ -76,7 +85,7 @@ message IntroSchemaInput {
     string mutation_type_name = 3;
     string subscription_type_name = 4;
     repeated IntroTypeInput types = 5;
-    IntroTypeInput query_type = 6;
+    optional IntroTypeInput query_type = 6;
     IntroTypeInput mutation_type = 7;
     IntroTypeInput subscription_type = 8;
     repeated IntroDirectiveInput directives = 9;
@@ -88,11 +97,12 @@ message IntroSchemaInput {
     string update_user_id = 15;
     string update_time = 16;
     string create_group_id = 17;
+    optional string intro_typename = 18;
 }
 message IntroTypeInput {
-    string name = 1;
+    optional string name = 1;
     int32 schema_id = 2;
-    IntroTypeKind kind = 3;
+    optional IntroTypeKind kind = 3;
     string description = 4;
     repeated IntroFieldInput fields = 5;
     repeated IntroTypeInput interfaces = 6;
@@ -109,11 +119,12 @@ message IntroTypeInput {
     string update_user_id = 17;
     string update_time = 18;
     string create_group_id = 19;
+    optional string intro_typename = 20;
 }
 message IntroTypeInterfacesInput {
     string id = 1;
-    string type_name = 2;
-    string interface_name = 3;
+    optional string type_name = 2;
+    optional string interface_name = 3;
     bool is_deprecated = 4;
     int32 version = 5;
     string realm_id = 6;
@@ -122,11 +133,12 @@ message IntroTypeInterfacesInput {
     string update_user_id = 9;
     string update_time = 10;
     string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message IntroTypePossibleTypesInput {
     string id = 1;
-    string type_name = 2;
-    string possible_type_name = 3;
+    optional string type_name = 2;
+    optional string possible_type_name = 3;
     bool is_deprecated = 4;
     int32 version = 5;
     string realm_id = 6;
@@ -135,6 +147,7 @@ message IntroTypePossibleTypesInput {
     string update_user_id = 9;
     string update_time = 10;
     string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message IntroFieldInput {
     string id = 1;
@@ -144,7 +157,7 @@ message IntroFieldInput {
     IntroTypeInput of_type = 5;
     string description = 6;
     repeated IntroInputValueInput args = 7;
-    IntroTypeInput type = 8;
+    optional IntroTypeInput type = 8;
     string deprecation_reason = 9;
     string from = 10;
     string to = 11;
@@ -159,6 +172,7 @@ message IntroFieldInput {
     string update_user_id = 20;
     string update_time = 21;
     string create_group_id = 22;
+    optional string intro_typename = 23;
 }
 message IntroInputValueInput {
     string id = 1;
@@ -169,7 +183,7 @@ message IntroInputValueInput {
     int32 field_id = 6;
     string directive_name = 7;
     string description = 8;
-    IntroTypeInput type = 9;
+    optional IntroTypeInput type = 9;
     string default_value = 10;
     bool is_deprecated = 11;
     int32 version = 12;
@@ -179,6 +193,7 @@ message IntroInputValueInput {
     string update_user_id = 16;
     string update_time = 17;
     string create_group_id = 18;
+    optional string intro_typename = 19;
 }
 message IntroEnumValueInput {
     string id = 1;
@@ -195,6 +210,7 @@ message IntroEnumValueInput {
     string update_user_id = 12;
     string update_time = 13;
     string create_group_id = 14;
+    optional string intro_typename = 15;
 }
 message IntroDirectiveInput {
     string name = 1;
@@ -213,11 +229,12 @@ message IntroDirectiveInput {
     string update_user_id = 14;
     string update_time = 15;
     string create_group_id = 16;
+    optional string intro_typename = 17;
 }
 message IntroDirectiveLocationsInput {
     string id = 1;
-    string directive_name = 2;
-    IntroDirectiveLocation directive_location = 3;
+    optional string directive_name = 2;
+    optional IntroDirectiveLocation directive_location = 3;
     bool is_deprecated = 4;
     int32 version = 5;
     string realm_id = 6;
@@ -226,12 +243,13 @@ message IntroDirectiveLocationsInput {
     string update_user_id = 9;
     string update_time = 10;
     string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message UserInput {
     string id = 1;
-    string login = 2;
-    string password = 3;
-    string name = 4;
+    optional string login = 2;
+    optional string password = 3;
+    optional string name = 4;
     int32 age = 5;
     bool disable = 6;
     Sex sex = 7;
@@ -249,6 +267,7 @@ message UserInput {
     string update_user_id = 19;
     string update_time = 20;
     string create_group_id = 21;
+    optional string intro_typename = 22;
 }
 message UserPhonesInput {
     string id = 1;
@@ -262,6 +281,7 @@ message UserPhonesInput {
     string update_user_id = 9;
     string update_time = 10;
     string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message UserTest1Input {
     string id = 1;
@@ -275,6 +295,7 @@ message UserTest1Input {
     string update_user_id = 9;
     string update_time = 10;
     string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message UserTest2Input {
     string id = 1;
@@ -288,6 +309,7 @@ message UserTest2Input {
     string update_user_id = 9;
     string update_time = 10;
     string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message UserRoleInput {
     string id = 1;
@@ -301,10 +323,11 @@ message UserRoleInput {
     string update_user_id = 9;
     string update_time = 10;
     string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message RoleInput {
     string id = 1;
-    string name = 2;
+    optional string name = 2;
     repeated RoleType type = 3;
     repeated UserInput users = 4;
     bool is_deprecated = 5;
@@ -315,6 +338,7 @@ message RoleInput {
     string update_user_id = 10;
     string update_time = 11;
     string create_group_id = 12;
+    optional string intro_typename = 13;
 }
 message RoleRoleTypeInput {
     string id = 1;
@@ -328,13 +352,14 @@ message RoleRoleTypeInput {
     string update_user_id = 9;
     string update_time = 10;
     string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message OrganizationInput {
     string id = 1;
     int32 above_id = 2;
     OrganizationInput above = 3;
     repeated UserInput users = 4;
-    string name = 5;
+    optional string name = 5;
     bool is_deprecated = 6;
     int32 version = 7;
     string realm_id = 8;
@@ -343,6 +368,7 @@ message OrganizationInput {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
+    optional string intro_typename = 14;
 }
 message IntroSchemaOrderBy {
     Sort id = 1;
@@ -357,6 +383,7 @@ message IntroSchemaOrderBy {
     Sort update_user_id = 10;
     Sort update_time = 11;
     Sort create_group_id = 12;
+    Sort intro_typename = 13;
 }
 message IntroTypeOrderBy {
     Sort name = 1;
@@ -371,6 +398,7 @@ message IntroTypeOrderBy {
     Sort update_user_id = 10;
     Sort update_time = 11;
     Sort create_group_id = 12;
+    Sort intro_typename = 13;
 }
 message IntroTypeInterfacesOrderBy {
     Sort id = 1;
@@ -384,6 +412,7 @@ message IntroTypeInterfacesOrderBy {
     Sort update_user_id = 9;
     Sort update_time = 10;
     Sort create_group_id = 11;
+    Sort intro_typename = 12;
 }
 message IntroTypePossibleTypesOrderBy {
     Sort id = 1;
@@ -397,6 +426,7 @@ message IntroTypePossibleTypesOrderBy {
     Sort update_user_id = 9;
     Sort update_time = 10;
     Sort create_group_id = 11;
+    Sort intro_typename = 12;
 }
 message IntroFieldOrderBy {
     Sort id = 1;
@@ -418,6 +448,7 @@ message IntroFieldOrderBy {
     Sort update_user_id = 17;
     Sort update_time = 18;
     Sort create_group_id = 19;
+    Sort intro_typename = 20;
 }
 message IntroInputValueOrderBy {
     Sort id = 1;
@@ -436,6 +467,7 @@ message IntroInputValueOrderBy {
     Sort update_user_id = 14;
     Sort update_time = 15;
     Sort create_group_id = 16;
+    Sort intro_typename = 17;
 }
 message IntroEnumValueOrderBy {
     Sort id = 1;
@@ -451,6 +483,7 @@ message IntroEnumValueOrderBy {
     Sort update_user_id = 11;
     Sort update_time = 12;
     Sort create_group_id = 13;
+    Sort intro_typename = 14;
 }
 message IntroDirectiveOrderBy {
     Sort name = 1;
@@ -467,6 +500,7 @@ message IntroDirectiveOrderBy {
     Sort update_user_id = 12;
     Sort update_time = 13;
     Sort create_group_id = 14;
+    Sort intro_typename = 15;
 }
 message IntroDirectiveLocationsOrderBy {
     Sort id = 1;
@@ -479,6 +513,7 @@ message IntroDirectiveLocationsOrderBy {
     Sort update_user_id = 8;
     Sort update_time = 9;
     Sort create_group_id = 10;
+    Sort intro_typename = 11;
 }
 message UserOrderBy {
     Sort id = 1;
@@ -496,6 +531,7 @@ message UserOrderBy {
     Sort update_user_id = 13;
     Sort update_time = 14;
     Sort create_group_id = 15;
+    Sort intro_typename = 16;
 }
 message UserPhonesOrderBy {
     Sort id = 1;
@@ -509,6 +545,7 @@ message UserPhonesOrderBy {
     Sort update_user_id = 9;
     Sort update_time = 10;
     Sort create_group_id = 11;
+    Sort intro_typename = 12;
 }
 message UserTest1OrderBy {
     Sort id = 1;
@@ -522,6 +559,7 @@ message UserTest1OrderBy {
     Sort update_user_id = 9;
     Sort update_time = 10;
     Sort create_group_id = 11;
+    Sort intro_typename = 12;
 }
 message UserTest2OrderBy {
     Sort id = 1;
@@ -535,6 +573,7 @@ message UserTest2OrderBy {
     Sort update_user_id = 9;
     Sort update_time = 10;
     Sort create_group_id = 11;
+    Sort intro_typename = 12;
 }
 message UserRoleOrderBy {
     Sort id = 1;
@@ -548,6 +587,7 @@ message UserRoleOrderBy {
     Sort update_user_id = 9;
     Sort update_time = 10;
     Sort create_group_id = 11;
+    Sort intro_typename = 12;
 }
 message RoleOrderBy {
     Sort id = 1;
@@ -560,6 +600,7 @@ message RoleOrderBy {
     Sort update_user_id = 8;
     Sort update_time = 9;
     Sort create_group_id = 10;
+    Sort intro_typename = 11;
 }
 message RoleRoleTypeOrderBy {
     Sort id = 1;
@@ -572,6 +613,7 @@ message RoleRoleTypeOrderBy {
     Sort update_user_id = 8;
     Sort update_time = 9;
     Sort create_group_id = 10;
+    Sort intro_typename = 11;
 }
 message OrganizationOrderBy {
     Sort id = 1;
@@ -585,6 +627,7 @@ message OrganizationOrderBy {
     Sort update_user_id = 9;
     Sort update_time = 10;
     Sort create_group_id = 11;
+    Sort intro_typename = 12;
 }
 message IntroSchemaExpression {
     StringExpression id = 1;
@@ -606,6 +649,7 @@ message IntroSchemaExpression {
     StringExpression create_group_id = 17;
     StringExpression intro_typename = 18;
     Conditional cond = 19;
+    repeated IntroSchemaExpression exs = 20;
 }
 message IntroTypeExpression {
     StringExpression name = 1;
@@ -629,6 +673,7 @@ message IntroTypeExpression {
     StringExpression create_group_id = 19;
     StringExpression intro_typename = 20;
     Conditional cond = 21;
+    repeated IntroTypeExpression exs = 22;
 }
 message IntroTypeInterfacesExpression {
     StringExpression id = 1;
@@ -644,6 +689,7 @@ message IntroTypeInterfacesExpression {
     StringExpression create_group_id = 11;
     StringExpression intro_typename = 12;
     Conditional cond = 13;
+    repeated IntroTypeInterfacesExpression exs = 14;
 }
 message IntroTypePossibleTypesExpression {
     StringExpression id = 1;
@@ -659,6 +705,7 @@ message IntroTypePossibleTypesExpression {
     StringExpression create_group_id = 11;
     StringExpression intro_typename = 12;
     Conditional cond = 13;
+    repeated IntroTypePossibleTypesExpression exs = 14;
 }
 message IntroFieldExpression {
     StringExpression id = 1;
@@ -685,6 +732,7 @@ message IntroFieldExpression {
     StringExpression create_group_id = 22;
     StringExpression intro_typename = 23;
     Conditional cond = 24;
+    repeated IntroFieldExpression exs = 25;
 }
 message IntroInputValueExpression {
     StringExpression id = 1;
@@ -707,6 +755,7 @@ message IntroInputValueExpression {
     StringExpression create_group_id = 18;
     StringExpression intro_typename = 19;
     Conditional cond = 20;
+    repeated IntroInputValueExpression exs = 21;
 }
 message IntroEnumValueExpression {
     StringExpression id = 1;
@@ -725,6 +774,7 @@ message IntroEnumValueExpression {
     StringExpression create_group_id = 14;
     StringExpression intro_typename = 15;
     Conditional cond = 16;
+    repeated IntroEnumValueExpression exs = 17;
 }
 message IntroDirectiveExpression {
     StringExpression name = 1;
@@ -745,6 +795,7 @@ message IntroDirectiveExpression {
     StringExpression create_group_id = 16;
     StringExpression intro_typename = 17;
     Conditional cond = 18;
+    repeated IntroDirectiveExpression exs = 19;
 }
 message IntroDirectiveLocationsExpression {
     StringExpression id = 1;
@@ -760,6 +811,7 @@ message IntroDirectiveLocationsExpression {
     StringExpression create_group_id = 11;
     StringExpression intro_typename = 12;
     Conditional cond = 13;
+    repeated IntroDirectiveLocationsExpression exs = 14;
 }
 message UserExpression {
     StringExpression id = 1;
@@ -785,6 +837,7 @@ message UserExpression {
     StringExpression create_group_id = 21;
     StringExpression intro_typename = 22;
     Conditional cond = 23;
+    repeated UserExpression exs = 24;
 }
 message UserPhonesExpression {
     StringExpression id = 1;
@@ -800,6 +853,7 @@ message UserPhonesExpression {
     StringExpression create_group_id = 11;
     StringExpression intro_typename = 12;
     Conditional cond = 13;
+    repeated UserPhonesExpression exs = 14;
 }
 message UserTest1Expression {
     StringExpression id = 1;
@@ -815,6 +869,7 @@ message UserTest1Expression {
     StringExpression create_group_id = 11;
     StringExpression intro_typename = 12;
     Conditional cond = 13;
+    repeated UserTest1Expression exs = 14;
 }
 message UserTest2Expression {
     StringExpression id = 1;
@@ -830,6 +885,7 @@ message UserTest2Expression {
     StringExpression create_group_id = 11;
     StringExpression intro_typename = 12;
     Conditional cond = 13;
+    repeated UserTest2Expression exs = 14;
 }
 message UserRoleExpression {
     StringExpression id = 1;
@@ -845,6 +901,7 @@ message UserRoleExpression {
     StringExpression create_group_id = 11;
     StringExpression intro_typename = 12;
     Conditional cond = 13;
+    repeated UserRoleExpression exs = 14;
 }
 message RoleExpression {
     StringExpression id = 1;
@@ -861,6 +918,7 @@ message RoleExpression {
     StringExpression create_group_id = 12;
     StringExpression intro_typename = 13;
     Conditional cond = 14;
+    repeated RoleExpression exs = 15;
 }
 message RoleRoleTypeExpression {
     StringExpression id = 1;
@@ -876,6 +934,7 @@ message RoleRoleTypeExpression {
     StringExpression create_group_id = 11;
     StringExpression intro_typename = 12;
     Conditional cond = 13;
+    repeated RoleRoleTypeExpression exs = 14;
 }
 message OrganizationExpression {
     StringExpression id = 1;
@@ -893,36 +952,45 @@ message OrganizationExpression {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     Conditional cond = 15;
+    repeated OrganizationExpression exs = 16;
 }
 message OperatorExpression {
     Operator opr = 1;
     Operator val = 2;
+    repeated Operator in = 3;
 }
 message ConditionalExpression {
     Operator opr = 1;
     Conditional val = 2;
+    repeated Conditional in = 3;
 }
 message SortExpression {
     Operator opr = 1;
     Sort val = 2;
+    repeated Sort in = 3;
 }
 message FunctionExpression {
     Operator opr = 1;
     Function val = 2;
+    repeated Function in = 3;
 }
 message IntroTypeKindExpression {
     Operator opr = 1;
     IntroTypeKind val = 2;
+    repeated IntroTypeKind in = 3;
 }
 message IntroDirectiveLocationExpression {
     Operator opr = 1;
     IntroDirectiveLocation val = 2;
+    repeated IntroDirectiveLocation in = 3;
 }
 message SexExpression {
     Operator opr = 1;
     Sex val = 2;
+    repeated Sex in = 3;
 }
 message RoleTypeExpression {
     Operator opr = 1;
     RoleType val = 2;
+    repeated RoleType in = 3;
 }

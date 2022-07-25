@@ -13,7 +13,7 @@ message IntroSchema {
     string mutation_type_name = 3;
     string subscription_type_name = 4;
     repeated IntroType types = 5;
-    IntroType query_type = 6;
+    optional IntroType query_type = 6;
     IntroType mutation_type = 7;
     IntroType subscription_type = 8;
     repeated IntroDirective directives = 9;
@@ -41,11 +41,12 @@ message IntroSchema {
     IntroType types_aggregate = 31;
     IntroDirective directives_aggregate = 32;
     IntroTypeConnection types_connection = 33;
+    IntroDirectiveConnection directives_connection = 34;
 }
 message IntroType {
-    string name = 1;
+    optional string name = 1;
     int32 schema_id = 2;
-    IntroTypeKind kind = 3;
+    optional IntroTypeKind kind = 3;
     string description = 4;
     repeated IntroField fields = 5;
     repeated IntroType interfaces = 6;
@@ -86,11 +87,12 @@ message IntroType {
     IntroTypeConnection interfaces_connection = 41;
     IntroTypeConnection possible_types_connection = 42;
     IntroEnumValueConnection enum_values_connection = 43;
+    IntroInputValueConnection input_fields_connection = 44;
 }
 message IntroTypeInterfaces {
     string id = 1;
-    string type_name = 2;
-    string interface_name = 3;
+    optional string type_name = 2;
+    optional string interface_name = 3;
     bool is_deprecated = 4;
     int32 version = 5;
     string realm_id = 6;
@@ -108,11 +110,12 @@ message IntroTypeInterfaces {
     string type_name_min = 18;
     int32 interface_name_count = 19;
     string interface_name_max = 20;
+    string interface_name_min = 21;
 }
 message IntroTypePossibleTypes {
     string id = 1;
-    string type_name = 2;
-    string possible_type_name = 3;
+    optional string type_name = 2;
+    optional string possible_type_name = 3;
     bool is_deprecated = 4;
     int32 version = 5;
     string realm_id = 6;
@@ -130,6 +133,7 @@ message IntroTypePossibleTypes {
     string type_name_min = 18;
     int32 possible_type_name_count = 19;
     string possible_type_name_max = 20;
+    string possible_type_name_min = 21;
 }
 message IntroField {
     string id = 1;
@@ -139,7 +143,7 @@ message IntroField {
     IntroType of_type = 5;
     string description = 6;
     repeated IntroInputValue args = 7;
-    IntroType type = 8;
+    optional IntroType type = 8;
     string deprecation_reason = 9;
     string from = 10;
     string to = 11;
@@ -189,6 +193,7 @@ message IntroField {
     string with_to_max = 55;
     string with_to_min = 56;
     IntroInputValue args_aggregate = 57;
+    IntroInputValueConnection args_connection = 58;
 }
 message IntroInputValue {
     string id = 1;
@@ -199,7 +204,7 @@ message IntroInputValue {
     int32 field_id = 6;
     string directive_name = 7;
     string description = 8;
-    IntroType type = 9;
+    optional IntroType type = 9;
     string default_value = 10;
     bool is_deprecated = 11;
     int32 version = 12;
@@ -235,6 +240,7 @@ message IntroInputValue {
     int32 field_id_sum = 42;
     int32 field_id_avg = 43;
     int32 field_id_max = 44;
+    int32 field_id_min = 45;
 }
 message IntroEnumValue {
     string id = 1;
@@ -266,6 +272,7 @@ message IntroEnumValue {
     string description_min = 27;
     int32 deprecation_reason_count = 28;
     string deprecation_reason_max = 29;
+    string deprecation_reason_min = 30;
 }
 message IntroDirective {
     string name = 1;
@@ -297,11 +304,12 @@ message IntroDirective {
     int32 schema_id_max = 27;
     int32 schema_id_min = 28;
     IntroInputValue args_aggregate = 29;
+    IntroInputValueConnection args_connection = 30;
 }
 message IntroDirectiveLocations {
     string id = 1;
-    string directive_name = 2;
-    IntroDirectiveLocation directive_location = 3;
+    optional string directive_name = 2;
+    optional IntroDirectiveLocation directive_location = 3;
     bool is_deprecated = 4;
     int32 version = 5;
     string realm_id = 6;
@@ -316,17 +324,19 @@ message IntroDirectiveLocations {
     string id_min = 15;
     int32 directive_name_count = 16;
     string directive_name_max = 17;
+    string directive_name_min = 18;
 }
 message PageInfo {
-    bool has_next_page = 1;
-    bool has_previous_page = 2;
-    string start_cursor = 3;
+    optional bool has_next_page = 1;
+    optional bool has_previous_page = 2;
+    optional string start_cursor = 3;
+    optional string end_cursor = 4;
 }
 message User {
     string id = 1;
-    string login = 2;
-    string password = 3;
-    string name = 4;
+    optional string login = 2;
+    optional string password = 3;
+    optional string name = 4;
     int32 age = 5;
     bool disable = 6;
     Sex sex = 7;
@@ -377,6 +387,7 @@ message User {
     int32 test1_min = 52;
     Role roles_aggregate = 53;
     RoleConnection roles_connection = 54;
+    string user_detail2 = 55;
 }
 message UserPhones {
     string id = 1;
@@ -401,6 +412,7 @@ message UserPhones {
     int32 user_id_sum = 20;
     int32 user_id_avg = 21;
     int32 user_id_max = 22;
+    int32 user_id_min = 23;
 }
 message UserTest1 {
     string id = 1;
@@ -427,6 +439,7 @@ message UserTest1 {
     int32 test1_sum = 22;
     int32 test1_avg = 23;
     int32 test1_max = 24;
+    int32 test1_min = 25;
 }
 message UserTest2 {
     string id = 1;
@@ -448,6 +461,7 @@ message UserTest2 {
     int32 user_id_sum = 17;
     int32 user_id_avg = 18;
     int32 user_id_max = 19;
+    int32 user_id_min = 20;
 }
 message UserRole {
     string id = 1;
@@ -474,10 +488,11 @@ message UserRole {
     int32 role_id_sum = 22;
     int32 role_id_avg = 23;
     int32 role_id_max = 24;
+    int32 role_id_min = 25;
 }
 message Role {
     string id = 1;
-    string name = 2;
+    optional string name = 2;
     repeated RoleType type = 3;
     repeated User users = 4;
     bool is_deprecated = 5;
@@ -496,6 +511,7 @@ message Role {
     string name_max = 18;
     string name_min = 19;
     User users_aggregate = 20;
+    UserConnection users_connection = 21;
 }
 message RoleRoleType {
     string id = 1;
@@ -517,13 +533,14 @@ message RoleRoleType {
     int32 role_id_sum = 17;
     int32 role_id_avg = 18;
     int32 role_id_max = 19;
+    int32 role_id_min = 20;
 }
 message Organization {
     string id = 1;
     int32 above_id = 2;
     Organization above = 3;
     repeated User users = 4;
-    string name = 5;
+    optional string name = 5;
     bool is_deprecated = 6;
     int32 version = 7;
     string realm_id = 8;
@@ -550,125 +567,160 @@ message Organization {
     repeated int32 org_level3 = 29;
     bool role_disable = 30;
     repeated User user_by_org = 31;
+    Organization parent = 32;
 }
 message IntroSchemaConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroSchemaEdge edges = 3;
 }
 message IntroTypeConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroTypeEdge edges = 3;
 }
 message IntroTypeInterfacesConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroTypeInterfacesEdge edges = 3;
 }
 message IntroTypePossibleTypesConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroTypePossibleTypesEdge edges = 3;
 }
 message IntroFieldConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroFieldEdge edges = 3;
 }
 message IntroInputValueConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroInputValueEdge edges = 3;
 }
 message IntroEnumValueConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroEnumValueEdge edges = 3;
 }
 message IntroDirectiveConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroDirectiveEdge edges = 3;
 }
 message IntroDirectiveLocationsConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated IntroDirectiveLocationsEdge edges = 3;
 }
 message UserConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated UserEdge edges = 3;
 }
 message UserPhonesConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated UserPhonesEdge edges = 3;
 }
 message UserTest1Connection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated UserTest1Edge edges = 3;
 }
 message UserTest2Connection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated UserTest2Edge edges = 3;
 }
 message UserRoleConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated UserRoleEdge edges = 3;
 }
 message RoleConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated RoleEdge edges = 3;
 }
 message RoleRoleTypeConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated RoleRoleTypeEdge edges = 3;
 }
 message OrganizationConnection {
     int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
+    repeated OrganizationEdge edges = 3;
 }
 message IntroSchemaEdge {
     IntroSchema node = 1;
+    string cursor = 2;
 }
 message IntroTypeEdge {
     IntroType node = 1;
+    string cursor = 2;
 }
 message IntroTypeInterfacesEdge {
     IntroTypeInterfaces node = 1;
+    string cursor = 2;
 }
 message IntroTypePossibleTypesEdge {
     IntroTypePossibleTypes node = 1;
+    string cursor = 2;
 }
 message IntroFieldEdge {
     IntroField node = 1;
+    string cursor = 2;
 }
 message IntroInputValueEdge {
     IntroInputValue node = 1;
+    string cursor = 2;
 }
 message IntroEnumValueEdge {
     IntroEnumValue node = 1;
+    string cursor = 2;
 }
 message IntroDirectiveEdge {
     IntroDirective node = 1;
+    string cursor = 2;
 }
 message IntroDirectiveLocationsEdge {
     IntroDirectiveLocations node = 1;
+    string cursor = 2;
 }
 message UserEdge {
     User node = 1;
+    string cursor = 2;
 }
 message UserPhonesEdge {
     UserPhones node = 1;
+    string cursor = 2;
 }
 message UserTest1Edge {
     UserTest1 node = 1;
+    string cursor = 2;
 }
 message UserTest2Edge {
     UserTest2 node = 1;
+    string cursor = 2;
 }
 message UserRoleEdge {
     UserRole node = 1;
+    string cursor = 2;
 }
 message RoleEdge {
     Role node = 1;
+    string cursor = 2;
 }
 message RoleRoleTypeEdge {
     RoleRoleType node = 1;
+    string cursor = 2;
 }
 message OrganizationEdge {
     Organization node = 1;
+    string cursor = 2;
 }
 message QueryType {
     IntroSchema intro_schema = 1;
@@ -737,6 +789,7 @@ message QueryType {
     repeated int32 get_org_level5 = 64;
     repeated User get_user_by_org2 = 65;
     Organization get_parent2 = 66;
+    repeated Role find_role2 = 67;
 }
 message MutationType {
     IntroSchema intro_schema = 1;
@@ -763,4 +816,5 @@ message MutationType {
     string create_time = 22;
     string update_user_id = 23;
     string update_time = 24;
+    string create_group_id = 25;
 }

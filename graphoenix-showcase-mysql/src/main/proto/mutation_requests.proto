@@ -17,7 +17,7 @@ message MutationIntroSchemaRequest {
     string mutation_type_name = 5;
     string subscription_type_name = 6;
     repeated IntroTypeInput types = 7;
-    IntroTypeInput query_type = 8;
+    optional IntroTypeInput query_type = 8;
     IntroTypeInput mutation_type = 9;
     IntroTypeInput subscription_type = 10;
     repeated IntroDirectiveInput directives = 11;
@@ -29,14 +29,15 @@ message MutationIntroSchemaRequest {
     string update_user_id = 17;
     string update_time = 18;
     string create_group_id = 19;
-    string intro_typename = 20;
+    optional string intro_typename = 20;
+    IntroSchemaExpression where = 21;
 }
 message MutationIntroTypeRequest {
     string selectionSet = 1;
     int32 layers = 2;
-    string name = 3;
+    optional string name = 3;
     int32 schema_id = 4;
-    IntroTypeKind kind = 5;
+    optional IntroTypeKind kind = 5;
     string description = 6;
     repeated IntroFieldInput fields = 7;
     repeated IntroTypeInput interfaces = 8;
@@ -53,14 +54,15 @@ message MutationIntroTypeRequest {
     string update_user_id = 19;
     string update_time = 20;
     string create_group_id = 21;
-    string intro_typename = 22;
+    optional string intro_typename = 22;
+    IntroTypeExpression where = 23;
 }
 message MutationIntroTypeInterfacesRequest {
     string selectionSet = 1;
     int32 layers = 2;
     string id = 3;
-    string type_name = 4;
-    string interface_name = 5;
+    optional string type_name = 4;
+    optional string interface_name = 5;
     bool is_deprecated = 6;
     int32 version = 7;
     string realm_id = 8;
@@ -69,14 +71,15 @@ message MutationIntroTypeInterfacesRequest {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
-    string intro_typename = 14;
+    optional string intro_typename = 14;
+    IntroTypeInterfacesExpression where = 15;
 }
 message MutationIntroTypePossibleTypesRequest {
     string selectionSet = 1;
     int32 layers = 2;
     string id = 3;
-    string type_name = 4;
-    string possible_type_name = 5;
+    optional string type_name = 4;
+    optional string possible_type_name = 5;
     bool is_deprecated = 6;
     int32 version = 7;
     string realm_id = 8;
@@ -85,7 +88,8 @@ message MutationIntroTypePossibleTypesRequest {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
-    string intro_typename = 14;
+    optional string intro_typename = 14;
+    IntroTypePossibleTypesExpression where = 15;
 }
 message MutationIntroFieldRequest {
     string selectionSet = 1;
@@ -97,7 +101,7 @@ message MutationIntroFieldRequest {
     IntroTypeInput of_type = 7;
     string description = 8;
     repeated IntroInputValueInput args = 9;
-    IntroTypeInput type = 10;
+    optional IntroTypeInput type = 10;
     string deprecation_reason = 11;
     string from = 12;
     string to = 13;
@@ -112,7 +116,8 @@ message MutationIntroFieldRequest {
     string update_user_id = 22;
     string update_time = 23;
     string create_group_id = 24;
-    string intro_typename = 25;
+    optional string intro_typename = 25;
+    IntroFieldExpression where = 26;
 }
 message MutationIntroInputValueRequest {
     string selectionSet = 1;
@@ -125,7 +130,7 @@ message MutationIntroInputValueRequest {
     int32 field_id = 8;
     string directive_name = 9;
     string description = 10;
-    IntroTypeInput type = 11;
+    optional IntroTypeInput type = 11;
     string default_value = 12;
     bool is_deprecated = 13;
     int32 version = 14;
@@ -135,7 +140,8 @@ message MutationIntroInputValueRequest {
     string update_user_id = 18;
     string update_time = 19;
     string create_group_id = 20;
-    string intro_typename = 21;
+    optional string intro_typename = 21;
+    IntroInputValueExpression where = 22;
 }
 message MutationIntroEnumValueRequest {
     string selectionSet = 1;
@@ -154,7 +160,8 @@ message MutationIntroEnumValueRequest {
     string update_user_id = 14;
     string update_time = 15;
     string create_group_id = 16;
-    string intro_typename = 17;
+    optional string intro_typename = 17;
+    IntroEnumValueExpression where = 18;
 }
 message MutationIntroDirectiveRequest {
     string selectionSet = 1;
@@ -175,14 +182,15 @@ message MutationIntroDirectiveRequest {
     string update_user_id = 16;
     string update_time = 17;
     string create_group_id = 18;
-    string intro_typename = 19;
+    optional string intro_typename = 19;
+    IntroDirectiveExpression where = 20;
 }
 message MutationIntroDirectiveLocationsRequest {
     string selectionSet = 1;
     int32 layers = 2;
     string id = 3;
-    string directive_name = 4;
-    IntroDirectiveLocation directive_location = 5;
+    optional string directive_name = 4;
+    optional IntroDirectiveLocation directive_location = 5;
     bool is_deprecated = 6;
     int32 version = 7;
     string realm_id = 8;
@@ -191,15 +199,16 @@ message MutationIntroDirectiveLocationsRequest {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
-    string intro_typename = 14;
+    optional string intro_typename = 14;
+    IntroDirectiveLocationsExpression where = 15;
 }
 message MutationUserRequest {
     string selectionSet = 1;
     int32 layers = 2;
     string id = 3;
-    string login = 4;
-    string password = 5;
-    string name = 6;
+    optional string login = 4;
+    optional string password = 5;
+    optional string name = 6;
     int32 age = 7;
     bool disable = 8;
     Sex sex = 9;
@@ -217,7 +226,8 @@ message MutationUserRequest {
     string update_user_id = 21;
     string update_time = 22;
     string create_group_id = 23;
-    string intro_typename = 24;
+    optional string intro_typename = 24;
+    UserExpression where = 25;
 }
 message MutationUserPhonesRequest {
     string selectionSet = 1;
@@ -233,7 +243,8 @@ message MutationUserPhonesRequest {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
-    string intro_typename = 14;
+    optional string intro_typename = 14;
+    UserPhonesExpression where = 15;
 }
 message MutationUserTest1Request {
     string selectionSet = 1;
@@ -249,7 +260,8 @@ message MutationUserTest1Request {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
-    string intro_typename = 14;
+    optional string intro_typename = 14;
+    UserTest1Expression where = 15;
 }
 message MutationUserTest2Request {
     string selectionSet = 1;
@@ -265,7 +277,8 @@ message MutationUserTest2Request {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
-    string intro_typename = 14;
+    optional string intro_typename = 14;
+    UserTest2Expression where = 15;
 }
 message MutationUserRoleRequest {
     string selectionSet = 1;
@@ -281,13 +294,14 @@ message MutationUserRoleRequest {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
-    string intro_typename = 14;
+    optional string intro_typename = 14;
+    UserRoleExpression where = 15;
 }
 message MutationRoleRequest {
     string selectionSet = 1;
     int32 layers = 2;
     string id = 3;
-    string name = 4;
+    optional string name = 4;
     repeated RoleType type = 5;
     repeated UserInput users = 6;
     bool is_deprecated = 7;
@@ -298,7 +312,8 @@ message MutationRoleRequest {
     string update_user_id = 12;
     string update_time = 13;
     string create_group_id = 14;
-    string intro_typename = 15;
+    optional string intro_typename = 15;
+    RoleExpression where = 16;
 }
 message MutationRoleRoleTypeRequest {
     string selectionSet = 1;
@@ -314,7 +329,8 @@ message MutationRoleRoleTypeRequest {
     string update_user_id = 11;
     string update_time = 12;
     string create_group_id = 13;
-    string intro_typename = 14;
+    optional string intro_typename = 14;
+    RoleRoleTypeExpression where = 15;
 }
 message MutationOrganizationRequest {
     string selectionSet = 1;
@@ -323,7 +339,7 @@ message MutationOrganizationRequest {
     int32 above_id = 4;
     OrganizationInput above = 5;
     repeated UserInput users = 6;
-    string name = 7;
+    optional string name = 7;
     bool is_deprecated = 8;
     int32 version = 9;
     string realm_id = 10;
@@ -332,7 +348,8 @@ message MutationOrganizationRequest {
     string update_user_id = 13;
     string update_time = 14;
     string create_group_id = 15;
-    string intro_typename = 16;
+    optional string intro_typename = 16;
+    OrganizationExpression where = 17;
 }
 message MutationIsDeprecatedRequest {
     string selectionSet = 1;

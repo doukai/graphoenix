@@ -7,6 +7,8 @@ import java.util.List;
 
 public class Field {
 
+    private Boolean optional;
+
     private Boolean repeated;
 
     private String name;
@@ -17,12 +19,24 @@ public class Field {
 
     private List<Option> options;
 
+    public Boolean getOptional() {
+        return optional;
+    }
+
+    public Field setOptional(Boolean optional) {
+        this.optional = optional;
+        return this;
+    }
+
     public Boolean getRepeated() {
         return repeated;
     }
 
     public Field setRepeated(Boolean repeated) {
         this.repeated = repeated;
+        if (repeated) {
+            this.setOptional(false);
+        }
         return this;
     }
 

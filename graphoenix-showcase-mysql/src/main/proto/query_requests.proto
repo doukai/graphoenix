@@ -31,6 +31,7 @@ message QueryIntroSchemaRequest {
     StringExpression create_group_id = 19;
     StringExpression intro_typename = 20;
     IntroSchemaExpression where = 21;
+    Conditional cond = 22;
 }
 message QueryIntroSchemaListRequest {
     string selectionSet = 1;
@@ -60,6 +61,7 @@ message QueryIntroSchemaListRequest {
     int32 last = 25;
     int32 offset = 26;
     string after = 27;
+    string before = 28;
 }
 message QueryIntroSchemaConnectionRequest {
     string selectionSet = 1;
@@ -90,6 +92,7 @@ message QueryIntroSchemaConnectionRequest {
     int32 last = 26;
     int32 offset = 27;
     string after = 28;
+    string before = 29;
 }
 message QueryIntroTypeRequest {
     string selectionSet = 1;
@@ -115,6 +118,7 @@ message QueryIntroTypeRequest {
     StringExpression create_group_id = 21;
     StringExpression intro_typename = 22;
     IntroTypeExpression where = 23;
+    Conditional cond = 24;
 }
 message QueryIntroTypeListRequest {
     string selectionSet = 1;
@@ -146,6 +150,7 @@ message QueryIntroTypeListRequest {
     int32 last = 27;
     int32 offset = 28;
     string after = 29;
+    string before = 30;
 }
 message QueryIntroTypeConnectionRequest {
     string selectionSet = 1;
@@ -178,6 +183,7 @@ message QueryIntroTypeConnectionRequest {
     int32 last = 28;
     int32 offset = 29;
     string after = 30;
+    string before = 31;
 }
 message QueryIntroTypeInterfacesRequest {
     string selectionSet = 1;
@@ -195,6 +201,7 @@ message QueryIntroTypeInterfacesRequest {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     IntroTypeInterfacesExpression where = 15;
+    Conditional cond = 16;
 }
 message QueryIntroTypeInterfacesListRequest {
     string selectionSet = 1;
@@ -218,6 +225,7 @@ message QueryIntroTypeInterfacesListRequest {
     int32 last = 19;
     int32 offset = 20;
     string after = 21;
+    string before = 22;
 }
 message QueryIntroTypeInterfacesConnectionRequest {
     string selectionSet = 1;
@@ -242,6 +250,7 @@ message QueryIntroTypeInterfacesConnectionRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryIntroTypePossibleTypesRequest {
     string selectionSet = 1;
@@ -259,6 +268,7 @@ message QueryIntroTypePossibleTypesRequest {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     IntroTypePossibleTypesExpression where = 15;
+    Conditional cond = 16;
 }
 message QueryIntroTypePossibleTypesListRequest {
     string selectionSet = 1;
@@ -282,6 +292,7 @@ message QueryIntroTypePossibleTypesListRequest {
     int32 last = 19;
     int32 offset = 20;
     string after = 21;
+    string before = 22;
 }
 message QueryIntroTypePossibleTypesConnectionRequest {
     string selectionSet = 1;
@@ -306,6 +317,7 @@ message QueryIntroTypePossibleTypesConnectionRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryIntroFieldRequest {
     string selectionSet = 1;
@@ -334,6 +346,7 @@ message QueryIntroFieldRequest {
     StringExpression create_group_id = 24;
     StringExpression intro_typename = 25;
     IntroFieldExpression where = 26;
+    Conditional cond = 27;
 }
 message QueryIntroFieldListRequest {
     string selectionSet = 1;
@@ -368,6 +381,7 @@ message QueryIntroFieldListRequest {
     int32 last = 30;
     int32 offset = 31;
     string after = 32;
+    string before = 33;
 }
 message QueryIntroFieldConnectionRequest {
     string selectionSet = 1;
@@ -403,6 +417,7 @@ message QueryIntroFieldConnectionRequest {
     int32 last = 31;
     int32 offset = 32;
     string after = 33;
+    string before = 34;
 }
 message QueryIntroInputValueRequest {
     string selectionSet = 1;
@@ -427,6 +442,7 @@ message QueryIntroInputValueRequest {
     StringExpression create_group_id = 20;
     StringExpression intro_typename = 21;
     IntroInputValueExpression where = 22;
+    Conditional cond = 23;
 }
 message QueryIntroInputValueListRequest {
     string selectionSet = 1;
@@ -457,6 +473,7 @@ message QueryIntroInputValueListRequest {
     int32 last = 26;
     int32 offset = 27;
     string after = 28;
+    string before = 29;
 }
 message QueryIntroInputValueConnectionRequest {
     string selectionSet = 1;
@@ -488,6 +505,7 @@ message QueryIntroInputValueConnectionRequest {
     int32 last = 27;
     int32 offset = 28;
     string after = 29;
+    string before = 30;
 }
 message QueryIntroEnumValueRequest {
     string selectionSet = 1;
@@ -508,6 +526,7 @@ message QueryIntroEnumValueRequest {
     StringExpression create_group_id = 16;
     StringExpression intro_typename = 17;
     IntroEnumValueExpression where = 18;
+    Conditional cond = 19;
 }
 message QueryIntroEnumValueListRequest {
     string selectionSet = 1;
@@ -534,6 +553,7 @@ message QueryIntroEnumValueListRequest {
     int32 last = 22;
     int32 offset = 23;
     string after = 24;
+    string before = 25;
 }
 message QueryIntroEnumValueConnectionRequest {
     string selectionSet = 1;
@@ -561,6 +581,7 @@ message QueryIntroEnumValueConnectionRequest {
     int32 last = 23;
     int32 offset = 24;
     string after = 25;
+    string before = 26;
 }
 message QueryIntroDirectiveRequest {
     string selectionSet = 1;
@@ -583,6 +604,7 @@ message QueryIntroDirectiveRequest {
     StringExpression create_group_id = 18;
     StringExpression intro_typename = 19;
     IntroDirectiveExpression where = 20;
+    Conditional cond = 21;
 }
 message QueryIntroDirectiveListRequest {
     string selectionSet = 1;
@@ -611,6 +633,7 @@ message QueryIntroDirectiveListRequest {
     int32 last = 24;
     int32 offset = 25;
     string after = 26;
+    string before = 27;
 }
 message QueryIntroDirectiveConnectionRequest {
     string selectionSet = 1;
@@ -640,6 +663,7 @@ message QueryIntroDirectiveConnectionRequest {
     int32 last = 25;
     int32 offset = 26;
     string after = 27;
+    string before = 28;
 }
 message QueryIntroDirectiveLocationsRequest {
     string selectionSet = 1;
@@ -657,6 +681,7 @@ message QueryIntroDirectiveLocationsRequest {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     IntroDirectiveLocationsExpression where = 15;
+    Conditional cond = 16;
 }
 message QueryIntroDirectiveLocationsListRequest {
     string selectionSet = 1;
@@ -680,6 +705,7 @@ message QueryIntroDirectiveLocationsListRequest {
     int32 last = 19;
     int32 offset = 20;
     string after = 21;
+    string before = 22;
 }
 message QueryIntroDirectiveLocationsConnectionRequest {
     string selectionSet = 1;
@@ -704,6 +730,7 @@ message QueryIntroDirectiveLocationsConnectionRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryUserRequest {
     string selectionSet = 1;
@@ -731,6 +758,7 @@ message QueryUserRequest {
     StringExpression create_group_id = 23;
     StringExpression intro_typename = 24;
     UserExpression where = 25;
+    Conditional cond = 26;
 }
 message QueryUserListRequest {
     string selectionSet = 1;
@@ -764,6 +792,7 @@ message QueryUserListRequest {
     int32 last = 29;
     int32 offset = 30;
     string after = 31;
+    string before = 32;
 }
 message QueryUserConnectionRequest {
     string selectionSet = 1;
@@ -798,6 +827,7 @@ message QueryUserConnectionRequest {
     int32 last = 30;
     int32 offset = 31;
     string after = 32;
+    string before = 33;
 }
 message QueryUserPhonesRequest {
     string selectionSet = 1;
@@ -815,6 +845,7 @@ message QueryUserPhonesRequest {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     UserPhonesExpression where = 15;
+    Conditional cond = 16;
 }
 message QueryUserPhonesListRequest {
     string selectionSet = 1;
@@ -838,6 +869,7 @@ message QueryUserPhonesListRequest {
     int32 last = 19;
     int32 offset = 20;
     string after = 21;
+    string before = 22;
 }
 message QueryUserPhonesConnectionRequest {
     string selectionSet = 1;
@@ -862,6 +894,7 @@ message QueryUserPhonesConnectionRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryUserTest1Request {
     string selectionSet = 1;
@@ -879,6 +912,7 @@ message QueryUserTest1Request {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     UserTest1Expression where = 15;
+    Conditional cond = 16;
 }
 message QueryUserTest1ListRequest {
     string selectionSet = 1;
@@ -902,6 +936,7 @@ message QueryUserTest1ListRequest {
     int32 last = 19;
     int32 offset = 20;
     string after = 21;
+    string before = 22;
 }
 message QueryUserTest1ConnectionRequest {
     string selectionSet = 1;
@@ -926,6 +961,7 @@ message QueryUserTest1ConnectionRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryUserTest2Request {
     string selectionSet = 1;
@@ -943,6 +979,7 @@ message QueryUserTest2Request {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     UserTest2Expression where = 15;
+    Conditional cond = 16;
 }
 message QueryUserTest2ListRequest {
     string selectionSet = 1;
@@ -966,6 +1003,7 @@ message QueryUserTest2ListRequest {
     int32 last = 19;
     int32 offset = 20;
     string after = 21;
+    string before = 22;
 }
 message QueryUserTest2ConnectionRequest {
     string selectionSet = 1;
@@ -990,6 +1028,7 @@ message QueryUserTest2ConnectionRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryUserRoleRequest {
     string selectionSet = 1;
@@ -1007,6 +1046,7 @@ message QueryUserRoleRequest {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     UserRoleExpression where = 15;
+    Conditional cond = 16;
 }
 message QueryUserRoleListRequest {
     string selectionSet = 1;
@@ -1030,6 +1070,7 @@ message QueryUserRoleListRequest {
     int32 last = 19;
     int32 offset = 20;
     string after = 21;
+    string before = 22;
 }
 message QueryUserRoleConnectionRequest {
     string selectionSet = 1;
@@ -1054,6 +1095,7 @@ message QueryUserRoleConnectionRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryRoleRequest {
     string selectionSet = 1;
@@ -1072,6 +1114,7 @@ message QueryRoleRequest {
     StringExpression create_group_id = 14;
     StringExpression intro_typename = 15;
     RoleExpression where = 16;
+    Conditional cond = 17;
 }
 message QueryRoleListRequest {
     string selectionSet = 1;
@@ -1096,6 +1139,7 @@ message QueryRoleListRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryRoleConnectionRequest {
     string selectionSet = 1;
@@ -1121,6 +1165,7 @@ message QueryRoleConnectionRequest {
     int32 last = 21;
     int32 offset = 22;
     string after = 23;
+    string before = 24;
 }
 message QueryRoleRoleTypeRequest {
     string selectionSet = 1;
@@ -1138,6 +1183,7 @@ message QueryRoleRoleTypeRequest {
     StringExpression create_group_id = 13;
     StringExpression intro_typename = 14;
     RoleRoleTypeExpression where = 15;
+    Conditional cond = 16;
 }
 message QueryRoleRoleTypeListRequest {
     string selectionSet = 1;
@@ -1161,6 +1207,7 @@ message QueryRoleRoleTypeListRequest {
     int32 last = 19;
     int32 offset = 20;
     string after = 21;
+    string before = 22;
 }
 message QueryRoleRoleTypeConnectionRequest {
     string selectionSet = 1;
@@ -1185,6 +1232,7 @@ message QueryRoleRoleTypeConnectionRequest {
     int32 last = 20;
     int32 offset = 21;
     string after = 22;
+    string before = 23;
 }
 message QueryOrganizationRequest {
     string selectionSet = 1;
@@ -1204,6 +1252,7 @@ message QueryOrganizationRequest {
     StringExpression create_group_id = 15;
     StringExpression intro_typename = 16;
     OrganizationExpression where = 17;
+    Conditional cond = 18;
 }
 message QueryOrganizationListRequest {
     string selectionSet = 1;
@@ -1229,6 +1278,7 @@ message QueryOrganizationListRequest {
     int32 last = 21;
     int32 offset = 22;
     string after = 23;
+    string before = 24;
 }
 message QueryOrganizationConnectionRequest {
     string selectionSet = 1;
@@ -1255,6 +1305,7 @@ message QueryOrganizationConnectionRequest {
     int32 last = 22;
     int32 offset = 23;
     string after = 24;
+    string before = 25;
 }
 message QueryIsDeprecatedRequest {
     string selectionSet = 1;
@@ -1291,34 +1342,42 @@ message QueryCreateGroupIdRequest {
 message QueryGetUserDetailRequest {
     string selectionSet = 1;
     int32 layers = 2;
+    User user = 3;
 }
 message QueryGetUserDetail6Request {
     string selectionSet = 1;
     int32 layers = 2;
+    User user = 3;
 }
 message QueryGetOrgLevelRequest {
     string selectionSet = 1;
     int32 layers = 2;
+    Organization organization = 3;
 }
 message QueryGetRoleDisable2Request {
     string selectionSet = 1;
     int32 layers = 2;
+    Organization organization = 3;
 }
 message QueryGetOrgLevel5Request {
     string selectionSet = 1;
     int32 layers = 2;
+    Organization organization = 3;
 }
 message QueryGetUserByOrg2Request {
     string selectionSet = 1;
     int32 layers = 2;
+    Organization organization = 3;
 }
 message QueryGetParent2Request {
     string selectionSet = 1;
     int32 layers = 2;
+    Organization organization = 3;
 }
 message QueryFindRole2Request {
     string selectionSet = 1;
     int32 layers = 2;
     string name = 3;
     int32 type = 4;
+    bool disable = 5;
 }
