@@ -56,7 +56,6 @@ public class RpcRequestHandlerBuilder {
     private TypeSpec buildRpcRequestHandler() {
         return TypeSpec.classBuilder("RpcRequestHandler")
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(ApplicationScoped.class)
                 .addField(
                         FieldSpec.builder(
                                 ClassName.get(String.class),
@@ -137,7 +136,6 @@ public class RpcRequestHandlerBuilder {
     private MethodSpec buildConstructor() {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Inject.class)
                 .build();
     }
 
