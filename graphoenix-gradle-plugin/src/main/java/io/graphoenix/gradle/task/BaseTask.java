@@ -180,14 +180,14 @@ public class BaseTask extends DefaultTask {
                                         .orElseGet(() -> new ObjectType().setName("QueryType"));
                                 objectType.addField(
                                         new Field()
-                                                .setName(methodDeclaration.getNameAsString())
+                                                .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
                                                 .setTypeName(getInvokeFieldTypeName(type))
                                                 .setArguments(
                                                         methodDeclaration.getParameters().stream()
                                                                 .map(parameter ->
                                                                         new InputValue()
                                                                                 .setName(parameter.getNameAsString())
-                                                                                .setTypeName(getInvokeFieldTypeName(parameter.getType())))
+                                                                                .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
                                                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                                                 )
                                 );
@@ -221,14 +221,14 @@ public class BaseTask extends DefaultTask {
                                         .orElseGet(() -> new ObjectType().setName("MutationType"));
                                 objectType.addField(
                                         new Field()
-                                                .setName(methodDeclaration.getNameAsString())
+                                                .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
                                                 .setTypeName(getInvokeFieldTypeName(type))
                                                 .setArguments(
                                                         methodDeclaration.getParameters().stream()
                                                                 .map(parameter ->
                                                                         new InputValue()
                                                                                 .setName(parameter.getNameAsString())
-                                                                                .setTypeName(getInvokeFieldTypeName(parameter.getType())))
+                                                                                .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
                                                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                                                 )
                                 );
@@ -303,5 +303,13 @@ public class BaseTask extends DefaultTask {
             throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_FIELD_TYPE.bind(type.toString()));
         }
         return typeName;
+    }
+
+    private String getInvokeFieldArgumentTypeName(Type type) {
+        String invokeFieldTypeName = getInvokeFieldTypeName(type);
+        if (manager.isObject(invokeFieldTypeName)) {
+            return invokeFieldTypeName.concat("Input");
+        }
+        return invokeFieldTypeName;
     }
 }

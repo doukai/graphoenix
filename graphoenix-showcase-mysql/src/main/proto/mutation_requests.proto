@@ -1,17 +1,17 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.graphoenix.showcase.mysql";
+option java_package = "io.graphoenix.showcase.mysql.grpc";
 
-package io.graphoenix.showcase.mysql;
+package io.graphoenix.showcase.mysql.grpc;
 
 import "enums.proto";
 import "objects.proto";
 import "input_objects.proto";
 
 message MutationIntroSchemaRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional string query_type_name = 4;
     optional string mutation_type_name = 5;
@@ -33,8 +33,8 @@ message MutationIntroSchemaRequest {
     optional IntroSchemaExpression where = 21;
 }
 message MutationIntroTypeRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     string name = 3;
     optional int32 schema_id = 4;
     IntroTypeKind kind = 5;
@@ -58,8 +58,8 @@ message MutationIntroTypeRequest {
     optional IntroTypeExpression where = 23;
 }
 message MutationIntroTypeInterfacesRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     string type_name = 4;
     string interface_name = 5;
@@ -75,8 +75,8 @@ message MutationIntroTypeInterfacesRequest {
     optional IntroTypeInterfacesExpression where = 15;
 }
 message MutationIntroTypePossibleTypesRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     string type_name = 4;
     string possible_type_name = 5;
@@ -92,8 +92,8 @@ message MutationIntroTypePossibleTypesRequest {
     optional IntroTypePossibleTypesExpression where = 15;
 }
 message MutationIntroFieldRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional string name = 4;
     optional string type_name = 5;
@@ -120,8 +120,8 @@ message MutationIntroFieldRequest {
     optional IntroFieldExpression where = 26;
 }
 message MutationIntroInputValueRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional string name = 4;
     optional string type_name = 5;
@@ -144,8 +144,8 @@ message MutationIntroInputValueRequest {
     optional IntroInputValueExpression where = 22;
 }
 message MutationIntroEnumValueRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional string name = 4;
     optional string of_type_name = 5;
@@ -164,8 +164,8 @@ message MutationIntroEnumValueRequest {
     optional IntroEnumValueExpression where = 18;
 }
 message MutationIntroDirectiveRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string name = 3;
     optional int32 schema_id = 4;
     optional string description = 5;
@@ -186,8 +186,8 @@ message MutationIntroDirectiveRequest {
     optional IntroDirectiveExpression where = 20;
 }
 message MutationIntroDirectiveLocationsRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     string directive_name = 4;
     IntroDirectiveLocation directive_location = 5;
@@ -203,8 +203,8 @@ message MutationIntroDirectiveLocationsRequest {
     optional IntroDirectiveLocationsExpression where = 15;
 }
 message MutationUserRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     string login = 4;
     string password = 5;
@@ -230,8 +230,8 @@ message MutationUserRequest {
     optional UserExpression where = 25;
 }
 message MutationUserPhonesRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional int32 user_id = 4;
     optional string phone = 5;
@@ -247,8 +247,8 @@ message MutationUserPhonesRequest {
     optional UserPhonesExpression where = 15;
 }
 message MutationUserTest1Request {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional int32 user_id = 4;
     optional int32 test1 = 5;
@@ -264,8 +264,8 @@ message MutationUserTest1Request {
     optional UserTest1Expression where = 15;
 }
 message MutationUserTest2Request {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional int32 user_id = 4;
     optional bool test2 = 5;
@@ -281,8 +281,8 @@ message MutationUserTest2Request {
     optional UserTest2Expression where = 15;
 }
 message MutationUserRoleRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional int32 user_id = 4;
     optional int32 role_id = 5;
@@ -298,8 +298,8 @@ message MutationUserRoleRequest {
     optional UserRoleExpression where = 15;
 }
 message MutationRoleRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     string name = 4;
     repeated RoleType type = 5;
@@ -316,8 +316,8 @@ message MutationRoleRequest {
     optional RoleExpression where = 16;
 }
 message MutationRoleRoleTypeRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional int32 role_id = 4;
     optional RoleType type = 5;
@@ -333,8 +333,8 @@ message MutationRoleRoleTypeRequest {
     optional RoleRoleTypeExpression where = 15;
 }
 message MutationOrganizationRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string id = 3;
     optional int32 above_id = 4;
     optional OrganizationInput above = 5;
@@ -352,34 +352,34 @@ message MutationOrganizationRequest {
     optional OrganizationExpression where = 17;
 }
 message MutationIsDeprecatedRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message MutationVersionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message MutationRealmIdRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message MutationCreateUserIdRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message MutationCreateTimeRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message MutationUpdateUserIdRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message MutationUpdateTimeRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message MutationCreateGroupIdRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }

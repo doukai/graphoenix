@@ -24,6 +24,9 @@ public class GraphQLConfig {
     private String packageName;
 
     @Optional
+    private String grpcPackageName;
+
+    @Optional
     private String objectTypePackageName;
 
     @Optional
@@ -108,6 +111,15 @@ public class GraphQLConfig {
 
     public void setPackageName(String packageName) {
         this.packageName = packageName;
+    }
+
+    public String getGrpcPackageName() {
+        return grpcPackageName != null ? grpcPackageName : packageName + ".grpc";
+    }
+
+    public GraphQLConfig setGrpcPackageName(String grpcPackageName) {
+        this.grpcPackageName = grpcPackageName;
+        return this;
     }
 
     public String getObjectTypePackageName() {

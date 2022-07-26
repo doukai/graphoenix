@@ -1,9 +1,9 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.graphoenix.showcase.mysql";
+option java_package = "io.graphoenix.showcase.mysql.grpc";
 
-package io.graphoenix.showcase.mysql;
+package io.graphoenix.showcase.mysql.grpc;
 
 import "enums.proto";
 import "objects.proto";
@@ -71,12 +71,12 @@ service QueryTypeService {
     rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
     rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
     rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
-    rpc GetUserDetail (QueryGetUserDetailRequest) returns (QueryGetUserDetailResponse);
-    rpc GetUserDetail6 (QueryGetUserDetail6Request) returns (QueryGetUserDetail6Response);
-    rpc GetOrgLevel (QueryGetOrgLevelRequest) returns (QueryGetOrgLevelResponse);
-    rpc GetRoleDisable2 (QueryGetRoleDisable2Request) returns (QueryGetRoleDisable2Response);
-    rpc GetOrgLevel5 (QueryGetOrgLevel5Request) returns (QueryGetOrgLevel5Response);
-    rpc GetUserByOrg2 (QueryGetUserByOrg2Request) returns (QueryGetUserByOrg2Response);
-    rpc GetParent2 (QueryGetParent2Request) returns (QueryGetParent2Response);
+    rpc UserDetail (QueryUserDetailRequest) returns (QueryUserDetailResponse);
+    rpc UserDetail6 (QueryUserDetail6Request) returns (QueryUserDetail6Response);
+    rpc OrgLevel (QueryOrgLevelRequest) returns (QueryOrgLevelResponse);
+    rpc RoleDisable2 (QueryRoleDisable2Request) returns (QueryRoleDisable2Response);
+    rpc OrgLevel5 (QueryOrgLevel5Request) returns (QueryOrgLevel5Response);
+    rpc UserByOrg2 (QueryUserByOrg2Request) returns (QueryUserByOrg2Response);
+    rpc Parent2 (QueryParent2Request) returns (QueryParent2Response);
     rpc FindRole2 (QueryFindRole2Request) returns (QueryFindRole2Response);
 }

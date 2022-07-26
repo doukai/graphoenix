@@ -1,17 +1,17 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.graphoenix.showcase.mysql";
+option java_package = "io.graphoenix.showcase.mysql.grpc";
 
-package io.graphoenix.showcase.mysql;
+package io.graphoenix.showcase.mysql.grpc;
 
 import "enums.proto";
 import "objects.proto";
 import "input_objects.proto";
 
 message QueryIntroSchemaRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression query_type_name = 4;
     optional StringExpression mutation_type_name = 5;
@@ -34,8 +34,8 @@ message QueryIntroSchemaRequest {
     optional Conditional cond = 22;
 }
 message QueryIntroSchemaListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression query_type_name = 4;
     optional StringExpression mutation_type_name = 5;
@@ -64,8 +64,8 @@ message QueryIntroSchemaListRequest {
     optional string before = 28;
 }
 message QueryIntroSchemaConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression query_type_name = 4;
     optional StringExpression mutation_type_name = 5;
@@ -95,8 +95,8 @@ message QueryIntroSchemaConnectionRequest {
     optional string before = 29;
 }
 message QueryIntroTypeRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression name = 3;
     optional IntExpression schema_id = 4;
     optional IntroTypeKindExpression kind = 5;
@@ -121,8 +121,8 @@ message QueryIntroTypeRequest {
     optional Conditional cond = 24;
 }
 message QueryIntroTypeListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression name = 3;
     optional IntExpression schema_id = 4;
     optional IntroTypeKindExpression kind = 5;
@@ -153,8 +153,8 @@ message QueryIntroTypeListRequest {
     optional string before = 30;
 }
 message QueryIntroTypeConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression name = 3;
     optional IntExpression schema_id = 4;
     optional IntroTypeKindExpression kind = 5;
@@ -186,8 +186,8 @@ message QueryIntroTypeConnectionRequest {
     optional string before = 31;
 }
 message QueryIntroTypeInterfacesRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression type_name = 4;
     optional StringExpression interface_name = 5;
@@ -204,8 +204,8 @@ message QueryIntroTypeInterfacesRequest {
     optional Conditional cond = 16;
 }
 message QueryIntroTypeInterfacesListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression type_name = 4;
     optional StringExpression interface_name = 5;
@@ -228,8 +228,8 @@ message QueryIntroTypeInterfacesListRequest {
     optional string before = 22;
 }
 message QueryIntroTypeInterfacesConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression type_name = 4;
     optional StringExpression interface_name = 5;
@@ -253,8 +253,8 @@ message QueryIntroTypeInterfacesConnectionRequest {
     optional string before = 23;
 }
 message QueryIntroTypePossibleTypesRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression type_name = 4;
     optional StringExpression possible_type_name = 5;
@@ -271,8 +271,8 @@ message QueryIntroTypePossibleTypesRequest {
     optional Conditional cond = 16;
 }
 message QueryIntroTypePossibleTypesListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression type_name = 4;
     optional StringExpression possible_type_name = 5;
@@ -295,8 +295,8 @@ message QueryIntroTypePossibleTypesListRequest {
     optional string before = 22;
 }
 message QueryIntroTypePossibleTypesConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression type_name = 4;
     optional StringExpression possible_type_name = 5;
@@ -320,8 +320,8 @@ message QueryIntroTypePossibleTypesConnectionRequest {
     optional string before = 23;
 }
 message QueryIntroFieldRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression type_name = 5;
@@ -349,8 +349,8 @@ message QueryIntroFieldRequest {
     optional Conditional cond = 27;
 }
 message QueryIntroFieldListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression type_name = 5;
@@ -384,8 +384,8 @@ message QueryIntroFieldListRequest {
     optional string before = 33;
 }
 message QueryIntroFieldConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression type_name = 5;
@@ -420,8 +420,8 @@ message QueryIntroFieldConnectionRequest {
     optional string before = 34;
 }
 message QueryIntroInputValueRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression type_name = 5;
@@ -445,8 +445,8 @@ message QueryIntroInputValueRequest {
     optional Conditional cond = 23;
 }
 message QueryIntroInputValueListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression type_name = 5;
@@ -476,8 +476,8 @@ message QueryIntroInputValueListRequest {
     optional string before = 29;
 }
 message QueryIntroInputValueConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression type_name = 5;
@@ -508,8 +508,8 @@ message QueryIntroInputValueConnectionRequest {
     optional string before = 30;
 }
 message QueryIntroEnumValueRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression of_type_name = 5;
@@ -529,8 +529,8 @@ message QueryIntroEnumValueRequest {
     optional Conditional cond = 19;
 }
 message QueryIntroEnumValueListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression of_type_name = 5;
@@ -556,8 +556,8 @@ message QueryIntroEnumValueListRequest {
     optional string before = 25;
 }
 message QueryIntroEnumValueConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional StringExpression of_type_name = 5;
@@ -584,8 +584,8 @@ message QueryIntroEnumValueConnectionRequest {
     optional string before = 26;
 }
 message QueryIntroDirectiveRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression name = 3;
     optional IntExpression schema_id = 4;
     optional StringExpression description = 5;
@@ -607,8 +607,8 @@ message QueryIntroDirectiveRequest {
     optional Conditional cond = 21;
 }
 message QueryIntroDirectiveListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression name = 3;
     optional IntExpression schema_id = 4;
     optional StringExpression description = 5;
@@ -636,8 +636,8 @@ message QueryIntroDirectiveListRequest {
     optional string before = 27;
 }
 message QueryIntroDirectiveConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression name = 3;
     optional IntExpression schema_id = 4;
     optional StringExpression description = 5;
@@ -666,8 +666,8 @@ message QueryIntroDirectiveConnectionRequest {
     optional string before = 28;
 }
 message QueryIntroDirectiveLocationsRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression directive_name = 4;
     optional IntroDirectiveLocationExpression directive_location = 5;
@@ -684,8 +684,8 @@ message QueryIntroDirectiveLocationsRequest {
     optional Conditional cond = 16;
 }
 message QueryIntroDirectiveLocationsListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression directive_name = 4;
     optional IntroDirectiveLocationExpression directive_location = 5;
@@ -708,8 +708,8 @@ message QueryIntroDirectiveLocationsListRequest {
     optional string before = 22;
 }
 message QueryIntroDirectiveLocationsConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression directive_name = 4;
     optional IntroDirectiveLocationExpression directive_location = 5;
@@ -733,8 +733,8 @@ message QueryIntroDirectiveLocationsConnectionRequest {
     optional string before = 23;
 }
 message QueryUserRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression login = 4;
     optional StringExpression password = 5;
@@ -761,8 +761,8 @@ message QueryUserRequest {
     optional Conditional cond = 26;
 }
 message QueryUserListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression login = 4;
     optional StringExpression password = 5;
@@ -795,8 +795,8 @@ message QueryUserListRequest {
     optional string before = 32;
 }
 message QueryUserConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression login = 4;
     optional StringExpression password = 5;
@@ -830,8 +830,8 @@ message QueryUserConnectionRequest {
     optional string before = 33;
 }
 message QueryUserPhonesRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional StringExpression phone = 5;
@@ -848,8 +848,8 @@ message QueryUserPhonesRequest {
     optional Conditional cond = 16;
 }
 message QueryUserPhonesListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional StringExpression phone = 5;
@@ -872,8 +872,8 @@ message QueryUserPhonesListRequest {
     optional string before = 22;
 }
 message QueryUserPhonesConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional StringExpression phone = 5;
@@ -897,8 +897,8 @@ message QueryUserPhonesConnectionRequest {
     optional string before = 23;
 }
 message QueryUserTest1Request {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional IntExpression test1 = 5;
@@ -915,8 +915,8 @@ message QueryUserTest1Request {
     optional Conditional cond = 16;
 }
 message QueryUserTest1ListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional IntExpression test1 = 5;
@@ -939,8 +939,8 @@ message QueryUserTest1ListRequest {
     optional string before = 22;
 }
 message QueryUserTest1ConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional IntExpression test1 = 5;
@@ -964,8 +964,8 @@ message QueryUserTest1ConnectionRequest {
     optional string before = 23;
 }
 message QueryUserTest2Request {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional BooleanExpression test2 = 5;
@@ -982,8 +982,8 @@ message QueryUserTest2Request {
     optional Conditional cond = 16;
 }
 message QueryUserTest2ListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional BooleanExpression test2 = 5;
@@ -1006,8 +1006,8 @@ message QueryUserTest2ListRequest {
     optional string before = 22;
 }
 message QueryUserTest2ConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional BooleanExpression test2 = 5;
@@ -1031,8 +1031,8 @@ message QueryUserTest2ConnectionRequest {
     optional string before = 23;
 }
 message QueryUserRoleRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional IntExpression role_id = 5;
@@ -1049,8 +1049,8 @@ message QueryUserRoleRequest {
     optional Conditional cond = 16;
 }
 message QueryUserRoleListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional IntExpression role_id = 5;
@@ -1073,8 +1073,8 @@ message QueryUserRoleListRequest {
     optional string before = 22;
 }
 message QueryUserRoleConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression user_id = 4;
     optional IntExpression role_id = 5;
@@ -1098,8 +1098,8 @@ message QueryUserRoleConnectionRequest {
     optional string before = 23;
 }
 message QueryRoleRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional RoleTypeExpression type = 5;
@@ -1117,8 +1117,8 @@ message QueryRoleRequest {
     optional Conditional cond = 17;
 }
 message QueryRoleListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional RoleTypeExpression type = 5;
@@ -1142,8 +1142,8 @@ message QueryRoleListRequest {
     optional string before = 23;
 }
 message QueryRoleConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional StringExpression name = 4;
     optional RoleTypeExpression type = 5;
@@ -1168,8 +1168,8 @@ message QueryRoleConnectionRequest {
     optional string before = 24;
 }
 message QueryRoleRoleTypeRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression role_id = 4;
     optional RoleTypeExpression type = 5;
@@ -1186,8 +1186,8 @@ message QueryRoleRoleTypeRequest {
     optional Conditional cond = 16;
 }
 message QueryRoleRoleTypeListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression role_id = 4;
     optional RoleTypeExpression type = 5;
@@ -1210,8 +1210,8 @@ message QueryRoleRoleTypeListRequest {
     optional string before = 22;
 }
 message QueryRoleRoleTypeConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression role_id = 4;
     optional RoleTypeExpression type = 5;
@@ -1235,8 +1235,8 @@ message QueryRoleRoleTypeConnectionRequest {
     optional string before = 23;
 }
 message QueryOrganizationRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression above_id = 4;
     optional OrganizationExpression above = 5;
@@ -1255,8 +1255,8 @@ message QueryOrganizationRequest {
     optional Conditional cond = 18;
 }
 message QueryOrganizationListRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression above_id = 4;
     optional OrganizationExpression above = 5;
@@ -1281,8 +1281,8 @@ message QueryOrganizationListRequest {
     optional string before = 24;
 }
 message QueryOrganizationConnectionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional StringExpression id = 3;
     optional IntExpression above_id = 4;
     optional OrganizationExpression above = 5;
@@ -1308,75 +1308,75 @@ message QueryOrganizationConnectionRequest {
     optional string before = 25;
 }
 message QueryIsDeprecatedRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message QueryVersionRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message QueryRealmIdRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message QueryCreateUserIdRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message QueryCreateTimeRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message QueryUpdateUserIdRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message QueryUpdateTimeRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
 message QueryCreateGroupIdRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
 }
-message QueryGetUserDetailRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
-    optional User user = 3;
+message QueryUserDetailRequest {
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
+    optional UserInput user = 3;
 }
-message QueryGetUserDetail6Request {
-    string selectionSet = 1;
-    int32 layers = 2;
-    optional User user = 3;
+message QueryUserDetail6Request {
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
+    optional UserInput user = 3;
 }
-message QueryGetOrgLevelRequest {
-    string selectionSet = 1;
-    int32 layers = 2;
-    optional Organization organization = 3;
+message QueryOrgLevelRequest {
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
+    optional OrganizationInput organization = 3;
 }
-message QueryGetRoleDisable2Request {
-    string selectionSet = 1;
-    int32 layers = 2;
-    optional Organization organization = 3;
+message QueryRoleDisable2Request {
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
+    optional OrganizationInput organization = 3;
 }
-message QueryGetOrgLevel5Request {
-    string selectionSet = 1;
-    int32 layers = 2;
-    optional Organization organization = 3;
+message QueryOrgLevel5Request {
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
+    optional OrganizationInput organization = 3;
 }
-message QueryGetUserByOrg2Request {
-    string selectionSet = 1;
-    int32 layers = 2;
-    optional Organization organization = 3;
+message QueryUserByOrg2Request {
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
+    optional OrganizationInput organization = 3;
 }
-message QueryGetParent2Request {
-    string selectionSet = 1;
-    int32 layers = 2;
-    optional Organization organization = 3;
+message QueryParent2Request {
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
+    optional OrganizationInput organization = 3;
 }
 message QueryFindRole2Request {
-    string selectionSet = 1;
-    int32 layers = 2;
+    optional string selectionSet = 1;
+    optional int32 layers = 2;
     optional string name = 3;
     optional int32 type = 4;
     optional bool disable = 5;

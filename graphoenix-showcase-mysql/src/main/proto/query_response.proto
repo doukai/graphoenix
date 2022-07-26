@@ -1,9 +1,9 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.graphoenix.showcase.mysql";
+option java_package = "io.graphoenix.showcase.mysql.grpc";
 
-package io.graphoenix.showcase.mysql;
+package io.graphoenix.showcase.mysql.grpc;
 
 import "enums.proto";
 import "objects.proto";
@@ -186,26 +186,26 @@ message QueryUpdateTimeResponse {
 message QueryCreateGroupIdResponse {
     optional string create_group_id = 1;
 }
-message QueryGetUserDetailResponse {
-    optional string get_user_detail = 1;
+message QueryUserDetailResponse {
+    optional string user_detail = 1;
 }
-message QueryGetUserDetail6Response {
-    repeated string get_user_detail6 = 1;
+message QueryUserDetail6Response {
+    repeated string user_detail6 = 1;
 }
-message QueryGetOrgLevelResponse {
-    optional int32 get_org_level = 1;
+message QueryOrgLevelResponse {
+    optional int32 org_level = 1;
 }
-message QueryGetRoleDisable2Response {
-    optional bool get_role_disable2 = 1;
+message QueryRoleDisable2Response {
+    optional bool role_disable2 = 1;
 }
-message QueryGetOrgLevel5Response {
-    repeated int32 get_org_level5 = 1;
+message QueryOrgLevel5Response {
+    repeated int32 org_level5 = 1;
 }
-message QueryGetUserByOrg2Response {
-    repeated User get_user_by_org2 = 1;
+message QueryUserByOrg2Response {
+    repeated User user_by_org2 = 1;
 }
-message QueryGetParent2Response {
-    optional Organization get_parent2 = 1;
+message QueryParent2Response {
+    optional Organization parent2 = 1;
 }
 message QueryFindRole2Response {
     repeated Role find_role2 = 1;

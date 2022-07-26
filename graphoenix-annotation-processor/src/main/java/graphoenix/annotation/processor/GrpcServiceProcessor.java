@@ -16,6 +16,7 @@ import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.java.generator.implementer.RpcRequestHandlerBuilder;
+import io.graphoenix.java.generator.implementer.RpcServiceImplementer;
 import io.graphoenix.spi.annotation.Skip;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
@@ -63,6 +64,7 @@ public class GrpcServiceProcessor extends AbstractProcessor {
     private JavaElementToInputType javaElementToInputType;
     private GraphQLApiBuilder graphQLApiBuilder;
     private RpcRequestHandlerBuilder rpcRequestHandlerBuilder;
+    private RpcServiceImplementer rpcServiceImplementer;
     private GraphQLConfig graphQLConfig;
     private Types typeUtils;
     private Filer filer;
@@ -81,6 +83,7 @@ public class GrpcServiceProcessor extends AbstractProcessor {
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
         this.rpcRequestHandlerBuilder = BeanContext.get(RpcRequestHandlerBuilder.class);
+        this.rpcServiceImplementer = BeanContext.get(RpcServiceImplementer.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
@@ -154,7 +157,7 @@ public class GrpcServiceProcessor extends AbstractProcessor {
 
         try {
             rpcRequestHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-
+            rpcServiceImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

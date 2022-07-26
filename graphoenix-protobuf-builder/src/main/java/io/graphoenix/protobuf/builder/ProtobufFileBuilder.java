@@ -57,10 +57,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(manager.getObjects().map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -73,10 +73,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(manager.getInputObjects().map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -84,10 +84,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(manager.getEnums().map(this::buildEnum).map(Enum::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -102,10 +102,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildQueryRpcRequest().map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -120,10 +120,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildQueryRpcResponse().map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -138,10 +138,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildMutationRpcRequest().map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -156,10 +156,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildMutationRpcResponse().map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -176,10 +176,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildQueryService().stream().map(Service::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -196,10 +196,10 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                         )
                 )
-                .setPkg(graphQLConfig.getPackageName())
+                .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildMutationService().stream().map(Service::toString).collect(Collectors.toList()))
                 .toString()
         );
@@ -251,7 +251,7 @@ public class ProtobufFileBuilder {
                                 .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
                                 .setFields(
                                         Stream.concat(
-                                                Stream.of(new Field().setName("selectionSet").setType("string").setNumber(1), new Field().setName("layers").setType("int32").setNumber(2)),
+                                                Stream.of(new Field().setName("selectionSet").setOptional(true).setType("string").setNumber(1), new Field().setName("layers").setOptional(true).setType("int32").setNumber(2)),
                                                 Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
                                                         .flatMap(argumentsDefinitionContext ->
                                                                 IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size())
@@ -298,7 +298,7 @@ public class ProtobufFileBuilder {
                                 .setName("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
                                 .setFields(
                                         Stream.concat(
-                                                Stream.of(new Field().setName("selectionSet").setType("string").setNumber(1), new Field().setName("layers").setType("int32").setNumber(2)),
+                                                Stream.of(new Field().setName("selectionSet").setOptional(true).setType("string").setNumber(1), new Field().setName("layers").setOptional(true).setType("int32").setNumber(2)),
                                                 Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
                                                         .flatMap(argumentsDefinitionContext ->
                                                                 IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size())

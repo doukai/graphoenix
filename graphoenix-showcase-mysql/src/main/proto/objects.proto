@@ -1,9 +1,9 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.graphoenix.showcase.mysql";
+option java_package = "io.graphoenix.showcase.mysql.grpc";
 
-package io.graphoenix.showcase.mysql;
+package io.graphoenix.showcase.mysql.grpc;
 
 import "enums.proto";
 
@@ -782,13 +782,13 @@ message QueryType {
     optional string update_user_id = 57;
     optional string update_time = 58;
     optional string create_group_id = 59;
-    optional string get_user_detail = 60;
-    repeated string get_user_detail6 = 61;
-    optional int32 get_org_level = 62;
-    optional bool get_role_disable2 = 63;
-    repeated int32 get_org_level5 = 64;
-    repeated User get_user_by_org2 = 65;
-    optional Organization get_parent2 = 66;
+    optional string user_detail = 60;
+    repeated string user_detail6 = 61;
+    optional int32 org_level = 62;
+    optional bool role_disable2 = 63;
+    repeated int32 org_level5 = 64;
+    repeated User user_by_org2 = 65;
+    optional Organization parent2 = 66;
     repeated Role find_role2 = 67;
 }
 message MutationType {

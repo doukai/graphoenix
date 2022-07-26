@@ -6,7 +6,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
@@ -14,7 +13,6 @@ import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -47,25 +45,89 @@ public class RpcRequestHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
-        Logger.info("SelectionFilter build success");
+        Logger.info("RpcRequestHandler build success");
     }
 
     private JavaFile buildClass() {
-        TypeSpec typeSpec = buildSelectionFilter();
+        TypeSpec typeSpec = buildRpcRequestHandler();
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildSelectionFilter() {
+    private TypeSpec buildRpcRequestHandler() {
         return TypeSpec.classBuilder("RpcRequestHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
-                                "manager",
+                                ClassName.get(String.class),
+                                "EMPTY",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
-                        ).build()
+                        ).initializer("\"\"").build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(String.class),
+                                "SPACE",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).initializer("\" \"").build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(String.class),
+                                "COLON",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).initializer("\": \"").build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(String.class),
+                                "COMMA",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).initializer("\", \"").build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(String.class),
+                                "QUOTATION",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).initializer("\"\\\"\"").build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(String.class),
+                                "CURLY_BRACKETS_START",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).initializer("\"{\"").build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(String.class),
+                                "CURLY_BRACKETS_END",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).initializer("\"}\"").build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(String.class),
+                                "SQUARE_BRACKETS_START",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).initializer("\"[\"").build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ClassName.get(String.class),
+                                "SQUARE_BRACKETS_END",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).initializer("\"]\"").build()
                 )
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
@@ -76,8 +138,6 @@ public class RpcRequestHandlerBuilder {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
-                .addStatement("this.manager = manager")
                 .build();
     }
 
@@ -85,6 +145,109 @@ public class RpcRequestHandlerBuilder {
         return manager.getInputObjects()
                 .map(this::buildTypeMethod)
                 .collect(Collectors.toList());
+    }
+
+    private MethodSpec buildTypeMethod(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        String typeParameterName = getRpcInputObjectLowerCamelName(inputObjectTypeDefinitionContext);
+        ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcInputObjectName(inputObjectTypeDefinitionContext));
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ClassName.get(String.class))
+                .addParameter(typeClassName, typeParameterName)
+                .addStatement("$T stringBuilder = new $T()", ClassName.get(StringBuilder.class), ClassName.get(StringBuilder.class))
+                .addStatement("stringBuilder.append(CURLY_BRACKETS_START)");
+
+        List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContexts = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition();
+        for (GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext : inputValueDefinitionContexts) {
+            if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
+                CodeBlock codeBlock;
+                if (manager.isScalar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("String")) {
+                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> QUOTATION + item + QUOTATION).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
+                                inputValueDefinitionContext.name().getText(),
+                                typeParameterName,
+                                getRpcGetInputValueListName(inputValueDefinitionContext),
+                                ClassName.get(Collectors.class)
+                        );
+                    } else {
+                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> item + EMPTY).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
+                                inputValueDefinitionContext.name().getText(),
+                                typeParameterName,
+                                getRpcGetInputValueListName(inputValueDefinitionContext),
+                                ClassName.get(Collectors.class)
+                        );
+                    }
+                } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> item.getValueDescriptor().getName().replaceFirst($S, EMPTY)).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
+                            inputValueDefinitionContext.name().getText(),
+                            typeParameterName,
+                            getRpcGetInputValueListName(inputValueDefinitionContext),
+                            getRpcEnumValueSuffixName(inputValueDefinitionContext.type()),
+                            ClassName.get(Collectors.class)
+                    );
+                } else if (manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(this::$L).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
+                            inputValueDefinitionContext.name().getText(),
+                            typeParameterName,
+                            getRpcGetInputValueListName(inputValueDefinitionContext),
+                            getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type()),
+                            ClassName.get(Collectors.class)
+                    );
+                } else {
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
+                }
+                if (inputValueDefinitionContext.type().nonNullType() == null) {
+                    builder.beginControlFlow("if ($L.$L() > 0)", typeParameterName, getRpcGetInputValueCountName(inputValueDefinitionContext))
+                            .addStatement(codeBlock)
+                            .endControlFlow();
+                } else {
+                    builder.addStatement(codeBlock);
+                }
+            } else {
+                CodeBlock codeBlock;
+                if (manager.isScalar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("String")) {
+                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(QUOTATION).append($L.$L()).append(QUOTATION).append(SPACE)",
+                                inputValueDefinitionContext.name().getText(),
+                                typeParameterName,
+                                getRpcGetInputValueName(inputValueDefinitionContext)
+                        );
+                    } else {
+                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append($L.$L()).append(SPACE)",
+                                inputValueDefinitionContext.name().getText(),
+                                typeParameterName,
+                                getRpcGetInputValueName(inputValueDefinitionContext)
+                        );
+                    }
+                } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append($L.$L().getValueDescriptor().getName().replaceFirst($S, EMPTY)).append(SPACE)",
+                            inputValueDefinitionContext.name().getText(),
+                            typeParameterName,
+                            getRpcGetInputValueName(inputValueDefinitionContext),
+                            getRpcEnumValueSuffixName(inputValueDefinitionContext.type())
+                    );
+                } else if (manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
+                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append($L($L.$L())).append(SPACE)",
+                            inputValueDefinitionContext.name().getText(),
+                            getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type()),
+                            typeParameterName,
+                            getRpcGetInputValueName(inputValueDefinitionContext)
+                    );
+                } else {
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
+                }
+                if (inputValueDefinitionContext.type().nonNullType() == null) {
+                    builder.beginControlFlow("if ($L.$L())", typeParameterName, getRpcHasInputValueName(inputValueDefinitionContext))
+                            .addStatement(codeBlock)
+                            .endControlFlow();
+                } else {
+                    builder.addStatement(codeBlock);
+                }
+            }
+        }
+        builder.addStatement("stringBuilder.append(CURLY_BRACKETS_END)")
+                .addStatement("return stringBuilder.toString()");
+        return builder.build();
     }
 
     private String getRpcInputObjectName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
@@ -137,108 +300,5 @@ public class RpcRequestHandlerBuilder {
 
     private String getRpcGetInputValueCountName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getRpcInputValueName(inputValueDefinitionContext))).concat("Count");
-    }
-
-    private MethodSpec buildTypeMethod(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        String typeParameterName = getRpcInputObjectLowerCamelName(inputObjectTypeDefinitionContext);
-        ClassName typeClassName = ClassName.get(graphQLConfig.getPackageName(), getRpcInputObjectName(inputObjectTypeDefinitionContext));
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(String.class))
-                .addParameter(typeClassName, typeParameterName)
-                .addStatement("$T stringBuilder = new $T()", ClassName.get(StringBuilder.class), ClassName.get(StringBuilder.class))
-                .addStatement("stringBuilder.append(\"{\")");
-
-        List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContexts = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition();
-        for (GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext : inputValueDefinitionContexts) {
-            if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
-                CodeBlock codeBlock;
-                if (manager.isScalar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
-                    if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("String")) {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(\": [\").append($L.$L().stream().map(item -> \"\\\"\" + item + \"\\\"\").collect($T.joining(\", \"))).append(\"] \")",
-                                inputValueDefinitionContext.name().getText(),
-                                typeParameterName,
-                                getRpcGetInputValueListName(inputValueDefinitionContext),
-                                ClassName.get(Collectors.class)
-                        );
-                    } else {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(\": [\").append($L.$L().stream().map(item -> item + \"\").collect($T.joining(\", \"))).append(\"] \")",
-                                inputValueDefinitionContext.name().getText(),
-                                typeParameterName,
-                                getRpcGetInputValueListName(inputValueDefinitionContext),
-                                ClassName.get(Collectors.class)
-                        );
-                    }
-                } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
-                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(\": [\").append($L.$L().stream().map(item -> item.getValueDescriptor().getName().replaceFirst($S, \"\")).collect($T.joining(\", \"))).append(\"] \")",
-                            inputValueDefinitionContext.name().getText(),
-                            typeParameterName,
-                            getRpcGetInputValueListName(inputValueDefinitionContext),
-                            getRpcEnumValueSuffixName(inputValueDefinitionContext.type()),
-                            ClassName.get(Collectors.class)
-                    );
-                } else if (manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
-                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(\": [\").append($L.$L().stream().map(this::$L).collect($T.joining(\", \"))).append(\"] \")",
-                            inputValueDefinitionContext.name().getText(),
-                            typeParameterName,
-                            getRpcGetInputValueListName(inputValueDefinitionContext),
-                            getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type()),
-                            ClassName.get(Collectors.class)
-                    );
-                } else {
-                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
-                }
-                if (inputValueDefinitionContext.type().nonNullType() == null) {
-                    builder.beginControlFlow("if ($L.$L() > 0)", typeParameterName, getRpcGetInputValueCountName(inputValueDefinitionContext))
-                            .addStatement(codeBlock)
-                            .endControlFlow();
-                } else {
-                    builder.addStatement(codeBlock);
-                }
-            } else {
-                CodeBlock codeBlock;
-                if (manager.isScalar(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
-                    if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("String")) {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(\": \").append(\"\\\"\").append($L.$L()).append(\"\\\"\").append(\" \")",
-                                inputValueDefinitionContext.name().getText(),
-                                typeParameterName,
-                                getRpcGetInputValueName(inputValueDefinitionContext)
-                        );
-                    } else {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(\": \").append($L.$L()).append(\" \")",
-                                inputValueDefinitionContext.name().getText(),
-                                typeParameterName,
-                                getRpcGetInputValueName(inputValueDefinitionContext)
-                        );
-                    }
-                } else if (manager.isEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
-                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(\": \").append($L.$L().getValueDescriptor().getName().replaceFirst($S, \"\")).append(\" \")",
-                            inputValueDefinitionContext.name().getText(),
-                            typeParameterName,
-                            getRpcGetInputValueName(inputValueDefinitionContext),
-                            getRpcEnumValueSuffixName(inputValueDefinitionContext.type())
-                    );
-                } else if (manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
-                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(\": \").append($L($L.$L())).append(\" \")",
-                            inputValueDefinitionContext.name().getText(),
-                            getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type()),
-                            typeParameterName,
-                            getRpcGetInputValueName(inputValueDefinitionContext)
-                    );
-                } else {
-                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
-                }
-                if (inputValueDefinitionContext.type().nonNullType() == null) {
-                    builder.beginControlFlow("if ($L.$L())", typeParameterName, getRpcHasInputValueName(inputValueDefinitionContext))
-                            .addStatement(codeBlock)
-                            .endControlFlow();
-                } else {
-                    builder.addStatement(codeBlock);
-                }
-            }
-        }
-        builder.addStatement("stringBuilder.append(\"}\")")
-                .addStatement("return stringBuilder.toString()");
-        return builder.build();
     }
 }
