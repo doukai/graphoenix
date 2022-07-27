@@ -1,18 +1,17 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.handler.OperationHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import jakarta.json.bind.Jsonb;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
@@ -62,8 +61,40 @@ public class RpcServiceImplementer {
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
                         FieldSpec.builder(
-                                ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcRequestHandler"),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcRequestHandler")),
                                 "requestHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcObjectHandler")),
+                                "rpcObjectHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)),
+                                "operationHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")),
+                                "invokeHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(Jsonb.class)),
+                                "jsonb",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
@@ -180,7 +211,16 @@ public class RpcServiceImplementer {
     private MethodSpec buildConstructor() {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addStatement("this.requestHandler = new $T()", ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcRequestHandler"))
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcRequestHandler")), "requestHandler")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcObjectHandler")), "rpcObjectHandler")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)), "operationHandler")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")), "invokeHandler")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(Jsonb.class)), "jsonb")
+                .addStatement("this.requestHandler = requestHandler")
+                .addStatement("this.rpcObjectHandler = rpcObjectHandler")
+                .addStatement("this.operationHandler = operationHandler")
+                .addStatement("this.invokeHandler = invokeHandler")
+                .addStatement("this.jsonb = jsonb")
                 .build();
     }
 
@@ -193,18 +233,63 @@ public class RpcServiceImplementer {
     }
 
     private MethodSpec buildTypeMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        String methodName = getRpcName(fieldDefinitionContext);
+        String methodName = getRpcName(fieldDefinitionContext.type());
         String requestParameterName = "request";
-
         ParameterizedTypeName requestClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryRequestClassName(fieldDefinitionContext)));
         ParameterizedTypeName responseClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)));
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(getRpcName(fieldDefinitionContext))
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(requestClassName, requestParameterName)
                 .returns(responseClassName);
 
-        return builder.build();
+        CodeBlock codeBlock;
+        if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+            codeBlock = CodeBlock.join(
+                    List.of(
+                            CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcName(fieldDefinitionContext)),
+                            CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
+                            CodeBlock.of(".flatMap(operationHandler.get()::query)"),
+                            CodeBlock.of(".map(jsonSting -> jsonb.get().fromJson(jsonSting, $T.class))",
+                                    ClassName.get(
+                                            graphQLConfig.getObjectTypePackageName(),
+                                            manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
+                                    )
+                            ),
+                            CodeBlock.of(".map(queryType -> queryType.$L().stream().map(item -> rpcObjectHandler.get().$L(item)).collect($T.toList()))",
+                                    getFieldGetterName(fieldDefinitionContext),
+                                    methodName,
+                                    ClassName.get(Collectors.class)
+                            ),
+                            CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
+                                    ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
+                                    getRpcFieldAddAllName(fieldDefinitionContext)
+                            )
+                    ),
+                    System.lineSeparator()
+            );
+        } else {
+            codeBlock = CodeBlock.join(
+                    List.of(
+                            CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcName(fieldDefinitionContext)),
+                            CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
+                            CodeBlock.of(".flatMap(operationHandler.get()::query)"),
+                            CodeBlock.of(".map(jsonSting -> jsonb.get().fromJson(jsonSting, $T.class))",
+                                    ClassName.get(
+                                            graphQLConfig.getObjectTypePackageName(),
+                                            manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
+                                    )
+                            ),
+                            CodeBlock.of(".map(queryType -> rpcObjectHandler.get().$L(queryType.$L()))", methodName, getFieldGetterName(fieldDefinitionContext)),
+                            CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
+                                    ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
+                                    getRpcFieldSetterName(fieldDefinitionContext)
+                            )
+                    ),
+                    System.lineSeparator()
+            );
+        }
+        return builder.addStatement(codeBlock).build();
     }
 
     private String buildSelectionSet(GraphqlParser.TypeContext typeContext) {
@@ -237,6 +322,14 @@ public class RpcServiceImplementer {
         stringBuilder.append(fieldNames);
         stringBuilder.append("}");
         return stringBuilder.toString();
+    }
+
+    private String getRpcName(GraphqlParser.TypeContext typeContext) {
+        String name = manager.getFieldTypeName(typeContext);
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "intro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
+        }
+        return name;
     }
 
     private String getRpcName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
@@ -319,4 +412,27 @@ public class RpcServiceImplementer {
         return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getRpcInputValueName(inputValueDefinitionContext))).concat("Count");
     }
 
+    private String getFieldGetterName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String name = fieldDefinitionContext.name().getText();
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "get__".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
+        }
+        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name));
+    }
+
+    private String getRpcFieldSetterName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String name = fieldDefinitionContext.name().getText();
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "setIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
+        }
+        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name));
+    }
+
+    private String getRpcFieldAddAllName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String name = fieldDefinitionContext.name().getText();
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "addAllIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
+        }
+        return "addAll".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name));
+    }
 }

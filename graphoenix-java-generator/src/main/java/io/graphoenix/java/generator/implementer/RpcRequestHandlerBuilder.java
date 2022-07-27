@@ -1,19 +1,14 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -59,10 +54,11 @@ public class RpcRequestHandlerBuilder {
 
     private TypeSpec buildRpcRequestHandler() {
         return TypeSpec.classBuilder("RpcRequestHandler")
+                .addAnnotation(ApplicationScoped.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
                         FieldSpec.builder(
-                                ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcInputObjectHandler"),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcInputObjectHandler")),
                                 "inputObjectHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -180,7 +176,8 @@ public class RpcRequestHandlerBuilder {
     private MethodSpec buildConstructor() {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addStatement("this.inputObjectHandler = new $T()", ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcInputObjectHandler"))
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcInputObjectHandler")), "inputObjectHandler")
+                .addStatement("this.inputObjectHandler = inputObjectHandler")
                 .build();
     }
 
@@ -195,14 +192,11 @@ public class RpcRequestHandlerBuilder {
     private MethodSpec buildTypeMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         String methodName = getRpcName(fieldDefinitionContext);
         String requestParameterName = "request";
-        String responseObserverParameterName = "responseObserver";
 
         ClassName requestClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryRequestClassName(fieldDefinitionContext));
-        ParameterizedTypeName responseObserverClassName = ParameterizedTypeName.get(ClassName.get("io.grpc.stub", "StreamObserver"), ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(requestClassName, requestParameterName)
-                .addParameter(responseObserverClassName, responseObserverParameterName)
                 .returns(ClassName.get(String.class))
                 .addStatement("$T stringBuilder = new $T()", ClassName.get(StringBuilder.class), ClassName.get(StringBuilder.class))
                 .addStatement("stringBuilder.append(QUERY).append(CURLY_BRACKETS_START).append($S)", fieldDefinitionContext.name().getText());
@@ -238,7 +232,7 @@ public class RpcRequestHandlerBuilder {
                                 ClassName.get(Collectors.class)
                         );
                     } else if (manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> inputObjectHandler.$L(item)).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
+                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> inputObjectHandler.get().$L(item)).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
                                 inputValueDefinitionContext.name().getText(),
                                 requestParameterName,
                                 getRpcGetInputValueListName(inputValueDefinitionContext),
@@ -279,7 +273,7 @@ public class RpcRequestHandlerBuilder {
                                 getRpcEnumValueSuffixName(inputValueDefinitionContext.type())
                         );
                     } else if (manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))) {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(inputObjectHandler.$L($L.$L())).append(SPACE)",
+                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(inputObjectHandler.get().$L($L.$L())).append(SPACE)",
                                 inputValueDefinitionContext.name().getText(),
                                 getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type()),
                                 requestParameterName,

@@ -55,6 +55,7 @@ public class RpcInputObjectHandlerBuilder {
 
     private TypeSpec buildRpcRequestHandler() {
         return TypeSpec.classBuilder("RpcInputObjectHandler")
+                .addAnnotation(ApplicationScoped.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
                         FieldSpec.builder(

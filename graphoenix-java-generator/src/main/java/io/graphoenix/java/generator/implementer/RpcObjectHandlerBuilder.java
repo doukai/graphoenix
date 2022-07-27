@@ -51,6 +51,7 @@ public class RpcObjectHandlerBuilder {
 
     private TypeSpec buildRpcResponseHandler() {
         return TypeSpec.classBuilder("RpcObjectHandler")
+                .addAnnotation(ApplicationScoped.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
