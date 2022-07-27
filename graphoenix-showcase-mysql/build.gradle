@@ -32,10 +32,14 @@ protobuf {
         grpc {
             artifact = 'io.grpc:protoc-gen-grpc-java:1.48.0'
         }
+        reactor {
+            artifact = "com.salesforce.servicelibs:reactor-grpc:1.2.3"
+        }
     }
     generateProtoTasks {
         all()*.plugins {
             grpc {}
+            reactor {}
         }
     }
 }
@@ -67,6 +71,7 @@ dependencies {
 
     runtimeOnly 'io.grpc:grpc-netty-shaded:1.48.0'
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
+    compile "com.salesforce.servicelibs:reactor-grpc-stub:1.2.3"
 
     annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-inject')

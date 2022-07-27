@@ -5,6 +5,7 @@ import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.utils.CodecUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,19 +21,19 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 
 @ApplicationScoped
-public class RpcResponseHandlerBuilder {
+public class RpcObjectHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public RpcResponseHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public RpcObjectHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
     }
 
-    public RpcResponseHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
+    public RpcObjectHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
@@ -40,7 +41,7 @@ public class RpcResponseHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
-        Logger.info("RpcResponseHandler build success");
+        Logger.info("RpcObjectHandler build success");
     }
 
     private JavaFile buildClass() {
@@ -49,7 +50,7 @@ public class RpcResponseHandlerBuilder {
     }
 
     private TypeSpec buildRpcResponseHandler() {
-        return TypeSpec.classBuilder("RpcResponseHandler")
+        return TypeSpec.classBuilder("RpcObjectHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
@@ -88,11 +89,18 @@ public class RpcResponseHandlerBuilder {
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition();
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContexts) {
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                            .addStatement("builder.$L(object.$L())", getRpcFieldAddAllName(fieldDefinitionContext), getFieldGetterName(fieldDefinitionContext))
-                            .endControlFlow();
-                } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                if (manager.isScalar(fieldTypeName)) {
+                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
+                        builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
+                                .addStatement("builder.$L(object.$L().stream().map(item -> $T.CODEC_UTIL.encode(item)).collect($T.toList()))", getRpcFieldAddAllName(fieldDefinitionContext), getFieldGetterName(fieldDefinitionContext), ClassName.get(CodecUtil.class))
+                                .endControlFlow();
+                    } else {
+                        builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
+                                .addStatement("builder.$L(object.$L())", getRpcFieldAddAllName(fieldDefinitionContext), getFieldGetterName(fieldDefinitionContext))
+                                .endControlFlow();
+                    }
+                } else if (manager.isEnum(fieldTypeName)) {
                     builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
                             .addStatement("builder.$L(object.$L().stream().map(item -> $T.forNumber(item.ordinal())).collect($T.toList()))",
                                     getRpcFieldAddAllName(fieldDefinitionContext),
@@ -101,7 +109,7 @@ public class RpcResponseHandlerBuilder {
                                     ClassName.get(Collectors.class)
                             )
                             .endControlFlow();
-                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                } else if (manager.isObject(fieldTypeName)) {
                     builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
                             .addStatement("builder.$L(object.$L().stream().map(this::$L).collect($T.toList()))",
                                     getRpcFieldAddAllName(fieldDefinitionContext),
@@ -114,11 +122,18 @@ public class RpcResponseHandlerBuilder {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
             } else {
+                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                            .addStatement("builder.$L(object.$L())", getRpcFieldSetterName(fieldDefinitionContext), getFieldGetterName(fieldDefinitionContext))
-                            .endControlFlow();
-                } else if (manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
+                        builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
+                                .addStatement("builder.$L($T.CODEC_UTIL.encode(object.$L()))", getRpcFieldSetterName(fieldDefinitionContext), ClassName.get(CodecUtil.class), getFieldGetterName(fieldDefinitionContext))
+                                .endControlFlow();
+                    } else {
+                        builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
+                                .addStatement("builder.$L(object.$L())", getRpcFieldSetterName(fieldDefinitionContext), getFieldGetterName(fieldDefinitionContext))
+                                .endControlFlow();
+                    }
+                } else if (manager.isEnum(fieldTypeName)) {
                     builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
                             .addStatement("builder.$L($T.forNumber(object.$L().ordinal()))",
                                     getRpcFieldSetterName(fieldDefinitionContext),
@@ -126,7 +141,7 @@ public class RpcResponseHandlerBuilder {
                                     getFieldGetterName(fieldDefinitionContext)
                             )
                             .endControlFlow();
-                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                } else if (manager.isObject(fieldTypeName)) {
                     builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
                             .addStatement("builder.$L($L(object.$L()))",
                                     getRpcFieldSetterName(fieldDefinitionContext),

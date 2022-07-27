@@ -627,6 +627,8 @@ public class DocumentBuilder {
     public List<Field> buildFunctionFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return Stream.concat(
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                        .filter(manager::isNotInvokeField)
+                        .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                         .filter(fieldDefinitionContext ->
                                 manager.getFieldTypeName(fieldDefinitionContext.type()).equals("ID") ||
                                         manager.getFieldTypeName(fieldDefinitionContext.type()).equals("String") ||
@@ -658,6 +660,8 @@ public class DocumentBuilder {
                                 )
                         ),
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                        .filter(manager::isNotInvokeField)
+                        .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                         .filter(fieldDefinitionContext ->
                                 manager.getFieldTypeName(fieldDefinitionContext.type()).equals("Int") ||
                                         manager.getFieldTypeName(fieldDefinitionContext.type()).equals("Float") ||

@@ -84,16 +84,6 @@ public class ProcessorManager {
         ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(classLoader);
         ReflectionTypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
         combinedTypeSolver.add(javaParserTypeSolver);
-        Path protoGrpcSourcePath = getProtoGrpcSourcePath(generatedSourcePath);
-        if (Files.exists(protoGrpcSourcePath)) {
-            JavaParserTypeSolver protoJavaParserTypeSolver = new JavaParserTypeSolver(protoGrpcSourcePath);
-            combinedTypeSolver.add(protoJavaParserTypeSolver);
-        }
-//        Path protoJavaSourcePath = getProtoJavaSourcePath(generatedSourcePath);
-//        if (Files.exists(protoJavaSourcePath)) {
-//            JavaParserTypeSolver protoGrpcParserTypeSolver = new JavaParserTypeSolver(protoJavaSourcePath);
-//            combinedTypeSolver.add(protoGrpcParserTypeSolver);
-//        }
         combinedTypeSolver.add(generatedJavaParserTypeSolver);
         combinedTypeSolver.add(classLoaderTypeSolver);
         combinedTypeSolver.add(reflectionTypeSolver);
@@ -132,18 +122,6 @@ public class ProcessorManager {
         Logger.info("source path: {}", sourcePath.toString());
         return sourcePath;
     }
-
-    private Path getProtoGrpcSourcePath(Path generatedSourcePath) {
-        Path sourcePath = generatedSourcePath.getParent().getParent().getParent().getParent().getParent().getParent().resolve("build/generated/source/proto/main/grpc");
-        Logger.info("source path: {}", sourcePath.toString());
-        return sourcePath;
-    }
-
-//    private Path getProtoJavaSourcePath(Path generatedSourcePath) {
-//        Path sourcePath = generatedSourcePath.getParent().getParent().getParent().getParent().getParent().getParent().resolve("build/generated/source/proto/main/java");
-//        Logger.info("source path: {}", sourcePath.toString());
-//        return sourcePath;
-//    }
 
     public String getRootPackageName() {
         String rootPackageName = roundEnv.getRootElements().stream()

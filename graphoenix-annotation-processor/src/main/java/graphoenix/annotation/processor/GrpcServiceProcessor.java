@@ -15,8 +15,9 @@ import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
+import io.graphoenix.java.generator.implementer.RpcInputObjectHandlerBuilder;
+import io.graphoenix.java.generator.implementer.RpcObjectHandlerBuilder;
 import io.graphoenix.java.generator.implementer.RpcRequestHandlerBuilder;
-import io.graphoenix.java.generator.implementer.RpcResponseHandlerBuilder;
 import io.graphoenix.java.generator.implementer.RpcServiceImplementer;
 import io.graphoenix.spi.annotation.Skip;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -64,8 +65,9 @@ public class GrpcServiceProcessor extends AbstractProcessor {
     private JavaElementToInterface javaElementToInterface;
     private JavaElementToInputType javaElementToInputType;
     private GraphQLApiBuilder graphQLApiBuilder;
+    private RpcInputObjectHandlerBuilder rpcInputObjectHandlerBuilder;
+    private RpcObjectHandlerBuilder rpcObjectHandlerBuilder;
     private RpcRequestHandlerBuilder rpcRequestHandlerBuilder;
-    private RpcResponseHandlerBuilder rpcResponseHandlerBuilder;
     private RpcServiceImplementer rpcServiceImplementer;
     private GraphQLConfig graphQLConfig;
     private Types typeUtils;
@@ -84,8 +86,9 @@ public class GrpcServiceProcessor extends AbstractProcessor {
         this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
         this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
+        this.rpcInputObjectHandlerBuilder = BeanContext.get(RpcInputObjectHandlerBuilder.class);
+        this.rpcObjectHandlerBuilder = BeanContext.get(RpcObjectHandlerBuilder.class);
         this.rpcRequestHandlerBuilder = BeanContext.get(RpcRequestHandlerBuilder.class);
-        this.rpcResponseHandlerBuilder = BeanContext.get(RpcResponseHandlerBuilder.class);
         this.rpcServiceImplementer = BeanContext.get(RpcServiceImplementer.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
@@ -159,8 +162,9 @@ public class GrpcServiceProcessor extends AbstractProcessor {
                 .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
         try {
+            rpcInputObjectHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            rpcObjectHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
             rpcRequestHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            rpcResponseHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
             rpcServiceImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
