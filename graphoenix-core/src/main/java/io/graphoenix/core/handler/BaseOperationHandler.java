@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static jakarta.json.JsonValue.FALSE;
 import static jakarta.json.JsonValue.TRUE;
@@ -53,12 +54,29 @@ public abstract class BaseOperationHandler {
                 .map(list -> list.stream().collect(JsonCollectors.toJsonObject()));
     }
 
+    protected GraphqlParser.SelectionContext getSelectionContext(GraphqlParser.OperationDefinitionContext operationDefinitionContext, String name) {
+        return operationDefinitionContext.selectionSet().selection().stream()
+                .filter(selectionContext -> selectionContext.field().name().getText().equals(name))
+                .findFirst()
+                .orElse(null);
+    }
+
     protected <T> T getArgument(GraphqlParser.SelectionContext selectionContext, String name, Class<T> beanClass) {
         return selectionContext.field().arguments().argument().stream()
                 .filter(argumentContext -> argumentContext.name().getText().equals(name))
                 .findFirst()
-                .map(argumentContext -> jsonb.fromJson(argumentContext.valueWithVariable().getText(), beanClass))
+                .map(argumentContext -> jsonb.fromJson(valueWithVariableToJsonString(argumentContext.valueWithVariable()), beanClass))
                 .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SELECTION_ARGUMENT_NOT_EXIST.bind(name, selectionContext.field().name().getText())));
+    }
+
+    protected String valueWithVariableToJsonString(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+        if (valueWithVariableContext.objectValueWithVariable() != null) {
+            return valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable().stream()
+                    .map(objectFieldWithVariableContext -> valueWithVariableToJsonString(objectFieldWithVariableContext.valueWithVariable()))
+                    .collect(Collectors.joining(","));
+        } else {
+            return valueWithVariableContext.getText();
+        }
     }
 
     protected JsonValue toJsonValueList(Collection<?> collection) {

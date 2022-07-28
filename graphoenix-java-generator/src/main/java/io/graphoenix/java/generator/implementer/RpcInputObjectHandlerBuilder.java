@@ -10,6 +10,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.utils.CodecUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -162,11 +163,19 @@ public class RpcInputObjectHandlerBuilder {
                 CodeBlock codeBlock;
                 String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("String") || fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
+                    if (fieldTypeName.equals("String")) {
                         codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> QUOTATION + item + QUOTATION).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
                                 inputValueDefinitionContext.name().getText(),
                                 typeParameterName,
                                 getRpcGetInputValueListName(inputValueDefinitionContext),
+                                ClassName.get(Collectors.class)
+                        );
+                    } else if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
+                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> QUOTATION + $T.CODEC_UTIL.encode(item) + QUOTATION).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
+                                inputValueDefinitionContext.name().getText(),
+                                typeParameterName,
+                                getRpcGetInputValueListName(inputValueDefinitionContext),
+                                ClassName.get(CodecUtil.class),
                                 ClassName.get(Collectors.class)
                         );
                     } else {
@@ -206,10 +215,17 @@ public class RpcInputObjectHandlerBuilder {
             } else {
                 CodeBlock codeBlock;
                 String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
-                if (manager.isScalar(fieldTypeName) || fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
+                if (manager.isScalar(fieldTypeName)) {
                     if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("String")) {
                         codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(QUOTATION).append($L.$L()).append(QUOTATION).append(SPACE)",
                                 inputValueDefinitionContext.name().getText(),
+                                typeParameterName,
+                                getRpcGetInputValueName(inputValueDefinitionContext)
+                        );
+                    } else if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
+                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(QUOTATION).append($T.CODEC_UTIL.encode($L.$L())).append(QUOTATION).append(SPACE)",
+                                inputValueDefinitionContext.name().getText(),
+                                ClassName.get(CodecUtil.class),
                                 typeParameterName,
                                 getRpcGetInputValueName(inputValueDefinitionContext)
                         );
@@ -249,6 +265,128 @@ public class RpcInputObjectHandlerBuilder {
         builder.addStatement("stringBuilder.append(CURLY_BRACKETS_END)")
                 .addStatement("return stringBuilder.toString()");
         return builder.build();
+    }
+
+    private MethodSpec buildTypeToInputObjectMethod(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        String typeParameterName = getRpcInputObjectLowerCamelName(inputObjectTypeDefinitionContext);
+        ClassName inputObjectClassName = ClassName.get(graphQLConfig.getInputObjectTypePackageName(), inputObjectTypeDefinitionContext.name().getText());
+        ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcInputObjectName(inputObjectTypeDefinitionContext));
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName.concat("ToInputObject"))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(inputObjectClassName)
+                .addParameter(typeClassName, typeParameterName)
+                .addStatement("$T inputObject = new $T()", inputObjectClassName, inputObjectClassName);
+
+        List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContexts = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition();
+        for (GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext : inputValueDefinitionContexts) {
+            if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
+                CodeBlock codeBlock;
+                String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
+                if (manager.isScalar(fieldTypeName)) {
+
+                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
+                        codeBlock = CodeBlock.of("inputObject.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.$L(item)).collect($T.toList()))",
+                                getInputValueSetterName(inputValueDefinitionContext),
+                                typeParameterName,
+                                getRpcGetInputValueListName(inputValueDefinitionContext),
+                                ClassName.get(CodecUtil.class),
+                                getDecodeName(fieldTypeName),
+                                ClassName.get(Collectors.class)
+                        );
+                    } else {
+                        codeBlock = CodeBlock.of("inputObject.$L($L.$L().stream().map(item -> item).collect($T.toList()))",
+                                getInputValueSetterName(inputValueDefinitionContext),
+                                typeParameterName,
+                                getRpcGetInputValueListName(inputValueDefinitionContext),
+                                ClassName.get(Collectors.class)
+                        );
+                    }
+                } else if (manager.isEnum(fieldTypeName)) {
+                    codeBlock = CodeBlock.of("inputObject.$L($L.$L().stream().map(item -> $T.valueOf(item.name())).collect($T.toList()))",
+                            getInputValueSetterName(inputValueDefinitionContext),
+                            typeParameterName,
+                            getRpcGetInputValueListName(inputValueDefinitionContext),
+                            ClassName.get(graphQLConfig.getEnumTypePackageName(), fieldTypeName),
+                            ClassName.get(Collectors.class)
+                    );
+                } else if (manager.isInputObject(fieldTypeName)) {
+                    codeBlock = CodeBlock.of("inputObject.$L($L.$L().stream().map(this::$L).collect($T.toList()))",
+                            getInputValueSetterName(inputValueDefinitionContext),
+                            typeParameterName,
+                            getRpcGetInputValueListName(inputValueDefinitionContext),
+                            getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type()).concat("ToInputObject"),
+                            ClassName.get(Collectors.class)
+                    );
+                } else {
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
+                }
+                if (inputValueDefinitionContext.type().nonNullType() == null) {
+                    builder.beginControlFlow("if ($L.$L() > 0)", typeParameterName, getRpcGetInputValueCountName(inputValueDefinitionContext))
+                            .addStatement(codeBlock)
+                            .endControlFlow();
+                } else {
+                    builder.addStatement(codeBlock);
+                }
+            } else {
+                CodeBlock codeBlock;
+                String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
+                if (manager.isScalar(fieldTypeName)) {
+                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
+                        codeBlock = CodeBlock.of("inputObject.$L($T.CODEC_UTIL.$L($L.$L()))",
+                                getInputValueSetterName(inputValueDefinitionContext),
+                                ClassName.get(CodecUtil.class),
+                                getDecodeName(fieldTypeName),
+                                typeParameterName,
+                                getRpcGetInputValueName(inputValueDefinitionContext)
+                        );
+                    } else {
+                        codeBlock = CodeBlock.of("inputObject.$L($L.$L())",
+                                getInputValueSetterName(inputValueDefinitionContext),
+                                typeParameterName,
+                                getRpcGetInputValueName(inputValueDefinitionContext)
+                        );
+                    }
+                } else if (manager.isEnum(fieldTypeName)) {
+                    codeBlock = CodeBlock.of("inputObject.$L($T.valueOf($L.$L().name()))",
+                            inputValueDefinitionContext.name().getText(),
+                            ClassName.get(graphQLConfig.getEnumTypePackageName(), fieldTypeName),
+                            typeParameterName,
+                            getRpcGetInputValueName(inputValueDefinitionContext)
+                    );
+                } else if (manager.isInputObject(fieldTypeName)) {
+                    codeBlock = CodeBlock.of("inputObject.$L($L($L.$L()))",
+                            getInputValueSetterName(inputValueDefinitionContext),
+                            getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type()).concat("ToInputObject"),
+                            typeParameterName,
+                            getRpcGetInputValueName(inputValueDefinitionContext)
+                    );
+                } else {
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
+                }
+                if (inputValueDefinitionContext.type().nonNullType() == null) {
+                    builder.beginControlFlow("if ($L.$L())", typeParameterName, getRpcHasInputValueName(inputValueDefinitionContext))
+                            .addStatement(codeBlock)
+                            .endControlFlow();
+                } else {
+                    builder.addStatement(codeBlock);
+                }
+            }
+        }
+        builder.addStatement("return inputObject");
+        return builder.build();
+    }
+
+    private String getDecodeName(String fieldTypeName) {
+        if (fieldTypeName.equals("DateTime")) {
+            return "decodeLocalDateTime";
+        } else if (fieldTypeName.equals("Timestamp")) {
+            return "decodeLocalDateTime";
+        } else if (fieldTypeName.equals("Date")) {
+            return "decodeLocalDate";
+        } else if (fieldTypeName.equals("Time")) {
+            return "decodeLocalTime";
+        }
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
     }
 
     private String getRpcInputObjectName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
@@ -301,5 +439,21 @@ public class RpcInputObjectHandlerBuilder {
 
     private String getRpcGetInputValueCountName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getRpcInputValueName(inputValueDefinitionContext))).concat("Count");
+    }
+
+    private String getFieldSetterName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        String name = fieldDefinitionContext.name().getText();
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "set__".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
+        }
+        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name));
+    }
+
+    private String getInputValueSetterName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        String name = inputValueDefinitionContext.name().getText();
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "set__".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
+        }
+        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name));
     }
 }
