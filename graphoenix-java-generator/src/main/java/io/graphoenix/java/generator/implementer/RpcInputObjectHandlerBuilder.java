@@ -182,19 +182,11 @@ public class RpcInputObjectHandlerBuilder {
                 CodeBlock codeBlock;
                 String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("String")) {
+                    if (fieldTypeName.equals("String") || fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
                         codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> QUOTATION + item + QUOTATION).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
                                 inputValueDefinitionContext.name().getText(),
                                 typeParameterName,
                                 getRpcGetInputValueListName(inputValueDefinitionContext),
-                                ClassName.get(Collectors.class)
-                        );
-                    } else if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> QUOTATION + $T.CODEC_UTIL.encode(item) + QUOTATION).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
-                                inputValueDefinitionContext.name().getText(),
-                                typeParameterName,
-                                getRpcGetInputValueListName(inputValueDefinitionContext),
-                                ClassName.get(CodecUtil.class),
                                 ClassName.get(Collectors.class)
                         );
                     } else {
@@ -235,16 +227,9 @@ public class RpcInputObjectHandlerBuilder {
                 CodeBlock codeBlock;
                 String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
                 if (manager.isScalar(fieldTypeName)) {
-                    if (manager.getFieldTypeName(inputValueDefinitionContext.type()).equals("String")) {
+                    if (fieldTypeName.equals("String") || fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
                         codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(QUOTATION).append($L.$L()).append(QUOTATION).append(SPACE)",
                                 inputValueDefinitionContext.name().getText(),
-                                typeParameterName,
-                                getRpcGetInputValueName(inputValueDefinitionContext)
-                        );
-                    } else if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(QUOTATION).append($T.CODEC_UTIL.encode($L.$L())).append(QUOTATION).append(SPACE)",
-                                inputValueDefinitionContext.name().getText(),
-                                ClassName.get(CodecUtil.class),
                                 typeParameterName,
                                 getRpcGetInputValueName(inputValueDefinitionContext)
                         );
