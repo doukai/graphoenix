@@ -14,6 +14,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.ArgumentBuilder;
 import io.graphoenix.core.handler.BaseOperationHandler;
 import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.core.schema.JsonSchemaValidator;
@@ -172,6 +173,14 @@ public class OperationHandlerImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ArgumentBuilder.class)),
+                                "argumentBuilder",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addMethod(buildOperationMethod(type))
                 .addMethod(buildConstructor(type))
                 .addMethods(buildMethods(type));
@@ -297,7 +306,7 @@ public class OperationHandlerImplementer {
                     methodName,
                     CodeBlock.join(parameters.stream()
                             .map(parameter ->
-                                    CodeBlock.of("getArgument(selectionContext, $S, $T.class)",
+                                    CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
                                             parameter.getKey(),
                                             typeManager.getClassNameByString(parameter.getValue())
                                     )
@@ -342,14 +351,14 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                                    "$T type = new $T<$T>() {}.getType()",
-                                    ClassName.get(Type.class),
-                                    ClassName.get(TypeToken.class),
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            ).addStatement(
-                                    "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            ).beginControlFlow("if(result == null)")
+                            "$T type = new $T<$T>() {}.getType()",
+                            ClassName.get(Type.class),
+                            ClassName.get(TypeToken.class),
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                    ).addStatement(
+                            "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                    ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.just($T.NULL)", ClassName.get(Flux.class), ClassName.get(JsonValue.class))
                             .endControlFlow()
                             .addStatement(
@@ -387,6 +396,7 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")), "selectionFilter")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(Jsonb.class)), "jsonb")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ArgumentBuilder.class)), "argumentBuilder")
                 .addStatement("this.manager = manager")
                 .addStatement("this.variablesProcessor = variablesProcessor")
                 .addStatement("this.operationHandler = operationHandler")
@@ -394,7 +404,8 @@ public class OperationHandlerImplementer {
                 .addStatement("this.connectionHandler = connectionHandler")
                 .addStatement("this.selectionFilter = selectionFilter")
                 .addStatement("this.jsonProvider = jsonProvider")
-                .addStatement("this.jsonb = jsonb");
+                .addStatement("this.jsonb = jsonb")
+                .addStatement("this.argumentBuilder = argumentBuilder");
         if (type.equals(MUTATION)) {
             builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
                     .addStatement("this.validator = validator");

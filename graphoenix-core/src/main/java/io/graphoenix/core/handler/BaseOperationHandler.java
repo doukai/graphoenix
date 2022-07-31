@@ -61,24 +61,6 @@ public abstract class BaseOperationHandler {
                 .orElse(null);
     }
 
-    protected <T> T getArgument(GraphqlParser.SelectionContext selectionContext, String name, Class<T> beanClass) {
-        return selectionContext.field().arguments().argument().stream()
-                .filter(argumentContext -> argumentContext.name().getText().equals(name))
-                .findFirst()
-                .map(argumentContext -> jsonb.fromJson(valueWithVariableToJsonString(argumentContext.valueWithVariable()), beanClass))
-                .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.SELECTION_ARGUMENT_NOT_EXIST.bind(name, selectionContext.field().name().getText())));
-    }
-
-    protected String valueWithVariableToJsonString(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-        if (valueWithVariableContext.objectValueWithVariable() != null) {
-            return valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable().stream()
-                    .map(objectFieldWithVariableContext -> valueWithVariableToJsonString(objectFieldWithVariableContext.valueWithVariable()))
-                    .collect(Collectors.joining(","));
-        } else {
-            return valueWithVariableContext.getText();
-        }
-    }
-
     protected JsonValue toJsonValueList(Collection<?> collection) {
         if (collection == null) {
             return JsonValue.NULL;
