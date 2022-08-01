@@ -6,6 +6,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.dto.type.OperationType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -18,10 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
+import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
+import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
 @ApplicationScoped
 public class RpcRequestHandlerBuilder {
@@ -45,15 +47,22 @@ public class RpcRequestHandlerBuilder {
     public void writeToFiler(Filer filer) throws IOException {
         this.buildQueryTypeServiceImplClass().writeTo(filer);
         Logger.info("QueryTypeServiceImpl build success");
+        this.buildMutationTypeServiceImplClass().writeTo(filer);
+        Logger.info("MutationTypeServiceImpl build success");
     }
 
     private JavaFile buildQueryTypeServiceImplClass() {
-        TypeSpec typeSpec = buildRpcRequestHandler();
+        TypeSpec typeSpec = buildRpcRequestHandler(QUERY);
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildRpcRequestHandler() {
-        return TypeSpec.classBuilder("RpcRequestHandler")
+    private JavaFile buildMutationTypeServiceImplClass() {
+        TypeSpec typeSpec = buildRpcRequestHandler(MUTATION);
+        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+    }
+
+    private TypeSpec buildRpcRequestHandler(OperationType operationType) {
+        return TypeSpec.classBuilder(operationType.equals(QUERY) ? "RpcQueryRequestHandler" : "RpcMutationRequestHandler")
                 .addAnnotation(ApplicationScoped.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
@@ -169,7 +178,7 @@ public class RpcRequestHandlerBuilder {
                         ).initializer("\"]\"").build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildQueryTypeMethods())
+                .addMethods(operationType.equals(QUERY) ? buildQueryTypeMethods() : buildMutationTypeMethods())
                 .build();
     }
 
@@ -185,15 +194,23 @@ public class RpcRequestHandlerBuilder {
         return manager.getQueryOperationTypeName().flatMap(manager::getObject)
                 .orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
                 .fieldsDefinition().fieldDefinition().stream()
-                .map(this::buildTypeMethod)
+                .map(fieldDefinitionContext -> buildTypeMethod(fieldDefinitionContext, QUERY))
                 .collect(Collectors.toList());
     }
 
-    private MethodSpec buildTypeMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    private List<MethodSpec> buildMutationTypeMethods() {
+        return manager.getMutationOperationTypeName().flatMap(manager::getObject)
+                .orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST))
+                .fieldsDefinition().fieldDefinition().stream()
+                .map(fieldDefinitionContext -> buildTypeMethod(fieldDefinitionContext, MUTATION))
+                .collect(Collectors.toList());
+    }
+
+    private MethodSpec buildTypeMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
         String methodName = getRpcName(fieldDefinitionContext);
         String requestParameterName = "request";
 
-        ClassName requestClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryRequestClassName(fieldDefinitionContext));
+        ClassName requestClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcRequestClassName(fieldDefinitionContext, operationType));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(requestClassName, requestParameterName)
@@ -345,12 +362,22 @@ public class RpcRequestHandlerBuilder {
         return name;
     }
 
-    private String getRpcQueryRequestClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    private String getRpcRequestClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
         String name = fieldDefinitionContext.name().getText();
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "QueryIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
+        switch (operationType) {
+            case QUERY:
+                if (name.startsWith(INTROSPECTION_PREFIX)) {
+                    return "QueryIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
+                }
+                return "Query".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
+            case MUTATION:
+                if (name.startsWith(INTROSPECTION_PREFIX)) {
+                    return "MutationIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
+                }
+                return "Mutation".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
+            default:
+                throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
-        return "Query".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
     }
 
     private String getRpcInputObjectName(GraphqlParser.TypeContext typeContext) {
