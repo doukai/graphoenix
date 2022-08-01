@@ -557,7 +557,7 @@ message Organization {
     optional UserConnection users_connection = 27;
     optional int32 org_level2 = 28;
     repeated int32 org_level3 = 29;
-    optional bool role_disable = 30;
+    repeated bool role_disable = 30;
     repeated User user_by_org = 31;
     optional Organization parent = 32;
 }
@@ -777,7 +777,7 @@ message QueryType {
     optional string user_detail = 60;
     repeated string user_detail6 = 61;
     optional int32 org_level = 62;
-    optional bool role_disable2 = 63;
+    repeated bool role_disable2 = 63;
     repeated int32 org_level5 = 64;
     repeated User user_by_org2 = 65;
     optional Organization parent2 = 66;

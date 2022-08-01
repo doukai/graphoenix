@@ -4,6 +4,11 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
@@ -107,7 +112,16 @@ public class BaseTask extends DefaultTask {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath();
         try {
+            CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+            JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(Path.of(javaPath));
+            ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(createClassLoader());
+            ReflectionTypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
+            combinedTypeSolver.add(javaParserTypeSolver);
+            combinedTypeSolver.add(classLoaderTypeSolver);
+            combinedTypeSolver.add(reflectionTypeSolver);
+            JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(combinedTypeSolver);
             SourceRoot sourceRoot = new SourceRoot(Path.of(javaPath));
+            sourceRoot.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
             sourceRoot.tryToParse();
             List<CompilationUnit> compilations = sourceRoot.getCompilationUnits();
             compilations.stream()
@@ -133,21 +147,32 @@ public class BaseTask extends DefaultTask {
                                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(typeName)));
 
                                 Type type = methodDeclaration.getType();
+                                boolean listType = false;
                                 if (type.isClassOrInterfaceType()) {
-                                    if (type.asClassOrInterfaceType().getNameAsString().equals(PublisherBuilder.class.getSimpleName()) ||
-                                            type.asClassOrInterfaceType().getNameAsString().equals(Flux.class.getSimpleName()) ||
-                                            type.asClassOrInterfaceType().getNameAsString().equals(Mono.class.getSimpleName())) {
+                                    if (type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(PublisherBuilder.class.getCanonicalName()) ||
+                                            type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(Mono.class.getCanonicalName())) {
+                                        Optional<NodeList<Type>> typeArguments = type.asClassOrInterfaceType().getTypeArguments();
+                                        if (typeArguments.isPresent()) {
+                                            type = typeArguments.get().get(0);
+                                        }
+                                    } else if (type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(Flux.class.getCanonicalName())) {
+                                        listType = true;
                                         Optional<NodeList<Type>> typeArguments = type.asClassOrInterfaceType().getTypeArguments();
                                         if (typeArguments.isPresent()) {
                                             type = typeArguments.get().get(0);
                                         }
                                     }
                                 }
+                                String invokeFieldTypeName = getInvokeFieldTypeName(type);
+                                if (listType) {
+                                    invokeFieldTypeName = "[".concat(invokeFieldTypeName).concat("]");
+                                }
+
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
                                         .addField(
                                                 new Field()
                                                         .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
-                                                        .setTypeName(getInvokeFieldTypeName(type))
+                                                        .setTypeName(invokeFieldTypeName)
                                         );
                                 manager.registerGraphQL(objectType.toString());
                             }
@@ -163,16 +188,27 @@ public class BaseTask extends DefaultTask {
                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
                     )
                     .forEach(methodDeclaration -> {
+
                                 Type type = methodDeclaration.getType();
+                                boolean listType = false;
                                 if (type.isClassOrInterfaceType()) {
-                                    if (type.asClassOrInterfaceType().getNameAsString().equals(PublisherBuilder.class.getSimpleName()) ||
-                                            type.asClassOrInterfaceType().getNameAsString().equals(Flux.class.getSimpleName()) ||
-                                            type.asClassOrInterfaceType().getNameAsString().equals(Mono.class.getSimpleName())) {
+                                    if (type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(PublisherBuilder.class.getCanonicalName()) ||
+                                            type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(Mono.class.getCanonicalName())) {
+                                        Optional<NodeList<Type>> typeArguments = type.asClassOrInterfaceType().getTypeArguments();
+                                        if (typeArguments.isPresent()) {
+                                            type = typeArguments.get().get(0);
+                                        }
+                                    } else if (type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(Flux.class.getCanonicalName())) {
+                                        listType = true;
                                         Optional<NodeList<Type>> typeArguments = type.asClassOrInterfaceType().getTypeArguments();
                                         if (typeArguments.isPresent()) {
                                             type = typeArguments.get().get(0);
                                         }
                                     }
+                                }
+                                String invokeFieldTypeName = getInvokeFieldTypeName(type);
+                                if (listType) {
+                                    invokeFieldTypeName = "[".concat(invokeFieldTypeName).concat("]");
                                 }
 
                                 ObjectType objectType = manager.getQueryOperationTypeName().flatMap(manager::getObject)
@@ -181,7 +217,7 @@ public class BaseTask extends DefaultTask {
                                 objectType.addField(
                                         new Field()
                                                 .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
-                                                .setTypeName(getInvokeFieldTypeName(type))
+                                                .setTypeName(invokeFieldTypeName)
                                                 .setArguments(
                                                         methodDeclaration.getParameters().stream()
                                                                 .map(parameter ->
@@ -206,23 +242,34 @@ public class BaseTask extends DefaultTask {
                     )
                     .forEach(methodDeclaration -> {
                                 Type type = methodDeclaration.getType();
+                                boolean listType = false;
                                 if (type.isClassOrInterfaceType()) {
-                                    if (type.asClassOrInterfaceType().getNameAsString().equals(PublisherBuilder.class.getSimpleName()) ||
-                                            type.asClassOrInterfaceType().getNameAsString().equals(Flux.class.getSimpleName()) ||
-                                            type.asClassOrInterfaceType().getNameAsString().equals(Mono.class.getSimpleName())) {
+                                    if (type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(PublisherBuilder.class.getCanonicalName()) ||
+                                            type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(Mono.class.getCanonicalName())) {
+                                        Optional<NodeList<Type>> typeArguments = type.asClassOrInterfaceType().getTypeArguments();
+                                        if (typeArguments.isPresent()) {
+                                            type = typeArguments.get().get(0);
+                                        }
+                                    } else if (type.asClassOrInterfaceType().resolve().asReferenceType().getQualifiedName().equals(Flux.class.getCanonicalName())) {
+                                        listType = true;
                                         Optional<NodeList<Type>> typeArguments = type.asClassOrInterfaceType().getTypeArguments();
                                         if (typeArguments.isPresent()) {
                                             type = typeArguments.get().get(0);
                                         }
                                     }
                                 }
+                                String invokeFieldTypeName = getInvokeFieldTypeName(type);
+                                if (listType) {
+                                    invokeFieldTypeName = "[".concat(invokeFieldTypeName).concat("]");
+                                }
+
                                 ObjectType objectType = manager.getMutationOperationTypeName().flatMap(manager::getObject)
                                         .map(documentBuilder::buildObject)
                                         .orElseGet(() -> new ObjectType().setName("MutationType"));
                                 objectType.addField(
                                         new Field()
                                                 .setName(getInvokeFieldName(methodDeclaration.getNameAsString()))
-                                                .setTypeName(getInvokeFieldTypeName(type))
+                                                .setTypeName(invokeFieldTypeName)
                                                 .setArguments(
                                                         methodDeclaration.getParameters().stream()
                                                                 .map(parameter ->

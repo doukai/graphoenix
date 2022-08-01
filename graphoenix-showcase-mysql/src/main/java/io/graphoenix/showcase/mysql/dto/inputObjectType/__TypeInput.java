@@ -59,7 +59,6 @@ public class __TypeInput {
   private String createGroupId;
 
   @DefaultValue("\"__Type\"")
-  @NonNull
   private String __typename;
 
   public String getName() {

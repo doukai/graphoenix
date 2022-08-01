@@ -4,10 +4,13 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
-import org.eclipse.microprofile.graphql.Type;
-
+import java.lang.Boolean;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @CompiledJson
@@ -131,6 +134,22 @@ public class QueryType implements Meta {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  private String userDetail;
+
+  private Collection<String> userDetail6;
+
+  private Integer orgLevel;
+
+  private Collection<Boolean> roleDisable2;
+
+  private Collection<Integer> orgLevel5;
+
+  private Collection<User> userByOrg2;
+
+  private Organization parent2;
+
+  private Collection<Role> findRole2;
 
   public __Schema get__Schema() {
     return this.__schema;
@@ -621,5 +640,69 @@ public class QueryType implements Meta {
   @Override
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
+  }
+
+  public String getUserDetail() {
+    return this.userDetail;
+  }
+
+  public void setUserDetail(String userDetail) {
+    this.userDetail = userDetail;
+  }
+
+  public Collection<String> getUserDetail6() {
+    return this.userDetail6;
+  }
+
+  public void setUserDetail6(Collection<String> userDetail6) {
+    this.userDetail6 = userDetail6;
+  }
+
+  public Integer getOrgLevel() {
+    return this.orgLevel;
+  }
+
+  public void setOrgLevel(Integer orgLevel) {
+    this.orgLevel = orgLevel;
+  }
+
+  public Collection<Boolean> getRoleDisable2() {
+    return this.roleDisable2;
+  }
+
+  public void setRoleDisable2(Collection<Boolean> roleDisable2) {
+    this.roleDisable2 = roleDisable2;
+  }
+
+  public Collection<Integer> getOrgLevel5() {
+    return this.orgLevel5;
+  }
+
+  public void setOrgLevel5(Collection<Integer> orgLevel5) {
+    this.orgLevel5 = orgLevel5;
+  }
+
+  public Collection<User> getUserByOrg2() {
+    return this.userByOrg2;
+  }
+
+  public void setUserByOrg2(Collection<User> userByOrg2) {
+    this.userByOrg2 = userByOrg2;
+  }
+
+  public Organization getParent2() {
+    return this.parent2;
+  }
+
+  public void setParent2(Organization parent2) {
+    this.parent2 = parent2;
+  }
+
+  public Collection<Role> getFindRole2() {
+    return this.findRole2;
+  }
+
+  public void setFindRole2(Collection<Role> findRole2) {
+    this.findRole2 = findRole2;
   }
 }

@@ -125,28 +125,34 @@ public class ElementManager {
         TypeMirror typeMirror;
         if (((TypeElement) types.asElement(executableElement.getReturnType())).getQualifiedName().contentEquals(Flux.class.getName())) {
             typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
+            return "[".concat(elementToTypeName(executableElement, typeMirror, types)).concat("]");
         } else if (((TypeElement) types.asElement(executableElement.getReturnType())).getQualifiedName().contentEquals(Mono.class.getName())) {
             typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
+            return elementToTypeName(executableElement, typeMirror, types);
         } else if (((TypeElement) types.asElement(executableElement.getReturnType())).getQualifiedName().contentEquals(PublisherBuilder.class.getName())) {
             typeMirror = ((DeclaredType) (executableElement).getReturnType()).getTypeArguments().get(0);
+            return elementToTypeName(executableElement, typeMirror, types);
         } else {
             typeMirror = executableElement.getReturnType();
+            return elementToTypeName(executableElement, typeMirror, types);
         }
-        return elementToTypeName(executableElement, typeMirror, types);
     }
 
     public String variableElementToTypeName(VariableElement variableElement, Types types) {
         TypeMirror typeMirror;
         if (((TypeElement) types.asElement(variableElement.asType())).getQualifiedName().contentEquals(Flux.class.getName())) {
             typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
+            return "[".concat(elementToTypeName(variableElement, typeMirror, types)).concat("]");
         } else if (((TypeElement) types.asElement(variableElement.asType())).getQualifiedName().contentEquals(Mono.class.getName())) {
             typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
+            return elementToTypeName(variableElement, typeMirror, types);
         } else if (((TypeElement) types.asElement(variableElement.asType())).getQualifiedName().contentEquals(PublisherBuilder.class.getName())) {
             typeMirror = ((DeclaredType) variableElement.asType()).getTypeArguments().get(0);
+            return elementToTypeName(variableElement, typeMirror, types);
         } else {
             typeMirror = variableElement.asType();
+            return elementToTypeName(variableElement, typeMirror, types);
         }
-        return elementToTypeName(variableElement, typeMirror, types);
     }
 
     public String elementToTypeName(Element element, TypeMirror typeMirror, Types types) {

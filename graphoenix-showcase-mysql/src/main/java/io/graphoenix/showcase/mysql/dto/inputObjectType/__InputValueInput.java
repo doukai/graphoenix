@@ -54,7 +54,6 @@ public class __InputValueInput {
   private String createGroupId;
 
   @DefaultValue("\"__InputValue\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

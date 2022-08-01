@@ -37,7 +37,7 @@ public @interface OrganizationInput1 {
 
   int[] orgLevel3() default {};
 
-  boolean roleDisable() default false;
+  boolean[] roleDisable() default {};
 
   String $id() default "";
 

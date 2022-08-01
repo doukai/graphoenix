@@ -97,12 +97,6 @@ public class User implements Meta {
 
   private String nameMin;
 
-  private Integer phonesCount;
-
-  private String phonesMax;
-
-  private String phonesMin;
-
   private Integer ageCount;
 
   private Integer ageSum;
@@ -122,16 +116,6 @@ public class User implements Meta {
   private Integer organizationIdMax;
 
   private Integer organizationIdMin;
-
-  private Integer test1Count;
-
-  private Integer test1Sum;
-
-  private Integer test1Avg;
-
-  private Integer test1Max;
-
-  private Integer test1Min;
 
   private Role rolesAggregate;
 
@@ -427,30 +411,6 @@ public class User implements Meta {
     this.nameMin = nameMin;
   }
 
-  public Integer getPhonesCount() {
-    return this.phonesCount;
-  }
-
-  public void setPhonesCount(Integer phonesCount) {
-    this.phonesCount = phonesCount;
-  }
-
-  public String getPhonesMax() {
-    return this.phonesMax;
-  }
-
-  public void setPhonesMax(String phonesMax) {
-    this.phonesMax = phonesMax;
-  }
-
-  public String getPhonesMin() {
-    return this.phonesMin;
-  }
-
-  public void setPhonesMin(String phonesMin) {
-    this.phonesMin = phonesMin;
-  }
-
   public Integer getAgeCount() {
     return this.ageCount;
   }
@@ -529,46 +489,6 @@ public class User implements Meta {
 
   public void setOrganizationIdMin(Integer organizationIdMin) {
     this.organizationIdMin = organizationIdMin;
-  }
-
-  public Integer getTest1Count() {
-    return this.test1Count;
-  }
-
-  public void setTest1Count(Integer test1Count) {
-    this.test1Count = test1Count;
-  }
-
-  public Integer getTest1Sum() {
-    return this.test1Sum;
-  }
-
-  public void setTest1Sum(Integer test1Sum) {
-    this.test1Sum = test1Sum;
-  }
-
-  public Integer getTest1Avg() {
-    return this.test1Avg;
-  }
-
-  public void setTest1Avg(Integer test1Avg) {
-    this.test1Avg = test1Avg;
-  }
-
-  public Integer getTest1Max() {
-    return this.test1Max;
-  }
-
-  public void setTest1Max(Integer test1Max) {
-    this.test1Max = test1Max;
-  }
-
-  public Integer getTest1Min() {
-    return this.test1Min;
-  }
-
-  public void setTest1Min(Integer test1Min) {
-    this.test1Min = test1Min;
   }
 
   public Role getRolesAggregate() {

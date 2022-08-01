@@ -64,7 +64,6 @@ public class __FieldInput {
   private String createGroupId;
 
   @DefaultValue("\"__Field\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

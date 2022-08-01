@@ -10,7 +10,6 @@ import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -40,7 +39,6 @@ public class RoleRoleTypeInput {
   private String createGroupId;
 
   @DefaultValue("\"RoleRoleType\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

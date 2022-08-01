@@ -42,7 +42,6 @@ public class __DirectiveLocationsInput {
   private String createGroupId;
 
   @DefaultValue("\"__DirectiveLocations\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

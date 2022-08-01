@@ -45,7 +45,6 @@ public class OrganizationInput {
   private String createGroupId;
 
   @DefaultValue("\"Organization\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

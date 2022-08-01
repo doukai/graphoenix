@@ -41,7 +41,6 @@ public class __TypeInterfacesInput {
   private String createGroupId;
 
   @DefaultValue("\"__TypeInterfaces\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

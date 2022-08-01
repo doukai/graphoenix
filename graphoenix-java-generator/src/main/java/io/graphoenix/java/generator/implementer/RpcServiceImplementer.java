@@ -6,6 +6,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
@@ -47,6 +48,7 @@ public class RpcServiceImplementer {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
+    private List<String> invokeClassNames;
 
     @Inject
     public RpcServiceImplementer(IGraphQLDocumentManager manager, TypeManager typeManager) {
@@ -61,6 +63,12 @@ public class RpcServiceImplementer {
     }
 
     public void writeToFiler(Filer filer) throws IOException {
+        invokeClassNames = manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                .map(typeManager::getClassName)
+                .distinct()
+                .collect(Collectors.toList());
         this.buildQueryTypeServiceImplClass().writeTo(filer);
         Logger.info("QueryTypeServiceImpl build success");
     }
@@ -137,7 +145,7 @@ public class RpcServiceImplementer {
     }
 
     private MethodSpec buildConstructor() {
-        return MethodSpec.constructorBuilder()
+        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcRequestHandler")), "requestHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcInputObjectHandler")), "inputObjectHandler")
@@ -146,23 +154,26 @@ public class RpcServiceImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")), "invokeHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(Jsonb.class)), "jsonb")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ArgumentBuilder.class)), "argumentBuilder")
+                .addParameters(
+                        invokeClassNames.stream()
+                                .map(className ->
+                                        ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())).build()
+                                )
+                                .collect(Collectors.toList())
+                )
                 .addStatement("this.requestHandler = requestHandler")
                 .addStatement("this.inputObjectHandler = inputObjectHandler")
                 .addStatement("this.rpcObjectHandler = rpcObjectHandler")
                 .addStatement("this.operationHandler = operationHandler")
                 .addStatement("this.invokeHandler = invokeHandler")
                 .addStatement("this.jsonb = jsonb")
-                .addStatement("this.argumentBuilder = argumentBuilder")
-                .build();
+                .addStatement("this.argumentBuilder = argumentBuilder");
+        invokeClassNames.forEach(className -> builder.addStatement("this.$L = $L", typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())));
+        return builder.build();
     }
 
     private Set<FieldSpec> buildQueryFields() {
-        return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
-                .map(typeManager::getClassName)
-                .distinct()
-                .collect(Collectors.toList()).stream()
+        return invokeClassNames.stream()
                 .map(className ->
                         FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
@@ -208,18 +219,6 @@ public class RpcServiceImplementer {
         CodeBlock codeBlock;
         CodeBlock wrapperCodeBlock;
         String fieldTypeName1 = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (manager.isScalar(fieldTypeName1)) {
-            wrapperCodeBlock = CodeBlock.of(".map(queryType -> queryType.$L())", getFieldGetterName(fieldDefinitionContext));
-        } else if (manager.isEnum(fieldTypeName1)) {
-            wrapperCodeBlock = CodeBlock.of(".map(queryType -> $T.forNumber(queryType.$L().ordinal()))",
-                    ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(fieldDefinitionContext.type())),
-                    getFieldGetterName(fieldDefinitionContext)
-            );
-        } else if (manager.isObject(fieldTypeName1)) {
-            wrapperCodeBlock = CodeBlock.of(".map(queryType -> rpcObjectHandler.get().$L(queryType.$L()))", methodName, getFieldGetterName(fieldDefinitionContext));
-        } else {
-            throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
-        }
 
 
         if (manager.isInvokeField(fieldDefinitionContext)) {
@@ -243,39 +242,101 @@ public class RpcServiceImplementer {
 
             CodeBlock mapBlock;
             if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
-                mapBlock = CodeBlock.of(".flatMap(result -> $T.from(result.buildRs()).map(item -> $T.newBuilder().$L(item).build()))",
-                        ClassName.get(Mono.class),
-                        ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
-                        getRpcFieldAddAllName(fieldDefinitionContext)
-                );
+                mapBlock = CodeBlock.of(".flatMap(result -> $T.from(result.buildRs()))", ClassName.get(Mono.class));
             } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                mapBlock = CodeBlock.of(".flatMap(result -> result.map(item -> $T.newBuilder().$L(item).build()))",
-                        ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
-                        getRpcFieldAddAllName(fieldDefinitionContext)
-                );
+                mapBlock = CodeBlock.of(".flatMap(result -> result)");
             } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName())) {
-                mapBlock = CodeBlock.of(".flatMap(result -> result.last().map(item -> $T.newBuilder().$L(item).build()))",
-                        ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
-                        getRpcFieldAddAllName(fieldDefinitionContext)
+                mapBlock = CodeBlock.of(".flatMap(result -> result.collectList())");
+            } else {
+                mapBlock = CodeBlock.of(".flatMap(result -> $T.just(result))", ClassName.get(Mono.class));
+            }
+
+            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                if (manager.isScalar(fieldTypeName1)) {
+                    if (fieldTypeName1.equals("DateTime") || fieldTypeName1.equals("Timestamp") || fieldTypeName1.equals("Date") || fieldTypeName1.equals("Time")) {
+                        wrapperCodeBlock = CodeBlock.of(".map(item -> item.stream().map($T.CODEC_UTIL::encode).collect($T.toList()))", ClassName.get(CodecUtil.class));
+                    } else {
+                        wrapperCodeBlock = CodeBlock.of(".map(item -> item)");
+                    }
+                } else if (manager.isEnum(fieldTypeName1)) {
+                    wrapperCodeBlock = CodeBlock.of(".map(item -> item.stream().map(item::ordinal).map($T::forNumber).collect($T.toList()))",
+                            ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(fieldDefinitionContext.type())),
+                            getFieldGetterName(fieldDefinitionContext),
+                            ClassName.get(Collectors.class)
+                    );
+                } else if (manager.isObject(fieldTypeName1)) {
+                    wrapperCodeBlock = CodeBlock.of(".map(item -> item.stream().map(rpcObjectHandler.get()::$L).collect($T.toList()))", methodName, ClassName.get(Collectors.class));
+                } else {
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
+                }
+
+                codeBlock = CodeBlock.join(
+                        List.of(
+                                CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcName(fieldDefinitionContext)),
+                                CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
+                                CodeBlock.of(".map(operationDefinitionContext -> operationDefinitionContext.selectionSet().selection(0))"),
+                                invokeCodeBlock,
+                                mapBlock,
+                                wrapperCodeBlock,
+                                CodeBlock.of(".map(item -> $T.newBuilder().$L(item).build())",
+                                        ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
+                                        getRpcFieldAddAllName(fieldDefinitionContext)
+                                )
+                        ),
+                        System.lineSeparator()
                 );
             } else {
-                mapBlock = CodeBlock.of(".flatMap(result -> $T.just(result).map(item -> $T.newBuilder().$L(item).build()))",
-                        ClassName.get(Mono.class),
-                        ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
-                        getRpcFieldAddAllName(fieldDefinitionContext)
+                if (manager.isScalar(fieldTypeName1)) {
+                    if (fieldTypeName1.equals("DateTime") || fieldTypeName1.equals("Timestamp") || fieldTypeName1.equals("Date") || fieldTypeName1.equals("Time")) {
+                        wrapperCodeBlock = CodeBlock.of(".map(item -> $T.CODEC_UTIL.encode(item))", ClassName.get(CodecUtil.class));
+                    } else {
+                        wrapperCodeBlock = CodeBlock.of(".map(item -> item)");
+                    }
+                } else if (manager.isEnum(fieldTypeName1)) {
+                    wrapperCodeBlock = CodeBlock.of(".map(item -> $T.forNumber(item.ordinal()))",
+                            ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(fieldDefinitionContext.type())),
+                            getFieldGetterName(fieldDefinitionContext)
+                    );
+                } else if (manager.isObject(fieldTypeName1)) {
+                    wrapperCodeBlock = CodeBlock.of(".map(item -> rpcObjectHandler.get().$L(item))", methodName);
+                } else {
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
+                }
+                codeBlock = CodeBlock.join(
+                        List.of(
+                                CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcName(fieldDefinitionContext)),
+                                CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
+                                CodeBlock.of(".map(operationDefinitionContext -> operationDefinitionContext.selectionSet().selection(0))"),
+                                invokeCodeBlock,
+                                mapBlock,
+                                wrapperCodeBlock,
+                                CodeBlock.of(".map(item -> $T.newBuilder().$L(item).build())",
+                                        ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
+                                        getRpcFieldSetterName(fieldDefinitionContext)
+                                )
+                        ),
+                        System.lineSeparator()
                 );
             }
-            codeBlock = CodeBlock.join(
-                    List.of(
-                            CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcName(fieldDefinitionContext)),
-                            CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
-                            CodeBlock.of(".map(operationDefinitionContext -> operationDefinitionContext.selectionSet().selection(0))"),
-                            invokeCodeBlock,
-                            mapBlock),
-                    System.lineSeparator()
-            );
         } else {
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                if (manager.isScalar(fieldTypeName1)) {
+                    if (fieldTypeName1.equals("DateTime") || fieldTypeName1.equals("Timestamp") || fieldTypeName1.equals("Date") || fieldTypeName1.equals("Time")) {
+                        wrapperCodeBlock = CodeBlock.of(".map(queryType -> queryType.$L().stream().map(item -> $T.CODEC_UTIL.encode(item)).collect($T.toList()))", ClassName.get(CodecUtil.class), getFieldGetterName(fieldDefinitionContext), ClassName.get(Collectors.class));
+                    } else {
+                        wrapperCodeBlock = CodeBlock.of(".map(queryType -> queryType.$L())", getFieldGetterName(fieldDefinitionContext));
+                    }
+                } else if (manager.isEnum(fieldTypeName1)) {
+                    wrapperCodeBlock = CodeBlock.of(".map(queryType -> queryType.$L().stream().map(item -> $T.forNumber(item.ordinal())).collect($T.toList()))",
+                            ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(fieldDefinitionContext.type())),
+                            getFieldGetterName(fieldDefinitionContext),
+                            ClassName.get(Collectors.class)
+                    );
+                } else if (manager.isObject(fieldTypeName1)) {
+                    wrapperCodeBlock = CodeBlock.of(".map(queryType -> queryType.$L().stream().map(item -> rpcObjectHandler.get().$L(item)).collect($T.toList()))", getFieldGetterName(fieldDefinitionContext), methodName, ClassName.get(Collectors.class));
+                } else {
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
+                }
                 codeBlock = CodeBlock.join(
                         List.of(
                                 CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcName(fieldDefinitionContext)),
@@ -287,11 +348,7 @@ public class RpcServiceImplementer {
                                                 manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
                                         )
                                 ),
-                                CodeBlock.of(".map(queryType -> queryType.$L().stream().map(item -> rpcObjectHandler.get().$L(item)).collect($T.toList()))",
-                                        getFieldGetterName(fieldDefinitionContext),
-                                        methodName,
-                                        ClassName.get(Collectors.class)
-                                ),
+                                wrapperCodeBlock,
                                 CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
                                         ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcQueryResponseClassName(fieldDefinitionContext)),
                                         getRpcFieldAddAllName(fieldDefinitionContext)
@@ -300,6 +357,22 @@ public class RpcServiceImplementer {
                         System.lineSeparator()
                 );
             } else {
+                if (manager.isScalar(fieldTypeName1)) {
+                    if (fieldTypeName1.equals("DateTime") || fieldTypeName1.equals("Timestamp") || fieldTypeName1.equals("Date") || fieldTypeName1.equals("Time")) {
+                        wrapperCodeBlock = CodeBlock.of(".map(queryType -> $T.CODEC_UTIL.encode(queryType.$L()))", ClassName.get(CodecUtil.class), getFieldGetterName(fieldDefinitionContext));
+                    } else {
+                        wrapperCodeBlock = CodeBlock.of(".map(queryType -> queryType.$L())", getFieldGetterName(fieldDefinitionContext));
+                    }
+                } else if (manager.isEnum(fieldTypeName1)) {
+                    wrapperCodeBlock = CodeBlock.of(".map(queryType -> $T.forNumber(queryType.$L().ordinal()))",
+                            ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(fieldDefinitionContext.type())),
+                            getFieldGetterName(fieldDefinitionContext)
+                    );
+                } else if (manager.isObject(fieldTypeName1)) {
+                    wrapperCodeBlock = CodeBlock.of(".map(queryType -> rpcObjectHandler.get().$L(queryType.$L()))", methodName, getFieldGetterName(fieldDefinitionContext));
+                } else {
+                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
+                }
                 codeBlock = CodeBlock.join(
                         List.of(
                                 CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcName(fieldDefinitionContext)),

@@ -67,7 +67,6 @@ public class UserInput {
   private String createGroupId;
 
   @DefaultValue("\"User\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

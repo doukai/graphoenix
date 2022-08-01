@@ -196,7 +196,7 @@ message QueryOrgLevelResponse {
     optional int32 org_level = 1;
 }
 message QueryRoleDisable2Response {
-    optional bool role_disable2 = 1;
+    repeated bool role_disable2 = 1;
 }
 message QueryOrgLevel5Response {
     repeated int32 org_level5 = 1;

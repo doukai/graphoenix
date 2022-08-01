@@ -53,7 +53,6 @@ public class __DirectiveInput {
   private String createGroupId;
 
   @DefaultValue("\"__Directive\"")
-  @NonNull
   private String __typename;
 
   public String getName() {

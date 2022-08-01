@@ -55,7 +55,6 @@ public class __SchemaInput {
   private String createGroupId;
 
   @DefaultValue("\"__Schema\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

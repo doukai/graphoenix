@@ -4,9 +4,12 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
-import org.eclipse.microprofile.graphql.Type;
-
+import java.lang.Boolean;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
 import java.time.LocalDateTime;
+import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @CompiledJson

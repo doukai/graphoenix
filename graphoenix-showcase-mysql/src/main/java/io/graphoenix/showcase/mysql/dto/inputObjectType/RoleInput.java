@@ -45,7 +45,6 @@ public class RoleInput {
   private String createGroupId;
 
   @DefaultValue("\"Role\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

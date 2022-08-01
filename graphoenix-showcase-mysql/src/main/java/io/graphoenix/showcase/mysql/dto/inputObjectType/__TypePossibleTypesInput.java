@@ -41,7 +41,6 @@ public class __TypePossibleTypesInput {
   private String createGroupId;
 
   @DefaultValue("\"__TypePossibleTypes\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

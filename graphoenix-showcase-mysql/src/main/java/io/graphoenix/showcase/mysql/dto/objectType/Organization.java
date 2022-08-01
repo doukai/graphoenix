@@ -81,7 +81,7 @@ public class Organization implements Meta {
 
   private Collection<Integer> orgLevel3;
 
-  private Boolean roleDisable;
+  private Collection<Boolean> roleDisable;
 
   private Collection<User> userByOrg;
 
@@ -335,11 +335,11 @@ public class Organization implements Meta {
     this.orgLevel3 = orgLevel3;
   }
 
-  public Boolean getRoleDisable() {
+  public Collection<Boolean> getRoleDisable() {
     return this.roleDisable;
   }
 
-  public void setRoleDisable(Boolean roleDisable) {
+  public void setRoleDisable(Collection<Boolean> roleDisable) {
     this.roleDisable = roleDisable;
   }
 

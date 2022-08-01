@@ -9,7 +9,6 @@ import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -39,7 +38,6 @@ public class UserTest2Input {
   private String createGroupId;
 
   @DefaultValue("\"UserTest2\"")
-  @NonNull
   private String __typename;
 
   public String getId() {

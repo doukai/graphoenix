@@ -9,7 +9,6 @@ import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -45,7 +44,6 @@ public class __EnumValueInput {
   private String createGroupId;
 
   @DefaultValue("\"__EnumValue\"")
-  @NonNull
   private String __typename;
 
   public String getId() {
