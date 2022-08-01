@@ -13,6 +13,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.ArgumentBuilder;
+import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.core.utils.CodecUtil;
 import io.graphoenix.core.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -94,7 +95,7 @@ public class RpcServiceImplementer {
     }
 
     private TypeSpec buildQueryTypeServiceImpl(OperationType operationType) {
-        return TypeSpec.classBuilder(operationType.equals(QUERY) ? "QueryTypeServiceImpl" : "MutationTypeServiceImpl")
+        TypeSpec.Builder builder = TypeSpec.classBuilder(operationType.equals(QUERY) ? "QueryTypeServiceImpl" : "MutationTypeServiceImpl")
                 .superclass(ClassName.get(graphQLConfig.getGrpcPackageName(), operationType.equals(QUERY) ? "ReactorQueryTypeServiceGrpc" : "ReactorMutationTypeServiceGrpc", operationType.equals(QUERY) ? "QueryTypeServiceImplBase" : "MutationTypeServiceImplBase"))
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
@@ -155,8 +156,20 @@ public class RpcServiceImplementer {
                 )
                 .addFields(operationType.equals(QUERY) ? buildQueryFields() : buildMutationFields())
                 .addMethod(buildConstructor(operationType))
-                .addMethods(operationType.equals(QUERY) ? buildQueryTypeMethods() : buildMutationTypeMethods())
-                .build();
+                .addMethods(operationType.equals(QUERY) ? buildQueryTypeMethods() : buildMutationTypeMethods());
+
+        if (operationType.equals(MUTATION)) {
+            builder.addFields(buildMutationFields())
+                    .addField(
+                            FieldSpec.builder(
+                                    ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
+                                    "validator",
+                                    Modifier.PRIVATE,
+                                    Modifier.FINAL
+                            ).build()
+                    );
+        }
+        return builder.build();
     }
 
     private MethodSpec buildConstructor(OperationType operationType) {
@@ -188,6 +201,8 @@ public class RpcServiceImplementer {
             queryInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $L", typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())));
         } else {
             mutationInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $L", typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName())));
+            builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
+                    .addStatement("this.validator = validator");
         }
         return builder.build();
     }
@@ -303,7 +318,8 @@ public class RpcServiceImplementer {
                                 CodeBlock.of(".map(item -> $T.newBuilder().$L(item).build())",
                                         ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcResponseClassName(fieldDefinitionContext, operationType)),
                                         getRpcFieldAddAllName(fieldDefinitionContext)
-                                )
+                                ),
+                                CodeBlock.of(".onErrorResume(Mono::error)")
                         ),
                         System.lineSeparator()
                 );
@@ -335,12 +351,32 @@ public class RpcServiceImplementer {
                                 CodeBlock.of(".map(item -> $T.newBuilder().$L(item).build())",
                                         ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcResponseClassName(fieldDefinitionContext, operationType)),
                                         getRpcFieldSetterName(fieldDefinitionContext)
-                                )
+                                ),
+                                CodeBlock.of(".onErrorResume(Mono::error)")
                         ),
                         System.lineSeparator()
                 );
             }
         } else {
+            ClassName operationClass;
+            String operationMethodName;
+            switch (operationType) {
+                case QUERY:
+                    operationClass = ClassName.get(
+                            graphQLConfig.getObjectTypePackageName(),
+                            manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
+                    );
+                    operationMethodName = "query";
+                case MUTATION:
+                    operationClass = ClassName.get(
+                            graphQLConfig.getObjectTypePackageName(),
+                            manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST))
+                    );
+                    operationMethodName = "mutation";
+                default:
+                    throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
+            }
+
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 if (manager.isObject(fieldTypeName)) {
                     invokeCodeBlock = CodeBlock.of(".map(operationType -> $T.from(Mono.justOrEmpty(operationType.$L())).flatMap($T::fromIterable).flatMap(invokeHandler.get()::$L))", ClassName.get(Flux.class), getFieldGetterName(fieldDefinitionContext), ClassName.get(Flux.class), getTypeInvokeMethodName(fieldDefinitionContext.type()));
@@ -367,19 +403,15 @@ public class RpcServiceImplementer {
                         List.of(
                                 CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcRequestHandlerMethodName(fieldDefinitionContext)),
                                 CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
-                                CodeBlock.of(".flatMap(operationHandler.get()::query)"),
-                                CodeBlock.of(".map(jsonSting -> jsonb.get().fromJson(jsonSting, $T.class))",
-                                        ClassName.get(
-                                                graphQLConfig.getObjectTypePackageName(),
-                                                manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
-                                        )
-                                ),
+                                CodeBlock.of(".flatMap(operationHandler.get()::$L)", operationMethodName),
+                                CodeBlock.of(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))", operationClass),
                                 invokeCodeBlock,
                                 wrapperCodeBlock,
                                 CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
                                         ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcResponseClassName(fieldDefinitionContext, operationType)),
                                         getRpcFieldAddAllName(fieldDefinitionContext)
-                                )
+                                ),
+                                CodeBlock.of(".onErrorResume(Mono::error)")
                         ),
                         System.lineSeparator()
                 );
@@ -409,19 +441,15 @@ public class RpcServiceImplementer {
                         List.of(
                                 CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, getRpcRequestHandlerMethodName(fieldDefinitionContext)),
                                 CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
-                                CodeBlock.of(".flatMap(operationHandler.get()::query)"),
-                                CodeBlock.of(".map(jsonSting -> jsonb.get().fromJson(jsonSting, $T.class))",
-                                        ClassName.get(
-                                                graphQLConfig.getObjectTypePackageName(),
-                                                manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
-                                        )
-                                ),
+                                CodeBlock.of(".flatMap(operationHandler.get()::$L)", operationMethodName),
+                                CodeBlock.of(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))", operationClass),
                                 invokeCodeBlock,
                                 wrapperCodeBlock,
                                 CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
                                         ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcResponseClassName(fieldDefinitionContext, operationType)),
                                         getRpcFieldSetterName(fieldDefinitionContext)
-                                )
+                                ),
+                                CodeBlock.of(".onErrorResume(Mono::error)")
                         ),
                         System.lineSeparator()
                 );
