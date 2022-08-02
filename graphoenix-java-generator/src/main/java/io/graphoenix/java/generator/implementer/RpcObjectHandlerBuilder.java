@@ -76,46 +76,61 @@ public class RpcObjectHandlerBuilder {
     }
 
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String parameterName = "object";
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(getRpcObjectLowerCamelName(objectTypeDefinitionContext))
+        String objectParameterName = getRpcObjectLowerCamelName(objectTypeDefinitionContext);
+        String rpcObjectName = getRpcObjectName(objectTypeDefinitionContext);
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(objectTypeDefinitionContext)))
-                .addParameter(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), parameterName)
+                .returns(ClassName.get(graphQLConfig.getGrpcPackageName(), rpcObjectName))
+                .addParameter(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()), objectParameterName)
                 .addStatement("$T builder = $T.newBuilder()",
-                        ClassName.get(graphQLConfig.getGrpcPackageName(),
-                                getRpcObjectName(objectTypeDefinitionContext), "Builder"),
-                        ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(objectTypeDefinitionContext))
+                        ClassName.get(graphQLConfig.getGrpcPackageName(), rpcObjectName, "Builder"),
+                        ClassName.get(graphQLConfig.getGrpcPackageName(), rpcObjectName)
                 );
 
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition();
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContexts) {
+            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+            String fieldGetterName = getFieldGetterName(fieldDefinitionContext);
+            String fieldRpcObjectName = getRpcObjectName(fieldDefinitionContext.type());
+            String objectFieldMethodName = getRpcObjectLowerCamelName(fieldDefinitionContext.type());
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                String rpcFieldAddAllName = getRpcFieldAddAllName(fieldDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
                     if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                                .addStatement("builder.$L(object.$L().stream().map(item -> $T.CODEC_UTIL.encode(item)).collect($T.toList()))", getRpcFieldAddAllName(fieldDefinitionContext), getFieldGetterName(fieldDefinitionContext), ClassName.get(CodecUtil.class))
+                        builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
+                                .addStatement("builder.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.encode(item)).collect($T.toList()))",
+                                        objectParameterName,
+                                        rpcFieldAddAllName,
+                                        fieldGetterName,
+                                        ClassName.get(CodecUtil.class)
+                                )
                                 .endControlFlow();
                     } else {
-                        builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                                .addStatement("builder.$L(object.$L())", getRpcFieldAddAllName(fieldDefinitionContext), getFieldGetterName(fieldDefinitionContext))
+                        builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
+                                .addStatement("builder.$L($L.$L())",
+                                        objectParameterName,
+                                        rpcFieldAddAllName,
+                                        fieldGetterName
+                                )
                                 .endControlFlow();
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
-                    builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                            .addStatement("builder.$L(object.$L().stream().map(item -> $T.forNumber(item.ordinal())).collect($T.toList()))",
-                                    getRpcFieldAddAllName(fieldDefinitionContext),
-                                    getFieldGetterName(fieldDefinitionContext),
-                                    ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(fieldDefinitionContext.type())),
+                    builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
+                            .addStatement("builder.$L($L.$L().stream().map(item -> $T.forNumber(item.ordinal())).collect($T.toList()))",
+                                    objectParameterName,
+                                    rpcFieldAddAllName,
+                                    fieldGetterName,
+                                    ClassName.get(graphQLConfig.getGrpcPackageName(), fieldRpcObjectName),
                                     ClassName.get(Collectors.class)
                             )
                             .endControlFlow();
                 } else if (manager.isObject(fieldTypeName)) {
-                    builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                            .addStatement("builder.$L(object.$L().stream().map(this::$L).collect($T.toList()))",
-                                    getRpcFieldAddAllName(fieldDefinitionContext),
-                                    getFieldGetterName(fieldDefinitionContext),
-                                    getRpcObjectLowerCamelName(fieldDefinitionContext.type()),
+                    builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
+                            .addStatement("builder.$L($L.$L().stream().map(this::$L).collect($T.toList()))",
+                                    objectParameterName,
+                                    rpcFieldAddAllName,
+                                    fieldGetterName,
+                                    objectFieldMethodName,
                                     ClassName.get(Collectors.class)
                             )
                             .endControlFlow();
@@ -123,31 +138,42 @@ public class RpcObjectHandlerBuilder {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
             } else {
-                String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                String rpcFieldSetterName = getRpcFieldSetterName(fieldDefinitionContext);
                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                                .addStatement("builder.$L($T.CODEC_UTIL.encode(object.$L()))", getRpcFieldSetterName(fieldDefinitionContext), ClassName.get(CodecUtil.class), getFieldGetterName(fieldDefinitionContext))
+                        builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
+                                .addStatement("builder.$L($T.CODEC_UTIL.encode($L.$L()))",
+                                        objectParameterName,
+                                        rpcFieldSetterName,
+                                        ClassName.get(CodecUtil.class),
+                                        fieldGetterName
+                                )
                                 .endControlFlow();
                     } else {
-                        builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                                .addStatement("builder.$L(object.$L())", getRpcFieldSetterName(fieldDefinitionContext), getFieldGetterName(fieldDefinitionContext))
+                        builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
+                                .addStatement("builder.$L($L.$L())",
+                                        objectParameterName,
+                                        rpcFieldSetterName,
+                                        fieldGetterName
+                                )
                                 .endControlFlow();
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
-                    builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                            .addStatement("builder.$L($T.forNumber(object.$L().ordinal()))",
-                                    getRpcFieldSetterName(fieldDefinitionContext),
-                                    ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(fieldDefinitionContext.type())),
-                                    getFieldGetterName(fieldDefinitionContext)
+                    builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
+                            .addStatement("builder.$L($T.forNumber($L.$L().ordinal()))",
+                                    objectParameterName,
+                                    rpcFieldSetterName,
+                                    ClassName.get(graphQLConfig.getGrpcPackageName(), fieldRpcObjectName),
+                                    fieldGetterName
                             )
                             .endControlFlow();
                 } else if (manager.isObject(fieldTypeName)) {
-                    builder.beginControlFlow("if(object.$L() != null)", getFieldGetterName(fieldDefinitionContext))
-                            .addStatement("builder.$L($L(object.$L()))",
-                                    getRpcFieldSetterName(fieldDefinitionContext),
-                                    getRpcObjectLowerCamelName(fieldDefinitionContext.type()),
-                                    getFieldGetterName(fieldDefinitionContext)
+                    builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
+                            .addStatement("builder.$L($L($L.$L()))",
+                                    objectParameterName,
+                                    rpcFieldSetterName,
+                                    objectFieldMethodName,
+                                    fieldGetterName
                             )
                             .endControlFlow();
                 } else {

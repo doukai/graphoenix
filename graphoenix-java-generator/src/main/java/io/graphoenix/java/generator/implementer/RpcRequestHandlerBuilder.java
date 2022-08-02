@@ -62,7 +62,22 @@ public class RpcRequestHandlerBuilder {
     }
 
     private TypeSpec buildRpcRequestHandler(OperationType operationType) {
-        return TypeSpec.classBuilder(operationType.equals(QUERY) ? "RpcQueryRequestHandler" : "RpcMutationRequestHandler")
+        String className;
+        List<MethodSpec> methodSpecs;
+        switch (operationType) {
+            case QUERY:
+                className = "RpcQueryRequestHandler";
+                methodSpecs = buildQueryTypeMethods();
+                break;
+            case MUTATION:
+                className = "RpcMutationRequestHandler";
+                methodSpecs = buildMutationTypeMethods();
+                break;
+            default:
+                throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
+        }
+
+        return TypeSpec.classBuilder(className)
                 .addAnnotation(ApplicationScoped.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
@@ -178,7 +193,7 @@ public class RpcRequestHandlerBuilder {
                         ).initializer("\"]\"").build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(operationType.equals(QUERY) ? buildQueryTypeMethods() : buildMutationTypeMethods())
+                .addMethods(methodSpecs)
                 .build();
     }
 
@@ -207,11 +222,10 @@ public class RpcRequestHandlerBuilder {
     }
 
     private MethodSpec buildTypeMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
-        String methodName = getRpcName(fieldDefinitionContext);
         String requestParameterName = "request";
 
         ClassName requestClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcRequestClassName(fieldDefinitionContext, operationType));
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(methodName)
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(getRpcFieldMethodName(fieldDefinitionContext))
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(requestClassName, requestParameterName)
                 .returns(ClassName.get(String.class))
@@ -354,7 +368,7 @@ public class RpcRequestHandlerBuilder {
         return stringBuilder.toString();
     }
 
-    private String getRpcName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    private String getRpcFieldMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         String name = fieldDefinitionContext.name().getText();
         if (name.startsWith(INTROSPECTION_PREFIX)) {
             return "intro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));

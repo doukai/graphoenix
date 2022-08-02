@@ -367,12 +367,14 @@ public class RpcServiceImplementer {
                             manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
                     );
                     operationMethodName = "query";
+                    break;
                 case MUTATION:
                     operationClass = ClassName.get(
                             graphQLConfig.getObjectTypePackageName(),
                             manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST))
                     );
                     operationMethodName = "mutation";
+                    break;
                 default:
                     throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
             }
