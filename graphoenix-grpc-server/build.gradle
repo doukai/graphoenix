@@ -15,6 +15,7 @@ dependencies {
     compile 'io.grpc:grpc-protobuf:1.48.0'
     compile 'io.grpc:grpc-stub:1.48.0'
 
+    implementation 'com.typesafe:config:1.4.2'
     implementation project(':graphoenix-core')
     implementation project(':graphoenix-config')
 

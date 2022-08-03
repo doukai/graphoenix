@@ -51,6 +51,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
+import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
@@ -87,7 +88,8 @@ import static javax.lang.model.SourceVersion.RELEASE_11;
         "jakarta.enterprise.context.Dependent",
         "jakarta.enterprise.context.ApplicationScoped",
         "jakarta.enterprise.context.RequestScoped",
-        "jakarta.enterprise.context.SessionScoped"
+        "jakarta.enterprise.context.SessionScoped",
+        "org.eclipse.microprofile.config.inject.ConfigProperties"
 })
 @SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
@@ -124,8 +126,9 @@ public class InjectProcessor extends AbstractProcessor {
         Set<? extends Element> applicationScopedSet = roundEnv.getElementsAnnotatedWith(ApplicationScoped.class);
         Set<? extends Element> requestScopedSet = roundEnv.getElementsAnnotatedWith(RequestScoped.class);
         Set<? extends Element> sessionScopedSet = roundEnv.getElementsAnnotatedWith(SessionScoped.class);
+        Set<? extends Element> configPropertiesSet = roundEnv.getElementsAnnotatedWith(ConfigProperties.class);
 
-        List<TypeElement> typeElements = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream())
+        List<TypeElement> typeElements = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream(), configPropertiesSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
@@ -166,7 +169,7 @@ public class InjectProcessor extends AbstractProcessor {
         processorManager.writeToFiler(moduleContextCompilationUnit);
         Logger.debug("module context class build success");
 
-        List<CompilationUnit> producesModuleCompilationUnits = buildProducesModuleStream(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet).collect(Collectors.toList());
+        List<CompilationUnit> producesModuleCompilationUnits = buildProducesModuleStream(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, configPropertiesSet).collect(Collectors.toList());
         producesModuleCompilationUnits.forEach(producesModuleCompilationUnit -> {
                     processorManager.writeToFiler(producesModuleCompilationUnit);
                     Logger.debug("produces module class class build success");
@@ -649,9 +652,10 @@ public class InjectProcessor extends AbstractProcessor {
                                                               Set<? extends Element> dependentSet,
                                                               Set<? extends Element> applicationScopedSet,
                                                               Set<? extends Element> requestScopedSet,
-                                                              Set<? extends Element> sessionScopedSet) {
+                                                              Set<? extends Element> sessionScopedSet,
+                                                              Set<? extends Element> configPropertiesSet) {
 
-        return Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream())
+        return Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream(), configPropertiesSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)

@@ -99,8 +99,8 @@ public class RpcObjectHandlerBuilder {
                     if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
                         builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
                                 .addStatement("builder.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.encode(item)).collect($T.toList()))",
-                                        objectParameterName,
                                         rpcFieldAddAllName,
+                                        objectParameterName,
                                         fieldGetterName,
                                         ClassName.get(CodecUtil.class)
                                 )
@@ -108,8 +108,8 @@ public class RpcObjectHandlerBuilder {
                     } else {
                         builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
                                 .addStatement("builder.$L($L.$L())",
-                                        objectParameterName,
                                         rpcFieldAddAllName,
+                                        objectParameterName,
                                         fieldGetterName
                                 )
                                 .endControlFlow();
@@ -117,8 +117,8 @@ public class RpcObjectHandlerBuilder {
                 } else if (manager.isEnum(fieldTypeName)) {
                     builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
                             .addStatement("builder.$L($L.$L().stream().map(item -> $T.forNumber(item.ordinal())).collect($T.toList()))",
-                                    objectParameterName,
                                     rpcFieldAddAllName,
+                                    objectParameterName,
                                     fieldGetterName,
                                     ClassName.get(graphQLConfig.getGrpcPackageName(), fieldRpcObjectName),
                                     ClassName.get(Collectors.class)
@@ -127,8 +127,8 @@ public class RpcObjectHandlerBuilder {
                 } else if (manager.isObject(fieldTypeName)) {
                     builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
                             .addStatement("builder.$L($L.$L().stream().map(this::$L).collect($T.toList()))",
-                                    objectParameterName,
                                     rpcFieldAddAllName,
+                                    objectParameterName,
                                     fieldGetterName,
                                     objectFieldMethodName,
                                     ClassName.get(Collectors.class)
@@ -143,17 +143,17 @@ public class RpcObjectHandlerBuilder {
                     if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
                         builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
                                 .addStatement("builder.$L($T.CODEC_UTIL.encode($L.$L()))",
-                                        objectParameterName,
                                         rpcFieldSetterName,
                                         ClassName.get(CodecUtil.class),
+                                        objectParameterName,
                                         fieldGetterName
                                 )
                                 .endControlFlow();
                     } else {
                         builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
                                 .addStatement("builder.$L($L.$L())",
-                                        objectParameterName,
                                         rpcFieldSetterName,
+                                        objectParameterName,
                                         fieldGetterName
                                 )
                                 .endControlFlow();
@@ -161,18 +161,18 @@ public class RpcObjectHandlerBuilder {
                 } else if (manager.isEnum(fieldTypeName)) {
                     builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
                             .addStatement("builder.$L($T.forNumber($L.$L().ordinal()))",
-                                    objectParameterName,
                                     rpcFieldSetterName,
                                     ClassName.get(graphQLConfig.getGrpcPackageName(), fieldRpcObjectName),
+                                    objectParameterName,
                                     fieldGetterName
                             )
                             .endControlFlow();
                 } else if (manager.isObject(fieldTypeName)) {
                     builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
                             .addStatement("builder.$L($L($L.$L()))",
-                                    objectParameterName,
                                     rpcFieldSetterName,
                                     objectFieldMethodName,
+                                    objectParameterName,
                                     fieldGetterName
                             )
                             .endControlFlow();
