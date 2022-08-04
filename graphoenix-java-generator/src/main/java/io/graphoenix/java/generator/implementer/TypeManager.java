@@ -60,7 +60,7 @@ public class TypeManager {
 
     public String getFieldGetterMethodName(String fieldName) {
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return "get".concat(INTROSPECTION_PREFIX).concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return "get".concat(fieldName);
         } else {
             return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
         }
@@ -72,7 +72,7 @@ public class TypeManager {
 
     public String getFieldSetterMethodName(String fieldName) {
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return "set".concat(INTROSPECTION_PREFIX).concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return "set".concat(fieldName);
         } else {
             return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
         }

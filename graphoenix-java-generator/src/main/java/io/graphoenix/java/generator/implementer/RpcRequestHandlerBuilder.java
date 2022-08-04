@@ -13,10 +13,7 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
-import io.grpc.Server;
-import io.grpc.ServerBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import org.tinylog.Logger;
@@ -380,7 +377,7 @@ public class RpcRequestHandlerBuilder {
                 .flatMap(fieldDefinitionContext -> {
                             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                                 if (level <= layers) {
-                                    return Stream.of(buildSelectionSet(fieldDefinitionContext.type(), level + 1, layers));
+                                    return Stream.of(fieldDefinitionContext.name().getText().concat(buildSelectionSet(fieldDefinitionContext.type(), level + 1, layers)));
                                 } else {
                                     return Stream.empty();
                                 }

@@ -153,11 +153,11 @@ public class __DirectiveOrderBy {
     this.createGroupId = createGroupId;
   }
 
-  public Sort get__Typename() {
+  public Sort get__typename() {
     return this.__typename;
   }
 
-  public void set__Typename(Sort __typename) {
+  public void set__typename(Sort __typename) {
     this.__typename = __typename;
   }
 }

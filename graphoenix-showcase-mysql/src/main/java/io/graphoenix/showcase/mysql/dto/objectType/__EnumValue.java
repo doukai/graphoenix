@@ -4,13 +4,10 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
-import java.lang.Boolean;
-import java.lang.Integer;
-import java.lang.Override;
-import java.lang.String;
-import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.Type;
+
+import java.time.LocalDateTime;
 
 @Type
 @CompiledJson
@@ -208,11 +205,11 @@ public class __EnumValue implements Meta {
     this.createGroupId = createGroupId;
   }
 
-  public String get__Typename() {
+  public String get__typename() {
     return this.__typename;
   }
 
-  public void set__Typename(String __typename) {
+  public void set__typename(String __typename) {
     this.__typename = __typename;
   }
 

@@ -162,11 +162,11 @@ public class __EnumValueExpression {
     this.createGroupId = createGroupId;
   }
 
-  public StringExpression get__Typename() {
+  public StringExpression get__typename() {
     return this.__typename;
   }
 
-  public void set__Typename(StringExpression __typename) {
+  public void set__typename(StringExpression __typename) {
     this.__typename = __typename;
   }
 

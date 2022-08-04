@@ -144,11 +144,29 @@ public class GraphQLTypeToTable {
         }
         if (nonNull) {
             columnSpecs.add("NOT NULL");
+        } else {
+            if (typeNameContext.name().getText().equals("Date") ||
+                    typeNameContext.name().getText().equals("Time") ||
+                    typeNameContext.name().getText().equals("DateTime") ||
+                    typeNameContext.name().getText().equals("Timestamp")) {
+                columnSpecs.add("NULL");
+            }
         }
-        getDataTypeDirective(fieldDefinitionContext.directives())
+        Optional<String> defaultValue = getDataTypeDirective(fieldDefinitionContext.directives())
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream().filter(argumentContext -> argumentContext.name().getText().equals("default")).findFirst())
-                .map(argumentContext -> dbNameUtil.directiveToColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText()))
-                .ifPresent(columnSpecs::add);
+                .map(argumentContext -> dbNameUtil.directiveToColumnDefinition(argumentContext.name().getText(), argumentContext.valueWithVariable().getText()));
+
+        if (defaultValue.isPresent()) {
+            columnSpecs.add(defaultValue.get());
+        } else {
+            if (typeNameContext.name().getText().equals("Date") ||
+                    typeNameContext.name().getText().equals("Time") ||
+                    typeNameContext.name().getText().equals("DateTime") ||
+                    typeNameContext.name().getText().equals("Timestamp")) {
+                columnSpecs.add("DEFAULT NULL");
+            }
+        }
+
         columnDirectiveToColumnSpecs(fieldDefinitionContext.directives()).ifPresent(columnSpecs::addAll);
         if (fieldDefinitionContext.description() != null) {
             columnSpecs.add("COMMENT " + dbNameUtil.graphqlDescriptionToDBComment(fieldDefinitionContext.description().getText()));

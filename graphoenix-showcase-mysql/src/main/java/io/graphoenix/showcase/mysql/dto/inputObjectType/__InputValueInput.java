@@ -200,11 +200,11 @@ public class __InputValueInput {
     this.createGroupId = createGroupId;
   }
 
-  public String get__Typename() {
+  public String get__typename() {
     return this.__typename;
   }
 
-  public void set__Typename(String __typename) {
+  public void set__typename(String __typename) {
     this.__typename = __typename;
   }
 }

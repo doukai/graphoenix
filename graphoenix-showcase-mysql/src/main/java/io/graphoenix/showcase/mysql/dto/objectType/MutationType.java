@@ -66,75 +66,75 @@ public class MutationType implements Meta {
 
   private String createGroupId;
 
-  public __Schema get__Schema() {
+  public __Schema get__schema() {
     return this.__schema;
   }
 
-  public void set__Schema(__Schema __schema) {
+  public void set__schema(__Schema __schema) {
     this.__schema = __schema;
   }
 
-  public __Type get__Type() {
+  public __Type get__type() {
     return this.__type;
   }
 
-  public void set__Type(__Type __type) {
+  public void set__type(__Type __type) {
     this.__type = __type;
   }
 
-  public __TypeInterfaces get__TypeInterfaces() {
+  public __TypeInterfaces get__typeInterfaces() {
     return this.__typeInterfaces;
   }
 
-  public void set__TypeInterfaces(__TypeInterfaces __typeInterfaces) {
+  public void set__typeInterfaces(__TypeInterfaces __typeInterfaces) {
     this.__typeInterfaces = __typeInterfaces;
   }
 
-  public __TypePossibleTypes get__TypePossibleTypes() {
+  public __TypePossibleTypes get__typePossibleTypes() {
     return this.__typePossibleTypes;
   }
 
-  public void set__TypePossibleTypes(__TypePossibleTypes __typePossibleTypes) {
+  public void set__typePossibleTypes(__TypePossibleTypes __typePossibleTypes) {
     this.__typePossibleTypes = __typePossibleTypes;
   }
 
-  public __Field get__Field() {
+  public __Field get__field() {
     return this.__field;
   }
 
-  public void set__Field(__Field __field) {
+  public void set__field(__Field __field) {
     this.__field = __field;
   }
 
-  public __InputValue get__InputValue() {
+  public __InputValue get__inputValue() {
     return this.__inputValue;
   }
 
-  public void set__InputValue(__InputValue __inputValue) {
+  public void set__inputValue(__InputValue __inputValue) {
     this.__inputValue = __inputValue;
   }
 
-  public __EnumValue get__EnumValue() {
+  public __EnumValue get__enumValue() {
     return this.__enumValue;
   }
 
-  public void set__EnumValue(__EnumValue __enumValue) {
+  public void set__enumValue(__EnumValue __enumValue) {
     this.__enumValue = __enumValue;
   }
 
-  public __Directive get__Directive() {
+  public __Directive get__directive() {
     return this.__directive;
   }
 
-  public void set__Directive(__Directive __directive) {
+  public void set__directive(__Directive __directive) {
     this.__directive = __directive;
   }
 
-  public __DirectiveLocations get__DirectiveLocations() {
+  public __DirectiveLocations get__directiveLocations() {
     return this.__directiveLocations;
   }
 
-  public void set__DirectiveLocations(__DirectiveLocations __directiveLocations) {
+  public void set__directiveLocations(__DirectiveLocations __directiveLocations) {
     this.__directiveLocations = __directiveLocations;
   }
 

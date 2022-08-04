@@ -706,7 +706,6 @@ public class TypeSpecBuilder {
                 }));
             });
         }
-
         classBuilder.addMethod(methodBuilder.build());
     }
 

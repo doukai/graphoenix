@@ -151,221 +151,221 @@ public class QueryType implements Meta {
 
   private Collection<Role> findRole2;
 
-  public __Schema get__Schema() {
+  public __Schema get__schema() {
     return this.__schema;
   }
 
-  public void set__Schema(__Schema __schema) {
+  public void set__schema(__Schema __schema) {
     this.__schema = __schema;
   }
 
-  public Collection<__Schema> get__SchemaList() {
+  public Collection<__Schema> get__schemaList() {
     return this.__schemaList;
   }
 
-  public void set__SchemaList(Collection<__Schema> __schemaList) {
+  public void set__schemaList(Collection<__Schema> __schemaList) {
     this.__schemaList = __schemaList;
   }
 
-  public __SchemaConnection get__SchemaConnection() {
+  public __SchemaConnection get__schemaConnection() {
     return this.__schemaConnection;
   }
 
-  public void set__SchemaConnection(__SchemaConnection __schemaConnection) {
+  public void set__schemaConnection(__SchemaConnection __schemaConnection) {
     this.__schemaConnection = __schemaConnection;
   }
 
-  public __Type get__Type() {
+  public __Type get__type() {
     return this.__type;
   }
 
-  public void set__Type(__Type __type) {
+  public void set__type(__Type __type) {
     this.__type = __type;
   }
 
-  public Collection<__Type> get__TypeList() {
+  public Collection<__Type> get__typeList() {
     return this.__typeList;
   }
 
-  public void set__TypeList(Collection<__Type> __typeList) {
+  public void set__typeList(Collection<__Type> __typeList) {
     this.__typeList = __typeList;
   }
 
-  public __TypeConnection get__TypeConnection() {
+  public __TypeConnection get__typeConnection() {
     return this.__typeConnection;
   }
 
-  public void set__TypeConnection(__TypeConnection __typeConnection) {
+  public void set__typeConnection(__TypeConnection __typeConnection) {
     this.__typeConnection = __typeConnection;
   }
 
-  public __TypeInterfaces get__TypeInterfaces() {
+  public __TypeInterfaces get__typeInterfaces() {
     return this.__typeInterfaces;
   }
 
-  public void set__TypeInterfaces(__TypeInterfaces __typeInterfaces) {
+  public void set__typeInterfaces(__TypeInterfaces __typeInterfaces) {
     this.__typeInterfaces = __typeInterfaces;
   }
 
-  public Collection<__TypeInterfaces> get__TypeInterfacesList() {
+  public Collection<__TypeInterfaces> get__typeInterfacesList() {
     return this.__typeInterfacesList;
   }
 
-  public void set__TypeInterfacesList(Collection<__TypeInterfaces> __typeInterfacesList) {
+  public void set__typeInterfacesList(Collection<__TypeInterfaces> __typeInterfacesList) {
     this.__typeInterfacesList = __typeInterfacesList;
   }
 
-  public __TypeInterfacesConnection get__TypeInterfacesConnection() {
+  public __TypeInterfacesConnection get__typeInterfacesConnection() {
     return this.__typeInterfacesConnection;
   }
 
-  public void set__TypeInterfacesConnection(__TypeInterfacesConnection __typeInterfacesConnection) {
+  public void set__typeInterfacesConnection(__TypeInterfacesConnection __typeInterfacesConnection) {
     this.__typeInterfacesConnection = __typeInterfacesConnection;
   }
 
-  public __TypePossibleTypes get__TypePossibleTypes() {
+  public __TypePossibleTypes get__typePossibleTypes() {
     return this.__typePossibleTypes;
   }
 
-  public void set__TypePossibleTypes(__TypePossibleTypes __typePossibleTypes) {
+  public void set__typePossibleTypes(__TypePossibleTypes __typePossibleTypes) {
     this.__typePossibleTypes = __typePossibleTypes;
   }
 
-  public Collection<__TypePossibleTypes> get__TypePossibleTypesList() {
+  public Collection<__TypePossibleTypes> get__typePossibleTypesList() {
     return this.__typePossibleTypesList;
   }
 
-  public void set__TypePossibleTypesList(Collection<__TypePossibleTypes> __typePossibleTypesList) {
+  public void set__typePossibleTypesList(Collection<__TypePossibleTypes> __typePossibleTypesList) {
     this.__typePossibleTypesList = __typePossibleTypesList;
   }
 
-  public __TypePossibleTypesConnection get__TypePossibleTypesConnection() {
+  public __TypePossibleTypesConnection get__typePossibleTypesConnection() {
     return this.__typePossibleTypesConnection;
   }
 
-  public void set__TypePossibleTypesConnection(
+  public void set__typePossibleTypesConnection(
       __TypePossibleTypesConnection __typePossibleTypesConnection) {
     this.__typePossibleTypesConnection = __typePossibleTypesConnection;
   }
 
-  public __Field get__Field() {
+  public __Field get__field() {
     return this.__field;
   }
 
-  public void set__Field(__Field __field) {
+  public void set__field(__Field __field) {
     this.__field = __field;
   }
 
-  public Collection<__Field> get__FieldList() {
+  public Collection<__Field> get__fieldList() {
     return this.__fieldList;
   }
 
-  public void set__FieldList(Collection<__Field> __fieldList) {
+  public void set__fieldList(Collection<__Field> __fieldList) {
     this.__fieldList = __fieldList;
   }
 
-  public __FieldConnection get__FieldConnection() {
+  public __FieldConnection get__fieldConnection() {
     return this.__fieldConnection;
   }
 
-  public void set__FieldConnection(__FieldConnection __fieldConnection) {
+  public void set__fieldConnection(__FieldConnection __fieldConnection) {
     this.__fieldConnection = __fieldConnection;
   }
 
-  public __InputValue get__InputValue() {
+  public __InputValue get__inputValue() {
     return this.__inputValue;
   }
 
-  public void set__InputValue(__InputValue __inputValue) {
+  public void set__inputValue(__InputValue __inputValue) {
     this.__inputValue = __inputValue;
   }
 
-  public Collection<__InputValue> get__InputValueList() {
+  public Collection<__InputValue> get__inputValueList() {
     return this.__inputValueList;
   }
 
-  public void set__InputValueList(Collection<__InputValue> __inputValueList) {
+  public void set__inputValueList(Collection<__InputValue> __inputValueList) {
     this.__inputValueList = __inputValueList;
   }
 
-  public __InputValueConnection get__InputValueConnection() {
+  public __InputValueConnection get__inputValueConnection() {
     return this.__inputValueConnection;
   }
 
-  public void set__InputValueConnection(__InputValueConnection __inputValueConnection) {
+  public void set__inputValueConnection(__InputValueConnection __inputValueConnection) {
     this.__inputValueConnection = __inputValueConnection;
   }
 
-  public __EnumValue get__EnumValue() {
+  public __EnumValue get__enumValue() {
     return this.__enumValue;
   }
 
-  public void set__EnumValue(__EnumValue __enumValue) {
+  public void set__enumValue(__EnumValue __enumValue) {
     this.__enumValue = __enumValue;
   }
 
-  public Collection<__EnumValue> get__EnumValueList() {
+  public Collection<__EnumValue> get__enumValueList() {
     return this.__enumValueList;
   }
 
-  public void set__EnumValueList(Collection<__EnumValue> __enumValueList) {
+  public void set__enumValueList(Collection<__EnumValue> __enumValueList) {
     this.__enumValueList = __enumValueList;
   }
 
-  public __EnumValueConnection get__EnumValueConnection() {
+  public __EnumValueConnection get__enumValueConnection() {
     return this.__enumValueConnection;
   }
 
-  public void set__EnumValueConnection(__EnumValueConnection __enumValueConnection) {
+  public void set__enumValueConnection(__EnumValueConnection __enumValueConnection) {
     this.__enumValueConnection = __enumValueConnection;
   }
 
-  public __Directive get__Directive() {
+  public __Directive get__directive() {
     return this.__directive;
   }
 
-  public void set__Directive(__Directive __directive) {
+  public void set__directive(__Directive __directive) {
     this.__directive = __directive;
   }
 
-  public Collection<__Directive> get__DirectiveList() {
+  public Collection<__Directive> get__directiveList() {
     return this.__directiveList;
   }
 
-  public void set__DirectiveList(Collection<__Directive> __directiveList) {
+  public void set__directiveList(Collection<__Directive> __directiveList) {
     this.__directiveList = __directiveList;
   }
 
-  public __DirectiveConnection get__DirectiveConnection() {
+  public __DirectiveConnection get__directiveConnection() {
     return this.__directiveConnection;
   }
 
-  public void set__DirectiveConnection(__DirectiveConnection __directiveConnection) {
+  public void set__directiveConnection(__DirectiveConnection __directiveConnection) {
     this.__directiveConnection = __directiveConnection;
   }
 
-  public __DirectiveLocations get__DirectiveLocations() {
+  public __DirectiveLocations get__directiveLocations() {
     return this.__directiveLocations;
   }
 
-  public void set__DirectiveLocations(__DirectiveLocations __directiveLocations) {
+  public void set__directiveLocations(__DirectiveLocations __directiveLocations) {
     this.__directiveLocations = __directiveLocations;
   }
 
-  public Collection<__DirectiveLocations> get__DirectiveLocationsList() {
+  public Collection<__DirectiveLocations> get__directiveLocationsList() {
     return this.__directiveLocationsList;
   }
 
-  public void set__DirectiveLocationsList(
+  public void set__directiveLocationsList(
       Collection<__DirectiveLocations> __directiveLocationsList) {
     this.__directiveLocationsList = __directiveLocationsList;
   }
 
-  public __DirectiveLocationsConnection get__DirectiveLocationsConnection() {
+  public __DirectiveLocationsConnection get__directiveLocationsConnection() {
     return this.__directiveLocationsConnection;
   }
 
-  public void set__DirectiveLocationsConnection(
+  public void set__directiveLocationsConnection(
       __DirectiveLocationsConnection __directiveLocationsConnection) {
     this.__directiveLocationsConnection = __directiveLocationsConnection;
   }
