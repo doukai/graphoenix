@@ -15,10 +15,7 @@ import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
 import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
 import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
-import io.graphoenix.java.generator.implementer.RpcInputObjectHandlerBuilder;
-import io.graphoenix.java.generator.implementer.RpcObjectHandlerBuilder;
-import io.graphoenix.java.generator.implementer.RpcRequestHandlerBuilder;
-import io.graphoenix.java.generator.implementer.RpcServiceImplementer;
+import io.graphoenix.java.generator.implementer.*;
 import io.graphoenix.spi.annotation.Skip;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
@@ -69,6 +66,7 @@ public class GrpcServiceProcessor extends AbstractProcessor {
     private RpcObjectHandlerBuilder rpcObjectHandlerBuilder;
     private RpcRequestHandlerBuilder rpcRequestHandlerBuilder;
     private RpcServiceImplementer rpcServiceImplementer;
+    private RpcSelectionFilterBuilder rpcSelectionFilterBuilder;
     private GraphQLConfig graphQLConfig;
     private Types typeUtils;
     private Filer filer;
@@ -90,6 +88,7 @@ public class GrpcServiceProcessor extends AbstractProcessor {
         this.rpcObjectHandlerBuilder = BeanContext.get(RpcObjectHandlerBuilder.class);
         this.rpcRequestHandlerBuilder = BeanContext.get(RpcRequestHandlerBuilder.class);
         this.rpcServiceImplementer = BeanContext.get(RpcServiceImplementer.class);
+        this.rpcSelectionFilterBuilder = BeanContext.get(RpcSelectionFilterBuilder.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
@@ -166,6 +165,7 @@ public class GrpcServiceProcessor extends AbstractProcessor {
             rpcObjectHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
             rpcRequestHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
             rpcServiceImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
+            rpcSelectionFilterBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

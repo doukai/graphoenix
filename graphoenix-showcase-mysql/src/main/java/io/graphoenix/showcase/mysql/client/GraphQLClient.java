@@ -1,5 +1,8 @@
 package io.graphoenix.showcase.mysql.client;
 
+import io.graphoenix.showcase.mysql.grpc.*;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import org.dataloader.BatchLoader;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderFactory;
@@ -8,6 +11,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -36,14 +40,18 @@ public class GraphQLClient {
         userList.add(new User(4L, "dd", 31, 5L));
         userList.add(new User(5L, "ee", 3, 2L));
 
-//        ManagedChannel localhost = ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext()
-//                .build();
-//
-//        ReactorQueryTypeServiceGrpc.ReactorQueryTypeServiceStub reactorQueryTypeServiceStub = ReactorQueryTypeServiceGrpc.newReactorStub(localhost);
+        ManagedChannel localhost = ManagedChannelBuilder.forAddress("localhost", 50051).usePlaintext()
+                .build();
+
+        ReactorQueryTypeServiceGrpc.ReactorQueryTypeServiceStub reactorQueryTypeServiceStub = ReactorQueryTypeServiceGrpc.newReactorStub(localhost);
 //
 //        reactorQueryTypeServiceStub.introType(QueryIntroTypeRequest.newBuilder().setName(StringExpression.newBuilder().setVal("User").build()).build())
 //                .doOnSuccess(r -> System.out.println(r.getIntroType().getName()))
 //                .block();
+
+        BatchLoader<String, Role> roleBatchLoader = keys -> reactorQueryTypeServiceStub.roleList(QueryRoleListRequest.newBuilder().setId(StringExpression.newBuilder().addAllIn(keys).build()).build())
+                .map(QueryRoleListResponse::getRoleListList)
+                .toFuture();
 
         BatchLoader<Long, User> userBatchLoader = userIds -> CompletableFuture.supplyAsync(() -> userList.stream().filter(user -> userIds.contains(user.id)).collect(Collectors.toList()));
 
