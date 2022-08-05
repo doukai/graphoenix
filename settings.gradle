@@ -17,4 +17,5 @@ include 'graphoenix-showcase-mysql'
 include 'graphoenix-json'
 include 'graphoenix-protobuf-builder'
 include 'graphoenix-grpc-server'
+include 'graphoenix-grpc-client'
 

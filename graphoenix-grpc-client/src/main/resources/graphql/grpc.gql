@@ -1,0 +1,5 @@
+directive @grpc(
+    packageName: String
+    from: String
+    to: String
+) on FIELD_DEFINITION
