@@ -67,38 +67,38 @@ public class GraphQLClient {
                 .map(QueryRoleListResponse::getRoleListList)
                 .toFuture();
 
-        DataLoader<String, Role> userLoader = DataLoaderFactory.newDataLoader(userBatchLoader);
-        userLoader.load("1L")
-                .thenAccept(user -> {
-                    System.out.println("user = " + user);
-                    userLoader.load(user.bossId)
-                            .thenAccept(invitedBy -> {
-                                userLoader.load(invitedBy.bossId)
-                                        .thenAccept(invitedBy2 -> {
-                                            System.out.println("bossId = " + invitedBy2.bossId);
-                                        });
-                            });
-                });
+//        DataLoader<String, Role> userLoader = DataLoaderFactory.newDataLoader(userBatchLoader);
+//        userLoader.load("1L")
+//                .thenAccept(user -> {
+//                    System.out.println("user = " + user);
+//                    userLoader.load(user.bossId)
+//                            .thenAccept(invitedBy -> {
+//                                userLoader.load(invitedBy.bossId)
+//                                        .thenAccept(invitedBy2 -> {
+//                                            System.out.println("bossId = " + invitedBy2.bossId);
+//                                        });
+//                            });
+//                });
+//
+//        userLoader.load(2L)
+//                .thenAccept(user -> {
+//                    System.out.println("user = " + user);
+//                    userLoader.load(user.bossId)
+//                            .thenAccept(invitedBy -> {
+//                                System.out.println("bossId = " + invitedBy);
+//                            });
+//                });
+//
+//        userLoader.load(5L)
+//                .thenAccept(user -> {
+//                    System.out.println("user = " + user);
+//                    userLoader.load(user.bossId)
+//                            .thenAccept(invitedBy -> {
+//                                System.out.println("bossId = " + invitedBy);
+//                            });
+//                });
 
-        userLoader.load(2L)
-                .thenAccept(user -> {
-                    System.out.println("user = " + user);
-                    userLoader.load(user.bossId)
-                            .thenAccept(invitedBy -> {
-                                System.out.println("bossId = " + invitedBy);
-                            });
-                });
-
-        userLoader.load(5L)
-                .thenAccept(user -> {
-                    System.out.println("user = " + user);
-                    userLoader.load(user.bossId)
-                            .thenAccept(invitedBy -> {
-                                System.out.println("bossId = " + invitedBy);
-                            });
-                });
-
-        userLoader.dispatch();
+//        userLoader.dispatch();
 
         Mono.just("aaa").toFuture();
     }
