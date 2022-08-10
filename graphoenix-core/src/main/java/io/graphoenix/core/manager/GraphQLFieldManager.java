@@ -76,6 +76,17 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
+    public boolean isGrpcField(String objectTypeName, String fieldName) {
+        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
+        return isGrpcField(fieldDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotGrpcField(String objectTypeName, String fieldName) {
+        return !isGrpcField(objectTypeName, fieldName);
+    }
+
+    @Override
     public boolean isFunctionField(String objectTypeName, String fieldName) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
         return isFunctionField(fieldDefinitionContext);
@@ -105,6 +116,16 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     @Override
     public boolean isNotInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return !isInvokeField(fieldDefinitionContext);
+    }
+
+    @Override
+    public boolean isGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME));
+    }
+
+    @Override
+    public boolean isNotGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return !isGrpcField(fieldDefinitionContext);
     }
 
     @Override

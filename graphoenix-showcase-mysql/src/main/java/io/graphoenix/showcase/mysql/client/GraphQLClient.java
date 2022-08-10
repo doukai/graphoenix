@@ -1,17 +1,22 @@
 package io.graphoenix.showcase.mysql.client;
 
-import io.graphoenix.showcase.mysql.grpc.*;
+import io.graphoenix.showcase.mysql.grpc.QueryRoleListRequest;
+import io.graphoenix.showcase.mysql.grpc.QueryRoleListResponse;
+import io.graphoenix.showcase.mysql.grpc.ReactorQueryTypeServiceGrpc;
+import io.graphoenix.showcase.mysql.grpc.Role;
+import io.graphoenix.showcase.mysql.grpc.StringExpression;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.dataloader.BatchLoader;
+import org.dataloader.BatchLoaderWithContext;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderFactory;
+import org.dataloader.DataLoaderOptions;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -53,10 +58,17 @@ public class GraphQLClient {
                 .map(QueryRoleListResponse::getRoleListList)
                 .toFuture();
 
-        BatchLoader<Long, User> userBatchLoader = userIds -> CompletableFuture.supplyAsync(() -> userList.stream().filter(user -> userIds.contains(user.id)).collect(Collectors.toList()));
+        DataLoaderOptions options = DataLoaderOptions.newOptions();
 
-        DataLoader<Long, User> userLoader = DataLoaderFactory.newDataLoader(userBatchLoader);
-        userLoader.load(1L)
+        options.setBatchLoaderContextProvider(() -> "");
+
+
+        BatchLoaderWithContext<String, Role> userBatchLoader = (keys, environment) -> reactorQueryTypeServiceStub.roleList(QueryRoleListRequest.newBuilder().setId(StringExpression.newBuilder().addAllIn(keys).build()).build())
+                .map(QueryRoleListResponse::getRoleListList)
+                .toFuture();
+
+        DataLoader<String, Role> userLoader = DataLoaderFactory.newDataLoader(userBatchLoader);
+        userLoader.load("1L")
                 .thenAccept(user -> {
                     System.out.println("user = " + user);
                     userLoader.load(user.bossId)

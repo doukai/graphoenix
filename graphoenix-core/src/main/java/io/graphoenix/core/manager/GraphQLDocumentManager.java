@@ -344,6 +344,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean isGrpcField(String objectTypeName, String name) {
+        return graphQLFieldManager.isGrpcField(objectTypeName, name);
+    }
+
+    @Override
+    public boolean isNotGrpcField(String objectTypeName, String name) {
+        return graphQLFieldManager.isNotGrpcField(objectTypeName, name);
+    }
+
+    @Override
     public boolean isFunctionField(String objectTypeName, String name) {
         return graphQLFieldManager.isFunctionField(objectTypeName, name);
     }
@@ -371,6 +381,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public boolean isNotInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return graphQLFieldManager.isNotInvokeField(fieldDefinitionContext);
+    }
+
+    @Override
+    public boolean isGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return graphQLFieldManager.isGrpcField(fieldDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return graphQLFieldManager.isNotGrpcField(fieldDefinitionContext);
     }
 
     @Override
