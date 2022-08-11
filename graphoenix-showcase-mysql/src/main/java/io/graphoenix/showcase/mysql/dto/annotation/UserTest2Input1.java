@@ -56,4 +56,8 @@ public @interface UserTest2Input1 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  UserTest2Input2[] list() default {};
+
+  String $list() default "";
 }

@@ -65,4 +65,8 @@ public @interface RoleInput1 {
   String $usersConnection() default "";
 
   UserInput2[] users() default {};
+
+  RoleInput2[] list() default {};
+
+  String $list() default "";
 }

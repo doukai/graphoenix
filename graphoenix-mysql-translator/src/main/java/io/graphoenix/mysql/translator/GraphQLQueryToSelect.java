@@ -23,6 +23,7 @@ import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.IsNullExpression;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.schema.Column;
@@ -45,8 +46,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_AGG_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_NOT_EXIST;
@@ -66,7 +69,18 @@ import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.FUNC_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.SORT_INPUT_NAME;
 
 @ApplicationScoped
 public class GraphQLQueryToSelect {
@@ -463,19 +477,52 @@ public class GraphQLQueryToSelect {
             } else {
                 Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
                 if (idFieldName.isPresent()) {
-                    Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), selectionContext.field().arguments())
-                            .flatMap(dbValueUtil::createIdValueExpression)
-                            .orElseGet(() -> dbValueUtil.createInsertIdUserVariable(typeName, idFieldName.get(), 0, 0));
+                    if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                        Optional<GraphqlParser.InputValueDefinitionContext> listInputValueDefinition = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
+                                .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
+                                .findFirst();
 
-                    EqualsTo idEqualsTo = new EqualsTo();
-                    idEqualsTo.setLeftExpression(fieldToColumn(typeToTable(typeName, level), idFieldName.get()));
-                    idEqualsTo.setRightExpression(idValueExpression);
-                    plainSelect.setWhere(idEqualsTo);
+                        GraphqlParser.ArgumentsContext argumentsContext = selectionContext.field().arguments();
+                        Optional<GraphqlParser.ArgumentContext> listArgument = argumentsContext.argument().stream()
+                                .filter(argumentContext -> argumentContext.name().getText().equals(LIST_INPUT_NAME))
+                                .findFirst();
+
+                        if (listInputValueDefinition.isPresent() && listArgument.isPresent()) {
+                            if (listArgument.get().valueWithVariable().variable() != null) {
+                                plainSelect.setWhere(dbValueUtil.createGreaterThanLastInsertIDExpression(typeName, idFieldName.get()));
+                            } else if (listArgument.get().valueWithVariable().arrayValueWithVariable() != null) {
+                                List<GraphqlParser.ValueWithVariableContext> valueWithVariableContexts = listArgument.get().valueWithVariable().arrayValueWithVariable().valueWithVariable();
+                                List<Expression> expressionList = IntStream.range(0, valueWithVariableContexts.size())
+                                        .filter(index -> valueWithVariableContexts.get(index).objectValueWithVariable() != null)
+                                        .mapToObj(index ->
+                                                manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContexts.get(index).objectValueWithVariable())
+                                                        .flatMap(dbValueUtil::createIdValueExpression)
+                                                        .orElseGet(() -> dbValueUtil.createInsertIdUserVariable(typeName, idFieldName.get(), 0, index))
+                                        )
+                                        .collect(Collectors.toList());
+                                InExpression inExpression = new InExpression()
+                                        .withLeftExpression(fieldToColumn(typeToTable(typeName, level), idFieldName.get()))
+                                        .withRightItemsList(new ExpressionList(expressionList));
+                                plainSelect.setWhere(inExpression);
+                            }
+                        } else {
+                            throw new GraphQLErrors(ARGUMENT_NOT_EXIST.bind(LIST_INPUT_NAME));
+                        }
+                    } else {
+                        Expression idValueExpression = manager.getIDArgument(fieldDefinitionContext.type(), selectionContext.field().arguments())
+                                .flatMap(dbValueUtil::createIdValueExpression)
+                                .orElseGet(() -> dbValueUtil.createInsertIdUserVariable(typeName, idFieldName.get(), 0, 0));
+
+                        EqualsTo idEqualsTo = new EqualsTo()
+                                .withLeftExpression(fieldToColumn(typeToTable(typeName, level), idFieldName.get()))
+                                .withRightExpression(idValueExpression);
+                        plainSelect.setWhere(idEqualsTo);
+                    }
                 } else {
                     throw new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
                 }
             }
-
         } else {
             Optional<Expression> where = argumentsToWhere.argumentsToMultipleExpression(fieldDefinitionContext, selectionContext.field().arguments(), level);
             where.ifPresent(expression -> {

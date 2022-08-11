@@ -6,6 +6,7 @@ import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.enumType.Sort;
 import io.graphoenix.showcase.mysql.dto.inputObjectType.OrganizationInput;
 import io.graphoenix.showcase.mysql.dto.inputObjectType.RoleInput;
+import io.graphoenix.showcase.mysql.dto.inputObjectType.UserInput;
 import io.graphoenix.showcase.mysql.dto.objectType.User;
 import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.annotation.MutationOperation;
@@ -56,4 +57,19 @@ public interface OperationTest {
             $test2 = "test2"
     )
     User mutationUser(Sex sex, String name, String orgName, List<RoleInput> roles, OrganizationInput organization, List<String> phones, List<Integer> test1, List<Boolean> test2) throws Exception;
+
+    @MutationOperation("userList")
+    @UserInput0(
+            $name = "name",
+            $sex = "sex",
+            login = "login1",
+            password = "password1",
+            $organization = "organization",
+            $roles = "roles",
+            $phones = "phones",
+            $test1 = "test1",
+            $test2 = "test2",
+            $list = "list"
+    )
+    List<User> mutationUserList(List<UserInput> list, Sex sex, String name, String orgName, List<RoleInput> roles, OrganizationInput organization, List<String> phones, List<Integer> test1, List<Boolean> test2) throws Exception;
 }

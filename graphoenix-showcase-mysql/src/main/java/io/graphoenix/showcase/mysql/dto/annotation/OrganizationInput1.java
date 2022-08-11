@@ -88,4 +88,8 @@ public @interface OrganizationInput1 {
   UserInput2[] userByOrg() default {};
 
   OrganizationInput2 parent() default @OrganizationInput2;
+
+  OrganizationInput2[] list() default {};
+
+  String $list() default "";
 }

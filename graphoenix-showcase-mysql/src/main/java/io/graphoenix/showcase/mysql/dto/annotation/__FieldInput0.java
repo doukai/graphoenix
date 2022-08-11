@@ -104,4 +104,8 @@ public @interface __FieldInput0 {
   __InputValueInput1[] args() default {};
 
   __TypeInput1 type() default @__TypeInput1;
+
+  __FieldInput1[] list() default {};
+
+  String $list() default "";
 }

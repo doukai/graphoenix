@@ -81,4 +81,8 @@ public @interface __DirectiveInput0 {
   String $argsConnection() default "";
 
   __InputValueInput1[] args() default {};
+
+  __DirectiveInput1[] list() default {};
+
+  String $list() default "";
 }

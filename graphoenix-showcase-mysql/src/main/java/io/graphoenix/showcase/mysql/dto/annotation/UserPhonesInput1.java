@@ -56,4 +56,8 @@ public @interface UserPhonesInput1 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  UserPhonesInput2[] list() default {};
+
+  String $list() default "";
 }

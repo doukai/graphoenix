@@ -105,4 +105,8 @@ public @interface UserInput1 {
   OrganizationInput2 organization() default @OrganizationInput2;
 
   RoleInput2[] roles() default {};
+
+  UserInput2[] list() default {};
+
+  String $list() default "";
 }

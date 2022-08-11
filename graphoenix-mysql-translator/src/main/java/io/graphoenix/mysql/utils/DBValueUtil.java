@@ -14,6 +14,7 @@ import net.sf.jsqlparser.expression.NullValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.UserVariable;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.statement.SetStatement;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -140,6 +141,14 @@ public class DBValueUtil {
         Function function = new Function();
         function.setName("LAST_INSERT_ID");
         return new SetStatement(idVariableName, Collections.singletonList(function));
+    }
+    
+    public Expression createGreaterThanLastInsertIDExpression(String typeName, String idFieldName) {
+        Function function = new Function();
+        function.setName("LAST_INSERT_ID");
+        return new GreaterThanEquals()
+                .withLeftExpression(dbNameUtil.fieldToColumn(dbNameUtil.typeToTable(typeName), idFieldName))
+                .withRightExpression(function);
     }
 
     public UserVariable createInsertIdUserVariable(String typeName, String idFieldName, int level, int index) {

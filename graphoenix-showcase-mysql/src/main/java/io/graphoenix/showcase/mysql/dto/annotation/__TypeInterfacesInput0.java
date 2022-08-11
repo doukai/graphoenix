@@ -56,4 +56,8 @@ public @interface __TypeInterfacesInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  __TypeInterfacesInput1[] list() default {};
+
+  String $list() default "";
 }

@@ -367,17 +367,23 @@ public class DocumentBuilder {
     public List<Field> buildMutationTypeFields() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
-                .map(objectTypeDefinitionContext -> buildSchemaTypeField(objectTypeDefinitionContext, InputType.INPUT))
+                .flatMap(objectTypeDefinitionContext ->
+                        Stream.of(
+                                buildSchemaTypeField(objectTypeDefinitionContext, InputType.INPUT),
+                                buildSchemaTypeFieldList(objectTypeDefinitionContext, InputType.INPUT)
+                        )
+                )
                 .collect(Collectors.toList());
     }
 
     public Field buildSchemaTypeField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext))
                 .setTypeName(objectTypeDefinitionContext.name().getText())
-                .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
-                .addArgument(new InputValue("where").setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.EXPRESSION.toString())));
+                .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType));
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
+        } else if (inputType.equals(InputType.INPUT)) {
+            field.addArgument(new InputValue(WHERE_INPUT_NAME).setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.EXPRESSION.toString())));
         }
         buildSecurity(objectTypeDefinitionContext, field);
         return field;
@@ -385,13 +391,13 @@ public class DocumentBuilder {
 
     public Field buildSchemaTypeFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
-                .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
-                .addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())))
-                .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"));
+                .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"));
 
         if (inputType.equals(InputType.EXPRESSION)) {
-            field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"))
+            field.addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())))
+                    .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"))
+                    .addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"))
                     .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
                     .addArgument(new InputValue().setName(LAST_INPUT_NAME).setTypeName("Int"))
                     .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"));
@@ -403,6 +409,9 @@ public class DocumentBuilder {
                             field.addArgument(new InputValue().setName(AFTER_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                                     .addArgument(new InputValue().setName(BEFORE_INPUT_NAME).setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
                     );
+        } else if (inputType.equals(InputType.INPUT)) {
+            field.addArgument(new InputValue().setName(LIST_INPUT_NAME).setTypeName("[".concat(objectTypeDefinitionContext.name().getText().concat(inputType.toString())).concat("]")))
+                    .addArgument(new InputValue(WHERE_INPUT_NAME).setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.EXPRESSION.toString())));
         }
         buildSecurity(objectTypeDefinitionContext, field);
         return field;
@@ -422,7 +431,7 @@ public class DocumentBuilder {
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"))
-                    .addArgument(new InputValue().setName("exs").setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat(InputType.EXPRESSION.toString()).concat("]")))
+                    .addArgument(new InputValue().setName("exs").setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat(inputType.toString()).concat("]")))
                     .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
                     .addArgument(new InputValue().setName(LAST_INPUT_NAME).setTypeName("Int"))
                     .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"));
@@ -490,7 +499,7 @@ public class DocumentBuilder {
             }
             return new InputValue().setName(fieldDefinitionContext.name().getText())
                     .setTypeName(fieldDefinitionContext.type().getText()
-                            .replace(fieldTypeName, fieldTypeName.concat(manager.isObject(fieldTypeName) ? InputType.INPUT.toString() : "")));
+                            .replace(fieldTypeName, fieldTypeName.concat(manager.isObject(fieldTypeName) ? inputType.toString() : "")));
         } else if (inputType.equals(InputType.EXPRESSION)) {
             if (fieldDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME)) {
                 return new InputValue().setName(DEPRECATED_INPUT_NAME).setTypeName("Boolean").setDefaultValue("false");
@@ -498,7 +507,7 @@ public class DocumentBuilder {
             String argumentTypeName;
             switch (fieldTypeName) {
                 case "Boolean":
-                    argumentTypeName = "Boolean".concat(InputType.EXPRESSION.toString());
+                    argumentTypeName = "Boolean".concat(inputType.toString());
                     break;
                 case "ID":
                 case "String":
@@ -506,18 +515,18 @@ public class DocumentBuilder {
                 case "Time":
                 case "DateTime":
                 case "Timestamp":
-                    argumentTypeName = "String".concat(InputType.EXPRESSION.toString());
+                    argumentTypeName = "String".concat(inputType.toString());
                     break;
                 case "Int":
                 case "BigInteger":
-                    argumentTypeName = "Int".concat(InputType.EXPRESSION.toString());
+                    argumentTypeName = "Int".concat(inputType.toString());
                     break;
                 case "Float":
                 case "BigDecimal":
-                    argumentTypeName = "Float".concat(InputType.EXPRESSION.toString());
+                    argumentTypeName = "Float".concat(inputType.toString());
                     break;
                 default:
-                    argumentTypeName = fieldTypeName.concat(InputType.EXPRESSION.toString());
+                    argumentTypeName = fieldTypeName.concat(inputType.toString());
                     break;
             }
             return new InputValue().setName(fieldDefinitionContext.name().getText()).setTypeName(argumentTypeName);

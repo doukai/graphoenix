@@ -57,4 +57,8 @@ public @interface __DirectiveLocationsInput0 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  __DirectiveLocationsInput1[] list() default {};
+
+  String $list() default "";
 }

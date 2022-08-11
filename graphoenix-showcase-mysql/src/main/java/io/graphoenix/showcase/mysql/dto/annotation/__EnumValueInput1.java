@@ -68,4 +68,8 @@ public @interface __EnumValueInput1 {
   String $__typename() default "";
 
   __TypeInput2 ofType() default @__TypeInput2;
+
+  __EnumValueInput2[] list() default {};
+
+  String $list() default "";
 }

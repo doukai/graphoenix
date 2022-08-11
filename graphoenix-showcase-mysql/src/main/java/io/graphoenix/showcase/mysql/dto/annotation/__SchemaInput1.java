@@ -88,4 +88,8 @@ public @interface __SchemaInput1 {
   __TypeInput2 subscriptionType() default @__TypeInput2;
 
   __DirectiveInput2[] directives() default {};
+
+  __SchemaInput2[] list() default {};
+
+  String $list() default "";
 }

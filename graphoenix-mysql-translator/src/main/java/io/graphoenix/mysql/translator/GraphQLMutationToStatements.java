@@ -45,8 +45,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.ID_ARGUMENT_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.INPUT_OBJECT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
@@ -60,6 +62,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
 
 @ApplicationScoped
@@ -71,8 +74,7 @@ public class GraphQLMutationToStatements {
     private final GraphQLArgumentsToWhere graphQLArgumentsToWhere;
     private final DBNameUtil dbNameUtil;
     private final DBValueUtil dbValueUtil;
-    private final String[] EXCLUDE_INPUT = {WHERE_INPUT_NAME};
-
+    private final String[] EXCLUDE_INPUT = {LIST_INPUT_NAME, WHERE_INPUT_NAME};
 
     enum MutationType {
         SAVE, UPDATE, DELETE
@@ -159,8 +161,40 @@ public class GraphQLMutationToStatements {
 
         if (mutationFieldTypeDefinitionContext.isPresent()) {
             GraphqlParser.FieldDefinitionContext fieldDefinitionContext = mutationFieldTypeDefinitionContext.get();
+            Optional<GraphqlParser.InputValueDefinitionContext> listInputValueDefinition = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                    .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
+                    .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
+                    .findFirst();
+
             GraphqlParser.ArgumentsContext argumentsContext = selectionContext.field().arguments();
-            return argumentsToStatementStream(fieldDefinitionContext, argumentsContext, getMutationType(selectionContext.field()));
+            Optional<GraphqlParser.ArgumentContext> listArgument = argumentsContext.argument().stream()
+                    .filter(argumentContext -> argumentContext.name().getText().equals(LIST_INPUT_NAME))
+                    .findFirst();
+
+            if (listInputValueDefinition.isPresent() && listArgument.isPresent()) {
+                Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObjectTypeDefinitionContext = manager.getInputObject(manager.getFieldTypeName(listInputValueDefinition.get().type()));
+                if (inputObjectTypeDefinitionContext.isPresent()) {
+                    if (listArgument.get().valueWithVariable().variable() != null) {
+                        return arrayObjectVariableToInsert(
+                                fieldDefinitionContext,
+                                inputObjectTypeDefinitionContext.get(),
+                                listArgument.get().valueWithVariable()
+                        ).map(insert -> insert);
+                    } else if (listArgument.get().valueWithVariable().arrayValueWithVariable() != null) {
+                        List<GraphqlParser.ValueWithVariableContext> valueWithVariableContexts = listArgument.get().valueWithVariable().arrayValueWithVariable().valueWithVariable();
+                        return IntStream.range(0, valueWithVariableContexts.size())
+                                .filter(index -> valueWithVariableContexts.get(index).objectValueWithVariable() != null)
+                                .mapToObj(index -> topObjectValueWithVariableToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext.get(), valueWithVariableContexts.get(index).objectValueWithVariable(), index))
+                                .flatMap(statementStream -> statementStream);
+                    } else {
+                        throw new GraphQLErrors(ARGUMENT_NOT_EXIST.bind(LIST_INPUT_NAME));
+                    }
+                } else {
+                    throw new GraphQLErrors(INPUT_OBJECT_NOT_EXIST.bind(manager.getInputObject(manager.getFieldTypeName(listInputValueDefinition.get().type()))));
+                }
+            } else {
+                return argumentsToStatementStream(fieldDefinitionContext, argumentsContext, getMutationType(selectionContext.field()));
+            }
         }
         throw new GraphQLErrors(MUTATION_NOT_EXIST);
     }
@@ -321,6 +355,169 @@ public class GraphQLMutationToStatements {
         return Stream.concat(insertStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream)));
     }
 
+    protected Stream<Statement> topObjectValueWithVariableToInsertStatementStream(
+            GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+            GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
+            GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext,
+            int index) {
+
+        Optional<GraphqlParser.ObjectFieldWithVariableContext> objectIdFieldWithVariableContext = manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), objectValueWithVariableContext);
+
+        Expression idValueExpression = objectIdFieldWithVariableContext.flatMap(dbValueUtil::createIdValueExpression).orElseGet(() -> createInsertIdUserVariable(fieldDefinitionContext, 0, index));
+
+        if (objectValueWithVariableContext == null) {
+            return Stream.empty();
+        }
+
+        Stream<Statement> insertStatementStream = objectValueWithVariableToInsertStatementStream(fieldDefinitionContext, inputObjectTypeDefinitionContext, objectValueWithVariableContext, 0, index);
+
+        Stream<Statement> objectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> !manager.fieldTypeIsList(inputValueDefinitionContext.type()))
+                .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
+                .flatMap(inputValueDefinitionContext ->
+                        manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
+                                .map(subFieldDefinitionContext ->
+                                        manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
+                                                .map(subInputObjectTypeDefinitionContext ->
+                                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
+                                                                .map(objectFieldWithVariableContext -> {
+                                                                            if (objectFieldWithVariableContext.valueWithVariable().variable() != null) {
+                                                                                return objectVariableToInsert(
+                                                                                        fieldDefinitionContext,
+                                                                                        inputObjectTypeDefinitionContext,
+                                                                                        objectFieldWithVariableContext.valueWithVariable()
+                                                                                );
+                                                                            } else {
+                                                                                return objectValueWithVariableToInsertStatementStream(
+                                                                                        fieldDefinitionContext,
+                                                                                        idValueExpression,
+                                                                                        subFieldDefinitionContext,
+                                                                                        subInputObjectTypeDefinitionContext,
+                                                                                        objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable(),
+                                                                                        mapper.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                        mapper.getMapToValueWithVariableFromObjectFieldWithVariable(subFieldDefinitionContext, objectFieldWithVariableContext.valueWithVariable().objectValueWithVariable())
+                                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                        0,
+                                                                                        index
+                                                                                );
+                                                                            }
+                                                                        }
+                                                                )
+                                                                .orElseGet(() ->
+                                                                        objectDefaultValueToStatementStream(
+                                                                                fieldDefinitionContext,
+                                                                                idValueExpression,
+                                                                                subFieldDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
+                                                                                inputValueDefinitionContext,
+                                                                                mapper.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                0,
+                                                                                index
+                                                                        )
+                                                                )
+                                                )
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                )
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
+
+        Stream<Statement> listObjectInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
+                .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
+                .flatMap(inputValueDefinitionContext ->
+                        manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
+                                .map(subFieldDefinitionContext ->
+                                        manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type()))
+                                                .map(subInputObjectTypeDefinitionContext ->
+                                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
+                                                                .map(objectFieldWithVariableContext -> {
+                                                                            if (objectFieldWithVariableContext.valueWithVariable().variable() != null) {
+                                                                                return arrayObjectVariableToInsert(
+                                                                                        fieldDefinitionContext,
+                                                                                        inputObjectTypeDefinitionContext,
+                                                                                        objectFieldWithVariableContext.valueWithVariable()
+                                                                                );
+                                                                            } else {
+                                                                                return listObjectValueWithVariableToInsertStatementStream(
+                                                                                        fieldDefinitionContext,
+                                                                                        idValueExpression,
+                                                                                        subFieldDefinitionContext,
+                                                                                        subInputObjectTypeDefinitionContext,
+                                                                                        objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable(),
+                                                                                        mapper.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                        0
+                                                                                );
+                                                                            }
+                                                                        }
+                                                                )
+                                                                .orElseGet(() ->
+                                                                        listObjectDefaultValueToStatementStream(
+                                                                                fieldDefinitionContext,
+                                                                                idValueExpression,
+                                                                                subFieldDefinitionContext,
+                                                                                subInputObjectTypeDefinitionContext,
+                                                                                inputValueDefinitionContext,
+                                                                                mapper.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                0
+                                                                        )
+                                                                )
+                                                )
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
+                                )
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
+
+
+        Stream<Statement> listInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
+                .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
+                .flatMap(inputValueDefinitionContext ->
+                        manager.getFieldDefinitionFromInputValueDefinition(fieldDefinitionContext.type(), inputValueDefinitionContext)
+                                .map(subFieldDefinitionContext ->
+                                        manager.getObjectFieldWithVariableFromInputValueDefinition(objectValueWithVariableContext, inputValueDefinitionContext)
+                                                .map(objectFieldWithVariableContext -> {
+                                                            if (objectFieldWithVariableContext.valueWithVariable().variable() != null) {
+                                                                return arrayVariableToInsertStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        objectFieldWithVariableContext.valueWithVariable(),
+                                                                        mapper.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null)
+                                                                );
+                                                            } else {
+                                                                return listValueWithVariableToInsertStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        objectFieldWithVariableContext.valueWithVariable().arrayValueWithVariable(),
+                                                                        mapper.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null)
+                                                                );
+                                                            }
+                                                        }
+                                                )
+                                                .orElseGet(() ->
+                                                        listDefaultValueToInsertStatementStream(
+                                                                fieldDefinitionContext,
+                                                                idValueExpression,
+                                                                subFieldDefinitionContext,
+                                                                inputValueDefinitionContext,
+                                                                mapper.getMapFromValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, subFieldDefinitionContext, objectValueWithVariableContext)
+                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null)
+                                                        )
+                                                )
+                                )
+                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
+                );
+
+        return Stream.concat(insertStatementStream, Stream.concat(objectInsertStatementStream, Stream.concat(listObjectInsertStatementStream, listInsertStatementStream)));
+    }
+
     protected Stream<Statement> objectValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                                Expression parentIdValueExpression,
                                                                                GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
@@ -405,7 +602,6 @@ public class GraphQLMutationToStatements {
                                 )
                                 .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
-
 
         Stream<Statement> objectTypeFieldRelationStatementStream = objectTypeFieldRelationStatementStream(
                 parentFieldDefinitionContext,

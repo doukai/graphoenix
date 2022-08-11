@@ -84,4 +84,8 @@ public @interface __InputValueInput1 {
   __TypeInput2 ofType() default @__TypeInput2;
 
   __TypeInput2 type() default @__TypeInput2;
+
+  __InputValueInput2[] list() default {};
+
+  String $list() default "";
 }

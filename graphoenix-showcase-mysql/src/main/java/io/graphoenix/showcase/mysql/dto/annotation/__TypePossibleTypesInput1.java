@@ -56,4 +56,8 @@ public @interface __TypePossibleTypesInput1 {
   String $createGroupId() default "";
 
   String $__typename() default "";
+
+  __TypePossibleTypesInput2[] list() default {};
+
+  String $list() default "";
 }
