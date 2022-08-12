@@ -152,7 +152,8 @@ public class InvokeHandlerBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .map(this::buildTypeInvokeMethod).collect(Collectors.toList());
+                .map(this::buildTypeInvokeMethod)
+                .collect(Collectors.toList());
     }
 
     private MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -211,6 +212,7 @@ public class InvokeHandlerBuilder {
                                                                 )
                                                 ),
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(manager::isNotGrpcField)
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                 .map(fieldDefinitionContext ->
@@ -222,6 +224,7 @@ public class InvokeHandlerBuilder {
                                                         )
                                                 ),
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(manager::isNotGrpcField)
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                 .map(fieldDefinitionContext ->

@@ -345,7 +345,10 @@ public class RpcRequestHandlerBuilder {
                     }
                 }
             }
-            builder.beginControlFlow("if(argumentsBuilder.length() > 0)")
+            builder.beginControlFlow("if ($L.hasArguments())", requestParameterName)
+                    .addStatement("argumentsBuilder.append(SPACE).append($L.getArguments())", requestParameterName)
+                    .endControlFlow()
+                    .beginControlFlow("if(argumentsBuilder.length() > 0)")
                     .addStatement("operationBuilder.append(BRACKETS_START).append(argumentsBuilder).append(BRACKETS_END)")
                     .endControlFlow();
         }

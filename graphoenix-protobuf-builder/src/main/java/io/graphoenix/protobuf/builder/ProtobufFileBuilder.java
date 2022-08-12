@@ -251,7 +251,7 @@ public class ProtobufFileBuilder {
                                 .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
                                 .setFields(
                                         Stream.concat(
-                                                Stream.of(new Field().setName("selectionSet").setOptional(true).setType("string").setNumber(1), new Field().setName("layers").setOptional(true).setType("int32").setNumber(2)),
+                                                Stream.of(new Field().setName("selectionSet").setOptional(true).setType("string").setNumber(1), new Field().setName("arguments").setOptional(true).setType("string").setNumber(2)),
                                                 Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
                                                         .flatMap(argumentsDefinitionContext ->
                                                                 IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size())
@@ -298,7 +298,9 @@ public class ProtobufFileBuilder {
                                 .setName("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
                                 .setFields(
                                         Stream.concat(
-                                                Stream.of(new Field().setName("selectionSet").setOptional(true).setType("string").setNumber(1), new Field().setName("layers").setOptional(true).setType("int32").setNumber(2)),
+                                                Stream.of(
+                                                        new Field().setName("selectionSet").setOptional(true).setType("string").setNumber(1), new Field().setName("arguments").setOptional(true).setType("string").setNumber(2)
+                                                ),
                                                 Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
                                                         .flatMap(argumentsDefinitionContext ->
                                                                 IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size())

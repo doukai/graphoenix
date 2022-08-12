@@ -14,20 +14,23 @@ import io.graphoenix.core.handler.GraphQLFieldFormatter;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
@@ -39,26 +42,40 @@ import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
 @ApplicationScoped
-public class RpcInvokeHandlerBuilder {
+public class RpcMutationDataLoaderBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
     private final List<String> packageNameList;
+    private final Map<String, List<String>> typeMap;
 
     @Inject
-    public RpcInvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public RpcMutationDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
-        packageNameList = manager.getObjects()
+        this.packageNameList = manager.getObjects()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .filter(manager::isGrpcField)
                 .map(this::getPackageName)
                 .distinct()
                 .collect(Collectors.toList());
+
+        this.typeMap = manager.getObjects()
+                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(manager::isGrpcField)
+                .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(getPackageName(fieldDefinitionContext), manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .collect(Collectors.groupingBy(
+                                AbstractMap.SimpleEntry<String, String>::getKey,
+                                Collectors.mapping(
+                                        AbstractMap.SimpleEntry<String, String>::getValue,
+                                        Collectors.toList()
+                                )
+                        )
+                );
     }
 
-    public RpcInvokeHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
+    public RpcMutationDataLoaderBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
@@ -66,19 +83,20 @@ public class RpcInvokeHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
-        Logger.info("RpcInvokeHandler build success");
+        Logger.info("RpcMutationDataLoader build success");
     }
 
     private JavaFile buildClass() {
-        TypeSpec typeSpec = buildRpcInvokeHandler();
+        TypeSpec typeSpec = buildRpcMutationDataLoader();
 
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildRpcInvokeHandler() {
-        TypeSpec.Builder builder = TypeSpec.classBuilder("RpcInvokeHandler")
+    private TypeSpec buildRpcMutationDataLoader() {
+        TypeSpec.Builder builder = TypeSpec.classBuilder("RpcMutationDataLoader")
+                .superclass(ClassName.get("io.graphoenix.grpc.client", "GrpcBaseInvokeHandler"))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(ApplicationScoped.class)
+                .addAnnotation(Dependent.class)
                 .addField(
                         FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
@@ -132,6 +150,26 @@ public class RpcInvokeHandlerBuilder {
                         ).build()
                 )
         );
+        this.typeMap.forEach((key, value) ->
+                value.forEach(
+                        typeName ->
+                                builder.addField(
+                                        FieldSpec.builder(
+                                                ParameterizedTypeName.get(LinkedHashMap.class, String.class, String.class),
+                                                getTypeMethodName(key, typeName).concat("Map"),
+                                                Modifier.PRIVATE,
+                                                Modifier.FINAL
+                                        ).build()
+                                ).addField(
+                                        FieldSpec.builder(
+                                                ParameterizedTypeName.get(ClassName.get(Mono.class), ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(key, getRpcObjectName(typeName)))),
+                                                getTypeMethodName(key, typeName).concat("ListMono"),
+                                                Modifier.PRIVATE,
+                                                Modifier.FINAL
+                                        ).build()
+                                )
+                )
+        );
         return builder.build();
     }
 
@@ -160,131 +198,145 @@ public class RpcInvokeHandlerBuilder {
                         packageName
                 )
         );
+
+        this.typeMap.forEach((key, value) ->
+                value.forEach(
+                        typeName ->
+                                builder.addStatement("this.$L = new LinkedHashMap<>()",
+                                        getTypeMethodName(key, typeName).concat("Map")
+                                ).addStatement("this.$L = this.$L.$L($T.newBuilder().setArguments(getListArguments($L.values())).build()).map(response -> response.$L())",
+                                        getTypeMethodName(key, typeName).concat("ListMono"),
+                                        getServiceStubParameterName(MUTATION, key),
+                                        getRpcObjectListMethodName(typeName),
+                                        ClassName.get(key, getRpcMutationListRequestName(typeName)),
+                                        getTypeMethodName(key, typeName).concat("Map"),
+                                        getRpcResponseListMethodName(typeName)
+                                )
+                )
+        );
         return builder.build();
     }
 
-    private List<MethodSpec> buildTypeMethods() {
-        return manager.getObjects()
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                )
-                .map(this::buildTypeMethod)
-                .collect(Collectors.toList());
-    }
+//    private List<MethodSpec> buildTypeMethods() {
+//        return this.typeMap.entrySet().stream()
+//                .flatMap(entry ->
+//                        entry.getValue().stream()
+//                                .map(typeName -> buildTypeMethod(entry.getKey(), typeName))
+//                )
+//                .collect(Collectors.toList());
+//    }
 
-    private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
-        ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(objectTypeDefinitionContext));
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(JsonValue.class))
-                .addParameter(typeClassName, typeParameterName)
-                .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
-
-        builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName)
-                .addStatement("$T objectBuilder = jsonProvider.get().createObjectBuilder()", ClassName.get(JsonObjectBuilder.class))
-                .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
-                        ClassName.get(GraphqlParser.SelectionContext.class),
-                        objectTypeDefinitionContext.name().getText(),
-                        ClassName.get(Collectors.class)
-                )
-                .addStatement("String selectionName = selectionContext.field().alias() == null ? selectionContext.field().name().getText() : selectionContext.field().alias().name().getText()");
-
-        int index = 0;
-        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition();
-        for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
-            String fieldGetterMethodName = getRpcFieldGetterName(fieldDefinitionContext);
-            String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
-            if (index == 0) {
-                builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
-            } else {
-                builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
-            }
-            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                builder.addStatement("$T arrayBuilder = jsonProvider.get().createArrayBuilder()", ClassName.get(JsonArrayBuilder.class))
-                        .beginControlFlow("if ($L.$L() > 0)",
-                                typeParameterName,
-                                fieldGetterMethodName.concat("Count")
-                        );
-                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
-                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
-                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
-                    if (value.isPresent() && locale.isPresent()) {
-                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, $S, item)))",
-                                typeParameterName,
-                                fieldGetterMethodName.concat("List"),
-                                value.get(),
-                                locale.get()
-                        );
-                    } else if (value.isPresent()) {
-                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, null, item)))",
-                                typeParameterName,
-                                fieldGetterMethodName.concat("List"),
-                                value.get()
-                        );
-                    } else {
-                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format(null, null, item)))",
-                                typeParameterName,
-                                fieldGetterMethodName.concat("List")
-                        );
-                    }
-                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add($L(item, selectionContext.field().selectionSet())))",
-                            typeParameterName,
-                            fieldGetterMethodName.concat("List"),
-                            fieldParameterName
-                    );
-                }
-                builder.addStatement("objectBuilder.add(selectionName, arrayBuilder)")
-                        .nextControlFlow("else")
-                        .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
-                        .endControlFlow();
-            } else {
-                if (manager.isGrpcField(fieldDefinitionContext)) {
-                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
-                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
-                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
-                    if (value.isPresent() && locale.isPresent()) {
-                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format($S, $S, $L.$L()))",
-                                value.get(),
-                                locale.get(),
-                                typeParameterName,
-                                fieldGetterMethodName
-                        );
-                    } else if (value.isPresent()) {
-                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format($S, null, $L.$L()))",
-                                value.get(),
-                                typeParameterName,
-                                fieldGetterMethodName
-                        );
-                    } else {
-                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format(null, null, $L.$L()))",
-                                typeParameterName,
-                                fieldGetterMethodName
-                        );
-                    }
-                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("objectBuilder.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",
-                            fieldParameterName,
-                            typeParameterName,
-                            fieldGetterMethodName
-                    );
-                }
-            }
-            if (index == fieldDefinitionContextList.size() - 1) {
-                builder.endControlFlow();
-            }
-            index++;
-        }
-        builder.endControlFlow()
-                .addStatement("return objectBuilder.build()")
-                .endControlFlow()
-                .addStatement("return $T.NULL", ClassName.get(JsonValue.class));
-        return builder.build();
-    }
+//    private MethodSpec buildTypeMethod(String packageName, String typeName) {
+//        String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
+//        ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(objectTypeDefinitionContext));
+//        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
+//                .addModifiers(Modifier.PUBLIC)
+//                .returns(ClassName.get(JsonValue.class))
+//                .addParameter(typeClassName, typeParameterName)
+//                .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
+//
+//        builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName)
+//                .addStatement("$T objectBuilder = jsonProvider.get().createObjectBuilder()", ClassName.get(JsonObjectBuilder.class))
+//                .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
+//                        ClassName.get(GraphqlParser.SelectionContext.class),
+//                        objectTypeDefinitionContext.name().getText(),
+//                        ClassName.get(Collectors.class)
+//                )
+//                .addStatement("String selectionName = selectionContext.field().alias() == null ? selectionContext.field().name().getText() : selectionContext.field().alias().name().getText()");
+//
+//        int index = 0;
+//        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition();
+//        for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
+//            String fieldGetterMethodName = getRpcFieldGetterName(fieldDefinitionContext);
+//            String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
+//            if (index == 0) {
+//                builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+//            } else {
+//                builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+//            }
+//            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+//                builder.addStatement("$T arrayBuilder = jsonProvider.get().createArrayBuilder()", ClassName.get(JsonArrayBuilder.class))
+//                        .beginControlFlow("if ($L.$L() > 0)",
+//                                typeParameterName,
+//                                fieldGetterMethodName.concat("Count")
+//                        );
+//                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+//                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
+//                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
+//                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
+//                    if (value.isPresent() && locale.isPresent()) {
+//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, $S, item)))",
+//                                typeParameterName,
+//                                fieldGetterMethodName.concat("List"),
+//                                value.get(),
+//                                locale.get()
+//                        );
+//                    } else if (value.isPresent()) {
+//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, null, item)))",
+//                                typeParameterName,
+//                                fieldGetterMethodName.concat("List"),
+//                                value.get()
+//                        );
+//                    } else {
+//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format(null, null, item)))",
+//                                typeParameterName,
+//                                fieldGetterMethodName.concat("List")
+//                        );
+//                    }
+//                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+//                    builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add($L(item, selectionContext.field().selectionSet())))",
+//                            typeParameterName,
+//                            fieldGetterMethodName.concat("List"),
+//                            fieldParameterName
+//                    );
+//                }
+//                builder.addStatement("objectBuilder.add(selectionName, arrayBuilder)")
+//                        .nextControlFlow("else")
+//                        .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
+//                        .endControlFlow();
+//            } else {
+//                if (manager.isGrpcField(fieldDefinitionContext)) {
+//                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
+//                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
+//                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
+//                    if (value.isPresent() && locale.isPresent()) {
+//                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format($S, $S, $L.$L()))",
+//                                value.get(),
+//                                locale.get(),
+//                                typeParameterName,
+//                                fieldGetterMethodName
+//                        );
+//                    } else if (value.isPresent()) {
+//                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format($S, null, $L.$L()))",
+//                                value.get(),
+//                                typeParameterName,
+//                                fieldGetterMethodName
+//                        );
+//                    } else {
+//                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format(null, null, $L.$L()))",
+//                                typeParameterName,
+//                                fieldGetterMethodName
+//                        );
+//                    }
+//                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+//                    builder.addStatement("objectBuilder.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",
+//                            fieldParameterName,
+//                            typeParameterName,
+//                            fieldGetterMethodName
+//                    );
+//                }
+//            }
+//            if (index == fieldDefinitionContextList.size() - 1) {
+//                builder.endControlFlow();
+//            }
+//            index++;
+//        }
+//        builder.endControlFlow()
+//                .addStatement("return objectBuilder.build()")
+//                .endControlFlow()
+//                .addStatement("return $T.NULL", ClassName.get(JsonValue.class));
+//        return builder.build();
+//    }
 
     private List<MethodSpec> buildListTypeMethods() {
         return manager.getObjects()
@@ -327,6 +379,13 @@ public class RpcInvokeHandlerBuilder {
         return name;
     }
 
+    private String getRpcObjectName(String name) {
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "Intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, ""));
+        }
+        return name;
+    }
+
     private String getRpcFieldGetterName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         String name = fieldDefinitionContext.name().getText();
         if (name.startsWith(INTROSPECTION_PREFIX)) {
@@ -338,12 +397,37 @@ public class RpcInvokeHandlerBuilder {
     private String getServiceStubParameterName(OperationType type, String packageName) {
         switch (type) {
             case QUERY:
-                return packageNameToUnderline(packageName).concat("QueryTypeServiceStub");
+                return packageNameToUnderline(packageName).concat("_QueryTypeServiceStub");
             case MUTATION:
-                return packageNameToUnderline(packageName).concat("MutationTypeServiceStub");
+                return packageNameToUnderline(packageName).concat("_MutationTypeServiceStub");
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
+    }
+
+    private String getRpcObjectListMethodName(String name) {
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, "")).concat("List");
+        }
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name).concat("List");
+    }
+
+    private String getRpcMutationListRequestName(String name) {
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "MutationIntro".concat(name.replaceFirst(INTROSPECTION_PREFIX, "")).concat("ListRequest");
+        }
+        return "Mutation".concat(name).concat("ListRequest");
+    }
+
+    private String getRpcResponseListMethodName(String name) {
+        if (name.startsWith(INTROSPECTION_PREFIX)) {
+            return "getIntro".concat(name.replaceFirst(INTROSPECTION_PREFIX, "")).concat("ListList");
+        }
+        return "get".concat(name).concat("ListList");
+    }
+
+    private String getTypeMethodName(String packageName, String typeName) {
+        return packageNameToUnderline(packageName).concat("_").concat(typeName);
     }
 
     private String packageNameToUnderline(String packageName) {

@@ -169,6 +169,7 @@ public class DocumentBuilder {
             objectType.addFields(buildFunctionFieldList(objectTypeDefinitionContext));
             objectType.addFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            .filter(manager::isNotGrpcField)
                             .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                             .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                             .map(this::buildListObjectAggregateField)
@@ -176,6 +177,7 @@ public class DocumentBuilder {
             );
             objectType.addFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            .filter(manager::isNotGrpcField)
                             .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                             .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                             .map(this::buildListObjectConnectionField)

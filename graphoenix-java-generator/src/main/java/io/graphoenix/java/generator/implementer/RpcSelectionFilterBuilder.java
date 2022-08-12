@@ -131,7 +131,9 @@ public class RpcSelectionFilterBuilder {
                 .addStatement("String selectionName = selectionContext.field().alias() == null ? selectionContext.field().name().getText() : selectionContext.field().alias().name().getText()");
 
         int index = 0;
-        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition();
+        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(manager::isNotGrpcField)
+                .collect(Collectors.toList());
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
             String fieldGetterMethodName = getRpcFieldGetterName(fieldDefinitionContext);
             String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());

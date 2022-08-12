@@ -2,6 +2,7 @@ package io.graphoenix.showcase.mysql.client;
 
 import io.graphoenix.showcase.mysql.grpc.QueryRoleListRequest;
 import io.graphoenix.showcase.mysql.grpc.QueryRoleListResponse;
+import io.graphoenix.showcase.mysql.grpc.ReactorMutationTypeServiceGrpc;
 import io.graphoenix.showcase.mysql.grpc.ReactorQueryTypeServiceGrpc;
 import io.graphoenix.showcase.mysql.grpc.Role;
 import io.graphoenix.showcase.mysql.grpc.StringExpression;
@@ -9,16 +10,12 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.dataloader.BatchLoader;
 import org.dataloader.BatchLoaderWithContext;
-import org.dataloader.DataLoader;
-import org.dataloader.DataLoaderFactory;
 import org.dataloader.DataLoaderOptions;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class GraphQLClient {
 
@@ -49,6 +46,7 @@ public class GraphQLClient {
                 .build();
 
         ReactorQueryTypeServiceGrpc.ReactorQueryTypeServiceStub reactorQueryTypeServiceStub = ReactorQueryTypeServiceGrpc.newReactorStub(localhost);
+        ReactorMutationTypeServiceGrpc.ReactorMutationTypeServiceStub reactorMutationTypeServiceStub = ReactorMutationTypeServiceGrpc.newReactorStub(localhost);
 //
 //        reactorQueryTypeServiceStub.introType(QueryIntroTypeRequest.newBuilder().setName(StringExpression.newBuilder().setVal("User").build()).build())
 //                .doOnSuccess(r -> System.out.println(r.getIntroType().getName()))

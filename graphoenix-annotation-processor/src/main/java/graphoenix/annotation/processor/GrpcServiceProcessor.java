@@ -67,6 +67,8 @@ public class GrpcServiceProcessor extends AbstractProcessor {
     private RpcRequestHandlerBuilder rpcRequestHandlerBuilder;
     private RpcServiceImplementer rpcServiceImplementer;
     private RpcSelectionFilterBuilder rpcSelectionFilterBuilder;
+    private RpcInvokeHandlerBuilder rpcInvokeHandlerBuilder;
+    private RpcMutationDataLoaderBuilder rpcMutationDataLoaderBuilder;
     private GraphQLConfig graphQLConfig;
     private Types typeUtils;
     private Filer filer;
@@ -89,6 +91,8 @@ public class GrpcServiceProcessor extends AbstractProcessor {
         this.rpcRequestHandlerBuilder = BeanContext.get(RpcRequestHandlerBuilder.class);
         this.rpcServiceImplementer = BeanContext.get(RpcServiceImplementer.class);
         this.rpcSelectionFilterBuilder = BeanContext.get(RpcSelectionFilterBuilder.class);
+        this.rpcInvokeHandlerBuilder = BeanContext.get(RpcInvokeHandlerBuilder.class);
+        this.rpcMutationDataLoaderBuilder = BeanContext.get(RpcMutationDataLoaderBuilder.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
@@ -166,6 +170,8 @@ public class GrpcServiceProcessor extends AbstractProcessor {
             rpcRequestHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
             rpcServiceImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
             rpcSelectionFilterBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            rpcInvokeHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            rpcMutationDataLoaderBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

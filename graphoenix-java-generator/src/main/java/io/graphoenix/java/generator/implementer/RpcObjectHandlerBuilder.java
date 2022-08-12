@@ -87,7 +87,9 @@ public class RpcObjectHandlerBuilder {
                         ClassName.get(graphQLConfig.getGrpcPackageName(), rpcObjectName)
                 );
 
-        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition();
+        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(manager::isNotGrpcField)
+                .collect(Collectors.toList());
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContexts) {
             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
             String fieldGetterName = getFieldGetterName(fieldDefinitionContext);
