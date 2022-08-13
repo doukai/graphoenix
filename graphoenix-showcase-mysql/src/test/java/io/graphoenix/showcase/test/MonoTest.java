@@ -1,8 +1,16 @@
 package io.graphoenix.showcase.test;
 
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MonoTest {
+
+    List<String> stringList = new ArrayList<>();
+
+    Mono<List<String>> mono = Mono.just(stringList);
 
     @Test
     void test1() {
@@ -33,6 +41,16 @@ public class MonoTest {
 //                        .block()
 //        );
 
+        getString("AAAA").subscribe(System.out::println);
+        getString("BBBB").subscribe(System.out::println);
+        mono.block();
 
+    }
+
+    Mono<String> getString(String content) {
+
+        stringList.add(content);
+        int index = stringList.size() - 1;
+        return mono.map(list -> list.get(index));
     }
 }

@@ -8,6 +8,7 @@ type User @table(engine: "InnoDB") {
     sex: Sex
     organizationId: Int
     rpcUser:[User] @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "id" to:"id")
+    rpcRole:[Role] @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "id" to:"id")
     organization: Organization @map(from: "organizationId" to: "id" anchor: true)
     roles: [Role!] @map(from: "id" with: {type: "UserRole" from: "userId" to: "roleId"} to: "id")
     phones: [String!]! @map(from: "id" with: {type: "UserPhones" from: "userId" to: "phone"})
