@@ -27,7 +27,6 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
@@ -35,8 +34,6 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TY
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.GRPC_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
-import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
-import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
 @ApplicationScoped
 public class RpcInvokeHandlerBuilder {
@@ -111,56 +108,46 @@ public class RpcInvokeHandlerBuilder {
                                 Modifier.FINAL
                         ).build()
                 )
-                .addMethod(buildConstructor());
-//                .addMethods(buildTypeMethods())
-//                .addMethods(buildListTypeMethods());
-
-        packageNameList.forEach(packageName ->
-                builder.addField(
+                .addField(
                         FieldSpec.builder(
-                                ClassName.get(packageName, "ReactorQueryTypeServiceGrpc", "ReactorQueryTypeServiceStub"),
-                                getServiceStubParameterName(QUERY, packageName),
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                ).addField(
-                        FieldSpec.builder(
-                                ClassName.get(packageName, "ReactorMutationTypeServiceGrpc", "ReactorMutationTypeServiceStub"),
-                                getServiceStubParameterName(MUTATION, packageName),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcPackageName(), "RpcQueryDataLoader")),
+                                "queryDataLoader",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
                 )
-        );
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcPackageName(), "RpcMutationDataLoader")),
+                                "mutationDataLoader",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addMethod(buildConstructor())
+                .addMethods(buildTypeMethods());
+//                .addMethods(buildListTypeMethods());
+
         return builder.build();
     }
 
     private MethodSpec buildConstructor() {
-
-        MethodSpec.Builder builder = MethodSpec.constructorBuilder()
+        return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFieldFormatter.class)), "formatter")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcPackageName(), "RpcQueryDataLoader")), "queryDataLoader")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcPackageName(), "RpcMutationDataLoader")), "mutationDataLoader")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
                 .addStatement("this.manager = manager")
                 .addStatement("this.formatter = formatter")
                 .addStatement("this.jsonProvider = jsonProvider")
-                .addStatement("this.channelManager = channelManager");
-
-        packageNameList.forEach(packageName ->
-                builder.addStatement("this.$L = $T.newReactorStub(channelManager.get().getChannel($S))",
-                        getServiceStubParameterName(QUERY, packageName),
-                        ClassName.get(packageName, "ReactorQueryTypeServiceGrpc"),
-                        packageName
-                ).addStatement("this.$L = $T.newReactorStub(channelManager.get().getChannel($S))",
-                        getServiceStubParameterName(MUTATION, packageName),
-                        ClassName.get(packageName, "ReactorMutationTypeServiceGrpc"),
-                        packageName
-                )
-        );
-        return builder.build();
+                .addStatement("this.queryDataLoader = queryDataLoader")
+                .addStatement("this.mutationDataLoader = mutationDataLoader")
+                .addStatement("this.channelManager = channelManager")
+                .build();
     }
 
     private List<MethodSpec> buildTypeMethods() {
@@ -180,7 +167,7 @@ public class RpcInvokeHandlerBuilder {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(JsonValue.class))
-                .addParameter(typeClassName, typeParameterName)
+                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
 
         builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName)
@@ -203,69 +190,55 @@ public class RpcInvokeHandlerBuilder {
                 builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
             }
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                builder.addStatement("$T arrayBuilder = jsonProvider.get().createArrayBuilder()", ClassName.get(JsonArrayBuilder.class))
-                        .beginControlFlow("if ($L.$L() > 0)",
-                                typeParameterName,
-                                fieldGetterMethodName.concat("Count")
-                        );
-                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
-                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
-                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
-                    if (value.isPresent() && locale.isPresent()) {
-                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, $S, item)))",
-                                typeParameterName,
-                                fieldGetterMethodName.concat("List"),
-                                value.get(),
-                                locale.get()
-                        );
-                    } else if (value.isPresent()) {
-                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, null, item)))",
-                                typeParameterName,
-                                fieldGetterMethodName.concat("List"),
-                                value.get()
-                        );
-                    } else {
-                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format(null, null, item)))",
-                                typeParameterName,
-                                fieldGetterMethodName.concat("List")
-                        );
-                    }
-                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add($L(item, selectionContext.field().selectionSet())))",
-                            typeParameterName,
-                            fieldGetterMethodName.concat("List"),
-                            fieldParameterName
-                    );
-                }
-                builder.addStatement("objectBuilder.add(selectionName, arrayBuilder)")
-                        .nextControlFlow("else")
-                        .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
-                        .endControlFlow();
+//                builder.addStatement("$T arrayBuilder = jsonProvider.get().createArrayBuilder()", ClassName.get(JsonArrayBuilder.class))
+//                        .beginControlFlow("if ($L.$L() > 0)",
+//                                typeParameterName,
+//                                fieldGetterMethodName.concat("Count")
+//                        );
+//                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+//                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
+//                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
+//                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
+//                    if (value.isPresent() && locale.isPresent()) {
+//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, $S, item)))",
+//                                typeParameterName,
+//                                fieldGetterMethodName.concat("List"),
+//                                value.get(),
+//                                locale.get()
+//                        );
+//                    } else if (value.isPresent()) {
+//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, null, item)))",
+//                                typeParameterName,
+//                                fieldGetterMethodName.concat("List"),
+//                                value.get()
+//                        );
+//                    } else {
+//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format(null, null, item)))",
+//                                typeParameterName,
+//                                fieldGetterMethodName.concat("List")
+//                        );
+//                    }
+//                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+//                    builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add($L(item, selectionContext.field().selectionSet())))",
+//                            typeParameterName,
+//                            fieldGetterMethodName.concat("List"),
+//                            fieldParameterName
+//                    );
+//                }
+//                builder.addStatement("objectBuilder.add(selectionName, arrayBuilder)")
+//                        .nextControlFlow("else")
+//                        .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
+//                        .endControlFlow();
             } else {
                 if (manager.isGrpcField(fieldDefinitionContext)) {
-                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
-                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
-                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
-                    if (value.isPresent() && locale.isPresent()) {
-                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format($S, $S, $L.$L()))",
-                                value.get(),
-                                locale.get(),
-                                typeParameterName,
-                                fieldGetterMethodName
-                        );
-                    } else if (value.isPresent()) {
-                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format($S, null, $L.$L()))",
-                                value.get(),
-                                typeParameterName,
-                                fieldGetterMethodName
-                        );
-                    } else {
-                        builder.addStatement("objectBuilder.add(selectionName, formatter.get().format(null, null, $L.$L()))",
-                                typeParameterName,
-                                fieldGetterMethodName
-                        );
-                    }
+                    String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                    String packageName = getPackageName(fieldDefinitionContext);
+                    String from = getFrom(fieldDefinitionContext);
+                    String to = getTo(fieldDefinitionContext);
+
+                    builder.addStatement("queryDataLoader.$L(\"\")",
+                            getTypeMethodName(packageName, typeName, to)
+                    );
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     builder.addStatement("objectBuilder.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",
                             fieldParameterName,
@@ -392,5 +365,13 @@ public class RpcInvokeHandlerBuilder {
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
                 .findFirst()
                 .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("to")));
+    }
+
+    private String getTypeMethodName(String packageName, String typeName, String fieldName) {
+        return packageNameToUnderline(packageName).concat("_").concat(typeName).concat("_").concat(fieldName);
+    }
+
+    private String getTypeListMethodName(String packageName, String typeName, String fieldName) {
+        return getTypeMethodName(packageName, typeName, fieldName).concat("List");
     }
 }

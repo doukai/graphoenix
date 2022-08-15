@@ -1,7 +1,13 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
@@ -13,12 +19,18 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import org.tinylog.Logger;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
@@ -98,6 +110,7 @@ public class RpcQueryDataLoaderBuilder {
                 )
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
+                .addMethods(buildTypeListMethods())
                 .addMethod(buildDispatchMethod());
 
         typeMap.keySet().forEach(packageName ->
@@ -187,6 +200,20 @@ public class RpcQueryDataLoaderBuilder {
                 .collect(Collectors.toList());
     }
 
+    private List<MethodSpec> buildTypeListMethods() {
+        return this.typeMap.entrySet().stream()
+                .flatMap(packageNameEntry ->
+                        packageNameEntry.getValue().entrySet().stream()
+                                .flatMap(typeNameEntry ->
+                                        typeNameEntry.getValue().stream()
+                                                .map(fieldName ->
+                                                        buildTypeListMethod(packageNameEntry.getKey(), typeNameEntry.getKey(), fieldName)
+                                                )
+                                )
+                )
+                .collect(Collectors.toList());
+    }
+
     private MethodSpec buildTypeMethod(String packageName, String typeName, String fieldName) {
         return MethodSpec.methodBuilder(getTypeMethodName(packageName, typeName, fieldName))
                 .addModifiers(Modifier.PUBLIC)
@@ -197,6 +224,15 @@ public class RpcQueryDataLoaderBuilder {
                 .endControlFlow()
                 .addStatement("final int index = new $T($L).indexOf(key)", ClassName.get(ArrayList.class), getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
                 .addStatement("return $L.map(item -> item.get(index))", getTypeMethodName(packageName, typeName, fieldName).concat("ListMono"))
+                .build();
+    }
+
+    private MethodSpec buildTypeListMethod(String packageName, String typeName, String fieldName) {
+        return MethodSpec.methodBuilder(getTypeListMethodName(packageName, typeName, fieldName))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(packageName, getRpcObjectName(typeName)))))
+                .addParameter(ParameterizedTypeName.get(List.class, String.class), "keys")
+                .addStatement("return $T.fromIterable(keys).flatMap(key -> $L(key)).collectList()", ClassName.get(Flux.class), getTypeMethodName(packageName, typeName, fieldName))
                 .build();
     }
 
@@ -275,6 +311,10 @@ public class RpcQueryDataLoaderBuilder {
 
     private String getTypeMethodName(String packageName, String typeName, String fieldName) {
         return packageNameToUnderline(packageName).concat("_").concat(typeName).concat("_").concat(fieldName);
+    }
+
+    private String getTypeListMethodName(String packageName, String typeName, String fieldName) {
+        return getTypeMethodName(packageName, typeName, fieldName).concat("List");
     }
 
     private String packageNameToUnderline(String packageName) {

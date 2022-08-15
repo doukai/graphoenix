@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.test;
 
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -41,9 +42,14 @@ public class MonoTest {
 //                        .block()
 //        );
 
-        getString("AAAA").subscribe(System.out::println);
-        getString("BBBB").subscribe(System.out::println);
+        getString("AAAA");
+        getString("BBBB");
         mono.block();
+
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.add("CCCC");
+        arrayList.add("DDDD");
+        getStringList(arrayList).subscribe(list -> list.forEach(System.out::println));
 
     }
 
@@ -53,4 +59,10 @@ public class MonoTest {
         int index = stringList.size() - 1;
         return mono.map(list -> list.get(index));
     }
+
+    Mono<List<String>> getStringList(List<String> contents) {
+
+        return Flux.fromIterable(contents).flatMap(this::getString).collectList();
+    }
+
 }

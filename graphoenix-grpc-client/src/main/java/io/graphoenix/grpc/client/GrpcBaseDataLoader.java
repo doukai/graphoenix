@@ -32,6 +32,6 @@ public class GrpcBaseDataLoader {
     }
 
     public String getListArguments(Collection<String> argumentList) {
-        return LIST_INPUT_NAME.concat(": [".concat(argumentList.stream().map(argument -> "{".concat(argument).concat("}")).collect(Collectors.joining(", "))).concat("]"));
+        return LIST_INPUT_NAME.concat(": [".concat(String.join(", ", argumentList)).concat("]"));
     }
 }
