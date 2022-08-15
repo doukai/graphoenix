@@ -11,202 +11,269 @@ import "input_objects.proto";
 
 message QueryIntroSchemaResponse {
     optional IntroSchema intro_schema = 1;
+    optional string json = 2;
 }
 message QueryIntroSchemaListResponse {
     repeated IntroSchema intro_schema_list = 1;
+    optional string json = 2;
 }
 message QueryIntroSchemaConnectionResponse {
     optional IntroSchemaConnection intro_schema_connection = 1;
+    optional string json = 2;
 }
 message QueryIntroTypeResponse {
     optional IntroType intro_type = 1;
+    optional string json = 2;
 }
 message QueryIntroTypeListResponse {
     repeated IntroType intro_type_list = 1;
+    optional string json = 2;
 }
 message QueryIntroTypeConnectionResponse {
     optional IntroTypeConnection intro_type_connection = 1;
+    optional string json = 2;
 }
 message QueryIntroTypeInterfacesResponse {
     optional IntroTypeInterfaces intro_type_interfaces = 1;
+    optional string json = 2;
 }
 message QueryIntroTypeInterfacesListResponse {
     repeated IntroTypeInterfaces intro_type_interfaces_list = 1;
+    optional string json = 2;
 }
 message QueryIntroTypeInterfacesConnectionResponse {
     optional IntroTypeInterfacesConnection intro_type_interfaces_connection = 1;
+    optional string json = 2;
 }
 message QueryIntroTypePossibleTypesResponse {
     optional IntroTypePossibleTypes intro_type_possible_types = 1;
+    optional string json = 2;
 }
 message QueryIntroTypePossibleTypesListResponse {
     repeated IntroTypePossibleTypes intro_type_possible_types_list = 1;
+    optional string json = 2;
 }
 message QueryIntroTypePossibleTypesConnectionResponse {
     optional IntroTypePossibleTypesConnection intro_type_possible_types_connection = 1;
+    optional string json = 2;
 }
 message QueryIntroFieldResponse {
     optional IntroField intro_field = 1;
+    optional string json = 2;
 }
 message QueryIntroFieldListResponse {
     repeated IntroField intro_field_list = 1;
+    optional string json = 2;
 }
 message QueryIntroFieldConnectionResponse {
     optional IntroFieldConnection intro_field_connection = 1;
+    optional string json = 2;
 }
 message QueryIntroInputValueResponse {
     optional IntroInputValue intro_input_value = 1;
+    optional string json = 2;
 }
 message QueryIntroInputValueListResponse {
     repeated IntroInputValue intro_input_value_list = 1;
+    optional string json = 2;
 }
 message QueryIntroInputValueConnectionResponse {
     optional IntroInputValueConnection intro_input_value_connection = 1;
+    optional string json = 2;
 }
 message QueryIntroEnumValueResponse {
     optional IntroEnumValue intro_enum_value = 1;
+    optional string json = 2;
 }
 message QueryIntroEnumValueListResponse {
     repeated IntroEnumValue intro_enum_value_list = 1;
+    optional string json = 2;
 }
 message QueryIntroEnumValueConnectionResponse {
     optional IntroEnumValueConnection intro_enum_value_connection = 1;
+    optional string json = 2;
 }
 message QueryIntroDirectiveResponse {
     optional IntroDirective intro_directive = 1;
+    optional string json = 2;
 }
 message QueryIntroDirectiveListResponse {
     repeated IntroDirective intro_directive_list = 1;
+    optional string json = 2;
 }
 message QueryIntroDirectiveConnectionResponse {
     optional IntroDirectiveConnection intro_directive_connection = 1;
+    optional string json = 2;
 }
 message QueryIntroDirectiveLocationsResponse {
     optional IntroDirectiveLocations intro_directive_locations = 1;
+    optional string json = 2;
 }
 message QueryIntroDirectiveLocationsListResponse {
     repeated IntroDirectiveLocations intro_directive_locations_list = 1;
+    optional string json = 2;
 }
 message QueryIntroDirectiveLocationsConnectionResponse {
     optional IntroDirectiveLocationsConnection intro_directive_locations_connection = 1;
+    optional string json = 2;
 }
 message QueryUserResponse {
     optional User user = 1;
+    optional string json = 2;
 }
 message QueryUserListResponse {
     repeated User user_list = 1;
+    optional string json = 2;
 }
 message QueryUserConnectionResponse {
     optional UserConnection user_connection = 1;
+    optional string json = 2;
 }
 message QueryUserPhonesResponse {
     optional UserPhones user_phones = 1;
+    optional string json = 2;
 }
 message QueryUserPhonesListResponse {
     repeated UserPhones user_phones_list = 1;
+    optional string json = 2;
 }
 message QueryUserPhonesConnectionResponse {
     optional UserPhonesConnection user_phones_connection = 1;
+    optional string json = 2;
 }
 message QueryUserTest1Response {
     optional UserTest1 user_test1 = 1;
+    optional string json = 2;
 }
 message QueryUserTest1ListResponse {
     repeated UserTest1 user_test1_list = 1;
+    optional string json = 2;
 }
 message QueryUserTest1ConnectionResponse {
     optional UserTest1Connection user_test1_connection = 1;
+    optional string json = 2;
 }
 message QueryUserTest2Response {
     optional UserTest2 user_test2 = 1;
+    optional string json = 2;
 }
 message QueryUserTest2ListResponse {
     repeated UserTest2 user_test2_list = 1;
+    optional string json = 2;
 }
 message QueryUserTest2ConnectionResponse {
     optional UserTest2Connection user_test2_connection = 1;
+    optional string json = 2;
 }
 message QueryUserRoleResponse {
     optional UserRole user_role = 1;
+    optional string json = 2;
 }
 message QueryUserRoleListResponse {
     repeated UserRole user_role_list = 1;
+    optional string json = 2;
 }
 message QueryUserRoleConnectionResponse {
     optional UserRoleConnection user_role_connection = 1;
+    optional string json = 2;
 }
 message QueryRoleResponse {
     optional Role role = 1;
+    optional string json = 2;
 }
 message QueryRoleListResponse {
     repeated Role role_list = 1;
+    optional string json = 2;
 }
 message QueryRoleConnectionResponse {
     optional RoleConnection role_connection = 1;
+    optional string json = 2;
 }
 message QueryRoleRoleTypeResponse {
     optional RoleRoleType role_role_type = 1;
+    optional string json = 2;
 }
 message QueryRoleRoleTypeListResponse {
     repeated RoleRoleType role_role_type_list = 1;
+    optional string json = 2;
 }
 message QueryRoleRoleTypeConnectionResponse {
     optional RoleRoleTypeConnection role_role_type_connection = 1;
+    optional string json = 2;
 }
 message QueryOrganizationResponse {
     optional Organization organization = 1;
+    optional string json = 2;
 }
 message QueryOrganizationListResponse {
     repeated Organization organization_list = 1;
+    optional string json = 2;
 }
 message QueryOrganizationConnectionResponse {
     optional OrganizationConnection organization_connection = 1;
+    optional string json = 2;
 }
 message QueryIsDeprecatedResponse {
     optional bool is_deprecated = 1;
+    optional string json = 2;
 }
 message QueryVersionResponse {
     optional int32 version = 1;
+    optional string json = 2;
 }
 message QueryRealmIdResponse {
     optional string realm_id = 1;
+    optional string json = 2;
 }
 message QueryCreateUserIdResponse {
     optional string create_user_id = 1;
+    optional string json = 2;
 }
 message QueryCreateTimeResponse {
     optional string create_time = 1;
+    optional string json = 2;
 }
 message QueryUpdateUserIdResponse {
     optional string update_user_id = 1;
+    optional string json = 2;
 }
 message QueryUpdateTimeResponse {
     optional string update_time = 1;
+    optional string json = 2;
 }
 message QueryCreateGroupIdResponse {
     optional string create_group_id = 1;
+    optional string json = 2;
 }
 message QueryUserDetailResponse {
     optional string user_detail = 1;
+    optional string json = 2;
 }
 message QueryUserDetail6Response {
     repeated string user_detail6 = 1;
+    optional string json = 2;
 }
 message QueryOrgLevelResponse {
     optional int32 org_level = 1;
+    optional string json = 2;
 }
 message QueryRoleDisable2Response {
     repeated bool role_disable2 = 1;
+    optional string json = 2;
 }
 message QueryOrgLevel5Response {
     repeated int32 org_level5 = 1;
+    optional string json = 2;
 }
 message QueryUserByOrg2Response {
     repeated User user_by_org2 = 1;
+    optional string json = 2;
 }
 message QueryParent2Response {
     optional Organization parent2 = 1;
+    optional string json = 2;
 }
 message QueryFindRole2Response {
     repeated Role find_role2 = 1;
+    optional string json = 2;
 }

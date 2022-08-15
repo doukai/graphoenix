@@ -2,7 +2,6 @@ package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -59,7 +58,6 @@ public class RpcObjectHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
-                .addMethods(buildTypeReversalMethods())
                 .build();
     }
 
@@ -77,17 +75,6 @@ public class RpcObjectHandlerBuilder {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .map(this::buildTypeMethod)
-                .collect(Collectors.toList());
-    }
-
-    private List<MethodSpec> buildTypeReversalMethods() {
-        return manager.getObjects()
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                )
-                .map(this::buildTypeReversalMethod)
                 .collect(Collectors.toList());
     }
 
@@ -200,155 +187,6 @@ public class RpcObjectHandlerBuilder {
             }
         }
         builder.addStatement("return builder.build()");
-        return builder.build();
-    }
-
-    private MethodSpec buildTypeReversalMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String objectParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
-        String rpcObjectParameterName = getRpcObjectLowerCamelName(objectTypeDefinitionContext);
-        String objectName = objectTypeDefinitionContext.name().getText();
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectName))
-                .addParameter(ClassName.get(graphQLConfig.getGrpcPackageName(), getRpcObjectName(objectTypeDefinitionContext)), rpcObjectParameterName)
-                .addStatement("$T object = new $T()",
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), objectName),
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), objectName)
-                );
-
-        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(manager::isNotGrpcField)
-                .collect(Collectors.toList());
-        for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContexts) {
-            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-            String fieldGetterName = getRpcFieldGetterName(fieldDefinitionContext);
-            String fieldRpcObjectName = getRpcObjectName(fieldDefinitionContext.type());
-            String objectFieldMethodName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
-            CodeBlock codeBlock;
-            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                String rpcFieldAddAllName = getRpcFieldAddAllName(fieldDefinitionContext);
-                if (manager.isScalar(fieldTypeName)) {
-                    switch (fieldTypeName) {
-                        case "DateTime":
-                        case "Timestamp":
-                            codeBlock = CodeBlock.of("object.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.decodeLocalDateTime(item)).collect($T.toList()))",
-                                    rpcFieldAddAllName,
-                                    rpcObjectParameterName,
-                                    fieldGetterName,
-                                    ClassName.get(CodecUtil.class)
-                            );
-                            break;
-                        case "Date":
-                            codeBlock = CodeBlock.of("object.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.decodeLocalDate(item)).collect($T.toList()))",
-                                    rpcFieldAddAllName,
-                                    rpcObjectParameterName,
-                                    fieldGetterName,
-                                    ClassName.get(CodecUtil.class)
-                            );
-                            break;
-                        case "Time":
-                            codeBlock = CodeBlock.of("object.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.decodeLocalTime(item)).collect($T.toList()))",
-                                    rpcFieldAddAllName,
-                                    rpcObjectParameterName,
-                                    fieldGetterName,
-                                    ClassName.get(CodecUtil.class)
-                            );
-                            break;
-                        default:
-                            codeBlock = CodeBlock.of("object.$L($L.$L())",
-                                    rpcFieldAddAllName,
-                                    rpcObjectParameterName,
-                                    fieldGetterName);
-                            break;
-                    }
-                } else if (manager.isEnum(fieldTypeName)) {
-                    codeBlock = CodeBlock.of("object.$L($L.$L().stream().map(item -> $T.forNumber(item.ordinal())).collect($T.toList()))",
-                            rpcFieldAddAllName,
-                            rpcObjectParameterName,
-                            fieldGetterName,
-                            ClassName.get(graphQLConfig.getGrpcPackageName(), fieldRpcObjectName),
-                            ClassName.get(Collectors.class)
-                    );
-                } else if (manager.isObject(fieldTypeName)) {
-                    codeBlock = CodeBlock.of("object.$L($L.$L().stream().map(this::$L).collect($T.toList()))",
-                            rpcFieldAddAllName,
-                            rpcObjectParameterName,
-                            fieldGetterName,
-                            objectFieldMethodName,
-                            ClassName.get(Collectors.class)
-                    );
-                } else {
-                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
-                }
-
-                String getFieldCountName = getRpcGetFieldCountName(fieldDefinitionContext);
-                if (fieldDefinitionContext.type().nonNullType() == null) {
-                    builder.beginControlFlow("if($L.$L() > 0)", rpcObjectParameterName, getFieldCountName)
-                            .addStatement(codeBlock)
-                            .endControlFlow();
-                } else {
-                    builder.addStatement(codeBlock);
-                }
-            } else {
-                String rpcFieldSetterName = getRpcFieldSetterName(fieldDefinitionContext);
-                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp")) {
-                        codeBlock = CodeBlock.of("object.$L($T.CODEC_UTIL.decodeLocalDateTime($L.$L()))",
-                                rpcFieldSetterName,
-                                ClassName.get(CodecUtil.class),
-                                rpcObjectParameterName,
-                                fieldGetterName
-                        );
-                    } else if (fieldTypeName.equals("Date")) {
-                        codeBlock = CodeBlock.of("object.$L($T.CODEC_UTIL.decodeLocalDate($L.$L()))",
-                                rpcFieldSetterName,
-                                ClassName.get(CodecUtil.class),
-                                rpcObjectParameterName,
-                                fieldGetterName
-                        );
-                    } else if (fieldTypeName.equals("Time")) {
-                        codeBlock = CodeBlock.of("object.$L($T.CODEC_UTIL.decodeLocalTime($L.$L()))",
-                                rpcFieldSetterName,
-                                ClassName.get(CodecUtil.class),
-                                rpcObjectParameterName,
-                                fieldGetterName
-                        );
-                    } else {
-                        codeBlock = CodeBlock.of("object.$L($L.$L())",
-                                rpcFieldSetterName,
-                                rpcObjectParameterName,
-                                fieldGetterName
-                        );
-                    }
-                } else if (manager.isEnum(fieldTypeName)) {
-                    codeBlock = CodeBlock.of("object.$L($T.forNumber($L.$L().ordinal()))",
-                            rpcFieldSetterName,
-                            ClassName.get(graphQLConfig.getGrpcPackageName(), fieldRpcObjectName),
-                            rpcObjectParameterName,
-                            fieldGetterName
-                    );
-                } else if (manager.isObject(fieldTypeName)) {
-                    codeBlock = CodeBlock.of("object.$L($L($L.$L()))",
-                            rpcFieldSetterName,
-                            objectFieldMethodName,
-                            rpcObjectParameterName,
-                            fieldGetterName
-                    );
-                } else {
-                    throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
-                }
-
-                String hasFieldName = getRpcHasFieldName(fieldDefinitionContext);
-                if (fieldDefinitionContext.type().nonNullType() == null) {
-                    builder.beginControlFlow("if($L.$L())", rpcObjectParameterName, hasFieldName)
-                            .addStatement(codeBlock)
-                            .endControlFlow();
-                } else {
-                    builder.addStatement(codeBlock);
-                }
-            }
-        }
-        builder.addStatement("return object");
         return builder.build();
     }
 

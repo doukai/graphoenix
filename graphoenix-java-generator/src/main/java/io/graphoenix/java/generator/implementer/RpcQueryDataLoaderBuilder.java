@@ -18,6 +18,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
+import jakarta.json.stream.JsonCollectors;
 import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,6 +28,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -102,6 +106,14 @@ public class RpcQueryDataLoaderBuilder {
                 .addAnnotation(Dependent.class)
                 .addField(
                         FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
+                                "jsonProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")),
                                 "channelManager",
                                 Modifier.PRIVATE,
@@ -136,8 +148,8 @@ public class RpcQueryDataLoaderBuilder {
                                                 ).build()
                                         ).addField(
                                                 FieldSpec.builder(
-                                                        ParameterizedTypeName.get(ClassName.get(Mono.class), ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(packageName, getRpcObjectName(typeName)))),
-                                                        getTypeMethodName(packageName, typeName, fieldName).concat("ListMono"),
+                                                        ParameterizedTypeName.get(Mono.class, String.class),
+                                                        getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
                                                         Modifier.PRIVATE,
                                                         Modifier.FINAL
                                                 ).build()
@@ -152,7 +164,9 @@ public class RpcQueryDataLoaderBuilder {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
+                .addStatement("this.jsonProvider = jsonProvider")
                 .addStatement("this.channelManager = channelManager");
 
         typeMap.keySet().forEach(packageName ->
@@ -170,15 +184,14 @@ public class RpcQueryDataLoaderBuilder {
                                         builder.addStatement("this.$L = new $T<>()",
                                                 getTypeMethodName(packageName, typeName, fieldName).concat("Set"),
                                                 ClassName.get(LinkedHashSet.class)
-                                        ).addStatement("this.$L = this.$L.$L($T.newBuilder().$L($T.newBuilder().addAllIn($L)).build()).map(response -> response.$L())",
-                                                getTypeMethodName(packageName, typeName, fieldName).concat("ListMono"),
+                                        ).addStatement("this.$L = this.$L.$L($T.newBuilder().$L($T.newBuilder().addAllIn($L)).build()).map(response -> response.getJson())",
+                                                getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
                                                 getQueryServiceStubParameterName(packageName),
-                                                getRpcObjectListMethodName(typeName),
+                                                getRpcObjectListMethodName(typeName).concat("Json"),
                                                 ClassName.get(packageName, getRpcQueryListRequestName(typeName)),
                                                 getRpcFieldExpressionSetterName(fieldName),
                                                 ClassName.get(packageName, "StringExpression"),
-                                                getTypeMethodName(packageName, typeName, fieldName).concat("Set"),
-                                                getRpcResponseListMethodName(typeName)
+                                                getTypeMethodName(packageName, typeName, fieldName).concat("Set")
                                         )
                                 )
                 )
@@ -217,22 +230,28 @@ public class RpcQueryDataLoaderBuilder {
     private MethodSpec buildTypeMethod(String packageName, String typeName, String fieldName) {
         return MethodSpec.methodBuilder(getTypeMethodName(packageName, typeName, fieldName))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(packageName, getRpcObjectName(typeName))))
+                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
                 .beginControlFlow("if (!$L.contains(key))", getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
                 .addStatement("$L.add(key)", getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
                 .endControlFlow()
                 .addStatement("final int index = new $T($L).indexOf(key)", ClassName.get(ArrayList.class), getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
-                .addStatement("return $L.map(item -> item.get(index))", getTypeMethodName(packageName, typeName, fieldName).concat("ListMono"))
+                .addStatement("return $L.map(json -> jsonProvider.get().createReader(new $T(json)).readArray()).map(item -> item.get(index))",
+                        getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
+                        ClassName.get(StringReader.class)
+                )
                 .build();
     }
 
     private MethodSpec buildTypeListMethod(String packageName, String typeName, String fieldName) {
         return MethodSpec.methodBuilder(getTypeListMethodName(packageName, typeName, fieldName))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(packageName, getRpcObjectName(typeName)))))
+                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ParameterizedTypeName.get(List.class, String.class), "keys")
-                .addStatement("return $T.fromIterable(keys).flatMap(key -> $L(key)).collectList()", ClassName.get(Flux.class), getTypeMethodName(packageName, typeName, fieldName))
+                .addStatement("return $T.fromIterable(keys).flatMap(key -> $L(key)).collectList().map(jsonValues -> jsonValues.stream().collect($T.toJsonArray()))",
+                        ClassName.get(Flux.class), getTypeMethodName(packageName, typeName, fieldName),
+                        ClassName.get(JsonCollectors.class)
+                )
                 .build();
     }
 
@@ -251,9 +270,9 @@ public class RpcQueryDataLoaderBuilder {
         List<CodeBlock> monoList = new ArrayList<>();
         for (int index = 0; index < monoTupleList.size(); index++) {
             if (index == 0) {
-                monoList.add(CodeBlock.of("return this.$L", getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("ListMono")));
+                monoList.add(CodeBlock.of("return this.$L", getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("JsonMono")));
             } else {
-                monoList.add(CodeBlock.of(".then(this.$L)", getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("ListMono")));
+                monoList.add(CodeBlock.of(".then(this.$L)", getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("JsonMono")));
             }
         }
         CodeBlock codeBlock;

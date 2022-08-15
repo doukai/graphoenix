@@ -10,12 +10,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,6 +75,14 @@ public class RpcMutationDataLoaderBuilder {
                 .addAnnotation(Dependent.class)
                 .addField(
                         FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
+                                "jsonProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")),
                                 "channelManager",
                                 Modifier.PRIVATE,
@@ -104,8 +115,9 @@ public class RpcMutationDataLoaderBuilder {
                                         ).build()
                                 ).addField(
                                         FieldSpec.builder(
-                                                ParameterizedTypeName.get(ClassName.get(Mono.class), ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(key, getRpcObjectName(typeName)))),
-                                                getTypeMethodName(key, typeName).concat("ListMono"),
+
+                                                ParameterizedTypeName.get(Mono.class, String.class),
+                                                getTypeMethodName(key, typeName).concat("JsonMono"),
                                                 Modifier.PRIVATE,
                                                 Modifier.FINAL
                                         ).build()
@@ -119,7 +131,9 @@ public class RpcMutationDataLoaderBuilder {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
+                .addStatement("this.jsonProvider = jsonProvider")
                 .addStatement("this.channelManager = channelManager");
 
         this.typeMap.keySet().forEach(packageName ->
@@ -136,13 +150,12 @@ public class RpcMutationDataLoaderBuilder {
                                 builder.addStatement("this.$L = new $T<>()",
                                         getTypeMethodName(key, typeName).concat("Map"),
                                         ClassName.get(LinkedHashMap.class)
-                                ).addStatement("this.$L = this.$L.$L($T.newBuilder().setArguments(getListArguments($L.values())).build()).map(response -> response.$L())",
-                                        getTypeMethodName(key, typeName).concat("ListMono"),
+                                ).addStatement("this.$L = this.$L.$L($T.newBuilder().setArguments(getListArguments($L.values())).build()).map(response -> response.getJson())",
+                                        getTypeMethodName(key, typeName).concat("JsonMono"),
                                         getMutationServiceStubParameterName(key),
-                                        getRpcObjectListMethodName(typeName),
+                                        getRpcObjectListMethodName(typeName).concat("Json"),
                                         ClassName.get(key, getRpcMutationListRequestName(typeName)),
-                                        getTypeMethodName(key, typeName).concat("Map"),
-                                        getRpcResponseListMethodName(typeName)
+                                        getTypeMethodName(key, typeName).concat("Map")
                                 )
                 )
         );
@@ -161,14 +174,17 @@ public class RpcMutationDataLoaderBuilder {
     private MethodSpec buildTypeMethod(String packageName, String typeName) {
         return MethodSpec.methodBuilder(getTypeMethodName(packageName, typeName))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(packageName, getRpcObjectName(typeName))))
+                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
                 .addParameter(ClassName.get(GraphqlParser.ValueWithVariableContext.class), "valueWithVariableContext")
                 .beginControlFlow("if (!$L.containsKey(key))", getTypeMethodName(packageName, typeName).concat("Map"))
                 .addStatement("$L.put(key, valueWithVariableToString(valueWithVariableContext))", getTypeMethodName(packageName, typeName).concat("Map"))
                 .endControlFlow()
                 .addStatement("final int index = new $T($L.keySet()).indexOf(key)", ClassName.get(ArrayList.class), getTypeMethodName(packageName, typeName).concat("Map"))
-                .addStatement("return $L.map(item -> item.get(index))", getTypeMethodName(packageName, typeName).concat("ListMono"))
+                .addStatement("return $L.map(json -> jsonProvider.get().createReader(new $T(json)).readArray()).map(item -> item.get(index))",
+                        getTypeMethodName(packageName, typeName).concat("JsonMono"),
+                        ClassName.get(StringReader.class)
+                )
                 .build();
     }
 
@@ -181,9 +197,9 @@ public class RpcMutationDataLoaderBuilder {
         for (int index = 0; index < monoEntryList.size(); index++) {
 
             if (index == 0) {
-                monoList.add(CodeBlock.of("return this.$L", getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("ListMono")));
+                monoList.add(CodeBlock.of("return this.$L", getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("JsonMono")));
             } else {
-                monoList.add(CodeBlock.of(".then(this.$L)", getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("ListMono")));
+                monoList.add(CodeBlock.of(".then(this.$L)", getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("JsonMono")));
             }
         }
         CodeBlock codeBlock;

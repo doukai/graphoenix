@@ -17,11 +17,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -213,11 +209,18 @@ public class ProtobufFileBuilder {
                         new Service().setName(objectTypeDefinitionContext.name().getText().concat("Service"))
                                 .setRpcs(
                                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .map(fieldDefinitionContext ->
-                                                        new Rpc()
-                                                                .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
-                                                                .setMessageType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                .setReturnType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
+                                                .flatMap(fieldDefinitionContext ->
+                                                        Stream.of(
+                                                                new Rpc()
+                                                                        .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
+                                                                        .setMessageType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
+                                                                        .setReturnType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response")),
+
+                                                                new Rpc()
+                                                                        .setName(getServiceRpcName(fieldDefinitionContext.name().getText().concat("Json")))
+                                                                        .setMessageType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
+                                                                        .setReturnType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
+                                                        )
                                                 )
                                                 .collect(Collectors.toList())
                                 )
@@ -231,11 +234,17 @@ public class ProtobufFileBuilder {
                         new Service().setName(objectTypeDefinitionContext.name().getText().concat("Service"))
                                 .setRpcs(
                                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .map(fieldDefinitionContext ->
-                                                        new Rpc()
-                                                                .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
-                                                                .setMessageType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                .setReturnType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
+                                                .flatMap(fieldDefinitionContext ->
+                                                        Stream.of(
+                                                                new Rpc()
+                                                                        .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
+                                                                        .setMessageType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
+                                                                        .setReturnType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response")),
+                                                                new Rpc()
+                                                                        .setName(getServiceRpcName(fieldDefinitionContext.name().getText().concat("Json")))
+                                                                        .setMessageType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
+                                                                        .setReturnType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
+                                                        )
                                                 )
                                                 .collect(Collectors.toList())
                                 )
@@ -277,13 +286,18 @@ public class ProtobufFileBuilder {
                         new Message()
                                 .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
                                 .setFields(
-                                        Collections.singletonList(
+                                        List.of(
                                                 new Field()
                                                         .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
                                                         .setType(buildType(fieldDefinitionContext.type()))
                                                         .setOptional(fieldDefinitionContext.type().nonNullType() == null)
                                                         .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                                                        .setNumber(1)
+                                                        .setNumber(1),
+                                                new Field()
+                                                        .setName("json")
+                                                        .setType("string")
+                                                        .setOptional(true)
+                                                        .setNumber(2)
                                         )
                                 )
                 );
@@ -326,13 +340,18 @@ public class ProtobufFileBuilder {
                         new Message()
                                 .setName("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
                                 .setFields(
-                                        Collections.singletonList(
+                                        List.of(
                                                 new Field()
                                                         .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
                                                         .setType(buildType(fieldDefinitionContext.type()))
                                                         .setOptional(fieldDefinitionContext.type().nonNullType() == null)
                                                         .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                                                        .setNumber(1)
+                                                        .setNumber(1),
+                                                new Field()
+                                                        .setName("json")
+                                                        .setType("string")
+                                                        .setOptional(true)
+                                                        .setNumber(2)
                                         )
                                 )
                 );
@@ -357,16 +376,19 @@ public class ProtobufFileBuilder {
     }
 
     public Message buildMessage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(manager::isNotGrpcField)
+                .collect(Collectors.toList());
         return new Message()
                 .setName(getName(objectTypeDefinitionContext.name().getText()))
                 .setFields(
-                        IntStream.range(0, objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().size())
+                        IntStream.range(0, fieldDefinitionContextList.size())
                                 .mapToObj(index ->
                                         new Field()
-                                                .setName(getMessageFiledName(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).name().getText()))
-                                                .setType(buildType(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
-                                                .setOptional(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type().nonNullType() == null)
-                                                .setRepeated(manager.fieldTypeIsList(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
+                                                .setName(getMessageFiledName(fieldDefinitionContextList.get(index).name().getText()))
+                                                .setType(buildType(fieldDefinitionContextList.get(index).type()))
+                                                .setOptional(fieldDefinitionContextList.get(index).type().nonNullType() == null)
+                                                .setRepeated(manager.fieldTypeIsList(fieldDefinitionContextList.get(index).type()))
                                                 .setNumber(index + 1)
                                 )
                                 .collect(Collectors.toList())
