@@ -110,7 +110,7 @@ public class RpcInvokeHandlerBuilder {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcPackageName(), "RpcQueryDataLoader")),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader")),
                                 "queryDataLoader",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -118,7 +118,7 @@ public class RpcInvokeHandlerBuilder {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcPackageName(), "RpcMutationDataLoader")),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcMutationDataLoader")),
                                 "mutationDataLoader",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -138,8 +138,8 @@ public class RpcInvokeHandlerBuilder {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFieldFormatter.class)), "formatter")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcPackageName(), "RpcQueryDataLoader")), "queryDataLoader")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcPackageName(), "RpcMutationDataLoader")), "mutationDataLoader")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader")), "queryDataLoader")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcMutationDataLoader")), "mutationDataLoader")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
                 .addStatement("this.manager = manager")
                 .addStatement("this.formatter = formatter")
@@ -170,7 +170,7 @@ public class RpcInvokeHandlerBuilder {
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
 
-        builder.beginControlFlow("if (selectionSet != null && $L != null)", typeParameterName)
+        builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
                 .addStatement("$T objectBuilder = jsonProvider.get().createObjectBuilder()", ClassName.get(JsonObjectBuilder.class))
                 .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
                         ClassName.get(GraphqlParser.SelectionContext.class),
@@ -195,36 +195,23 @@ public class RpcInvokeHandlerBuilder {
 //                                typeParameterName,
 //                                fieldGetterMethodName.concat("Count")
 //                        );
-//                if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-//                    Optional<GraphqlParser.DirectiveContext> format = typeManager.getFormat(fieldDefinitionContext);
-//                    Optional<String> value = format.flatMap(typeManager::getFormatValue);
-//                    Optional<String> locale = format.flatMap(typeManager::getFormatLocale);
-//                    if (value.isPresent() && locale.isPresent()) {
-//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, $S, item)))",
-//                                typeParameterName,
-//                                fieldGetterMethodName.concat("List"),
-//                                value.get(),
-//                                locale.get()
-//                        );
-//                    } else if (value.isPresent()) {
-//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format($S, null, item)))",
-//                                typeParameterName,
-//                                fieldGetterMethodName.concat("List"),
-//                                value.get()
-//                        );
-//                    } else {
-//                        builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add(formatter.get().format(null, null, item)))",
-//                                typeParameterName,
-//                                fieldGetterMethodName.concat("List")
-//                        );
-//                    }
-//                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-//                    builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add($L(item, selectionContext.field().selectionSet())))",
-//                            typeParameterName,
-//                            fieldGetterMethodName.concat("List"),
-//                            fieldParameterName
-//                    );
-//                }
+                if (manager.isGrpcField(fieldDefinitionContext)) {
+                    String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                    String packageName = getPackageName(fieldDefinitionContext);
+                    String from = getFrom(fieldDefinitionContext);
+                    String to = getTo(fieldDefinitionContext);
+
+                    builder.addStatement("queryDataLoader.get().$L(jsonValue.asJsonObject().getString($S)).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
+                            getTypeListMethodName(packageName, typeName, to),
+                            from
+                    );
+                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("$L.$L().forEach(item -> arrayBuilder.add($L(item, selectionContext.field().selectionSet())))",
+                            typeParameterName,
+                            fieldGetterMethodName.concat("List"),
+                            fieldParameterName
+                    );
+                }
 //                builder.addStatement("objectBuilder.add(selectionName, arrayBuilder)")
 //                        .nextControlFlow("else")
 //                        .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
@@ -236,8 +223,9 @@ public class RpcInvokeHandlerBuilder {
                     String from = getFrom(fieldDefinitionContext);
                     String to = getTo(fieldDefinitionContext);
 
-                    builder.addStatement("queryDataLoader.$L(\"\")",
-                            getTypeMethodName(packageName, typeName, to)
+                    builder.addStatement("queryDataLoader.get().$L(jsonValue.asJsonObject().getString($S)).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
+                            getTypeMethodName(packageName, typeName, to),
+                            from
                     );
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     builder.addStatement("objectBuilder.add(selectionName ,$L($L.$L(),selectionContext.field().selectionSet()))",

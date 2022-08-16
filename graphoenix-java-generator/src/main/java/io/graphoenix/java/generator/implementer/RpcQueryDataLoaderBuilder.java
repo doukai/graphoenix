@@ -18,11 +18,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
 import org.tinylog.Logger;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
@@ -148,7 +148,7 @@ public class RpcQueryDataLoaderBuilder {
                                                 ).build()
                                         ).addField(
                                                 FieldSpec.builder(
-                                                        ParameterizedTypeName.get(Mono.class, String.class),
+                                                        ParameterizedTypeName.get(Mono.class, JsonArray.class),
                                                         getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
                                                         Modifier.PRIVATE,
                                                         Modifier.FINAL
@@ -184,14 +184,15 @@ public class RpcQueryDataLoaderBuilder {
                                         builder.addStatement("this.$L = new $T<>()",
                                                 getTypeMethodName(packageName, typeName, fieldName).concat("Set"),
                                                 ClassName.get(LinkedHashSet.class)
-                                        ).addStatement("this.$L = this.$L.$L($T.newBuilder().$L($T.newBuilder().addAllIn($L)).build()).map(response -> response.getJson())",
+                                        ).addStatement("this.$L = this.$L.$L($T.newBuilder().$L($T.newBuilder().addAllIn($L)).build()).map(response -> jsonProvider.get().createReader(new $T(response.getJson())).readArray())",
                                                 getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
                                                 getQueryServiceStubParameterName(packageName),
                                                 getRpcObjectListMethodName(typeName).concat("Json"),
                                                 ClassName.get(packageName, getRpcQueryListRequestName(typeName)),
                                                 getRpcFieldExpressionSetterName(fieldName),
                                                 ClassName.get(packageName, "StringExpression"),
-                                                getTypeMethodName(packageName, typeName, fieldName).concat("Set")
+                                                getTypeMethodName(packageName, typeName, fieldName).concat("Set"),
+                                                ClassName.get(StringReader.class)
                                         )
                                 )
                 )
@@ -232,13 +233,11 @@ public class RpcQueryDataLoaderBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
-                .beginControlFlow("if (!$L.contains(key))", getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
                 .addStatement("$L.add(key)", getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
-                .endControlFlow()
-                .addStatement("final int index = new $T($L).indexOf(key)", ClassName.get(ArrayList.class), getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
-                .addStatement("return $L.map(json -> jsonProvider.get().createReader(new $T(json)).readArray()).map(item -> item.get(index))",
+                .addStatement("return $L.map(array -> array.stream().filter(item -> item.asJsonObject().getString($S).equals(key)).findFirst().orElse($T.NULL))",
                         getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
-                        ClassName.get(StringReader.class)
+                        fieldName,
+                        ClassName.get(JsonValue.class)
                 )
                 .build();
     }
@@ -247,9 +246,11 @@ public class RpcQueryDataLoaderBuilder {
         return MethodSpec.methodBuilder(getTypeListMethodName(packageName, typeName, fieldName))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
-                .addParameter(ParameterizedTypeName.get(List.class, String.class), "keys")
-                .addStatement("return $T.fromIterable(keys).flatMap(key -> $L(key)).collectList().map(jsonValues -> jsonValues.stream().collect($T.toJsonArray()))",
-                        ClassName.get(Flux.class), getTypeMethodName(packageName, typeName, fieldName),
+                .addParameter(String.class, "key")
+                .addStatement("$L.add(key)", getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
+                .addStatement("return $L.map(array -> array.stream().filter(item -> item.asJsonObject().getString($S).equals(key)).collect($T.toJsonArray()))",
+                        getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
+                        fieldName,
                         ClassName.get(JsonCollectors.class)
                 )
                 .build();
@@ -289,13 +290,6 @@ public class RpcQueryDataLoaderBuilder {
                 .build();
     }
 
-    private String getRpcObjectName(String name) {
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "Intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, ""));
-        }
-        return name;
-    }
-
     private String getQueryServiceStubParameterName(String packageName) {
         return packageNameToUnderline(packageName).concat("_QueryTypeServiceStub");
     }
@@ -319,13 +313,6 @@ public class RpcQueryDataLoaderBuilder {
             return "QueryIntro".concat(name.replaceFirst(INTROSPECTION_PREFIX, "")).concat("ListRequest");
         }
         return "Query".concat(name).concat("ListRequest");
-    }
-
-    private String getRpcResponseListMethodName(String name) {
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "getIntro".concat(name.replaceFirst(INTROSPECTION_PREFIX, "")).concat("ListList");
-        }
-        return "get".concat(name).concat("ListList");
     }
 
     private String getTypeMethodName(String packageName, String typeName, String fieldName) {
