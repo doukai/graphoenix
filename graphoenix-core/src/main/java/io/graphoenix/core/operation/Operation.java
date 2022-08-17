@@ -1,5 +1,7 @@
 package io.graphoenix.core.operation;
 
+import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.document.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -15,6 +17,17 @@ public class Operation {
     private Set<VariableDefinition> variableDefinitions;
     private Set<String> directives;
     private Set<Field> fields;
+
+    public Operation() {
+    }
+
+    public Operation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        this.operationType = operationDefinitionContext.operationType().getText();
+        this.name = operationDefinitionContext.name().getText();
+        this.variableDefinitions = operationDefinitionContext.variableDefinitions().variableDefinition().stream().map(VariableDefinition::new).collect(Collectors.toCollection(LinkedHashSet::new));
+        this.directives = operationDefinitionContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
+        this.fields = operationDefinitionContext.selectionSet().selection().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
 
     public String getOperationType() {
         return operationType;

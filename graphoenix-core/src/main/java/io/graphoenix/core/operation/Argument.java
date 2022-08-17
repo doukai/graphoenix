@@ -7,19 +7,19 @@ import org.stringtemplate.v4.STGroupFile;
 public class Argument {
 
     private String name;
-    private String valueWithVariable;
+    private ValueWithVariable valueWithVariable;
 
     public Argument() {
     }
 
     public Argument(GraphqlParser.ArgumentContext argumentContext) {
         this.name = argumentContext.name().getText();
-        this.valueWithVariable = new ValueWithVariable(argumentContext.valueWithVariable()).toString();
+        this.valueWithVariable = new ValueWithVariable(argumentContext.valueWithVariable());
     }
 
     public Argument(String name, String valueWithVariable) {
         this.name = name;
-        this.valueWithVariable = valueWithVariable;
+        this.valueWithVariable = new ValueWithVariable(valueWithVariable);
     }
 
     public String getName() {
@@ -31,72 +31,72 @@ public class Argument {
         return this;
     }
 
-    public String getValueWithVariable() {
+    public ValueWithVariable getValueWithVariable() {
         return valueWithVariable;
     }
 
     public Argument setValueWithVariable(String valueWithVariable) {
-        this.valueWithVariable = valueWithVariable;
+        this.valueWithVariable = new ValueWithVariable(valueWithVariable);
         return this;
     }
 
     public Argument setValueWithVariable(Object object) {
-        this.valueWithVariable = new ValueWithVariable(object).toString();
+        this.valueWithVariable = new ValueWithVariable(object);
         return this;
     }
 
     public Argument setValueWithVariable(ValueWithVariable valueWithVariable) {
-        this.valueWithVariable = valueWithVariable.toString();
+        this.valueWithVariable = valueWithVariable;
         return this;
     }
 
     public Argument setValueWithVariable(NullValue value) {
-        this.valueWithVariable = value.toString();
+        this.valueWithVariable = new ValueWithVariable(value);
         return this;
     }
 
     public Argument setValueWithVariable(BooleanValue value) {
-        this.valueWithVariable = value.toString();
+        this.valueWithVariable = new ValueWithVariable(value);
         return this;
     }
 
     public Argument setValueWithVariable(IntValue value) {
-        this.valueWithVariable = value.toString();
+        this.valueWithVariable = new ValueWithVariable(value);
         return this;
     }
 
     public Argument setValueWithVariable(FloatValue value) {
-        this.valueWithVariable = value.toString();
+        this.valueWithVariable = new ValueWithVariable(value);
         return this;
     }
 
     public Argument setValueWithVariable(StringValue value) {
-        this.valueWithVariable = value.toString();
+        this.valueWithVariable = new ValueWithVariable(value);
         return this;
     }
 
     public Argument setValueWithVariable(EnumValue value) {
-        this.valueWithVariable = value.toString();
+        this.valueWithVariable = new ValueWithVariable(value);
         return this;
     }
 
     public Argument setValueWithVariable(ObjectValueWithVariable value) {
-        this.valueWithVariable = value.toString();
+        this.valueWithVariable = new ValueWithVariable(value);
         return this;
     }
 
     public Argument setValueWithVariable(ArrayValueWithVariable value) {
-        this.valueWithVariable = value.toString();
+        this.valueWithVariable = new ValueWithVariable(value);
         return this;
     }
 
     public Argument setValueWithVariable(Variable variable) {
-        this.valueWithVariable = variable.toString();
+        this.valueWithVariable = new ValueWithVariable(variable);
         return this;
     }
 
     public Argument setValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-        this.valueWithVariable = new ValueWithVariable(valueWithVariableContext).toString();
+        this.valueWithVariable = new ValueWithVariable(valueWithVariableContext);
         return this;
     }
 

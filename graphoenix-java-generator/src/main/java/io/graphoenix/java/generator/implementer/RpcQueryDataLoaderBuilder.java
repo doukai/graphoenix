@@ -15,7 +15,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple3;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.json.JsonArray;
@@ -103,7 +103,7 @@ public class RpcQueryDataLoaderBuilder {
         TypeSpec.Builder builder = TypeSpec.classBuilder("RpcQueryDataLoader")
                 .superclass(ClassName.get("io.graphoenix.grpc.client", "GrpcBaseDataLoader"))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Dependent.class)
+                .addAnnotation(RequestScoped.class)
                 .addField(
                         FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),

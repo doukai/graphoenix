@@ -186,9 +186,41 @@ public class OperationHandlerImplementer {
                 .addMethods(buildMethods(type));
 
         if (type.equals(QUERY)) {
-            builder.addFields(buildQueryFields());
+            builder.addField(
+                            FieldSpec.builder(
+                                    ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcInvokeHandler")),
+                                    "grpcInvokeHandler",
+                                    Modifier.PRIVATE,
+                                    Modifier.FINAL
+                            ).build()
+                    )
+                    .addField(
+                            FieldSpec.builder(
+                                    ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"))),
+                                    "queryDataLoader",
+                                    Modifier.PRIVATE,
+                                    Modifier.FINAL
+                            ).build()
+                    )
+                    .addFields(buildQueryFields());
         } else if (type.equals(MUTATION)) {
-            builder.addFields(buildMutationFields())
+            builder.addField(
+                            FieldSpec.builder(
+                                    ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcInvokeHandler")),
+                                    "grpcInvokeHandler",
+                                    Modifier.PRIVATE,
+                                    Modifier.FINAL
+                            ).build()
+                    )
+                    .addField(
+                            FieldSpec.builder(
+                                    ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcMutationDataLoader"))),
+                                    "mutationDataLoader",
+                                    Modifier.PRIVATE,
+                                    Modifier.FINAL
+                            ).build()
+                    )
+                    .addFields(buildMutationFields())
                     .addField(
                             FieldSpec.builder(
                                     ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
@@ -293,6 +325,7 @@ public class OperationHandlerImplementer {
         boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         String fieldTypeParameterName = typeManager.typeToLowerCamelName(manager.getFieldTypeName(fieldDefinitionContext.type()));
+        CodeBlock grpcCodeBlock = CodeBlock.of(".flatMap(filtered -> queryDataLoader.get().flatMap(loader -> grpcInvokeHandler.get().$L(filtered, selectionContext.field().selectionSet(), loader).dispatch()).thenReturn(filtered))", fieldTypeParameterName);
 
         if (manager.isInvokeField(fieldDefinitionContext)) {
             String className = typeManager.getClassName(fieldDefinitionContext);
@@ -314,6 +347,7 @@ public class OperationHandlerImplementer {
                             .collect(Collectors.toList()), ", ")
             );
 
+            CodeBlock invokeCodeBlock;
             if (manager.isObject(fieldTypeName)) {
                 String filterMethodName;
                 if (fieldTypeIsList) {
@@ -322,14 +356,23 @@ public class OperationHandlerImplementer {
                     filterMethodName = fieldTypeParameterName;
                 }
                 if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
-                    builder.addStatement("return $T.from(result.buildRs()).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), filterMethodName);
+                    invokeCodeBlock = CodeBlock.of("return $T.from(result.buildRs()).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), filterMethodName);
                 } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                    builder.addStatement("return result.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
+                    invokeCodeBlock = CodeBlock.of("return result.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
                 } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName())) {
-                    builder.addStatement("return result.collectList().map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
+                    invokeCodeBlock = CodeBlock.of("return result.collectList().map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
                 } else {
-                    builder.addStatement("return $T.just(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), filterMethodName);
+                    invokeCodeBlock = CodeBlock.of("return $T.just(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), filterMethodName);
                 }
+                builder.addStatement(
+                        CodeBlock.join(
+                                List.of(
+                                        invokeCodeBlock,
+                                        grpcCodeBlock
+                                ),
+                                System.lineSeparator()
+                        )
+                );
             } else {
                 String filterMethodName;
                 if (fieldTypeIsList) {
@@ -338,14 +381,15 @@ public class OperationHandlerImplementer {
                     filterMethodName = "toJsonValue";
                 }
                 if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
-                    builder.addStatement("return $T.from(result.buildRs()).map(item-> $L(item))", ClassName.get(Mono.class), filterMethodName);
+                    invokeCodeBlock = CodeBlock.of("return $T.from(result.buildRs()).map(item-> $L(item))", ClassName.get(Mono.class), filterMethodName);
                 } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                    builder.addStatement("return result.map(item-> $L(item))", filterMethodName);
+                    invokeCodeBlock = CodeBlock.of("return result.map(item-> $L(item))", filterMethodName);
                 } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName())) {
-                    builder.addStatement("return result.collectList().map(item-> $L(item))", filterMethodName);
+                    invokeCodeBlock = CodeBlock.of("return result.collectList().map(item-> $L(item))", filterMethodName);
                 } else {
-                    builder.addStatement("return $T.just(result).map(item-> $L(item))", ClassName.get(Mono.class), filterMethodName);
+                    invokeCodeBlock = CodeBlock.of("return $T.just(result).map(item-> $L(item))", ClassName.get(Mono.class), filterMethodName);
                 }
+                builder.addStatement(invokeCodeBlock);
             }
         } else {
             if (manager.isObject(fieldTypeName)) {
@@ -362,19 +406,35 @@ public class OperationHandlerImplementer {
                             .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                             .endControlFlow()
                             .addStatement(
-                                    "return $T.fromIterable(result).flatMap(item -> invokeHandler.get().$L(item)).collectList().map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
-                                    ClassName.get(Flux.class),
-                                    fieldTypeParameterName,
-                                    fieldTypeParameterName.concat("List")
+                                    CodeBlock.join(
+                                            List.of(
+                                                    CodeBlock.of("return $T.fromIterable(result).flatMap(item -> invokeHandler.get().$L(item)).collectList().map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
+                                                            ClassName.get(Flux.class),
+                                                            fieldTypeParameterName,
+                                                            fieldTypeParameterName.concat("List")
+                                                    ),
+                                                    grpcCodeBlock
+                                            ),
+                                            System.lineSeparator()
+                                    )
+
                             );
                 } else {
                     builder.addStatement(
                             "$T result = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement("return invokeHandler.get().$L(result).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
-                            fieldTypeParameterName,
-                            fieldTypeParameterName
+                    ).addStatement(
+                            CodeBlock.join(
+                                    List.of(
+                                            CodeBlock.of("return invokeHandler.get().$L(result).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
+                                                    fieldTypeParameterName,
+                                                    fieldTypeParameterName
+                                            ),
+                                            grpcCodeBlock
+                                    ),
+                                    System.lineSeparator()
+                            )
                     );
                 }
             } else {
@@ -397,6 +457,8 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(Jsonb.class)), "jsonb")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ArgumentBuilder.class)), "argumentBuilder")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"))), "queryDataLoader")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcInvokeHandler")), "grpcInvokeHandler")
                 .addStatement("this.manager = manager")
                 .addStatement("this.variablesProcessor = variablesProcessor")
                 .addStatement("this.operationHandler = operationHandler")
@@ -405,7 +467,9 @@ public class OperationHandlerImplementer {
                 .addStatement("this.selectionFilter = selectionFilter")
                 .addStatement("this.jsonProvider = jsonProvider")
                 .addStatement("this.jsonb = jsonb")
-                .addStatement("this.argumentBuilder = argumentBuilder");
+                .addStatement("this.argumentBuilder = argumentBuilder")
+                .addStatement("this.grpcInvokeHandler = grpcInvokeHandler")
+                .addStatement("this.queryDataLoader = queryDataLoader");
         if (type.equals(MUTATION)) {
             builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
                     .addStatement("this.validator = validator");

@@ -1,11 +1,13 @@
 package io.graphoenix.core.document;
 
+import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.operation.Argument;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Directive {
 
@@ -17,6 +19,11 @@ public class Directive {
     }
 
     public Directive() {
+    }
+
+    public Directive(GraphqlParser.DirectiveContext directiveContext) {
+        this.name = directiveContext.name().getText();
+        this.arguments = directiveContext.arguments().argument().stream().map(Argument::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Directive(String name) {

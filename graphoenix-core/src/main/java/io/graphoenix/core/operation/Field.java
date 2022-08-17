@@ -6,6 +6,7 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -72,6 +73,14 @@ public class Field {
     public Field setArguments(Set<Argument> arguments) {
         this.arguments = arguments;
         return this;
+    }
+
+    public Optional<Argument> getArgument(String name) {
+        return arguments.stream().filter(argument -> argument.getName().equals(name)).findFirst();
+    }
+
+    public Optional<ValueWithVariable> getValueWithVariable(String name) {
+        return getArgument(name).map(Argument::getValueWithVariable);
     }
 
     public Field addArgument(Argument argument) {

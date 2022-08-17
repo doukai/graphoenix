@@ -1,6 +1,7 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.error.GraphQLErrors;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -13,6 +14,8 @@ import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
+
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
 
 public class ValueWithVariable {
 
@@ -46,7 +49,7 @@ public class ValueWithVariable {
         } else if (valueWithVariableContext.objectValueWithVariable() != null) {
             return new ObjectValueWithVariable(valueWithVariableContext.objectValueWithVariable());
         }
-        throw new RuntimeException();
+        throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueWithVariableContext.getText()));
     }
 
     private Object getValueWithVariable(Object value) {
@@ -80,6 +83,24 @@ public class ValueWithVariable {
             return new ObjectValueWithVariable((Map<?, ?>) value);
         } else if (value instanceof AnnotationMirror) {
             return new ObjectValueWithVariable((AnnotationMirror) value);
+        } else if (value instanceof BooleanValue) {
+            return value;
+        } else if (value instanceof IntValue) {
+            return value;
+        } else if (value instanceof FloatValue) {
+            return value;
+        } else if (value instanceof StringValue) {
+            return value;
+        } else if (value instanceof NullValue) {
+            return value;
+        } else if (value instanceof EnumValue) {
+            return value;
+        } else if (value instanceof ObjectValueWithVariable) {
+            return value;
+        } else if (value instanceof ArrayValueWithVariable) {
+            return value;
+        } else if (value instanceof Variable) {
+            return value;
         } else if (value instanceof AnnotationValue) {
             if (value.getClass().getSimpleName().equals("Enum")) {
                 return new EnumValue((AnnotationValue) value);
@@ -89,6 +110,90 @@ public class ValueWithVariable {
         } else {
             return new ObjectValueWithVariable(value);
         }
+    }
+
+    public boolean isBoolean() {
+        return valueWithVariable instanceof BooleanValue;
+    }
+
+    public boolean isInteger() {
+        return valueWithVariable instanceof IntValue;
+    }
+
+    public boolean isFloat() {
+        return valueWithVariable instanceof FloatValue;
+    }
+
+    public boolean isString() {
+        return valueWithVariable instanceof StringValue;
+    }
+
+    public boolean isNull() {
+        return valueWithVariable instanceof NullValue;
+    }
+
+    public boolean isEnum() {
+        return valueWithVariable instanceof EnumValue;
+    }
+
+    public boolean isObject() {
+        return valueWithVariable instanceof ObjectValueWithVariable;
+    }
+
+    public boolean isArray() {
+        return valueWithVariable instanceof ArrayValueWithVariable;
+    }
+
+    public BooleanValue asBoolean() {
+        return (BooleanValue) valueWithVariable;
+    }
+
+    public IntValue asInteger() {
+        return (IntValue) valueWithVariable;
+    }
+
+    public FloatValue asFloat() {
+        return (FloatValue) valueWithVariable;
+    }
+
+    public StringValue asString() {
+        return (StringValue) valueWithVariable;
+    }
+
+    public NullValue asNull() {
+        return (NullValue) valueWithVariable;
+    }
+
+    public EnumValue asEnum() {
+        return (EnumValue) valueWithVariable;
+    }
+
+    public ObjectValueWithVariable asObject() {
+        return (ObjectValueWithVariable) valueWithVariable;
+    }
+
+    public ArrayValueWithVariable asArray() {
+        return (ArrayValueWithVariable) valueWithVariable;
+    }
+
+    public Boolean getBoolean() {
+        return ((BooleanValue) valueWithVariable).getValue();
+    }
+
+    public Integer getInteger() {
+        return (Integer) ((IntValue) valueWithVariable).getValue();
+    }
+
+    public Float getFloat() {
+        return (Float) ((FloatValue) valueWithVariable).getValue();
+    }
+
+    public String getString() {
+        return ((StringValue) valueWithVariable).getValue();
+    }
+
+    public String getEnum() {
+        return ((EnumValue) valueWithVariable).getValue();
     }
 
     @Override

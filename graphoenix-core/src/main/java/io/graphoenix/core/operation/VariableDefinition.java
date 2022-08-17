@@ -1,5 +1,6 @@
 package io.graphoenix.core.operation;
 
+import graphql.parser.antlr.GraphqlParser;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -11,6 +12,12 @@ public class VariableDefinition {
     private String typeName;
     private String defaultValue;
     private Set<String> directives;
+
+    public VariableDefinition() {
+    }
+
+    public VariableDefinition(GraphqlParser.VariableDefinitionContext variableDefinitionContext) {
+    }
 
     public Variable getVariable() {
         return variable;
