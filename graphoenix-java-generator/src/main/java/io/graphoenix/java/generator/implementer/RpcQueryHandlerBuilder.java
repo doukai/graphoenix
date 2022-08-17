@@ -29,19 +29,19 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.GRPC_DIRECTIVE_NAME;
 
 @ApplicationScoped
-public class RpcInvokeHandlerBuilder {
+public class RpcQueryHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public RpcInvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public RpcQueryHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
     }
 
-    public RpcInvokeHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
+    public RpcQueryHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
@@ -49,17 +49,17 @@ public class RpcInvokeHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
-        Logger.info("RpcInvokeHandler build success");
+        Logger.info("RpcQueryHandler build success");
     }
 
     private JavaFile buildClass() {
-        TypeSpec typeSpec = buildRpcInvokeHandler();
+        TypeSpec typeSpec = buildRpcQueryHandler();
 
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildRpcInvokeHandler() {
-        TypeSpec.Builder builder = TypeSpec.classBuilder("RpcInvokeHandler")
+    private TypeSpec buildRpcQueryHandler() {
+        TypeSpec.Builder builder = TypeSpec.classBuilder("RpcQueryHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .addField(
@@ -144,8 +144,7 @@ public class RpcInvokeHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet")
-                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"), "loader")
-                .returns(ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"));
+                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"), "loader");
 
         builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
                 .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
@@ -208,8 +207,7 @@ public class RpcInvokeHandlerBuilder {
             index++;
         }
         builder.endControlFlow()
-                .endControlFlow()
-                .addStatement("return loader");
+                .endControlFlow();
         return builder.build();
     }
 
@@ -220,15 +218,13 @@ public class RpcInvokeHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet")
-                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"), "loader")
-                .returns(ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"));
+                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"), "loader");
 
         builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
                 .addStatement("jsonValue.asJsonArray().forEach(item -> $L(item, selectionSet, loader))",
                         typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                 )
-                .endControlFlow()
-                .addStatement("return loader");
+                .endControlFlow();
         return builder.build();
     }
 
