@@ -148,7 +148,7 @@ public class TypeManager {
         }
     }
 
-    protected Optional<GraphqlParser.DirectiveContext> getFormat(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public Optional<GraphqlParser.DirectiveContext> getFormat(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         if (fieldDefinitionContext.directives() == null) {
             return Optional.empty();
         }
@@ -157,7 +157,7 @@ public class TypeManager {
                 .findFirst();
     }
 
-    protected Optional<String> getFormatValue(GraphqlParser.DirectiveContext directiveContext) {
+    public Optional<String> getFormatValue(GraphqlParser.DirectiveContext directiveContext) {
         if (directiveContext.arguments() == null) {
             return Optional.empty();
         }
@@ -168,7 +168,7 @@ public class TypeManager {
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
     }
 
-    protected Optional<String> getFormatLocale(GraphqlParser.DirectiveContext directiveContext) {
+    public Optional<String> getFormatLocale(GraphqlParser.DirectiveContext directiveContext) {
         if (directiveContext.arguments() == null) {
             return Optional.empty();
         }

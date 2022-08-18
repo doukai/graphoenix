@@ -1,4 +1,4 @@
-package io.graphoenix.java.generator.implementer;
+package io.graphoenix.java.generator.implementer.grpc;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -8,8 +8,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLFieldFormatter;
+import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -24,24 +24,22 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
-import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.GRPC_DIRECTIVE_NAME;
-
 @ApplicationScoped
-public class RpcQueryHandlerBuilder {
+public class GrpcQueryHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
+    private final GrpcNameUtil grpcNameUtil;
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public RpcQueryHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public GrpcQueryHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
         this.manager = manager;
         this.typeManager = typeManager;
+        this.grpcNameUtil = grpcNameUtil;
     }
 
-    public RpcQueryHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
+    public GrpcQueryHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
@@ -49,17 +47,17 @@ public class RpcQueryHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
-        Logger.info("RpcQueryHandler build success");
+        Logger.info("GrpcQueryHandler build success");
     }
 
     private JavaFile buildClass() {
-        TypeSpec typeSpec = buildRpcQueryHandler();
+        TypeSpec typeSpec = buildGrpcQueryHandler();
 
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildRpcQueryHandler() {
-        TypeSpec.Builder builder = TypeSpec.classBuilder("RpcQueryHandler")
+    private TypeSpec buildGrpcQueryHandler() {
+        TypeSpec.Builder builder = TypeSpec.classBuilder("GrpcQueryHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .addField(
@@ -144,7 +142,7 @@ public class RpcQueryHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet")
-                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"), "loader");
+                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcQueryDataLoader"), "loader");
 
         builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
                 .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
@@ -169,12 +167,12 @@ public class RpcQueryHandlerBuilder {
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 if (manager.isGrpcField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String packageName = getPackageName(fieldDefinitionContext);
-                    String from = getFrom(fieldDefinitionContext);
-                    String to = getTo(fieldDefinitionContext);
+                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
+                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
+                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
                     builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S)).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
-                            getTypeListMethodName(packageName, typeName, to),
+                            grpcNameUtil.getTypeListMethodName(packageName, typeName, to),
                             from
                     );
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
@@ -186,12 +184,12 @@ public class RpcQueryHandlerBuilder {
             } else {
                 if (manager.isGrpcField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String packageName = getPackageName(fieldDefinitionContext);
-                    String from = getFrom(fieldDefinitionContext);
-                    String to = getTo(fieldDefinitionContext);
+                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
+                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
+                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
                     builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S)).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
-                            getTypeMethodName(packageName, typeName, to),
+                            grpcNameUtil.getTypeMethodName(packageName, typeName, to),
                             from
                     );
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
@@ -218,7 +216,7 @@ public class RpcQueryHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet")
-                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"), "loader");
+                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcQueryDataLoader"), "loader");
 
         builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
                 .addStatement("jsonValue.asJsonArray().forEach(item -> $L(item, selectionSet, loader))",
@@ -226,50 +224,5 @@ public class RpcQueryHandlerBuilder {
                 )
                 .endControlFlow();
         return builder.build();
-    }
-
-    private String packageNameToUnderline(String packageName) {
-        return String.join("_", packageName.split("\\."));
-    }
-
-    private String getPackageName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives().directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
-                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
-                .filter(argumentContext -> argumentContext.name().getText().equals("packageName"))
-                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
-                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
-                .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("packageName")));
-    }
-
-    private String getFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives().directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
-                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
-                .filter(argumentContext -> argumentContext.name().getText().equals("from"))
-                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
-                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
-                .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("from")));
-    }
-
-    private String getTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives().directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
-                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
-                .filter(argumentContext -> argumentContext.name().getText().equals("to"))
-                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
-                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
-                .findFirst()
-                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("to")));
-    }
-
-    private String getTypeMethodName(String packageName, String typeName, String fieldName) {
-        return packageNameToUnderline(packageName).concat("_").concat(typeName).concat("_").concat(fieldName);
-    }
-
-    private String getTypeListMethodName(String packageName, String typeName, String fieldName) {
-        return getTypeMethodName(packageName, typeName, fieldName).concat("List");
     }
 }

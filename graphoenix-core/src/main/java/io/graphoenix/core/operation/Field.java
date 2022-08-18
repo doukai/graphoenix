@@ -94,6 +94,10 @@ public class Field {
         return getArgument(name).map(Argument::getValueWithVariable);
     }
 
+    public ValueWithVariable getValueWithVariableOrEmpty(String name) {
+        return getArgument(name).map(Argument::getValueWithVariable).orElseGet(() -> new ValueWithVariable(new NullValue()));
+    }
+
     public Field addArgument(Argument argument) {
         if (this.arguments == null) {
             this.arguments = new LinkedHashSet<>();
