@@ -79,6 +79,17 @@ public class Field {
         return arguments.stream().filter(argument -> argument.getName().equals(name)).findFirst();
     }
 
+    public Argument getOrCreateArgument(String name) {
+        Optional<Argument> argument = getArgument(name);
+        if (argument.isPresent()) {
+            return argument.get();
+        } else {
+            Argument newArgument = new Argument(name);
+            this.arguments.add(newArgument);
+            return newArgument;
+        }
+    }
+
     public Optional<ValueWithVariable> getValueWithVariable(String name) {
         return getArgument(name).map(Argument::getValueWithVariable);
     }

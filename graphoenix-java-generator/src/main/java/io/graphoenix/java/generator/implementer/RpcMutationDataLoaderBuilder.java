@@ -1,26 +1,49 @@
 package io.graphoenix.java.generator.implementer;
 
 import com.google.common.base.CaseFormat;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.operation.ArrayValueWithVariable;
+import io.graphoenix.core.operation.ObjectValueWithVariable;
+import io.graphoenix.core.operation.ValueWithVariable;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
+import jakarta.json.stream.JsonCollectors;
 import org.tinylog.Logger;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
@@ -32,7 +55,7 @@ public class RpcMutationDataLoaderBuilder {
 
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
-    private final Map<String, Set<String>> typeMap;
+    private final Map<String, Set<Tuple2<String, String>>> typeMap;
 
     @Inject
     public RpcMutationDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
@@ -40,12 +63,12 @@ public class RpcMutationDataLoaderBuilder {
         this.typeMap = manager.getObjects()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .filter(manager::isGrpcField)
-                .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(getPackageName(fieldDefinitionContext), manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(getPackageName(fieldDefinitionContext), Tuple.of(manager.getFieldTypeName(fieldDefinitionContext.type()), getKey(fieldDefinitionContext))))
                 .collect(
                         Collectors.groupingBy(
-                                AbstractMap.SimpleEntry<String, String>::getKey,
+                                AbstractMap.SimpleEntry<String, Tuple2<String, String>>::getKey,
                                 Collectors.mapping(
-                                        AbstractMap.SimpleEntry<String, String>::getValue,
+                                        AbstractMap.SimpleEntry<String, Tuple2<String, String>>::getValue,
                                         Collectors.toSet()
                                 )
                         )
@@ -105,11 +128,11 @@ public class RpcMutationDataLoaderBuilder {
         );
         this.typeMap.forEach((key, value) ->
                 value.forEach(
-                        typeName ->
+                        tuple2 ->
                                 builder.addField(
                                         FieldSpec.builder(
                                                 ParameterizedTypeName.get(LinkedHashMap.class, String.class, String.class),
-                                                getTypeMethodName(key, typeName).concat("Map"),
+                                                getTypeMethodName(key, tuple2._1()).concat("Map"),
                                                 Modifier.PRIVATE,
                                                 Modifier.FINAL
                                         ).build()
@@ -117,7 +140,7 @@ public class RpcMutationDataLoaderBuilder {
                                         FieldSpec.builder(
 
                                                 ParameterizedTypeName.get(Mono.class, String.class),
-                                                getTypeMethodName(key, typeName).concat("JsonMono"),
+                                                getTypeMethodName(key, tuple2._1()).concat("JsonMono"),
                                                 Modifier.PRIVATE,
                                                 Modifier.FINAL
                                         ).build()
@@ -146,16 +169,16 @@ public class RpcMutationDataLoaderBuilder {
 
         this.typeMap.forEach((key, value) ->
                 value.forEach(
-                        typeName ->
+                        tuple2 ->
                                 builder.addStatement("this.$L = new $T<>()",
-                                        getTypeMethodName(key, typeName).concat("Map"),
+                                        getTypeMethodName(key, tuple2._1()).concat("Map"),
                                         ClassName.get(LinkedHashMap.class)
                                 ).addStatement("this.$L = this.$L.$L($T.newBuilder().setArguments(getListArguments($L.values())).build()).map(response -> response.getJson())",
-                                        getTypeMethodName(key, typeName).concat("JsonMono"),
+                                        getTypeMethodName(key, tuple2._1()).concat("JsonMono"),
                                         getMutationServiceStubParameterName(key),
-                                        getRpcObjectListMethodName(typeName).concat("Json"),
-                                        ClassName.get(key, getRpcMutationListRequestName(typeName)),
-                                        getTypeMethodName(key, typeName).concat("Map")
+                                        getRpcObjectListMethodName(tuple2._1()).concat("Json"),
+                                        ClassName.get(key, getRpcMutationListRequestName(tuple2._1())),
+                                        getTypeMethodName(key, tuple2._1()).concat("Map")
                                 )
                 )
         );
@@ -166,32 +189,122 @@ public class RpcMutationDataLoaderBuilder {
         return this.typeMap.entrySet().stream()
                 .flatMap(entry ->
                         entry.getValue().stream()
-                                .map(typeName -> buildTypeMethod(entry.getKey(), typeName))
+                                .flatMap(tuple2 ->
+                                        Stream.of(
+                                                buildTypeMethod(entry.getKey(), tuple2._1(), tuple2._2()),
+                                                buildTypeFieldMethod(entry.getKey(), tuple2._1(), tuple2._2()),
+                                                buildTypeListMethod(entry.getKey(), tuple2._1()),
+                                                buildTypeListFieldMethod(entry.getKey(), tuple2._1())
+                                        )
+                                )
                 )
                 .collect(Collectors.toList());
     }
 
-    private MethodSpec buildTypeMethod(String packageName, String typeName) {
+    private MethodSpec buildTypeMethod(String packageName, String typeName, String key) {
+        String mapName = getTypeMethodName(packageName, typeName).concat("Map");
         return MethodSpec.methodBuilder(getTypeMethodName(packageName, typeName))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
-                .addParameter(String.class, "key")
-                .addParameter(ClassName.get(GraphqlParser.ValueWithVariableContext.class), "valueWithVariableContext")
-                .beginControlFlow("if (!$L.containsKey(key))", getTypeMethodName(packageName, typeName).concat("Map"))
-                .addStatement("$L.put(key, valueWithVariableToString(valueWithVariableContext))", getTypeMethodName(packageName, typeName).concat("Map"))
+                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                .beginControlFlow("if (jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
+                .addStatement("$T jsonObject = jsonValue.asJsonObject()", ClassName.get(JsonObject.class))
+                .addStatement("$T keyField = jsonObject.get($S)", ClassName.get(JsonValue.class), key)
+                .addStatement("final int index")
+                .beginControlFlow("if (keyField != null && keyField.getValueType().equals($T.ValueType.STRING))", ClassName.get(JsonValue.class))
+                .addStatement("$T key = (($T) keyField).getString()", ClassName.get(String.class), ClassName.get(JsonString.class))
+                .beginControlFlow("if ($L.containsKey(key))", mapName)
+                .addStatement("index = new $T<>($L.keySet()).indexOf(key)", ClassName.get(ArrayList.class), mapName)
+                .nextControlFlow("else")
+                .addStatement("$L.put(key, jsonObject.toString())", mapName)
+                .addStatement("index = $L.size() - 1", mapName)
                 .endControlFlow()
-                .addStatement("final int index = new $T($L.keySet()).indexOf(key)", ClassName.get(ArrayList.class), getTypeMethodName(packageName, typeName).concat("Map"))
+                .nextControlFlow("else")
+                .addStatement("$L.put($T.randomUUID().toString(), jsonObject.toString())", mapName, ClassName.get(UUID.class))
+                .addStatement("index = $L.size() - 1", mapName)
+                .endControlFlow()
                 .addStatement("return $L.map(json -> jsonProvider.get().createReader(new $T(json)).readArray()).map(item -> item.get(index))",
                         getTypeMethodName(packageName, typeName).concat("JsonMono"),
                         ClassName.get(StringReader.class)
                 )
+                .nextControlFlow("else")
+                .addStatement("return $T.empty()", ClassName.get(Mono.class))
+                .endControlFlow()
+                .build();
+    }
+
+    private MethodSpec buildTypeFieldMethod(String packageName, String typeName, String key) {
+        String mapName = getTypeMethodName(packageName, typeName).concat("Map");
+        return MethodSpec.methodBuilder(getTypeMethodName(packageName, typeName))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
+                .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
+                .beginControlFlow("if (valueWithVariable.isObject())")
+                .addStatement("$T objectValueWithVariable = valueWithVariable.asObject()", ClassName.get(ObjectValueWithVariable.class))
+                .addStatement("$T keyField = objectValueWithVariable.get($S)", ClassName.get(ValueWithVariable.class), key)
+                .addStatement("final int index")
+                .beginControlFlow("if (keyField != null && keyField.isString())")
+                .addStatement("$T key = keyField.asString().getValue()", ClassName.get(String.class))
+                .beginControlFlow("if ($L.containsKey(key))", mapName)
+                .addStatement("index = new $T<>($L.keySet()).indexOf(key)", ClassName.get(ArrayList.class), mapName)
+                .nextControlFlow("else")
+                .addStatement("$L.put(key, objectValueWithVariable.toString())", mapName)
+                .addStatement("index = $L.size() - 1", mapName)
+                .endControlFlow()
+                .nextControlFlow("else")
+                .addStatement("$L.put($T.randomUUID().toString(), objectValueWithVariable.toString())", mapName, ClassName.get(UUID.class))
+                .addStatement("index = $L.size() - 1", mapName)
+                .endControlFlow()
+                .addStatement("return $L.map(json -> jsonProvider.get().createReader(new $T(json)).readArray()).map(item -> item.get(index))",
+                        getTypeMethodName(packageName, typeName).concat("JsonMono"),
+                        ClassName.get(StringReader.class)
+                )
+                .nextControlFlow("else")
+                .addStatement("return $T.empty()", ClassName.get(Mono.class))
+                .endControlFlow()
+                .build();
+    }
+
+    private MethodSpec buildTypeListMethod(String packageName, String typeName) {
+        return MethodSpec.methodBuilder(getTypeMethodName(packageName, typeName).concat("List"))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
+                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                .beginControlFlow("if (jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
+                .addStatement("$T jsonArray = jsonValue.asJsonArray()", ClassName.get(JsonArray.class))
+                .addStatement("return $T.fromIterable(jsonArray).flatMap(item -> $L(item)).collect($T.toJsonArray())",
+                        ClassName.get(Flux.class),
+                        getTypeMethodName(packageName, typeName),
+                        ClassName.get(JsonCollectors.class)
+                )
+                .nextControlFlow("else")
+                .addStatement("return $T.empty()", ClassName.get(Mono.class))
+                .endControlFlow()
+                .build();
+    }
+
+    private MethodSpec buildTypeListFieldMethod(String packageName, String typeName) {
+        return MethodSpec.methodBuilder(getTypeMethodName(packageName, typeName).concat("List"))
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
+                .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
+                .beginControlFlow("if (valueWithVariable.isArray())", ClassName.get(JsonValue.class))
+                .addStatement("$T arrayValueWithVariable = valueWithVariable.asArray()", ClassName.get(ArrayValueWithVariable.class))
+                .addStatement("return $T.fromIterable(arrayValueWithVariable).flatMap(item -> $L(item)).collect($T.toJsonArray())",
+                        ClassName.get(Flux.class),
+                        getTypeMethodName(packageName, typeName),
+                        ClassName.get(JsonCollectors.class)
+                )
+                .nextControlFlow("else")
+                .addStatement("return $T.empty()", ClassName.get(Mono.class))
+                .endControlFlow()
                 .build();
     }
 
     private MethodSpec buildDispatchMethod() {
         List<AbstractMap.SimpleEntry<String, String>> monoEntryList = this.typeMap.entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream()
-                        .map(typeName -> new AbstractMap.SimpleEntry<>(entry.getKey(), typeName)))
+                        .map(tuple2 -> new AbstractMap.SimpleEntry<>(entry.getKey(), tuple2._1())))
                 .collect(Collectors.toList());
         List<CodeBlock> monoList = new ArrayList<>();
         for (int index = 0; index < monoEntryList.size(); index++) {
@@ -265,5 +378,16 @@ public class RpcMutationDataLoaderBuilder {
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
                 .findFirst()
                 .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("packageName")));
+    }
+
+    private String getKey(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives().directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("key"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()))
+                .findFirst()
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("key")));
     }
 }

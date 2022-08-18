@@ -48,7 +48,6 @@ import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
@@ -181,13 +180,7 @@ public class OperationHandlerImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
-                .addMethod(buildOperationMethod(type))
-                .addMethod(buildConstructor(type))
-                .addMethods(buildMethods(type));
-
-        switch (type) {
-            case QUERY:
-                builder.addField(
+                .addField(
                         FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryHandler")),
                                 "grpcQueryHandler",
@@ -201,24 +194,31 @@ public class OperationHandlerImplementer {
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
-                ).addFields(buildQueryFields());
+                )
+                .addMethod(buildOperationMethod(type))
+                .addMethod(buildConstructor(type))
+                .addMethods(buildMethods(type));
+
+        switch (type) {
+            case QUERY:
+                builder.addFields(buildQueryFields());
                 break;
             case MUTATION:
                 builder.addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcMutationHandler")),
-                                "grpcMutationHandler",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                ).addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcMutationDataLoader"))),
-                                "mutationDataLoader",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                ).addFields(buildMutationFields())
+                                FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcMutationHandler")),
+                                        "grpcMutationHandler",
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL
+                                ).build()
+                        ).addField(
+                                FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcMutationDataLoader"))),
+                                        "mutationDataLoader",
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL
+                                ).build()
+                        ).addFields(buildMutationFields())
                         .addField(
                                 FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
@@ -402,14 +402,14 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                            "$T type = new $T<$T>() {}.getType()",
-                            ClassName.get(Type.class),
-                            ClassName.get(TypeToken.class),
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement(
-                            "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).beginControlFlow("if(result == null)")
+                                    "$T type = new $T<$T>() {}.getType()",
+                                    ClassName.get(Type.class),
+                                    ClassName.get(TypeToken.class),
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).addStatement(
+                                    "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                             .endControlFlow()
                             .addStatement(
@@ -464,6 +464,8 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(Jsonb.class)), "jsonb")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ArgumentBuilder.class)), "argumentBuilder")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"))), "queryDataLoader")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryHandler")), "grpcQueryHandler")
                 .addStatement("this.manager = manager")
                 .addStatement("this.variablesProcessor = variablesProcessor")
                 .addStatement("this.operationHandler = operationHandler")
@@ -472,14 +474,12 @@ public class OperationHandlerImplementer {
                 .addStatement("this.selectionFilter = selectionFilter")
                 .addStatement("this.jsonProvider = jsonProvider")
                 .addStatement("this.jsonb = jsonb")
-                .addStatement("this.argumentBuilder = argumentBuilder");
+                .addStatement("this.argumentBuilder = argumentBuilder")
+                .addStatement("this.queryDataLoader = queryDataLoader")
+                .addStatement("this.grpcQueryHandler = grpcQueryHandler");
 
         switch (type) {
             case QUERY:
-                builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryDataLoader"))), "queryDataLoader")
-                        .addStatement("this.queryDataLoader = queryDataLoader")
-                        .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "RpcQueryHandler")), "grpcQueryHandler")
-                        .addStatement("this.grpcQueryHandler = grpcQueryHandler");
                 manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
                         .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
                         .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))

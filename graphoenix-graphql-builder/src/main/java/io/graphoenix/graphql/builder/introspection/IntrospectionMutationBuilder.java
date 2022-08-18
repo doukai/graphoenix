@@ -73,8 +73,7 @@ public class IntrospectionMutationBuilder {
                                                                 )
                                                         )
                                                 )
-                                        ).collect(Collectors.toList()),
-                                        false
+                                        ).collect(Collectors.toList())
                                 ).toString()
                         )
         );
@@ -86,8 +85,7 @@ public class IntrospectionMutationBuilder {
                                 new ArrayValueWithVariable(
                                         manager.getDirectives()
                                                 .map(this::directiveDefinitionContextToDirective)
-                                                .collect(Collectors.toList()),
-                                        false
+                                                .collect(Collectors.toList())
                                 ).toString()
                         )
         );

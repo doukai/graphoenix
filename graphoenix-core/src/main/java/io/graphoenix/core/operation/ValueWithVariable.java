@@ -25,6 +25,42 @@ public class ValueWithVariable {
         this.valueWithVariable = getValueWithVariable(value);
     }
 
+    public ValueWithVariable(BooleanValue value) {
+        this.valueWithVariable = value;
+    }
+
+    public ValueWithVariable(IntValue value) {
+        this.valueWithVariable = value;
+    }
+
+    public ValueWithVariable(FloatValue value) {
+        this.valueWithVariable = value;
+    }
+
+    public ValueWithVariable(StringValue value) {
+        this.valueWithVariable = value;
+    }
+
+    public ValueWithVariable(EnumValue value) {
+        this.valueWithVariable = value;
+    }
+
+    public ValueWithVariable(NullValue value) {
+        this.valueWithVariable = value;
+    }
+
+    public ValueWithVariable(ObjectValueWithVariable value) {
+        this.valueWithVariable = value;
+    }
+
+    public ValueWithVariable(ArrayValueWithVariable value) {
+        this.valueWithVariable = value;
+    }
+
+    public ValueWithVariable(Variable value) {
+        this.valueWithVariable = value;
+    }
+
     public ValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         this.valueWithVariable = getValueWithVariable(valueWithVariableContext);
     }
@@ -83,24 +119,6 @@ public class ValueWithVariable {
             return new ObjectValueWithVariable((Map<?, ?>) value);
         } else if (value instanceof AnnotationMirror) {
             return new ObjectValueWithVariable((AnnotationMirror) value);
-        } else if (value instanceof BooleanValue) {
-            return value;
-        } else if (value instanceof IntValue) {
-            return value;
-        } else if (value instanceof FloatValue) {
-            return value;
-        } else if (value instanceof StringValue) {
-            return value;
-        } else if (value instanceof NullValue) {
-            return value;
-        } else if (value instanceof EnumValue) {
-            return value;
-        } else if (value instanceof ObjectValueWithVariable) {
-            return value;
-        } else if (value instanceof ArrayValueWithVariable) {
-            return value;
-        } else if (value instanceof Variable) {
-            return value;
         } else if (value instanceof AnnotationValue) {
             if (value.getClass().getSimpleName().equals("Enum")) {
                 return new EnumValue((AnnotationValue) value);
@@ -194,6 +212,22 @@ public class ValueWithVariable {
 
     public String getEnum() {
         return ((EnumValue) valueWithVariable).getValue();
+    }
+
+    public String getValueAsString() {
+        if (isString()) {
+            return asString().getValue();
+        } else if (isBoolean()) {
+            return String.valueOf(asBoolean().getValue());
+        } else if (isInteger()) {
+            return String.valueOf(asInteger().getValue());
+        } else if (isFloat()) {
+            return String.valueOf(asFloat().getValue());
+        } else if (isEnum()) {
+            return asEnum().getValue();
+        } else {
+            return null;
+        }
     }
 
     @Override
