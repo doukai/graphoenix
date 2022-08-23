@@ -27,22 +27,26 @@ public class Field {
     }
 
     public Field(GraphqlParser.SelectionContext selectionContext) {
-        this.name = selectionContext.field().name().getText();
-        if (selectionContext.field().alias() != null) {
-            this.alias = selectionContext.field().alias().name().getText();
+        this(selectionContext.field());
+    }
+
+    public Field(GraphqlParser.FieldContext fieldContext) {
+        this.name = fieldContext.name().getText();
+        if (fieldContext.alias() != null) {
+            this.alias = fieldContext.alias().name().getText();
         }
-        if (selectionContext.field().arguments() != null) {
-            this.arguments = selectionContext.field().arguments().argument().stream()
+        if (fieldContext.arguments() != null) {
+            this.arguments = fieldContext.arguments().argument().stream()
                     .map(Argument::new)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
-        if (selectionContext.field().selectionSet() != null) {
-            this.fields = selectionContext.field().selectionSet().selection().stream()
+        if (fieldContext.selectionSet() != null) {
+            this.fields = fieldContext.selectionSet().selection().stream()
                     .map(Field::new)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }
-        if (selectionContext.field().directives() != null) {
-            this.directives = selectionContext.field().directives().directive().stream()
+        if (fieldContext.directives() != null) {
+            this.directives = fieldContext.directives().directive().stream()
                     .map(RuleContext::toString)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
         }

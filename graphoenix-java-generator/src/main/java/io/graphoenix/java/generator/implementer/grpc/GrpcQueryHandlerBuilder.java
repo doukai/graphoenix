@@ -23,6 +23,7 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class GrpcQueryHandlerBuilder {
@@ -93,8 +94,7 @@ public class GrpcQueryHandlerBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeMethods())
-                .addMethods(buildListTypeMethods());
+                .addMethods(buildTypeMethods());
 
         return builder.build();
     }
@@ -121,18 +121,12 @@ public class GrpcQueryHandlerBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .map(this::buildTypeMethod)
-                .collect(Collectors.toList());
-    }
-
-    private List<MethodSpec> buildListTypeMethods() {
-        return manager.getObjects()
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                .flatMap(objectTypeDefinitionContext ->
+                        Stream.of(
+                                buildTypeMethod(objectTypeDefinitionContext),
+                                buildListTypeMethod(objectTypeDefinitionContext)
+                        )
                 )
-                .map(this::buildListTypeMethod)
                 .collect(Collectors.toList());
     }
 

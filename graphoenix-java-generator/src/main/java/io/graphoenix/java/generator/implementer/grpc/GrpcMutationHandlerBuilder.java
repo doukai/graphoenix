@@ -20,6 +20,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
@@ -28,6 +29,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
 
 @ApplicationScoped
 public class GrpcMutationHandlerBuilder {
@@ -99,6 +103,7 @@ public class GrpcMutationHandlerBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
+                .addMethod(buildHandleMethod())
                 .addMethods(buildTypeMethods(anchor));
 
         return builder.build();
@@ -126,6 +131,9 @@ public class GrpcMutationHandlerBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
+                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
                                 buildTypeFieldMethod(objectTypeDefinitionContext, anchor),
@@ -150,6 +158,9 @@ public class GrpcMutationHandlerBuilder {
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
+                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).endsWith(AGGREGATE_SUFFIX))
                 .filter(fieldDefinitionContext -> grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor)
                 .collect(Collectors.toList());
 
@@ -220,6 +231,9 @@ public class GrpcMutationHandlerBuilder {
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
+                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).endsWith(AGGREGATE_SUFFIX))
                 .filter(fieldDefinitionContext -> grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor)
                 .collect(Collectors.toList());
 
@@ -309,6 +323,39 @@ public class GrpcMutationHandlerBuilder {
                         typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                 )
                 .endControlFlow();
+        return builder.build();
+    }
+
+    private MethodSpec buildHandleMethod() {
+
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("handle")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinition")
+                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationDataLoader"), "loader")
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Void.class)))
+                .beginControlFlow("for ($T selectionContext : operationDefinition.selectionSet().selection()) ", ClassName.get(GraphqlParser.SelectionContext.class));
+
+        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = manager.getMutationOperationTypeName().flatMap(manager::getObject).stream()
+                .flatMap(objectTypeDefinitionContext ->
+                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                )
+                .collect(Collectors.toList());
+
+        int index = 0;
+        for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
+            String typeMethodName = fieldDefinitionContext.name().getText();
+            if (index == 0) {
+                builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", typeMethodName);
+            } else {
+                builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", typeMethodName);
+            }
+            builder.addStatement("$L(new $T(selectionContext.field()), loader)", typeMethodName, ClassName.get(Field.class));
+            index++;
+        }
+        builder.endControlFlow()
+                .endControlFlow()
+                .addStatement("return loader.dispatch()");
         return builder.build();
     }
 }
