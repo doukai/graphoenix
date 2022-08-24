@@ -157,11 +157,10 @@ public class GrpcMutationHandlerBuilder {
 
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isGrpcField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).endsWith(AGGREGATE_SUFFIX))
-                .filter(fieldDefinitionContext -> grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor)
                 .collect(Collectors.toList());
 
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
@@ -230,11 +229,10 @@ public class GrpcMutationHandlerBuilder {
 
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isGrpcField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).endsWith(AGGREGATE_SUFFIX))
-                .filter(fieldDefinitionContext -> grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor)
                 .collect(Collectors.toList());
 
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {

@@ -190,7 +190,7 @@ public class GraphQLQueryToSelect {
                                 .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
                                 .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
                                 .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
-                                .flatMap(subSelectionContext -> selectionToExpressionStream(typeName, subSelectionContext, level))
+                                .flatMap(subSelectionContext -> selectionToExpressionStream(typeName, subSelectionContext, level, parentTypeName == null))
                                 .collect(Collectors.toList())
                 )
         );
@@ -265,7 +265,7 @@ public class GraphQLQueryToSelect {
         return plainSelect;
     }
 
-    protected Stream<Expression> selectionToExpressionStream(String typeName, GraphqlParser.SelectionContext selectionContext, int level) {
+    protected Stream<Expression> selectionToExpressionStream(String typeName, GraphqlParser.SelectionContext selectionContext, int level, boolean isOperation) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getObjectFieldDefinition(typeName, selectionContext.field().name().getText())
                 .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
 
@@ -323,7 +323,7 @@ public class GraphQLQueryToSelect {
             }
             throw new GraphQLErrors(CONNECTION_NOT_EXIST.bind(fieldDefinitionContext.name().getText()));
         } else {
-            StringValue selectionKey = selectionToStringValueKey(selectionContext);
+            StringValue selectionKey = selectionToStringValueKey(selectionContext, isOperation);
             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
             if (manager.isObject(fieldTypeName)) {
                 return Stream.of(
@@ -901,7 +901,10 @@ public class GraphQLQueryToSelect {
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(enumValueContext.enumValueName().getText()));
     }
 
-    protected StringValue selectionToStringValueKey(GraphqlParser.SelectionContext selectionContext) {
+    protected StringValue selectionToStringValueKey(GraphqlParser.SelectionContext selectionContext, boolean isOperation) {
+        if (isOperation) {
+            return new StringValue(selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText());
+        }
         return new StringValue(selectionContext.field().name().getText());
     }
 

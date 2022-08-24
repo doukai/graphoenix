@@ -41,7 +41,7 @@ public abstract class BaseOperationHandler {
         return Flux.fromIterable(operationDefinitionContext.selectionSet().selection())
                 .flatMap(selectionContext ->
                         getOperationHandler(selectionContext.field().name().getText())
-                                .apply(jsonValue.asJsonObject().get(selectionContext.field().name().getText()), selectionContext)
+                                .apply(jsonValue.asJsonObject().get(selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()), selectionContext)
                                 .map(subJsonValue -> new AbstractMap.SimpleEntry<>(selectionContext.field().name().getText(), subJsonValue))
                 )
                 .collectList()
