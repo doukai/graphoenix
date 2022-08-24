@@ -311,13 +311,27 @@ public class OperationHandlerImplementer {
                 .addStatement("manager.get().registerFragment(graphQL)")
                 .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class));
         if (type.equals(MUTATION)) {
-            builder.addStatement("validator.get().validateOperation(operationDefinitionContext)");
+            builder.addStatement("validator.get().validateOperation(operationDefinitionContext)")
+                    .addStatement(
+                            CodeBlock.join(
+                                    List.of(
+                                            CodeBlock.of("$T result = mutationDataLoader.get().flatMap(loader -> grpcMutationBeforeHandler.get().handle(operationDefinitionContext, loader))", ParameterizedTypeName.get(Mono.class, JsonValue.class)),
+                                            CodeBlock.of(".then(operationHandler.get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject()))",
+                                                    operationName,
+                                                    ClassName.get(StringReader.class)
+                                            )
+                                    ),
+                                    System.lineSeparator()
+                            )
+                    );
+        } else {
+            builder.addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
+                    ParameterizedTypeName.get(Mono.class, JsonValue.class),
+                    operationName,
+                    ClassName.get(StringReader.class)
+            );
         }
-        builder.addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
-                ParameterizedTypeName.get(Mono.class, JsonValue.class),
-                operationName,
-                ClassName.get(StringReader.class)
-        ).addStatement(
+        builder.addStatement(
                 CodeBlock.join(
                         List.of(
                                 CodeBlock.of("return result.flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName),

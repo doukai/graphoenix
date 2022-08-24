@@ -2,6 +2,9 @@ package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -22,6 +25,10 @@ public class ValueWithVariable {
     private final Object valueWithVariable;
 
     public ValueWithVariable(Object value) {
+        this.valueWithVariable = getValueWithVariable(value);
+    }
+
+    public ValueWithVariable(JsonValue value) {
         this.valueWithVariable = getValueWithVariable(value);
     }
 
@@ -86,6 +93,27 @@ public class ValueWithVariable {
             return new ObjectValueWithVariable(valueWithVariableContext.objectValueWithVariable());
         }
         throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueWithVariableContext.getText()));
+    }
+
+    private Object getValueWithVariable(JsonValue value) {
+        if (value == null) {
+            return new NullValue();
+        } else if (value.getValueType().equals(JsonValue.ValueType.NULL)) {
+            return new NullValue();
+        } else if (value.getValueType().equals(JsonValue.ValueType.TRUE)) {
+            return new BooleanValue(true);
+        } else if (value.getValueType().equals(JsonValue.ValueType.FALSE)) {
+            return new BooleanValue(false);
+        } else if (value.getValueType().equals(JsonValue.ValueType.NUMBER)) {
+            return new FloatValue(((JsonNumber) value).numberValue());
+        } else if (value.getValueType().equals(JsonValue.ValueType.STRING)) {
+            return new StringValue(((JsonString) value).getString());
+        } else if (value.getValueType().equals(JsonValue.ValueType.OBJECT)) {
+            return new ObjectValueWithVariable(value.asJsonObject());
+        } else if (value.getValueType().equals(JsonValue.ValueType.ARRAY)) {
+            return new ArrayValueWithVariable(value.asJsonArray());
+        }
+        throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(value.getValueType().name()));
     }
 
     private Object getValueWithVariable(Object value) {

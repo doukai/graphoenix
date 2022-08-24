@@ -302,16 +302,15 @@ public class GrpcMutationDataLoaderBuilder {
                 .collect(Collectors.toList());
         List<CodeBlock> monoList = new ArrayList<>();
         for (int index = 0; index < monoEntryList.size(); index++) {
-
             if (index == 0) {
                 monoList.add(CodeBlock.of("return this.$L", grpcNameUtil.getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("JsonMono")));
             } else {
                 monoList.add(CodeBlock.of(".then(this.$L)", grpcNameUtil.getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("JsonMono")));
             }
+            monoList.add(CodeBlock.of(".then($T.fromRunnable($L::clear))", ClassName.get(Mono.class), grpcNameUtil.getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("Map")));
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
-            monoList.add(CodeBlock.of(".then()"));
             codeBlock = CodeBlock.join(monoList, System.lineSeparator());
         } else {
             codeBlock = CodeBlock.of("return Mono.empty()");

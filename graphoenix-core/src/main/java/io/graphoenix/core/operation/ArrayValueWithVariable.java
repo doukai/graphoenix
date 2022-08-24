@@ -1,6 +1,7 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import jakarta.json.JsonArray;
 import org.jetbrains.annotations.NotNull;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
@@ -24,6 +25,10 @@ public class ArrayValueWithVariable implements Collection<ValueWithVariable> {
     }
 
     public ArrayValueWithVariable(Collection<?> valueWithVariables) {
+        this.valueWithVariables = valueWithVariables.stream().map(ValueWithVariable::new).collect(Collectors.toList());
+    }
+
+    public ArrayValueWithVariable(JsonArray valueWithVariables) {
         this.valueWithVariables = valueWithVariables.stream().map(ValueWithVariable::new).collect(Collectors.toList());
     }
 

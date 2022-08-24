@@ -2,6 +2,8 @@ package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.vavr.CheckedFunction2;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.stringtemplate.v4.ST;
@@ -21,6 +23,10 @@ public class ObjectValueWithVariable implements Map<String, ValueWithVariable> {
 
     public ObjectValueWithVariable(Map<?, ?> objectValueWithVariable) {
         this.objectValueWithVariable = objectValueWithVariable.entrySet().stream().collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> new ValueWithVariable(entry.getValue())));
+    }
+
+    public ObjectValueWithVariable(JsonObject objectValueWithVariable) {
+        this.objectValueWithVariable = objectValueWithVariable.entrySet().stream().collect(Collectors.toMap(Entry::getKey, entry -> new ValueWithVariable(entry.getValue())));
     }
 
     public ObjectValueWithVariable(AnnotationMirror objectValueWithVariable) {
@@ -79,6 +85,14 @@ public class ObjectValueWithVariable implements Map<String, ValueWithVariable> {
     @Override
     public ValueWithVariable put(String key, ValueWithVariable value) {
         return objectValueWithVariable.put(key, value);
+    }
+
+    public ValueWithVariable put(String key, Object value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, JsonValue value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
     }
 
     @Override

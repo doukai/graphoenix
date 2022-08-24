@@ -270,10 +270,10 @@ public class GrpcQueryDataLoaderBuilder {
             } else {
                 monoList.add(CodeBlock.of(".then(this.$L)", grpcNameUtil.getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("JsonMono")));
             }
+            monoList.add(CodeBlock.of(".then($T.fromRunnable($L::clear))", ClassName.get(Mono.class), grpcNameUtil.getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("Set")));
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
-            monoList.add(CodeBlock.of(".then()"));
             codeBlock = CodeBlock.join(monoList, System.lineSeparator());
         } else {
             codeBlock = CodeBlock.of("return Mono.empty()");
