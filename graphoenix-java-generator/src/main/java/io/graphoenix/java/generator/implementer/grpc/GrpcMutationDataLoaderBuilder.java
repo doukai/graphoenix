@@ -302,12 +302,26 @@ public class GrpcMutationDataLoaderBuilder {
                 .collect(Collectors.toList());
         List<CodeBlock> monoList = new ArrayList<>();
         for (int index = 0; index < monoEntryList.size(); index++) {
+            String typeMethodName = grpcNameUtil.getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue());
             if (index == 0) {
-                monoList.add(CodeBlock.of("return this.$L", grpcNameUtil.getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("JsonMono")));
+                monoList.add(
+                        CodeBlock.of("return $T.just($L.size() == 0).flatMap(empty -> empty ? Mono.empty() : this.$L.then(Mono.fromRunnable($L::clear)))",
+                                ClassName.get(Mono.class),
+                                typeMethodName.concat("Map"),
+                                typeMethodName.concat("JsonMono"),
+                                typeMethodName.concat("Map")
+                        )
+                );
             } else {
-                monoList.add(CodeBlock.of(".then(this.$L)", grpcNameUtil.getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("JsonMono")));
+                monoList.add(
+                        CodeBlock.of(".then($T.just($L.size() == 0).flatMap(empty -> empty ? Mono.empty() : this.$L.then(Mono.fromRunnable($L::clear))))",
+                                ClassName.get(Mono.class),
+                                typeMethodName.concat("Map"),
+                                typeMethodName.concat("JsonMono"),
+                                typeMethodName.concat("Map")
+                        )
+                );
             }
-            monoList.add(CodeBlock.of(".then($T.fromRunnable($L::clear))", ClassName.get(Mono.class), grpcNameUtil.getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue()).concat("Map")));
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {

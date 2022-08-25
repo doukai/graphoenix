@@ -265,12 +265,26 @@ public class GrpcQueryDataLoaderBuilder {
                 .collect(Collectors.toList());
         List<CodeBlock> monoList = new ArrayList<>();
         for (int index = 0; index < monoTupleList.size(); index++) {
+            String typeMethodName = grpcNameUtil.getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3());
             if (index == 0) {
-                monoList.add(CodeBlock.of("return this.$L", grpcNameUtil.getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("JsonMono")));
+                monoList.add(
+                        CodeBlock.of("return $T.just($L.size() == 0).flatMap(empty -> empty ? Mono.empty() : this.$L.then(Mono.fromRunnable($L::clear)))",
+                                ClassName.get(Mono.class),
+                                typeMethodName.concat("Set"),
+                                typeMethodName.concat("JsonMono"),
+                                typeMethodName.concat("Set")
+                        )
+                );
             } else {
-                monoList.add(CodeBlock.of(".then(this.$L)", grpcNameUtil.getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("JsonMono")));
+                monoList.add(
+                        CodeBlock.of(".then($T.just($L.size() == 0).flatMap(empty -> empty ? Mono.empty() : this.$L.then(Mono.fromRunnable($L::clear))))",
+                                ClassName.get(Mono.class),
+                                typeMethodName.concat("Set"),
+                                typeMethodName.concat("JsonMono"),
+                                typeMethodName.concat("Set")
+                        )
+                );
             }
-            monoList.add(CodeBlock.of(".then($T.fromRunnable($L::clear))", ClassName.get(Mono.class), grpcNameUtil.getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3()).concat("Set")));
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {

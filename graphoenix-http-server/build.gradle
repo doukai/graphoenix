@@ -17,7 +17,6 @@ dependencies {
     implementation project(':graphoenix-core')
     implementation project(':graphoenix-config')
     implementation 'io.projectreactor.netty:reactor-netty-core:1.0.18'
-    implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
 
     annotationProcessor project(':graphoenix-core')
     annotationProcessor project(':graphoenix-inject')

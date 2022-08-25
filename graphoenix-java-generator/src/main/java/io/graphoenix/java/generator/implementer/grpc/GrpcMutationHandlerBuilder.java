@@ -106,11 +106,8 @@ public class GrpcMutationHandlerBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeMethods(anchor));
-
-        if (anchor) {
-            builder.addMethod(buildHandleMethod());
-        }
+                .addMethods(buildTypeMethods(anchor))
+                .addMethod(buildHandleMethod(anchor));
         return builder.build();
     }
 
@@ -140,30 +137,30 @@ public class GrpcMutationHandlerBuilder {
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .flatMap(objectTypeDefinitionContext ->
-                        anchor ?
-                                Stream.of(
-                                        buildTypeFieldMethod(objectTypeDefinitionContext),
-                                        buildTypeMethod(objectTypeDefinitionContext, true),
-                                        buildListTypeFieldMethod(objectTypeDefinitionContext),
-                                        buildListTypeMethod(objectTypeDefinitionContext, true)
-                                ) :
-                                Stream.of(
-                                        buildTypeMethod(objectTypeDefinitionContext, false),
-                                        buildListTypeMethod(objectTypeDefinitionContext, false)
-                                )
+                        Stream.of(
+                                buildTypeFieldMethod(objectTypeDefinitionContext, anchor),
+                                buildTypeMethod(objectTypeDefinitionContext, anchor),
+                                buildListTypeFieldMethod(objectTypeDefinitionContext, anchor),
+                                buildListTypeMethod(objectTypeDefinitionContext, anchor)
+                        )
                 )
                 .collect(Collectors.toList());
     }
 
-    private MethodSpec buildTypeFieldMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    private MethodSpec buildTypeFieldMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean anchor) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(Field.class), "field")
                 .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationDataLoader"), "loader");
 
-        builder.beginControlFlow("if (field != null && field.getArguments() != null && field.getArguments().size() > 0)")
-                .beginControlFlow("for ($T argument : field.getArguments())", ClassName.get(Argument.class));
+        if (anchor) {
+            builder.beginControlFlow("if (field != null && field.getArguments() != null && field.getArguments().size() > 0)");
+        } else {
+            builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                    .beginControlFlow("if (field != null && field.getArguments() != null && field.getArguments().size() > 0 && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class));
+        }
+        builder.beginControlFlow("for ($T argument : field.getArguments())", ClassName.get(Argument.class));
 
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
@@ -184,10 +181,21 @@ public class GrpcMutationHandlerBuilder {
                 if (manager.isGrpcField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
-                    builder.addStatement("loader.$L(argument.getValueWithVariable())", grpcNameUtil.getTypeListMethodName(packageName, typeName));
+                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
+                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
+                    if (anchor) {
+                        builder.addStatement("loader.$L(argument.getValueWithVariable())", grpcNameUtil.getTypeListMethodName(packageName, typeName));
+                    } else {
+                        builder.addStatement("argument.getValueWithVariable().asArray().forEach(item -> item.asObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
+                                .addStatement("loader.$L(argument.getValueWithVariable())", grpcNameUtil.getTypeListMethodName(packageName, typeName));
+                    }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L(argument.getValueWithVariable(), loader)", fieldParameterName.concat("List"));
+                    if (anchor) {
+                        builder.addStatement("$L(argument.getValueWithVariable(), loader)", fieldParameterName.concat("List"));
+                    } else {
+                        builder.addStatement("$L(argument.getValueWithVariable(), loader, jsonValue.asJsonObject().get($S))", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText());
+                    }
                 }
             } else {
                 if (manager.isGrpcField(fieldDefinitionContext)) {
@@ -195,13 +203,22 @@ public class GrpcMutationHandlerBuilder {
                     String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
-                    builder.addStatement("loader.$L(argument.getValueWithVariable()).subscribe(result -> field.getOrCreateArgument($S).setValueWithVariable(result.asJsonObject().getString($S)))",
-                            grpcNameUtil.getTypeMethodName(packageName, typeName),
-                            from,
-                            to
-                    );
+                    if (anchor) {
+                        builder.addStatement("loader.$L(argument.getValueWithVariable()).subscribe(result -> field.getOrCreateArgument($S).setValueWithVariable(result.asJsonObject().getString($S)))",
+                                grpcNameUtil.getTypeMethodName(packageName, typeName),
+                                from,
+                                to
+                        );
+                    } else {
+                        builder.addStatement("argument.getValueWithVariable().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
+                                .addStatement("loader.$L(argument.getValueWithVariable())", grpcNameUtil.getTypeMethodName(packageName, typeName));
+                    }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L(argument.getValueWithVariable(), loader)", fieldParameterName);
+                    if (anchor) {
+                        builder.addStatement("$L(argument.getValueWithVariable(), loader)", fieldParameterName);
+                    } else {
+                        builder.addStatement("$L(argument.getValueWithVariable(), loader, jsonValue.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText());
+                    }
                 }
             }
             if (index == fieldDefinitionContextList.size() - 1) {
@@ -299,7 +316,7 @@ public class GrpcMutationHandlerBuilder {
         return builder.build();
     }
 
-    private MethodSpec buildListTypeFieldMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    private MethodSpec buildListTypeFieldMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean anchor) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         String listTypeParameterName = typeParameterName.concat("List");
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
@@ -307,14 +324,31 @@ public class GrpcMutationHandlerBuilder {
                 .addParameter(ClassName.get(Field.class), "field")
                 .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationDataLoader"), "loader");
 
-        builder.beginControlFlow(
-                "if (field != null && field.getArgument($T.LIST_INPUT_NAME).isPresent() && field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().isArray())",
-                ClassName.get(Hammurabi.class),
-                ClassName.get(Hammurabi.class)
-        ).addStatement("field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray().forEach(item -> $L(item, loader))",
-                ClassName.get(Hammurabi.class),
-                typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
-        ).endControlFlow();
+        if (anchor) {
+            builder.beginControlFlow(
+                    "if (field != null && field.getArgument($T.LIST_INPUT_NAME).isPresent() && field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().isArray())",
+                    ClassName.get(Hammurabi.class),
+                    ClassName.get(Hammurabi.class)
+            ).addStatement("field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray().forEach(item -> $L(item, loader))",
+                    ClassName.get(Hammurabi.class),
+                    typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
+            ).endControlFlow();
+        } else {
+            builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                    .beginControlFlow(
+                            "if (field != null && field.getArgument($T.LIST_INPUT_NAME).isPresent() && field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().isArray() && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))",
+                            ClassName.get(Hammurabi.class),
+                            ClassName.get(Hammurabi.class),
+                            ClassName.get(JsonValue.class)
+                    )
+                    .addStatement("$T.range(0, field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray().size()).forEach(index -> $L(new $T<>(field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray()).get(index), loader, jsonValue.asJsonArray().get(index)))",
+                            ClassName.get(IntStream.class),
+                            ClassName.get(Hammurabi.class),
+                            typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()),
+                            ClassName.get(ArrayList.class),
+                            ClassName.get(Hammurabi.class)
+                    ).endControlFlow();
+        }
         return builder.build();
     }
 
@@ -345,7 +379,7 @@ public class GrpcMutationHandlerBuilder {
         return builder.build();
     }
 
-    private MethodSpec buildHandleMethod() {
+    private MethodSpec buildHandleMethod(boolean anchor) {
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder("handle")
                 .addModifiers(Modifier.PUBLIC)
@@ -354,6 +388,10 @@ public class GrpcMutationHandlerBuilder {
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Void.class)))
                 .beginControlFlow("for ($T selectionContext : operationDefinition.selectionSet().selection()) ", ClassName.get(GraphqlParser.SelectionContext.class));
 
+        if (!anchor) {
+            builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                    .addStatement("$T selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()", ClassName.get(String.class));
+        }
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = manager.getMutationOperationTypeName().flatMap(manager::getObject).stream()
                 .flatMap(objectTypeDefinitionContext ->
                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
@@ -369,7 +407,11 @@ public class GrpcMutationHandlerBuilder {
             } else {
                 builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", typeMethodName);
             }
-            builder.addStatement("$L(new $T(selectionContext.field()), loader)", typeMethodName, ClassName.get(Field.class));
+            if (anchor) {
+                builder.addStatement("$L(new $T(selectionContext.field()), loader)", typeMethodName, ClassName.get(Field.class));
+            } else {
+                builder.addStatement("$L(new $T(selectionContext.field()), loader, jsonValue.asJsonObject().get(selectionName))", typeMethodName, ClassName.get(Field.class));
+            }
             index++;
         }
         builder.endControlFlow()

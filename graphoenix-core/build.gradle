@@ -19,6 +19,7 @@ dependencies {
     compile 'com.google.auto.service:auto-service:1.0.1'
     compile 'org.eclipse.microprofile.reactive-streams-operators:microprofile-reactive-streams-operators-core:2.0'
     compile 'com.lightbend.microprofile.reactive.streams:lightbend-microprofile-reactive-streams-zerodep:1.0.0'
+    compile 'com.aventrix.jnanoid:jnanoid:2.0.0'
 
     implementation project(':graphoenix-config')
     implementation project(':graphoenix-json')

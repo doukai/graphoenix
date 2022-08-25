@@ -12,7 +12,6 @@ repositories {
 }
 
 dependencies {
-    compile 'com.graphql-java:java-dataloader:3.2.0'
     implementation project(':graphoenix-core')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
