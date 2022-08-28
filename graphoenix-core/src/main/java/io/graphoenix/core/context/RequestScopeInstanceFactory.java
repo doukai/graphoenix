@@ -15,8 +15,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.concurrent.TimeUnit;
 
+import static io.graphoenix.spi.constant.Hammurabi.REQUEST_ID;
+
 public class RequestScopeInstanceFactory {
-    public static final String REQUEST_ID = "requestId";
 
     private static final AsyncLoadingCache<String, ScopeInstances> REQUEST_CACHE = buildCache();
     private static final ReactiveStreamsFactory reactiveStreamsFactory = ReactiveStreamsFactoryResolver.instance();

@@ -19,11 +19,8 @@ import reactor.util.context.Context;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.graphoenix.core.context.RequestScopeInstanceFactory.REQUEST_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.GRAPHQL_REQUEST;
-import static io.graphoenix.spi.constant.Hammurabi.REQUEST;
-import static io.graphoenix.spi.constant.Hammurabi.RESPONSE;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped

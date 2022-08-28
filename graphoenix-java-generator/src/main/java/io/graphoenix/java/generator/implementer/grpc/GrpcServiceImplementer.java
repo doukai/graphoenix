@@ -1,5 +1,6 @@
 package io.graphoenix.java.generator.implementer.grpc;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -19,6 +20,7 @@ import io.graphoenix.core.utils.DocumentUtil;
 import io.graphoenix.core.utils.GraphQLResponseUtil;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.constant.Hammurabi;
 import io.graphoenix.spi.dto.type.OperationType;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.grpc.Server;
@@ -32,6 +34,7 @@ import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
@@ -606,12 +609,12 @@ public class GrpcServiceImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
-                .addMethod(buildConstructor())
+                .addMethod(buildGraphQLServiceConstructor())
                 .addMethod(buildOperationMethod())
                 .build();
     }
 
-    private MethodSpec buildConstructor() {
+    private MethodSpec buildGraphQLServiceConstructor() {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addStatement("this.graphQLRequestHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(GraphQLRequestHandler.class))
@@ -635,7 +638,8 @@ public class GrpcServiceImplementer {
                                         CodeBlock.of(".flatMap(graphQLRequestHandler.get()::handle)"),
                                         CodeBlock.of(".onErrorResume(throwable -> Mono.just($T.GRAPHQL_RESPONSE_UTIL.error(throwable)))", ClassName.get(GraphQLResponseUtil.class)),
                                         CodeBlock.of(".map($T.newBuilder()::setResponse)", ClassName.get(graphQLConfig.getGrpcPackageName(), "GraphQLResponse")),
-                                        CodeBlock.of(".map($T.Builder::build)", ClassName.get(graphQLConfig.getGrpcPackageName(), "GraphQLResponse"))
+                                        CodeBlock.of(".map($T.Builder::build)", ClassName.get(graphQLConfig.getGrpcPackageName(), "GraphQLResponse")),
+                                        CodeBlock.of(".contextWrite($T.of($T.REQUEST_ID, $T.randomNanoId()))", ClassName.get(Context.class), ClassName.get(Hammurabi.class), ClassName.get(NanoIdUtils.class))
                                 ),
                                 System.lineSeparator()
                         )

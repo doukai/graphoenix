@@ -8,9 +8,9 @@ import reactor.util.context.ContextView;
 
 import java.util.Map;
 
-import static io.graphoenix.core.context.SessionScopeInstanceFactory.SESSION_ID;
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
 import static io.graphoenix.http.error.HttpErrorStatusUtil.HTTP_ERROR_STATUS_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.SESSION_ID;
 
 public abstract class BaseRequestHandler {
 
