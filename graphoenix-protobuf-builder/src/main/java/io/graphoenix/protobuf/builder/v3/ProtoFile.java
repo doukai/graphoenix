@@ -3,6 +3,7 @@ package io.graphoenix.protobuf.builder.v3;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProtoFile {
@@ -35,6 +36,14 @@ public class ProtoFile {
 
     public List<String> getTopLevelDefs() {
         return topLevelDefs;
+    }
+
+    public ProtoFile addTopLevelDef(String topLevelDef) {
+        if (this.topLevelDefs == null) {
+            this.topLevelDefs = new ArrayList<>();
+        }
+        this.topLevelDefs.add(topLevelDef);
+        return this;
     }
 
     public ProtoFile setTopLevelDefs(List<String> topLevelDefs) {

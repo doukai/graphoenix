@@ -3,6 +3,7 @@ package io.graphoenix.protobuf.builder.v3;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Service {
@@ -24,6 +25,14 @@ public class Service {
 
     public List<Rpc> getRpcs() {
         return rpcs;
+    }
+
+    public Service addRpc(Rpc rpc) {
+        if (this.rpcs == null) {
+            this.rpcs = new ArrayList<>();
+        }
+        this.rpcs.add(rpc);
+        return this;
     }
 
     public Service setRpcs(List<Rpc> rpcs) {

@@ -3,6 +3,7 @@ package io.graphoenix.protobuf.builder.v3;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Message {
@@ -28,6 +29,14 @@ public class Message {
 
     public Message setFields(List<Field> fields) {
         this.fields = fields;
+        return this;
+    }
+
+    public Message addField(Field field) {
+        if (this.fields == null) {
+            this.fields = new ArrayList<>();
+        }
+        this.fields.add(field);
         return this;
     }
 

@@ -199,6 +199,19 @@ public class ProtobufFileBuilder {
                 .setTopLevelDefs(buildMutationService().stream().map(Service::toString).collect(Collectors.toList()))
                 .toString()
         );
+        protoFileMap.put("graphQL", new ProtoFile()
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getGrpcPackageName())
+                .addTopLevelDef(buildGraphQLService().toString())
+                .addTopLevelDef(buildGraphQLRpcRequest().toString())
+                .addTopLevelDef(buildGraphQLRpcResponse().toString())
+                .toString()
+        );
         return protoFileMap;
     }
 
@@ -209,18 +222,11 @@ public class ProtobufFileBuilder {
                         new Service().setName(objectTypeDefinitionContext.name().getText().concat("Service"))
                                 .setRpcs(
                                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .flatMap(fieldDefinitionContext ->
-                                                        Stream.of(
-                                                                new Rpc()
-                                                                        .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
-                                                                        .setMessageType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                        .setReturnType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response")),
-
-                                                                new Rpc()
-                                                                        .setName(getServiceRpcName(fieldDefinitionContext.name().getText().concat("Json")))
-                                                                        .setMessageType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                        .setReturnType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
-                                                        )
+                                                .map(fieldDefinitionContext ->
+                                                        new Rpc()
+                                                                .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
+                                                                .setMessageType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
+                                                                .setReturnType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
                                                 )
                                                 .collect(Collectors.toList())
                                 )
@@ -234,20 +240,24 @@ public class ProtobufFileBuilder {
                         new Service().setName(objectTypeDefinitionContext.name().getText().concat("Service"))
                                 .setRpcs(
                                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                                                .flatMap(fieldDefinitionContext ->
-                                                        Stream.of(
-                                                                new Rpc()
-                                                                        .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
-                                                                        .setMessageType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                        .setReturnType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response")),
-                                                                new Rpc()
-                                                                        .setName(getServiceRpcName(fieldDefinitionContext.name().getText().concat("Json")))
-                                                                        .setMessageType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                        .setReturnType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
-                                                        )
+                                                .map(fieldDefinitionContext ->
+                                                        new Rpc()
+                                                                .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
+                                                                .setMessageType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
+                                                                .setReturnType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
                                                 )
                                                 .collect(Collectors.toList())
                                 )
+                );
+    }
+
+    public Service buildGraphQLService() {
+        return new Service().setName("GraphQLService")
+                .addRpc(
+                        new Rpc()
+                                .setName("operation")
+                                .setMessageType("GraphQLRequest")
+                                .setReturnType("GraphQLResponse")
                 );
     }
 
@@ -285,20 +295,13 @@ public class ProtobufFileBuilder {
                 .map(fieldDefinitionContext ->
                         new Message()
                                 .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
-                                .setFields(
-                                        List.of(
-                                                new Field()
-                                                        .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
-                                                        .setType(buildType(fieldDefinitionContext.type()))
-                                                        .setOptional(fieldDefinitionContext.type().nonNullType() == null)
-                                                        .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                                                        .setNumber(1),
-                                                new Field()
-                                                        .setName("json")
-                                                        .setType("string")
-                                                        .setOptional(true)
-                                                        .setNumber(2)
-                                        )
+                                .addField(
+                                        new Field()
+                                                .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
+                                                .setType(buildType(fieldDefinitionContext.type()))
+                                                .setOptional(fieldDefinitionContext.type().nonNullType() == null)
+                                                .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                                                .setNumber(1)
                                 )
                 );
     }
@@ -339,22 +342,28 @@ public class ProtobufFileBuilder {
                 .map(fieldDefinitionContext ->
                         new Message()
                                 .setName("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
-                                .setFields(
-                                        List.of(
-                                                new Field()
-                                                        .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
-                                                        .setType(buildType(fieldDefinitionContext.type()))
-                                                        .setOptional(fieldDefinitionContext.type().nonNullType() == null)
-                                                        .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
-                                                        .setNumber(1),
-                                                new Field()
-                                                        .setName("json")
-                                                        .setType("string")
-                                                        .setOptional(true)
-                                                        .setNumber(2)
-                                        )
+                                .addField(
+                                        new Field()
+                                                .setName(getMessageFiledName(fieldDefinitionContext.name().getText()))
+                                                .setType(buildType(fieldDefinitionContext.type()))
+                                                .setOptional(fieldDefinitionContext.type().nonNullType() == null)
+                                                .setRepeated(manager.fieldTypeIsList(fieldDefinitionContext.type()))
+                                                .setNumber(1)
                                 )
                 );
+    }
+
+    public Message buildGraphQLRpcRequest() {
+        return new Message()
+                .setName("GraphQLRequest")
+                .addField(new Field().setName("request").setType("string").setNumber(1))
+                .addField(new Field().setName("transaction_id").setType("string").setOptional(true).setNumber(2));
+    }
+
+    public Message buildGraphQLRpcResponse() {
+        return new Message()
+                .setName("GraphQLResponse")
+                .addField(new Field().setName("response").setType("string").setNumber(1));
     }
 
     public Enum buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
