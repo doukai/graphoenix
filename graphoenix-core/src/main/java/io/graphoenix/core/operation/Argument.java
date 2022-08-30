@@ -22,6 +22,11 @@ public class Argument {
         this.valueWithVariable = new ValueWithVariable(valueWithVariable);
     }
 
+    public Argument(String name, ValueWithVariable valueWithVariable) {
+        this.name = name;
+        this.valueWithVariable = valueWithVariable;
+    }
+
     public Argument(String name) {
         this.name = name;
     }

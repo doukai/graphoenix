@@ -9,6 +9,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -66,70 +67,6 @@ public class GrpcInputObjectHandlerBuilder {
                                 Modifier.FINAL
                         ).initializer("\"\"").build()
                 )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(String.class),
-                                "SPACE",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).initializer("\" \"").build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(String.class),
-                                "COLON",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).initializer("\": \"").build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(String.class),
-                                "COMMA",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).initializer("\", \"").build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(String.class),
-                                "QUOTATION",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).initializer("\"\\\"\"").build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(String.class),
-                                "CURLY_BRACKETS_START",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).initializer("\"{\"").build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(String.class),
-                                "CURLY_BRACKETS_END",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).initializer("\"}\"").build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(String.class),
-                                "SQUARE_BRACKETS_START",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).initializer("\"[\"").build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ClassName.get(String.class),
-                                "SQUARE_BRACKETS_END",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).initializer("\"]\"").build()
-                )
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods())
                 .build();
@@ -152,10 +89,9 @@ public class GrpcInputObjectHandlerBuilder {
         ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), grpcNameUtil.getRpcInputObjectName(inputObjectTypeDefinitionContext));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(inputObjectParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(String.class))
+                .returns(ClassName.get(ObjectValueWithVariable.class))
                 .addParameter(typeClassName, inputObjectParameterName)
-                .addStatement("$T stringBuilder = new $T()", ClassName.get(StringBuilder.class), ClassName.get(StringBuilder.class))
-                .addStatement("stringBuilder.append(CURLY_BRACKETS_START)");
+                .addStatement("$T objectValueWithVariable = new $T()", ClassName.get(ObjectValueWithVariable.class), ClassName.get(ObjectValueWithVariable.class));
 
         List<GraphqlParser.InputValueDefinitionContext> inputValueDefinitionContexts = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition();
         for (GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext : inputValueDefinitionContexts) {
@@ -166,23 +102,13 @@ public class GrpcInputObjectHandlerBuilder {
             if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
                 String rpcGetInputValueListName = grpcNameUtil.getRpcGetInputValueListName(inputValueDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("String") || fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> QUOTATION + item + QUOTATION).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
-                                inputValueDefinitionContext.name().getText(),
-                                inputObjectParameterName,
-                                rpcGetInputValueListName,
-                                ClassName.get(Collectors.class)
-                        );
-                    } else {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> item + EMPTY).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
-                                inputValueDefinitionContext.name().getText(),
-                                inputObjectParameterName,
-                                rpcGetInputValueListName,
-                                ClassName.get(Collectors.class)
-                        );
-                    }
+                    codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L())",
+                            inputValueDefinitionContext.name().getText(),
+                            inputObjectParameterName,
+                            rpcGetInputValueListName
+                    );
                 } else if (manager.isEnum(fieldTypeName)) {
-                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(item -> item.getValueDescriptor().getName().replaceFirst($S, EMPTY)).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
+                    codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L().stream().map(item -> item.getValueDescriptor().getName().replaceFirst($S, EMPTY)).collect($T.toList()))",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
                             rpcGetInputValueListName,
@@ -190,7 +116,7 @@ public class GrpcInputObjectHandlerBuilder {
                             ClassName.get(Collectors.class)
                     );
                 } else if (manager.isInputObject(fieldTypeName)) {
-                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(SQUARE_BRACKETS_START).append($L.$L().stream().map(this::$L).collect($T.joining(COMMA))).append(SQUARE_BRACKETS_END).append(SPACE)",
+                    codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L().stream().map(this::$L).collect($T.toList()))",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
                             rpcGetInputValueListName,
@@ -210,28 +136,20 @@ public class GrpcInputObjectHandlerBuilder {
             } else {
                 String rpcGetInputValueName = grpcNameUtil.getRpcGetInputValueName(inputValueDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
-                    if (fieldTypeName.equals("String") || fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append(QUOTATION).append($L.$L()).append(QUOTATION).append(SPACE)",
-                                inputValueDefinitionContext.name().getText(),
-                                inputObjectParameterName,
-                                rpcGetInputValueName
-                        );
-                    } else {
-                        codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append($L.$L()).append(SPACE)",
-                                inputValueDefinitionContext.name().getText(),
-                                inputObjectParameterName,
-                                rpcGetInputValueName
-                        );
-                    }
+                    codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L())",
+                            inputValueDefinitionContext.name().getText(),
+                            inputObjectParameterName,
+                            rpcGetInputValueName
+                    );
                 } else if (manager.isEnum(fieldTypeName)) {
-                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append($L.$L().getValueDescriptor().getName().replaceFirst($S, EMPTY)).append(SPACE)",
+                    codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L().getValueDescriptor().getName().replaceFirst($S, EMPTY))",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
                             rpcGetInputValueName,
                             rpcEnumValueSuffixName
                     );
                 } else if (manager.isInputObject(fieldTypeName)) {
-                    codeBlock = CodeBlock.of("stringBuilder.append($S).append(COLON).append($L($L.$L())).append(SPACE)",
+                    codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L($L.$L()))",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectFieldMethodName,
                             inputObjectParameterName,
@@ -249,8 +167,7 @@ public class GrpcInputObjectHandlerBuilder {
                 }
             }
         }
-        builder.addStatement("stringBuilder.append(CURLY_BRACKETS_END)")
-                .addStatement("return stringBuilder.toString()");
+        builder.addStatement("return objectValueWithVariable");
         return builder.build();
     }
 }

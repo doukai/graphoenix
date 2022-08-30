@@ -224,6 +224,10 @@ public class GrpcNameUtil {
         return packageNameToUnderline(packageName).concat("_QueryTypeServiceStub");
     }
 
+    public String getGraphQLServiceStubParameterName(String packageName) {
+        return packageNameToUnderline(packageName).concat("_GraphQLServiceStub");
+    }
+
     public String getRpcFieldExpressionSetterName(String fieldName) {
         if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
             return "setIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));

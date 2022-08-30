@@ -13,6 +13,7 @@ import javax.lang.model.element.AnnotationMirror;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,6 +21,10 @@ import java.util.stream.Collectors;
 public class ObjectValueWithVariable implements Map<String, ValueWithVariable> {
 
     private final Map<String, ValueWithVariable> objectValueWithVariable;
+
+    public ObjectValueWithVariable() {
+        this.objectValueWithVariable = new HashMap<>();
+    }
 
     public ObjectValueWithVariable(Map<?, ?> objectValueWithVariable) {
         this.objectValueWithVariable = objectValueWithVariable.entrySet().stream().collect(Collectors.toMap(entry -> (String) entry.getKey(), entry -> new ValueWithVariable(entry.getValue())));
@@ -85,6 +90,42 @@ public class ObjectValueWithVariable implements Map<String, ValueWithVariable> {
     @Override
     public ValueWithVariable put(String key, ValueWithVariable value) {
         return objectValueWithVariable.put(key, value);
+    }
+
+    public ValueWithVariable put(String key, BooleanValue value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, IntValue value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, FloatValue value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, StringValue value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, EnumValue value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, NullValue value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, ObjectValueWithVariable value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, ArrayValueWithVariable value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
+    }
+
+    public ValueWithVariable put(String key, Variable value) {
+        return objectValueWithVariable.put(key, new ValueWithVariable(value));
     }
 
     public ValueWithVariable put(String key, Object value) {

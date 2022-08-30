@@ -7,6 +7,7 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -17,6 +18,7 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
@@ -29,11 +31,11 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 public class GrpcQueryDataLoaderBuilder {
@@ -123,33 +125,18 @@ public class GrpcQueryDataLoaderBuilder {
         typeMap.keySet().forEach(packageName ->
                 builder.addField(
                         FieldSpec.builder(
-                                ClassName.get(packageName, "ReactorQueryTypeServiceGrpc", "ReactorQueryTypeServiceStub"),
-                                grpcNameUtil.getQueryServiceStubParameterName(packageName),
+                                ClassName.get(packageName, "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
+                                grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
-                )
-        );
-        this.typeMap.forEach((packageName, typeNameMap) ->
-                typeNameMap.forEach(
-                        (typeName, fieldNameList) ->
-                                fieldNameList.forEach(fieldName ->
-                                        builder.addField(
-                                                FieldSpec.builder(
-                                                        ParameterizedTypeName.get(LinkedHashSet.class, String.class),
-                                                        grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("Set"),
-                                                        Modifier.PRIVATE,
-                                                        Modifier.FINAL
-                                                ).build()
-                                        ).addField(
-                                                FieldSpec.builder(
-                                                        ParameterizedTypeName.get(Mono.class, JsonArray.class),
-                                                        grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
-                                                        Modifier.PRIVATE,
-                                                        Modifier.FINAL
-                                                ).build()
-                                        )
-                                )
+                ).addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(Mono.class, JsonObject.class),
+                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
                 )
         );
         return builder.build();
@@ -164,32 +151,18 @@ public class GrpcQueryDataLoaderBuilder {
                 .addStatement("this.jsonProvider = jsonProvider")
                 .addStatement("this.channelManager = channelManager");
 
-        typeMap.keySet().forEach(packageName ->
+        this.typeMap.keySet().forEach(packageName ->
                 builder.addStatement("this.$L = $T.newReactorStub(channelManager.get().getChannel($S))",
-                        grpcNameUtil.getQueryServiceStubParameterName(packageName),
-                        ClassName.get(packageName, "ReactorQueryTypeServiceGrpc"),
+                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                        ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
                         packageName
-                )
-        );
-
-        this.typeMap.forEach((packageName, typeNameMap) ->
-                typeNameMap.forEach(
-                        (typeName, fieldNameList) ->
-                                fieldNameList.forEach(fieldName ->
-                                        builder.addStatement("this.$L = new $T<>()",
-                                                grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("Set"),
-                                                ClassName.get(LinkedHashSet.class)
-                                        ).addStatement("this.$L = this.$L.$L($T.newBuilder().$L($T.newBuilder().addAllIn($L)).build()).map(response -> jsonProvider.get().createReader(new $T(response.getJson())).readArray())",
-                                                grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
-                                                grpcNameUtil.getQueryServiceStubParameterName(packageName),
-                                                grpcNameUtil.getRpcObjectListMethodName(typeName).concat("Json"),
-                                                ClassName.get(packageName, grpcNameUtil.getRpcQueryListRequestName(typeName)),
-                                                grpcNameUtil.getRpcFieldExpressionSetterName(fieldName),
-                                                ClassName.get(packageName, "StringExpression"),
-                                                grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("Set"),
-                                                ClassName.get(StringReader.class)
-                                        )
-                                )
+                ).addStatement("this.$L = this.$L.operation($T.newBuilder().setRequest(buildOperation($S).toString()).build()).map(response -> jsonProvider.get().createReader(new $T(response.getResponse())).readObject().get($S).asJsonObject())",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                        ClassName.get(packageName, "GraphQLRequest"),
+                        packageName,
+                        ClassName.get(StringReader.class),
+                        "data"
                 )
         );
         return builder.build();
@@ -228,9 +201,15 @@ public class GrpcQueryDataLoaderBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
-                .addStatement("$L.add(key)", grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
-                .addStatement("return $L.map(array -> array.stream().filter(item -> item.asJsonObject().getString($S).equals(key)).findFirst().orElse($T.NULL))",
-                        grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
+                .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
+                .addStatement("mergeSelection($S, $S, selectionSetContext)", packageName, typeName)
+                .addStatement("addCondition($S, $S, $S, key)", packageName, typeName, fieldName)
+                .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).findFirst().orElse($T.NULL))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        ClassName.get(Stream.class),
+                        typeName,
+                        fieldName,
+                        ClassName.get(JsonArray.class),
                         fieldName,
                         ClassName.get(JsonValue.class)
                 )
@@ -242,9 +221,15 @@ public class GrpcQueryDataLoaderBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
-                .addStatement("$L.add(key)", grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("Set"))
-                .addStatement("return $L.map(array -> array.stream().filter(item -> item.asJsonObject().getString($S).equals(key)).collect($T.toJsonArray()))",
-                        grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName).concat("JsonMono"),
+                .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
+                .addStatement("mergeSelection($S, $S, selectionSetContext)", packageName, typeName)
+                .addStatement("addCondition($S, $S, $S, key)", packageName, typeName, fieldName)
+                .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).collect($T.toJsonArray()))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        ClassName.get(Stream.class),
+                        typeName,
+                        fieldName,
+                        ClassName.get(JsonArray.class),
                         fieldName,
                         ClassName.get(JsonCollectors.class)
                 )
@@ -268,20 +253,16 @@ public class GrpcQueryDataLoaderBuilder {
             String typeMethodName = grpcNameUtil.getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3());
             if (index == 0) {
                 monoList.add(
-                        CodeBlock.of("return $T.just($L.size() == 0).flatMap(empty -> empty ? Mono.empty() : this.$L.then(Mono.fromRunnable($L::clear)))",
-                                ClassName.get(Mono.class),
-                                typeMethodName.concat("Set"),
-                                typeMethodName.concat("JsonMono"),
-                                typeMethodName.concat("Set")
+                        CodeBlock.of("return this.$L.then(Mono.fromRunnable(() -> clear($S)))",
+                                grpcNameUtil.packageNameToUnderline(monoTupleList.get(index)._1()).concat("_JsonMono"),
+                                monoTupleList.get(index)._1()
                         )
                 );
             } else {
                 monoList.add(
-                        CodeBlock.of(".then($T.just($L.size() == 0).flatMap(empty -> empty ? Mono.empty() : this.$L.then(Mono.fromRunnable($L::clear))))",
-                                ClassName.get(Mono.class),
-                                typeMethodName.concat("Set"),
-                                typeMethodName.concat("JsonMono"),
-                                typeMethodName.concat("Set")
+                        CodeBlock.of(".then(this.$L.then(Mono.fromRunnable(() -> clear($S))))",
+                                grpcNameUtil.packageNameToUnderline(monoTupleList.get(index)._1()).concat("_JsonMono"),
+                                monoTupleList.get(index)._1()
                         )
                 );
             }

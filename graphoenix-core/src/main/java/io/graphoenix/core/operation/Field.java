@@ -18,6 +18,7 @@ public class Field {
     private Set<Argument> arguments;
     private Set<String> directives;
     private Set<Field> fields;
+    private String selections;
 
     public Field() {
     }
@@ -141,6 +142,15 @@ public class Field {
             this.fields = new LinkedHashSet<>();
         }
         this.fields.add(field);
+        return this;
+    }
+
+    public String getSelections() {
+        return selections;
+    }
+
+    public Field setSelections(String selections) {
+        this.selections = selections;
         return this;
     }
 
