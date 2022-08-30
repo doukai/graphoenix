@@ -11,8 +11,6 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.vavr.Tuple;
-import io.vavr.Tuple3;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -237,35 +235,25 @@ public class GrpcQueryDataLoaderBuilder {
     }
 
     private MethodSpec buildDispatchMethod() {
-        List<Tuple3<String, String, String>> monoTupleList = this.typeMap.entrySet().stream()
-                .flatMap(packageNameEntry ->
-                        packageNameEntry.getValue().entrySet().stream()
-                                .flatMap(typeNameEntry ->
-                                        typeNameEntry.getValue().stream()
-                                                .map(fieldName ->
-                                                        Tuple.of(packageNameEntry.getKey(), typeNameEntry.getKey(), fieldName)
-                                                )
-                                )
-                )
-                .collect(Collectors.toList());
         List<CodeBlock> monoList = new ArrayList<>();
-        for (int index = 0; index < monoTupleList.size(); index++) {
-            String typeMethodName = grpcNameUtil.getTypeMethodName(monoTupleList.get(index)._1(), monoTupleList.get(index)._2(), monoTupleList.get(index)._3());
+        int index = 0;
+        for (String packageName : this.typeMap.keySet()) {
             if (index == 0) {
                 monoList.add(
                         CodeBlock.of("return this.$L.then(Mono.fromRunnable(() -> clear($S)))",
-                                grpcNameUtil.packageNameToUnderline(monoTupleList.get(index)._1()).concat("_JsonMono"),
-                                monoTupleList.get(index)._1()
+                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                                packageName
                         )
                 );
             } else {
                 monoList.add(
                         CodeBlock.of(".then(this.$L.then(Mono.fromRunnable(() -> clear($S))))",
-                                grpcNameUtil.packageNameToUnderline(monoTupleList.get(index)._1()).concat("_JsonMono"),
-                                monoTupleList.get(index)._1()
+                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                                packageName
                         )
                 );
             }
+            index++;
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {

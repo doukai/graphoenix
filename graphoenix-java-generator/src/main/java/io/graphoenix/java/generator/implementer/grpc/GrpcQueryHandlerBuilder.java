@@ -165,7 +165,7 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S)).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
+                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet()).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
                             grpcNameUtil.getTypeListMethodName(packageName, typeName, to),
                             from
                     );
@@ -182,7 +182,7 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S)).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
+                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet()).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
                             grpcNameUtil.getTypeMethodName(packageName, typeName, to),
                             from
                     );
