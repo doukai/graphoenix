@@ -96,7 +96,7 @@ public class GrpcQueryDataLoaderBuilder {
 
     private TypeSpec buildGrpcQueryDataLoader() {
         TypeSpec.Builder builder = TypeSpec.classBuilder("GrpcQueryDataLoader")
-                .superclass(ClassName.get("io.graphoenix.grpc.client", "GrpcBaseDataLoader"))
+                .superclass(ClassName.get("io.graphoenix.grpc.client", "GrpcBaseQueryDataLoader"))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(RequestScoped.class)
                 .addField(
@@ -200,9 +200,9 @@ public class GrpcQueryDataLoaderBuilder {
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
                 .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
-                .addStatement("mergeSelection($S, $S, selectionSetContext)", packageName, typeName)
+                .addStatement("mergeSelection($S, $S, $S, selectionSetContext)", packageName, typeName, fieldName)
                 .addStatement("addCondition($S, $S, $S, key)", packageName, typeName, fieldName)
-                .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).findFirst().orElse($T.NULL))",
+                .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).findFirst().orElse($T.NULL)).map(jsonValue -> jsonValueFilter(jsonValue, selectionSetContext))",
                         grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                         ClassName.get(Stream.class),
                         typeName,
@@ -220,9 +220,9 @@ public class GrpcQueryDataLoaderBuilder {
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
                 .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
-                .addStatement("mergeSelection($S, $S, selectionSetContext)", packageName, typeName)
+                .addStatement("mergeSelection($S, $S, $S, selectionSetContext)", packageName, typeName, fieldName)
                 .addStatement("addCondition($S, $S, $S, key)", packageName, typeName, fieldName)
-                .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).collect($T.toJsonArray()))",
+                .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).collect($T.toJsonArray())).map(jsonValue -> jsonValueFilter(jsonValue, selectionSetContext))",
                         grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                         ClassName.get(Stream.class),
                         typeName,

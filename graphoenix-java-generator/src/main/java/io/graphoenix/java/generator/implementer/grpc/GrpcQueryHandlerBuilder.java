@@ -8,14 +8,12 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.handler.GraphQLFieldFormatter;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.json.JsonValue;
-import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -69,30 +67,6 @@ public class GrpcQueryHandlerBuilder {
                                 Modifier.FINAL
                         ).build()
                 )
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFieldFormatter.class)),
-                                "formatter",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
-                                "jsonProvider",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")),
-                                "channelManager",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
                 .addMethod(buildConstructor())
                 .addMethods(buildTypeMethods());
 
@@ -104,13 +78,7 @@ public class GrpcQueryHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLFieldFormatter.class)), "formatter")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
                 .addStatement("this.manager = manager")
-                .addStatement("this.formatter = formatter")
-                .addStatement("this.jsonProvider = jsonProvider")
-                .addStatement("this.channelManager = channelManager")
                 .build();
     }
 

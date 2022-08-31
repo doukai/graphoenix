@@ -9,7 +9,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.operation.ArrayValueWithVariable;
-import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.ValueWithVariable;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -21,7 +20,6 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
@@ -35,11 +33,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,7 +84,7 @@ public class GrpcMutationDataLoaderBuilder {
 
     private TypeSpec buildGrpcMutationDataLoader() {
         TypeSpec.Builder builder = TypeSpec.classBuilder("GrpcMutationDataLoader")
-                .superclass(ClassName.get("io.graphoenix.grpc.client", "GrpcBaseDataLoader"))
+                .superclass(ClassName.get("io.graphoenix.grpc.client", "GrpcBaseMutationDataLoader"))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(RequestScoped.class)
                 .addField(
@@ -114,31 +110,18 @@ public class GrpcMutationDataLoaderBuilder {
         this.typeMap.keySet().forEach(packageName ->
                 builder.addField(
                         FieldSpec.builder(
-                                ClassName.get(packageName, "ReactorMutationTypeServiceGrpc", "ReactorMutationTypeServiceStub"),
-                                grpcNameUtil.getMutationServiceStubParameterName(packageName),
+                                ClassName.get(packageName, "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
+                                grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
-                )
-        );
-        this.typeMap.forEach((key, value) ->
-                value.forEach(
-                        tuple2 ->
-                                builder.addField(
-                                        FieldSpec.builder(
-                                                ParameterizedTypeName.get(LinkedHashMap.class, String.class, String.class),
-                                                grpcNameUtil.getTypeMethodName(key, tuple2._1()).concat("Map"),
-                                                Modifier.PRIVATE,
-                                                Modifier.FINAL
-                                        ).build()
-                                ).addField(
-                                        FieldSpec.builder(
-                                                ParameterizedTypeName.get(Mono.class, String.class),
-                                                grpcNameUtil.getTypeMethodName(key, tuple2._1()).concat("JsonMono"),
-                                                Modifier.PRIVATE,
-                                                Modifier.FINAL
-                                        ).build()
-                                )
+                ).addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(Mono.class, JsonObject.class),
+                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
                 )
         );
         return builder.build();
@@ -155,25 +138,16 @@ public class GrpcMutationDataLoaderBuilder {
 
         this.typeMap.keySet().forEach(packageName ->
                 builder.addStatement("this.$L = $T.newReactorStub(channelManager.get().getChannel($S))",
-                        grpcNameUtil.getMutationServiceStubParameterName(packageName),
-                        ClassName.get(packageName, "ReactorMutationTypeServiceGrpc"),
+                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                        ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
                         packageName
-                )
-        );
-
-        this.typeMap.forEach((key, value) ->
-                value.forEach(
-                        tuple2 ->
-                                builder.addStatement("this.$L = new $T<>()",
-                                        grpcNameUtil.getTypeMethodName(key, tuple2._1()).concat("Map"),
-                                        ClassName.get(LinkedHashMap.class)
-                                ).addStatement("this.$L = this.$L.$L($T.newBuilder().setArguments(getListArguments($L.values())).build()).map(response -> response.getJson())",
-                                        grpcNameUtil.getTypeMethodName(key, tuple2._1()).concat("JsonMono"),
-                                        grpcNameUtil.getMutationServiceStubParameterName(key),
-                                        grpcNameUtil.getRpcObjectListMethodName(tuple2._1()).concat("Json"),
-                                        ClassName.get(key, grpcNameUtil.getRpcMutationListRequestName(tuple2._1())),
-                                        grpcNameUtil.getTypeMethodName(key, tuple2._1()).concat("Map")
-                                )
+                ).addStatement("this.$L = this.$L.operation($T.newBuilder().setRequest(buildOperation($S).toString()).build()).map(response -> jsonProvider.get().createReader(new $T(response.getResponse())).readObject().get($S).asJsonObject())",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                        ClassName.get(packageName, "GraphQLRequest"),
+                        packageName,
+                        ClassName.get(StringReader.class),
+                        "data"
                 )
         );
         return builder.build();
@@ -196,30 +170,18 @@ public class GrpcMutationDataLoaderBuilder {
     }
 
     private MethodSpec buildTypeMethod(String packageName, String typeName, String key) {
-        String mapName = grpcNameUtil.getTypeMethodName(packageName, typeName).concat("Map");
         return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                .addParameter(ClassName.get(String.class), "selectionName")
                 .beginControlFlow("if (jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
-                .addStatement("$T jsonObject = jsonValue.asJsonObject()", ClassName.get(JsonObject.class))
-                .addStatement("$T keyField = jsonObject.get($S)", ClassName.get(JsonValue.class), key)
-                .addStatement("final int index")
-                .beginControlFlow("if (keyField != null && keyField.getValueType().equals($T.ValueType.STRING))", ClassName.get(JsonValue.class))
-                .addStatement("$T key = (($T) keyField).getString()", ClassName.get(String.class), ClassName.get(JsonString.class))
-                .beginControlFlow("if ($L.containsKey(key))", mapName)
-                .addStatement("index = new $T<>($L.keySet()).indexOf(key)", ClassName.get(ArrayList.class), mapName)
-                .nextControlFlow("else")
-                .addStatement("$L.put(key, jsonObject.toString())", mapName)
-                .addStatement("index = $L.size() - 1", mapName)
-                .endControlFlow()
-                .nextControlFlow("else")
-                .addStatement("$L.put($T.randomUUID().toString(), jsonObject.toString())", mapName, ClassName.get(UUID.class))
-                .addStatement("index = $L.size() - 1", mapName)
-                .endControlFlow()
-                .addStatement("return $L.map(json -> jsonProvider.get().createReader(new $T(json)).readArray()).map(item -> item.get(index))",
-                        grpcNameUtil.getTypeMethodName(packageName, typeName).concat("JsonMono"),
-                        ClassName.get(StringReader.class)
+                .addStatement("final int index = addObjectValue($S, $S, jsonValue.asJsonObject(), $S)", packageName, typeName, key)
+                .addStatement("addSelection($S, $S, selectionName)", packageName, typeName)
+                .addStatement("return $L.map(jsonObject -> jsonObject.getJsonArray(typeToLowerCamelName($S)).get(index).asJsonObject().getOrDefault(selectionName, $T.NULL))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        typeName,
+                        ClassName.get(JsonValue.class)
                 )
                 .nextControlFlow("else")
                 .addStatement("return $T.empty()", ClassName.get(Mono.class))
@@ -228,30 +190,18 @@ public class GrpcMutationDataLoaderBuilder {
     }
 
     private MethodSpec buildTypeFieldMethod(String packageName, String typeName, String key) {
-        String mapName = grpcNameUtil.getTypeMethodName(packageName, typeName).concat("Map");
         return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName))
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
+                .addParameter(ClassName.get(String.class), "selectionName")
                 .beginControlFlow("if (valueWithVariable.isObject())")
-                .addStatement("$T objectValueWithVariable = valueWithVariable.asObject()", ClassName.get(ObjectValueWithVariable.class))
-                .addStatement("$T keyField = objectValueWithVariable.get($S)", ClassName.get(ValueWithVariable.class), key)
-                .addStatement("final int index")
-                .beginControlFlow("if (keyField != null && keyField.isString())")
-                .addStatement("$T key = keyField.asString().getValue()", ClassName.get(String.class))
-                .beginControlFlow("if ($L.containsKey(key))", mapName)
-                .addStatement("index = new $T<>($L.keySet()).indexOf(key)", ClassName.get(ArrayList.class), mapName)
-                .nextControlFlow("else")
-                .addStatement("$L.put(key, objectValueWithVariable.toString())", mapName)
-                .addStatement("index = $L.size() - 1", mapName)
-                .endControlFlow()
-                .nextControlFlow("else")
-                .addStatement("$L.put($T.randomUUID().toString(), objectValueWithVariable.toString())", mapName, ClassName.get(UUID.class))
-                .addStatement("index = $L.size() - 1", mapName)
-                .endControlFlow()
-                .addStatement("return $L.map(json -> jsonProvider.get().createReader(new $T(json)).readArray()).map(item -> item.get(index))",
-                        grpcNameUtil.getTypeMethodName(packageName, typeName).concat("JsonMono"),
-                        ClassName.get(StringReader.class)
+                .addStatement("final int index = addObjectValue($S, $S, valueWithVariable.asObject(), $S)", packageName, typeName, key)
+                .addStatement("addSelection($S, $S, selectionName)", packageName, typeName)
+                .addStatement("return $L.map(jsonObject -> jsonObject.getJsonArray(typeToLowerCamelName($S)).get(index).asJsonObject().getOrDefault(selectionName, $T.NULL))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        typeName,
+                        ClassName.get(JsonValue.class)
                 )
                 .nextControlFlow("else")
                 .addStatement("return $T.empty()", ClassName.get(Mono.class))
@@ -264,9 +214,10 @@ public class GrpcMutationDataLoaderBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                .addParameter(ClassName.get(String.class), "selectionName")
                 .beginControlFlow("if (jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
                 .addStatement("$T jsonArray = jsonValue.asJsonArray()", ClassName.get(JsonArray.class))
-                .addStatement("return $T.fromIterable(jsonArray).flatMap(item -> $L(item)).collect($T.toJsonArray())",
+                .addStatement("return $T.fromIterable(jsonArray).flatMap(item -> $L(item, selectionName)).collect($T.toJsonArray())",
                         ClassName.get(Flux.class),
                         grpcNameUtil.getTypeMethodName(packageName, typeName),
                         ClassName.get(JsonCollectors.class)
@@ -282,9 +233,10 @@ public class GrpcMutationDataLoaderBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
+                .addParameter(ClassName.get(String.class), "selectionName")
                 .beginControlFlow("if (valueWithVariable.isArray())", ClassName.get(JsonValue.class))
                 .addStatement("$T arrayValueWithVariable = valueWithVariable.asArray()", ClassName.get(ArrayValueWithVariable.class))
-                .addStatement("return $T.fromIterable(arrayValueWithVariable).flatMap(item -> $L(item)).collect($T.toJsonArray())",
+                .addStatement("return $T.fromIterable(arrayValueWithVariable).flatMap(item -> $L(item, selectionName)).collect($T.toJsonArray())",
                         ClassName.get(Flux.class),
                         grpcNameUtil.getTypeMethodName(packageName, typeName),
                         ClassName.get(JsonCollectors.class)
@@ -296,32 +248,25 @@ public class GrpcMutationDataLoaderBuilder {
     }
 
     private MethodSpec buildDispatchMethod() {
-        List<AbstractMap.SimpleEntry<String, String>> monoEntryList = this.typeMap.entrySet().stream()
-                .flatMap(entry -> entry.getValue().stream()
-                        .map(tuple2 -> new AbstractMap.SimpleEntry<>(entry.getKey(), tuple2._1())))
-                .collect(Collectors.toList());
         List<CodeBlock> monoList = new ArrayList<>();
-        for (int index = 0; index < monoEntryList.size(); index++) {
-            String typeMethodName = grpcNameUtil.getTypeMethodName(monoEntryList.get(index).getKey(), monoEntryList.get(index).getValue());
+        int index = 0;
+        for (String packageName : this.typeMap.keySet()) {
             if (index == 0) {
                 monoList.add(
-                        CodeBlock.of("return $T.just($L.size() == 0).flatMap(empty -> empty ? Mono.empty() : this.$L.then(Mono.fromRunnable($L::clear)))",
-                                ClassName.get(Mono.class),
-                                typeMethodName.concat("Map"),
-                                typeMethodName.concat("JsonMono"),
-                                typeMethodName.concat("Map")
+                        CodeBlock.of("return this.$L.then(Mono.fromRunnable(() -> clear($S)))",
+                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                                packageName
                         )
                 );
             } else {
                 monoList.add(
-                        CodeBlock.of(".then($T.just($L.size() == 0).flatMap(empty -> empty ? Mono.empty() : this.$L.then(Mono.fromRunnable($L::clear))))",
-                                ClassName.get(Mono.class),
-                                typeMethodName.concat("Map"),
-                                typeMethodName.concat("JsonMono"),
-                                typeMethodName.concat("Map")
+                        CodeBlock.of(".then(this.$L.then(Mono.fromRunnable(() -> clear($S))))",
+                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                                packageName
                         )
                 );
             }
+            index++;
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {

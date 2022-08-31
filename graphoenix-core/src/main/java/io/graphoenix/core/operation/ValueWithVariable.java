@@ -25,7 +25,31 @@ public class ValueWithVariable {
     private final Object valueWithVariable;
 
     public ValueWithVariable(Object value) {
-        this.valueWithVariable = getValueWithVariable(value);
+        if (value instanceof BooleanValue) {
+            this.valueWithVariable = value;
+        } else if (value instanceof IntValue) {
+            this.valueWithVariable = value;
+        } else if (value instanceof FloatValue) {
+            this.valueWithVariable = value;
+        } else if (value instanceof StringValue) {
+            this.valueWithVariable = value;
+        } else if (value instanceof EnumValue) {
+            this.valueWithVariable = value;
+        } else if (value instanceof NullValue) {
+            this.valueWithVariable = value;
+        } else if (value instanceof ObjectValueWithVariable) {
+            this.valueWithVariable = value;
+        } else if (value instanceof ArrayValueWithVariable) {
+            this.valueWithVariable = value;
+        } else if (value instanceof Variable) {
+            this.valueWithVariable = value;
+        } else if (value instanceof JsonValue) {
+            this.valueWithVariable = getValueWithVariable((JsonValue) value);
+        } else if (value instanceof GraphqlParser.ValueWithVariableContext) {
+            this.valueWithVariable = getValueWithVariable((GraphqlParser.ValueWithVariableContext) value);
+        } else {
+            this.valueWithVariable = getValueWithVariable(value);
+        }
     }
 
     public ValueWithVariable(JsonValue value) {
