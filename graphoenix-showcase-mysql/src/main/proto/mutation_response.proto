@@ -69,6 +69,12 @@ message MutationUserResponse {
 message MutationUserListResponse {
     repeated User user_list = 1;
 }
+message MutationUserProfileResponse {
+    optional UserProfile user_profile = 1;
+}
+message MutationUserProfileListResponse {
+    repeated UserProfile user_profile_list = 1;
+}
 message MutationUserPhonesResponse {
     optional UserPhones user_phones = 1;
 }

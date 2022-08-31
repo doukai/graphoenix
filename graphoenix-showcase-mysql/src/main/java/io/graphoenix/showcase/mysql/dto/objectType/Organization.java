@@ -28,6 +28,8 @@ public class Organization implements Meta {
 
   private Collection<User> users;
 
+  private Collection<User> rpcUsers;
+
   @NonNull
   private String name;
 
@@ -117,6 +119,14 @@ public class Organization implements Meta {
 
   public void setUsers(Collection<User> users) {
     this.users = users;
+  }
+
+  public Collection<User> getRpcUsers() {
+    return this.rpcUsers;
+  }
+
+  public void setRpcUsers(Collection<User> rpcUsers) {
+    this.rpcUsers = rpcUsers;
   }
 
   public String getName() {

@@ -8,12 +8,16 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-public @interface OrganizationInput1 {
+public @interface UserProfileInput1 {
   String id() default "";
 
-  int aboveId() default 0;
+  String userId() default "";
 
-  String name() default "";
+  String email() default "";
+
+  String address() default "";
+
+  String qq() default "";
 
   boolean isDeprecated() default false;
 
@@ -33,23 +37,19 @@ public @interface OrganizationInput1 {
 
   String __typename() default "";
 
-  int orgLevel2() default 0;
-
-  int[] orgLevel3() default {};
-
-  boolean[] roleDisable() default {};
-
   String $id() default "";
 
-  String $aboveId() default "";
+  String $userId() default "";
 
-  String $above() default "";
+  String $email() default "";
 
-  String $users() default "";
+  String $address() default "";
 
-  String $rpcUsers() default "";
+  String $qq() default "";
 
-  String $name() default "";
+  String $user() default "";
+
+  String $rpcUser() default "";
 
   String $isDeprecated() default "";
 
@@ -69,31 +69,11 @@ public @interface OrganizationInput1 {
 
   String $__typename() default "";
 
-  String $usersAggregate() default "";
+  UserInput2 user() default @UserInput2;
 
-  String $usersConnection() default "";
+  UserInput2 rpcUser() default @UserInput2;
 
-  String $orgLevel2() default "";
-
-  String $orgLevel3() default "";
-
-  String $roleDisable() default "";
-
-  String $userByOrg() default "";
-
-  String $parent() default "";
-
-  OrganizationInput2 above() default @OrganizationInput2;
-
-  UserInput2[] users() default {};
-
-  UserInput2[] rpcUsers() default {};
-
-  UserInput2[] userByOrg() default {};
-
-  OrganizationInput2 parent() default @OrganizationInput2;
-
-  OrganizationInput2[] list() default {};
+  UserProfileInput2[] list() default {};
 
   String $list() default "";
 }

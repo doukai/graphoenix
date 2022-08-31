@@ -35,6 +35,8 @@ public class UserInput {
 
   private Sex sex;
 
+  private UserProfileInput userProfile;
+
   private Integer organizationId;
 
   private OrganizationInput organization;
@@ -123,6 +125,14 @@ public class UserInput {
 
   public void setSex(Sex sex) {
     this.sex = sex;
+  }
+
+  public UserProfileInput getUserProfile() {
+    return this.userProfile;
+  }
+
+  public void setUserProfile(UserProfileInput userProfile) {
+    this.userProfile = userProfile;
   }
 
   public Integer getOrganizationId() {

@@ -51,6 +51,12 @@ public @interface UserOrderBy0 {
 
   Sort userDetail2() default Sort.ASC;
 
+  UserProfileOrderBy1 userProfile() default @UserProfileOrderBy1;
+
+  UserProfileOrderBy1 rpcUserProfile() default @UserProfileOrderBy1;
+
+  OrganizationOrderBy1 rpcOrganization() default @OrganizationOrderBy1;
+
   OrganizationOrderBy1 organization() default @OrganizationOrderBy1;
 
   RoleOrderBy1 roles() default @RoleOrderBy1;

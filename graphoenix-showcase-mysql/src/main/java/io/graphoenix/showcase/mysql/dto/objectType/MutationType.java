@@ -57,6 +57,10 @@ public class MutationType implements Meta {
 
   private Collection<User> userList;
 
+  private UserProfile userProfile;
+
+  private Collection<UserProfile> userProfileList;
+
   private UserPhones userPhones;
 
   private Collection<UserPhones> userPhonesList;
@@ -260,6 +264,22 @@ public class MutationType implements Meta {
 
   public void setUserList(Collection<User> userList) {
     this.userList = userList;
+  }
+
+  public UserProfile getUserProfile() {
+    return this.userProfile;
+  }
+
+  public void setUserProfile(UserProfile userProfile) {
+    this.userProfile = userProfile;
+  }
+
+  public Collection<UserProfile> getUserProfileList() {
+    return this.userProfileList;
+  }
+
+  public void setUserProfileList(Collection<UserProfile> userProfileList) {
+    this.userProfileList = userProfileList;
   }
 
   public UserPhones getUserPhones() {

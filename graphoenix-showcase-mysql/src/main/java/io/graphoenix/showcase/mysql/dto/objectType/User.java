@@ -38,7 +38,13 @@ public class User implements Meta {
 
   private Sex sex;
 
+  private UserProfile userProfile;
+
+  private UserProfile rpcUserProfile;
+
   private Integer organizationId;
+
+  private Organization rpcOrganization;
 
   private Organization organization;
 
@@ -179,12 +185,36 @@ public class User implements Meta {
     this.sex = sex;
   }
 
+  public UserProfile getUserProfile() {
+    return this.userProfile;
+  }
+
+  public void setUserProfile(UserProfile userProfile) {
+    this.userProfile = userProfile;
+  }
+
+  public UserProfile getRpcUserProfile() {
+    return this.rpcUserProfile;
+  }
+
+  public void setRpcUserProfile(UserProfile rpcUserProfile) {
+    this.rpcUserProfile = rpcUserProfile;
+  }
+
   public Integer getOrganizationId() {
     return this.organizationId;
   }
 
   public void setOrganizationId(Integer organizationId) {
     this.organizationId = organizationId;
+  }
+
+  public Organization getRpcOrganization() {
+    return this.rpcOrganization;
+  }
+
+  public void setRpcOrganization(Organization rpcOrganization) {
+    this.rpcOrganization = rpcOrganization;
   }
 
   public Organization getOrganization() {

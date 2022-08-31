@@ -8,12 +8,16 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-public @interface OrganizationOrderBy1 {
+public @interface UserProfileOrderBy0 {
   Sort id() default Sort.ASC;
 
-  Sort aboveId() default Sort.ASC;
+  Sort userId() default Sort.ASC;
 
-  Sort name() default Sort.ASC;
+  Sort email() default Sort.ASC;
+
+  Sort address() default Sort.ASC;
+
+  Sort qq() default Sort.ASC;
 
   Sort isDeprecated() default Sort.ASC;
 
@@ -33,19 +37,7 @@ public @interface OrganizationOrderBy1 {
 
   Sort __typename() default Sort.ASC;
 
-  Sort orgLevel2() default Sort.ASC;
+  UserOrderBy1 user() default @UserOrderBy1;
 
-  Sort orgLevel3() default Sort.ASC;
-
-  Sort roleDisable() default Sort.ASC;
-
-  OrganizationOrderBy2 above() default @OrganizationOrderBy2;
-
-  UserOrderBy2 users() default @UserOrderBy2;
-
-  UserOrderBy2 rpcUsers() default @UserOrderBy2;
-
-  UserOrderBy2 userByOrg() default @UserOrderBy2;
-
-  OrganizationOrderBy2 parent() default @OrganizationOrderBy2;
+  UserOrderBy1 rpcUser() default @UserOrderBy1;
 }

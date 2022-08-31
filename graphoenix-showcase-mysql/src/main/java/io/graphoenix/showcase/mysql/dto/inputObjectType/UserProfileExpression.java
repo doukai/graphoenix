@@ -13,34 +13,18 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
-public class UserExpression {
+public class UserProfileExpression {
   private StringExpression id;
 
-  private StringExpression login;
+  private StringExpression userId;
 
-  private StringExpression password;
+  private StringExpression email;
 
-  private StringExpression name;
+  private StringExpression address;
 
-  private IntExpression age;
+  private StringExpression qq;
 
-  private BooleanExpression disable;
-
-  private SexExpression sex;
-
-  private UserProfileExpression userProfile;
-
-  private IntExpression organizationId;
-
-  private OrganizationExpression organization;
-
-  private RoleExpression roles;
-
-  private StringExpression phones;
-
-  private IntExpression test1;
-
-  private BooleanExpression test2;
+  private UserExpression user;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -64,7 +48,7 @@ public class UserExpression {
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<UserExpression> exs;
+  private Collection<UserProfileExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -74,108 +58,44 @@ public class UserExpression {
     this.id = id;
   }
 
-  public StringExpression getLogin() {
-    return this.login;
+  public StringExpression getUserId() {
+    return this.userId;
   }
 
-  public void setLogin(StringExpression login) {
-    this.login = login;
+  public void setUserId(StringExpression userId) {
+    this.userId = userId;
   }
 
-  public StringExpression getPassword() {
-    return this.password;
+  public StringExpression getEmail() {
+    return this.email;
   }
 
-  public void setPassword(StringExpression password) {
-    this.password = password;
+  public void setEmail(StringExpression email) {
+    this.email = email;
   }
 
-  public StringExpression getName() {
-    return this.name;
+  public StringExpression getAddress() {
+    return this.address;
   }
 
-  public void setName(StringExpression name) {
-    this.name = name;
+  public void setAddress(StringExpression address) {
+    this.address = address;
   }
 
-  public IntExpression getAge() {
-    return this.age;
+  public StringExpression getQq() {
+    return this.qq;
   }
 
-  public void setAge(IntExpression age) {
-    this.age = age;
+  public void setQq(StringExpression qq) {
+    this.qq = qq;
   }
 
-  public BooleanExpression getDisable() {
-    return this.disable;
+  public UserExpression getUser() {
+    return this.user;
   }
 
-  public void setDisable(BooleanExpression disable) {
-    this.disable = disable;
-  }
-
-  public SexExpression getSex() {
-    return this.sex;
-  }
-
-  public void setSex(SexExpression sex) {
-    this.sex = sex;
-  }
-
-  public UserProfileExpression getUserProfile() {
-    return this.userProfile;
-  }
-
-  public void setUserProfile(UserProfileExpression userProfile) {
-    this.userProfile = userProfile;
-  }
-
-  public IntExpression getOrganizationId() {
-    return this.organizationId;
-  }
-
-  public void setOrganizationId(IntExpression organizationId) {
-    this.organizationId = organizationId;
-  }
-
-  public OrganizationExpression getOrganization() {
-    return this.organization;
-  }
-
-  public void setOrganization(OrganizationExpression organization) {
-    this.organization = organization;
-  }
-
-  public RoleExpression getRoles() {
-    return this.roles;
-  }
-
-  public void setRoles(RoleExpression roles) {
-    this.roles = roles;
-  }
-
-  public StringExpression getPhones() {
-    return this.phones;
-  }
-
-  public void setPhones(StringExpression phones) {
-    this.phones = phones;
-  }
-
-  public IntExpression getTest1() {
-    return this.test1;
-  }
-
-  public void setTest1(IntExpression test1) {
-    this.test1 = test1;
-  }
-
-  public BooleanExpression getTest2() {
-    return this.test2;
-  }
-
-  public void setTest2(BooleanExpression test2) {
-    this.test2 = test2;
+  public void setUser(UserExpression user) {
+    this.user = user;
   }
 
   public Boolean getIncludeDeprecated() {
@@ -258,11 +178,11 @@ public class UserExpression {
     this.cond = cond;
   }
 
-  public Collection<UserExpression> getExs() {
+  public Collection<UserProfileExpression> getExs() {
     return this.exs;
   }
 
-  public void setExs(Collection<UserExpression> exs) {
+  public void setExs(Collection<UserProfileExpression> exs) {
     this.exs = exs;
   }
 }

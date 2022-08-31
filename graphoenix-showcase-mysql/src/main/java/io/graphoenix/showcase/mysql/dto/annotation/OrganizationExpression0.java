@@ -70,6 +70,8 @@ public @interface OrganizationExpression0 {
 
   UserExpression1 users() default @UserExpression1;
 
+  UserExpression1 rpcUsers() default @UserExpression1;
+
   UserExpression1 userByOrg() default @UserExpression1;
 
   OrganizationExpression1 parent() default @OrganizationExpression1;

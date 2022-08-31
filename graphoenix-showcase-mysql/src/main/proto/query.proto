@@ -42,6 +42,9 @@ service QueryTypeService {
     rpc User (QueryUserRequest) returns (QueryUserResponse);
     rpc UserList (QueryUserListRequest) returns (QueryUserListResponse);
     rpc UserConnection (QueryUserConnectionRequest) returns (QueryUserConnectionResponse);
+    rpc UserProfile (QueryUserProfileRequest) returns (QueryUserProfileResponse);
+    rpc UserProfileList (QueryUserProfileListRequest) returns (QueryUserProfileListResponse);
+    rpc UserProfileConnection (QueryUserProfileConnectionRequest) returns (QueryUserProfileConnectionResponse);
     rpc UserPhones (QueryUserPhonesRequest) returns (QueryUserPhonesResponse);
     rpc UserPhonesList (QueryUserPhonesListRequest) returns (QueryUserPhonesListResponse);
     rpc UserPhonesConnection (QueryUserPhonesConnectionRequest) returns (QueryUserPhonesConnectionResponse);

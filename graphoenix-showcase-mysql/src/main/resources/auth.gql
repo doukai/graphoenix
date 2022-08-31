@@ -6,15 +6,25 @@ type User @table(engine: "InnoDB") {
     age: Int
     disable: Boolean
     sex: Sex
+    userProfile: UserProfile @map(from: "id" to: "userId")
+    rpcUserProfile: UserProfile @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "id" to: "userId" key:"id")
     organizationId: Int
-    rpcUser:[User] @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "id" to:"id" key:"id")
-    rpcUser2:[User] @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "name" anchor: true to:"name" key:"id")
-    rpcRole:[Role] @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "id" to:"id" key:"id")
+    rpcOrganization:Organization @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "organizationId" to:"id" key:"id" anchor: true)
     organization: Organization @map(from: "organizationId" to: "id" anchor: true)
     roles: [Role!] @map(from: "id" with: {type: "UserRole" from: "userId" to: "roleId"} to: "id")
     phones: [String!]! @map(from: "id" with: {type: "UserPhones" from: "userId" to: "phone"})
     test1: [Int!]! @map(from: "id" with: {type: "UserTest1" from: "userId" to: "test1"})
     test2: [Boolean!]! @map(from: "id" with: {type: "UserTest2" from: "userId" to: "test2"})
+}
+
+type UserProfile @table(engine: "InnoDB") {
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    userId: String
+    email: String
+    address: String
+    qq: String
+    user: User @map(from: "userId" to: "id" anchor: true)
+    rpcUser: User @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "userId" to: "id" key:"id" anchor: true)
 }
 
 type UserPhones @table(engine: "InnoDB") {
@@ -70,5 +80,6 @@ type Organization @table(engine: "InnoDB") {
     aboveId: Int
     above: Organization @map(from: "aboveId" to: "id" anchor: true)
     users: [User!] @map(from: "id" to: "organizationId")
+    rpcUsers: [User] @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "id" to: "organizationId" key:"id")
     name: String!
 }

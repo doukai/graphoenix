@@ -78,6 +78,12 @@ public @interface UserExpression0 {
 
   String $before() default "";
 
+  UserProfileExpression1 userProfile() default @UserProfileExpression1;
+
+  UserProfileExpression1 rpcUserProfile() default @UserProfileExpression1;
+
+  OrganizationExpression1 rpcOrganization() default @OrganizationExpression1;
+
   OrganizationExpression1 organization() default @OrganizationExpression1;
 
   RoleExpression1 roles() default @RoleExpression1;

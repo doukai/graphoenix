@@ -47,6 +47,8 @@ public @interface OrganizationInput0 {
 
   String $users() default "";
 
+  String $rpcUsers() default "";
+
   String $name() default "";
 
   String $isDeprecated() default "";
@@ -84,6 +86,8 @@ public @interface OrganizationInput0 {
   OrganizationInput1 above() default @OrganizationInput1;
 
   UserInput1[] users() default {};
+
+  UserInput1[] rpcUsers() default {};
 
   UserInput1[] userByOrg() default {};
 

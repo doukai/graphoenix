@@ -9,30 +9,18 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
-public @interface UserExpression1 {
+public @interface UserProfileExpression0 {
   Conditional cond() default Conditional.AND;
 
   IDExpression id() default @IDExpression;
 
-  StringExpression login() default @StringExpression;
+  StringExpression userId() default @StringExpression;
 
-  StringExpression password() default @StringExpression;
+  StringExpression email() default @StringExpression;
 
-  StringExpression name() default @StringExpression;
+  StringExpression address() default @StringExpression;
 
-  IntExpression age() default @IntExpression;
-
-  BooleanExpression disable() default @BooleanExpression;
-
-  SexExpression sex() default @SexExpression;
-
-  IntExpression organizationId() default @IntExpression;
-
-  StringExpression phones() default @StringExpression;
-
-  IntExpression test1() default @IntExpression;
-
-  BooleanExpression test2() default @BooleanExpression;
+  StringExpression qq() default @StringExpression;
 
   BooleanExpression isDeprecated() default @BooleanExpression;
 
@@ -52,11 +40,9 @@ public @interface UserExpression1 {
 
   StringExpression __typename() default @StringExpression;
 
-  StringExpression userDetail2() default @StringExpression;
-
   String[] groupBy() default {};
 
-  UserOrderBy1 orderBy() default @UserOrderBy1;
+  UserProfileOrderBy0 orderBy() default @UserProfileOrderBy0;
 
   int first() default 0;
 
@@ -78,15 +64,9 @@ public @interface UserExpression1 {
 
   String $before() default "";
 
-  UserProfileExpression2 userProfile() default @UserProfileExpression2;
+  UserExpression1 user() default @UserExpression1;
 
-  UserProfileExpression2 rpcUserProfile() default @UserProfileExpression2;
+  UserExpression1 rpcUser() default @UserExpression1;
 
-  OrganizationExpression2 rpcOrganization() default @OrganizationExpression2;
-
-  OrganizationExpression2 organization() default @OrganizationExpression2;
-
-  RoleExpression2 roles() default @RoleExpression2;
-
-  UserExpression2[] exs() default {};
+  UserProfileExpression1[] exs() default {};
 }

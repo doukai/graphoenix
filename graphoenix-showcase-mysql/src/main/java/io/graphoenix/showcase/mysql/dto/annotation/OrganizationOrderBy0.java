@@ -43,6 +43,8 @@ public @interface OrganizationOrderBy0 {
 
   UserOrderBy1 users() default @UserOrderBy1;
 
+  UserOrderBy1 rpcUsers() default @UserOrderBy1;
+
   UserOrderBy1 userByOrg() default @UserOrderBy1;
 
   OrganizationOrderBy1 parent() default @OrganizationOrderBy1;

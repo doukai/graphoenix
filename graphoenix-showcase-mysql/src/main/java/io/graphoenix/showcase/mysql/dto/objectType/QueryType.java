@@ -77,6 +77,12 @@ public class QueryType implements Meta {
 
   private UserConnection userConnection;
 
+  private UserProfile userProfile;
+
+  private Collection<UserProfile> userProfileList;
+
+  private UserProfileConnection userProfileConnection;
+
   private UserPhones userPhones;
 
   private Collection<UserPhones> userPhonesList;
@@ -392,6 +398,30 @@ public class QueryType implements Meta {
 
   public void setUserConnection(UserConnection userConnection) {
     this.userConnection = userConnection;
+  }
+
+  public UserProfile getUserProfile() {
+    return this.userProfile;
+  }
+
+  public void setUserProfile(UserProfile userProfile) {
+    this.userProfile = userProfile;
+  }
+
+  public Collection<UserProfile> getUserProfileList() {
+    return this.userProfileList;
+  }
+
+  public void setUserProfileList(Collection<UserProfile> userProfileList) {
+    this.userProfileList = userProfileList;
+  }
+
+  public UserProfileConnection getUserProfileConnection() {
+    return this.userProfileConnection;
+  }
+
+  public void setUserProfileConnection(UserProfileConnection userProfileConnection) {
+    this.userProfileConnection = userProfileConnection;
   }
 
   public UserPhones getUserPhones() {

@@ -66,7 +66,13 @@ public @interface UserInput0 {
 
   String $sex() default "";
 
+  String $userProfile() default "";
+
+  String $rpcUserProfile() default "";
+
   String $organizationId() default "";
+
+  String $rpcOrganization() default "";
 
   String $organization() default "";
 
@@ -101,6 +107,12 @@ public @interface UserInput0 {
   String $rolesConnection() default "";
 
   String $userDetail2() default "";
+
+  UserProfileInput1 userProfile() default @UserProfileInput1;
+
+  UserProfileInput1 rpcUserProfile() default @UserProfileInput1;
+
+  OrganizationInput1 rpcOrganization() default @OrganizationInput1;
 
   OrganizationInput1 organization() default @OrganizationInput1;
 

@@ -47,6 +47,8 @@ public @interface OrganizationInput2 {
 
   String $users() default "";
 
+  String $rpcUsers() default "";
+
   String $name() default "";
 
   String $isDeprecated() default "";

@@ -32,6 +32,8 @@ service MutationTypeService {
     rpc IntroDirectiveLocationsList (MutationIntroDirectiveLocationsListRequest) returns (MutationIntroDirectiveLocationsListResponse);
     rpc User (MutationUserRequest) returns (MutationUserResponse);
     rpc UserList (MutationUserListRequest) returns (MutationUserListResponse);
+    rpc UserProfile (MutationUserProfileRequest) returns (MutationUserProfileResponse);
+    rpc UserProfileList (MutationUserProfileListRequest) returns (MutationUserProfileListResponse);
     rpc UserPhones (MutationUserPhonesRequest) returns (MutationUserPhonesResponse);
     rpc UserPhonesList (MutationUserPhonesListRequest) returns (MutationUserPhonesListResponse);
     rpc UserTest1 (MutationUserTest1Request) returns (MutationUserTest1Response);

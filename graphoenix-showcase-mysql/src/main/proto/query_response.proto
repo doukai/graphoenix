@@ -99,6 +99,15 @@ message QueryUserListResponse {
 message QueryUserConnectionResponse {
     optional UserConnection user_connection = 1;
 }
+message QueryUserProfileResponse {
+    optional UserProfile user_profile = 1;
+}
+message QueryUserProfileListResponse {
+    repeated UserProfile user_profile_list = 1;
+}
+message QueryUserProfileConnectionResponse {
+    optional UserProfileConnection user_profile_connection = 1;
+}
 message QueryUserPhonesResponse {
     optional UserPhones user_phones = 1;
 }
