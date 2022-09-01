@@ -11,15 +11,17 @@ import io.graphoenix.core.introspection.__Schema;
 import io.graphoenix.core.introspection.__Type;
 import io.graphoenix.core.introspection.__TypeKind;
 import io.graphoenix.core.operation.Argument;
-import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.spi.JsonProvider;
+import jakarta.json.stream.JsonCollectors;
 import org.tinylog.Logger;
 
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Optional;
@@ -34,47 +36,46 @@ public class IntrospectionMutationBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final IGraphQLFieldMapManager mapper;
+    private final JsonProvider jsonProvider;
 
     private final int levelThreshold;
 
     @Inject
-    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
+    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, JsonProvider jsonProvider) {
         this.manager = manager;
         this.mapper = mapper;
+        this.jsonProvider = jsonProvider;
         this.levelThreshold = 1;
     }
 
     public Operation buildIntrospectionSchemaMutation() {
         Set<Argument> arguments = new LinkedHashSet<>();
-
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
-        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(jsonProvider.createReader(new StringReader(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())).readObject())));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> mutationTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject);
-        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("mutationType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("mutationType").setValueWithVariable(jsonProvider.createReader(new StringReader(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())).readObject())));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> subscriptionTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject);
-        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())));
+        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(jsonProvider.createReader(new StringReader(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())).readObject())));
 
         arguments.add(
                 new Argument()
                         .setName("types")
                         .setValueWithVariable(
-                                new ArrayValueWithVariable(
-                                        Stream.concat(
-                                                manager.getObjects().map(this::objectTypeDefinitionContextToType),
+                                Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject()),
                                                 Stream.concat(
-                                                        manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
+                                                        manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject()),
                                                         Stream.concat(
-                                                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType),
+                                                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject()),
                                                                 Stream.concat(
-                                                                        manager.getEnums().map(this::enumTypeDefinitionContextToType),
-                                                                        manager.getScalars().map(this::scalarTypeDefinitionContextToType)
+                                                                        manager.getEnums().map(this::enumTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject()),
+                                                                        manager.getScalars().map(this::scalarTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject())
                                                                 )
                                                         )
                                                 )
-                                        ).collect(Collectors.toList())
-                                ).toString()
+                                        )
+                                        .collect(JsonCollectors.toJsonArray())
                         )
         );
 
@@ -82,11 +83,10 @@ public class IntrospectionMutationBuilder {
                 new Argument()
                         .setName("directives")
                         .setValueWithVariable(
-                                new ArrayValueWithVariable(
-                                        manager.getDirectives()
-                                                .map(this::directiveDefinitionContextToDirective)
-                                                .collect(Collectors.toList())
-                                ).toString()
+                                manager.getDirectives()
+                                        .map(this::directiveDefinitionContextToDirective)
+                                        .map(__directive -> jsonProvider.createReader(new StringReader(__directive.toString())).readObject())
+                                        .collect(JsonCollectors.toJsonArray())
                         )
         );
 
@@ -157,6 +157,7 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            .filter(manager::isNotGrpcField)
                             .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
                             .map(fieldDefinitionContext -> fieldDefinitionContextToField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
                             .collect(Collectors.toCollection(LinkedHashSet::new))
@@ -192,6 +193,7 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(
                     interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            .filter(manager::isNotGrpcField)
                             .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
                             .map(fieldDefinitionContext -> fieldDefinitionContextToField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
                             .collect(Collectors.toCollection(LinkedHashSet::new))

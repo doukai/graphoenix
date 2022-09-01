@@ -1,6 +1,7 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -44,8 +45,8 @@ public class Argument {
         return valueWithVariable;
     }
 
-    public Argument setValueWithVariable(String valueWithVariable) {
-        this.valueWithVariable = new ValueWithVariable(valueWithVariable);
+    public Argument setValueWithVariable(JsonValue jsonValue) {
+        this.valueWithVariable = new ValueWithVariable(jsonValue);
         return this;
     }
 

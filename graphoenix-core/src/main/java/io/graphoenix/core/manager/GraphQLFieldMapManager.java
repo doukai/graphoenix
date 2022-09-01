@@ -310,6 +310,9 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     public Optional<GraphqlParser.ValueWithVariableContext> getMapFromValueWithVariableFromArguments(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                                                      GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                                                      GraphqlParser.ArgumentsContext parentArgumentsContext) {
+        if (parentArgumentsContext == null) {
+            return Optional.empty();
+        }
         return getFromFieldDefinition(manager.getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(fromFieldDefinition ->
                         parentArgumentsContext.argument().stream()
@@ -324,6 +327,9 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     public Optional<GraphqlParser.ValueWithVariableContext> getMapFromValueWithVariableFromObjectFieldWithVariable(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                                                                    GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                                                                    GraphqlParser.ObjectValueWithVariableContext parentObjectValueWithVariableContext) {
+        if (parentObjectValueWithVariableContext == null) {
+            return Optional.empty();
+        }
         return getFromFieldDefinition(manager.getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(fromFieldDefinition ->
                         parentObjectValueWithVariableContext.objectFieldWithVariable().stream()
@@ -338,6 +344,9 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     public Optional<GraphqlParser.ValueContext> getMapFromValueFromObjectField(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                                GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                                GraphqlParser.ObjectValueContext parentObjectValueContext) {
+        if (parentObjectValueContext == null) {
+            return Optional.empty();
+        }
         return getFromFieldDefinition(manager.getFieldTypeName(parentFieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(fromFieldDefinition ->
                         parentObjectValueContext.objectField().stream()
@@ -351,6 +360,9 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     @Override
     public Optional<GraphqlParser.ValueWithVariableContext> getMapToValueWithVariableFromObjectFieldWithVariable(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                                                                  GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        if (objectValueWithVariableContext == null) {
+            return Optional.empty();
+        }
         return getFromFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(toFieldDefinition ->
                         objectValueWithVariableContext.objectFieldWithVariable().stream()
@@ -364,6 +376,9 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     @Override
     public Optional<GraphqlParser.ValueContext> getMapToValueFromObjectField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                              GraphqlParser.ObjectValueContext objectValueContext) {
+        if (objectValueContext == null) {
+            return Optional.empty();
+        }
         return getFromFieldDefinition(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.name().getText())
                 .flatMap(toFieldDefinition ->
                         objectValueContext.objectField().stream()
