@@ -36,46 +36,45 @@ public class IntrospectionMutationBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final IGraphQLFieldMapManager mapper;
-    private final JsonProvider jsonProvider;
 
     private final int levelThreshold;
 
     @Inject
-    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, JsonProvider jsonProvider) {
+    public IntrospectionMutationBuilder(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper) {
         this.manager = manager;
         this.mapper = mapper;
-        this.jsonProvider = jsonProvider;
         this.levelThreshold = 1;
     }
 
     public Operation buildIntrospectionSchemaMutation() {
         Set<Argument> arguments = new LinkedHashSet<>();
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
-        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(jsonProvider.createReader(new StringReader(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())).readObject())));
+        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue())));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> mutationTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject);
-        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("mutationType").setValueWithVariable(jsonProvider.createReader(new StringReader(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())).readObject())));
+        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("mutationType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue())));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> subscriptionTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject);
-        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(jsonProvider.createReader(new StringReader(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toString())).readObject())));
+        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue())));
 
         arguments.add(
                 new Argument()
                         .setName("types")
                         .setValueWithVariable(
-                                Stream.concat(manager.getObjects().map(this::objectTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject()),
+                                Stream.concat(
+                                        manager.getObjects().map(this::objectTypeDefinitionContextToType),
+                                        Stream.concat(
+                                                manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
                                                 Stream.concat(
-                                                        manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject()),
+                                                        manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType),
                                                         Stream.concat(
-                                                                manager.getInputObjects().map(this::inputObjectTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject()),
-                                                                Stream.concat(
-                                                                        manager.getEnums().map(this::enumTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject()),
-                                                                        manager.getScalars().map(this::scalarTypeDefinitionContextToType).map(__type -> jsonProvider.createReader(new StringReader(__type.toString())).readObject())
-                                                                )
+                                                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                                                manager.getScalars().map(this::scalarTypeDefinitionContextToType)
                                                         )
                                                 )
                                         )
-                                        .collect(JsonCollectors.toJsonArray())
+                                ).map(__Type::toValue)
+                                        .collect(Collectors.toList())
                         )
         );
 
@@ -85,8 +84,8 @@ public class IntrospectionMutationBuilder {
                         .setValueWithVariable(
                                 manager.getDirectives()
                                         .map(this::directiveDefinitionContextToDirective)
-                                        .map(__directive -> jsonProvider.createReader(new StringReader(__directive.toString())).readObject())
-                                        .collect(JsonCollectors.toJsonArray())
+                                        .map(__Directive::toValue)
+                                        .collect(Collectors.toList())
                         )
         );
 

@@ -1,9 +1,11 @@
 package io.graphoenix.core.introspection;
 
+import io.graphoenix.core.operation.ObjectValueWithVariable;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class __Field {
 
@@ -115,6 +117,44 @@ public class __Field {
 
     public void setWithTo(String withTo) {
         this.withTo = withTo;
+    }
+
+    public ObjectValueWithVariable toValue() {
+        ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
+        if (this.getName() != null) {
+            objectValueWithVariable.put("name", this.getName());
+        }
+        if (this.getDescription() != null) {
+            objectValueWithVariable.put("description", this.getDescription());
+        }
+        if (this.getArgs() != null) {
+            objectValueWithVariable.put("args", this.getArgs().stream().map(__InputValue::toValue).collect(Collectors.toList()));
+        }
+        if (this.getType() != null) {
+            objectValueWithVariable.put("type", this.getType().toValue());
+        }
+        if (this.getIsDeprecated() != null) {
+            objectValueWithVariable.put("isDeprecated", this.getIsDeprecated());
+        }
+        if (this.getDeprecationReason() != null) {
+            objectValueWithVariable.put("deprecationReason", this.getDeprecationReason());
+        }
+        if (this.getFrom() != null) {
+            objectValueWithVariable.put("from", this.getFrom());
+        }
+        if (this.getTo() != null) {
+            objectValueWithVariable.put("to", this.getTo());
+        }
+        if (this.getWithType() != null) {
+            objectValueWithVariable.put("withType", this.getWithType());
+        }
+        if (this.getWithFrom() != null) {
+            objectValueWithVariable.put("withFrom", this.getWithFrom());
+        }
+        if (this.getWithTo() != null) {
+            objectValueWithVariable.put("withTo", this.getWithTo());
+        }
+        return objectValueWithVariable;
     }
 
     @Override

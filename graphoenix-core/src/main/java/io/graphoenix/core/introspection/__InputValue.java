@@ -1,5 +1,6 @@
 package io.graphoenix.core.introspection;
 
+import io.graphoenix.core.operation.ObjectValueWithVariable;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -43,6 +44,23 @@ public class __InputValue {
 
     public void setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+    }
+
+    public ObjectValueWithVariable toValue() {
+        ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
+        if (this.getName() != null) {
+            objectValueWithVariable.put("name", this.getName());
+        }
+        if (this.getDescription() != null) {
+            objectValueWithVariable.put("description", this.getDescription());
+        }
+        if (this.getType() != null) {
+            objectValueWithVariable.put("type", this.getType().toValue());
+        }
+        if (this.getDefaultValue() != null) {
+            objectValueWithVariable.put("defaultValue", this.getDefaultValue());
+        }
+        return objectValueWithVariable;
     }
 
     @Override

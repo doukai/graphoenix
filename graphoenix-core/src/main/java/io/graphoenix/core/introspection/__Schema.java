@@ -1,9 +1,11 @@
 package io.graphoenix.core.introspection;
 
+import io.graphoenix.core.operation.ObjectValueWithVariable;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class __Schema {
 
@@ -65,6 +67,29 @@ public class __Schema {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public ObjectValueWithVariable toValue() {
+        ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
+        if (this.getTypes() != null) {
+            objectValueWithVariable.put("types", this.getTypes().stream().map(__Type::toValue).collect(Collectors.toList()));
+        }
+        if (this.getQueryType() != null) {
+            objectValueWithVariable.put("queryType", this.getQueryType().toValue());
+        }
+        if (this.getMutationType() != null) {
+            objectValueWithVariable.put("mutationType", this.getMutationType().toValue());
+        }
+        if (this.getSubscriptionType() != null) {
+            objectValueWithVariable.put("subscriptionType", this.getSubscriptionType().toValue());
+        }
+        if (this.getDirectives() != null) {
+            objectValueWithVariable.put("directives", this.getDirectives().stream().map(__Directive::toValue).collect(Collectors.toList()));
+        }
+        if (this.getDescription() != null) {
+            objectValueWithVariable.put("description", this.getDescription());
+        }
+        return objectValueWithVariable;
     }
 
     @Override

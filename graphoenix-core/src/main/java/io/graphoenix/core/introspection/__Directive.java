@@ -1,9 +1,13 @@
 package io.graphoenix.core.introspection;
 
+import io.graphoenix.core.document.InputValue;
+import io.graphoenix.core.operation.ObjectValueWithVariable;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class __Directive {
 
@@ -75,6 +79,32 @@ public class __Directive {
 
     public void setOnField(Boolean onField) {
         this.onField = onField;
+    }
+
+    public ObjectValueWithVariable toValue() {
+        ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
+        if (this.getName() != null) {
+            objectValueWithVariable.put("name", this.getName());
+        }
+        if (this.getDescription() != null) {
+            objectValueWithVariable.put("description", this.getDescription());
+        }
+        if (this.getLocations() != null) {
+            objectValueWithVariable.put("locations", this.getLocations());
+        }
+        if (this.getArgs() != null) {
+            objectValueWithVariable.put("args", this.getArgs().stream().map(__InputValue::toValue).collect(Collectors.toList()));
+        }
+        if (this.getOnOperation() != null) {
+            objectValueWithVariable.put("onOperation", this.getOnOperation());
+        }
+        if (this.getOnFragment() != null) {
+            objectValueWithVariable.put("onFragment", this.getOnFragment());
+        }
+        if (this.getOnField() != null) {
+            objectValueWithVariable.put("onField", this.getOnField());
+        }
+        return objectValueWithVariable;
     }
 
     @Override
