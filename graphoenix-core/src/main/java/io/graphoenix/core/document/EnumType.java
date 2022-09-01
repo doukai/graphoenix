@@ -1,11 +1,12 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
-import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,10 +28,10 @@ public class EnumType {
             this.description = DOCUMENT_UTIL.getStringValue(enumTypeDefinitionContext.description().StringValue());
         }
         if (enumTypeDefinitionContext.directives() != null) {
-            this.directives = enumTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toSet());
+            this.directives = enumTypeDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (enumTypeDefinitionContext.enumValueDefinitions() != null) {
-            this.enumValues = enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream().map(EnumValue::new).collect(Collectors.toSet());
+            this.enumValues = enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream().map(EnumValue::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
@@ -42,7 +43,8 @@ public class EnumType {
         EnumType enumType = new EnumType();
         enumType.name = enumTypes[0].getName();
         enumType.description = enumTypes[0].getDescription();
-        enumType.directives = Stream.of(enumTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        enumType.directives = Stream.of(enumTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
+        enumType.enumValues = enumTypes[0].getEnumValues();
         for (EnumType item : enumTypes) {
             for (EnumValue itemEnumValue : item.getEnumValues()) {
                 if (enumType.enumValues.stream().noneMatch(enumValue -> enumValue.getName().equals(itemEnumValue.getName()))) {

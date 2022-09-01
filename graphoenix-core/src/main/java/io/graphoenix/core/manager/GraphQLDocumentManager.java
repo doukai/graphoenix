@@ -145,6 +145,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public void mergeDocument(String graphQL) {
+        mergeDocument(DOCUMENT_UTIL.graphqlToDocument(graphQL));
+    }
+
+    @Override
     public void mergeDocument(GraphqlParser.DocumentContext documentContext) {
         documentContext.definition().forEach(this::mergeDefinition);
     }

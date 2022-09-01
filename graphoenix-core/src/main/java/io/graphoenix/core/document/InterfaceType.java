@@ -1,19 +1,16 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
-import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
 
 public class InterfaceType {
 
@@ -32,13 +29,13 @@ public class InterfaceType {
             this.description = DOCUMENT_UTIL.getStringValue(interfaceTypeDefinitionContext.description().StringValue());
         }
         if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
-            this.interfaces = interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toSet());
+            this.interfaces = interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (interfaceTypeDefinitionContext.directives() != null) {
-            this.directives = interfaceTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toSet());
+            this.directives = interfaceTypeDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (interfaceTypeDefinitionContext.fieldsDefinition() != null) {
-            this.fields = interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(Field::new).collect(Collectors.toSet());
+            this.fields = interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
@@ -50,8 +47,9 @@ public class InterfaceType {
         InterfaceType interfaceType = new InterfaceType();
         interfaceType.name = interfaceTypes[0].getName();
         interfaceType.description = interfaceTypes[0].getDescription();
-        interfaceType.interfaces = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
-        interfaceType.directives = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        interfaceType.interfaces = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
+        interfaceType.directives = Stream.of(interfaceTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
+        interfaceType.fields = interfaceTypes[0].getFields();
         for (InterfaceType item : interfaceTypes) {
             for (Field itemField : item.getFields()) {
                 if (interfaceType.fields.stream().noneMatch(field -> field.getName().equals(itemField.getName()))) {

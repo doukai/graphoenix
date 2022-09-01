@@ -1,10 +1,10 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
-import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,9 +24,11 @@ public class InputValue {
     public InputValue(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
         this.name = inputValueDefinitionContext.name().getText();
         this.typeName = inputValueDefinitionContext.type().getText();
-        this.defaultValue = inputValueDefinitionContext.defaultValue().value().getText();
+        if (inputValueDefinitionContext.defaultValue() != null) {
+            this.defaultValue = inputValueDefinitionContext.defaultValue().value().getText();
+        }
         if (inputValueDefinitionContext.directives() != null) {
-            this.directives = inputValueDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toSet());
+            this.directives = inputValueDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (inputValueDefinitionContext.description() != null) {
             this.description = DOCUMENT_UTIL.getStringValue(inputValueDefinitionContext.description().StringValue());

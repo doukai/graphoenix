@@ -1,10 +1,10 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
-import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,7 +26,7 @@ public class EnumValue {
     public EnumValue(GraphqlParser.EnumValueDefinitionContext enumValueDefinitionContext) {
         this.name = enumValueDefinitionContext.enumValue().enumValueName().getText();
         if (enumValueDefinitionContext.directives() != null) {
-            this.directives = enumValueDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toSet());
+            this.directives = enumValueDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (enumValueDefinitionContext.description() != null) {
             this.description = DOCUMENT_UTIL.getStringValue(enumValueDefinitionContext.description().StringValue());

@@ -1,11 +1,13 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
-import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,13 +30,13 @@ public class ObjectType {
             this.description = DOCUMENT_UTIL.getStringValue(objectTypeDefinitionContext.description().StringValue());
         }
         if (objectTypeDefinitionContext.implementsInterfaces() != null) {
-            this.interfaces = objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toSet());
+            this.interfaces = objectTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (objectTypeDefinitionContext.directives() != null) {
-            this.directives = objectTypeDefinitionContext.directives().directive().stream().map(RuleContext::getText).collect(Collectors.toSet());
+            this.directives = objectTypeDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (objectTypeDefinitionContext.fieldsDefinition() != null) {
-            this.fields = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(Field::new).collect(Collectors.toSet());
+            this.fields = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
@@ -46,8 +48,9 @@ public class ObjectType {
         ObjectType objectType = new ObjectType();
         objectType.name = objectTypes[0].getName();
         objectType.description = objectTypes[0].getDescription();
-        objectType.interfaces = Stream.of(objectTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
-        objectType.directives = Stream.of(objectTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toSet());
+        objectType.interfaces = Stream.of(objectTypes).flatMap(item -> Stream.ofNullable(item.getInterfaces()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
+        objectType.directives = Stream.of(objectTypes).flatMap(item -> Stream.ofNullable(item.getDirectives()).flatMap(Collection::stream).distinct()).collect(Collectors.toCollection(LinkedHashSet::new));
+        objectType.fields = objectTypes[0].getFields();
         for (ObjectType item : objectTypes) {
             for (Field itemField : item.getFields()) {
                 if (objectType.fields.stream().noneMatch(field -> field.getName().equals(itemField.getName()))) {
@@ -134,7 +137,7 @@ public class ObjectType {
         if (this.fields == null) {
             this.fields = new LinkedHashSet<>();
         }
-        this.fields.addAll(fields);
+        this.fields.addAll(fields.stream().filter(field -> this.fields.stream().noneMatch(item -> item.getName().equals(field.getName()))).collect(Collectors.toCollection(LinkedHashSet::new)));
         return this;
     }
 
@@ -142,7 +145,9 @@ public class ObjectType {
         if (this.fields == null) {
             this.fields = new LinkedHashSet<>();
         }
-        this.fields.add(field);
+        if (this.fields.stream().noneMatch(item -> item.getName().equals(field.getName()))) {
+            this.fields.add(field);
+        }
         return this;
     }
 

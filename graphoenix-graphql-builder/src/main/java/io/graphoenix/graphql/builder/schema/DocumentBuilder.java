@@ -169,7 +169,12 @@ public class DocumentBuilder {
             objectType.addFields(buildFunctionFieldList(objectTypeDefinitionContext));
             objectType.addFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                            .filter(manager::isNotGrpcField)
+                            .filter(manager::isNotInvokeField)
+                            .filter(manager::isNotFunctionField)
+                            .filter(manager::isNotConnectionField)
+                            .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                            .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().equals("__typename"))
+                            .filter(this::isNotMetaInterfaceField)
                             .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                             .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                             .map(this::buildListObjectAggregateField)
@@ -177,7 +182,12 @@ public class DocumentBuilder {
             );
             objectType.addFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                            .filter(manager::isNotGrpcField)
+                            .filter(manager::isNotInvokeField)
+                            .filter(manager::isNotFunctionField)
+                            .filter(manager::isNotConnectionField)
+                            .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                            .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().equals("__typename"))
+                            .filter(this::isNotMetaInterfaceField)
                             .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                             .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                             .map(this::buildListObjectConnectionField)
@@ -211,6 +221,16 @@ public class DocumentBuilder {
                 .fieldsDefinition().fieldDefinition().stream()
                 .map(fieldDefinitionContext -> buildField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, false))
                 .collect(Collectors.toList());
+    }
+
+    public boolean isMetaInterfaceField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return manager.getInterface(META_INTERFACE_NAME).stream()
+                .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .anyMatch(item -> item.name().getText().equals(fieldDefinitionContext.name().getText()));
+    }
+
+    public boolean isNotMetaInterfaceField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return !isMetaInterfaceField(fieldDefinitionContext);
     }
 
     public EnumType buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
@@ -355,6 +375,11 @@ public class DocumentBuilder {
 
     public List<Field> buildQueryTypeFields() {
         return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -368,6 +393,11 @@ public class DocumentBuilder {
 
     public List<Field> buildMutationTypeFields() {
         return manager.getObjects()
+                .filter(objectTypeDefinitionContext ->
+                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
+                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
+                )
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -639,6 +669,11 @@ public class DocumentBuilder {
         return Stream.concat(
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                         .filter(manager::isNotInvokeField)
+                        .filter(manager::isNotFunctionField)
+                        .filter(manager::isNotConnectionField)
+                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().equals("__typename"))
+                        .filter(this::isNotMetaInterfaceField)
                         .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                         .filter(fieldDefinitionContext ->
                                 manager.getFieldTypeName(fieldDefinitionContext.type()).equals("ID") ||
@@ -672,6 +707,11 @@ public class DocumentBuilder {
                         ),
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                         .filter(manager::isNotInvokeField)
+                        .filter(manager::isNotFunctionField)
+                        .filter(manager::isNotConnectionField)
+                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().equals("__typename"))
+                        .filter(this::isNotMetaInterfaceField)
                         .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                         .filter(fieldDefinitionContext ->
                                 manager.getFieldTypeName(fieldDefinitionContext.type()).equals("Int") ||

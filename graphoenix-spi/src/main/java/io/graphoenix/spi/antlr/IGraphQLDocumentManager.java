@@ -28,6 +28,8 @@ public interface IGraphQLDocumentManager {
 
     void registerDocument(GraphqlParser.DocumentContext documentContext);
 
+    void mergeDocument(String graphQL);
+
     void mergeDocument(GraphqlParser.DocumentContext documentContext);
 
     GraphqlParser.OperationTypeContext getOperationType(String graphql);
