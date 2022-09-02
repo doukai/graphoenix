@@ -28,7 +28,7 @@ public class GrpcBaseMutationDataLoader {
     private Map<String, Map<String, Set<String>>> selectionMap;
 
     public Mono<Operation> buildOperation(String packageName) {
-        if (objectValueMap == null || objectValueMap.isEmpty()) {
+        if (objectValueMap == null || objectValueMap.isEmpty() || objectValueMap.get(packageName) == null || objectValueMap.get(packageName).isEmpty()) {
             return Mono.empty();
         }
         return Mono.just(

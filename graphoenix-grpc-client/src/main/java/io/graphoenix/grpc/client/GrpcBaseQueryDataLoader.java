@@ -28,7 +28,7 @@ public class GrpcBaseQueryDataLoader {
     private Map<String, Map<String, Map<String, Set<Field>>>> fieldTree;
 
     public Mono<Operation> buildOperation(String packageName) {
-        if (conditionMap == null || conditionMap.isEmpty()) {
+        if (conditionMap == null || conditionMap.isEmpty() || conditionMap.get(packageName) == null || conditionMap.get(packageName).isEmpty()) {
             return Mono.empty();
         }
         return Mono.just(
