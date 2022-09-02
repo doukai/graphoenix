@@ -8,6 +8,7 @@ import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.core.operation.ValueWithVariable;
 import jakarta.json.JsonObject;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,25 +27,30 @@ public class GrpcBaseMutationDataLoader {
     private Map<String, Map<String, Map<String, ObjectValueWithVariable>>> objectValueMap;
     private Map<String, Map<String, Set<String>>> selectionMap;
 
-    public Operation buildOperation(String packageName) {
-        return new Operation()
-                .setOperationType("mutation")
-                .setFields(
-                        objectValueMap.get(packageName).entrySet().stream()
-                                .filter(typeEntry -> typeEntry.getValue().size() > 0)
-                                .map(typeEntry ->
-                                        new Field()
-                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
-                                                .addArgument(
-                                                        new Argument().setName(LIST_INPUT_NAME)
-                                                                .setValueWithVariable(
-                                                                        new ArrayValueWithVariable(typeEntry.getValue().values())
-                                                                )
-                                                )
-                                                .setFields(selectionMap.get(packageName).get(typeEntry.getKey()).stream().map(Field::new).collect(Collectors.toSet()))
-                                )
-                                .collect(Collectors.toSet())
-                );
+    public Mono<Operation> buildOperation(String packageName) {
+        if (objectValueMap == null || objectValueMap.isEmpty()) {
+            return Mono.empty();
+        }
+        return Mono.just(
+                new Operation()
+                        .setOperationType("mutation")
+                        .setFields(
+                                objectValueMap.get(packageName).entrySet().stream()
+                                        .filter(typeEntry -> typeEntry.getValue().size() > 0)
+                                        .map(typeEntry ->
+                                                new Field()
+                                                        .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                        .addArgument(
+                                                                new Argument().setName(LIST_INPUT_NAME)
+                                                                        .setValueWithVariable(
+                                                                                new ArrayValueWithVariable(typeEntry.getValue().values())
+                                                                        )
+                                                        )
+                                                        .setFields(selectionMap.get(packageName).get(typeEntry.getKey()).stream().map(Field::new).collect(Collectors.toSet()))
+                                        )
+                                        .collect(Collectors.toSet())
+                        )
+        );
     }
 
     public int addObjectValue(String packageName, String typeName, ObjectValueWithVariable objectValueWithVariable, String keyName) {

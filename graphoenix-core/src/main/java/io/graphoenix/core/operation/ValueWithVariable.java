@@ -266,22 +266,6 @@ public class ValueWithVariable {
         return ((EnumValue) valueWithVariable).getValue();
     }
 
-    public String getValueAsString() {
-        if (isString()) {
-            return asString().getValue();
-        } else if (isBoolean()) {
-            return String.valueOf(asBoolean().getValue());
-        } else if (isInteger()) {
-            return String.valueOf(asInteger().getValue());
-        } else if (isFloat()) {
-            return String.valueOf(asFloat().getValue());
-        } else if (isEnum()) {
-            return asEnum().getValue();
-        } else {
-            return null;
-        }
-    }
-
     @Override
     public String toString() {
         return valueWithVariable.toString();

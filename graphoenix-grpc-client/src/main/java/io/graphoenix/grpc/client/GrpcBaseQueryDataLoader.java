@@ -9,6 +9,7 @@ import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
 import jakarta.json.JsonValue;
 import jakarta.json.stream.JsonCollectors;
+import reactor.core.publisher.Mono;
 
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
@@ -26,27 +27,32 @@ public class GrpcBaseQueryDataLoader {
     private Map<String, Map<String, Map<String, Set<String>>>> conditionMap;
     private Map<String, Map<String, Map<String, Set<Field>>>> fieldTree;
 
-    public Operation buildOperation(String packageName) {
-        return new Operation()
-                .setOperationType("query")
-                .setFields(
-                        conditionMap.get(packageName).entrySet().stream()
-                                .flatMap(typeEntry ->
-                                        typeEntry.getValue().entrySet().stream()
-                                                .filter(fieldEntry -> fieldEntry.getValue().size() > 0)
-                                                .map(fieldEntry ->
-                                                        new Field()
-                                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
-                                                                .setAlias(getQueryFieldAlias(typeEntry.getKey(), fieldEntry.getKey()))
-                                                                .addArgument(
-                                                                        new Argument().setName(fieldEntry.getKey())
-                                                                                .setValueWithVariable(new ObjectValueWithVariable(Map.of("in", fieldEntry.getValue())))
-                                                                )
-                                                                .setFields(fieldTree.get(packageName).get(typeEntry.getKey()).get(fieldEntry.getKey()))
-                                                )
-                                )
-                                .collect(Collectors.toSet())
-                );
+    public Mono<Operation> buildOperation(String packageName) {
+        if (conditionMap == null || conditionMap.isEmpty()) {
+            return Mono.empty();
+        }
+        return Mono.just(
+                new Operation()
+                        .setOperationType("query")
+                        .setFields(
+                                conditionMap.get(packageName).entrySet().stream()
+                                        .flatMap(typeEntry ->
+                                                typeEntry.getValue().entrySet().stream()
+                                                        .filter(fieldEntry -> fieldEntry.getValue().size() > 0)
+                                                        .map(fieldEntry ->
+                                                                new Field()
+                                                                        .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                                        .setAlias(getQueryFieldAlias(typeEntry.getKey(), fieldEntry.getKey()))
+                                                                        .addArgument(
+                                                                                new Argument().setName(fieldEntry.getKey())
+                                                                                        .setValueWithVariable(new ObjectValueWithVariable(Map.of("in", fieldEntry.getValue())))
+                                                                        )
+                                                                        .setFields(fieldTree.get(packageName).get(typeEntry.getKey()).get(fieldEntry.getKey()))
+                                                        )
+                                        )
+                                        .collect(Collectors.toSet())
+                        )
+        );
     }
 
     public void addCondition(String packageName, String typeName, String fieldName, String key) {

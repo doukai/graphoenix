@@ -154,11 +154,11 @@ public class GrpcQueryDataLoaderBuilder {
                         grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                         ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
                         packageName
-                ).addStatement("this.$L = this.$L.operation($T.newBuilder().setRequest(buildOperation($S).toString()).build()).map(response -> jsonProvider.get().createReader(new $T(response.getResponse())).readObject().get($S).asJsonObject())",
+                ).addStatement("this.$L = buildOperation($S).flatMap(operation -> this.$L.operation($T.newBuilder().setRequest(operation.toString()).build())).map(response -> jsonProvider.get().createReader(new $T(response.getResponse())).readObject().get($S).asJsonObject())",
                         grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        packageName,
                         grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                         ClassName.get(packageName, "GraphQLRequest"),
-                        packageName,
                         ClassName.get(StringReader.class),
                         "data"
                 )
