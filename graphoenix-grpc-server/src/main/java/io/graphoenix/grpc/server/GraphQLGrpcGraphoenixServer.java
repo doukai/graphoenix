@@ -1,34 +1,26 @@
 package io.graphoenix.grpc.server;
 
-import io.graphoenix.spi.handler.ScopeEventResolver;
+import io.graphoenix.core.bootstrap.GraphoenixServer;
 import io.grpc.Server;
-import io.vavr.CheckedRunnable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.tinylog.Logger;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static io.graphoenix.core.utils.BannerUtil.BANNER_UTIL;
-
 @ApplicationScoped
-public class GraphQLGrpcServer {
+public class GraphQLGrpcGraphoenixServer implements GraphoenixServer {
 
     private final Server server;
 
     @Inject
-    public GraphQLGrpcServer(Server server) {
+    public GraphQLGrpcGraphoenixServer(Server server) {
         this.server = server;
     }
 
-    public void run() {
-        BANNER_UTIL.getBanner().ifPresent(Logger::info);
-        ScopeEventResolver.initialized(ApplicationScoped.class).then(Mono.fromRunnable(CheckedRunnable.of(this::start).unchecked())).block();
-    }
-
-    private void start() throws IOException, InterruptedException {
+    @Override
+    public void run() throws IOException, InterruptedException {
         server.start();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {

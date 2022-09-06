@@ -1,10 +1,10 @@
 package io.graphoenix.http.server;
 
+import io.graphoenix.core.bootstrap.GraphoenixServer;
 import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.handler.GetRequestHandler;
 import io.graphoenix.http.handler.PostRequestHandler;
 import io.graphoenix.http.handler.SchemaRequestHandler;
-import io.graphoenix.spi.handler.ScopeEventResolver;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
@@ -13,15 +13,13 @@ import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.tinylog.Logger;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
-import static io.graphoenix.core.utils.BannerUtil.BANNER_UTIL;
 import static io.graphoenix.http.handler.SchemaRequestHandler.SCHEMA_PARAM_NAME;
 
 @ApplicationScoped
-public class GraphQLHttpServer {
+public class GraphQLHttpGraphoenixServer implements GraphoenixServer {
 
     private final HttpServerConfig httpServerConfig;
     private final SchemaRequestHandler schemaRequestHandler;
@@ -29,16 +27,15 @@ public class GraphQLHttpServer {
     private final PostRequestHandler postRequestHandler;
 
     @Inject
-    public GraphQLHttpServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler) {
+    public GraphQLHttpGraphoenixServer(HttpServerConfig httpServerConfig, SchemaRequestHandler schemaRequestHandler, GetRequestHandler getRequestHandler, PostRequestHandler postRequestHandler) {
         this.httpServerConfig = httpServerConfig;
         this.schemaRequestHandler = schemaRequestHandler;
         this.getRequestHandler = getRequestHandler;
         this.postRequestHandler = postRequestHandler;
     }
 
+    @Override
     public void run() {
-        BANNER_UTIL.getBanner().ifPresent(Logger::info);
-
         CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
                 .allowedRequestHeaders(HttpHeaderNames.CONTENT_TYPE)
                 .allowedRequestMethods(HttpMethod.GET)
@@ -59,6 +56,6 @@ public class GraphQLHttpServer {
                 .port(httpServerConfig.getPort())
                 .bindNow();
 
-        ScopeEventResolver.initialized(ApplicationScoped.class).then(server.onDispose()).block();
+        server.onDispose().block();
     }
 }
