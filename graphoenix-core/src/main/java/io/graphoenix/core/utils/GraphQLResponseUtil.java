@@ -42,7 +42,7 @@ public enum GraphQLResponseUtil {
 
     public String success(Object object) {
         JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
-        responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(object))).readObject());
+        responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(object))).read());
         StringWriter stringWriter = new StringWriter();
         jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
         return stringWriter.toString();
@@ -51,9 +51,9 @@ public enum GraphQLResponseUtil {
     public String error(GraphQLErrors graphQLErrors) {
         JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
         if (graphQLErrors.getData() != null) {
-            responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLErrors.getData()))).readObject());
+            responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLErrors.getData()))).read());
         }
-        responseBuilder.add("errors", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLErrors.getErrors()))).readObject());
+        responseBuilder.add("errors", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLErrors.getErrors()))).read());
         StringWriter stringWriter = new StringWriter();
         jsonProvider.createWriter(stringWriter).write(responseBuilder.build());
         return stringWriter.toString();
@@ -62,7 +62,7 @@ public enum GraphQLResponseUtil {
     public String error(GraphQLException graphQLException) {
         JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
         if (graphQLException.getPartialResults() != null) {
-            responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLException.getPartialResults()))).readObject());
+            responseBuilder.add("data", jsonProvider.createReader(new StringReader(jsonb.toJson(graphQLException.getPartialResults()))).read());
         }
         JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
         errorsBuilder.add(graphQLException.getMessage());

@@ -2,9 +2,11 @@ package io.graphoenix.grpc.server;
 
 import io.graphoenix.core.bootstrap.GraphoenixServer;
 import io.grpc.Server;
+import io.vavr.CheckedRunnable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.tinylog.Logger;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +22,11 @@ public class GraphQLGrpcGraphoenixServer implements GraphoenixServer {
     }
 
     @Override
-    public void run() throws IOException, InterruptedException {
+    public Mono<Void> run() {
+        return Mono.fromRunnable(CheckedRunnable.of(this::start).unchecked());
+    }
+
+    private void start() throws IOException, InterruptedException {
         server.start();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {

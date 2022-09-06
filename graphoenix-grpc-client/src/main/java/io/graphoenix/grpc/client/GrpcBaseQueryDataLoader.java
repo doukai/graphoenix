@@ -27,32 +27,34 @@ public class GrpcBaseQueryDataLoader {
     private Map<String, Map<String, Map<String, Set<String>>>> conditionMap;
     private Map<String, Map<String, Map<String, Set<Field>>>> fieldTree;
 
-    public Mono<Operation> buildOperation(String packageName) {
+    public Mono<Operation> build(String packageName) {
+        return Mono.fromSupplier(() -> buildOperation(packageName));
+    }
+
+    public Operation buildOperation(String packageName) {
         if (conditionMap == null || conditionMap.isEmpty() || conditionMap.get(packageName) == null || conditionMap.get(packageName).isEmpty()) {
-            return Mono.empty();
+            return null;
         }
-        return Mono.just(
-                new Operation()
-                        .setOperationType("query")
-                        .setFields(
-                                conditionMap.get(packageName).entrySet().stream()
-                                        .flatMap(typeEntry ->
-                                                typeEntry.getValue().entrySet().stream()
-                                                        .filter(fieldEntry -> fieldEntry.getValue().size() > 0)
-                                                        .map(fieldEntry ->
-                                                                new Field()
-                                                                        .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
-                                                                        .setAlias(getQueryFieldAlias(typeEntry.getKey(), fieldEntry.getKey()))
-                                                                        .addArgument(
-                                                                                new Argument().setName(fieldEntry.getKey())
-                                                                                        .setValueWithVariable(new ObjectValueWithVariable(Map.of("in", fieldEntry.getValue())))
-                                                                        )
-                                                                        .setFields(fieldTree.get(packageName).get(typeEntry.getKey()).get(fieldEntry.getKey()))
-                                                        )
-                                        )
-                                        .collect(Collectors.toSet())
-                        )
-        );
+        return new Operation()
+                .setOperationType("query")
+                .setFields(
+                        conditionMap.get(packageName).entrySet().stream()
+                                .flatMap(typeEntry ->
+                                        typeEntry.getValue().entrySet().stream()
+                                                .filter(fieldEntry -> fieldEntry.getValue().size() > 0)
+                                                .map(fieldEntry ->
+                                                        new Field()
+                                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                                .setAlias(getQueryFieldAlias(typeEntry.getKey(), fieldEntry.getKey()))
+                                                                .addArgument(
+                                                                        new Argument().setName(fieldEntry.getKey())
+                                                                                .setValueWithVariable(new ObjectValueWithVariable(Map.of("in", fieldEntry.getValue())))
+                                                                )
+                                                                .setFields(fieldTree.get(packageName).get(typeEntry.getKey()).get(fieldEntry.getKey()))
+                                                )
+                                )
+                                .collect(Collectors.toSet())
+                );
     }
 
     public void addCondition(String packageName, String typeName, String fieldName, String key) {
@@ -71,7 +73,7 @@ public class GrpcBaseQueryDataLoader {
         }
         fieldTree.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
         fieldTree.get(packageName).computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
-        fieldTree.get(packageName).get(typeName).computeIfAbsent(typeName, k -> new LinkedHashSet<>());
+        fieldTree.get(packageName).get(typeName).computeIfAbsent(fieldName, k -> new LinkedHashSet<>());
         mergeSelection(fieldTree.get(packageName).get(typeName).get(fieldName), selectionSetContext.selection().stream().map(Field::new).collect(Collectors.toSet()));
     }
 

@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
@@ -35,7 +36,7 @@ public class GraphQLHttpGraphoenixServer implements GraphoenixServer {
     }
 
     @Override
-    public void run() {
+    public Mono<Void> run() {
         CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin()
                 .allowedRequestHeaders(HttpHeaderNames.CONTENT_TYPE)
                 .allowedRequestMethods(HttpMethod.GET)
@@ -56,6 +57,6 @@ public class GraphQLHttpGraphoenixServer implements GraphoenixServer {
                 .port(httpServerConfig.getPort())
                 .bindNow();
 
-        server.onDispose().block();
+        return server.onDispose();
     }
 }

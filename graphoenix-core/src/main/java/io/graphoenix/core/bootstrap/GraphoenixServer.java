@@ -1,5 +1,8 @@
 package io.graphoenix.core.bootstrap;
 
+import reactor.core.publisher.Mono;
+
 public interface GraphoenixServer {
-    void run() throws Exception;
+
+    Mono<Void> run();
 }

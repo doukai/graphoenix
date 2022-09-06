@@ -4,19 +4,16 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.spi.handler.ScopeEventResolver;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.tinylog.Logger;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 import static io.graphoenix.core.utils.BannerUtil.BANNER_UTIL;
 
 public class GraphoenixStarter {
-
-    private CountDownLatch latch;
 
     private List<GraphoenixServer> serverList;
 
@@ -36,34 +33,13 @@ public class GraphoenixStarter {
     }
 
     @SafeVarargs
-    public static <T extends GraphoenixServer> GraphoenixStarter with(Class<T>... classes) {
+    public static GraphoenixStarter with(Class<? extends GraphoenixServer>... classes) {
         return getInstance().addServers(Arrays.stream(classes).map(BeanContext::get).toArray(GraphoenixServer[]::new));
     }
 
-    public void run() throws Exception {
-        latch = new CountDownLatch(1);
+    public void run() {
         ScopeEventResolver.initialized(ApplicationScoped.class)
-                .then(Flux.fromIterable(serverList)
-                        .map(graphoenixServer ->
-                                new Thread(() -> {
-                                    try {
-                                        latch.await();
-                                        graphoenixServer.run();
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                })
-                        )
-                        .flatMap(thread -> Mono.fromRunnable(()->{
-                            thread.start();
-                            try {
-                                thread.join();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }))
-                        .then(Mono.fromRunnable(() -> latch.countDown()))
-                )
+                .then(Mono.when(serverList.stream().map(GraphoenixServer::run).collect(Collectors.toList())))
                 .doFirst(() -> BANNER_UTIL.getBanner().ifPresent(Logger::info))
                 .block();
     }

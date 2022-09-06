@@ -27,30 +27,32 @@ public class GrpcBaseMutationDataLoader {
     private Map<String, Map<String, Map<String, ObjectValueWithVariable>>> objectValueMap;
     private Map<String, Map<String, Set<String>>> selectionMap;
 
-    public Mono<Operation> buildOperation(String packageName) {
+    public Mono<Operation> build(String packageName) {
+        return Mono.fromSupplier(() -> buildOperation(packageName));
+    }
+
+    public Operation buildOperation(String packageName) {
         if (objectValueMap == null || objectValueMap.isEmpty() || objectValueMap.get(packageName) == null || objectValueMap.get(packageName).isEmpty()) {
-            return Mono.empty();
+            return null;
         }
-        return Mono.just(
-                new Operation()
-                        .setOperationType("mutation")
-                        .setFields(
-                                objectValueMap.get(packageName).entrySet().stream()
-                                        .filter(typeEntry -> typeEntry.getValue().size() > 0)
-                                        .map(typeEntry ->
-                                                new Field()
-                                                        .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
-                                                        .addArgument(
-                                                                new Argument().setName(LIST_INPUT_NAME)
-                                                                        .setValueWithVariable(
-                                                                                new ArrayValueWithVariable(typeEntry.getValue().values())
-                                                                        )
-                                                        )
-                                                        .setFields(selectionMap.get(packageName).get(typeEntry.getKey()).stream().map(Field::new).collect(Collectors.toSet()))
-                                        )
-                                        .collect(Collectors.toSet())
-                        )
-        );
+        return new Operation()
+                .setOperationType("mutation")
+                .setFields(
+                        objectValueMap.get(packageName).entrySet().stream()
+                                .filter(typeEntry -> typeEntry.getValue().size() > 0)
+                                .map(typeEntry ->
+                                        new Field()
+                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                .addArgument(
+                                                        new Argument().setName(LIST_INPUT_NAME)
+                                                                .setValueWithVariable(
+                                                                        new ArrayValueWithVariable(typeEntry.getValue().values())
+                                                                )
+                                                )
+                                                .setFields(selectionMap.get(packageName).get(typeEntry.getKey()).stream().map(Field::new).collect(Collectors.toSet()))
+                                )
+                                .collect(Collectors.toSet())
+                );
     }
 
     public int addObjectValue(String packageName, String typeName, ObjectValueWithVariable objectValueWithVariable, String keyName) {
