@@ -1,12 +1,6 @@
 package io.graphoenix.java.generator.implementer.grpc;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.java.generator.implementer.TypeManager;
@@ -15,8 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
@@ -26,18 +20,14 @@ import reactor.core.publisher.Mono;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
-import java.io.StringReader;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApplicationScoped
 public class GrpcQueryDataLoaderBuilder {
 
+    private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
     private final GrpcNameUtil grpcNameUtil;
@@ -45,6 +35,7 @@ public class GrpcQueryDataLoaderBuilder {
 
     @Inject
     public GrpcQueryDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+        this.manager = manager;
         this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
         this.typeMap = manager.getObjects()
@@ -101,6 +92,14 @@ public class GrpcQueryDataLoaderBuilder {
                 .addAnnotation(RequestScoped.class)
                 .addField(
                         FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
+                                "manager",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
                                 "jsonProvider",
                                 Modifier.PRIVATE,
@@ -116,9 +115,10 @@ public class GrpcQueryDataLoaderBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeMethods())
-                .addMethods(buildTypeListMethods())
-                .addMethod(buildDispatchMethod());
+                .addMethods(buildGrpcTypeMethods())
+                .addMethods(buildGrpcTypeListMethods())
+                .addMethod(buildDispatchMethod())
+                .addMethods(buildTypeMethods());
 
         typeMap.keySet().forEach(packageName ->
                 builder.addField(
@@ -130,7 +130,7 @@ public class GrpcQueryDataLoaderBuilder {
                         ).build()
                 ).addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(Mono.class, JsonObject.class),
+                                ParameterizedTypeName.get(Mono.class, String.class),
                                 grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -144,8 +144,10 @@ public class GrpcQueryDataLoaderBuilder {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
+                .addStatement("this.manager = manager")
                 .addStatement("this.jsonProvider = jsonProvider")
                 .addStatement("this.channelManager = channelManager");
 
@@ -154,85 +156,63 @@ public class GrpcQueryDataLoaderBuilder {
                         grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                         ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
                         packageName
-                ).addStatement("this.$L = build($S).flatMap(operation -> this.$L.operation($T.newBuilder().setRequest(operation.toString()).build())).map(response -> jsonProvider.get().createReader(new $T(response.getResponse())).readObject().get($S).asJsonObject())",
+                ).addStatement("this.$L = build($S).flatMap(operation -> this.$L.operation($T.newBuilder().setRequest(operation.toString()).build())).map(response -> response.getResponse())",
                         grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                         packageName,
                         grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                        ClassName.get(packageName, "GraphQLRequest"),
-                        ClassName.get(StringReader.class),
-                        "data"
+                        ClassName.get(packageName, "GraphQLRequest")
                 )
         );
         return builder.build();
     }
 
-    private List<MethodSpec> buildTypeMethods() {
+    private List<MethodSpec> buildGrpcTypeMethods() {
         return this.typeMap.entrySet().stream()
                 .flatMap(packageNameEntry ->
                         packageNameEntry.getValue().entrySet().stream()
                                 .flatMap(typeNameEntry ->
                                         typeNameEntry.getValue().stream()
                                                 .map(fieldName ->
-                                                        buildTypeMethod(packageNameEntry.getKey(), typeNameEntry.getKey(), fieldName)
+                                                        buildGrpcTypeMethod(packageNameEntry.getKey(), typeNameEntry.getKey(), fieldName)
                                                 )
                                 )
                 )
                 .collect(Collectors.toList());
     }
 
-    private List<MethodSpec> buildTypeListMethods() {
+    private List<MethodSpec> buildGrpcTypeListMethods() {
         return this.typeMap.entrySet().stream()
                 .flatMap(packageNameEntry ->
                         packageNameEntry.getValue().entrySet().stream()
                                 .flatMap(typeNameEntry ->
                                         typeNameEntry.getValue().stream()
                                                 .map(fieldName ->
-                                                        buildTypeListMethod(packageNameEntry.getKey(), typeNameEntry.getKey(), fieldName)
+                                                        buildGrpcTypeListMethod(packageNameEntry.getKey(), typeNameEntry.getKey(), fieldName)
                                                 )
                                 )
                 )
                 .collect(Collectors.toList());
     }
 
-    private MethodSpec buildTypeMethod(String packageName, String typeName, String fieldName) {
+    private MethodSpec buildGrpcTypeMethod(String packageName, String typeName, String fieldName) {
         return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
                 .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
                 .addStatement("addSelection($S, $S, $S, $S)", packageName, typeName, fieldName, fieldName)
                 .addStatement("mergeSelection($S, $S, $S, selectionSetContext)", packageName, typeName, fieldName)
                 .addStatement("addCondition($S, $S, $S, key)", packageName, typeName, fieldName)
-                .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).findFirst().orElse($T.NULL)).map(jsonValue -> jsonValueFilter(jsonValue, selectionSetContext))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        ClassName.get(Stream.class),
-                        typeName,
-                        fieldName,
-                        ClassName.get(JsonArray.class),
-                        fieldName,
-                        ClassName.get(JsonValue.class)
-                )
                 .build();
     }
 
-    private MethodSpec buildTypeListMethod(String packageName, String typeName, String fieldName) {
+    private MethodSpec buildGrpcTypeListMethod(String packageName, String typeName, String fieldName) {
         return MethodSpec.methodBuilder(grpcNameUtil.getTypeListMethodName(packageName, typeName, fieldName))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
                 .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
                 .addStatement("addSelection($S, $S, $S, $S)", packageName, typeName, fieldName, fieldName)
                 .addStatement("mergeSelection($S, $S, $S, selectionSetContext)", packageName, typeName, fieldName)
                 .addStatement("addCondition($S, $S, $S, key)", packageName, typeName, fieldName)
-                .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).collect($T.toJsonArray())).map(jsonValue -> jsonValueFilter(jsonValue, selectionSetContext))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        ClassName.get(Stream.class),
-                        typeName,
-                        fieldName,
-                        ClassName.get(JsonArray.class),
-                        fieldName,
-                        ClassName.get(JsonCollectors.class)
-                )
                 .build();
     }
 
@@ -241,25 +221,164 @@ public class GrpcQueryDataLoaderBuilder {
         int index = 0;
         for (String packageName : this.typeMap.keySet()) {
             if (index == 0) {
-                monoList.add(CodeBlock.of("return this.$L", grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono")));
+                monoList.add(CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        ClassName.get(Mono.class),
+                        packageName));
             } else {
-                monoList.add(CodeBlock.of(".then(this.$L)", grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono")));
+                monoList.add(CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        ClassName.get(Mono.class),
+                        packageName));
             }
             index++;
         }
-        if (monoList.size() == 1) {
-            monoList.add(CodeBlock.of(".then()"));
-        }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
+            monoList.add(
+                    CodeBlock.of(".then($T.fromCallable(() -> queryType(jsonValue, operationDefinitionContext.selectionSet()).map(builder -> builder.build()).orElse($T.EMPTY_JSON_OBJECT)))",
+                            ClassName.get(Mono.class),
+                            ClassName.get(JsonValue.class)
+                    )
+            );
             codeBlock = CodeBlock.join(monoList, System.lineSeparator());
         } else {
             codeBlock = CodeBlock.of("return Mono.empty()");
         }
         return MethodSpec.methodBuilder("dispatch")
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Void.class)))
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)))
+                .addParameter(ParameterSpec.builder(ClassName.get(JsonValue.class), "jsonValue").build())
+                .addParameter(ParameterSpec.builder(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext").build())
                 .addStatement(codeBlock)
                 .build();
+    }
+
+    private List<MethodSpec> buildTypeMethods() {
+        return manager.getObjects()
+                .flatMap(objectTypeDefinitionContext ->
+                        Stream.of(
+                                buildTypeMethod(objectTypeDefinitionContext),
+                                buildListTypeMethod(objectTypeDefinitionContext)
+                        )
+                )
+                .collect(Collectors.toList());
+    }
+
+    private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(Optional.class, JsonObjectBuilder.class))
+                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
+
+        builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
+                .addStatement("$T objectBuilder = jsonProvider.get().createObjectBuilder(jsonValue.asJsonObject())", ClassName.get(JsonObjectBuilder.class))
+                .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
+                        ClassName.get(GraphqlParser.SelectionContext.class),
+                        objectTypeDefinitionContext.name().getText(),
+                        ClassName.get(Collectors.class)
+                )
+                .addStatement("String selectionName = selectionContext.field().alias() == null ? selectionContext.field().name().getText() : selectionContext.field().alias().name().getText()");
+
+        int index = 0;
+        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .collect(Collectors.toList());
+
+        for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
+            String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
+            if (index == 0) {
+                builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+            } else {
+                builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+            }
+            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
+                if (manager.isGrpcField(fieldDefinitionContext)) {
+                    String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
+                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
+                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
+
+                    builder.addStatement("$T data = getResult($S)", ClassName.get(JsonValue.class), packageName)
+                            .beginControlFlow("if (data == null || data.getValueType().equals(JsonValue.ValueType.NULL))")
+                            .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
+                            .nextControlFlow("else")
+                            .addStatement("$T fieldValue = data.asJsonObject().get(getQueryFieldAlias($S, $S))", ClassName.get(JsonValue.class), typeName, to)
+                            .beginControlFlow("if (fieldValue == null || fieldValue.getValueType().equals($T.ValueType.NULL))", ClassName.get(JsonValue.class))
+                            .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
+                            .nextControlFlow("else")
+                            .addStatement("objectBuilder.add(selectionName, fieldValue.asJsonArray().stream().filter(item -> item.asJsonObject().getString($S).equals(jsonValue.asJsonObject().getString($S))).map(result -> jsonValueFilter(result, selectionContext.field().selectionSet())).collect($T.toJsonArray()))",
+                                    to,
+                                    from,
+                                    ClassName.get(JsonCollectors.class)
+                            )
+                            .endControlFlow()
+                            .endControlFlow();
+                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("$L(jsonValue.asJsonObject().get($S), selectionContext.field().selectionSet()).ifPresent(builder -> objectBuilder.add(selectionName, builder))",
+                            fieldParameterName.concat("List"),
+                            fieldDefinitionContext.name().getText()
+                    );
+                }
+            } else {
+                if (manager.isGrpcField(fieldDefinitionContext)) {
+                    String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
+                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
+                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
+
+                    builder.addStatement("$T data = getResult($S)", ClassName.get(JsonValue.class), packageName)
+                            .beginControlFlow("if (data == null || data.getValueType().equals(JsonValue.ValueType.NULL))")
+                            .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
+                            .nextControlFlow("else")
+                            .addStatement("$T fieldValue = data.asJsonObject().get(getQueryFieldAlias($S, $S))", ClassName.get(JsonValue.class), typeName, to)
+                            .beginControlFlow("if (fieldValue == null || fieldValue.getValueType().equals($T.ValueType.NULL))", ClassName.get(JsonValue.class))
+                            .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
+                            .nextControlFlow("else")
+                            .addStatement("objectBuilder.add(selectionName, fieldValue.asJsonArray().stream().filter(item -> item.asJsonObject().getString($S).equals(jsonValue.asJsonObject().getString($S))).map(result -> jsonValueFilter(result, selectionContext.field().selectionSet())).findFirst().orElse($T.NULL))",
+                                    to,
+                                    from,
+                                    ClassName.get(JsonValue.class))
+                            .endControlFlow()
+                            .endControlFlow();
+                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
+                    builder.addStatement("$L(jsonValue.asJsonObject().get($S), selectionContext.field().selectionSet()).ifPresent(builder -> objectBuilder.add(selectionName, builder))",
+                            fieldParameterName,
+                            fieldDefinitionContext.name().getText()
+                    );
+                }
+            }
+            if (index == fieldDefinitionContextList.size() - 1) {
+                builder.endControlFlow();
+            }
+            index++;
+        }
+        builder.endControlFlow()
+                .addStatement("return $T.of(objectBuilder)", ClassName.get(Optional.class))
+                .endControlFlow()
+                .addStatement("return Optional.empty()");
+        return builder.build();
+    }
+
+    private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
+        String listTypeParameterName = typeParameterName.concat("List");
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
+                .addModifiers(Modifier.PUBLIC)
+                .returns(ParameterizedTypeName.get(Optional.class, JsonArrayBuilder.class))
+                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet");
+
+        builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
+                .addStatement("$T arrayBuilder = jsonProvider.get().createArrayBuilder(jsonValue.asJsonArray())", ClassName.get(JsonArrayBuilder.class))
+                .addStatement("jsonValue.asJsonArray().forEach(item -> $L(item, selectionSet).ifPresent(builder -> arrayBuilder.add(builder)))",
+                        typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
+                )
+                .addStatement("return $T.of(arrayBuilder)", ClassName.get(Optional.class))
+                .endControlFlow()
+                .addStatement("return Optional.empty()");
+        return builder.build();
     }
 }

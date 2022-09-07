@@ -2,15 +2,19 @@ package io.graphoenix.grpc.client;
 
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.Argument;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
 import reactor.core.publisher.Mono;
 
+import java.io.StringReader;
 import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -24,8 +28,14 @@ import static jakarta.json.JsonValue.NULL;
 
 public class GrpcBaseQueryDataLoader {
 
+    private final JsonProvider jsonProvider;
     private Map<String, Map<String, Map<String, Set<String>>>> conditionMap;
     private Map<String, Map<String, Map<String, Set<Field>>>> fieldTree;
+    private Map<String, JsonValue> resultMap;
+
+    public GrpcBaseQueryDataLoader() {
+        this.jsonProvider = BeanContext.get(JsonProvider.class);
+    }
 
     public Mono<Operation> build(String packageName) {
         return Mono.fromSupplier(() -> buildOperation(packageName));
@@ -67,6 +77,18 @@ public class GrpcBaseQueryDataLoader {
         conditionMap.get(packageName).computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
         conditionMap.get(packageName).get(typeName).computeIfAbsent(fieldName, k -> new LinkedHashSet<>());
         conditionMap.get(packageName).get(typeName).get(fieldName).add(key);
+    }
+
+    public void addResult(String packageName, String response) {
+        JsonObject jsonObject = jsonProvider.createReader(new StringReader(response)).readObject().get("data").asJsonObject();
+        if (resultMap == null) {
+            resultMap = new ConcurrentHashMap<>();
+        }
+        resultMap.computeIfAbsent(packageName, k -> jsonObject);
+    }
+
+    public JsonValue getResult(String packageName) {
+        return resultMap.get(packageName);
     }
 
     public void mergeSelection(String packageName, String typeName, String fieldName, GraphqlParser.SelectionSetContext selectionSetContext) {

@@ -205,27 +205,27 @@ public class OperationHandlerImplementer {
                 break;
             case MUTATION:
                 builder.addField(
-                                FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationBeforeHandler")),
-                                        "grpcMutationBeforeHandler",
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL
-                                ).build()
-                        ).addField(
-                                FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationAfterHandler")),
-                                        "grpcMutationAfterHandler",
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL
-                                ).build()
-                        ).addField(
-                                FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationDataLoader"))),
-                                        "mutationDataLoader",
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL
-                                ).build()
-                        ).addFields(buildMutationFields())
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationBeforeHandler")),
+                                "grpcMutationBeforeHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                ).addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationAfterHandler")),
+                                "grpcMutationAfterHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                ).addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationDataLoader"))),
+                                "mutationDataLoader",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                ).addFields(buildMutationFields())
                         .addField(
                                 FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)),
@@ -329,6 +329,7 @@ public class OperationHandlerImplementer {
             builder.addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
                     ParameterizedTypeName.get(Mono.class, JsonValue.class),
                     operationName,
+
                     ClassName.get(StringReader.class)
             );
         }
@@ -336,7 +337,7 @@ public class OperationHandlerImplementer {
                 CodeBlock.join(
                         List.of(
                                 CodeBlock.of("return result.flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName),
-                                CodeBlock.of(".flatMap(jsonValue -> queryDataLoader.get().flatMap(loader -> loader.dispatch()).thenReturn(jsonValue))")
+                                CodeBlock.of(".flatMap(jsonValue -> queryDataLoader.get().flatMap(loader -> loader.dispatch(jsonValue, operationDefinitionContext)))")
                         ),
                         System.lineSeparator()
                 )
@@ -424,14 +425,14 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                                    "$T type = new $T<$T>() {}.getType()",
-                                    ClassName.get(Type.class),
-                                    ClassName.get(TypeToken.class),
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            ).addStatement(
-                                    "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            ).beginControlFlow("if(result == null)")
+                            "$T type = new $T<$T>() {}.getType()",
+                            ClassName.get(Type.class),
+                            ClassName.get(TypeToken.class),
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                    ).addStatement(
+                            "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                    ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                             .endControlFlow()
                             .addStatement(

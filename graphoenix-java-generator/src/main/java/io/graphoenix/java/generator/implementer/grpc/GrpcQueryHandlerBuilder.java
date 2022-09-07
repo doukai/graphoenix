@@ -77,8 +77,7 @@ public class GrpcQueryHandlerBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeMethods())
-                .addMethod(buildUpdateMethod());
+                .addMethods(buildTypeMethods());
 
         return builder.build();
     }
@@ -145,7 +144,7 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet()).subscribe(result -> update(jsonValue, jsonProvider.get().createObjectBuilder(jsonValue.asJsonObject()).add(selectionName, result).build()))",
+                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet())",
                             grpcNameUtil.getTypeListMethodName(packageName, typeName, to),
                             from
                     );
@@ -162,7 +161,7 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet()).subscribe(result -> update(jsonValue, jsonProvider.get().createObjectBuilder(jsonValue.asJsonObject()).add(selectionName, result).build()))",
+                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet())",
                             grpcNameUtil.getTypeMethodName(packageName, typeName, to),
                             from
                     );
@@ -198,14 +197,5 @@ public class GrpcQueryHandlerBuilder {
                 )
                 .endControlFlow();
         return builder.build();
-    }
-
-    private MethodSpec buildUpdateMethod() {
-        return MethodSpec.methodBuilder("update")
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
-                .addParameter(ClassName.get(JsonValue.class), "updated")
-                .addStatement("jsonValue = updated")
-                .build();
     }
 }
