@@ -35,7 +35,7 @@ public class GrpcBaseQueryDataLoader {
         if (conditionMap == null || conditionMap.isEmpty() || conditionMap.get(packageName) == null || conditionMap.get(packageName).isEmpty()) {
             return null;
         }
-        return new Operation()
+        Operation operation = new Operation()
                 .setOperationType("query")
                 .setFields(
                         conditionMap.get(packageName).entrySet().stream()
@@ -55,6 +55,8 @@ public class GrpcBaseQueryDataLoader {
                                 )
                                 .collect(Collectors.toSet())
                 );
+        this.clear(packageName);
+        return operation;
     }
 
     public void addCondition(String packageName, String typeName, String fieldName, String key) {
@@ -75,6 +77,16 @@ public class GrpcBaseQueryDataLoader {
         fieldTree.get(packageName).computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
         fieldTree.get(packageName).get(typeName).computeIfAbsent(fieldName, k -> new LinkedHashSet<>());
         mergeSelection(fieldTree.get(packageName).get(typeName).get(fieldName), selectionSetContext.selection().stream().map(Field::new).collect(Collectors.toSet()));
+    }
+
+    public void addSelection(String packageName, String typeName, String fieldName, String selectionName) {
+        if (fieldTree == null) {
+            fieldTree = new ConcurrentHashMap<>();
+        }
+        fieldTree.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
+        fieldTree.get(packageName).computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
+        fieldTree.get(packageName).get(typeName).computeIfAbsent(fieldName, k -> new LinkedHashSet<>());
+        mergeSelection(fieldTree.get(packageName).get(typeName).get(fieldName), Set.of(new Field().setName(selectionName)));
     }
 
     public void mergeSelection(Set<Field> originalSet, Set<Field> fieldSet) {

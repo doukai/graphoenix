@@ -14,6 +14,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -67,8 +68,17 @@ public class GrpcQueryHandlerBuilder {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
+                                "jsonProvider",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeMethods());
+                .addMethods(buildTypeMethods())
+                .addMethod(buildUpdateMethod());
 
         return builder.build();
     }
@@ -78,7 +88,9 @@ public class GrpcQueryHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addStatement("this.manager = manager")
+                .addStatement("this.jsonProvider = jsonProvider")
                 .build();
     }
 
@@ -133,7 +145,7 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet()).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
+                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet()).subscribe(result -> update(jsonValue, jsonProvider.get().createObjectBuilder(jsonValue.asJsonObject()).add(selectionName, result).build()))",
                             grpcNameUtil.getTypeListMethodName(packageName, typeName, to),
                             from
                     );
@@ -150,7 +162,7 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet()).subscribe(result -> jsonValue.asJsonObject().put(selectionName, result))",
+                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet()).subscribe(result -> update(jsonValue, jsonProvider.get().createObjectBuilder(jsonValue.asJsonObject()).add(selectionName, result).build()))",
                             grpcNameUtil.getTypeMethodName(packageName, typeName, to),
                             from
                     );
@@ -186,5 +198,14 @@ public class GrpcQueryHandlerBuilder {
                 )
                 .endControlFlow();
         return builder.build();
+    }
+
+    private MethodSpec buildUpdateMethod() {
+        return MethodSpec.methodBuilder("update")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                .addParameter(ClassName.get(JsonValue.class), "updated")
+                .addStatement("jsonValue = updated")
+                .build();
     }
 }

@@ -200,6 +200,7 @@ public class GrpcQueryDataLoaderBuilder {
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
                 .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
+                .addStatement("addSelection($S, $S, $S, $S)", packageName, typeName, fieldName, fieldName)
                 .addStatement("mergeSelection($S, $S, $S, selectionSetContext)", packageName, typeName, fieldName)
                 .addStatement("addCondition($S, $S, $S, key)", packageName, typeName, fieldName)
                 .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).findFirst().orElse($T.NULL)).map(jsonValue -> jsonValueFilter(jsonValue, selectionSetContext))",
@@ -220,6 +221,7 @@ public class GrpcQueryDataLoaderBuilder {
                 .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(String.class, "key")
                 .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
+                .addStatement("addSelection($S, $S, $S, $S)", packageName, typeName, fieldName, fieldName)
                 .addStatement("mergeSelection($S, $S, $S, selectionSetContext)", packageName, typeName, fieldName)
                 .addStatement("addCondition($S, $S, $S, key)", packageName, typeName, fieldName)
                 .addStatement("return $L.map(jsonObject -> $T.ofNullable(jsonObject.getJsonArray(getQueryFieldAlias($S, $S))).flatMap($T::stream).filter(item -> item.asJsonObject().getString($S).equals(key)).collect($T.toJsonArray())).map(jsonValue -> jsonValueFilter(jsonValue, selectionSetContext))",
@@ -239,21 +241,14 @@ public class GrpcQueryDataLoaderBuilder {
         int index = 0;
         for (String packageName : this.typeMap.keySet()) {
             if (index == 0) {
-                monoList.add(
-                        CodeBlock.of("return this.$L.then(Mono.fromRunnable(() -> clear($S)))",
-                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                                packageName
-                        )
-                );
+                monoList.add(CodeBlock.of("return this.$L", grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono")));
             } else {
-                monoList.add(
-                        CodeBlock.of(".then(this.$L.then(Mono.fromRunnable(() -> clear($S))))",
-                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                                packageName
-                        )
-                );
+                monoList.add(CodeBlock.of(".then(this.$L)", grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono")));
             }
             index++;
+        }
+        if (monoList.size() == 1) {
+            monoList.add(CodeBlock.of(".then()"));
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {

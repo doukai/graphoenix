@@ -336,7 +336,7 @@ public class OperationHandlerImplementer {
                 CodeBlock.join(
                         List.of(
                                 CodeBlock.of("return result.flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName),
-                                CodeBlock.of(".flatMap(jsonValue -> queryDataLoader.get().map(loader -> loader.dispatch()).thenReturn(jsonValue))")
+                                CodeBlock.of(".flatMap(jsonValue -> queryDataLoader.get().flatMap(loader -> loader.dispatch()).thenReturn(jsonValue))")
                         ),
                         System.lineSeparator()
                 )

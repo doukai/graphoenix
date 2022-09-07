@@ -146,8 +146,11 @@ public class ConnectionHandlerBuilder {
                         );
             }
 
+            builder.addStatement("String name = subSelectionContext.field().alias() != null ? subSelectionContext.field().alias().name().getText() : subSelectionContext.field().name().getText()");
+
             List<GraphqlParser.FieldDefinitionContext> objectFieldList = manager.getFields(objectTypeDefinitionContext.name().getText())
                     .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                    .filter(manager::isNotInvokeField)
                     .collect(Collectors.toList());
 
             int index = 0;
@@ -163,14 +166,12 @@ public class ConnectionHandlerBuilder {
                             objectTypeDefinitionContext.name().getText()
                     );
                 } else if (!manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                    builder.addStatement("$L(jsonValue.asJsonObject().get($S), $S, subSelectionContext)",
+                    builder.addStatement("$L(jsonValue.asJsonObject().get(name), $S, subSelectionContext)",
                             getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
-                            fieldDefinitionContext.name().getText(),
                             objectTypeDefinitionContext.name().getText()
                     );
                 } else {
-                    builder.addStatement("jsonValue.asJsonObject().get($S).asJsonArray().forEach(item -> $L(item, $S, subSelectionContext))",
-                            fieldDefinitionContext.name().getText(),
+                    builder.addStatement("jsonValue.asJsonObject().get(name).asJsonArray().forEach(item -> $L(item, $S, subSelectionContext))",
                             getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                             objectTypeDefinitionContext.name().getText()
                     );

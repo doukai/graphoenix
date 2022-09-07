@@ -35,7 +35,7 @@ public class GrpcBaseMutationDataLoader {
         if (objectValueMap == null || objectValueMap.isEmpty() || objectValueMap.get(packageName) == null || objectValueMap.get(packageName).isEmpty()) {
             return null;
         }
-        return new Operation()
+        Operation operation = new Operation()
                 .setOperationType("mutation")
                 .setFields(
                         objectValueMap.get(packageName).entrySet().stream()
@@ -53,6 +53,8 @@ public class GrpcBaseMutationDataLoader {
                                 )
                                 .collect(Collectors.toSet())
                 );
+        this.clear(packageName);
+        return operation;
     }
 
     public int addObjectValue(String packageName, String typeName, ObjectValueWithVariable objectValueWithVariable, String keyName) {

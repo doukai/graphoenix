@@ -252,21 +252,14 @@ public class GrpcMutationDataLoaderBuilder {
         int index = 0;
         for (String packageName : this.typeMap.keySet()) {
             if (index == 0) {
-                monoList.add(
-                        CodeBlock.of("return this.$L.then(Mono.fromRunnable(() -> clear($S)))",
-                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                                packageName
-                        )
-                );
+                monoList.add(CodeBlock.of("return this.$L", grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono")));
             } else {
-                monoList.add(
-                        CodeBlock.of(".then(this.$L.then(Mono.fromRunnable(() -> clear($S))))",
-                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                                packageName
-                        )
-                );
+                monoList.add(CodeBlock.of(".then(this.$L)", grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono")));
             }
             index++;
+        }
+        if (monoList.size() == 1) {
+            monoList.add(CodeBlock.of(".then()"));
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {

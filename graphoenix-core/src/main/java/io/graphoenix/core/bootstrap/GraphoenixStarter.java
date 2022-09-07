@@ -9,11 +9,15 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static io.graphoenix.core.utils.BannerUtil.BANNER_UTIL;
 
 public class GraphoenixStarter {
+
+    private CountDownLatch latch;
 
     private List<GraphoenixServer> serverList;
 
@@ -38,10 +42,29 @@ public class GraphoenixStarter {
     }
 
     public void run() {
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        this.latch = new CountDownLatch(1);
+        if (serverList != null && serverList.size() > 0) {
+            for (GraphoenixServer server : serverList) {
+                executorService.execute(
+                        new Thread(() -> {
+                            try {
+                                latch.await();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            server.run();
+                        })
+                );
+            }
+        }
+
         ScopeEventResolver.initialized(ApplicationScoped.class)
-                .then(Mono.when(serverList.stream().map(GraphoenixServer::run).collect(Collectors.toList())))
+                .then(Mono.fromRunnable(() -> latch.countDown()))
                 .doFirst(() -> BANNER_UTIL.getBanner().ifPresent(Logger::info))
                 .block();
+
+        executorService.shutdown();
     }
 
     private static class Holder {

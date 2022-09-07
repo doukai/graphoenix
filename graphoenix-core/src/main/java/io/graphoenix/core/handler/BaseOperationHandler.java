@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 import static jakarta.json.JsonValue.FALSE;
+import static jakarta.json.JsonValue.NULL;
 import static jakarta.json.JsonValue.TRUE;
 
 public abstract class BaseOperationHandler {
@@ -39,74 +40,81 @@ public abstract class BaseOperationHandler {
 
     protected Mono<JsonValue> invoke(JsonValue jsonValue, GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return Flux.fromIterable(operationDefinitionContext.selectionSet().selection())
-                .flatMap(selectionContext ->
-                        getOperationHandler(selectionContext.field().name().getText())
-                                .apply(jsonValue.asJsonObject().get(selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()), selectionContext)
-                                .map(subJsonValue -> new AbstractMap.SimpleEntry<>(selectionContext.field().name().getText(), subJsonValue))
+                .flatMap(selectionContext -> {
+                            String name = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText();
+                            JsonValue fieldValue = jsonValue.asJsonObject().get(name);
+                            if (fieldValue == null || fieldValue.getValueType().equals(JsonValue.ValueType.NULL)) {
+                                return Mono.just(new AbstractMap.SimpleEntry<>(name, fieldValue));
+                            } else {
+                                return getOperationHandler(selectionContext.field().name().getText())
+                                        .apply(fieldValue, selectionContext)
+                                        .map(subJsonValue -> new AbstractMap.SimpleEntry<>(name, subJsonValue));
+                            }
+                        }
                 )
                 .collectList()
                 .map(list -> list.stream().collect(JsonCollectors.toJsonObject()));
     }
 
-    protected GraphqlParser.SelectionContext getSelectionContext(GraphqlParser.OperationDefinitionContext operationDefinitionContext, String name) {
-        return operationDefinitionContext.selectionSet().selection().stream()
-                .filter(selectionContext -> selectionContext.field().name().getText().equals(name))
-                .findFirst()
-                .orElse(null);
-    }
+//    protected GraphqlParser.SelectionContext getSelectionContext(GraphqlParser.OperationDefinitionContext operationDefinitionContext, String name) {
+//        return operationDefinitionContext.selectionSet().selection().stream()
+//                .filter(selectionContext -> selectionContext.field().name().getText().equals(name))
+//                .findFirst()
+//                .orElse(null);
+//    }
 
     protected JsonValue toJsonValueList(Collection<?> collection) {
         if (collection == null) {
-            return JsonValue.NULL;
+            return NULL;
         }
         return jsonProvider.createArrayBuilder(collection).build();
     }
 
     protected JsonValue toJsonValue(String value) {
         if (value == null) {
-            return JsonValue.NULL;
+            return NULL;
         }
         return jsonProvider.createValue(value);
     }
 
     protected JsonValue toJsonValue(Integer value) {
         if (value == null) {
-            return JsonValue.NULL;
+            return NULL;
         }
         return jsonProvider.createValue(value);
     }
 
     protected JsonValue toJsonValue(Long value) {
         if (value == null) {
-            return JsonValue.NULL;
+            return NULL;
         }
         return jsonProvider.createValue(value);
     }
 
     protected JsonValue toJsonValue(Double value) {
         if (value == null) {
-            return JsonValue.NULL;
+            return NULL;
         }
         return jsonProvider.createValue(value);
     }
 
     protected JsonValue toJsonValue(BigDecimal value) {
         if (value == null) {
-            return JsonValue.NULL;
+            return NULL;
         }
         return jsonProvider.createValue(value);
     }
 
     protected JsonValue toJsonValue(BigInteger value) {
         if (value == null) {
-            return JsonValue.NULL;
+            return NULL;
         }
         return jsonProvider.createValue(value);
     }
 
     protected JsonValue toJsonValue(Boolean value) {
         if (value == null) {
-            return JsonValue.NULL;
+            return NULL;
         }
         return value ? TRUE : FALSE;
     }
