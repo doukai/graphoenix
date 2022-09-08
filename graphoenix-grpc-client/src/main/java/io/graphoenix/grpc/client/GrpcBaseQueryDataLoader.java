@@ -35,6 +35,7 @@ public class GrpcBaseQueryDataLoader {
 
     public GrpcBaseQueryDataLoader() {
         this.jsonProvider = BeanContext.get(JsonProvider.class);
+        this.resultMap = new ConcurrentHashMap<>();
     }
 
     public Mono<Operation> build(String packageName) {
@@ -84,7 +85,7 @@ public class GrpcBaseQueryDataLoader {
         if (resultMap == null) {
             resultMap = new ConcurrentHashMap<>();
         }
-        resultMap.computeIfAbsent(packageName, k -> jsonObject);
+        resultMap.put(packageName, jsonObject);
     }
 
     public JsonValue getResult(String packageName) {

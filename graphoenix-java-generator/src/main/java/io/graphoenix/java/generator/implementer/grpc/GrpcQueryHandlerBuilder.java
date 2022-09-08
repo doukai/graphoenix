@@ -144,14 +144,15 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet())",
-                            grpcNameUtil.getTypeListMethodName(packageName, typeName, to),
-                            from
-                    );
+                    builder.beginControlFlow("if(!jsonValue.asJsonObject().isNull($S))", from)
+                            .addStatement("loader.$L(jsonValue.asJsonObject().get($S).toString(), selectionContext.field().selectionSet())",
+                                    grpcNameUtil.getTypeListMethodName(packageName, typeName, to),
+                                    from
+                            )
+                            .endControlFlow();
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L(jsonValue.asJsonObject().get($S), selectionContext.field().selectionSet(), loader)",
-                            fieldParameterName.concat("List"),
-                            fieldDefinitionContext.name().getText()
+                    builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader)",
+                            fieldParameterName.concat("List")
                     );
                 }
             } else {
@@ -161,14 +162,15 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("loader.$L(jsonValue.asJsonObject().getString($S), selectionContext.field().selectionSet())",
-                            grpcNameUtil.getTypeMethodName(packageName, typeName, to),
-                            from
-                    );
+                    builder.beginControlFlow("if(!jsonValue.asJsonObject().isNull($S))", from)
+                            .addStatement("loader.$L(jsonValue.asJsonObject().get($S).toString(), selectionContext.field().selectionSet())",
+                                    grpcNameUtil.getTypeMethodName(packageName, typeName, to),
+                                    from
+                            )
+                            .endControlFlow();
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L(jsonValue.asJsonObject().get($S), selectionContext.field().selectionSet(), loader)",
-                            fieldParameterName,
-                            fieldDefinitionContext.name().getText()
+                    builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader)",
+                            fieldParameterName
                     );
                 }
             }

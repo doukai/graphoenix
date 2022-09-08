@@ -1,6 +1,13 @@
 package io.graphoenix.java.generator.implementer.grpc;
 
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.java.generator.implementer.TypeManager;
@@ -20,8 +27,14 @@ import reactor.core.publisher.Mono;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @ApplicationScoped
@@ -236,7 +249,7 @@ public class GrpcQueryDataLoaderBuilder {
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
             monoList.add(
-                    CodeBlock.of(".then($T.fromCallable(() -> queryType(jsonValue, operationDefinitionContext.selectionSet()).map(builder -> builder.build()).orElse($T.EMPTY_JSON_OBJECT)))",
+                    CodeBlock.of(".then($T.fromSupplier(() -> queryType(jsonValue, operationDefinitionContext.selectionSet()).map(builder -> builder.build()).orElse($T.EMPTY_JSON_OBJECT)))",
                             ClassName.get(Mono.class),
                             ClassName.get(JsonValue.class)
                     )
@@ -301,7 +314,10 @@ public class GrpcQueryDataLoaderBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("$T data = getResult($S)", ClassName.get(JsonValue.class), packageName)
+                    builder.beginControlFlow("if(jsonValue.asJsonObject().isNull($S))", from)
+                            .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
+                            .nextControlFlow("else")
+                            .addStatement("$T data = getResult($S)", ClassName.get(JsonValue.class), packageName)
                             .beginControlFlow("if (data == null || data.getValueType().equals(JsonValue.ValueType.NULL))")
                             .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
                             .nextControlFlow("else")
@@ -309,17 +325,17 @@ public class GrpcQueryDataLoaderBuilder {
                             .beginControlFlow("if (fieldValue == null || fieldValue.getValueType().equals($T.ValueType.NULL))", ClassName.get(JsonValue.class))
                             .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
                             .nextControlFlow("else")
-                            .addStatement("objectBuilder.add(selectionName, fieldValue.asJsonArray().stream().filter(item -> item.asJsonObject().getString($S).equals(jsonValue.asJsonObject().getString($S))).map(result -> jsonValueFilter(result, selectionContext.field().selectionSet())).collect($T.toJsonArray()))",
+                            .addStatement("objectBuilder.add(selectionName, fieldValue.asJsonArray().stream().filter(item -> item.asJsonObject().get($S).toString().equals(jsonValue.asJsonObject().get($S).toString())).map(result -> jsonValueFilter(result, selectionContext.field().selectionSet())).collect($T.toJsonArray()))",
                                     to,
                                     from,
                                     ClassName.get(JsonCollectors.class)
                             )
                             .endControlFlow()
+                            .endControlFlow()
                             .endControlFlow();
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L(jsonValue.asJsonObject().get($S), selectionContext.field().selectionSet()).ifPresent(builder -> objectBuilder.add(selectionName, builder))",
-                            fieldParameterName.concat("List"),
-                            fieldDefinitionContext.name().getText()
+                    builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet()).ifPresent(builder -> objectBuilder.add(selectionName, builder))",
+                            fieldParameterName.concat("List")
                     );
                 }
             } else {
@@ -329,7 +345,10 @@ public class GrpcQueryDataLoaderBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("$T data = getResult($S)", ClassName.get(JsonValue.class), packageName)
+                    builder.beginControlFlow("if(jsonValue.asJsonObject().isNull($S))", from)
+                            .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
+                            .nextControlFlow("else")
+                            .addStatement("$T data = getResult($S)", ClassName.get(JsonValue.class), packageName)
                             .beginControlFlow("if (data == null || data.getValueType().equals(JsonValue.ValueType.NULL))")
                             .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
                             .nextControlFlow("else")
@@ -337,16 +356,16 @@ public class GrpcQueryDataLoaderBuilder {
                             .beginControlFlow("if (fieldValue == null || fieldValue.getValueType().equals($T.ValueType.NULL))", ClassName.get(JsonValue.class))
                             .addStatement("objectBuilder.add(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
                             .nextControlFlow("else")
-                            .addStatement("objectBuilder.add(selectionName, fieldValue.asJsonArray().stream().filter(item -> item.asJsonObject().getString($S).equals(jsonValue.asJsonObject().getString($S))).map(result -> jsonValueFilter(result, selectionContext.field().selectionSet())).findFirst().orElse($T.NULL))",
+                            .addStatement("objectBuilder.add(selectionName, fieldValue.asJsonArray().stream().filter(item -> item.asJsonObject().get($S).toString().equals(jsonValue.asJsonObject().get($S).toString())).map(result -> jsonValueFilter(result, selectionContext.field().selectionSet())).findFirst().orElse($T.NULL))",
                                     to,
                                     from,
                                     ClassName.get(JsonValue.class))
                             .endControlFlow()
+                            .endControlFlow()
                             .endControlFlow();
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L(jsonValue.asJsonObject().get($S), selectionContext.field().selectionSet()).ifPresent(builder -> objectBuilder.add(selectionName, builder))",
-                            fieldParameterName,
-                            fieldDefinitionContext.name().getText()
+                    builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet()).ifPresent(builder -> objectBuilder.add(selectionName, builder))",
+                            fieldParameterName
                     );
                 }
             }
@@ -373,7 +392,8 @@ public class GrpcQueryDataLoaderBuilder {
 
         builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
                 .addStatement("$T arrayBuilder = jsonProvider.get().createArrayBuilder(jsonValue.asJsonArray())", ClassName.get(JsonArrayBuilder.class))
-                .addStatement("jsonValue.asJsonArray().forEach(item -> $L(item, selectionSet).ifPresent(builder -> arrayBuilder.add(builder)))",
+                .addStatement("$T.range(0, jsonValue.asJsonArray().size()).forEach(index -> $L(jsonValue.asJsonArray().get(index), selectionSet).ifPresent(builder -> arrayBuilder.set(index, builder)))",
+                        ClassName.get(IntStream.class),
                         typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                 )
                 .addStatement("return $T.of(arrayBuilder)", ClassName.get(Optional.class))
