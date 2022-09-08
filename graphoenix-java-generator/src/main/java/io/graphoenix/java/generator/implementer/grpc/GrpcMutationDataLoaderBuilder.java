@@ -22,9 +22,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
-import jakarta.json.stream.JsonCollectors;
 import org.tinylog.Logger;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
@@ -172,19 +170,11 @@ public class GrpcMutationDataLoaderBuilder {
     private MethodSpec buildTypeMethod(String packageName, String typeName, String key) {
         return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(String.class), "selectionName")
                 .beginControlFlow("if (jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
                 .addStatement("final int index = addObjectValue($S, $S, jsonValue.asJsonObject(), $S)", packageName, typeName, key)
                 .addStatement("addSelection($S, $S, selectionName)", packageName, typeName)
-                .addStatement("return $L.map(jsonObject -> jsonObject.getJsonArray(typeToLowerCamelName($S)).get(index).asJsonObject().getOrDefault(selectionName, $T.NULL))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        typeName,
-                        ClassName.get(JsonValue.class)
-                )
-                .nextControlFlow("else")
-                .addStatement("return $T.empty()", ClassName.get(Mono.class))
                 .endControlFlow()
                 .build();
     }
@@ -192,19 +182,11 @@ public class GrpcMutationDataLoaderBuilder {
     private MethodSpec buildTypeFieldMethod(String packageName, String typeName, String key) {
         return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
                 .addParameter(ClassName.get(String.class), "selectionName")
                 .beginControlFlow("if (valueWithVariable.isObject())")
                 .addStatement("final int index = addObjectValue($S, $S, valueWithVariable.asObject(), $S)", packageName, typeName, key)
                 .addStatement("addSelection($S, $S, selectionName)", packageName, typeName)
-                .addStatement("return $L.map(jsonObject -> jsonObject.getJsonArray(typeToLowerCamelName($S)).get(index).asJsonObject().getOrDefault(selectionName, $T.NULL))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        typeName,
-                        ClassName.get(JsonValue.class)
-                )
-                .nextControlFlow("else")
-                .addStatement("return $T.empty()", ClassName.get(Mono.class))
                 .endControlFlow()
                 .build();
     }
@@ -212,18 +194,13 @@ public class GrpcMutationDataLoaderBuilder {
     private MethodSpec buildTypeListMethod(String packageName, String typeName) {
         return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName).concat("List"))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(String.class), "selectionName")
                 .beginControlFlow("if (jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
                 .addStatement("$T jsonArray = jsonValue.asJsonArray()", ClassName.get(JsonArray.class))
-                .addStatement("return $T.fromIterable(jsonArray).flatMap(item -> $L(item, selectionName)).collect($T.toJsonArray())",
-                        ClassName.get(Flux.class),
-                        grpcNameUtil.getTypeMethodName(packageName, typeName),
-                        ClassName.get(JsonCollectors.class)
+                .addStatement("jsonArray.forEach(item -> $L(item, selectionName))",
+                        grpcNameUtil.getTypeMethodName(packageName, typeName)
                 )
-                .nextControlFlow("else")
-                .addStatement("return $T.empty()", ClassName.get(Mono.class))
                 .endControlFlow()
                 .build();
     }
@@ -231,18 +208,13 @@ public class GrpcMutationDataLoaderBuilder {
     private MethodSpec buildTypeListFieldMethod(String packageName, String typeName) {
         return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName).concat("List"))
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ParameterizedTypeName.get(Mono.class, JsonValue.class))
                 .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
                 .addParameter(ClassName.get(String.class), "selectionName")
                 .beginControlFlow("if (valueWithVariable.isArray())", ClassName.get(JsonValue.class))
                 .addStatement("$T arrayValueWithVariable = valueWithVariable.asArray()", ClassName.get(ArrayValueWithVariable.class))
-                .addStatement("return $T.fromIterable(arrayValueWithVariable).flatMap(item -> $L(item, selectionName)).collect($T.toJsonArray())",
-                        ClassName.get(Flux.class),
-                        grpcNameUtil.getTypeMethodName(packageName, typeName),
-                        ClassName.get(JsonCollectors.class)
+                .addStatement("arrayValueWithVariable.forEach(item -> $L(item, selectionName))",
+                        grpcNameUtil.getTypeMethodName(packageName, typeName)
                 )
-                .nextControlFlow("else")
-                .addStatement("return $T.empty()", ClassName.get(Mono.class))
                 .endControlFlow()
                 .build();
     }

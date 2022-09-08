@@ -1,6 +1,5 @@
 package io.graphoenix.grpc.server;
 
-import io.graphoenix.core.bootstrap.GraphoenixServer;
 import io.grpc.Server;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -10,7 +9,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
-public class GraphQLGrpcGraphoenixServer implements GraphoenixServer {
+public class GraphQLGrpcGraphoenixServer implements Runnable {
 
     private final Server server;
 

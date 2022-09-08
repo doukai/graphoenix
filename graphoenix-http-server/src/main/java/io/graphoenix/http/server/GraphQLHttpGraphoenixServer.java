@@ -1,6 +1,5 @@
 package io.graphoenix.http.server;
 
-import io.graphoenix.core.bootstrap.GraphoenixServer;
 import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.handler.GetRequestHandler;
 import io.graphoenix.http.handler.PostRequestHandler;
@@ -19,7 +18,7 @@ import reactor.netty.http.server.HttpServer;
 import static io.graphoenix.http.handler.SchemaRequestHandler.SCHEMA_PARAM_NAME;
 
 @ApplicationScoped
-public class GraphQLHttpGraphoenixServer implements GraphoenixServer {
+public class GraphQLHttpGraphoenixServer implements Runnable {
 
     private final HttpServerConfig httpServerConfig;
     private final SchemaRequestHandler schemaRequestHandler;

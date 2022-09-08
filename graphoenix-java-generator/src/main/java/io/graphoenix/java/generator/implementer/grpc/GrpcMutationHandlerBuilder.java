@@ -160,10 +160,9 @@ public class GrpcMutationHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
                     if (anchor) {
-                        builder.addStatement("loader.$L(argument.getValueWithVariable(), $S).subscribe(result -> field.getOrCreateArgument($S).setValueWithVariable(result))",
+                        builder.addStatement("loader.$L(argument.getValueWithVariable(), $S)",
                                 grpcNameUtil.getTypeMethodName(packageName, typeName),
-                                to,
-                                from
+                                to
                         );
                     } else {
                         builder.addStatement("argument.getValueWithVariable().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
@@ -245,10 +244,9 @@ public class GrpcMutationHandlerBuilder {
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
                     if (anchor) {
-                        builder.addStatement("loader.$L(field.getValue(), $S).subscribe(result -> valueWithVariable.asObject().put($S, new ValueWithVariable(result)))",
+                        builder.addStatement("loader.$L(field.getValue(), $S)",
                                 grpcNameUtil.getTypeMethodName(packageName, typeName),
-                                to,
-                                from
+                                to
                         );
                     } else {
                         builder.addStatement("field.getValue().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)

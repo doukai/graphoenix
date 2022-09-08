@@ -19,12 +19,12 @@ public class GraphoenixStarter {
 
     private CountDownLatch latch;
 
-    private List<GraphoenixServer> serverList;
+    private List<Runnable> serverList;
 
     private GraphoenixStarter() {
     }
 
-    public GraphoenixStarter addServers(GraphoenixServer... servers) {
+    public GraphoenixStarter addServers(Runnable... servers) {
         if (this.serverList == null) {
             this.serverList = new ArrayList<>();
         }
@@ -32,20 +32,20 @@ public class GraphoenixStarter {
         return this;
     }
 
-    public static GraphoenixStarter with(GraphoenixServer... servers) {
+    public static GraphoenixStarter with(Runnable... servers) {
         return getInstance().addServers(servers);
     }
 
     @SafeVarargs
-    public static GraphoenixStarter with(Class<? extends GraphoenixServer>... classes) {
-        return getInstance().addServers(Arrays.stream(classes).map(BeanContext::get).toArray(GraphoenixServer[]::new));
+    public static GraphoenixStarter with(Class<? extends Runnable>... classes) {
+        return getInstance().addServers(Arrays.stream(classes).map(BeanContext::get).toArray(Runnable[]::new));
     }
 
     public void run() {
         ExecutorService executorService = Executors.newCachedThreadPool();
         this.latch = new CountDownLatch(1);
         if (serverList != null && serverList.size() > 0) {
-            for (GraphoenixServer server : serverList) {
+            for (Runnable server : serverList) {
                 executorService.execute(
                         new Thread(() -> {
                             try {
