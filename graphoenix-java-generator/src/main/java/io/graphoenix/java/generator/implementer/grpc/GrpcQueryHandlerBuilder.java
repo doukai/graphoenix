@@ -22,6 +22,7 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @ApplicationScoped
@@ -115,7 +116,8 @@ public class GrpcQueryHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet")
-                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcQueryDataLoader"), "loader");
+                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcQueryDataLoader"), "loader")
+                .addParameter(ClassName.get(String.class), "jsonPointer");
 
         builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
                 .beginControlFlow("for ($T selectionContext : selectionSet.selection().stream().flatMap(selectionContext -> manager.get().fragmentUnzip($S, selectionContext)).collect($T.toList()))",
@@ -145,13 +147,13 @@ public class GrpcQueryHandlerBuilder {
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
                     builder.beginControlFlow("if(!jsonValue.asJsonObject().isNull($S))", from)
-                            .addStatement("loader.$L(jsonValue.asJsonObject().get($S).toString(), selectionContext.field().selectionSet())",
+                            .addStatement("loader.$L(jsonValue.asJsonObject().get($S).toString(), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
                                     grpcNameUtil.getTypeListMethodName(packageName, typeName, to),
                                     from
                             )
                             .endControlFlow();
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader)",
+                    builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader, jsonPointer + \"/\" + selectionName)",
                             fieldParameterName.concat("List")
                     );
                 }
@@ -163,13 +165,13 @@ public class GrpcQueryHandlerBuilder {
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
                     builder.beginControlFlow("if(!jsonValue.asJsonObject().isNull($S))", from)
-                            .addStatement("loader.$L(jsonValue.asJsonObject().get($S).toString(), selectionContext.field().selectionSet())",
+                            .addStatement("loader.$L(jsonValue.asJsonObject().get($S).toString(), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
                                     grpcNameUtil.getTypeMethodName(packageName, typeName, to),
                                     from
                             )
                             .endControlFlow();
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader)",
+                    builder.addStatement("$L(jsonValue.asJsonObject().get(selectionName), selectionContext.field().selectionSet(), loader, jsonPointer + \"/\" + selectionName)",
                             fieldParameterName
                     );
                 }
@@ -191,10 +193,12 @@ public class GrpcQueryHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionSetContext.class), "selectionSet")
-                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcQueryDataLoader"), "loader");
+                .addParameter(ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcQueryDataLoader"), "loader")
+                .addParameter(ClassName.get(String.class), "jsonPointer");
 
         builder.beginControlFlow("if (selectionSet != null && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
-                .addStatement("jsonValue.asJsonArray().forEach(item -> $L(item, selectionSet, loader))",
+                .addStatement("$T.range(0, jsonValue.asJsonArray().size()).forEach(index -> $L(jsonValue.asJsonArray().get(index), selectionSet, loader, jsonPointer + \"/\" + index))",
+                        ClassName.get(IntStream.class),
                         typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                 )
                 .endControlFlow();

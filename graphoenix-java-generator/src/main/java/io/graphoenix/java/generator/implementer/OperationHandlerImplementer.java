@@ -337,7 +337,7 @@ public class OperationHandlerImplementer {
                 CodeBlock.join(
                         List.of(
                                 CodeBlock.of("return result.flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, $S, operationDefinitionContext), operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName), operationTypeName),
-                                CodeBlock.of(".flatMap(jsonValue -> queryDataLoader.get().flatMap(loader -> loader.dispatch(jsonValue, operationDefinitionContext)))")
+                                CodeBlock.of(".flatMap(jsonValue -> queryDataLoader.get().flatMap(loader -> loader.dispatch(jsonValue)))")
                         ),
                         System.lineSeparator()
                 )
@@ -362,8 +362,7 @@ public class OperationHandlerImplementer {
         } else {
             grpcMethodName = fieldTypeParameterName;
         }
-        CodeBlock grpcCodeBlock = CodeBlock.of(".flatMap(filtered -> queryDataLoader.get().flatMap(loader -> Mono.fromRunnable(() -> grpcQueryHandler.get().$L(filtered, selectionContext.field().selectionSet(), loader))).thenReturn(filtered))", grpcMethodName);
-
+        CodeBlock grpcCodeBlock = CodeBlock.of(".flatMap(filtered -> queryDataLoader.get().flatMap(loader -> Mono.fromRunnable(() -> grpcQueryHandler.get().$L(filtered, selectionContext.field().selectionSet(), loader, \"/\" + selectionName))).thenReturn(filtered))", grpcMethodName);
 
         if (manager.isInvokeField(fieldDefinitionContext)) {
             String className = typeManager.getClassName(fieldDefinitionContext);
@@ -371,19 +370,20 @@ public class OperationHandlerImplementer {
             List<AbstractMap.SimpleEntry<String, String>> parameters = typeManager.getParameters(fieldDefinitionContext);
             String returnClassName = typeManager.getReturnClassName(fieldDefinitionContext);
 
-            builder.addStatement("$T result = $L.get().$L($L)",
-                    typeManager.getTypeNameByString(returnClassName),
-                    typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
-                    methodName,
-                    CodeBlock.join(parameters.stream()
-                            .map(parameter ->
-                                    CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
-                                            parameter.getKey(),
-                                            typeManager.getClassNameByString(parameter.getValue())
+            builder.addStatement("String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()")
+                    .addStatement("$T result = $L.get().$L($L)",
+                            typeManager.getTypeNameByString(returnClassName),
+                            typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
+                            methodName,
+                            CodeBlock.join(parameters.stream()
+                                    .map(parameter ->
+                                            CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
+                                                    parameter.getKey(),
+                                                    typeManager.getClassNameByString(parameter.getValue())
+                                            )
                                     )
-                            )
-                            .collect(Collectors.toList()), ", ")
-            );
+                                    .collect(Collectors.toList()), ", ")
+                    );
 
             CodeBlock invokeCodeBlock;
             if (manager.isObject(fieldTypeName)) {
@@ -430,6 +430,8 @@ public class OperationHandlerImplementer {
                 builder.addStatement(invokeCodeBlock);
             }
         } else {
+            builder.addStatement("String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()");
+
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
