@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.eclipse.parsson:jakarta.json:1.1.0'
+    compile 'org.eclipse.parsson:jakarta.json:1.1.1'
     compile 'com.dslplatform:dsl-json-java8:1.9.9'
 
     implementation project(':graphoenix-spi')

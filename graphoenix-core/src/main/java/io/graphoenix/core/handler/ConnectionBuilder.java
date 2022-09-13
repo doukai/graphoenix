@@ -27,6 +27,7 @@ import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
+import static jakarta.json.JsonValue.EMPTY_JSON_OBJECT;
 import static jakarta.json.JsonValue.NULL;
 
 @ApplicationScoped
@@ -42,6 +43,9 @@ public class ConnectionBuilder {
     }
 
     public JsonValue build(JsonValue jsonValue, String typeName, GraphqlParser.SelectionContext selectionContext) {
+        if (jsonValue == null || jsonValue.getValueType().equals(JsonValue.ValueType.NULL) || jsonValue.asJsonObject().isEmpty()) {
+            return EMPTY_JSON_OBJECT;
+        }
         JsonObjectBuilder connectionObjectBuilder = jsonProvider.createObjectBuilder();
         if (selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0) {
             GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext = manager.getField(typeName, selectionContext.field().name().getText())

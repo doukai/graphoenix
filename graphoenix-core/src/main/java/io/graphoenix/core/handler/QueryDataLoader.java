@@ -1,7 +1,8 @@
-package io.graphoenix.grpc.client;
+package io.graphoenix.core.handler;
 
 import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.Argument;
 import io.graphoenix.core.operation.Field;
@@ -9,8 +10,6 @@ import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
@@ -29,18 +28,28 @@ import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 import static jakarta.json.JsonValue.NULL;
 
-@Dependent
-public class GrpcQueryDispatcher {
+public abstract class QueryDataLoader {
 
     private final JsonProvider jsonProvider;
     private Map<String, Map<String, Map<String, Map<String, Map<JsonValue.ValueType, Set<Tuple2<String, GraphqlParser.SelectionSetContext>>>>>>> conditionMap;
     private Map<String, Map<String, Map<String, Set<Field>>>> fieldTree;
     private Map<String, JsonValue> resultMap;
 
-    @Inject
-    public GrpcQueryDispatcher(JsonProvider jsonProvider) {
-        this.jsonProvider = jsonProvider;
+    public QueryDataLoader() {
+        this.jsonProvider = BeanContext.get(JsonProvider.class);
         this.resultMap = new ConcurrentHashMap<>();
+    }
+
+    public void register(String packageName, String typeName, String fieldName, String key, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
+        addSelection(packageName, typeName, fieldName, fieldName);
+        mergeSelection(packageName, typeName, fieldName, selectionSetContext);
+        addCondition(packageName, typeName, fieldName, key, JsonValue.ValueType.OBJECT, jsonPointer, selectionSetContext);
+    }
+
+    public void registerArray(String packageName, String typeName, String fieldName, String key, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
+        addSelection(packageName, typeName, fieldName, fieldName);
+        mergeSelection(packageName, typeName, fieldName, selectionSetContext);
+        addCondition(packageName, typeName, fieldName, key, JsonValue.ValueType.ARRAY, jsonPointer, selectionSetContext);
     }
 
     public Mono<Operation> build(String packageName) {
@@ -222,4 +231,6 @@ public class GrpcQueryDispatcher {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
         }
     }
+
+    public abstract Mono<JsonValue> load(JsonValue jsonValue);
 }
