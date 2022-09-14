@@ -67,7 +67,7 @@ public class ConnectionBuilder {
                         .findFirst()
                         .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
 
-                if (connectionFieldName.isPresent() && connectionAggFieldName.isPresent()) {
+                if (connectionFieldName.isPresent() && connectionAggFieldName.isPresent() && jsonValue.asJsonObject().get(connectionFieldName.get()) != null && !jsonValue.asJsonObject().isNull(connectionFieldName.get())) {
                     String fieldName = selectionContext.field().name().getText().substring(0, selectionContext.field().name().getText().length() - CONNECTION_SUFFIX.length());
                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, fieldName)
                             .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, fieldName)));

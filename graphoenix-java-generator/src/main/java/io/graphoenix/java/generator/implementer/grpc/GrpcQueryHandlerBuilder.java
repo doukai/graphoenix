@@ -147,9 +147,8 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("jsonValue.asJsonObject().put(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
-                            .beginControlFlow("if(!jsonValue.asJsonObject().isNull($S))", from)
-                            .addStatement("loader.registerArray($S, $S, $S, jsonValue.asJsonObject().get($S).toString(), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
+                    builder.beginControlFlow("if(!jsonValue.asJsonObject().isNull($S))", from)
+                            .addStatement("loader.registerArray($S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
                                     packageName,
                                     typeName,
                                     to,
@@ -168,9 +167,8 @@ public class GrpcQueryHandlerBuilder {
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
                     String to = grpcNameUtil.getTo(fieldDefinitionContext);
 
-                    builder.addStatement("jsonValue.asJsonObject().put(selectionName, $T.NULL)", ClassName.get(JsonValue.class))
-                            .beginControlFlow("if(!jsonValue.asJsonObject().isNull($S))", from)
-                            .addStatement("loader.register($S, $S, $S, jsonValue.asJsonObject().get($S).toString(), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
+                    builder.beginControlFlow("if(!jsonValue.asJsonObject().isNull($S))", from)
+                            .addStatement("loader.register($S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
                                     packageName,
                                     typeName,
                                     to,

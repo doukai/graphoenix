@@ -8,14 +8,12 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
-import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.handler.QueryDataLoader;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import jakarta.json.JsonValue;
@@ -123,16 +121,7 @@ public class GrpcQueryDataLoaderBuilder {
                                 Modifier.FINAL
                         ).build()
                 )
-//                .addField(
-//                        FieldSpec.builder(
-//                                ClassName.get("io.graphoenix.grpc.client", "GrpcQueryDispatcher"),
-//                                "dispatcher",
-//                                Modifier.PRIVATE
-//                        ).build()
-//                )
                 .addMethod(buildConstructor())
-//                .addMethods(buildGrpcTypeMethods())
-//                .addMethods(buildGrpcTypeListMethods())
                 .addMethod(buildDispatchMethod());
 
         typeMap.keySet().forEach(packageName ->
@@ -162,7 +151,6 @@ public class GrpcQueryDataLoaderBuilder {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
-//                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "GrpcQueryDispatcher")), "dispatcherProvider")
                 .addStatement("this.manager = manager")
                 .addStatement("this.jsonProvider = jsonProvider")
                 .addStatement("this.channelManager = channelManager");
@@ -181,58 +169,6 @@ public class GrpcQueryDataLoaderBuilder {
         );
         return builder.build();
     }
-
-//    private List<MethodSpec> buildGrpcTypeMethods() {
-//        return this.typeMap.entrySet().stream()
-//                .flatMap(packageNameEntry ->
-//                        packageNameEntry.getValue().entrySet().stream()
-//                                .flatMap(typeNameEntry ->
-//                                        typeNameEntry.getValue().stream()
-//                                                .map(fieldName ->
-//                                                        buildGrpcTypeMethod(packageNameEntry.getKey(), typeNameEntry.getKey(), fieldName)
-//                                                )
-//                                )
-//                )
-//                .collect(Collectors.toList());
-//    }
-//
-//    private List<MethodSpec> buildGrpcTypeListMethods() {
-//        return this.typeMap.entrySet().stream()
-//                .flatMap(packageNameEntry ->
-//                        packageNameEntry.getValue().entrySet().stream()
-//                                .flatMap(typeNameEntry ->
-//                                        typeNameEntry.getValue().stream()
-//                                                .map(fieldName ->
-//                                                        buildGrpcTypeListMethod(packageNameEntry.getKey(), typeNameEntry.getKey(), fieldName)
-//                                                )
-//                                )
-//                )
-//                .collect(Collectors.toList());
-//    }
-
-//    private MethodSpec buildGrpcTypeMethod(String packageName, String typeName, String fieldName) {
-//        return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName, fieldName))
-//                .addModifiers(Modifier.PUBLIC)
-//                .addParameter(String.class, "key")
-//                .addParameter(String.class, "jsonPointer")
-//                .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
-//                .addStatement("dispatcher.addSelection($S, $S, $S, $S)", packageName, typeName, fieldName, fieldName)
-//                .addStatement("dispatcher.mergeSelection($S, $S, $S, selectionSetContext)", packageName, typeName, fieldName)
-//                .addStatement("dispatcher.addCondition($S, $S, $S, key, $T.ValueType.OBJECT, jsonPointer, selectionSetContext)", packageName, typeName, fieldName, ClassName.get(JsonValue.class))
-//                .build();
-//    }
-//
-//    private MethodSpec buildGrpcTypeListMethod(String packageName, String typeName, String fieldName) {
-//        return MethodSpec.methodBuilder(grpcNameUtil.getTypeListMethodName(packageName, typeName, fieldName))
-//                .addModifiers(Modifier.PUBLIC)
-//                .addParameter(String.class, "key")
-//                .addParameter(String.class, "jsonPointer")
-//                .addParameter(GraphqlParser.SelectionSetContext.class, "selectionSetContext")
-//                .addStatement("dispatcher.addSelection($S, $S, $S, $S)", packageName, typeName, fieldName, fieldName)
-//                .addStatement("dispatcher.mergeSelection($S, $S, $S, selectionSetContext)", packageName, typeName, fieldName)
-//                .addStatement("dispatcher.addCondition($S, $S, $S, key, $T.ValueType.ARRAY, jsonPointer, selectionSetContext)", packageName, typeName, fieldName, ClassName.get(JsonValue.class))
-//                .build();
-//    }
 
     private MethodSpec buildDispatchMethod() {
         List<CodeBlock> monoList = new ArrayList<>();

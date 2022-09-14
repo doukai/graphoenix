@@ -11,6 +11,7 @@ import io.graphoenix.core.operation.Operation;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonPatchBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
@@ -40,16 +41,16 @@ public abstract class QueryDataLoader {
         this.resultMap = new ConcurrentHashMap<>();
     }
 
-    public void register(String packageName, String typeName, String fieldName, String key, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
+    public void register(String packageName, String typeName, String fieldName, JsonValue key, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
         addSelection(packageName, typeName, fieldName, fieldName);
         mergeSelection(packageName, typeName, fieldName, selectionSetContext);
-        addCondition(packageName, typeName, fieldName, key, JsonValue.ValueType.OBJECT, jsonPointer, selectionSetContext);
+        addCondition(packageName, typeName, fieldName, getKeyValue(key), JsonValue.ValueType.OBJECT, jsonPointer, selectionSetContext);
     }
 
-    public void registerArray(String packageName, String typeName, String fieldName, String key, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
+    public void registerArray(String packageName, String typeName, String fieldName, JsonValue key, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
         addSelection(packageName, typeName, fieldName, fieldName);
         mergeSelection(packageName, typeName, fieldName, selectionSetContext);
-        addCondition(packageName, typeName, fieldName, key, JsonValue.ValueType.ARRAY, jsonPointer, selectionSetContext);
+        addCondition(packageName, typeName, fieldName, getKeyValue(key), JsonValue.ValueType.ARRAY, jsonPointer, selectionSetContext);
     }
 
     public Mono<Operation> build(String packageName) {
@@ -103,6 +104,7 @@ public abstract class QueryDataLoader {
     }
 
     public JsonValue dispatch(JsonObject jsonObject) {
+        JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
         if (conditionMap != null && !conditionMap.isEmpty()) {
             conditionMap.forEach((packageName, packageMap) -> {
                 if (packageMap != null && !packageMap.isEmpty()) {
@@ -120,32 +122,30 @@ public abstract class QueryDataLoader {
                                                         if (valueType.equals(JsonValue.ValueType.ARRAY)) {
                                                             if (jsonPointerList != null && !jsonPointerList.isEmpty()) {
                                                                 jsonPointerList.forEach(jsonPointer ->
-                                                                        jsonProvider.createPointer(jsonPointer._1())
-                                                                                .replace(
-                                                                                        jsonObject,
-                                                                                        jsonValueFilter(
-                                                                                                fieldValue.asJsonArray().stream()
-                                                                                                        .filter(item -> item.asJsonObject().getString(fieldName).equals(key))
-                                                                                                        .collect(JsonCollectors.toJsonArray()),
-                                                                                                jsonPointer._2()
-                                                                                        )
+                                                                        patchBuilder.add(
+                                                                                jsonPointer._1(),
+                                                                                jsonValueFilter(
+                                                                                        fieldValue.asJsonArray().stream()
+                                                                                                .filter(item -> getKeyValue(item.asJsonObject().get(fieldName)).equals(key))
+                                                                                                .collect(JsonCollectors.toJsonArray()),
+                                                                                        jsonPointer._2()
                                                                                 )
+                                                                        )
                                                                 );
                                                             }
                                                         } else {
                                                             if (jsonPointerList != null && !jsonPointerList.isEmpty()) {
                                                                 jsonPointerList.forEach(jsonPointer ->
-                                                                        jsonProvider.createPointer(jsonPointer._1())
-                                                                                .replace(
-                                                                                        jsonObject,
-                                                                                        jsonValueFilter(
-                                                                                                fieldValue.asJsonArray().stream()
-                                                                                                        .filter(item -> item.asJsonObject().getString(fieldName).equals(key))
-                                                                                                        .findFirst()
-                                                                                                        .orElse(NULL),
-                                                                                                jsonPointer._2()
-                                                                                        )
+                                                                        patchBuilder.add(
+                                                                                jsonPointer._1(),
+                                                                                jsonValueFilter(
+                                                                                        fieldValue.asJsonArray().stream()
+                                                                                                .filter(item -> getKeyValue(item.asJsonObject().get(fieldName)).equals(key))
+                                                                                                .findFirst()
+                                                                                                .orElse(NULL),
+                                                                                        jsonPointer._2()
                                                                                 )
+                                                                        )
                                                                 );
                                                             }
                                                         }
@@ -161,7 +161,16 @@ public abstract class QueryDataLoader {
                 }
             });
         }
-        return jsonObject;
+        return patchBuilder.build().apply(jsonObject);
+    }
+
+    private String getKeyValue(JsonValue jsonValue) {
+        if (jsonValue.getValueType().equals(JsonValue.ValueType.STRING)) {
+            String string = jsonValue.toString();
+            return string.substring(1, string.length() - 1);
+        } else {
+            return jsonValue.toString();
+        }
     }
 
     public void mergeSelection(String packageName, String typeName, String fieldName, GraphqlParser.SelectionSetContext selectionSetContext) {
