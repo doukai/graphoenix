@@ -53,11 +53,11 @@ public abstract class QueryDataLoader {
         addCondition(packageName, typeName, fieldName, getKeyValue(key), JsonValue.ValueType.ARRAY, jsonPointer, selectionSetContext);
     }
 
-    public Mono<Operation> build(String packageName) {
+    protected Mono<Operation> build(String packageName) {
         return Mono.fromSupplier(() -> buildOperation(packageName));
     }
 
-    public Operation buildOperation(String packageName) {
+    private Operation buildOperation(String packageName) {
         if (conditionMap == null || conditionMap.isEmpty() || conditionMap.get(packageName) == null || conditionMap.get(packageName).isEmpty()) {
             return null;
         }
@@ -83,7 +83,7 @@ public abstract class QueryDataLoader {
                 );
     }
 
-    public void addCondition(String packageName, String typeName, String fieldName, String key, JsonValue.ValueType valueType, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
+    private void addCondition(String packageName, String typeName, String fieldName, String key, JsonValue.ValueType valueType, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
         if (conditionMap == null) {
             conditionMap = new ConcurrentHashMap<>();
         }
@@ -95,7 +95,7 @@ public abstract class QueryDataLoader {
         conditionMap.get(packageName).get(typeName).get(fieldName).get(key).get(valueType).add(Tuple.of(jsonPointer, selectionSetContext));
     }
 
-    public void addResult(String packageName, String response) {
+    protected void addResult(String packageName, String response) {
         JsonObject jsonObject = jsonProvider.createReader(new StringReader(response)).readObject().get("data").asJsonObject();
         if (resultMap == null) {
             resultMap = new ConcurrentHashMap<>();
@@ -103,7 +103,7 @@ public abstract class QueryDataLoader {
         resultMap.put(packageName, jsonObject);
     }
 
-    public JsonValue dispatch(JsonObject jsonObject) {
+    protected JsonValue dispatch(JsonObject jsonObject) {
         JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
         if (conditionMap != null && !conditionMap.isEmpty()) {
             conditionMap.forEach((packageName, packageMap) -> {
@@ -173,15 +173,15 @@ public abstract class QueryDataLoader {
         }
     }
 
-    public void mergeSelection(String packageName, String typeName, String fieldName, GraphqlParser.SelectionSetContext selectionSetContext) {
+    private void mergeSelection(String packageName, String typeName, String fieldName, GraphqlParser.SelectionSetContext selectionSetContext) {
         mergeSelection(packageName, typeName, fieldName, selectionSetContext.selection().stream().map(Field::new).collect(Collectors.toSet()));
     }
 
-    public void addSelection(String packageName, String typeName, String fieldName, String selectionName) {
+    private void addSelection(String packageName, String typeName, String fieldName, String selectionName) {
         mergeSelection(packageName, typeName, fieldName, Set.of(new Field().setName(selectionName)));
     }
 
-    public void mergeSelection(String packageName, String typeName, String fieldName, Set<Field> fieldSet) {
+    private void mergeSelection(String packageName, String typeName, String fieldName, Set<Field> fieldSet) {
         if (fieldTree == null) {
             fieldTree = new ConcurrentHashMap<>();
         }
@@ -191,7 +191,7 @@ public abstract class QueryDataLoader {
         mergeSelection(fieldTree.get(packageName).get(typeName).get(fieldName), fieldSet);
     }
 
-    public void mergeSelection(Set<Field> originalSet, Set<Field> fieldSet) {
+    private void mergeSelection(Set<Field> originalSet, Set<Field> fieldSet) {
         fieldSet.forEach(
                 field -> {
                     if (originalSet.stream().map(Field::getName).noneMatch(name -> name.equals(field.getName()))) {
@@ -212,7 +212,7 @@ public abstract class QueryDataLoader {
         );
     }
 
-    public JsonValue jsonValueFilter(JsonValue jsonValue, GraphqlParser.SelectionSetContext selectionSetContext) {
+    private JsonValue jsonValueFilter(JsonValue jsonValue, GraphqlParser.SelectionSetContext selectionSetContext) {
         if (jsonValue.getValueType().equals(JsonValue.ValueType.OBJECT)) {
             return selectionSetContext.selection().stream()
                     .map(selectionContext ->
@@ -229,11 +229,11 @@ public abstract class QueryDataLoader {
         }
     }
 
-    protected String getQueryFieldAlias(String typeName, String fieldName) {
+    private String getQueryFieldAlias(String typeName, String fieldName) {
         return typeName.concat("_").concat(fieldName);
     }
 
-    public String typeToLowerCamelName(String fieldTypeName) {
+    private String typeToLowerCamelName(String fieldTypeName) {
         if (fieldTypeName.startsWith(INTROSPECTION_PREFIX)) {
             return INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName.replaceFirst(INTROSPECTION_PREFIX, "")));
         } else {

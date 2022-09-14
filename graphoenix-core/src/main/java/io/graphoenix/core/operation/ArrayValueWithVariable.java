@@ -9,12 +9,14 @@ import org.stringtemplate.v4.STGroupFile;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ArrayValueWithVariable implements Collection<ValueWithVariable> {
+public class ArrayValueWithVariable implements List<ValueWithVariable> {
 
-    private final Collection<ValueWithVariable> valueWithVariables;
+    private final List<ValueWithVariable> valueWithVariables;
 
     public ArrayValueWithVariable(Arrays valueWithVariables) {
         this.valueWithVariables = Stream.of(valueWithVariables).map(ValueWithVariable::new).collect(Collectors.toList());
@@ -96,6 +98,11 @@ public class ArrayValueWithVariable implements Collection<ValueWithVariable> {
     }
 
     @Override
+    public boolean addAll(int index, @NotNull Collection<? extends ValueWithVariable> c) {
+        return false;
+    }
+
+    @Override
     public boolean removeAll(@NotNull Collection<?> c) {
         return valueWithVariables.removeAll(c);
     }
@@ -108,5 +115,53 @@ public class ArrayValueWithVariable implements Collection<ValueWithVariable> {
     @Override
     public void clear() {
         valueWithVariables.clear();
+    }
+
+    @Override
+    public ValueWithVariable get(int index) {
+        return valueWithVariables.get(index);
+    }
+
+    @Override
+    public ValueWithVariable set(int index, ValueWithVariable element) {
+        return valueWithVariables.set(index, element);
+    }
+
+    @Override
+    public void add(int index, ValueWithVariable element) {
+        valueWithVariables.add(index, element);
+    }
+
+    @Override
+    public ValueWithVariable remove(int index) {
+        return valueWithVariables.remove(index);
+    }
+
+    @Override
+    public int indexOf(Object o) {
+        return valueWithVariables.indexOf(o);
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        return valueWithVariables.lastIndexOf(o);
+    }
+
+    @NotNull
+    @Override
+    public ListIterator<ValueWithVariable> listIterator() {
+        return valueWithVariables.listIterator();
+    }
+
+    @NotNull
+    @Override
+    public ListIterator<ValueWithVariable> listIterator(int index) {
+        return valueWithVariables.listIterator(index);
+    }
+
+    @NotNull
+    @Override
+    public List<ValueWithVariable> subList(int fromIndex, int toIndex) {
+        return valueWithVariables.subList(fromIndex, toIndex);
     }
 }
