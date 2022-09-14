@@ -9,6 +9,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.handler.MutationDataLoader;
 import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.ValueWithVariable;
 import io.graphoenix.java.generator.implementer.TypeManager;
@@ -23,7 +24,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -157,12 +157,11 @@ public class GrpcMutationHandlerBuilder {
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
-                        builder.addStatement("$L(argument.getValueWithVariable(), loader, path + \"/\" + $S)", fieldParameterName.concat("List"), fieldParameterName.concat("List"));
+                        builder.addStatement("$L(argument.getValueWithVariable(), loader, path + \"/\" + argument.getName())", fieldParameterName.concat("List"));
                     } else {
-                        builder.addStatement("$L(argument.getValueWithVariable(), loader, jsonValue.asJsonObject().get($S), path + \"/\" + $S)",
+                        builder.addStatement("$L(argument.getValueWithVariable(), loader, path + \"/\" + argument.getName(), jsonValue.asJsonObject().get($S))",
                                 fieldParameterName.concat("List"),
-                                fieldDefinitionContext.name().getText(),
-                                fieldParameterName.concat("List")
+                                fieldDefinitionContext.name().getText()
                         );
                     }
                 }
@@ -186,9 +185,9 @@ public class GrpcMutationHandlerBuilder {
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
-                        builder.addStatement("$L(argument.getValueWithVariable(), loader, path + \"/\" + $S)", fieldParameterName, fieldParameterName);
+                        builder.addStatement("$L(argument.getValueWithVariable(), loader, path + \"/\" + argument.getName())", fieldParameterName);
                     } else {
-                        builder.addStatement("$L(argument.getValueWithVariable(), loader, jsonValue.asJsonObject().get($S), path + \"/\" + $S)", fieldParameterName, fieldDefinitionContext.name().getText(), fieldParameterName);
+                        builder.addStatement("$L(argument.getValueWithVariable(), loader, path + \"/\" + argument.getName(), jsonValue.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText());
                     }
                 }
             }
@@ -254,9 +253,9 @@ public class GrpcMutationHandlerBuilder {
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
-                        builder.addStatement("$L(field.getValue(), loader, path + \"/\" + $S)", fieldParameterName.concat("List"), fieldParameterName.concat("List"));
+                        builder.addStatement("$L(field.getValue(), loader, path + \"/\" + field.getKey())", fieldParameterName.concat("List"));
                     } else {
-                        builder.addStatement("$L(field.getValue(), loader, jsonValue.asJsonObject().get($S), path + \"/\" + $S)", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText(), fieldParameterName.concat("List"));
+                        builder.addStatement("$L(field.getValue(), loader, path + \"/\" + field.getKey(), jsonValue.asJsonObject().get($S))", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText());
                     }
                 }
             } else {
@@ -280,9 +279,9 @@ public class GrpcMutationHandlerBuilder {
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
-                        builder.addStatement("$L(field.getValue(), loader, path + \"/\" + $S)", fieldParameterName, fieldParameterName);
+                        builder.addStatement("$L(field.getValue(), loader, path + \"/\" + field.getKey())", fieldParameterName);
                     } else {
-                        builder.addStatement("$L(field.getValue(), loader, jsonValue.asJsonObject().get($S), path + \"/\" + $S)", fieldParameterName, fieldDefinitionContext.name().getText(), fieldParameterName);
+                        builder.addStatement("$L(field.getValue(), loader, path + \"/\" + field.getKey(), jsonValue.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText());
                     }
                 }
             }
@@ -310,8 +309,11 @@ public class GrpcMutationHandlerBuilder {
                     "if (field != null && field.getArgument($T.LIST_INPUT_NAME).isPresent() && field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().isArray())",
                     ClassName.get(Hammurabi.class),
                     ClassName.get(Hammurabi.class)
-            ).addStatement("field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray().forEach(item -> $L(item, loader))",
-                    ClassName.get(Hammurabi.class),
+            ).addStatement("$T valueWithVariables = field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray()",
+                    ClassName.get(ArrayValueWithVariable.class),
+                    ClassName.get(Hammurabi.class)
+            ).addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, path + \"/\" + index))",
+                    ClassName.get(IntStream.class),
                     typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
             ).endControlFlow();
         } else {
@@ -322,13 +324,15 @@ public class GrpcMutationHandlerBuilder {
                             ClassName.get(Hammurabi.class),
                             ClassName.get(JsonValue.class)
                     )
-                    .addStatement("$T.range(0, field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray().size()).forEach(index -> $L(new $T<>(field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray()).get(index), loader, jsonValue.asJsonArray().get(index)))",
-                            ClassName.get(IntStream.class),
-                            ClassName.get(Hammurabi.class),
-                            typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()),
-                            ClassName.get(ArrayList.class),
+                    .addStatement("$T valueWithVariables = field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray()",
+                            ClassName.get(ArrayValueWithVariable.class),
                             ClassName.get(Hammurabi.class)
-                    ).endControlFlow();
+                    )
+                    .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, path + \"/\" + index, jsonValue.asJsonArray().get(index)))",
+                            ClassName.get(IntStream.class),
+                            typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
+                    )
+                    .endControlFlow();
         }
         return builder.build();
     }
@@ -344,17 +348,23 @@ public class GrpcMutationHandlerBuilder {
 
         if (anchor) {
             builder.beginControlFlow("if (valueWithVariable != null && valueWithVariable.isArray())")
-                    .addStatement("valueWithVariable.asArray().forEach(item -> $L(item, loader))",
+                    .addStatement("$T valueWithVariables = valueWithVariable.asArray()",
+                            ClassName.get(ArrayValueWithVariable.class)
+                    )
+                    .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, path + \"/\" + index))",
+                            ClassName.get(IntStream.class),
                             typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                     )
                     .endControlFlow();
         } else {
             builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
                     .beginControlFlow("if (valueWithVariable != null && valueWithVariable.isArray() && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
-                    .addStatement("$T.range(0, valueWithVariable.asArray().size()).forEach(index -> $L(new $T<>(valueWithVariable.asArray()).get(index), loader, jsonValue.asJsonArray().get(index)))",
+                    .addStatement("$T valueWithVariables = valueWithVariable.asArray()",
+                            ClassName.get(ArrayValueWithVariable.class)
+                    )
+                    .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, path + \"/\" + index, jsonValue.asJsonArray().get(index)))",
                             ClassName.get(IntStream.class),
-                            typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText()),
-                            ClassName.get(ArrayList.class)
+                            typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                     )
                     .endControlFlow();
         }
@@ -368,6 +378,7 @@ public class GrpcMutationHandlerBuilder {
                 .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinition")
                 .addParameter(ClassName.get(MutationDataLoader.class), "loader")
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Void.class)))
+                .addStatement("$T path = \"\"", ClassName.get(String.class))
                 .beginControlFlow("for ($T selectionContext : operationDefinition.selectionSet().selection()) ", ClassName.get(GraphqlParser.SelectionContext.class));
 
         if (!anchor) {
@@ -390,9 +401,9 @@ public class GrpcMutationHandlerBuilder {
                 builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", typeMethodName);
             }
             if (anchor) {
-                builder.addStatement("$L(new $T(selectionContext.field()), loader)", typeMethodName, ClassName.get(Field.class));
+                builder.addStatement("$L(new $T(selectionContext.field()), loader, path)", typeMethodName, ClassName.get(Field.class));
             } else {
-                builder.addStatement("$L(new $T(selectionContext.field()), loader, jsonValue.asJsonObject().get(selectionName))", typeMethodName, ClassName.get(Field.class));
+                builder.addStatement("$L(new $T(selectionContext.field()), loader, path, jsonValue.asJsonObject().get(selectionName))", typeMethodName, ClassName.get(Field.class));
             }
             index++;
         }
