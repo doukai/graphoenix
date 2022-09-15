@@ -1,10 +1,14 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.json.stream.JsonCollectors;
 import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -80,6 +84,11 @@ public class Field {
         return this;
     }
 
+    public Field setArguments(JsonObject jsonObject) {
+        this.arguments = jsonObject.entrySet().stream().map(entry -> new Argument().setName(entry.getKey()).setValueWithVariable(entry.getValue())).collect(Collectors.toSet());
+        return this;
+    }
+
     public Optional<Argument> getArgument(String name) {
         return arguments.stream().filter(argument -> argument.getName().equals(name)).findFirst();
     }
@@ -111,12 +120,23 @@ public class Field {
         return this;
     }
 
+    public Field addArgument(String name, JsonValue jsonValue) {
+        this.addArgument(new Argument(name, jsonValue));
+        return this;
+    }
+
     public Field addArguments(Stream<Argument> argumentStream) {
         if (this.arguments == null) {
             this.arguments = new LinkedHashSet<>();
         }
         this.arguments.addAll(argumentStream.collect(Collectors.toList()));
         return this;
+    }
+
+    public JsonObject getArgumentsJson() {
+        return this.getArguments().stream()
+                .map(argument -> new AbstractMap.SimpleEntry<>(argument.getName(), argument.getValueWithVariable().toJson()))
+                .collect(JsonCollectors.toJsonObject());
     }
 
     public Set<String> getDirectives() {

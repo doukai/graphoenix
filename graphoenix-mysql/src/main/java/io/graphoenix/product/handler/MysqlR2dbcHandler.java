@@ -23,6 +23,18 @@ public class MysqlR2dbcHandler implements OperationHandler {
     }
 
     @Override
+    public Mono<String> query(String operation) {
+        String select = operationToSQLConvertHandler.queryToSelect(operation);
+        return operationSQLExecuteHandler.query(select);
+    }
+
+    @Override
+    public Mono<String> mutation(String operation) {
+        String select = operationToSQLConvertHandler.queryToSelect(operation);
+        return operationSQLExecuteHandler.query(select);
+    }
+
+    @Override
     public Mono<String> query(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         String select = operationToSQLConvertHandler.queryToSelect(operationDefinitionContext);
         return operationSQLExecuteHandler.query(select);

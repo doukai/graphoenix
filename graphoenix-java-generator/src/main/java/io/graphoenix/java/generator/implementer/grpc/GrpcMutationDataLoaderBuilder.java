@@ -8,18 +8,15 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.operation.ArrayValueWithVariable;
-import io.graphoenix.core.operation.ValueWithVariable;
+import io.graphoenix.core.handler.MutationDataLoader;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
@@ -28,14 +25,12 @@ import reactor.core.publisher.Mono;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ApplicationScoped
 public class GrpcMutationDataLoaderBuilder {
@@ -82,9 +77,9 @@ public class GrpcMutationDataLoaderBuilder {
 
     private TypeSpec buildGrpcMutationDataLoader() {
         TypeSpec.Builder builder = TypeSpec.classBuilder("GrpcMutationDataLoader")
-                .superclass(ClassName.get("io.graphoenix.grpc.client", "GrpcBaseMutationDataLoader"))
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(RequestScoped.class)
+                .superclass(ClassName.get(MutationDataLoader.class))
+                .addAnnotation(Dependent.class)
                 .addField(
                         FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
@@ -102,7 +97,6 @@ public class GrpcMutationDataLoaderBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeMethods())
                 .addMethod(buildDispatchMethod());
 
         this.typeMap.keySet().forEach(packageName ->
@@ -115,7 +109,7 @@ public class GrpcMutationDataLoaderBuilder {
                         ).build()
                 ).addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(Mono.class, JsonObject.class),
+                                ParameterizedTypeName.get(Mono.class, String.class),
                                 grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -139,84 +133,14 @@ public class GrpcMutationDataLoaderBuilder {
                         grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                         ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
                         packageName
-                ).addStatement("this.$L = build($S).flatMap(operation -> this.$L.operation($T.newBuilder().setRequest(operation.toString()).build())).map(response -> jsonProvider.get().createReader(new $T(response.getResponse())).readObject().get($S).asJsonObject())",
+                ).addStatement("this.$L = build($S).flatMap(operation -> this.$L.operation($T.newBuilder().setRequest(operation.toString()).build())).map(response -> response.getResponse())",
                         grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                         packageName,
                         grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                        ClassName.get(packageName, "GraphQLRequest"),
-                        ClassName.get(StringReader.class),
-                        "data"
+                        ClassName.get(packageName, "GraphQLRequest")
                 )
         );
         return builder.build();
-    }
-
-    private List<MethodSpec> buildTypeMethods() {
-        return this.typeMap.entrySet().stream()
-                .flatMap(entry ->
-                        entry.getValue().stream()
-                                .flatMap(tuple2 ->
-                                        Stream.of(
-                                                buildTypeMethod(entry.getKey(), tuple2._1(), tuple2._2()),
-                                                buildTypeFieldMethod(entry.getKey(), tuple2._1(), tuple2._2()),
-                                                buildTypeListMethod(entry.getKey(), tuple2._1()),
-                                                buildTypeListFieldMethod(entry.getKey(), tuple2._1())
-                                        )
-                                )
-                )
-                .collect(Collectors.toList());
-    }
-
-    private MethodSpec buildTypeMethod(String packageName, String typeName, String key) {
-        return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName))
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
-                .addParameter(ClassName.get(String.class), "selectionName")
-                .beginControlFlow("if (jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class))
-                .addStatement("final int index = addObjectValue($S, $S, jsonValue.asJsonObject(), $S)", packageName, typeName, key)
-                .addStatement("addSelection($S, $S, selectionName)", packageName, typeName)
-                .endControlFlow()
-                .build();
-    }
-
-    private MethodSpec buildTypeFieldMethod(String packageName, String typeName, String key) {
-        return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName))
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
-                .addParameter(ClassName.get(String.class), "selectionName")
-                .beginControlFlow("if (valueWithVariable.isObject())")
-                .addStatement("final int index = addObjectValue($S, $S, valueWithVariable.asObject(), $S)", packageName, typeName, key)
-                .addStatement("addSelection($S, $S, selectionName)", packageName, typeName)
-                .endControlFlow()
-                .build();
-    }
-
-    private MethodSpec buildTypeListMethod(String packageName, String typeName) {
-        return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName).concat("List"))
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(JsonValue.class), "jsonValue")
-                .addParameter(ClassName.get(String.class), "selectionName")
-                .beginControlFlow("if (jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
-                .addStatement("$T jsonArray = jsonValue.asJsonArray()", ClassName.get(JsonArray.class))
-                .addStatement("jsonArray.forEach(item -> $L(item, selectionName))",
-                        grpcNameUtil.getTypeMethodName(packageName, typeName)
-                )
-                .endControlFlow()
-                .build();
-    }
-
-    private MethodSpec buildTypeListFieldMethod(String packageName, String typeName) {
-        return MethodSpec.methodBuilder(grpcNameUtil.getTypeMethodName(packageName, typeName).concat("List"))
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
-                .addParameter(ClassName.get(String.class), "selectionName")
-                .beginControlFlow("if (valueWithVariable.isArray())", ClassName.get(JsonValue.class))
-                .addStatement("$T arrayValueWithVariable = valueWithVariable.asArray()", ClassName.get(ArrayValueWithVariable.class))
-                .addStatement("arrayValueWithVariable.forEach(item -> $L(item, selectionName))",
-                        grpcNameUtil.getTypeMethodName(packageName, typeName)
-                )
-                .endControlFlow()
-                .build();
     }
 
     private MethodSpec buildDispatchMethod() {
@@ -224,23 +148,32 @@ public class GrpcMutationDataLoaderBuilder {
         int index = 0;
         for (String packageName : this.typeMap.keySet()) {
             if (index == 0) {
-                monoList.add(CodeBlock.of("return this.$L", grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono")));
+                monoList.add(CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        ClassName.get(Mono.class),
+                        packageName));
             } else {
-                monoList.add(CodeBlock.of(".then(this.$L)", grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono")));
+                monoList.add(CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        ClassName.get(Mono.class),
+                        packageName));
             }
             index++;
         }
-        if (monoList.size() == 1) {
-            monoList.add(CodeBlock.of(".then()"));
-        }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
+            monoList.add(
+                    CodeBlock.of(".then($T.fromRunnable(() -> dispatch()))",
+                            ClassName.get(Mono.class)
+                    )
+            );
             codeBlock = CodeBlock.join(monoList, System.lineSeparator());
         } else {
             codeBlock = CodeBlock.of("return Mono.empty()");
         }
-        return MethodSpec.methodBuilder("dispatch")
+        return MethodSpec.methodBuilder("load")
                 .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Void.class)))
                 .addStatement(codeBlock)
                 .build();

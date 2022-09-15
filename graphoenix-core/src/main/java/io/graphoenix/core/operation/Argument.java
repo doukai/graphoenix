@@ -28,6 +28,11 @@ public class Argument {
         this.valueWithVariable = valueWithVariable;
     }
 
+    public Argument(String name, JsonValue jsonValue) {
+        this.name = name;
+        this.valueWithVariable = new ValueWithVariable(jsonValue);
+    }
+
     public Argument(String name) {
         this.name = name;
     }

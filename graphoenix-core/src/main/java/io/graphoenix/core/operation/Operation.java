@@ -2,9 +2,13 @@ package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.document.Directive;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
+import jakarta.json.stream.JsonCollectors;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -90,12 +94,20 @@ public class Operation {
         return this;
     }
 
+    public Field getField(String name) {
+        return this.fields.stream().filter(field -> field.getAlias() != null && field.getAlias().equals(name) || field.getName().equals(name)).findFirst().orElse(null);
+    }
+
     public Operation addField(Field field) {
         if (this.fields == null) {
             this.fields = new LinkedHashSet<>();
         }
         this.fields.add(field);
         return this;
+    }
+
+    public JsonObject getAllArgumentsJson() {
+        return getFields().stream().map(field -> new AbstractMap.SimpleEntry<>(field.getAlias() != null ? field.getAlias() : field.getName(), (JsonValue) field.getArgumentsJson())).collect(JsonCollectors.toJsonObject());
     }
 
     @Override
