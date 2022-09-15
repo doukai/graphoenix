@@ -122,7 +122,7 @@ public class GrpcMutationHandlerBuilder {
 
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) || !manager.isGrpcField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isGrpcField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -286,7 +286,12 @@ public class GrpcMutationHandlerBuilder {
                                 to
                         );
                     } else {
-                        builder.addStatement("field.getValue().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from);
+                        builder.addStatement("field.getValue().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
+                                .addStatement("loader.register($S, $S, $S, field.getValue())",
+                                        packageName,
+                                        typeName,
+                                        key
+                                );
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
