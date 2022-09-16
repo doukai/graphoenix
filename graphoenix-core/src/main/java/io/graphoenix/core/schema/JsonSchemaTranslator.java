@@ -37,16 +37,39 @@ public class JsonSchemaTranslator {
         return stringWriter.toString();
     }
 
+    public String objectListToJsonSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        StringWriter stringWriter = new StringWriter();
+        jsonProvider.createWriter(stringWriter).write(objectListToJsonSchema(objectTypeDefinitionContext));
+        return stringWriter.toString();
+    }
+
     public JsonValue objectToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         JsonObjectBuilder jsonSchemaBuilder = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
-        jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText())));
-        jsonSchemaBuilder.add("type", jsonProvider.createValue("object"));
-        jsonSchemaBuilder.add("properties", objectToProperties(objectTypeDefinitionContext));
-        jsonSchemaBuilder.add("required", buildRequired(objectTypeDefinitionContext));
-        jsonSchemaBuilder.add("additionalProperties", TRUE);
-        return jsonSchemaBuilder.build();
+        return jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText())))
+                .add("type", jsonProvider.createValue("object"))
+                .add("properties", objectToProperties(objectTypeDefinitionContext))
+                .add("required", buildRequired(objectTypeDefinitionContext))
+                .add("additionalProperties", TRUE)
+                .build();
+    }
+
+    public JsonValue objectListToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        JsonObjectBuilder jsonSchemaBuilder = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
+                .map(this::buildValidation)
+                .orElseGet(jsonProvider::createObjectBuilder);
+        return jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText().concat("List"))))
+                .add("type", jsonProvider.createValue("object"))
+                .add("properties",
+                        jsonProvider.createObjectBuilder()
+                                .add("list",
+                                        jsonProvider.createObjectBuilder()
+                                                .add("type", jsonProvider.createValue("array"))
+                                                .add("items", jsonProvider.createObjectBuilder().add("$ref", objectTypeDefinitionContext.name().getText()))
+                                )
+                )
+                .build();
     }
 
     protected JsonArrayBuilder buildRequired(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

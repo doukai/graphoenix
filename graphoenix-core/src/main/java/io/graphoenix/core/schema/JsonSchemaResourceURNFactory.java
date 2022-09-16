@@ -13,7 +13,7 @@ public class JsonSchemaResourceURNFactory implements URNFactory {
     @Override
     public URI create(String urn) {
         try {
-            return Objects.requireNonNull(getClass().getClassLoader().getResource("META-INF/schema/".concat(urn).concat(".json"))).toURI();
+            return Objects.requireNonNull(getClass().getClassLoader().getResource("META-INF/schema/".concat(urn))).toURI();
         } catch (URISyntaxException e) {
             return null;
         }

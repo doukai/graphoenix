@@ -41,8 +41,8 @@ public class JsonSchemaValidator {
         this.factory = new JsonSchemaFactory.Builder().defaultMetaSchemaURI(jsonMetaSchema.getUri()).addMetaSchema(jsonMetaSchema).addUrnFactory(jsonSchemaResourceURNFactory).build();
     }
 
-    public Set<ValidationMessage> validate(String objectName, String json) throws JsonProcessingException {
-        return factory.getSchema(jsonSchemaManager.getJsonSchema(objectName)).validate(mapper.readTree(json));
+    public Set<ValidationMessage> validate(String objectName, boolean isList, String json) throws JsonProcessingException {
+        return factory.getSchema(jsonSchemaManager.getJsonSchema(isList ? objectName.concat("List") : objectName)).validate(mapper.readTree(json));
     }
 
     public void validateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
@@ -68,7 +68,8 @@ public class JsonSchemaValidator {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(mutationTypeName,
                 selectionContext.field().name().getText()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(mutationTypeName, selectionContext.field().name().getText())));
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        return validate(fieldTypeName, argumentsToJsonElement(selectionContext.field().arguments()).toString());
+        boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
+        return validate(fieldTypeName, isList, argumentsToJsonElement(selectionContext.field().arguments()).toString());
     }
 
     protected JsonValue argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {

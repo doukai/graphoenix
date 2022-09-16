@@ -391,14 +391,16 @@ public class GrpcMutationHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinition")
                 .addParameter(ClassName.get(MutationDataLoader.class), "loader")
-                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(String.class)))
-                .addStatement("$T operation = new $T(operationDefinition)", ClassName.get(Operation.class), ClassName.get(Operation.class))
-                .beginControlFlow("for ($T selectionContext : operationDefinition.selectionSet().selection()) ", ClassName.get(GraphqlParser.SelectionContext.class))
-                .addStatement("$T selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()", ClassName.get(String.class));
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Operation.class)));
 
-        if (!anchor) {
-            builder.addParameter(ClassName.get(JsonValue.class), "jsonValue");
+        if (anchor) {
+            builder.addStatement("$T operation = new $T(operationDefinition)", ClassName.get(Operation.class), ClassName.get(Operation.class));
+        } else {
+            builder.addParameter(ClassName.get(Operation.class), "operation")
+                    .addParameter(ClassName.get(JsonValue.class), "jsonValue");
         }
+        builder.beginControlFlow("for ($T selectionContext : operationDefinition.selectionSet().selection()) ", ClassName.get(GraphqlParser.SelectionContext.class))
+                .addStatement("$T selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()", ClassName.get(String.class));
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = manager.getMutationOperationTypeName().flatMap(manager::getObject).stream()
                 .flatMap(objectTypeDefinitionContext ->
                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
@@ -423,7 +425,7 @@ public class GrpcMutationHandlerBuilder {
         }
         builder.endControlFlow()
                 .endControlFlow()
-                .addStatement("return loader.load().thenReturn(operation.toString())");
+                .addStatement("return loader.load().thenReturn(operation)");
         return builder.build();
     }
 }

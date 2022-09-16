@@ -180,9 +180,13 @@ public class ApplicationProcessor extends AbstractProcessor {
                     .collect(Collectors.toList());
 
             for (GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext : schemaObjectList) {
-                FileObject schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText()).concat(".json"));
+                FileObject schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText()));
                 writer = schema.openWriter();
                 writer.write(jsonSchemaTranslator.objectToJsonSchemaString(objectTypeDefinitionContext));
+                writer.close();
+                schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText().concat("List")));
+                writer = schema.openWriter();
+                writer.write(jsonSchemaTranslator.objectListToJsonSchemaString(objectTypeDefinitionContext));
                 writer.close();
             }
 

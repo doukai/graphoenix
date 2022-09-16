@@ -27,9 +27,15 @@ public class Operation {
 
     public Operation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         this.operationType = operationDefinitionContext.operationType().getText();
-        this.name = operationDefinitionContext.name().getText();
-        this.variableDefinitions = operationDefinitionContext.variableDefinitions().variableDefinition().stream().map(VariableDefinition::new).collect(Collectors.toCollection(LinkedHashSet::new));
-        this.directives = operationDefinitionContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
+        if (operationDefinitionContext.name() != null) {
+            this.name = operationDefinitionContext.name().getText();
+        }
+        if (operationDefinitionContext.variableDefinitions() != null) {
+            this.variableDefinitions = operationDefinitionContext.variableDefinitions().variableDefinition().stream().map(VariableDefinition::new).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        if (operationDefinitionContext.directives() != null) {
+            this.directives = operationDefinitionContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
         this.fields = operationDefinitionContext.selectionSet().selection().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

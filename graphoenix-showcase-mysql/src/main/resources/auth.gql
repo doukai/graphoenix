@@ -12,9 +12,9 @@ type User @table(engine: "InnoDB") {
     rpcOrganization:Organization @grpc(packageName: "io.graphoenix.showcase.mysql.grpc" from: "organizationId" to:"id" key:"id" anchor: true)
     organization: Organization @map(from: "organizationId" to: "id" anchor: true)
     roles: [Role!] @map(from: "id" with: {type: "UserRole" from: "userId" to: "roleId"} to: "id")
-    phones: [String!]! @map(from: "id" with: {type: "UserPhones" from: "userId" to: "phone"})
-    test1: [Int!]! @map(from: "id" with: {type: "UserTest1" from: "userId" to: "test1"})
-    test2: [Boolean!]! @map(from: "id" with: {type: "UserTest2" from: "userId" to: "test2"})
+    phones: [String!] @map(from: "id" with: {type: "UserPhones" from: "userId" to: "phone"})
+    test1: [Int!] @map(from: "id" with: {type: "UserTest1" from: "userId" to: "test1"})
+    test2: [Boolean!] @map(from: "id" with: {type: "UserTest2" from: "userId" to: "test2"})
 }
 
 type UserProfile @table(engine: "InnoDB") {

@@ -19,11 +19,13 @@ import io.graphoenix.core.handler.BaseOperationHandler;
 import io.graphoenix.core.handler.GraphQLVariablesProcessor;
 import io.graphoenix.core.handler.QueryDataLoader;
 import io.graphoenix.core.schema.JsonSchemaValidator;
+import io.graphoenix.core.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
 import io.graphoenix.spi.handler.MutationHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import io.graphoenix.spi.handler.QueryHandler;
+import io.vavr.Tuple;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
@@ -319,11 +321,13 @@ public class OperationHandlerImplementer {
                             CodeBlock.join(
                                     List.of(
                                             CodeBlock.of("$T result = grpcMutationBeforeHandler.get().handle(operationDefinitionContext, this.mutationDataLoader.get())", ParameterizedTypeName.get(Mono.class, JsonValue.class)),
-                                            CodeBlock.of(".flatMap(operation -> operationHandler.get().$L(operation).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject()))",
+                                            CodeBlock.of(".flatMap(operation -> operationHandler.get().$L($T.DOCUMENT_UTIL.graphqlToOperation(operation.toString())).map(jsonString -> $T.of(operation, jsonProvider.get().createReader(new $T(jsonString)).readObject())))",
                                                     operationName,
+                                                    ClassName.get(DocumentUtil.class),
+                                                    ClassName.get(Tuple.class),
                                                     ClassName.get(StringReader.class)
                                             ),
-                                            CodeBlock.of(".flatMap(jsonObject -> grpcMutationAfterHandler.get().handle(operationDefinitionContext, mutationDataLoader.get(), jsonObject).thenReturn(jsonObject))")
+                                            CodeBlock.of(".flatMap(tuple2 -> grpcMutationAfterHandler.get().handle(operationDefinitionContext, mutationDataLoader.get(), tuple2._1(), tuple2._2()).thenReturn(tuple2._2()))")
                                     ),
                                     System.lineSeparator()
                             )
