@@ -80,7 +80,7 @@ public enum GraphQLResponseUtil {
         } else {
             JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
             JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
-            errorsBuilder.add(throwable.getMessage());
+            errorsBuilder.add(throwable.getMessage() != null ? throwable.getMessage() : throwable.toString());
             responseBuilder.add("errors", errorsBuilder);
             StringWriter stringWriter = new StringWriter();
             jsonProvider.createWriter(stringWriter).write(responseBuilder.build());

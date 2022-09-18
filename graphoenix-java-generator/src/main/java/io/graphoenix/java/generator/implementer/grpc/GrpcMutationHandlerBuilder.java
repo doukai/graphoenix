@@ -150,12 +150,14 @@ public class GrpcMutationHandlerBuilder {
                                 key
                         );
                     } else {
-                        builder.addStatement("argument.getValueWithVariable().asArray().forEach(item -> item.asObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
+                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
+                                .addStatement("argument.getValueWithVariable().asArray().forEach(item -> item.asObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
                                 .addStatement("loader.registerArray($S, $S, $S, argument.getValueWithVariable())",
                                         packageName,
                                         typeName,
                                         key
-                                );
+                                )
+                                .endControlFlow();
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
@@ -184,12 +186,14 @@ public class GrpcMutationHandlerBuilder {
                                 to
                         );
                     } else {
-                        builder.addStatement("argument.getValueWithVariable().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
+                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
+                                .addStatement("argument.getValueWithVariable().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
                                 .addStatement("loader.register($S, $S, $S, argument.getValueWithVariable())",
                                         packageName,
                                         typeName,
                                         key
-                                );
+                                )
+                                .endControlFlow();
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
@@ -254,12 +258,14 @@ public class GrpcMutationHandlerBuilder {
                                 key
                         );
                     } else {
-                        builder.addStatement("field.getValue().asArray().forEach(item -> item.asObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
+                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
+                                .addStatement("field.getValue().asArray().forEach(item -> item.asObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
                                 .addStatement("loader.registerArray($S, $S, $S, field.getValue())",
                                         packageName,
                                         typeName,
                                         key
-                                );
+                                )
+                                .endControlFlow();
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
@@ -286,12 +292,14 @@ public class GrpcMutationHandlerBuilder {
                                 to
                         );
                     } else {
-                        builder.addStatement("field.getValue().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
+                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
+                                .addStatement("field.getValue().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
                                 .addStatement("loader.register($S, $S, $S, field.getValue())",
                                         packageName,
                                         typeName,
                                         key
-                                );
+                                )
+                                .endControlFlow();
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
