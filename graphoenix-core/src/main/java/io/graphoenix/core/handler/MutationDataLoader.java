@@ -2,12 +2,14 @@ package io.graphoenix.core.handler;
 
 import com.google.common.base.CaseFormat;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.Argument;
 import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.core.operation.ValueWithVariable;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
@@ -27,18 +29,22 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 
 public abstract class MutationDataLoader {
 
+    private final IGraphQLDocumentManager manager;
     private final JsonProvider jsonProvider;
     private Map<String, Map<String, Map<String, ObjectValueWithVariable>>> objectValueMap;
     private Map<String, Map<String, Set<String>>> selectionMap;
     private Map<String, Map<String, Map<Integer, List<Consumer<JsonObject>>>>> indexMap;
     private Map<String, JsonValue> resultMap;
+    private Map<String, Set<String>> compensatingMap;
 
     public MutationDataLoader() {
+        this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.jsonProvider = BeanContext.get(JsonProvider.class);
         this.resultMap = new ConcurrentHashMap<>();
     }
@@ -89,6 +95,14 @@ public abstract class MutationDataLoader {
         registerArray(packageName, typeName, null, keyName, null, valueWithVariable);
     }
 
+    public void registerCompensating(String typeName, String id) {
+        if (compensatingMap == null) {
+            compensatingMap = new ConcurrentHashMap<>();
+        }
+        compensatingMap.computeIfAbsent(typeName, k -> new LinkedHashSet<>());
+        compensatingMap.get(typeName).add(id);
+    }
+
     protected Mono<Operation> build(String packageName) {
         return Mono.fromSupplier(() -> buildOperation(packageName));
     }
@@ -112,6 +126,36 @@ public abstract class MutationDataLoader {
                                                                 )
                                                 )
                                                 .setFields(selectionMap.get(packageName).get(typeEntry.getKey()).stream().map(Field::new).collect(Collectors.toSet()))
+                                )
+                                .collect(Collectors.toSet())
+                );
+    }
+
+    private Operation buildCompensating() {
+        if (compensatingMap == null || compensatingMap.isEmpty()) {
+            return null;
+        }
+        return new Operation()
+                .setOperationType("query")
+                .setFields(
+                        compensatingMap.entrySet().stream()
+                                .filter(typeEntry -> typeEntry.getValue().size() > 0)
+                                .map(typeEntry ->
+                                        new Field()
+                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                .addArgument(
+                                                        new Argument().setName(manager.getObjectTypeIDFieldName(typeEntry.getKey()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST)))
+                                                                .setValueWithVariable(
+                                                                        new ArrayValueWithVariable(typeEntry.getValue())
+                                                                )
+                                                )
+                                                .setFields(
+                                                        manager.getFields(typeEntry.getKey())
+                                                                .filter(fieldDefinitionContext -> !manager.isObject(typeEntry.getKey()))
+                                                                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText())
+                                                                .map(Field::new)
+                                                                .collect(Collectors.toSet())
+                                                )
                                 )
                                 .collect(Collectors.toSet())
                 );
