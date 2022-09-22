@@ -40,7 +40,7 @@ public class GraphQLObjectManager implements IGraphQLObjectManager {
     @Override
     public boolean isContainerType(String objectTypeName) {
         GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = objectTypeDefinitionMap.get(objectTypeName);
-        return objectTypeDefinitionContext.directives() != null && objectTypeDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("containerType"));
+        return objectTypeDefinitionContext != null && objectTypeDefinitionContext.directives() != null && objectTypeDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("containerType"));
     }
 
     @Override

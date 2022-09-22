@@ -10,8 +10,11 @@ import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.core.operation.ValueWithVariable;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.constant.Hammurabi;
+import io.graphoenix.spi.handler.OperationHandler;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonStructure;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import reactor.core.publisher.Mono;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 
@@ -37,15 +41,19 @@ public abstract class MutationDataLoader {
 
     private final IGraphQLDocumentManager manager;
     private final JsonProvider jsonProvider;
+    private final OperationHandler operationHandler;
     private Map<String, Map<String, Map<String, ObjectValueWithVariable>>> objectValueMap;
     private Map<String, Map<String, Set<String>>> selectionMap;
     private Map<String, Map<String, Map<Integer, List<Consumer<JsonObject>>>>> indexMap;
-    private Map<String, JsonValue> resultMap;
-    private Map<String, Set<String>> compensatingMap;
+    private final Map<String, JsonValue> resultMap;
+    private Map<String, Set<String>> updateMap;
+    private Map<String, Set<String>> createMap;
+    private String backUp;
 
     public MutationDataLoader() {
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.jsonProvider = BeanContext.get(JsonProvider.class);
+        this.operationHandler = BeanContext.get(OperationHandler.class);
         this.resultMap = new ConcurrentHashMap<>();
     }
 
@@ -95,12 +103,27 @@ public abstract class MutationDataLoader {
         registerArray(packageName, typeName, null, keyName, null, valueWithVariable);
     }
 
-    public void registerCompensating(String typeName, String id) {
-        if (compensatingMap == null) {
-            compensatingMap = new ConcurrentHashMap<>();
+    public void registerUpdate(String typeName, ValueWithVariable valueWithVariable) {
+        if (updateMap == null) {
+            updateMap = new ConcurrentHashMap<>();
         }
-        compensatingMap.computeIfAbsent(typeName, k -> new LinkedHashSet<>());
-        compensatingMap.get(typeName).add(id);
+        updateMap.computeIfAbsent(typeName, k -> new LinkedHashSet<>());
+        if (valueWithVariable != null && valueWithVariable.isString()) {
+            updateMap.get(typeName).add(valueWithVariable.asString().getValue());
+        }
+    }
+
+    public void registerCreate(String typeName, JsonValue jsonValue) {
+        if (createMap == null) {
+            createMap = new ConcurrentHashMap<>();
+        }
+        createMap.computeIfAbsent(typeName, k -> new LinkedHashSet<>());
+        if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.STRING)) {
+            String id = jsonValue.toString().substring(1, jsonValue.toString().length() - 1);
+            if (!updateMap.get(typeName).contains(id)) {
+                createMap.get(typeName).add(id);
+            }
+        }
     }
 
     protected Mono<Operation> build(String packageName) {
@@ -120,7 +143,8 @@ public abstract class MutationDataLoader {
                                         new Field()
                                                 .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
                                                 .addArgument(
-                                                        new Argument().setName(LIST_INPUT_NAME)
+                                                        new Argument()
+                                                                .setName(LIST_INPUT_NAME)
                                                                 .setValueWithVariable(
                                                                         new ArrayValueWithVariable(typeEntry.getValue().values())
                                                                 )
@@ -131,22 +155,27 @@ public abstract class MutationDataLoader {
                 );
     }
 
-    private Operation buildCompensating() {
-        if (compensatingMap == null || compensatingMap.isEmpty()) {
+    public Mono<Void> backup() {
+        return Mono.fromSupplier(this::buildBackupQuery).flatMap(operation -> operationHandler.query(DOCUMENT_UTIL.graphqlToOperation(operation.toString()))).flatMap(jsonString -> Mono.fromRunnable(() -> this.backUp = jsonString));
+    }
+
+    protected Operation buildBackupQuery() {
+        if (updateMap == null || updateMap.isEmpty()) {
             return null;
         }
         return new Operation()
                 .setOperationType("query")
                 .setFields(
-                        compensatingMap.entrySet().stream()
+                        updateMap.entrySet().stream()
                                 .filter(typeEntry -> typeEntry.getValue().size() > 0)
                                 .map(typeEntry ->
                                         new Field()
                                                 .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
                                                 .addArgument(
-                                                        new Argument().setName(manager.getObjectTypeIDFieldName(typeEntry.getKey()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST)))
+                                                        new Argument()
+                                                                .setName(manager.getObjectTypeIDFieldName(typeEntry.getKey()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST)))
                                                                 .setValueWithVariable(
-                                                                        new ArrayValueWithVariable(typeEntry.getValue())
+                                                                        new ObjectValueWithVariable().put("in", new ArrayValueWithVariable(typeEntry.getValue()))
                                                                 )
                                                 )
                                                 .setFields(
@@ -159,6 +188,67 @@ public abstract class MutationDataLoader {
                                 )
                                 .collect(Collectors.toSet())
                 );
+    }
+
+    protected Mono<Void> compensating() {
+        return Mono.fromSupplier(this::buildCompensatingMutation).flatMap(operation -> operationHandler.mutation(DOCUMENT_UTIL.graphqlToOperation(operation.toString()))).then();
+    }
+
+    private Operation buildCompensatingMutation() {
+        if (backUp == null) {
+            return null;
+        }
+        JsonStructure response = jsonProvider.createReader(new StringReader(backUp)).read();
+        if (!response.getValueType().equals(JsonValue.ValueType.OBJECT) || !response.asJsonObject().containsKey("data")) {
+            return null;
+        }
+        JsonObject data = response.asJsonObject().getJsonObject("data");
+        return new Operation()
+                .setOperationType("mutation")
+                .setFields(
+                        updateMap.keySet().stream()
+                                .filter(typeName ->
+                                        data.containsKey(typeToLowerCamelName(typeName).concat("List")) &&
+                                                data.get(typeToLowerCamelName(typeName).concat("List")).getValueType().equals(JsonValue.ValueType.ARRAY) &&
+                                                data.get(typeToLowerCamelName(typeName).concat("List")).asJsonArray().size() > 0
+                                )
+                                .map(typeName ->
+                                        new Field()
+                                                .setName(typeToLowerCamelName(typeName).concat("List"))
+                                                .addArgument(
+                                                        new Argument()
+                                                                .setName(LIST_INPUT_NAME)
+                                                                .setValueWithVariable(getArrayValueWithVariable(typeName, data.get(typeToLowerCamelName(typeName).concat("List"))))
+                                                )
+                                                .addField(new Field(manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST))))
+                                )
+                                .collect(Collectors.toSet())
+                );
+    }
+
+    private ArrayValueWithVariable getArrayValueWithVariable(String typeName, JsonValue jsonValue) {
+        String idFieldName = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
+        ArrayValueWithVariable arrayValueWithVariable = null;
+        if (jsonValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
+            arrayValueWithVariable = new ArrayValueWithVariable(jsonValue.asJsonArray());
+        }
+        if (this.createMap.get(typeName) != null && !this.createMap.get(typeName).isEmpty()) {
+            List<ObjectValueWithVariable> objectValueWithVariableList = this.createMap.get(typeName).stream()
+                    .map(id -> {
+                                ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
+                                objectValueWithVariable.put(idFieldName, id);
+                                objectValueWithVariable.put(Hammurabi.DEPRECATED_FIELD_NAME, true);
+                                return objectValueWithVariable;
+                            }
+                    )
+                    .collect(Collectors.toList());
+            if (arrayValueWithVariable == null) {
+                arrayValueWithVariable = new ArrayValueWithVariable(objectValueWithVariableList);
+            } else {
+                arrayValueWithVariable.addAll(objectValueWithVariableList.stream().map(ValueWithVariable::new).collect(Collectors.toList()));
+            }
+        }
+        return arrayValueWithVariable;
     }
 
     public void addObjectValue(String packageName, String typeName, String keyName, Consumer<JsonObject> callback, ObjectValueWithVariable objectValueWithVariable) {
@@ -214,9 +304,6 @@ public abstract class MutationDataLoader {
 
     protected void addResult(String packageName, String response) {
         JsonObject jsonObject = jsonProvider.createReader(new StringReader(response)).readObject().get("data").asJsonObject();
-        if (resultMap == null) {
-            resultMap = new ConcurrentHashMap<>();
-        }
         resultMap.put(packageName, jsonObject);
     }
 

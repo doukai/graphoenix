@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.MutationDataLoader;
 import io.graphoenix.core.operation.Argument;
 import io.graphoenix.core.operation.ArrayValueWithVariable;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
 
@@ -120,9 +122,10 @@ public class GrpcMutationHandlerBuilder {
         }
         builder.beginControlFlow("for ($T argument : field.getArguments())", ClassName.get(Argument.class));
 
+        String idFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isGrpcField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isGrpcField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isGrpcField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -170,7 +173,18 @@ public class GrpcMutationHandlerBuilder {
                     }
                 }
             } else {
-                if (manager.isGrpcField(fieldDefinitionContext)) {
+                if (fieldDefinitionContext.name().getText().equals(idFieldName)) {
+                    if (anchor) {
+                        builder.addStatement("loader.registerUpdate($S, argument.getValueWithVariable())",
+                                objectTypeDefinitionContext.name().getText()
+                        );
+                    } else {
+                        builder.addStatement("loader.registerCreate($S, jsonValue.asJsonObject().get($S))",
+                                objectTypeDefinitionContext.name().getText(),
+                                fieldDefinitionContext.name().getText()
+                        );
+                    }
+                } else if (manager.isGrpcField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
@@ -228,9 +242,10 @@ public class GrpcMutationHandlerBuilder {
         }
         builder.beginControlFlow("for ($T field : valueWithVariable.asObject().entrySet())", ParameterizedTypeName.get(Map.Entry.class, String.class, ValueWithVariable.class));
 
+        String idFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isGrpcField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isGrpcField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isGrpcField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -275,7 +290,18 @@ public class GrpcMutationHandlerBuilder {
                     }
                 }
             } else {
-                if (manager.isGrpcField(fieldDefinitionContext)) {
+                if (fieldDefinitionContext.name().getText().equals(idFieldName)) {
+                    if (anchor) {
+                        builder.addStatement("loader.registerUpdate($S, field.getValue())",
+                                objectTypeDefinitionContext.name().getText()
+                        );
+                    } else {
+                        builder.addStatement("loader.registerCreate($S, jsonValue.asJsonObject().get($S))",
+                                objectTypeDefinitionContext.name().getText(),
+                                fieldDefinitionContext.name().getText()
+                        );
+                    }
+                } else if (manager.isGrpcField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
@@ -432,8 +458,13 @@ public class GrpcMutationHandlerBuilder {
             index++;
         }
         builder.endControlFlow()
-                .endControlFlow()
-                .addStatement("return loader.load().thenReturn(operation)");
+                .endControlFlow();
+
+        if (anchor) {
+            builder.addStatement("return loader.backup().then(loader.load()).thenReturn(operation)");
+        } else {
+            builder.addStatement("return loader.load().thenReturn(operation)");
+        }
         return builder.build();
     }
 }
