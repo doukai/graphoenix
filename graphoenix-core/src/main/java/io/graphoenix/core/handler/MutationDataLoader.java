@@ -45,7 +45,7 @@ public abstract class MutationDataLoader {
     private Map<String, Map<String, Map<String, ObjectValueWithVariable>>> objectValueMap;
     private Map<String, Map<String, Set<String>>> selectionMap;
     private Map<String, Map<String, Map<Integer, List<Consumer<JsonObject>>>>> indexMap;
-    private final Map<String, JsonValue> resultMap;
+    private Map<String, JsonValue> resultMap;
     private Map<String, Set<String>> updateMap;
     private Map<String, Set<String>> createMap;
     private String backUp;
@@ -55,6 +55,14 @@ public abstract class MutationDataLoader {
         this.jsonProvider = BeanContext.get(JsonProvider.class);
         this.operationHandler = BeanContext.get(OperationHandler.class);
         this.resultMap = new ConcurrentHashMap<>();
+    }
+
+    public MutationDataLoader then() {
+        this.objectValueMap = null;
+        this.selectionMap = null;
+        this.indexMap = null;
+        this.resultMap = new ConcurrentHashMap<>();
+        return this;
     }
 
     public void register(String packageName, String typeName, String selectionName, String keyName, Consumer<JsonObject> callback, JsonValue jsonValue) {
@@ -190,7 +198,7 @@ public abstract class MutationDataLoader {
                 );
     }
 
-    protected Mono<Void> compensating() {
+    public Mono<Void> compensating() {
         return Mono.fromSupplier(this::buildCompensatingMutation).flatMap(operation -> operationHandler.mutation(DOCUMENT_UTIL.graphqlToOperation(operation.toString()))).then();
     }
 

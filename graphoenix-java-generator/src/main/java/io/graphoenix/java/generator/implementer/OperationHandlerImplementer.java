@@ -14,10 +14,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.handler.ArgumentBuilder;
-import io.graphoenix.core.handler.BaseOperationHandler;
-import io.graphoenix.core.handler.GraphQLVariablesProcessor;
-import io.graphoenix.core.handler.QueryDataLoader;
+import io.graphoenix.core.handler.*;
 import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.core.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -29,6 +26,7 @@ import io.vavr.Tuple;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.spi.JsonProvider;
@@ -209,27 +207,27 @@ public class OperationHandlerImplementer {
                 break;
             case MUTATION:
                 builder.addField(
-                                FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationBeforeHandler")),
-                                        "grpcMutationBeforeHandler",
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL
-                                ).build()
-                        ).addField(
-                                FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationAfterHandler")),
-                                        "grpcMutationAfterHandler",
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL
-                                ).build()
-                        ).addField(
-                                FieldSpec.builder(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationDataLoader")),
-                                        "mutationDataLoader",
-                                        Modifier.PRIVATE,
-                                        Modifier.FINAL
-                                ).build()
-                        )
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationBeforeHandler")),
+                                "grpcMutationBeforeHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                ).addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationAfterHandler")),
+                                "grpcMutationAfterHandler",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                ).addField(
+                        FieldSpec.builder(
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationDataLoader")),
+                                "mutationDataLoader",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
                         .addFields(buildMutationFields())
                         .addField(
                                 FieldSpec.builder(
@@ -317,17 +315,19 @@ public class OperationHandlerImplementer {
                 .addStatement("$T operationDefinitionContext = variablesProcessor.get().buildVariables(graphQL, variables)", ClassName.get(GraphqlParser.OperationDefinitionContext.class));
         if (type.equals(MUTATION)) {
             builder.addStatement("validator.get().validateOperation(operationDefinitionContext)")
+                    .addStatement("$T mutationLoader = mutationDataLoader.get()", ClassName.get(MutationDataLoader.class))
                     .addStatement(
                             CodeBlock.join(
                                     List.of(
-                                            CodeBlock.of("$T result = grpcMutationBeforeHandler.get().handle(operationDefinitionContext, this.mutationDataLoader.get())", ParameterizedTypeName.get(Mono.class, JsonValue.class)),
+                                            CodeBlock.of("$T result = grpcMutationBeforeHandler.get().handle(operationDefinitionContext, mutationLoader)", ParameterizedTypeName.get(Mono.class, JsonObject.class)),
                                             CodeBlock.of(".flatMap(operation -> operationHandler.get().$L($T.DOCUMENT_UTIL.graphqlToOperation(operation.toString())).map(jsonString -> $T.of(operation, jsonProvider.get().createReader(new $T(jsonString)).readObject())))",
                                                     operationName,
                                                     ClassName.get(DocumentUtil.class),
                                                     ClassName.get(Tuple.class),
                                                     ClassName.get(StringReader.class)
                                             ),
-                                            CodeBlock.of(".flatMap(tuple2 -> grpcMutationAfterHandler.get().handle(operationDefinitionContext, mutationDataLoader.get(), tuple2._1(), tuple2._2()).thenReturn(tuple2._2()))")
+                                            CodeBlock.of(".flatMap(tuple2 -> grpcMutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), tuple2._1(), tuple2._2()).thenReturn(tuple2._2()))"),
+                                            CodeBlock.of(".onErrorResume(throwable -> mutationLoader.compensating().then($T.error(throwable)))", ClassName.get(Mono.class))
                                     ),
                                     System.lineSeparator()
                             )
@@ -340,12 +340,12 @@ public class OperationHandlerImplementer {
                     ClassName.get(StringReader.class)
             );
         }
-        builder.addStatement("$T loader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
+        builder.addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                 .addStatement(
                         CodeBlock.join(
                                 List.of(
-                                        CodeBlock.of("return result.flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, operationDefinitionContext), operationDefinitionContext, loader))", typeManager.typeToLowerCamelName(operationTypeName)),
-                                        CodeBlock.of(".flatMap(jsonValue -> loader.load(jsonValue))")
+                                        CodeBlock.of("return result.flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, operationDefinitionContext), operationDefinitionContext, queryLoader))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                        CodeBlock.of(".flatMap(jsonValue -> queryLoader.load(jsonValue))")
                                 ),
                                 System.lineSeparator()
                         )
@@ -444,14 +444,14 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                                    "$T type = new $T<$T>() {}.getType()",
-                                    ClassName.get(Type.class),
-                                    ClassName.get(TypeToken.class),
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            ).addStatement(
-                                    "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            ).beginControlFlow("if(result == null)")
+                            "$T type = new $T<$T>() {}.getType()",
+                            ClassName.get(Type.class),
+                            ClassName.get(TypeToken.class),
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                    ).addStatement(
+                            "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
+                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                    ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                             .endControlFlow()
                             .addStatement(

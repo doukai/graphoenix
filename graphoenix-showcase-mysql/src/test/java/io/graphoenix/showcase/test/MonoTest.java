@@ -15,7 +15,7 @@ public class MonoTest {
 
     @Test
     void test1() {
-        String key = "key";
+//        String key = "key";
 //        String key2 = "key2";
 //        Map<String, Object> p = new HashMap<>();
 //        String block = Mono.from(Mono.deferContextual(ctx ->
@@ -42,14 +42,19 @@ public class MonoTest {
 //                        .block()
 //        );
 
-        getString("AAAA");
-        getString("BBBB");
-        mono.block();
+//        getString("AAAA");
+//        getString("BBBB");
+//        mono.block();
+//
+//        ArrayList<String> arrayList = new ArrayList<>();
+//        arrayList.add("CCCC");
+//        arrayList.add("DDDD");
+//        getStringList(arrayList).subscribe(list -> list.forEach(System.out::println));
 
-        ArrayList<String> arrayList = new ArrayList<>();
-        arrayList.add("CCCC");
-        arrayList.add("DDDD");
-        getStringList(arrayList).subscribe(list -> list.forEach(System.out::println));
+        Mono.just("1").then(Mono.fromRunnable(() -> {
+            throw new RuntimeException("test");
+        })).onErrorResume(throwable -> Mono.just("2").doOnSuccess(System.out::println))
+                .doOnSuccess(System.out::println).block();
 
     }
 
