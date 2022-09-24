@@ -56,13 +56,6 @@ public abstract class BaseOperationHandler {
                 .map(list -> list.stream().collect(JsonCollectors.toJsonObject()));
     }
 
-//    protected GraphqlParser.SelectionContext getSelectionContext(GraphqlParser.OperationDefinitionContext operationDefinitionContext, String name) {
-//        return operationDefinitionContext.selectionSet().selection().stream()
-//                .filter(selectionContext -> selectionContext.field().name().getText().equals(name))
-//                .findFirst()
-//                .orElse(null);
-//    }
-
     protected JsonValue toJsonValueList(Collection<?> collection) {
         if (collection == null) {
             return NULL;

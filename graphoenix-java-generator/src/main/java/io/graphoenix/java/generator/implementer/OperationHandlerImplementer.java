@@ -316,40 +316,41 @@ public class OperationHandlerImplementer {
         if (type.equals(MUTATION)) {
             builder.addStatement("validator.get().validateOperation(operationDefinitionContext)")
                     .addStatement("$T mutationLoader = mutationDataLoader.get()", ClassName.get(MutationDataLoader.class))
+                    .addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                     .addStatement(
                             CodeBlock.join(
                                     List.of(
-                                            CodeBlock.of("$T result = grpcMutationBeforeHandler.get().handle(operationDefinitionContext, mutationLoader)", ParameterizedTypeName.get(Mono.class, JsonObject.class)),
+                                            CodeBlock.of("return grpcMutationBeforeHandler.get().handle(operationDefinitionContext, mutationLoader)"),
                                             CodeBlock.of(".flatMap(operation -> operationHandler.get().$L($T.DOCUMENT_UTIL.graphqlToOperation(operation.toString())).map(jsonString -> $T.of(operation, jsonProvider.get().createReader(new $T(jsonString)).readObject())))",
                                                     operationName,
                                                     ClassName.get(DocumentUtil.class),
                                                     ClassName.get(Tuple.class),
                                                     ClassName.get(StringReader.class)
                                             ),
+                                            CodeBlock.of(".flatMap(tuple2 -> invoke(connectionHandler.get().$L(tuple2._2(), operationDefinitionContext), operationDefinitionContext, queryLoader).map(jsonValue -> Tuple.of(tuple2._1(), jsonValue)))", typeManager.typeToLowerCamelName(operationTypeName)),
                                             CodeBlock.of(".flatMap(tuple2 -> grpcMutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), tuple2._1(), tuple2._2()).thenReturn(tuple2._2()))"),
-                                            CodeBlock.of(".onErrorResume(throwable -> mutationLoader.compensating().then($T.error(throwable)))", ClassName.get(Mono.class))
+                                            CodeBlock.of(".onErrorResume(throwable -> mutationLoader.compensating().then($T.error(throwable)))", ClassName.get(Mono.class)),
+                                            CodeBlock.of(".flatMap(jsonValue -> queryLoader.load(jsonValue))")
                                     ),
                                     System.lineSeparator()
                             )
                     );
         } else {
-            builder.addStatement("$T result = operationHandler.get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
-                    ParameterizedTypeName.get(Mono.class, JsonValue.class),
-                    operationName,
-
-                    ClassName.get(StringReader.class)
-            );
+            builder.addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
+                    .addStatement(
+                            CodeBlock.join(
+                                    List.of(
+                                            CodeBlock.of("return operationHandler.get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
+                                                    operationName,
+                                                    ClassName.get(StringReader.class)
+                                            ),
+                                            CodeBlock.of(".flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, operationDefinitionContext), operationDefinitionContext, queryLoader))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                            CodeBlock.of(".flatMap(jsonValue -> queryLoader.load(jsonValue))")
+                                    ),
+                                    System.lineSeparator()
+                            )
+                    );
         }
-        builder.addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
-                .addStatement(
-                        CodeBlock.join(
-                                List.of(
-                                        CodeBlock.of("return result.flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, operationDefinitionContext), operationDefinitionContext, queryLoader))", typeManager.typeToLowerCamelName(operationTypeName)),
-                                        CodeBlock.of(".flatMap(jsonValue -> queryLoader.load(jsonValue))")
-                                ),
-                                System.lineSeparator()
-                        )
-                );
         return builder.build();
     }
 
