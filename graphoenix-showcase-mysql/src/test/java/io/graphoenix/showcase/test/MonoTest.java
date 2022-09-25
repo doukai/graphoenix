@@ -53,8 +53,11 @@ public class MonoTest {
 
         Mono.just("1").then(Mono.fromRunnable(() -> {
             throw new RuntimeException("test");
-        })).onErrorResume(throwable -> Mono.just("2").doOnSuccess(System.out::println))
-                .doOnSuccess(System.out::println).block();
+        }))
+                .then(Mono.just("2"))
+                .onErrorResume(throwable -> Mono.just("b").doOnSuccess(System.out::println).then(Mono.error(throwable)))
+                .doOnSuccess(System.out::println)
+                .block();
 
     }
 
