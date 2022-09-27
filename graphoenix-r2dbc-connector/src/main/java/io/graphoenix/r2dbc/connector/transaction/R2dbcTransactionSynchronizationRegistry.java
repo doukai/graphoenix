@@ -4,8 +4,14 @@ import jakarta.transaction.Synchronization;
 import jakarta.transaction.TransactionScoped;
 import jakarta.transaction.TransactionSynchronizationRegistry;
 
+import java.util.Map;
+
 @TransactionScoped
 public class R2dbcTransactionSynchronizationRegistry implements TransactionSynchronizationRegistry {
+
+    private int status;
+
+    private Map<Object, Object> resourceMap;
 
     @Override
     public Object getTransactionKey() {
@@ -14,12 +20,12 @@ public class R2dbcTransactionSynchronizationRegistry implements TransactionSynch
 
     @Override
     public void putResource(Object key, Object value) {
-
+        this.resourceMap.put(key, value);
     }
 
     @Override
     public Object getResource(Object key) {
-        return null;
+        return this.resourceMap.get(key);
     }
 
     @Override
@@ -29,7 +35,7 @@ public class R2dbcTransactionSynchronizationRegistry implements TransactionSynch
 
     @Override
     public int getTransactionStatus() {
-        return 0;
+        return this.status;
     }
 
     @Override
