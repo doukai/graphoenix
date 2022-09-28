@@ -10,6 +10,9 @@ public class TimeoutConfig {
     private int request = 5 * 60;
 
     @Optional
+    private int transaction = 5 * 60;
+
+    @Optional
     private int session = 60 * 60;
 
     public int getRequest() {
@@ -18,6 +21,14 @@ public class TimeoutConfig {
 
     public void setRequest(int request) {
         this.request = request;
+    }
+
+    public int getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(int transaction) {
+        this.transaction = transaction;
     }
 
     public int getSession() {
