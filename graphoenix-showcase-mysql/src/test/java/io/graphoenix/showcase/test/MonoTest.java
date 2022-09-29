@@ -3,6 +3,7 @@ package io.graphoenix.showcase.test;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,12 +52,42 @@ public class MonoTest {
 //        arrayList.add("DDDD");
 //        getStringList(arrayList).subscribe(list -> list.forEach(System.out::println));
 
-        Mono.just("1").then(Mono.fromRunnable(() -> {
-            throw new RuntimeException("test");
-        }))
-                .then(Mono.just("2"))
-                .onErrorResume(throwable -> Mono.just("b").doOnSuccess(System.out::println).then(Mono.error(throwable)))
-                .doOnSuccess(System.out::println)
+//        Mono.just("1").then(Mono.fromRunnable(() -> {
+//            throw new RuntimeException("test");
+//        }))
+//                .then(Mono.just("2"))
+//                .onErrorResume(throwable -> Mono.just("b").doOnSuccess(System.out::println).then(Mono.error(throwable)))
+//                .doOnSuccess(System.out::println)
+//                .block();
+
+        String key = "key";
+        String key2 = "key2";
+        String block = Mono.from(
+
+                        Mono.just("$")
+                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
+                                ))
+                                .contextWrite(Context.of(key, "myValue4"))
+                                .doOnSuccess(System.out::println)
+
+                ).then(
+
+                        Mono.just("$")
+                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
+                                ))
+                                .contextWrite(Context.of(key, "myValue5"))
+                                .doOnSuccess(System.out::println)
+
+                ).then(
+                        Mono.just("$")
+                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
+                                ))
+                                .doOnSuccess(System.out::println)
+
+                )
+                .contextWrite(Context.of(key, "myValue3"))
+                .contextWrite(Context.of(key, "myValue2"))
+                .contextWrite(Context.of(key, "myValue"))
                 .block();
 
     }

@@ -49,29 +49,31 @@ public class InvocationContextProxy implements InvocationContext {
     }
 
     public Map<String, Object> getOwnerValues() {
-        return ownerValues;
+        return this.ownerValues;
     }
 
     public Object getOwnerValue(String name) {
-        return ownerValues.get(name);
+        return this.ownerValues.get(name);
     }
 
     public InvocationContextProxy setOwnerValues(Map<String, Object> ownerValues) {
         this.ownerValues = ownerValues;
+        this.contextData.putAll(ownerValues);
         return this;
     }
 
     public InvocationContextProxy addOwnerValue(String name, Object value) {
-        ownerValues.put(name, value);
+        this.ownerValues.put(name, value);
+        this.contextData.put(name, value);
         return this;
     }
 
     public InvocationContextProxy setTarget(Object target) {
         this.target = target;
         if (target instanceof Class<?>) {
-            targetClass = (Class<?>) target;
+            this.targetClass = (Class<?>) target;
         } else {
-            targetClass = target.getClass();
+            this.targetClass = target.getClass();
         }
         return this;
     }
@@ -87,16 +89,15 @@ public class InvocationContextProxy implements InvocationContext {
     }
 
     public InvocationContextProxy setMethod(String methodName, int parameterCount, String[] parameterTypeNames) {
-        this.method = Arrays.stream(targetClass.getMethods())
+        this.method = Arrays.stream(this.targetClass.getMethods())
                 .filter(method -> method.getName().equals(methodName))
                 .filter(method -> method.getParameterCount() == parameterCount)
                 .filter(method ->
                         IntStream.range(0, method.getParameterCount() - 1)
-                                .allMatch(index -> method.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
+                                .allMatch(index -> this.method.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
                 )
                 .findFirst()
                 .orElseThrow(NoSuchMethodError::new);
-
         return this;
     }
 
@@ -106,11 +107,11 @@ public class InvocationContextProxy implements InvocationContext {
     }
 
     public InvocationContextProxy setConstructor(int parameterCount, String[] parameterTypeNames) {
-        this.constructor = Arrays.stream(targetClass.getConstructors())
+        this.constructor = Arrays.stream(this.targetClass.getConstructors())
                 .filter(constructor -> constructor.getParameterCount() == parameterCount)
                 .filter(constructor ->
                         IntStream.range(0, constructor.getParameterCount() - 1)
-                                .allMatch(index -> constructor.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
+                                .allMatch(index -> this.constructor.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
                 )
                 .findFirst()
                 .orElseThrow(NoSuchMethodError::new);
@@ -124,7 +125,7 @@ public class InvocationContextProxy implements InvocationContext {
     }
 
     public Object getParameterValue(String parameterName) {
-        return parameterMap.get(parameterName);
+        return this.parameterMap.get(parameterName);
     }
 
     public InvocationContextProxy setParameterMap(Map<String, Object> parameterMap) {
@@ -133,7 +134,7 @@ public class InvocationContextProxy implements InvocationContext {
     }
 
     public InvocationContextProxy addParameterValue(String parameterName, Object parameterValue) {
-        parameterMap.put(parameterName, parameterValue);
+        this.parameterMap.put(parameterName, parameterValue);
         return this;
     }
 
@@ -159,52 +160,52 @@ public class InvocationContextProxy implements InvocationContext {
 
     @Override
     public Object getTarget() {
-        return target;
+        return this.target;
     }
 
     @Override
     public Object getTimer() {
-        return timer;
+        return this.timer;
     }
 
     @Override
     public Method getMethod() {
-        return method;
+        return this.method;
     }
 
     @Override
     public Constructor<?> getConstructor() {
-        return constructor;
+        return this.constructor;
     }
 
     @Override
     public Object[] getParameters() {
-        return parameterMap.values().toArray();
+        return this.parameterMap.values().toArray();
     }
 
     @Override
     public void setParameters(Object[] params) {
         if (params != null) {
-            IntStream.range(0, method.getParameterCount() - 1).forEach(index -> parameterMap.put(method.getParameters()[index].getName(), params[index]));
+            IntStream.range(0, this.method.getParameterCount() - 1).forEach(index -> this.parameterMap.put(this.method.getParameters()[index].getName(), params[index]));
         }
     }
 
     @Override
     public Map<String, Object> getContextData() {
-        return contextData;
+        return this.contextData;
     }
 
     @Override
     public Object proceed() throws Exception {
         try {
-            if (function != null) {
-                return function.apply(this);
-            } else if (consumer != null) {
-                consumer.accept(this);
+            if (this.function != null) {
+                return this.function.apply(this);
+            } else if (this.consumer != null) {
+                this.consumer.accept(this);
                 return null;
             } else {
-                ((InvocationContextProxy) nextInvocationContext).setParameterMap(parameterMap).setContextData(contextData).setMethod(method).setConstructor(constructor);
-                return nextProceed.apply(nextInvocationContext);
+                ((InvocationContextProxy) this.nextInvocationContext).setParameterMap(this.parameterMap).setContextData(this.contextData).setMethod(this.method).setConstructor(this.constructor);
+                return this.nextProceed.apply(this.nextInvocationContext);
             }
         } catch (Throwable throwable) {
             throw new Exception(throwable);
