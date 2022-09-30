@@ -40,7 +40,7 @@ public class RequestScopeInstanceFactory {
     }
 
     public static <T> Mono<ScopeInstances> getScopeInstances() {
-        return Mono.deferContextual(contextView -> Mono.fromFuture(REQUEST_CACHE.get(contextView.get(REQUEST_ID))));
+        return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(REQUEST_ID)).flatMap(id -> Mono.fromFuture(REQUEST_CACHE.get((String) id))));
     }
 
     public static <T> Mono<ScopeInstances> getScopeInstances(Class<T> beanClass, T instance) {
@@ -48,7 +48,7 @@ public class RequestScopeInstanceFactory {
     }
 
     public static <T> Mono<ScopeInstances> getScopeInstances(Class<T> beanClass, String name, T instance) {
-        return Mono.deferContextual(contextView -> Mono.fromFuture(REQUEST_CACHE.get(contextView.get(REQUEST_ID))))
+        return getScopeInstances()
                 .map(scopeInstances -> {
                             scopeInstances.get(beanClass).putIfAbsent(name, instance);
                             return scopeInstances;
@@ -131,7 +131,7 @@ public class RequestScopeInstanceFactory {
 
     @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
     public static <T> Mono<T> putIfAbsent(Class<T> beanClass, String name, T instance) {
-        return Mono.deferContextual(contextView -> Mono.fromFuture(REQUEST_CACHE.get(contextView.get(REQUEST_ID))))
+        return getScopeInstances()
                 .mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance));
     }
 }

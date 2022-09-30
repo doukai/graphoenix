@@ -1,6 +1,5 @@
 package io.graphoenix.core.context;
 
-import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.typesafe.config.Config;
@@ -41,19 +40,19 @@ public class TransactionScopeInstanceFactory {
     }
 
     public static <T> Mono<ScopeInstances> getScopeInstances() {
-        return Mono.deferContextual(contextView -> Mono.fromFuture(TRANSACTION_CACHE.get(contextView.get(TRANSACTION_ID))));
+        return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(TRANSACTION_ID)).flatMap(id -> Mono.fromFuture(TRANSACTION_CACHE.get((String) id))));
     }
 
-    public static <T> Mono<ScopeInstances> getOrNewScopeInstances() {
-        return Mono.deferContextual(contextView -> Mono.fromFuture(TRANSACTION_CACHE.get(contextView.getOrDefault(TRANSACTION_ID, NanoIdUtils.randomNanoId()), key -> new ScopeInstances())));
-    }
+//    public static <T> Mono<ScopeInstances> getOrNewScopeInstances() {
+//        return Mono.deferContextual(contextView -> Mono.fromFuture(TRANSACTION_CACHE.get(contextView.getOrDefault(TRANSACTION_ID, NanoIdUtils.randomNanoId()), key -> new ScopeInstances())));
+//    }
 
     public static <T> Mono<ScopeInstances> getScopeInstances(Class<T> beanClass, T instance) {
         return getScopeInstances(beanClass, beanClass.getName(), instance);
     }
 
     public static <T> Mono<ScopeInstances> getScopeInstances(Class<T> beanClass, String name, T instance) {
-        return Mono.deferContextual(contextView -> Mono.fromFuture(TRANSACTION_CACHE.get(contextView.get(TRANSACTION_ID))))
+        return getScopeInstances()
                 .map(scopeInstances -> {
                             scopeInstances.get(beanClass).putIfAbsent(name, instance);
                             return scopeInstances;
@@ -95,30 +94,30 @@ public class TransactionScopeInstanceFactory {
                 .mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Mono<T> getOrNew(T instance) {
-        return getOrNew((Class<T>) instance.getClass(), instance.getClass().getName(), instance);
-    }
+//    @SuppressWarnings("unchecked")
+//    public static <T> Mono<T> getOrNew(T instance) {
+//        return getOrNew((Class<T>) instance.getClass(), instance.getClass().getName(), instance);
+//    }
+//
+//    public static <T> Mono<T> getOrNew(Class<T> beanClass, T instance) {
+//        return getOrNew(beanClass, beanClass.getName(), instance);
+//    }
+//
+//    @SuppressWarnings("unchecked")
+//    public static <T> Mono<T> getOrNew(String name, T instance) {
+//        return getOrNew((Class<T>) instance.getClass(), name, instance);
+//    }
 
-    public static <T> Mono<T> getOrNew(Class<T> beanClass, T instance) {
-        return getOrNew(beanClass, beanClass.getName(), instance);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Mono<T> getOrNew(String name, T instance) {
-        return getOrNew((Class<T>) instance.getClass(), name, instance);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Mono<T> getOrNew(Class<T> beanClass, String name, T instance) {
-        return getOrNewScopeInstances()
-                .map(scopeInstances -> {
-                            scopeInstances.get(beanClass).putIfAbsent(name, instance);
-                            return scopeInstances;
-                        }
-                )
-                .mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
-    }
+//    @SuppressWarnings("unchecked")
+//    public static <T> Mono<T> getOrNew(Class<T> beanClass, String name, T instance) {
+//        return getOrNewScopeInstances()
+//                .map(scopeInstances -> {
+//                            scopeInstances.get(beanClass).putIfAbsent(name, instance);
+//                            return scopeInstances;
+//                        }
+//                )
+//                .mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
+//    }
 
     public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass) {
         return getPublisherBuilder(beanClass, beanClass.getName());
@@ -161,7 +160,7 @@ public class TransactionScopeInstanceFactory {
 
     @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
     public static <T> Mono<T> putIfAbsent(Class<T> beanClass, String name, T instance) {
-        return Mono.deferContextual(contextView -> Mono.fromFuture(TRANSACTION_CACHE.get(contextView.get(TRANSACTION_ID))))
+        return getScopeInstances()
                 .mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance));
     }
 }

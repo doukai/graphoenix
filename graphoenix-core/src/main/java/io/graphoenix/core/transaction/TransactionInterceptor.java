@@ -1,8 +1,8 @@
 package io.graphoenix.core.transaction;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
-import io.r2dbc.spi.Batch;
 import io.r2dbc.spi.Connection;
+import io.vavr.CheckedFunction0;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -10,6 +10,8 @@ import jakarta.inject.Provider;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
+import jakarta.transaction.InvalidTransactionException;
+import jakarta.transaction.TransactionRequiredException;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.reactivestreams.Publisher;
@@ -58,19 +60,42 @@ public class TransactionInterceptor {
 
         try {
             if (invocationContext.getMethod().getReturnType().isAssignableFrom(Mono.class)) {
-                return Mono.usingWhen(
+                Mono<?> newTransaction = Mono.usingWhen(
                         connectionProvider.get(),
                         connection ->
                                 Mono.from(connection.setAutoCommit(false))
                                         .then(Mono.from(connection.beginTransaction()))
-                                        .then(Mono.from(connection.commitTransaction())),
+                                        .then(CheckedFunction0.of(() -> (Mono<Object>) invocationContext.proceed()).unchecked().get()),
                         connection -> Mono.from(connection.commitTransaction()).thenEmpty(connection.close()),
                         (connection, throwable) -> {
                             Logger.error(throwable);
                             return Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
                         },
                         connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
-                );
+                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+
+                Mono<?> nonTransaction = connectionProvider.get()
+                        .map(connection -> connection.setAutoCommit(true))
+                        .then(CheckedFunction0.of(() -> (Mono<Object>) invocationContext.proceed()).unchecked().get())
+                        .contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+
+                switch (txType) {
+                    case REQUIRED:
+                        return connectionProvider.get().then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
+                    case REQUIRES_NEW:
+                        return newTransaction;
+                    case MANDATORY:
+                        return connectionProvider.get().then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(Mono.error(new TransactionRequiredException()));
+                    case SUPPORTS:
+                        return nonTransaction;
+                    case NOT_SUPPORTED:
+                        return connectionProvider.get().then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(nonTransaction);
+                    case NEVER:
+                        return connectionProvider.get().then(Mono.error(new InvalidTransactionException())).switchIfEmpty(nonTransaction);
+
+                }
+                return connectionProvider.get().then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
+
             } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(Flux.class)) {
                 return ((Flux<?>) invocationContext.proceed())
                         .thenMany(connectionProvider.get().map(Connection::commitTransaction))
