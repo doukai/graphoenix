@@ -30,8 +30,7 @@ public class QueryExecutor {
     }
 
     public Mono<String> executeQuery(String sql, Map<String, Object> parameters) {
-
-        return Flux
+        return Mono
                 .usingWhen(
                         connectionCreator.createConnection(),
                         connection -> {
@@ -41,11 +40,10 @@ public class QueryExecutor {
                             if (parameters != null) {
                                 parameters.forEach(statement::bind);
                             }
-                            return statement.execute();
+                            return Mono.from(statement.execute());
                         },
                         Connection::close
                 )
-                .single()
                 .flatMap(this::getJsonStringFromResult);
     }
 
@@ -54,7 +52,6 @@ public class QueryExecutor {
     }
 
     public Flux<Tuple2<String, String>> executeQuery(Stream<Tuple2<String, String>> sqlStream, Map<String, Object> parameters) {
-
         return Flux
                 .usingWhen(
                         connectionCreator.createConnection(),

@@ -7,9 +7,9 @@ import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigFactory;
 import io.graphoenix.core.config.TimeoutConfig;
 import io.graphoenix.spi.context.ScopeInstances;
+import jakarta.inject.Provider;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
-import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsFactoryResolver;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
@@ -20,7 +20,7 @@ import static io.graphoenix.spi.constant.Hammurabi.REQUEST_ID;
 public class RequestScopeInstanceFactory {
 
     private static final AsyncLoadingCache<String, ScopeInstances> REQUEST_CACHE = buildCache();
-    private static final ReactiveStreamsFactory reactiveStreamsFactory = ReactiveStreamsFactoryResolver.instance();
+    private static final ReactiveStreamsFactory reactiveStreamsFactory = BeanContext.get(ReactiveStreamsFactory.class);
 
     private static AsyncLoadingCache<String, ScopeInstances> buildCache() {
         Caffeine<Object, Object> builder = Caffeine.newBuilder()
@@ -43,19 +43,6 @@ public class RequestScopeInstanceFactory {
         return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(REQUEST_ID)).flatMap(id -> Mono.fromFuture(REQUEST_CACHE.get((String) id))));
     }
 
-    public static <T> Mono<ScopeInstances> getScopeInstances(Class<T> beanClass, T instance) {
-        return getScopeInstances(beanClass, beanClass.getName(), instance);
-    }
-
-    public static <T> Mono<ScopeInstances> getScopeInstances(Class<T> beanClass, String name, T instance) {
-        return getScopeInstances()
-                .map(scopeInstances -> {
-                            scopeInstances.get(beanClass).putIfAbsent(name, instance);
-                            return scopeInstances;
-                        }
-                );
-    }
-
     public static <T> Mono<T> get(Class<T> beanClass) {
         return get(beanClass, beanClass.getName());
     }
@@ -65,29 +52,22 @@ public class RequestScopeInstanceFactory {
         return getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Mono<T> get(T instance) {
-        return get((Class<T>) instance.getClass(), instance.getClass().getName(), instance);
+    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
+    public static <T> Mono<T> get(Class<T> beanClass, String name, Provider<T> instanceProvider) {
+        return get(beanClass, name).switchIfEmpty(getScopeInstances().map(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instanceProvider.get())));
     }
 
-    public static <T> Mono<T> get(Class<T> beanClass, T instance) {
-        return get(beanClass, beanClass.getName(), instance);
+    public static <T> Mono<T> get(Class<T> beanClass, Provider<T> instanceProvider) {
+        return get(beanClass, beanClass.getName(), instanceProvider);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Mono<T> get(String name, T instance) {
-        return get((Class<T>) instance.getClass(), name, instance);
+    public static <T> Mono<T> get(Class<T> beanClass, Mono<T> instanceMono) {
+        return get(beanClass, beanClass.getName(), instanceMono);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> Mono<T> get(Class<T> beanClass, String name, T instance) {
-        return getScopeInstances()
-                .map(scopeInstances -> {
-                            scopeInstances.get(beanClass).putIfAbsent(name, instance);
-                            return scopeInstances;
-                        }
-                )
-                .mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
+    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
+    public static <T> Mono<T> get(Class<T> beanClass, String name, Mono<T> instanceMono) {
+        return get(beanClass, name).switchIfEmpty(instanceMono.flatMap(instance -> getScopeInstances().map(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance))));
     }
 
     public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass) {
@@ -98,40 +78,19 @@ public class RequestScopeInstanceFactory {
         return reactiveStreamsFactory.fromPublisher(get(beanClass, name));
     }
 
-    public static <T> PublisherBuilder<T> getPublisherBuilder(T instance) {
-        return getPublisherBuilder(instance.getClass().getName(), instance);
+    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, Provider<T> instanceProvider) {
+        return getPublisherBuilder(beanClass, beanClass.getName(), instanceProvider);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> PublisherBuilder<T> getPublisherBuilder(String name, T instance) {
-        return getPublisherBuilder((Class<T>) instance.getClass(), name, instance);
+    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, String name, Provider<T> instanceProvider) {
+        return reactiveStreamsFactory.fromPublisher(get(beanClass, name, instanceProvider));
     }
 
-    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, T instance) {
-        return getPublisherBuilder(beanClass, beanClass.getName(), instance);
+    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, Mono<T> instanceMono) {
+        return getPublisherBuilder(beanClass, beanClass.getName(), instanceMono);
     }
 
-    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, String name, T instance) {
-        return reactiveStreamsFactory.fromPublisher(get(beanClass, name, instance));
-    }
-
-    public static <T> Mono<T> putIfAbsent(String requestId, Class<T> beanClass, T instance) {
-        return putIfAbsent(requestId, beanClass, beanClass.getName(), instance);
-    }
-
-    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
-    public static <T> Mono<T> putIfAbsent(String requestId, Class<T> beanClass, String name, T instance) {
-        return Mono.fromFuture(REQUEST_CACHE.get(requestId))
-                .mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance));
-    }
-
-    public static <T> Mono<T> putIfAbsent(Class<T> beanClass, T instance) {
-        return putIfAbsent(beanClass, beanClass.getName(), instance);
-    }
-
-    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
-    public static <T> Mono<T> putIfAbsent(Class<T> beanClass, String name, T instance) {
-        return getScopeInstances()
-                .mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance));
+    public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass, String name, Mono<T> instanceMono) {
+        return reactiveStreamsFactory.fromPublisher(get(beanClass, name, instanceMono));
     }
 }

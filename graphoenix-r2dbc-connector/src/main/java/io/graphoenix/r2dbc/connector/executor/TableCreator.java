@@ -6,7 +6,6 @@ import io.r2dbc.spi.Connection;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.tinylog.Logger;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Stream;
@@ -22,13 +21,12 @@ public class TableCreator {
     }
 
     public Mono<Void> createTable(String sql) {
-
-        return Flux
+        return Mono
                 .usingWhen(
                         connectionCreator.createConnection(),
                         connection -> {
                             Logger.info("create table:\r\n{}", sql);
-                            return connection.createStatement(sql).execute();
+                            return Mono.from(connection.createStatement(sql).execute());
                         },
                         Connection::close
                 )
@@ -36,8 +34,7 @@ public class TableCreator {
     }
 
     public Mono<Void> createTables(Stream<String> sqlStream) {
-
-        return Flux
+        return Mono
                 .usingWhen(
                         connectionCreator.createConnection(),
                         connection -> {
@@ -47,7 +44,7 @@ public class TableCreator {
                                         batch.add(sql);
                                     }
                             );
-                            return batch.execute();
+                            return Mono.from(batch.execute());
                         },
                         Connection::close
                 )

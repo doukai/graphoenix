@@ -51,6 +51,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.inject.Provider;
 import jakarta.inject.Singleton;
+import jakarta.transaction.TransactionScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.tinylog.Logger;
@@ -89,6 +90,7 @@ import static javax.lang.model.SourceVersion.RELEASE_11;
         "jakarta.enterprise.context.ApplicationScoped",
         "jakarta.enterprise.context.RequestScoped",
         "jakarta.enterprise.context.SessionScoped",
+        "jakarta.transaction.TransactionScoped",
         "org.eclipse.microprofile.config.inject.ConfigProperties"
 })
 @SupportedSourceVersion(RELEASE_11)
@@ -126,9 +128,10 @@ public class InjectProcessor extends AbstractProcessor {
         Set<? extends Element> applicationScopedSet = roundEnv.getElementsAnnotatedWith(ApplicationScoped.class);
         Set<? extends Element> requestScopedSet = roundEnv.getElementsAnnotatedWith(RequestScoped.class);
         Set<? extends Element> sessionScopedSet = roundEnv.getElementsAnnotatedWith(SessionScoped.class);
+        Set<? extends Element> transactionScopedSet = roundEnv.getElementsAnnotatedWith(TransactionScoped.class);
         Set<? extends Element> configPropertiesSet = roundEnv.getElementsAnnotatedWith(ConfigProperties.class);
 
-        List<TypeElement> typeElements = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream(), configPropertiesSet.stream())
+        List<TypeElement> typeElements = Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream(), transactionScopedSet.stream(), configPropertiesSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)
@@ -155,7 +158,7 @@ public class InjectProcessor extends AbstractProcessor {
         componentProxyCompilationUnits.forEach(compilationUnit -> processorManager.writeToFiler(compilationUnit));
         Logger.debug("all proxy class build success");
 
-        CompilationUnit moduleCompilationUnit = buildModule(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, componentProxyCompilationUnits);
+        CompilationUnit moduleCompilationUnit = buildModule(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, transactionScopedSet, componentProxyCompilationUnits);
         processorManager.writeToFiler(moduleCompilationUnit);
         Logger.debug("module class build success");
 
@@ -169,7 +172,7 @@ public class InjectProcessor extends AbstractProcessor {
         processorManager.writeToFiler(moduleContextCompilationUnit);
         Logger.debug("module context class build success");
 
-        List<CompilationUnit> producesModuleCompilationUnits = buildProducesModuleStream(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, configPropertiesSet).collect(Collectors.toList());
+        List<CompilationUnit> producesModuleCompilationUnits = buildProducesModuleStream(singletonSet, dependentSet, applicationScopedSet, requestScopedSet, sessionScopedSet, transactionScopedSet, configPropertiesSet).collect(Collectors.toList());
         producesModuleCompilationUnits.forEach(producesModuleCompilationUnit -> {
                     processorManager.writeToFiler(producesModuleCompilationUnit);
                     Logger.debug("produces module class class build success");
@@ -297,6 +300,7 @@ public class InjectProcessor extends AbstractProcessor {
                                         Set<? extends Element> applicationScopedSet,
                                         Set<? extends Element> requestScopedSet,
                                         Set<? extends Element> sessionScopedSet,
+                                        Set<? extends Element> transactionScopedSet,
                                         List<CompilationUnit> componentProxyCompilationUnits) {
 
         ClassOrInterfaceDeclaration moduleClassDeclaration = new ClassOrInterfaceDeclaration()
@@ -333,6 +337,13 @@ public class InjectProcessor extends AbstractProcessor {
                 .map(element -> (TypeElement) element)
                 .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
                 .forEach(componentCompilationUnit -> buildSessionScopeProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
+
+        transactionScopedSet.stream()
+                .filter(element -> element.getAnnotation(Generated.class) == null)
+                .filter(element -> element.getKind().isClass())
+                .map(element -> (TypeElement) element)
+                .map(typeElement -> processorManager.getCompilationUnitBySourceCode(typeElement))
+                .forEach(componentCompilationUnit -> buildTransactionScopeProvidesMethod(moduleCompilationUnit, moduleClassDeclaration, componentCompilationUnit, getComponentProxyCompilationUnit(componentCompilationUnit, componentProxyCompilationUnits)));
 
         dependentSet.stream()
                 .filter(element -> element.getAnnotation(Generated.class) == null)
@@ -395,6 +406,21 @@ public class InjectProcessor extends AbstractProcessor {
                 .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getName())));
 
         methodDeclaration.createBody().addStatement(buildSessionScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
+        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
+        processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
+    }
+
+    private void buildTransactionScopeProvidesMethod(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration moduleClassDeclaration, CompilationUnit componentCompilationUnit, CompilationUnit componentProxyCompilationUnit) {
+        ClassOrInterfaceDeclaration componentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
+        ClassOrInterfaceDeclaration componentProxyClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit);
+
+        moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
+
+        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
+                .addAnnotation(Provides.class)
+                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getName())));
+
+        methodDeclaration.createBody().addStatement(buildTransactionScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
         processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
         processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentProxyClassDeclaration);
     }
@@ -462,13 +488,20 @@ public class InjectProcessor extends AbstractProcessor {
                                                 .setName("get")
                                                 .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
                                                 .addArgument(
-                                                        new ObjectCreationExpr()
-                                                                .setType(componentProxyClassDeclaration.getNameAsString())
-                                                                .setArguments(
-                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
-                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                        new LambdaExpr()
+                                                                .setEnclosingParameters(true)
+                                                                .setBody(
+                                                                        new ExpressionStmt()
+                                                                                .setExpression(
+                                                                                        new ObjectCreationExpr()
+                                                                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                                .setArguments(
+                                                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
+                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                                )
+                                                                                )
                                                                 )
                                                 )
                                                 .setScope(new NameExpr("RequestScopeInstanceFactory"));
@@ -478,15 +511,22 @@ public class InjectProcessor extends AbstractProcessor {
                                                 .setName("get")
                                                 .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
                                                 .addArgument(
-                                                        new MethodCallExpr()
-                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
-                                                                .setArguments(
-                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
-                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                        new LambdaExpr()
+                                                                .setEnclosingParameters(true)
+                                                                .setBody(
+                                                                        new ExpressionStmt()
+                                                                                .setExpression(
+                                                                                        new MethodCallExpr()
+                                                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
+                                                                                                .setArguments(
+                                                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
+                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                                )
+                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
+                                                                                )
                                                                 )
-                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
                                                 )
                                                 .setScope(new NameExpr("RequestScopeInstanceFactory"));
                                     }
@@ -497,18 +537,25 @@ public class InjectProcessor extends AbstractProcessor {
                                         .setName("get")
                                         .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
                                         .addArgument(
-                                                new ObjectCreationExpr()
-                                                        .setType(componentProxyClassDeclaration.getNameAsString())
-                                                        .setArguments(
-                                                                componentProxyClassDeclaration.getConstructors().stream()
-                                                                        .findFirst()
-                                                                        .map(constructorDeclaration ->
-                                                                                constructorDeclaration.getParameters().stream()
-                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                new LambdaExpr()
+                                                        .setEnclosingParameters(true)
+                                                        .setBody(
+                                                                new ExpressionStmt()
+                                                                        .setExpression(
+                                                                                new ObjectCreationExpr()
+                                                                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                        .setArguments(
+                                                                                                componentProxyClassDeclaration.getConstructors().stream()
+                                                                                                        .findFirst()
+                                                                                                        .map(constructorDeclaration ->
+                                                                                                                constructorDeclaration.getParameters().stream()
+                                                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                                                                        )
+                                                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
+                                                                                        )
                                                                         )
-                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
                                                         )
                                         )
                                         .setScope(new NameExpr("RequestScopeInstanceFactory"))
@@ -531,13 +578,20 @@ public class InjectProcessor extends AbstractProcessor {
                                                 .setName("get")
                                                 .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
                                                 .addArgument(
-                                                        new ObjectCreationExpr()
-                                                                .setType(componentProxyClassDeclaration.getNameAsString())
-                                                                .setArguments(
-                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
-                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                        new LambdaExpr()
+                                                                .setEnclosingParameters(true)
+                                                                .setBody(
+                                                                        new ExpressionStmt()
+                                                                                .setExpression(
+                                                                                        new ObjectCreationExpr()
+                                                                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                                .setArguments(
+                                                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
+                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                                )
+                                                                                )
                                                                 )
                                                 )
                                                 .setScope(new NameExpr("SessionScopeInstanceFactory"));
@@ -547,15 +601,22 @@ public class InjectProcessor extends AbstractProcessor {
                                                 .setName("get")
                                                 .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
                                                 .addArgument(
-                                                        new MethodCallExpr()
-                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
-                                                                .setArguments(
-                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
-                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                        new LambdaExpr()
+                                                                .setEnclosingParameters(true)
+                                                                .setBody(
+                                                                        new ExpressionStmt()
+                                                                                .setExpression(
+                                                                                        new MethodCallExpr()
+                                                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
+                                                                                                .setArguments(
+                                                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
+                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                                )
+                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
+                                                                                )
                                                                 )
-                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
                                                 )
                                                 .setScope(new NameExpr("SessionScopeInstanceFactory"));
                                     }
@@ -566,21 +627,118 @@ public class InjectProcessor extends AbstractProcessor {
                                         .setName("get")
                                         .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
                                         .addArgument(
-                                                new ObjectCreationExpr()
-                                                        .setType(componentProxyClassDeclaration.getNameAsString())
-                                                        .setArguments(
-                                                                componentProxyClassDeclaration.getConstructors().stream()
-                                                                        .findFirst()
-                                                                        .map(constructorDeclaration ->
-                                                                                constructorDeclaration.getParameters().stream()
-                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
-                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
-                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                new LambdaExpr()
+                                                        .setEnclosingParameters(true)
+                                                        .setBody(
+                                                                new ExpressionStmt()
+                                                                        .setExpression(
+                                                                                new ObjectCreationExpr()
+                                                                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                        .setArguments(
+                                                                                                componentProxyClassDeclaration.getConstructors().stream()
+                                                                                                        .findFirst()
+                                                                                                        .map(constructorDeclaration ->
+                                                                                                                constructorDeclaration.getParameters().stream()
+                                                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                                                                        )
+                                                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
+                                                                                        )
                                                                         )
-                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
                                                         )
                                         )
                                         .setScope(new NameExpr("SessionScopeInstanceFactory"))
+                        )
+        );
+    }
+
+    private ReturnStmt buildTransactionScopeProvidesMethodReturnStmt(CompilationUnit moduleCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
+        moduleCompilationUnit.addImport(Mono.class)
+                .addImport(PublisherBuilder.class)
+                .addImport("io.graphoenix.core.context.TransactionScopeInstanceFactory");
+        return new ReturnStmt(
+                componentProxyClassDeclaration.getMembers().stream()
+                        .filter(bodyDeclaration -> bodyDeclaration.isAnnotationPresent(Produces.class))
+                        .filter(bodyDeclaration -> bodyDeclaration.isConstructorDeclaration() || bodyDeclaration.isMethodDeclaration())
+                        .findFirst()
+                        .map(bodyDeclaration -> {
+                                    if (bodyDeclaration.isConstructorDeclaration()) {
+                                        return new MethodCallExpr()
+                                                .setName("get")
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(
+                                                        new LambdaExpr()
+                                                                .setEnclosingParameters(true)
+                                                                .setBody(
+                                                                        new ExpressionStmt()
+                                                                                .setExpression(
+                                                                                        new ObjectCreationExpr()
+                                                                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                                .setArguments(
+                                                                                                        bodyDeclaration.asConstructorDeclaration().getParameters().stream()
+                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                                )
+                                                                                )
+                                                                )
+                                                )
+                                                .setScope(new NameExpr("TransactionScopeInstanceFactory"));
+                                    } else {
+                                        moduleCompilationUnit.addImport(processorManager.getQualifiedNameByDeclaration(componentProxyClassDeclaration));
+                                        return new MethodCallExpr()
+                                                .setName("get")
+                                                .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                                .addArgument(
+                                                        new LambdaExpr()
+                                                                .setEnclosingParameters(true)
+                                                                .setBody(
+                                                                        new ExpressionStmt()
+                                                                                .setExpression(
+                                                                                        new MethodCallExpr()
+                                                                                                .setName(bodyDeclaration.asMethodDeclaration().getNameAsString())
+                                                                                                .setArguments(
+                                                                                                        bodyDeclaration.asMethodDeclaration().getParameters().stream()
+                                                                                                                .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                .collect(Collectors.toCollection(NodeList::new))
+                                                                                                )
+                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
+                                                                                )
+                                                                )
+                                                )
+                                                .setScope(new NameExpr("TransactionScopeInstanceFactory"));
+                                    }
+                                }
+                        )
+                        .orElseGet(() ->
+                                new MethodCallExpr()
+                                        .setName("get")
+                                        .addArgument(new ClassExpr().setType(componentClassDeclaration.getNameAsString()))
+                                        .addArgument(
+                                                new LambdaExpr()
+                                                        .setEnclosingParameters(true)
+                                                        .setBody(
+                                                                new ExpressionStmt()
+                                                                        .setExpression(
+                                                                                new ObjectCreationExpr()
+                                                                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                        .setArguments(
+                                                                                                componentProxyClassDeclaration.getConstructors().stream()
+                                                                                                        .findFirst()
+                                                                                                        .map(constructorDeclaration ->
+                                                                                                                constructorDeclaration.getParameters().stream()
+                                                                                                                        .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
+                                                                                                                        .map(methodCallExpr -> (Expression) methodCallExpr)
+                                                                                                                        .collect(Collectors.toCollection(NodeList::new))
+                                                                                                        )
+                                                                                                        .orElseThrow(() -> new InjectionProcessException(CONSTRUCTOR_NOT_EXIST.bind(componentProxyClassDeclaration.getNameAsString())))
+                                                                                        )
+                                                                        )
+                                                        )
+                                        )
+                                        .setScope(new NameExpr("TransactionScopeInstanceFactory"))
                         )
         );
     }
@@ -653,9 +811,10 @@ public class InjectProcessor extends AbstractProcessor {
                                                               Set<? extends Element> applicationScopedSet,
                                                               Set<? extends Element> requestScopedSet,
                                                               Set<? extends Element> sessionScopedSet,
+                                                              Set<? extends Element> transactionScopedSet,
                                                               Set<? extends Element> configPropertiesSet) {
 
-        return Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream(), configPropertiesSet.stream())
+        return Streams.concat(singletonSet.stream(), dependentSet.stream(), applicationScopedSet.stream(), requestScopedSet.stream(), sessionScopedSet.stream(), transactionScopedSet.stream(), configPropertiesSet.stream())
                 .filter(element -> element.getAnnotation(Generated.class) == null)
                 .filter(element -> element.getKind().isClass())
                 .map(element -> (TypeElement) element)

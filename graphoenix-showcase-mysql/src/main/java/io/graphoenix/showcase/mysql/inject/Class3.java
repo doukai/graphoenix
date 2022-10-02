@@ -27,7 +27,7 @@ public class Class3 {
     @RequestScoped
     @Named("no")
     public PublisherBuilder<Class6> class6() {
-        return RequestScopeInstanceFactory.getPublisherBuilder(new Class6());
+        return RequestScopeInstanceFactory.getPublisherBuilder(Class6.class, Class6::new);
     }
 
     @Produces
