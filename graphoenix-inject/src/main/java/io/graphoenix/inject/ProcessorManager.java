@@ -68,7 +68,6 @@ public class ProcessorManager {
     private RoundEnvironment roundEnv;
     private final ClassFileToJavaSourceDecompiler decompiler;
     private final DecompilerLoader decompilerLoader;
-    private final DecompilerPrinter decompilerPrinter;
 
     public ProcessorManager(ProcessingEnvironment processingEnv, ClassLoader classLoader) {
         this.processingEnv = processingEnv;
@@ -92,7 +91,6 @@ public class ProcessorManager {
         this.javaParser.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
         this.decompiler = new ClassFileToJavaSourceDecompiler();
         this.decompilerLoader = new DecompilerLoader(classLoader);
-        this.decompilerPrinter = new DecompilerPrinter();
     }
 
     public void setRoundEnv(RoundEnvironment roundEnv) {
@@ -266,6 +264,7 @@ public class ProcessorManager {
                 return javaParser.parse(treePath.getCompilationUnit().toString()).getResult();
             } else {
                 try {
+                    DecompilerPrinter decompilerPrinter = new DecompilerPrinter();
                     decompiler.decompile(decompilerLoader, decompilerPrinter, elementByType.asType().toString());
                     String source = decompilerPrinter.toString();
                     return javaParser.parse(source).getResult();

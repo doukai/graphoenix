@@ -8,7 +8,7 @@ import io.r2dbc.spi.Statement;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
-import jakarta.transaction.TransactionScoped;
+import jakarta.transaction.Transactional;
 import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,7 +28,7 @@ public class MutationExecutor {
         this.connectionMonoProvider = connectionMonoProvider;
     }
 
-    @TransactionScoped
+    @Transactional
     public Mono<String> executeMutationsInBatch(Stream<String> sqlStream) {
         return this.connectionMonoProvider.get()
                 .flatMapMany(connection -> {
@@ -45,7 +45,7 @@ public class MutationExecutor {
                 .flatMap(this::getJsonStringFromResult);
     }
 
-    @TransactionScoped
+    @Transactional
     public Flux<Integer> executeMutationsInBatchByGroup(Stream<String> sqlStream, int itemCount) {
         List<List<String>> sqlListGroup = Lists.partition(sqlStream.collect(Collectors.toList()), itemCount);
         return this.connectionMonoProvider.get()
@@ -65,7 +65,7 @@ public class MutationExecutor {
         return executeMutations(sqlStream, null);
     }
 
-    @TransactionScoped
+    @Transactional
     public Mono<String> executeMutations(Stream<String> sqlStream, Map<String, Object> parameters) {
         return this.connectionMonoProvider.get()
                 .flatMapMany(connection ->
@@ -90,7 +90,7 @@ public class MutationExecutor {
         return executeMutations(sql, null);
     }
 
-    @TransactionScoped
+    @Transactional
     public Mono<String> executeMutations(String sql, Map<String, Object> parameters) {
         return this.connectionMonoProvider.get()
                 .flatMapMany(connection -> {

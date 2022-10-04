@@ -14,10 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -85,9 +82,15 @@ public class GraphQLConfigRegister {
         Iterator<URL> urlIterator = Objects.requireNonNull(classLoader.getResources("META-INF/graphql")).asIterator();
         while (urlIterator.hasNext()) {
             URI uri = urlIterator.next().toURI();
-            Map<String, String> env = new HashMap<>();
-            try (FileSystem fileSystem = FileSystems.newFileSystem(uri, env)) {
-                List<Path> pathList = Files.list(fileSystem.getPath("META-INF/graphql")).collect(Collectors.toList());
+            List<Path> pathList;
+            try {
+                pathList = Files.list(Path.of(uri)).collect(Collectors.toList());
+            } catch (FileSystemNotFoundException fileSystemNotFoundException) {
+                Map<String, String> env = new HashMap<>();
+                FileSystem fileSystem = FileSystems.newFileSystem(uri, env);
+                pathList = Files.list(fileSystem.getPath("META-INF/graphql")).collect(Collectors.toList());
+            }
+            try {
                 Optional<Path> microprofile = pathList.stream().filter(path -> path.getFileName().getFileName().toString().equals("microprofile.gql")).findFirst();
                 if (microprofile.isPresent()) {
                     manager.mergePath(microprofile.get());
