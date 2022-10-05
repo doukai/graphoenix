@@ -4,6 +4,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -266,7 +267,7 @@ public class ProcessorManager {
                 try {
                     DecompilerPrinter decompilerPrinter = new DecompilerPrinter();
                     decompiler.decompile(decompilerLoader, decompilerPrinter, elementByType.asType().toString());
-                    String source = decompilerPrinter.toString();
+                    String source = "package " + elementByType.getEnclosingElement().asType().toString() + ";" + System.lineSeparator() + decompilerPrinter;
                     return javaParser.parse(source).getResult();
                 } catch (Exception e) {
                     Logger.warn(e);
@@ -328,7 +329,6 @@ public class ProcessorManager {
     }
 
     public void importAllClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration) {
-
         classOrInterfaceDeclaration.getMembers().stream()
                 .flatMap(bodyDeclaration -> bodyDeclaration.findAll(ClassOrInterfaceType.class).stream())
                 .forEach(classOrInterfaceType -> {
@@ -338,9 +338,7 @@ public class ProcessorManager {
                             sourceClassOrInterfaceDeclaration.findAll(ClassOrInterfaceType.class).stream()
                                     .filter(sourceClassOrInterfaceType -> sourceClassOrInterfaceType.getNameAsString().equals(classOrInterfaceType.getNameAsString()))
                                     .findFirst()
-                                    .ifPresent(sourceClassOrInterfaceType ->
-                                            classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByType(sourceClassOrInterfaceType)))
-                                    );
+                                    .ifPresent(sourceClassOrInterfaceType -> importClassOrInterfaceType(classOrInterfaceDeclaration, sourceClassOrInterfaceType));
                         }
                 );
 
@@ -358,6 +356,16 @@ public class ProcessorManager {
                                     );
                         }
                 );
+    }
+
+    private void importClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceType classOrInterfaceType) {
+        Optional<NodeList<Type>> typeArguments = classOrInterfaceType.getTypeArguments();
+        classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByType(classOrInterfaceType)));
+        typeArguments.ifPresent(types ->
+                types.stream()
+                        .filter(Type::isClassOrInterfaceType)
+                        .forEach(argumentClassOrInterfaceType -> importClassOrInterfaceType(classOrInterfaceDeclaration, argumentClassOrInterfaceType.asClassOrInterfaceType()))
+        );
     }
 
     private boolean tryResolve(Node node) {

@@ -121,9 +121,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
 
         buildMethod(annotationNameList, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
         buildConstructor(annotationNameList, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
-//        componentProxyCompilationUnit.addImport(InvocationContext.class);
-//        componentProxyCompilationUnit.addImport(InvocationContextProxy.class);
-//        componentProxyCompilationUnit.addImport("io.graphoenix.core.context.BeanContext");
+
         processorManager.importAllClassOrInterfaceType(componentProxyClassDeclaration, componentClassDeclaration);
     }
 
@@ -134,7 +132,9 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                     .map(annotationExpr -> processorManager.getQualifiedNameByAnnotationExpr(annotationExpr))
                                     .anyMatch(annotationNameList::contains)
                             ) {
-
+                                componentProxyCompilationUnit.addImport(InvocationContext.class);
+                                componentProxyCompilationUnit.addImport(InvocationContextProxy.class);
+                                componentProxyCompilationUnit.addImport("io.graphoenix.core.context.BeanContext");
                                 MethodDeclaration overrideMethodDeclaration = componentProxyClassDeclaration.addMethod(methodDeclaration.getNameAsString())
                                         .setModifiers(methodDeclaration.getModifiers())
                                         .setParameters(methodDeclaration.getParameters())
@@ -192,7 +192,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                 for (AnnotationExpr annotationExpr : annotationExprList) {
                                     String annotationName = processorManager.getQualifiedNameByAnnotationExpr(annotationExpr);
                                     for (Tuple3<CompilationUnit, ClassOrInterfaceDeclaration, MethodDeclaration> tuple3 : getInterceptorMethodList(annotationName, AroundInvoke.class)) {
-
+                                        componentProxyCompilationUnit.addImport(tuple3._2().getFullyQualifiedName().orElseGet(() -> tuple3._2().getNameAsString()));
                                         componentProxyCompilationUnit.addImport(annotationName);
                                         CompilationUnit invokeCompilationUnit = tuple3._1();
                                         ClassOrInterfaceDeclaration invokeClassOrInterfaceDeclaration = tuple3._2();
@@ -297,7 +297,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                             .setInitializer(
                                                                     new ArrayInitializerExpr(
                                                                             methodDeclaration.getParameters().stream()
-                                                                                    .map(parameter -> parameter.getType().asString())
+                                                                                    .map(parameter -> parameter.getType().isClassOrInterfaceType() ? processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType()) : parameter.getType().asString())
                                                                                     .map(StringLiteralExpr::new)
                                                                                     .collect(Collectors.toCollection(NodeList::new))
                                                                     )
@@ -361,6 +361,9 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                     .map(annotationExpr -> processorManager.getQualifiedNameByAnnotationExpr(annotationExpr))
                                     .anyMatch(annotationNameList::contains)
                             ) {
+                                componentProxyCompilationUnit.addImport(InvocationContext.class);
+                                componentProxyCompilationUnit.addImport(InvocationContextProxy.class);
+                                componentProxyCompilationUnit.addImport("io.graphoenix.core.context.BeanContext");
                                 MethodDeclaration creatorMethod = componentProxyClassDeclaration.addMethod("create".concat(componentProxyClassDeclaration.getNameAsString()))
                                         .setModifiers(Modifier.Keyword.PUBLIC, Modifier.Keyword.STATIC)
                                         .setType(componentProxyClassDeclaration.getNameAsString())
@@ -413,7 +416,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                 for (AnnotationExpr annotationExpr : annotationExprList) {
                                     String annotationName = processorManager.getQualifiedNameByAnnotationExpr(annotationExpr);
                                     for (Tuple3<CompilationUnit, ClassOrInterfaceDeclaration, MethodDeclaration> tuple3 : getInterceptorMethodList(annotationName, AroundConstruct.class)) {
-
+                                        componentProxyCompilationUnit.addImport(tuple3._2().getFullyQualifiedName().orElseGet(() -> tuple3._2().getNameAsString()));
                                         componentProxyCompilationUnit.addImport(annotationName);
                                         CompilationUnit invokeCompilationUnit = tuple3._1();
                                         ClassOrInterfaceDeclaration invokeClassOrInterfaceDeclaration = tuple3._2();
@@ -506,7 +509,8 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                     ArrayCreationExpr constructorParameterTypeNames = new ArrayCreationExpr().setElementType(String.class)
                                                             .setInitializer(
                                                                     new ArrayInitializerExpr(
-                                                                            constructorDeclaration.getParameters().stream().map(parameter -> parameter.getType().asString())
+                                                                            constructorDeclaration.getParameters().stream()
+                                                                                    .map(parameter -> parameter.getType().isClassOrInterfaceType() ? processorManager.getQualifiedNameByType(parameter.getType().asClassOrInterfaceType()) : parameter.getType().asString())
                                                                                     .map(StringLiteralExpr::new)
                                                                                     .collect(Collectors.toCollection(NodeList::new))
                                                                     )
@@ -560,10 +564,6 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                             }
                         }
                 );
-//        componentProxyCompilationUnit.addImport(InvocationContext.class);
-//        componentProxyCompilationUnit.addImport(InvocationContextProxy.class);
-//        componentProxyCompilationUnit.addImport("io.graphoenix.core.context.BeanContext");
-//        processorManager.importAllClassOrInterfaceType(componentProxyClassDeclaration, componentClassDeclaration);
     }
 
 
