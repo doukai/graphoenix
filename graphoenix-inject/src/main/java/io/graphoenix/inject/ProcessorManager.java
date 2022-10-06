@@ -1,10 +1,7 @@
 package io.graphoenix.inject;
 
 import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.*;
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -335,10 +332,7 @@ public class ProcessorManager {
                             if (sourceClassOrInterfaceDeclaration.getNameAsString().equals(classOrInterfaceType.getNameAsString())) {
                                 classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByDeclaration(sourceClassOrInterfaceDeclaration)));
                             }
-                            sourceClassOrInterfaceDeclaration.findAll(ClassOrInterfaceType.class).stream()
-                                    .filter(sourceClassOrInterfaceType -> sourceClassOrInterfaceType.getNameAsString().equals(classOrInterfaceType.getNameAsString()))
-                                    .findFirst()
-                                    .ifPresent(sourceClassOrInterfaceType -> importClassOrInterfaceType(classOrInterfaceDeclaration, sourceClassOrInterfaceType));
+                            importClassOrInterfaceType(classOrInterfaceDeclaration, sourceClassOrInterfaceDeclaration, classOrInterfaceType);
                         }
                 );
 
@@ -358,14 +352,42 @@ public class ProcessorManager {
                 );
     }
 
-    private void importClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceType classOrInterfaceType) {
-        Optional<NodeList<Type>> typeArguments = classOrInterfaceType.getTypeArguments();
-        classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByType(classOrInterfaceType)));
-        typeArguments.ifPresent(types ->
-                types.stream()
-                        .filter(Type::isClassOrInterfaceType)
-                        .forEach(argumentClassOrInterfaceType -> importClassOrInterfaceType(classOrInterfaceDeclaration, argumentClassOrInterfaceType.asClassOrInterfaceType()))
-        );
+    private void importClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration, ClassOrInterfaceType classOrInterfaceType) {
+        sourceClassOrInterfaceDeclaration.findAll(ClassOrInterfaceType.class).stream()
+                .filter(sourceClassOrInterfaceType -> sourceClassOrInterfaceType.getNameAsString().equals(classOrInterfaceType.getNameAsString()))
+                .findFirst()
+                .ifPresentOrElse(
+                        sourceClassOrInterfaceType -> classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByType(sourceClassOrInterfaceType))),
+                        () -> importImportDeclaration(classOrInterfaceDeclaration, sourceClassOrInterfaceDeclaration, classOrInterfaceType)
+                );
+
+        classOrInterfaceType.getTypeArguments()
+                .ifPresent(types ->
+                        types.stream()
+                                .filter(Type::isClassOrInterfaceType)
+                                .forEach(argumentClassOrInterfaceType ->
+                                        importClassOrInterfaceType(classOrInterfaceDeclaration, sourceClassOrInterfaceDeclaration, argumentClassOrInterfaceType.asClassOrInterfaceType())
+                                )
+                );
+    }
+
+    private void importImportDeclaration(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration, ClassOrInterfaceType classOrInterfaceType) {
+        sourceClassOrInterfaceDeclaration.findCompilationUnit().stream()
+                .flatMap(compilationUnit -> compilationUnit.getImports().stream())
+                .filter(importDeclaration -> importDeclaration.getNameAsString().equals(classOrInterfaceType.getNameAsString()) || importDeclaration.getNameAsString().endsWith("." + classOrInterfaceType.getNameAsString()))
+                .findFirst()
+                .ifPresent(importDeclaration ->
+                        classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(importDeclaration))
+                );
+
+        classOrInterfaceType.getTypeArguments()
+                .ifPresent(types ->
+                        types.stream()
+                                .filter(Type::isClassOrInterfaceType)
+                                .forEach(argumentClassOrInterfaceType ->
+                                        importImportDeclaration(classOrInterfaceDeclaration, sourceClassOrInterfaceDeclaration, argumentClassOrInterfaceType.asClassOrInterfaceType())
+                                )
+                );
     }
 
     private boolean tryResolve(Node node) {

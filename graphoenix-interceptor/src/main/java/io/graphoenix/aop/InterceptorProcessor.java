@@ -121,8 +121,6 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
 
         buildMethod(annotationNameList, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
         buildConstructor(annotationNameList, componentClassDeclaration, componentProxyCompilationUnit, componentProxyClassDeclaration);
-
-        processorManager.importAllClassOrInterfaceType(componentProxyClassDeclaration, componentClassDeclaration);
     }
 
     private void buildMethod(Set<String> annotationNameList, ClassOrInterfaceDeclaration componentClassDeclaration, CompilationUnit componentProxyCompilationUnit, ClassOrInterfaceDeclaration componentProxyClassDeclaration) {
@@ -287,6 +285,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                     }
                                 }
 
+                                processorManager.importAllClassOrInterfaceType(componentProxyClassDeclaration, componentClassDeclaration);
                                 assert nextTuple3 != null;
                                 BlockStmt blockStmt = overrideMethodDeclaration.getBody().orElseGet(overrideMethodDeclaration::createBody);
                                 blockStmt.getStatements().getLast()
@@ -501,6 +500,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                     }
                                 }
 
+                                processorManager.importAllClassOrInterfaceType(componentProxyClassDeclaration, componentClassDeclaration);
                                 assert nextTuple3 != null;
                                 BlockStmt blockStmt = creatorMethod.getBody().orElseGet(invocationCreatorMethod::createBody);
                                 blockStmt.getStatements().getLast()
