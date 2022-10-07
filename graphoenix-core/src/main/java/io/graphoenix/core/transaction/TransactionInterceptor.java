@@ -43,167 +43,181 @@ public class TransactionInterceptor {
 
     @SuppressWarnings("unchecked")
     @AroundInvoke
-    public Object aroundInvoke(InvocationContext invocationContext) throws Exception {
+    public Object aroundInvoke(InvocationContext invocationContext) {
         Transactional.TxType txType;
         Class<? extends Exception>[] rollbackOn;
         Class<? extends Exception>[] dontRollbackOn;
 
-        if (invocationContext.getContextData().containsKey("value")) {
-            txType = (Transactional.TxType) invocationContext.getContextData().get("value");
-        } else {
-            txType = (Transactional.TxType) Transactional.class.getDeclaredMethod("value").getDefaultValue();
-        }
-        if (invocationContext.getContextData().containsKey("rollbackOn")) {
-            rollbackOn = (Class<? extends Exception>[]) invocationContext.getContextData().get("rollbackOn");
-        } else {
-            rollbackOn = (Class<? extends Exception>[]) Transactional.class.getDeclaredMethod("rollbackOn").getDefaultValue();
-        }
-        if (invocationContext.getContextData().containsKey("dontRollbackOn")) {
-            dontRollbackOn = (Class<? extends Exception>[]) invocationContext.getContextData().get("dontRollbackOn");
-        } else {
-            dontRollbackOn = (Class<? extends Exception>[]) Transactional.class.getDeclaredMethod("dontRollbackOn").getDefaultValue();
-        }
-        Mono<Connection> transactionConnection = connectionProvider.get().filter(connection -> !connection.isAutoCommit());
-
-        if (invocationContext.getMethod().getReturnType().isAssignableFrom(Mono.class)) {
-            Mono<?> newTransaction = Mono.usingWhen(
-                    connectionProvider.get(),
-                    connection ->
-                            Mono.from(connection.setAutoCommit(false))
-                                    .then(Mono.from(connection.beginTransaction()))
-                                    .then(CheckedFunction0.of(() -> (Mono<Object>) invocationContext.proceed()).unchecked().get()),
-                    connection -> Mono.from(connection.commitTransaction()).thenEmpty(connection.close()),
-                    (connection, throwable) -> {
-                        Logger.error(throwable);
-                        return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
-                    },
-                    connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
-            ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
-
-
-            Mono<?> nonTransaction = Mono.usingWhen(
-                    connectionProvider.get(),
-                    connection ->
-                            Mono.from(connection.setAutoCommit(true))
-                                    .then(CheckedFunction0.of(() -> (Mono<Object>) invocationContext.proceed()).unchecked().get()),
-                    Connection::close
-            ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
-
-            switch (txType) {
-                case REQUIRED:
-                    return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
-                case REQUIRES_NEW:
-                    return newTransaction;
-                case MANDATORY:
-                    return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(Mono.error(new TransactionRequiredException()));
-                case SUPPORTS:
-                    return nonTransaction;
-                case NOT_SUPPORTED:
-                    return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(nonTransaction);
-                case NEVER:
-                    return transactionConnection.then(Mono.error(new InvalidTransactionException())).switchIfEmpty(nonTransaction);
-                default:
-                    throw new NotSupportedException();
-            }
-        } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(Flux.class)) {
-            Flux<?> newTransaction = Flux.usingWhen(
-                    connectionProvider.get(),
-                    connection ->
-                            Flux.from(connection.setAutoCommit(false))
-                                    .thenMany(Flux.from(connection.beginTransaction()))
-                                    .thenMany(CheckedFunction0.of(() -> (Flux<Object>) invocationContext.proceed()).unchecked().get()),
-                    connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
-                    (connection, throwable) -> {
-                        Logger.error(throwable);
-                        return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(throwable));
-                    },
-                    connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
-            ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
-
-            Flux<?> nonTransaction = Flux.usingWhen(
-                    connectionProvider.get(),
-                    connection ->
-                            Flux.from(connection.setAutoCommit(true))
-                                    .thenMany(CheckedFunction0.of(() -> (Flux<Object>) invocationContext.proceed()).unchecked().get()),
-                    Connection::close
-            ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
-
-            switch (txType) {
-                case REQUIRED:
-                    return transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
-                case REQUIRES_NEW:
-                    return newTransaction;
-                case MANDATORY:
-                    return transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(Flux.error(new TransactionRequiredException()));
-                case SUPPORTS:
-                    return nonTransaction;
-                case NOT_SUPPORTED:
-                    return transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(nonTransaction);
-                case NEVER:
-                    return transactionConnection.thenMany(Flux.error(new InvalidTransactionException())).switchIfEmpty(nonTransaction);
-                default:
-                    throw new NotSupportedException();
-            }
-        } else {
-            Flux<?> proceed;
-            if (invocationContext.getMethod().getReturnType().isAssignableFrom(Publisher.class)) {
-                proceed = Flux.from(((Publisher<?>) invocationContext.proceed()));
-            } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(PublisherBuilder.class)) {
-                proceed = Flux.from(((PublisherBuilder<?>) invocationContext.proceed()).buildRs());
+        try {
+            if (invocationContext.getContextData().containsKey("value")) {
+                txType = (Transactional.TxType) invocationContext.getContextData().get("value");
             } else {
-                throw new NotSupportedException();
+                txType = (Transactional.TxType) Transactional.class.getDeclaredMethod("value").getDefaultValue();
             }
-            Flux<?> newTransaction = Flux.usingWhen(
-                    connectionProvider.get(),
-                    connection ->
-                            Flux.from(connection.setAutoCommit(false))
-                                    .thenMany(Flux.from(connection.beginTransaction()))
-                                    .thenMany(CheckedFunction0.of(() -> proceed).unchecked().get()),
-                    connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
-                    (connection, throwable) -> {
-                        Logger.error(throwable);
-                        return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(throwable));
-                    },
-                    connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
-            ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
-
-            Flux<?> nonTransaction = Flux.usingWhen(
-                    connectionProvider.get(),
-                    connection ->
-                            Flux.from(connection.setAutoCommit(true))
-                                    .thenMany(CheckedFunction0.of(() -> proceed).unchecked().get()),
-                    Connection::close
-            ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
-
-            Flux<?> transaction;
-            switch (txType) {
-                case REQUIRED:
-                    transaction = transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
-                    break;
-                case REQUIRES_NEW:
-                    transaction = newTransaction;
-                    break;
-                case MANDATORY:
-                    transaction = transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(Flux.error(new TransactionRequiredException()));
-                    break;
-                case SUPPORTS:
-                    transaction = nonTransaction;
-                    break;
-                case NOT_SUPPORTED:
-                    transaction = transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(nonTransaction);
-                    break;
-                case NEVER:
-                    transaction = transactionConnection.thenMany(Flux.error(new InvalidTransactionException())).switchIfEmpty(nonTransaction);
-                    break;
-                default:
-                    throw new NotSupportedException();
-            }
-            if (invocationContext.getMethod().getReturnType().isAssignableFrom(Publisher.class)) {
-                return transaction;
-            } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(PublisherBuilder.class)) {
-                return reactiveStreamsFactory.fromPublisher(transaction);
+            if (invocationContext.getContextData().containsKey("rollbackOn")) {
+                rollbackOn = (Class<? extends Exception>[]) invocationContext.getContextData().get("rollbackOn");
             } else {
-                throw new NotSupportedException();
+                rollbackOn = (Class<? extends Exception>[]) Transactional.class.getDeclaredMethod("rollbackOn").getDefaultValue();
+            }
+            if (invocationContext.getContextData().containsKey("dontRollbackOn")) {
+                dontRollbackOn = (Class<? extends Exception>[]) invocationContext.getContextData().get("dontRollbackOn");
+            } else {
+                dontRollbackOn = (Class<? extends Exception>[]) Transactional.class.getDeclaredMethod("dontRollbackOn").getDefaultValue();
+            }
+            Mono<Connection> transactionConnection = connectionProvider.get().filter(connection -> !connection.isAutoCommit());
+
+            if (invocationContext.getMethod().getReturnType().isAssignableFrom(Mono.class)) {
+                Mono<?> newTransaction = Mono.usingWhen(
+                        connectionProvider.get(),
+                        connection ->
+                                Mono.from(connection.setAutoCommit(false))
+                                        .then(Mono.from(connection.beginTransaction()))
+                                        .then(CheckedFunction0.of(() -> (Mono<Object>) invocationContext.proceed()).unchecked().get()),
+                        connection -> Mono.from(connection.commitTransaction()).thenEmpty(connection.close()),
+                        (connection, throwable) -> {
+                            Logger.error(throwable);
+                            return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
+                        },
+                        connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
+                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+
+
+                Mono<?> nonTransaction = Mono.usingWhen(
+                        connectionProvider.get(),
+                        connection ->
+                                Mono.from(connection.setAutoCommit(true))
+                                        .then(CheckedFunction0.of(() -> (Mono<Object>) invocationContext.proceed()).unchecked().get()),
+                        Connection::close
+                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+
+                switch (txType) {
+                    case REQUIRED:
+                        return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
+                    case REQUIRES_NEW:
+                        return newTransaction;
+                    case MANDATORY:
+                        return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(Mono.error(new TransactionRequiredException()));
+                    case SUPPORTS:
+                        return nonTransaction;
+                    case NOT_SUPPORTED:
+                        return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(nonTransaction);
+                    case NEVER:
+                        return transactionConnection.then(Mono.error(new InvalidTransactionException())).switchIfEmpty(nonTransaction);
+                    default:
+                        throw new NotSupportedException();
+                }
+            } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(Flux.class)) {
+                Flux<?> newTransaction = Flux.usingWhen(
+                        connectionProvider.get(),
+                        connection ->
+                                Flux.from(connection.setAutoCommit(false))
+                                        .thenMany(Flux.from(connection.beginTransaction()))
+                                        .thenMany(CheckedFunction0.of(() -> (Flux<Object>) invocationContext.proceed()).unchecked().get()),
+                        connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
+                        (connection, throwable) -> {
+                            Logger.error(throwable);
+                            return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(throwable));
+                        },
+                        connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
+                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+
+                Flux<?> nonTransaction = Flux.usingWhen(
+                        connectionProvider.get(),
+                        connection ->
+                                Flux.from(connection.setAutoCommit(true))
+                                        .thenMany(CheckedFunction0.of(() -> (Flux<Object>) invocationContext.proceed()).unchecked().get()),
+                        Connection::close
+                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+
+                switch (txType) {
+                    case REQUIRED:
+                        return transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
+                    case REQUIRES_NEW:
+                        return newTransaction;
+                    case MANDATORY:
+                        return transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(Flux.error(new TransactionRequiredException()));
+                    case SUPPORTS:
+                        return nonTransaction;
+                    case NOT_SUPPORTED:
+                        return transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(nonTransaction);
+                    case NEVER:
+                        return transactionConnection.thenMany(Flux.error(new InvalidTransactionException())).switchIfEmpty(nonTransaction);
+                    default:
+                        throw new NotSupportedException();
+                }
+            } else {
+                Flux<?> proceed;
+                if (invocationContext.getMethod().getReturnType().isAssignableFrom(Publisher.class)) {
+                    proceed = Flux.from(((Publisher<?>) invocationContext.proceed()));
+                } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(PublisherBuilder.class)) {
+                    proceed = Flux.from(((PublisherBuilder<?>) invocationContext.proceed()).buildRs());
+                } else {
+                    throw new NotSupportedException();
+                }
+                Flux<?> newTransaction = Flux.usingWhen(
+                        connectionProvider.get(),
+                        connection ->
+                                Flux.from(connection.setAutoCommit(false))
+                                        .thenMany(Flux.from(connection.beginTransaction()))
+                                        .thenMany(CheckedFunction0.of(() -> proceed).unchecked().get()),
+                        connection -> Flux.from(connection.commitTransaction()).thenEmpty(connection.close()),
+                        (connection, throwable) -> {
+                            Logger.error(throwable);
+                            return Flux.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Flux.error(throwable));
+                        },
+                        connection -> Flux.from(connection.rollbackTransaction()).thenEmpty(connection.close())
+                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+
+                Flux<?> nonTransaction = Flux.usingWhen(
+                        connectionProvider.get(),
+                        connection ->
+                                Flux.from(connection.setAutoCommit(true))
+                                        .thenMany(CheckedFunction0.of(() -> proceed).unchecked().get()),
+                        Connection::close
+                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+
+                Flux<?> transaction;
+                switch (txType) {
+                    case REQUIRED:
+                        transaction = transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
+                        break;
+                    case REQUIRES_NEW:
+                        transaction = newTransaction;
+                        break;
+                    case MANDATORY:
+                        transaction = transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(Flux.error(new TransactionRequiredException()));
+                        break;
+                    case SUPPORTS:
+                        transaction = nonTransaction;
+                        break;
+                    case NOT_SUPPORTED:
+                        transaction = transactionConnection.thenMany((Flux<Object>) invocationContext.proceed()).switchIfEmpty(nonTransaction);
+                        break;
+                    case NEVER:
+                        transaction = transactionConnection.thenMany(Flux.error(new InvalidTransactionException())).switchIfEmpty(nonTransaction);
+                        break;
+                    default:
+                        throw new NotSupportedException();
+                }
+                if (invocationContext.getMethod().getReturnType().isAssignableFrom(Publisher.class)) {
+                    return transaction;
+                } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(PublisherBuilder.class)) {
+                    return reactiveStreamsFactory.fromPublisher(transaction);
+                } else {
+                    throw new NotSupportedException();
+                }
+            }
+        } catch (Exception exception) {
+            if (invocationContext.getMethod().getReturnType().isAssignableFrom(Mono.class)) {
+                return Mono.error(exception);
+            } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(Flux.class)) {
+                return Flux.error(exception);
+            } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(Publisher.class)) {
+                return Flux.error(exception);
+            } else if (invocationContext.getMethod().getReturnType().isAssignableFrom(PublisherBuilder.class)) {
+                return reactiveStreamsFactory.fromPublisher(Flux.error(exception));
+            } else {
+                throw new RuntimeException(exception);
             }
         }
     }

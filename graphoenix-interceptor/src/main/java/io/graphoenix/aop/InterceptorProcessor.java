@@ -139,7 +139,14 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                         .setType(methodDeclaration.getType())
                                         .addAnnotation(Override.class);
 
-                                MethodDeclaration proxyMethodDeclaration = componentProxyClassDeclaration.addMethod(methodDeclaration.getNameAsString().concat("Proxy"))
+                                String proxyMethodName = methodDeclaration.getNameAsString()
+                                        .concat("_")
+                                        .concat(methodDeclaration.getParameters().stream()
+                                                .map(parameter -> parameter.getType().isClassOrInterfaceType() ? parameter.getType().asClassOrInterfaceType().getNameAsString() : parameter.getType().asString())
+                                                .collect(Collectors.joining("_"))
+                                        )
+                                        .concat("_Proxy");
+                                MethodDeclaration proxyMethodDeclaration = componentProxyClassDeclaration.addMethod(proxyMethodName)
                                         .setModifiers(methodDeclaration.getModifiers())
                                         .addParameter(InvocationContext.class, "invocationContext")
                                         .addThrownException(Exception.class);
@@ -217,7 +224,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                         .setName("setConsumer")
                                                         .addArgument(
                                                                 new MethodReferenceExpr()
-                                                                        .setIdentifier(methodDeclaration.getNameAsString().concat("Proxy"))
+                                                                        .setIdentifier(proxyMethodName)
                                                                         .setScope(methodDeclaration.isStatic() ? new NameExpr(componentProxyClassDeclaration.getNameAsString()) : new ThisExpr())
                                                         );
                                             } else {
@@ -225,7 +232,7 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
                                                         .setName("setFunction")
                                                         .addArgument(
                                                                 new MethodReferenceExpr()
-                                                                        .setIdentifier(methodDeclaration.getNameAsString().concat("Proxy"))
+                                                                        .setIdentifier(proxyMethodName)
                                                                         .setScope(methodDeclaration.isStatic() ? new NameExpr(componentProxyClassDeclaration.getNameAsString()) : new ThisExpr())
                                                         )
                                                         .setScope(createContextExpr);

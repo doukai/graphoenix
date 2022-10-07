@@ -376,9 +376,7 @@ public class ProcessorManager {
                 .flatMap(compilationUnit -> compilationUnit.getImports().stream())
                 .filter(importDeclaration -> importDeclaration.getNameAsString().equals(classOrInterfaceType.getNameAsString()) || importDeclaration.getNameAsString().endsWith("." + classOrInterfaceType.getNameAsString()))
                 .findFirst()
-                .ifPresent(importDeclaration ->
-                        classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(importDeclaration))
-                );
+                .ifPresent(importDeclaration -> classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(importDeclaration)));
 
         classOrInterfaceType.getTypeArguments()
                 .ifPresent(types ->
