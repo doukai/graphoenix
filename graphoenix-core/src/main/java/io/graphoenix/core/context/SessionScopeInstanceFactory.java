@@ -39,7 +39,7 @@ public class SessionScopeInstanceFactory {
     private SessionScopeInstanceFactory() {
     }
 
-    public static <T> Mono<ScopeInstances> getScopeInstances() {
+    public static Mono<ScopeInstances> getScopeInstances() {
         return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(SESSION_ID)).flatMap(id -> Mono.fromFuture(SESSION_CACHE.get((String) id))));
     }
 

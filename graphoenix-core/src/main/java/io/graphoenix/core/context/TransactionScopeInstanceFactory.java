@@ -39,7 +39,7 @@ public class TransactionScopeInstanceFactory {
     private TransactionScopeInstanceFactory() {
     }
 
-    public static <T> Mono<ScopeInstances> getScopeInstances() {
+    public static Mono<ScopeInstances> getScopeInstances() {
         return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(TRANSACTION_ID)).flatMap(id -> Mono.fromFuture(TRANSACTION_CACHE.get((String) id))));
     }
 

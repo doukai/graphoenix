@@ -39,7 +39,7 @@ public class RequestScopeInstanceFactory {
     private RequestScopeInstanceFactory() {
     }
 
-    public static <T> Mono<ScopeInstances> getScopeInstances() {
+    public static Mono<ScopeInstances> getScopeInstances() {
         return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty(REQUEST_ID)).flatMap(id -> Mono.fromFuture(REQUEST_CACHE.get((String) id))));
     }
 

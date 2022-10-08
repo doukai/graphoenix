@@ -1,5 +1,6 @@
 package io.graphoenix.showcase.test;
 
+import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,35 +61,45 @@ public class MonoTest {
 //                .doOnSuccess(System.out::println)
 //                .block();
 
+//        String key = "key";
+//        String key2 = "key2";
+//        String block = Mono.from(
+//
+//                        Mono.just("$")
+//                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
+//                                ))
+//                                .contextWrite(Context.of(key, "myValue4"))
+//                                .doOnSuccess(System.out::println)
+//
+//                ).then(
+//
+//                        Mono.just("$")
+//                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
+//                                ))
+//                                .contextWrite(Context.of(key, "myValue5"))
+//                                .doOnSuccess(System.out::println)
+//
+//                ).then(
+//                        Mono.just("$")
+//                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
+//                                ))
+//                                .doOnSuccess(System.out::println)
+//
+//                )
+//                .contextWrite(Context.of(key, "myValue3"))
+//                .contextWrite(Context.of(key, "myValue2"))
+//                .contextWrite(Context.of(key, "myValue"))
+//                .block();
+
         String key = "key";
-        String key2 = "key2";
-        String block = Mono.from(
+        Mono<String> stringMono = Mono.from(Mono.deferContextual(ctx ->
+                Mono.just("$" + ctx.get(key))));
 
-                        Mono.just("$")
-                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
-                                ))
-                                .contextWrite(Context.of(key, "myValue4"))
-                                .doOnSuccess(System.out::println)
+        stringMono.doOnSuccess(System.out::println)
+                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
+        stringMono.doOnSuccess(System.out::println)
+                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
 
-                ).then(
-
-                        Mono.just("$")
-                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
-                                ))
-                                .contextWrite(Context.of(key, "myValue5"))
-                                .doOnSuccess(System.out::println)
-
-                ).then(
-                        Mono.just("$")
-                                .flatMap(s -> Mono.deferContextual(ctx -> Mono.just(s + ctx.get(key))
-                                ))
-                                .doOnSuccess(System.out::println)
-
-                )
-                .contextWrite(Context.of(key, "myValue3"))
-                .contextWrite(Context.of(key, "myValue2"))
-                .contextWrite(Context.of(key, "myValue"))
-                .block();
 
     }
 
