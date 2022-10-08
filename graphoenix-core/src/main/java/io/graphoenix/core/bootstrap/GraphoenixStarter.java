@@ -51,7 +51,7 @@ public class GraphoenixStarter {
                             try {
                                 latch.await();
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                Logger.error(e);
                             }
                             server.run();
                         })

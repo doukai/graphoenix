@@ -23,6 +23,12 @@ public class InvocationContextProxy implements InvocationContext {
 
     private Object timer;
 
+    private String methodName;
+
+    private int parameterCount;
+
+    private String[] parameterTypeNames;
+
     private Method method;
 
     private Constructor<?> constructor;
@@ -89,15 +95,9 @@ public class InvocationContextProxy implements InvocationContext {
     }
 
     public InvocationContextProxy setMethod(String methodName, int parameterCount, String[] parameterTypeNames) {
-        this.method = Arrays.stream(this.targetClass.getMethods())
-                .filter(method -> method.getName().equals(methodName))
-                .filter(method -> method.getParameterCount() == parameterCount)
-                .filter(method ->
-                        IntStream.range(0, method.getParameterCount() - 1)
-                                .allMatch(index -> this.method.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
-                )
-                .findFirst()
-                .orElseThrow(NoSuchMethodError::new);
+        this.methodName = methodName;
+        this.parameterCount = parameterCount;
+        this.parameterTypeNames = parameterTypeNames;
         return this;
     }
 
@@ -107,15 +107,8 @@ public class InvocationContextProxy implements InvocationContext {
     }
 
     public InvocationContextProxy setConstructor(int parameterCount, String[] parameterTypeNames) {
-        this.constructor = Arrays.stream(this.targetClass.getConstructors())
-                .filter(constructor -> constructor.getParameterCount() == parameterCount)
-                .filter(constructor ->
-                        IntStream.range(0, constructor.getParameterCount() - 1)
-                                .allMatch(index -> this.constructor.getParameters()[index].getType().getName().equals(parameterTypeNames[index]))
-                )
-                .findFirst()
-                .orElseThrow(NoSuchMethodError::new);
-
+        this.parameterCount = parameterCount;
+        this.parameterTypeNames = parameterTypeNames;
         return this;
     }
 
@@ -170,11 +163,32 @@ public class InvocationContextProxy implements InvocationContext {
 
     @Override
     public Method getMethod() {
+        if (this.method == null) {
+            this.method = Arrays.stream(this.targetClass.getMethods())
+                    .filter(method -> method.getName().equals(this.methodName))
+                    .filter(method -> method.getParameterCount() == this.parameterCount)
+                    .filter(method ->
+                            IntStream.range(0, method.getParameterCount())
+                                    .allMatch(index -> method.getParameters()[index].getType().getName().equals(this.parameterTypeNames[index]))
+                    )
+                    .findFirst()
+                    .orElseThrow(NoSuchMethodError::new);
+        }
         return this.method;
     }
 
     @Override
     public Constructor<?> getConstructor() {
+        if (this.constructor == null) {
+            this.constructor = Arrays.stream(this.targetClass.getConstructors())
+                    .filter(constructor -> constructor.getParameterCount() == this.parameterCount)
+                    .filter(constructor ->
+                            IntStream.range(0, constructor.getParameterCount())
+                                    .allMatch(index -> constructor.getParameters()[index].getType().getName().equals(this.parameterTypeNames[index]))
+                    )
+                    .findFirst()
+                    .orElseThrow(NoSuchMethodError::new);
+        }
         return this.constructor;
     }
 
@@ -186,7 +200,7 @@ public class InvocationContextProxy implements InvocationContext {
     @Override
     public void setParameters(Object[] params) {
         if (params != null) {
-            IntStream.range(0, this.method.getParameterCount() - 1).forEach(index -> this.parameterMap.put(this.method.getParameters()[index].getName(), params[index]));
+            IntStream.range(0, this.method.getParameterCount()).forEach(index -> this.parameterMap.put(this.method.getParameters()[index].getName(), params[index]));
         }
     }
 
