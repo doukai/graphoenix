@@ -95,9 +95,9 @@ public class MonoTest {
         Mono<String> stringMono = Mono.from(Mono.deferContextual(ctx ->
                 Mono.just("$" + ctx.get(key))));
 
-        stringMono.doOnSuccess(System.out::println)
+        Mono.from(stringMono.doOnSuccess(System.out::println))
                 .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
-        stringMono.doOnSuccess(System.out::println)
+        Mono.from(stringMono.doOnSuccess(System.out::println))
                 .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
 
 
