@@ -64,43 +64,48 @@ public class TransactionInterceptor {
             } else {
                 dontRollbackOn = (Class<? extends Exception>[]) Transactional.class.getDeclaredMethod("dontRollbackOn").getDefaultValue();
             }
-            Mono<Connection> transactionConnection = connectionProvider.get().filter(connection -> !connection.isAutoCommit());
+            Mono<Connection> transactionConnection = Mono.defer(() -> connectionProvider.get().filter(connection -> !connection.isAutoCommit()));
 
             if (invocationContext.getMethod().getReturnType().isAssignableFrom(Mono.class)) {
-                Mono<?> newTransaction = Mono.usingWhen(
-                        connectionProvider.get(),
-                        connection ->
-                                Mono.from(connection.setAutoCommit(false))
-                                        .then(Mono.from(connection.beginTransaction()))
-                                        .then(CheckedFunction0.of(() -> (Mono<Object>) invocationContext.proceed()).unchecked().get()),
-                        connection -> Mono.from(connection.commitTransaction()).thenEmpty(connection.close()),
-                        (connection, throwable) -> {
-                            Logger.error(throwable);
-                            return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
-                        },
-                        connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
-                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
-
-
-                Mono<?> nonTransaction = Mono.usingWhen(
-                        connectionProvider.get(),
-                        connection ->
-                                Mono.from(connection.setAutoCommit(true))
-                                        .then(CheckedFunction0.of(() -> (Mono<Object>) invocationContext.proceed()).unchecked().get()),
-                        Connection::close
-                ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()));
+                Mono<Object> proceed = Mono.defer(() -> {
+                    try {
+                        return (Mono<Object>) invocationContext.proceed();
+                    } catch (Exception e) {
+                        return Mono.error(e);
+                    }
+                });
+                Mono<?> newTransaction = Mono.defer(() -> Mono.usingWhen(
+                                connectionProvider.get(),
+                                connection ->
+                                        Mono.from(connection.setAutoCommit(false))
+                                                .then(Mono.from(connection.beginTransaction()))
+                                                .then(proceed),
+                                connection -> Mono.from(connection.commitTransaction()).thenEmpty(connection.close()),
+                                (connection, throwable) -> {
+                                    Logger.error(throwable);
+                                    return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
+                                },
+                                connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
+                        ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()))
+                );
+                Mono<?> nonTransaction = Mono.defer(() -> Mono.usingWhen(
+                                connectionProvider.get(),
+                                connection -> Mono.from(connection.setAutoCommit(true)).then(proceed),
+                                Connection::close
+                        ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()))
+                );
 
                 switch (txType) {
                     case REQUIRED:
-                        return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(newTransaction);
+                        return transactionConnection.then(proceed).switchIfEmpty(newTransaction);
                     case REQUIRES_NEW:
                         return newTransaction;
                     case MANDATORY:
-                        return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(Mono.error(new TransactionRequiredException()));
+                        return transactionConnection.then(proceed).switchIfEmpty(Mono.error(new TransactionRequiredException()));
                     case SUPPORTS:
                         return nonTransaction;
                     case NOT_SUPPORTED:
-                        return transactionConnection.then((Mono<Object>) invocationContext.proceed()).switchIfEmpty(nonTransaction);
+                        return transactionConnection.then(proceed).switchIfEmpty(nonTransaction);
                     case NEVER:
                         return transactionConnection.then(Mono.error(new InvalidTransactionException())).switchIfEmpty(nonTransaction);
                     default:
