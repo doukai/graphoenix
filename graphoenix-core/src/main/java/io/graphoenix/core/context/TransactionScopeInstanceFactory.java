@@ -49,7 +49,7 @@ public class TransactionScopeInstanceFactory {
 
     @SuppressWarnings("unchecked")
     public static <T> Mono<T> get(Class<T> beanClass, String name) {
-        return getScopeInstances().map(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
+        return getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
     }
 
     public static <T> Mono<T> get(Class<T> beanClass, Provider<T> instanceProvider) {
@@ -58,16 +58,26 @@ public class TransactionScopeInstanceFactory {
 
     @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
     public static <T> Mono<T> get(Class<T> beanClass, String name, Provider<T> instanceProvider) {
-        return getScopeInstances().map(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instanceProvider.get()));
+        return get(beanClass, name).switchIfEmpty(getScopeInstances().map(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instanceProvider.get())));
     }
 
     public static <T> Mono<T> getByMonoProvider(Class<T> beanClass, Provider<Mono<T>> instanceMonoProvider) {
         return getByMonoProvider(beanClass, beanClass.getName(), instanceMonoProvider);
     }
 
-    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
+    @SuppressWarnings({"unchecked"})
     public static <T> Mono<T> getByMonoProvider(Class<T> beanClass, String name, Provider<Mono<T>> instanceMonoProvider) {
-        return getScopeInstances().flatMap(scopeInstances -> instanceMonoProvider.get().map(instance -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance)));
+        return get(beanClass, name)
+                .switchIfEmpty(getScopeInstances()
+                        .flatMap(scopeInstances ->
+                                instanceMonoProvider.get()
+                                        .map(instance -> {
+                                                    scopeInstances.get(beanClass).putIfAbsent(name, instance);
+                                                    return (T) scopeInstances.get(beanClass).get(name);
+                                                }
+                                        )
+                        )
+                );
     }
 
     public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass) {
