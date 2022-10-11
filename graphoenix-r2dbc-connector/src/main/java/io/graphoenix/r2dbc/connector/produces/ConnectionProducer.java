@@ -22,6 +22,6 @@ public class ConnectionProducer {
     @Produces
     @TransactionScoped
     public Mono<Connection> connection() {
-        return TransactionScopeInstanceFactory.get(Connection.class, connectionCreator.createConnection());
+        return TransactionScopeInstanceFactory.getByMonoProvider(Connection.class, () -> connectionCreator.createConnection());
     }
 }

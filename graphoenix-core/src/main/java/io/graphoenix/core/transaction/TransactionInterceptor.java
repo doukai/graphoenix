@@ -86,18 +86,48 @@ public class TransactionInterceptor {
                                     return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
                                 },
                                 connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
-                        ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()))
+                        )
                 );
                 Mono<?> nonTransaction = Mono.defer(() -> Mono.usingWhen(
                                 connectionProvider.get(),
                                 connection -> Mono.from(connection.setAutoCommit(true)).then(proceed),
                                 Connection::close
-                        ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId()))
+                        )
                 );
 
                 switch (txType) {
                     case REQUIRED:
-                        return transactionConnection.then(proceed).switchIfEmpty(newTransaction);
+//                        return transactionConnection.then(proceed).switchIfEmpty(newTransaction);
+                        return connectionProvider.get()
+                                .filter(connection -> !connection.isAutoCommit())
+                                .transformDeferredContextual(
+                                        (mono, contextView) -> {
+                                            try {
+                                                return !contextView.hasKey(TRANSACTION_ID) ?
+                                                        Mono.usingWhen(
+                                                                connectionProvider.get(),
+                                                                connection ->
+                                                                {
+                                                                    try {
+                                                                        return Mono.from(connection.setAutoCommit(false))
+                                                                                .then(Mono.from(connection.beginTransaction()))
+                                                                                .then((Mono<Object>) invocationContext.proceed());
+                                                                    } catch (Exception e) {
+                                                                        return Mono.error(e);
+                                                                    }
+                                                                },
+                                                                connection -> Mono.from(connection.commitTransaction()).thenEmpty(connection.close()),
+                                                                (connection, throwable) -> {
+                                                                    Logger.error(throwable);
+                                                                    return Mono.from(errorProcess(connection, throwable, rollbackOn, dontRollbackOn)).thenEmpty(connection.close()).thenEmpty(Mono.error(throwable));
+                                                                },
+                                                                connection -> Mono.from(connection.rollbackTransaction()).thenEmpty(connection.close())
+                                                        ).contextWrite(Context.of(TRANSACTION_ID, NanoIdUtils.randomNanoId())) :
+                                                        (Mono<Object>) invocationContext.proceed();
+                                            } catch (Exception e) {
+                                                return Mono.error(e);
+                                            }
+                                        });
                     case REQUIRES_NEW:
                         return newTransaction;
                     case MANDATORY:

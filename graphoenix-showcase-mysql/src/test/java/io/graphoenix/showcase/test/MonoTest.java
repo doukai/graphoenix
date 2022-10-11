@@ -1,7 +1,9 @@
 package io.graphoenix.showcase.test;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
+import jakarta.inject.Provider;
 import org.junit.jupiter.api.Test;
+import org.tinylog.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
@@ -92,15 +94,39 @@ public class MonoTest {
 //                .block();
 
         String key = "key";
-        Mono<String> stringMono = Mono.from(Mono.deferContextual(ctx ->
-                Mono.just("$" + ctx.get(key))));
+//        Mono<String> stringMono = Mono.from(Mono.deferContextual(ctx ->
+//                Mono.just("$" + ctx.get(key))));
+//
+//        Mono.from(stringMono.doOnSuccess(System.out::println))
+//                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
+//        Mono.from(stringMono.doOnSuccess(System.out::println))
+//                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
 
-        Mono.from(stringMono.doOnSuccess(System.out::println))
-                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
-        Mono.from(stringMono.doOnSuccess(System.out::println))
-                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
+        Provider<Mono<String>> provider = this::test2;
+
+        provider.get().doOnSuccess(System.out::println).then()
+                .switchIfEmpty(
+                        Mono.usingWhen(
+                                        provider.get(),
+                                        s -> Mono.fromRunnable(() -> System.out.println(s)),
+                                        s -> Mono.fromRunnable(() -> System.out.println(s)),
+                                        (connection, throwable) -> {
+                                            Logger.error(throwable);
+                                            return Mono.empty();
+                                        },
+                                        connection -> Mono.empty()
+                                )
+                                .then()
+                                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId()))
+                )
+                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId()))
+                .block();
 
 
+    }
+
+    Mono<String> test2() {
+        return Mono.deferContextual(contextView -> Mono.justOrEmpty(contextView.getOrEmpty("key")));
     }
 
     Mono<String> getString(String content) {

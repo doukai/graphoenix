@@ -41,8 +41,7 @@ public class MutationExecutor {
                             return batch.execute();
                         }
                 )
-                .collectList()
-                .map(list -> list.get(list.size() - 1))
+                .last()
                 .flatMap(this::getJsonStringFromResult);
     }
 
@@ -83,8 +82,7 @@ public class MutationExecutor {
                                 )
                                 .flatMap(Statement::execute)
                 )
-                .collectList()
-                .map(list -> list.get(list.size() - 1))
+                .last()
                 .flatMap(this::getJsonStringFromResult);
     }
 
@@ -105,8 +103,7 @@ public class MutationExecutor {
                             return statement.execute();
                         }
                 )
-                .collectList()
-                .map(list -> list.get(list.size() - 1))
+                .last()
                 .flatMap(this::getJsonStringFromResult);
     }
 
