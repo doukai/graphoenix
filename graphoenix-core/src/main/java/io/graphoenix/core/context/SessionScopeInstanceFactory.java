@@ -49,7 +49,7 @@ public class SessionScopeInstanceFactory {
 
     @SuppressWarnings("unchecked")
     public static <T> Mono<T> get(Class<T> beanClass, String name) {
-        return getScopeInstances().map(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
+        return getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).get(name));
     }
 
     public static <T> Mono<T> get(Class<T> beanClass, Provider<T> instanceProvider) {
@@ -58,16 +58,16 @@ public class SessionScopeInstanceFactory {
 
     @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
     public static <T> Mono<T> get(Class<T> beanClass, String name, Provider<T> instanceProvider) {
-        return getScopeInstances().map(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instanceProvider.get()));
+        return get(beanClass, name).switchIfEmpty(getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).computeIfAbsent(name, key -> instanceProvider.get())));
     }
 
     public static <T> Mono<T> getByMonoProvider(Class<T> beanClass, Provider<Mono<T>> instanceMonoProvider) {
         return getByMonoProvider(beanClass, beanClass.getName(), instanceMonoProvider);
     }
 
-    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
+    @SuppressWarnings({"unchecked"})
     public static <T> Mono<T> getByMonoProvider(Class<T> beanClass, String name, Provider<Mono<T>> instanceMonoProvider) {
-        return getScopeInstances().flatMap(scopeInstances -> instanceMonoProvider.get().map(instance -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance)));
+        return get(beanClass, name).switchIfEmpty(getScopeInstances().flatMap(scopeInstances -> instanceMonoProvider.get().mapNotNull(instance -> (T) scopeInstances.get(beanClass).computeIfAbsent(name, key -> instance))));
     }
 
     public static <T> PublisherBuilder<T> getPublisherBuilder(Class<T> beanClass) {

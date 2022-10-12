@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ScopeInstances extends ClassValue<Map<String, Object>> {
 
-    private static final Map<String, Object> INSTANCE_MAP = new ConcurrentHashMap<>();
+    private final Map<String, Object> INSTANCE_MAP = new ConcurrentHashMap<>();
 
     @Override
     protected Map<String, Object> computeValue(Class<?> type) {

@@ -30,10 +30,15 @@ public class Hammurabi {
     public static final String REQUEST_ID = "requestId";
     public static final String SESSION_ID = "sessionId";
     public static final String TRANSACTION_ID = "TransactionId";
+    public static final String TRANSACTION_TYPE = "TransactionType";
     public static final String REQUEST = "request";
     public static final String RESPONSE = "response";
     public static final String GRAPHQL_REQUEST = "graphQLRequest";
     public static final String CURRENT_USER = "currentUser";
     public static final String OPERATION_DEFINITION = "operationDefinition";
     public static final String PERMIT_ALL = "permitAll";
+
+    public enum TransactionType {
+        NO_TRANSACTION, IN_TRANSACTION
+    }
 }
