@@ -81,6 +81,14 @@ public enum GraphQLResponseUtil {
             return error((GraphQLErrors) throwable.getCause());
         } else if (throwable.getCause() instanceof GraphQLException) {
             return error((GraphQLException) throwable.getCause());
+        } else if (throwable.getCause().getCause() instanceof GraphQLErrors) {
+            return error((GraphQLErrors) throwable.getCause().getCause());
+        } else if (throwable.getCause().getCause() instanceof GraphQLException) {
+            return error((GraphQLException) throwable.getCause().getCause());
+        } else if (throwable.getCause().getCause().getCause() instanceof GraphQLErrors) {
+            return error((GraphQLErrors) throwable.getCause().getCause().getCause());
+        } else if (throwable.getCause().getCause().getCause() instanceof GraphQLException) {
+            return error((GraphQLException) throwable.getCause().getCause().getCause());
         } else {
             JsonObjectBuilder responseBuilder = jsonProvider.createObjectBuilder();
             JsonArrayBuilder errorsBuilder = jsonProvider.createArrayBuilder();
