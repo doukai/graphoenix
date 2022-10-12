@@ -102,26 +102,27 @@ public class MonoTest {
 //        Mono.from(stringMono.doOnSuccess(System.out::println))
 //                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId())).block();
 
-        Provider<Mono<String>> provider = this::test2;
+//        Provider<Mono<String>> provider = this::test2;
+//
+//        provider.get().doOnSuccess(System.out::println).then()
+//                .switchIfEmpty(
+//                        Mono.usingWhen(
+//                                        provider.get(),
+//                                        s -> Mono.fromRunnable(() -> System.out.println(s)),
+//                                        s -> Mono.fromRunnable(() -> System.out.println(s)),
+//                                        (connection, throwable) -> {
+//                                            Logger.error(throwable);
+//                                            return Mono.empty();
+//                                        },
+//                                        connection -> Mono.empty()
+//                                )
+//                                .then()
+//                                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId()))
+//                )
+//                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId()))
+//                .block();
 
-        provider.get().doOnSuccess(System.out::println).then()
-                .switchIfEmpty(
-                        Mono.usingWhen(
-                                        provider.get(),
-                                        s -> Mono.fromRunnable(() -> System.out.println(s)),
-                                        s -> Mono.fromRunnable(() -> System.out.println(s)),
-                                        (connection, throwable) -> {
-                                            Logger.error(throwable);
-                                            return Mono.empty();
-                                        },
-                                        connection -> Mono.empty()
-                                )
-                                .then()
-                                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId()))
-                )
-                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId()))
-                .block();
-
+        Mono.empty().then(Mono.just("test")).doOnSuccess(System.out::println).block();
 
     }
 

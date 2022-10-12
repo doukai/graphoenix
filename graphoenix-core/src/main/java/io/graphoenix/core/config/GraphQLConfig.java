@@ -21,6 +21,12 @@ public class GraphQLConfig {
     @Optional
     private Boolean englishPlural = false;
 
+    @Optional
+    private Boolean backup = false;
+
+    @Optional
+    private Boolean compensating = false;
+
     private String packageName;
 
     @Optional
@@ -103,6 +109,22 @@ public class GraphQLConfig {
 
     public void setEnglishPlural(Boolean englishPlural) {
         this.englishPlural = englishPlural;
+    }
+
+    public Boolean getBackup() {
+        return backup;
+    }
+
+    public void setBackup(Boolean backup) {
+        this.backup = backup;
+    }
+
+    public Boolean getCompensating() {
+        return compensating;
+    }
+
+    public void setCompensating(Boolean compensating) {
+        this.compensating = compensating;
     }
 
     public String getPackageName() {

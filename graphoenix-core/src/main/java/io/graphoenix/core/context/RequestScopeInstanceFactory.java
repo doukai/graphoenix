@@ -56,7 +56,7 @@ public class RequestScopeInstanceFactory {
         return get(beanClass, beanClass.getName(), instanceProvider);
     }
 
-    @SuppressWarnings({"unchecked", "ReactiveStreamsNullableInLambdaInTransform"})
+    @SuppressWarnings({"unchecked"})
     public static <T> Mono<T> get(Class<T> beanClass, String name, Provider<T> instanceProvider) {
         return get(beanClass, name).switchIfEmpty(getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).computeIfAbsent(name, key -> instanceProvider.get())));
     }

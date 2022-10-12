@@ -1,6 +1,7 @@
 package io.graphoenix.core.handler;
 
 import com.google.common.base.CaseFormat;
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.Argument;
@@ -40,6 +41,7 @@ import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 public abstract class MutationDataLoader {
 
     private final IGraphQLDocumentManager manager;
+    private final GraphQLConfig graphQLConfig;
     private final JsonProvider jsonProvider;
     private final OperationHandler operationHandler;
     private Map<String, Map<String, Map<String, ObjectValueWithVariable>>> objectValueMap;
@@ -52,6 +54,7 @@ public abstract class MutationDataLoader {
 
     public MutationDataLoader() {
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
+        this.graphQLConfig = BeanContext.get(GraphQLConfig.class);
         this.jsonProvider = BeanContext.get(JsonProvider.class);
         this.operationHandler = BeanContext.get(OperationHandler.class);
         this.resultMap = new ConcurrentHashMap<>();
@@ -164,7 +167,9 @@ public abstract class MutationDataLoader {
     }
 
     public Mono<Void> backup() {
-        return Mono.fromSupplier(this::buildBackupQuery).flatMap(operation -> operationHandler.query(DOCUMENT_UTIL.graphqlToOperation(operation.toString()))).flatMap(jsonString -> Mono.fromRunnable(() -> this.backUp = jsonString));
+        return this.graphQLConfig.getBackup() ?
+                Mono.fromSupplier(this::buildBackupQuery).flatMap(operation -> operationHandler.query(DOCUMENT_UTIL.graphqlToOperation(operation.toString()))).flatMap(jsonString -> Mono.fromRunnable(() -> this.backUp = jsonString)) :
+                Mono.empty();
     }
 
     protected Operation buildBackupQuery() {
@@ -199,7 +204,9 @@ public abstract class MutationDataLoader {
     }
 
     public Mono<Void> compensating() {
-        return Mono.fromSupplier(this::buildCompensatingMutation).flatMap(operation -> operationHandler.mutation(DOCUMENT_UTIL.graphqlToOperation(operation.toString()))).then();
+        return this.graphQLConfig.getCompensating() ?
+                Mono.fromSupplier(this::buildCompensatingMutation).flatMap(operation -> operationHandler.mutation(DOCUMENT_UTIL.graphqlToOperation(operation.toString()))).then() :
+                Mono.empty();
     }
 
     private Operation buildCompensatingMutation() {
@@ -318,26 +325,28 @@ public abstract class MutationDataLoader {
     protected void dispatch() {
         if (indexMap != null && !indexMap.isEmpty()) {
             indexMap.forEach((packageName, packageMap) -> {
-                if (packageMap != null && !packageMap.isEmpty()) {
-                    packageMap.forEach((typeName, typeMap) -> {
-                        if (typeMap != null && !typeMap.isEmpty()) {
-                            if (resultMap.containsKey(packageName)) {
-                                JsonObject data = resultMap.get(packageName).asJsonObject();
-                                JsonValue fieldValue = data.get(typeToLowerCamelName(typeName).concat("List"));
-                                if (fieldValue != null && fieldValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
-                                    JsonArray jsonArray = fieldValue.asJsonArray();
-                                    IntStream.range(0, jsonArray.size()).forEach(index -> {
-                                        List<Consumer<JsonObject>> callbackList = typeMap.get(index);
-                                        if (callbackList != null && !callbackList.isEmpty()) {
-                                            callbackList.forEach(callback -> callback.accept(jsonArray.get(index).asJsonObject()));
+                        if (packageMap != null && !packageMap.isEmpty()) {
+                            packageMap.forEach((typeName, typeMap) -> {
+                                        if (typeMap != null && !typeMap.isEmpty()) {
+                                            if (resultMap.containsKey(packageName)) {
+                                                JsonObject data = resultMap.get(packageName).asJsonObject();
+                                                JsonValue fieldValue = data.get(typeToLowerCamelName(typeName).concat("List"));
+                                                if (fieldValue != null && fieldValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
+                                                    JsonArray jsonArray = fieldValue.asJsonArray();
+                                                    IntStream.range(0, jsonArray.size()).forEach(index -> {
+                                                        List<Consumer<JsonObject>> callbackList = typeMap.get(index);
+                                                        if (callbackList != null && !callbackList.isEmpty()) {
+                                                            callbackList.forEach(callback -> callback.accept(jsonArray.get(index).asJsonObject()));
+                                                        }
+                                                    });
+                                                }
+                                            }
                                         }
-                                    });
-                                }
-                            }
+                                    }
+                            );
                         }
-                    });
-                }
-            });
+                    }
+            );
         }
     }
 
