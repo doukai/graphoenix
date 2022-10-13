@@ -1,39 +1,41 @@
 package io.graphoenix.http.handler;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
-import com.google.common.reflect.TypeToken;
+import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
-import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.spi.handler.ScopeEventResolver;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.json.JsonValue;
-import jakarta.json.bind.Jsonb;
+import jakarta.json.spi.JsonProvider;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
 import reactor.util.context.Context;
 
-import java.lang.reflect.Type;
+import java.io.StringReader;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.spi.constant.Hammurabi.GRAPHQL_REQUEST;
+import static io.graphoenix.spi.constant.Hammurabi.REQUEST;
+import static io.graphoenix.spi.constant.Hammurabi.REQUEST_ID;
+import static io.graphoenix.spi.constant.Hammurabi.RESPONSE;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped
 public class GetRequestHandler extends BaseRequestHandler {
 
     private final GraphQLRequestHandler graphQLRequestHandler;
-    private final Jsonb jsonb;
+    private final JsonProvider jsonProvider;
 
     @Inject
-    public GetRequestHandler(GraphQLRequestHandler graphQLRequestHandler, Jsonb jsonb) {
+    public GetRequestHandler(GraphQLRequestHandler graphQLRequestHandler, JsonProvider jsonProvider) {
         this.graphQLRequestHandler = graphQLRequestHandler;
-        this.jsonb = jsonb;
+        this.jsonProvider = jsonProvider;
     }
 
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
@@ -41,12 +43,10 @@ public class GetRequestHandler extends BaseRequestHandler {
         Map<String, Object> context = new ConcurrentHashMap<>();
         context.put(REQUEST, request);
         context.put(RESPONSE, response);
-        Type type = new TypeToken<Map<String, JsonValue>>() {
-        }.getType();
         GraphQLRequest graphQLRequest = new GraphQLRequest(
                 request.param("query"),
                 request.param("operationName"),
-                jsonb.fromJson(request.param("variables"), type)
+                request.param("variables") == null ? null : jsonProvider.createReader(new StringReader(Objects.requireNonNull(request.param("variables")))).readObject()
         );
         context.put(GRAPHQL_REQUEST, graphQLRequest);
 

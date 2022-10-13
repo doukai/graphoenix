@@ -1,38 +1,42 @@
 package io.graphoenix.http.handler;
 
 import com.aventrix.jnanoid.jnanoid.NanoIdUtils;
+import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
 import io.graphoenix.http.codec.MimeType;
-import io.graphoenix.core.dto.GraphQLRequest;
 import io.graphoenix.spi.handler.ScopeEventResolver;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.json.bind.Jsonb;
+import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.server.HttpServerRequest;
 import reactor.netty.http.server.HttpServerResponse;
 import reactor.util.context.Context;
 
+import java.io.StringReader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.graphoenix.core.utils.GraphQLResponseUtil.GRAPHQL_RESPONSE_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.spi.constant.Hammurabi.GRAPHQL_REQUEST;
+import static io.graphoenix.spi.constant.Hammurabi.REQUEST;
+import static io.graphoenix.spi.constant.Hammurabi.REQUEST_ID;
+import static io.graphoenix.spi.constant.Hammurabi.RESPONSE;
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 @ApplicationScoped
 public class PostRequestHandler extends BaseRequestHandler {
 
     private final GraphQLRequestHandler graphQLRequestHandler;
-    private final Jsonb jsonb;
+    private final JsonProvider jsonProvider;
 
     @Inject
-    public PostRequestHandler(GraphQLRequestHandler graphQLRequestHandler, Jsonb jsonb) {
+    public PostRequestHandler(GraphQLRequestHandler graphQLRequestHandler, JsonProvider jsonProvider) {
         this.graphQLRequestHandler = graphQLRequestHandler;
-        this.jsonb = jsonb;
+        this.jsonProvider = jsonProvider;
     }
 
     public Mono<Void> handle(HttpServerRequest request, HttpServerResponse response) {
@@ -46,7 +50,7 @@ public class PostRequestHandler extends BaseRequestHandler {
             return response.addHeader(CONTENT_TYPE, MimeType.Application.JSON)
                     .sendString(
                             request.receive().aggregate().asString()
-                                    .map(content -> jsonb.fromJson(content, GraphQLRequest.class))
+                                    .map(content -> GraphQLRequest.fromJson(jsonProvider.createReader(new StringReader(content)).readObject()))
                                     .doOnNext(graphQLRequest -> context.put(GRAPHQL_REQUEST, graphQLRequest))
                                     .flatMap(graphQLRequest ->
                                             ScopeEventResolver.initialized(context, RequestScoped.class)

@@ -1,6 +1,7 @@
 package io.graphoenix.core.dto;
 
 import com.dslplatform.json.CompiledJson;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 
 import java.util.Map;
@@ -12,7 +13,7 @@ public class GraphQLRequest {
 
     private String operationName;
 
-    private Map<String, JsonValue> variables;
+    private JsonObject variables;
 
     public GraphQLRequest() {
     }
@@ -21,7 +22,7 @@ public class GraphQLRequest {
         this.query = query;
     }
 
-    public GraphQLRequest(String query, String operationName, Map<String, JsonValue> variables) {
+    public GraphQLRequest(String query, String operationName, JsonObject variables) {
         this.query = query;
         this.operationName = operationName;
         this.variables = variables;
@@ -43,11 +44,22 @@ public class GraphQLRequest {
         this.operationName = operationName;
     }
 
+    public static GraphQLRequest fromJson(JsonObject jsonObject) {
+        return new GraphQLRequest(
+                jsonObject.containsKey("query") ? jsonObject.getString("query") : null,
+                jsonObject.containsKey("operationName") ? jsonObject.getString("operationName") : null,
+                jsonObject.containsKey("variables") ? jsonObject.getJsonObject("variables") : null
+        );
+    }
+
     public Map<String, JsonValue> getVariables() {
+        if (variables == null) {
+            return JsonValue.EMPTY_JSON_OBJECT;
+        }
         return variables;
     }
 
-    public void setVariables(Map<String, JsonValue> variables) {
+    public void setVariables(JsonObject variables) {
         this.variables = variables;
     }
 }

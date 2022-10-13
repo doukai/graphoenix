@@ -15,15 +15,15 @@ dependencies {
     implementation project(':graphoenix-core')
     implementation project(':graphoenix-config')
     implementation project(':graphoenix-interceptor')
-    implementation 'org.mariadb:r2dbc-mariadb:1.0.3'
-    implementation 'io.r2dbc:r2dbc-pool:0.9.0.RELEASE'
+    implementation 'org.mariadb:r2dbc-mariadb:1.1.2'
+    implementation 'io.r2dbc:r2dbc-pool:0.9.2.RELEASE'
 
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')
     annotationProcessor project(':graphoenix-config')
     annotationProcessor project(':graphoenix-core')
-    annotationProcessor 'org.mariadb:r2dbc-mariadb:1.0.3'
-    annotationProcessor 'io.r2dbc:r2dbc-pool:0.9.0.RELEASE'
+    annotationProcessor 'org.mariadb:r2dbc-mariadb:1.1.2'
+    annotationProcessor 'io.r2dbc:r2dbc-pool:0.9.2.RELEASE'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
