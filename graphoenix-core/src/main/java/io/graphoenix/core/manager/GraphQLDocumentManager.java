@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.UPDATE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
@@ -172,6 +173,13 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return operationDefinitionContext.variableDefinitions().variableDefinition().stream();
+    }
+
+    @Override
+    public boolean isUpdateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return Stream.ofNullable(operationDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(UPDATE_DIRECTIVE_NAME));
     }
 
     @Override

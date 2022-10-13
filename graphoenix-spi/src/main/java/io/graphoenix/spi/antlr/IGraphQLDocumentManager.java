@@ -40,6 +40,8 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
+    boolean isUpdateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
+
     void registerFragment(String graphql);
 
     boolean isScalar(String name);
