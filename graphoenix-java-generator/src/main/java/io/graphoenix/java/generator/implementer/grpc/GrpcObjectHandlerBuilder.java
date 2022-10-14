@@ -80,8 +80,8 @@ public class GrpcObjectHandlerBuilder {
     }
 
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String objectParameterName = grpcNameUtil.getRpcObjectLowerCamelName(objectTypeDefinitionContext);
-        String rpcObjectName = grpcNameUtil.getRpcObjectName(objectTypeDefinitionContext);
+        String objectParameterName = grpcNameUtil.getLowerCamelName(objectTypeDefinitionContext);
+        String rpcObjectName = grpcNameUtil.getGrpcTypeName(objectTypeDefinitionContext);
         MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(graphQLConfig.getGrpcPackageName(), rpcObjectName))
@@ -96,11 +96,11 @@ public class GrpcObjectHandlerBuilder {
                 .collect(Collectors.toList());
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContexts) {
             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-            String fieldGetterName = grpcNameUtil.getFieldGetterName(fieldDefinitionContext);
-            String fieldRpcObjectName = grpcNameUtil.getRpcObjectName(fieldDefinitionContext.type());
-            String objectFieldMethodName = grpcNameUtil.getRpcObjectLowerCamelName(fieldDefinitionContext.type());
+            String fieldGetterName = grpcNameUtil.getGetMethodName(fieldDefinitionContext);
+            String fieldRpcObjectName = grpcNameUtil.getGrpcTypeName(fieldDefinitionContext.type());
+            String objectFieldMethodName = grpcNameUtil.getLowerCamelName(fieldDefinitionContext.type());
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                String rpcFieldAddAllName = grpcNameUtil.getRpcFieldAddAllName(fieldDefinitionContext);
+                String rpcFieldAddAllName = grpcNameUtil.getGrpcAddAllMethodName(fieldDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
                     if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
                         builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
@@ -144,7 +144,7 @@ public class GrpcObjectHandlerBuilder {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
             } else {
-                String rpcFieldSetterName = grpcNameUtil.getRpcFieldSetterName(fieldDefinitionContext);
+                String rpcFieldSetterName = grpcNameUtil.getGrpcSetMethodName(fieldDefinitionContext);
                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
                         builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)

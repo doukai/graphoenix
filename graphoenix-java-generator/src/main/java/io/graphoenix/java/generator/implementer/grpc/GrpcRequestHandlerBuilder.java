@@ -167,8 +167,8 @@ public class GrpcRequestHandlerBuilder {
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
-        ClassName requestClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), grpcNameUtil.getRpcRequestClassName(fieldDefinitionContext, operationType));
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(grpcNameUtil.getRpcFieldMethodName(fieldDefinitionContext))
+        ClassName requestClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), grpcNameUtil.getGrpcRequestClassName(fieldDefinitionContext, operationType));
+        MethodSpec.Builder builder = MethodSpec.methodBuilder(grpcNameUtil.getGrpcFieldName(fieldDefinitionContext))
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(requestClassName, requestParameterName)
                 .returns(ClassName.get(String.class))
@@ -180,10 +180,10 @@ public class GrpcRequestHandlerBuilder {
             for (GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext : inputValueDefinitionContexts) {
                 CodeBlock codeBlock;
                 String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
-                String rpcEnumValueSuffixName = grpcNameUtil.getRpcEnumValueSuffixName(inputValueDefinitionContext.type());
-                String inputObjectFieldMethodName = grpcNameUtil.getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type());
+                String rpcEnumValueSuffixName = grpcNameUtil.getGrpcEnumValueSuffixName(inputValueDefinitionContext.type());
+                String inputObjectFieldMethodName = grpcNameUtil.getLowerCamelName(inputValueDefinitionContext.type());
                 if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
-                    String rpcGetInputValueListName = grpcNameUtil.getRpcGetInputValueListName(inputValueDefinitionContext);
+                    String rpcGetInputValueListName = grpcNameUtil.getGrpcGetListMethodName(inputValueDefinitionContext);
                     if (manager.isScalar(fieldTypeName)) {
                         codeBlock = CodeBlock.of("field.addArgument(new $T().setName($S).setValueWithVariable($L.$L()))",
                                 ClassName.get(Argument.class),
@@ -213,14 +213,14 @@ public class GrpcRequestHandlerBuilder {
                         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                     }
                     if (inputValueDefinitionContext.type().nonNullType() == null) {
-                        builder.beginControlFlow("if ($L.$L() > 0)", requestParameterName, grpcNameUtil.getRpcGetInputValueCountName(inputValueDefinitionContext))
+                        builder.beginControlFlow("if ($L.$L() > 0)", requestParameterName, grpcNameUtil.getGrpcGetCountMethodName(inputValueDefinitionContext))
                                 .addStatement(codeBlock)
                                 .endControlFlow();
                     } else {
                         builder.addStatement(codeBlock);
                     }
                 } else {
-                    String rpcGetInputValueName = grpcNameUtil.getRpcGetInputValueName(inputValueDefinitionContext);
+                    String rpcGetInputValueName = grpcNameUtil.getGrpcGetMethodName(inputValueDefinitionContext);
                     if (manager.isScalar(fieldTypeName)) {
                         codeBlock = CodeBlock.of("field.addArgument(new $T().setName($S).setValueWithVariable($L.$L()))",
                                 ClassName.get(Argument.class),
@@ -248,7 +248,7 @@ public class GrpcRequestHandlerBuilder {
                         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                     }
                     if (inputValueDefinitionContext.type().nonNullType() == null) {
-                        builder.beginControlFlow("if ($L.$L())", requestParameterName, grpcNameUtil.getRpcHasInputValueName(inputValueDefinitionContext))
+                        builder.beginControlFlow("if ($L.$L())", requestParameterName, grpcNameUtil.getGrpcHasMethodName(inputValueDefinitionContext))
                                 .addStatement(codeBlock)
                                 .endControlFlow();
                     } else {

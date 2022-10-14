@@ -85,8 +85,8 @@ public class GrpcInputObjectHandlerBuilder {
     }
 
     private MethodSpec buildTypeMethod(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        String inputObjectParameterName = grpcNameUtil.getRpcInputObjectLowerCamelName(inputObjectTypeDefinitionContext);
-        ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), grpcNameUtil.getRpcInputObjectName(inputObjectTypeDefinitionContext));
+        String inputObjectParameterName = grpcNameUtil.getLowerCamelName(inputObjectTypeDefinitionContext);
+        ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), grpcNameUtil.getGrpcTypeName(inputObjectTypeDefinitionContext));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(inputObjectParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(ObjectValueWithVariable.class))
@@ -97,10 +97,10 @@ public class GrpcInputObjectHandlerBuilder {
         for (GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext : inputValueDefinitionContexts) {
             CodeBlock codeBlock;
             String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
-            String rpcEnumValueSuffixName = grpcNameUtil.getRpcEnumValueSuffixName(inputValueDefinitionContext.type());
-            String inputObjectFieldMethodName = grpcNameUtil.getRpcInputObjectLowerCamelName(inputValueDefinitionContext.type());
+            String rpcEnumValueSuffixName = grpcNameUtil.getGrpcEnumValueSuffixName(inputValueDefinitionContext.type());
+            String inputObjectFieldMethodName = grpcNameUtil.getLowerCamelName(inputValueDefinitionContext.type());
             if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
-                String rpcGetInputValueListName = grpcNameUtil.getRpcGetInputValueListName(inputValueDefinitionContext);
+                String rpcGetInputValueListName = grpcNameUtil.getGrpcGetListMethodName(inputValueDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L())",
                             inputValueDefinitionContext.name().getText(),
@@ -127,14 +127,14 @@ public class GrpcInputObjectHandlerBuilder {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
                 if (inputValueDefinitionContext.type().nonNullType() == null) {
-                    builder.beginControlFlow("if ($L.$L() > 0)", inputObjectParameterName, grpcNameUtil.getRpcGetInputValueCountName(inputValueDefinitionContext))
+                    builder.beginControlFlow("if ($L.$L() > 0)", inputObjectParameterName, grpcNameUtil.getGrpcGetCountMethodName(inputValueDefinitionContext))
                             .addStatement(codeBlock)
                             .endControlFlow();
                 } else {
                     builder.addStatement(codeBlock);
                 }
             } else {
-                String rpcGetInputValueName = grpcNameUtil.getRpcGetInputValueName(inputValueDefinitionContext);
+                String rpcGetInputValueName = grpcNameUtil.getGrpcGetMethodName(inputValueDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L())",
                             inputValueDefinitionContext.name().getText(),
@@ -159,7 +159,7 @@ public class GrpcInputObjectHandlerBuilder {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
                 if (inputValueDefinitionContext.type().nonNullType() == null) {
-                    builder.beginControlFlow("if ($L.$L())", inputObjectParameterName, grpcNameUtil.getRpcHasInputValueName(inputValueDefinitionContext))
+                    builder.beginControlFlow("if ($L.$L())", inputObjectParameterName, grpcNameUtil.getGrpcHasMethodName(inputValueDefinitionContext))
                             .addStatement(codeBlock)
                             .endControlFlow();
                 } else {

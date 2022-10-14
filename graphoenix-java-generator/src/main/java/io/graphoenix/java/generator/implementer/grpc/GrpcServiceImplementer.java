@@ -336,9 +336,9 @@ public class GrpcServiceImplementer {
 
     private MethodSpec buildTypeMethod(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
         String requestParameterName = "request";
-        String rpcHandlerMethodName = grpcNameUtil.getRpcHandlerMethodName(fieldDefinitionContext);
-        String rpcRequestClassName = grpcNameUtil.getRpcRequestClassName(fieldDefinitionContext, operationType);
-        String rpcResponseClassName = grpcNameUtil.getRpcResponseClassName(fieldDefinitionContext, operationType);
+        String rpcHandlerMethodName = grpcNameUtil.getGrpcFieldName(fieldDefinitionContext);
+        String rpcRequestClassName = grpcNameUtil.getGrpcRequestClassName(fieldDefinitionContext, operationType);
+        String rpcResponseClassName = grpcNameUtil.getGrpcResponseClassName(fieldDefinitionContext, operationType);
         ParameterizedTypeName requestClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getGrpcPackageName(), rpcRequestClassName));
         ParameterizedTypeName responseClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getGrpcPackageName(), rpcResponseClassName));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(rpcHandlerMethodName)
@@ -351,11 +351,11 @@ public class GrpcServiceImplementer {
         CodeBlock invokeCodeBlock;
         CodeBlock wrapperCodeBlock;
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        String rpcObjectHandlerMethodName = grpcNameUtil.getRpcObjectHandlerMethodName(fieldDefinitionContext.type());
-        String fieldGetterName = grpcNameUtil.getFieldGetterName(fieldDefinitionContext);
-        String rpcObjectName = grpcNameUtil.getRpcObjectName(fieldDefinitionContext.type());
-        String rpcFieldAddAllName = grpcNameUtil.getRpcFieldAddAllName(fieldDefinitionContext);
-        String rpcFieldSetterName = grpcNameUtil.getRpcFieldSetterName(fieldDefinitionContext);
+        String rpcObjectHandlerMethodName = grpcNameUtil.getLowerCamelName(fieldDefinitionContext.type());
+        String fieldGetterName = grpcNameUtil.getGetMethodName(fieldDefinitionContext);
+        String rpcObjectName = grpcNameUtil.getGrpcTypeName(fieldDefinitionContext.type());
+        String rpcFieldAddAllName = grpcNameUtil.getGrpcAddAllMethodName(fieldDefinitionContext);
+        String rpcFieldSetterName = grpcNameUtil.getGrpcSetMethodName(fieldDefinitionContext);
 
         if (manager.isInvokeField(fieldDefinitionContext)) {
             String className = typeManager.getClassName(fieldDefinitionContext);
