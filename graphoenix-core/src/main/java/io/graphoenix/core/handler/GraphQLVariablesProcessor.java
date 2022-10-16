@@ -14,7 +14,9 @@ import java.util.stream.Collectors;
 import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static jakarta.json.JsonValue.ValueType.*;
+import static jakarta.json.JsonValue.ValueType.ARRAY;
+import static jakarta.json.JsonValue.ValueType.NULL;
+import static jakarta.json.JsonValue.ValueType.OBJECT;
 
 @ApplicationScoped
 public class GraphQLVariablesProcessor {
@@ -38,11 +40,13 @@ public class GraphQLVariablesProcessor {
     }
 
     private void processSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
-        if (selectionContext.field() != null && selectionContext.field().arguments() != null) {
-            selectionContext.field().arguments().argument().forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
-        }
-        if (selectionContext.field() != null && selectionContext.field().selectionSet() != null) {
-            selectionContext.field().selectionSet().selection().forEach(subSelectionContext -> processSelection(subSelectionContext, operationDefinitionContext, variables));
+        if (selectionContext.field() != null) {
+            if (selectionContext.field().arguments() != null) {
+                selectionContext.field().arguments().argument().forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
+            }
+            if (selectionContext.field().selectionSet() != null) {
+                selectionContext.field().selectionSet().selection().forEach(subSelectionContext -> processSelection(subSelectionContext, operationDefinitionContext, variables));
+            }
         }
     }
 

@@ -18,6 +18,7 @@ public class Hammurabi {
     public static final String CONNECTION_DIRECTIVE_NAME = "connection";
     public static final String GRPC_DIRECTIVE_NAME = "grpc";
     public static final String UPDATE_DIRECTIVE_NAME = "update";
+    public static final String DELETE_DIRECTIVE_NAME = "delete";
     public static final String SORT_INPUT_NAME = "sort";
     public static final String INTROSPECTION_PREFIX = "__";
     public static final String INPUT_SUFFIX = "Input";
@@ -41,5 +42,9 @@ public class Hammurabi {
 
     public enum TransactionType {
         NO_TRANSACTION, IN_TRANSACTION
+    }
+
+    public enum MutationType {
+        MERGE, UPDATE, DELETE
     }
 }

@@ -19,6 +19,7 @@ import io.graphoenix.spi.antlr.IGraphQLOperationManager;
 import io.graphoenix.spi.antlr.IGraphQLScalarManager;
 import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
 import io.graphoenix.spi.antlr.IGraphQLUnionManager;
+import io.graphoenix.spi.constant.Hammurabi;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -35,6 +36,10 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.MutationType.DELETE;
+import static io.graphoenix.spi.constant.Hammurabi.MutationType.MERGE;
+import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
 import static io.graphoenix.spi.constant.Hammurabi.UPDATE_DIRECTIVE_NAME;
 
 @ApplicationScoped
@@ -176,10 +181,23 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean isUpdateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+    public Hammurabi.MutationType getMutationType(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return Stream.ofNullable(operationDefinitionContext.directives())
-                .flatMap(directivesContext -> directivesContext.directive().stream())
-                .anyMatch(directiveContext -> directiveContext.name().getText().equals(UPDATE_DIRECTIVE_NAME));
+                .map(directivesContext ->
+                        directivesContext.directive().stream()
+                                .filter(directiveContext -> directiveContext.name().getText().equals(UPDATE_DIRECTIVE_NAME))
+                                .findFirst()
+                                .map(directiveContext -> UPDATE)
+                                .orElseGet(() ->
+                                        directivesContext.directive().stream()
+                                                .filter(directiveContext -> directiveContext.name().getText().equals(DELETE_DIRECTIVE_NAME))
+                                                .findFirst()
+                                                .map(directiveContext -> DELETE)
+                                                .orElse(MERGE)
+                                )
+                )
+                .findFirst()
+                .orElse(MERGE);
     }
 
     @Override

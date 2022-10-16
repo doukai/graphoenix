@@ -26,82 +26,59 @@ public class GrpcNameUtil {
         this.manager = manager;
     }
 
-    public String getRpcInputObjectName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        String name = inputObjectTypeDefinitionContext.name().getText();
+    public String getGrpcTypeName(String name) {
+        return name.replaceFirst(INTROSPECTION_PREFIX, "Intro");
+    }
+
+    public String getGrpcFieldName(String name) {
         if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "Intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, ""));
+            return "intro".concat(getUpperCamelName(name.replaceFirst(INTROSPECTION_PREFIX, "")));
         }
         return name;
     }
 
-    public String getRpcInputObjectLowerCamelName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, getRpcInputObjectName(inputObjectTypeDefinitionContext));
+    public String getLowerCamelName(String name) {
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
     }
 
-    public String getRpcInputObjectName(GraphqlParser.TypeContext typeContext) {
-        String name = manager.getFieldTypeName(typeContext);
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "Intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, ""));
-        }
-        return name;
+    public String getUpperCamelName(String name) {
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name);
     }
 
-    public String getRpcInputObjectLowerCamelName(GraphqlParser.TypeContext typeContext) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, getRpcInputObjectName(typeContext));
+    public String getGrpcTypeName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return getGrpcTypeName(inputObjectTypeDefinitionContext.name().getText());
     }
 
-    public String getRpcEnumValueSuffixName(GraphqlParser.TypeContext typeContext) {
-        return "_".concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, getRpcInputObjectName(typeContext)));
+    public String getGrpcTypeName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return getGrpcTypeName(objectTypeDefinitionContext.name().getText());
     }
 
-    public String getRpcInputValueName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        String name = inputValueDefinitionContext.name().getText();
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "intro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
-        }
-        return name;
+    public String getGrpcTypeName(GraphqlParser.TypeContext typeContext) {
+        return getGrpcTypeName(manager.getFieldTypeName(typeContext));
     }
 
-    public String getRpcGetInputValueName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getRpcInputValueName(inputValueDefinitionContext)));
+    public String getGrpcFieldName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return getGrpcFieldName(inputValueDefinitionContext.name().getText());
     }
 
-    public String getRpcHasInputValueName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return "has".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getRpcInputValueName(inputValueDefinitionContext)));
+    public String getGrpcFieldName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return getGrpcFieldName(fieldDefinitionContext.name().getText());
     }
 
-    public String getRpcGetInputValueListName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getRpcInputValueName(inputValueDefinitionContext))).concat("List");
+    public String getLowerCamelName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return getLowerCamelName(getGrpcTypeName(inputObjectTypeDefinitionContext));
     }
 
-    public String getRpcGetInputValueCountName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
-        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, getRpcInputValueName(inputValueDefinitionContext))).concat("Count");
+    public String getLowerCamelName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return getLowerCamelName(getGrpcTypeName(objectTypeDefinitionContext));
     }
 
-    public String getMutationServiceStubParameterName(String packageName) {
-        return packageNameToUnderline(packageName).concat("_MutationTypeServiceStub");
+    public String getLowerCamelName(GraphqlParser.TypeContext typeContext) {
+        return getLowerCamelName(getGrpcTypeName(typeContext));
     }
 
-    public String getRpcObjectListMethodName(String name) {
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, "")).concat("List");
-        }
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name).concat("List");
-    }
-
-    public String getRpcMutationListRequestName(String name) {
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "MutationIntro".concat(name.replaceFirst(INTROSPECTION_PREFIX, "")).concat("ListRequest");
-        }
-        return "Mutation".concat(name).concat("ListRequest");
-    }
-
-    public String getTypeMethodName(String packageName, String typeName) {
-        return packageNameToUnderline(packageName).concat("_").concat(typeName);
-    }
-
-    public String packageNameToUnderline(String packageName) {
-        return String.join("_", packageName.split("\\."));
+    public String getGrpcEnumValueSuffixName(GraphqlParser.TypeContext typeContext) {
+        return "_".concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, getGrpcTypeName(typeContext)));
     }
 
     public String getPackageName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
@@ -164,147 +141,63 @@ public class GrpcNameUtil {
                 .orElse(false);
     }
 
-    public String getTypeListMethodName(String packageName, String typeName) {
-        return getTypeMethodName(packageName, typeName).concat("List");
+    public String getGrpcGetMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return "get".concat(getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext)));
     }
 
-    public String getFieldGetterName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    public String getGrpcHasMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return "has".concat(getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext)));
+    }
+
+    public String getGrpcGetListMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return "get".concat(getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext))).concat("List");
+    }
+
+    public String getGrpcGetCountMethodName(GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext) {
+        return "get".concat(getUpperCamelName(getGrpcFieldName(inputValueDefinitionContext))).concat("Count");
+    }
+
+    public String getGetMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         String name = fieldDefinitionContext.name().getText();
         if (name.startsWith(INTROSPECTION_PREFIX)) {
             return "get".concat(name);
         }
-        return "get".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name));
+        return "get".concat(getUpperCamelName(name));
     }
 
-    public String getRpcFieldSetterName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        String name = fieldDefinitionContext.name().getText();
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "setIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
-        }
-        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name));
+    public String getGrpcSetMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return "set".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext)));
     }
 
-    public String getRpcFieldAddAllName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        String name = fieldDefinitionContext.name().getText();
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "addAllIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
-        }
-        return "addAll".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name));
+    public String getGrpcAddAllMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return "addAll".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext)));
     }
 
-    public String getRpcObjectName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String name = objectTypeDefinitionContext.name().getText();
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "Intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, ""));
-        }
-        return name;
-    }
-
-    public String getRpcObjectLowerCamelName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        String name = objectTypeDefinitionContext.name().getText();
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, ""));
-        }
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
-    }
-
-    public String getRpcObjectName(GraphqlParser.TypeContext typeContext) {
-        String name = manager.getFieldTypeName(typeContext);
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "Intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, ""));
-        }
-        return name;
-    }
-
-    public String getRpcObjectLowerCamelName(GraphqlParser.TypeContext typeContext) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, getRpcObjectName(typeContext));
-    }
-
-    public String getQueryServiceStubParameterName(String packageName) {
-        return packageNameToUnderline(packageName).concat("_QueryTypeServiceStub");
+    public String packageNameToUnderline(String packageName) {
+        return String.join("_", packageName.split("\\."));
     }
 
     public String getGraphQLServiceStubParameterName(String packageName) {
         return packageNameToUnderline(packageName).concat("_GraphQLServiceStub");
     }
 
-    public String getRpcFieldExpressionSetterName(String fieldName) {
-        if (fieldName.startsWith(INTROSPECTION_PREFIX)) {
-            return "setIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName.replaceFirst(INTROSPECTION_PREFIX, "")));
-        }
-        return "set".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, fieldName));
-    }
-
-    public String getRpcQueryListRequestName(String name) {
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "QueryIntro".concat(name.replaceFirst(INTROSPECTION_PREFIX, "")).concat("ListRequest");
-        }
-        return "Query".concat(name).concat("ListRequest");
-    }
-
-    public String getTypeMethodName(String packageName, String typeName, String fieldName) {
-        return packageNameToUnderline(packageName).concat("_").concat(typeName).concat("_").concat(fieldName);
-    }
-
-    public String getTypeListMethodName(String packageName, String typeName, String fieldName) {
-        return getTypeMethodName(packageName, typeName, fieldName).concat("List");
-    }
-
-    public String getRpcFieldMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        String name = fieldDefinitionContext.name().getText();
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "intro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
-        }
-        return name;
-    }
-
-    public String getRpcObjectHandlerMethodName(GraphqlParser.TypeContext typeContext) {
-        String name = manager.getFieldTypeName(typeContext);
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "intro".concat(name.replaceFirst(INTROSPECTION_PREFIX, ""));
-        }
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
-    }
-
-    public String getRpcHandlerMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        String name = fieldDefinitionContext.name().getText();
-        if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "intro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
-        }
-        return name;
-    }
-
-    public String getRpcRequestClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
-        String name = fieldDefinitionContext.name().getText();
+    public String getGrpcRequestClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
         switch (operationType) {
             case QUERY:
-                if (name.startsWith(INTROSPECTION_PREFIX)) {
-                    return "QueryIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
-                }
-                return "Query".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
+                return "Query".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext))).concat("Request");
             case MUTATION:
-                if (name.startsWith(INTROSPECTION_PREFIX)) {
-                    return "MutationIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
-                }
-                return "Mutation".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Request");
+                return "Mutation".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext))).concat("Request");
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
     }
 
-    public String getRpcResponseClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
-        String name = fieldDefinitionContext.name().getText();
+    public String getGrpcResponseClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, OperationType operationType) {
         switch (operationType) {
             case QUERY:
-                if (name.startsWith(INTROSPECTION_PREFIX)) {
-                    return "QueryIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Response");
-                }
-                return "Query".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Response");
+                return "Query".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext))).concat("Response");
             case MUTATION:
-                if (name.startsWith(INTROSPECTION_PREFIX)) {
-                    return "MutationIntro".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Response");
-                }
-                return "Mutation".concat(CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("Response");
+                return "Mutation".concat(getUpperCamelName(getGrpcFieldName(fieldDefinitionContext))).concat("Response");
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
@@ -313,8 +206,8 @@ public class GrpcNameUtil {
     public String getTypeInvokeMethodName(GraphqlParser.TypeContext typeContext) {
         String name = manager.getFieldTypeName(typeContext);
         if (name.startsWith(INTROSPECTION_PREFIX)) {
-            return "__".concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name.replaceFirst(INTROSPECTION_PREFIX, "")));
+            return INTROSPECTION_PREFIX.concat(getLowerCamelName(name.replaceFirst(INTROSPECTION_PREFIX, "")));
         }
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
+        return getLowerCamelName(name);
     }
 }

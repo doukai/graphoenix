@@ -1,6 +1,7 @@
 package io.graphoenix.spi.antlr;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.spi.constant.Hammurabi;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +41,7 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
-    boolean isUpdateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
+    Hammurabi.MutationType getMutationType(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
     void registerFragment(String graphql);
 
