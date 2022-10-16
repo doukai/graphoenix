@@ -1,7 +1,9 @@
 package io.graphoenix.core.schema;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Streams;
 import com.networknt.schema.JsonMetaSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.ValidationMessage;
@@ -17,6 +19,7 @@ import jakarta.json.spi.JsonProvider;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
@@ -43,6 +46,29 @@ public class JsonSchemaValidator {
 
     public Set<ValidationMessage> validate(String objectName, boolean isList, String json) throws JsonProcessingException {
         return factory.getSchema(jsonSchemaManager.getJsonSchema(isList ? objectName.concat("List") : objectName)).validate(mapper.readTree(json));
+    }
+
+    public Stream<ValidationMessage> validate(JsonNode jsonNode, JsonNode parentNode, String fieldName, String objectName) {
+        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(objectName, fieldName).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, fieldName)));
+        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        if (jsonNode.isObject()) {
+            return validate(jsonNode, fieldTypeName);
+        } else if (jsonNode.isArray()) {
+            if (manager.isObject(fieldTypeName)) {
+                return Streams.stream(jsonNode.elements()).flatMap(item -> validate(item, fieldTypeName));
+            }
+        }
+        return factory.getSchema(jsonSchemaManager.getJsonSchema(objectName)).validate(jsonNode, parentNode, fieldName).stream();
+    }
+
+    public Stream<ValidationMessage> validate(JsonNode objectNode, String objectName) {
+        return Streams.stream(objectNode.fields())
+                .flatMap(field -> {
+                            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(objectName, field.getKey()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, field.getKey())));
+                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                            return validate(field.getValue(), objectNode, field.getKey(), fieldTypeName);
+                        }
+                );
     }
 
     public void validateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {

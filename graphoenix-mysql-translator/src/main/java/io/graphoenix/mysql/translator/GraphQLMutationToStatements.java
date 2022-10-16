@@ -56,7 +56,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EX
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
+//import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
@@ -241,18 +241,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -888,9 +888,10 @@ public class GraphQLMutationToStatements {
                         level,
                         index
                 );
-            } else {
-                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
+//            else {
+//                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
+//            }
         }
         return Stream.empty();
     }
@@ -1028,9 +1029,10 @@ public class GraphQLMutationToStatements {
                         fromValueExpression,
                         level
                 );
-            } else {
-                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
+//            else {
+//                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
+//            }
         }
         return Stream.empty();
     }
@@ -1135,9 +1137,10 @@ public class GraphQLMutationToStatements {
                         parentInputValueDefinitionContext.defaultValue().value().arrayValue(),
                         fromValueExpression
                 );
-            } else {
-                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
             }
+//            else {
+//                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(parentInputValueDefinitionContext.getText()));
+//            }
         }
         return Stream.empty();
     }
@@ -2006,9 +2009,10 @@ public class GraphQLMutationToStatements {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(inputValueDefinitionContext.getText()));
                 }
-            } else {
-                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
+//            else {
+//                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
+//            }
         }
         return null;
     }
