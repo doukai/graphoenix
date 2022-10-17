@@ -1,10 +1,10 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.document.Directive;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.stream.JsonCollectors;
-import org.antlr.v4.runtime.RuleContext;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -41,19 +41,14 @@ public class Field {
             this.alias = fieldContext.alias().name().getText();
         }
         if (fieldContext.arguments() != null) {
-            this.arguments = fieldContext.arguments().argument().stream()
-                    .map(Argument::new)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            this.arguments = fieldContext.arguments().argument().stream().map(Argument::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (fieldContext.selectionSet() != null) {
-            this.fields = fieldContext.selectionSet().selection().stream()
-                    .map(Field::new)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            this.fields = fieldContext.selectionSet().selection().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (fieldContext.directives() != null) {
-            this.directives = fieldContext.directives().directive().stream()
-                    .map(RuleContext::toString)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            this.directives = fieldContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
+
         }
     }
 

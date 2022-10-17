@@ -1,10 +1,13 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.document.Directive;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class VariableDefinition {
 
@@ -17,6 +20,18 @@ public class VariableDefinition {
     }
 
     public VariableDefinition(GraphqlParser.VariableDefinitionContext variableDefinitionContext) {
+        if (variableDefinitionContext.variable() != null) {
+            this.variable = new Variable(variableDefinitionContext.variable());
+        }
+        if (variableDefinitionContext.type() != null) {
+            this.typeName = variableDefinitionContext.type().typeName().name().getText();
+        }
+        if (variableDefinitionContext.defaultValue() != null) {
+            this.defaultValue = variableDefinitionContext.defaultValue().value().getText();
+        }
+        if (variableDefinitionContext.directives() != null) {
+            this.directives = variableDefinitionContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
     }
 
     public Variable getVariable() {

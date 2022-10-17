@@ -3,6 +3,7 @@ package io.graphoenix.core.schema;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Streams;
 import com.networknt.schema.JsonMetaSchema;
 import com.networknt.schema.JsonSchemaFactory;
@@ -18,6 +19,8 @@ import jakarta.inject.Inject;
 import jakarta.json.*;
 import jakarta.json.spi.JsonProvider;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,34 +57,56 @@ public class JsonSchemaValidator {
         JsonNode jsonNode = mapper.readTree(json);
         if (manager.isObject(objectName)) {
             if (isList) {
-                return Streams.stream(jsonNode.elements()).flatMap(item -> validateUpdate(item, objectName)).collect(Collectors.toSet());
+                return Streams.stream(jsonNode.elements())
+                        .flatMap(item -> {
+                                    try {
+                                        return validateUpdate(item, objectName);
+                                    } catch (JsonProcessingException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        ).collect(Collectors.toSet());
             }
             return validateUpdate(jsonNode, objectName).collect(Collectors.toSet());
         }
-        return factory.getSchema(jsonSchemaManager.getJsonSchema(objectName)).validate(jsonNode);
+        return Collections.emptySet();
     }
 
-    public Stream<ValidationMessage> validateUpdate(JsonNode jsonNode, JsonNode parentNode, String fieldName, String objectName) {
-        GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(objectName, fieldName).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, fieldName)));
-        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (manager.isObject(fieldTypeName)) {
-            boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
-            if (isList) {
-                return Streams.stream(jsonNode.elements()).flatMap(item -> validateUpdate(item, fieldTypeName));
-            }
-            return validateUpdate(jsonNode, fieldTypeName);
-        }
-        return factory.getSchema(jsonSchemaManager.getJsonSchema(objectName)).validate(jsonNode, parentNode, fieldName).stream();
-    }
-
-    public Stream<ValidationMessage> validateUpdate(JsonNode objectNode, String objectName) {
-        return Streams.stream(objectNode.fields())
-                .flatMap(field -> {
-                            GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(objectName, field.getKey()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, field.getKey())));
-                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                            return validateUpdate(field.getValue(), objectNode, field.getKey(), fieldTypeName);
-                        }
-                );
+    public Stream<ValidationMessage> validateUpdate(JsonNode jsonNode, String objectName) throws JsonProcessingException {
+        ObjectNode jsonSchema = (ObjectNode) mapper.readTree(jsonSchemaManager.getJsonSchema(objectName));
+        jsonSchema.remove("required");
+        return Stream.concat(
+                factory.getSchema(jsonSchema)
+                        .validate(
+                                mapper.createObjectNode()
+                                        .setAll(
+                                                Streams.stream(jsonNode.fields())
+                                                        .filter(field -> !manager.isObject(manager.getFieldTypeName(manager.getField(objectName, field.getKey()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, field.getKey()))).type())))
+                                                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                                        )
+                        ).stream(),
+                Streams.stream(jsonNode.fields())
+                        .filter(field -> manager.isObject(manager.getFieldTypeName(manager.getField(objectName, field.getKey()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, field.getKey()))).type())))
+                        .flatMap(field -> {
+                                    try {
+                                        if (manager.fieldTypeIsList(manager.getField(objectName, field.getKey()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, field.getKey()))).type())) {
+                                            return Streams.stream(jsonNode.elements())
+                                                    .flatMap(item -> {
+                                                                try {
+                                                                    return validateUpdate(item, objectName);
+                                                                } catch (JsonProcessingException e) {
+                                                                    throw new RuntimeException(e);
+                                                                }
+                                                            }
+                                                    );
+                                        }
+                                        return validateUpdate(field.getValue(), manager.getFieldTypeName(manager.getField(objectName, field.getKey()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, field.getKey()))).type()));
+                                    } catch (JsonProcessingException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                        )
+        );
     }
 
     public void validateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {

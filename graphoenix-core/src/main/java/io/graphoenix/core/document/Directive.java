@@ -23,7 +23,9 @@ public class Directive {
 
     public Directive(GraphqlParser.DirectiveContext directiveContext) {
         this.name = directiveContext.name().getText();
-        this.arguments = directiveContext.arguments().argument().stream().map(Argument::new).collect(Collectors.toCollection(LinkedHashSet::new));
+        if (directiveContext.arguments() != null) {
+            this.arguments = directiveContext.arguments().argument().stream().map(Argument::new).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
     }
 
     public Directive(String name) {

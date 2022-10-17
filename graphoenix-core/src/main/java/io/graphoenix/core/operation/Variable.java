@@ -1,5 +1,6 @@
 package io.graphoenix.core.operation;
 
+import graphql.parser.antlr.GraphqlParser;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -9,6 +10,10 @@ public class Variable {
 
     public Variable(String name) {
         this.name = name;
+    }
+
+    public Variable(GraphqlParser.VariableContext variableContext) {
+        this.name = variableContext.name().getText();
     }
 
     public String getName() {
