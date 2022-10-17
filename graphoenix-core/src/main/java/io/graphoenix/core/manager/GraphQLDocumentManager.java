@@ -181,8 +181,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public Hammurabi.MutationType getMutationType(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        return Stream.ofNullable(operationDefinitionContext.directives())
+    public Hammurabi.MutationType getMutationType(GraphqlParser.SelectionContext selectionContext) {
+        return Stream.ofNullable(selectionContext.field())
+                .flatMap(fieldContext -> Stream.ofNullable(fieldContext.directives()))
                 .map(directivesContext ->
                         directivesContext.directive().stream()
                                 .filter(directiveContext -> directiveContext.name().getText().equals(UPDATE_DIRECTIVE_NAME))

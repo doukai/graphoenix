@@ -7,6 +7,7 @@ import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.mysql.utils.DBValueUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
+import io.graphoenix.spi.constant.Hammurabi;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.sf.jsqlparser.expression.Alias;
@@ -56,7 +57,6 @@ import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EX
 import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
-//import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
@@ -75,25 +75,6 @@ public class GraphQLMutationToStatements {
     private final DBNameUtil dbNameUtil;
     private final DBValueUtil dbValueUtil;
     private final String[] EXCLUDE_INPUT = {LIST_INPUT_NAME, WHERE_INPUT_NAME};
-
-    enum MutationType {
-        SAVE, UPDATE, DELETE
-    }
-
-    private MutationType getMutationType(GraphqlParser.FieldContext fieldContext) {
-        if (fieldContext.directives() == null) {
-            return MutationType.SAVE;
-        }
-        Optional<GraphqlParser.DirectiveContext> update = fieldContext.directives().directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("update")).findFirst();
-        if (update.isPresent()) {
-            return MutationType.UPDATE;
-        }
-        Optional<GraphqlParser.DirectiveContext> delete = fieldContext.directives().directive().stream().filter(directiveContext -> directiveContext.name().getText().equals("delete")).findFirst();
-        if (delete.isPresent()) {
-            return MutationType.DELETE;
-        }
-        return MutationType.SAVE;
-    }
 
     @Inject
     public GraphQLMutationToStatements(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLQueryToSelect graphQLQueryToSelect, GraphQLArgumentsToWhere graphQLArgumentsToWhere, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
@@ -193,7 +174,7 @@ public class GraphQLMutationToStatements {
                     throw new GraphQLErrors(INPUT_OBJECT_NOT_EXIST.bind(manager.getInputObject(manager.getFieldTypeName(listInputValueDefinition.get().type()))));
                 }
             } else {
-                return argumentsToStatementStream(fieldDefinitionContext, argumentsContext, getMutationType(selectionContext.field()));
+                return argumentsToStatementStream(fieldDefinitionContext, argumentsContext, manager.getMutationType(selectionContext));
             }
         }
         throw new GraphQLErrors(MUTATION_NOT_EXIST);
@@ -201,7 +182,7 @@ public class GraphQLMutationToStatements {
 
     protected Stream<Statement> argumentsToStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                            GraphqlParser.ArgumentsContext argumentsContext,
-                                                           MutationType mutationType) {
+                                                           Hammurabi.MutationType mutationType) {
 
         Stream<Statement> insertStatementStream = argumentsToInsertStatementStream(fieldDefinitionContext, argumentsContext, mutationType);
 
@@ -241,18 +222,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                objectDefaultValueToStatementStream(
-                                                                        fieldDefinitionContext,
-                                                                        idValueExpression,
-                                                                        subFieldDefinitionContext,
-                                                                        inputObjectTypeDefinitionContext,
-                                                                        inputValueDefinitionContext,
-                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                        0,
-                                                                        0
+                                                                        objectDefaultValueToStatementStream(
+                                                                                fieldDefinitionContext,
+                                                                                idValueExpression,
+                                                                                subFieldDefinitionContext,
+                                                                                inputObjectTypeDefinitionContext,
+                                                                                inputValueDefinitionContext,
+                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                0,
+                                                                                0
+                                                                        )
                                                                 )
-                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -1549,7 +1530,7 @@ public class GraphQLMutationToStatements {
 
     protected Stream<Statement> argumentsToInsertStatementStream(GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                  GraphqlParser.ArgumentsContext argumentsContext,
-                                                                 MutationType mutationType) {
+                                                                 Hammurabi.MutationType mutationType) {
 
         String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         Table table = typeToTable(fieldDefinitionContext);

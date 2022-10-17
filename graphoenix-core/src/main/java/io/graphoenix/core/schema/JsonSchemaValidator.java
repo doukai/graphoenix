@@ -10,6 +10,7 @@ import com.networknt.schema.ValidationMessage;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.manager.GraphQLDocumentManager;
+import io.graphoenix.spi.constant.Hammurabi;
 import io.graphoenix.spi.dto.GraphQLError;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,6 +25,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.MutationType.MERGE;
 import static jakarta.json.JsonValue.*;
 
 @ApplicationScoped
@@ -48,25 +50,36 @@ public class JsonSchemaValidator {
         return factory.getSchema(jsonSchemaManager.getJsonSchema(isList ? objectName.concat("List") : objectName)).validate(mapper.readTree(json));
     }
 
-    public Stream<ValidationMessage> validate(JsonNode jsonNode, JsonNode parentNode, String fieldName, String objectName) {
+    public Set<ValidationMessage> validateUpdate(String objectName, boolean isList, String json) throws JsonProcessingException {
+        JsonNode jsonNode = mapper.readTree(json);
+        if (manager.isObject(objectName)) {
+            if (isList) {
+                return Streams.stream(jsonNode.elements()).flatMap(item -> validateUpdate(item, objectName)).collect(Collectors.toSet());
+            }
+            return validateUpdate(jsonNode, objectName).collect(Collectors.toSet());
+        }
+        return factory.getSchema(jsonSchemaManager.getJsonSchema(objectName)).validate(jsonNode);
+    }
+
+    public Stream<ValidationMessage> validateUpdate(JsonNode jsonNode, JsonNode parentNode, String fieldName, String objectName) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(objectName, fieldName).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, fieldName)));
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-        if (jsonNode.isObject()) {
-            return validate(jsonNode, fieldTypeName);
-        } else if (jsonNode.isArray()) {
-            if (manager.isObject(fieldTypeName)) {
-                return Streams.stream(jsonNode.elements()).flatMap(item -> validate(item, fieldTypeName));
+        if (manager.isObject(fieldTypeName)) {
+            boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
+            if (isList) {
+                return Streams.stream(jsonNode.elements()).flatMap(item -> validateUpdate(item, fieldTypeName));
             }
+            return validateUpdate(jsonNode, fieldTypeName);
         }
         return factory.getSchema(jsonSchemaManager.getJsonSchema(objectName)).validate(jsonNode, parentNode, fieldName).stream();
     }
 
-    public Stream<ValidationMessage> validate(JsonNode objectNode, String objectName) {
+    public Stream<ValidationMessage> validateUpdate(JsonNode objectNode, String objectName) {
         return Streams.stream(objectNode.fields())
                 .flatMap(field -> {
                             GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(objectName, field.getKey()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectName, field.getKey())));
                             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                            return validate(field.getValue(), objectNode, field.getKey(), fieldTypeName);
+                            return validateUpdate(field.getValue(), objectNode, field.getKey(), fieldTypeName);
                         }
                 );
     }
@@ -75,7 +88,6 @@ public class JsonSchemaValidator {
         Set<ValidationMessage> messageSet = operationDefinitionContext.selectionSet().selection().stream()
                 .flatMap(selectionContext -> Try.of(() -> validateSelection(selectionContext)).get().stream())
                 .collect(Collectors.toSet());
-
         if (messageSet.size() > 0) {
             GraphQLErrors graphQLErrors = new GraphQLErrors();
             messageSet.forEach(validationMessage ->
@@ -95,7 +107,13 @@ public class JsonSchemaValidator {
                 selectionContext.field().name().getText()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(mutationTypeName, selectionContext.field().name().getText())));
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
-        return validate(fieldTypeName, isList, argumentsToJsonElement(selectionContext.field().arguments()).toString());
+
+        Hammurabi.MutationType mutationType = manager.getMutationType(selectionContext);
+        if (mutationType.equals(MERGE)) {
+            return validate(fieldTypeName, isList, argumentsToJsonElement(selectionContext.field().arguments()).toString());
+        } else {
+            return validateUpdate(fieldTypeName, isList, argumentsToJsonElement(selectionContext.field().arguments()).toString());
+        }
     }
 
     protected JsonValue argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {

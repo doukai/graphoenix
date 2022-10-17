@@ -41,7 +41,7 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.VariableDefinitionContext> getOperationTypeVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
-    Hammurabi.MutationType getMutationType(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
+    Hammurabi.MutationType getMutationType(GraphqlParser.SelectionContext selectionContext);
 
     void registerFragment(String graphql);
 
