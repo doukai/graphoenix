@@ -33,6 +33,9 @@ public class R2DBCConfig {
     @Optional
     private Long poolMaxIdleTime = 1000L;
 
+    @Optional
+    private Boolean allowMultiQueries = true;
+
     public String getDriver() {
         return driver;
     }
@@ -111,5 +114,13 @@ public class R2DBCConfig {
 
     public void setPoolMaxIdleTime(Long poolMaxIdleTime) {
         this.poolMaxIdleTime = poolMaxIdleTime;
+    }
+
+    public Boolean getAllowMultiQueries() {
+        return allowMultiQueries;
+    }
+
+    public void setAllowMultiQueries(Boolean allowMultiQueries) {
+        this.allowMultiQueries = allowMultiQueries;
     }
 }

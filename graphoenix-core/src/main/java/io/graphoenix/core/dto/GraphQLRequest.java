@@ -46,9 +46,9 @@ public class GraphQLRequest {
 
     public static GraphQLRequest fromJson(JsonObject jsonObject) {
         return new GraphQLRequest(
-                jsonObject.containsKey("query") ? jsonObject.getString("query") : null,
-                jsonObject.containsKey("operationName") ? jsonObject.getString("operationName") : null,
-                jsonObject.containsKey("variables") ? jsonObject.getJsonObject("variables") : null
+                jsonObject.containsKey("query") && !jsonObject.isNull("query") ? jsonObject.getString("query") : null,
+                jsonObject.containsKey("operationName") && !jsonObject.isNull("operationName") ? jsonObject.getString("operationName") : null,
+                jsonObject.containsKey("variables") && !jsonObject.isNull("variables") ? jsonObject.getJsonObject("variables") : null
         );
     }
 

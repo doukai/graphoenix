@@ -24,10 +24,10 @@ public class VariableDefinition {
             this.variable = new Variable(variableDefinitionContext.variable());
         }
         if (variableDefinitionContext.type() != null) {
-            this.typeName = variableDefinitionContext.type().typeName().name().getText();
+            this.typeName = variableDefinitionContext.type().getText();
         }
         if (variableDefinitionContext.defaultValue() != null) {
-            this.defaultValue = variableDefinitionContext.defaultValue().value().getText();
+            this.defaultValue = variableDefinitionContext.defaultValue().getText();
         }
         if (variableDefinitionContext.directives() != null) {
             this.directives = variableDefinitionContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));

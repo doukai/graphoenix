@@ -6,6 +6,7 @@ import io.r2dbc.spi.ConnectionFactory;
 import io.r2dbc.spi.ConnectionFactoryOptions;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.mariadb.r2dbc.MariadbConnectionFactoryProvider;
 
 @ApplicationScoped
 public class ConnectionFactoryCreator {
@@ -27,6 +28,7 @@ public class ConnectionFactoryCreator {
                 .option(ConnectionFactoryOptions.USER, r2DBCConfig.getUser())
                 .option(ConnectionFactoryOptions.PASSWORD, r2DBCConfig.getPassword())
                 .option(ConnectionFactoryOptions.DATABASE, r2DBCConfig.getDatabase())
+                .option(MariadbConnectionFactoryProvider.ALLOW_MULTI_QUERIES, r2DBCConfig.getAllowMultiQueries())
                 .build();
 
         return ConnectionFactories.get(options);

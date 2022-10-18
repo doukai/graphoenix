@@ -100,14 +100,14 @@ public class GraphQLVariablesProcessor {
     private GraphqlParser.ValueWithVariableContext variableToValue(GraphqlParser.VariableDefinitionContext variableDefinitionContext, JsonValue variable) {
         if (variable == null) {
             if (variableDefinitionContext.type().nonNullType() != null) {
-                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
+                throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name().getText()));
             } else {
                 variable = JsonValue.NULL;
             }
         } else {
             if (variable.getValueType().equals(NULL)) {
                 if (variableDefinitionContext.type().nonNullType() != null) {
-                    throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name()));
+                    throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(variableDefinitionContext.variable().name().getText()));
                 }
             }
         }
