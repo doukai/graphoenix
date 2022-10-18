@@ -61,9 +61,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLMutationToStatements {
@@ -74,7 +72,6 @@ public class GraphQLMutationToStatements {
     private final GraphQLArgumentsToWhere graphQLArgumentsToWhere;
     private final DBNameUtil dbNameUtil;
     private final DBValueUtil dbValueUtil;
-    private final String[] EXCLUDE_INPUT = {LIST_INPUT_NAME, WHERE_INPUT_NAME};
 
     @Inject
     public GraphQLMutationToStatements(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLQueryToSelect graphQLQueryToSelect, GraphQLArgumentsToWhere graphQLArgumentsToWhere, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {

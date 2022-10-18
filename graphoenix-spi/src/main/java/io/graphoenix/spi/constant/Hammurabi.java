@@ -14,12 +14,13 @@ public class Hammurabi {
     public static final String BEFORE_INPUT_NAME = "before";
     public static final String ORDER_BY_INPUT_NAME = "orderBy";
     public static final String GROUP_BY_INPUT_NAME = "groupBy";
+    public static final String SORT_INPUT_NAME = "sort";
+    public static final String[] EXCLUDE_INPUT = {DEPRECATED_INPUT_NAME, FIRST_INPUT_NAME, LAST_INPUT_NAME, OFFSET_INPUT_NAME, AFTER_INPUT_NAME, BEFORE_INPUT_NAME, GROUP_BY_INPUT_NAME, ORDER_BY_INPUT_NAME, SORT_INPUT_NAME, LIST_INPUT_NAME, WHERE_INPUT_NAME};
     public static final String FUNC_DIRECTIVE_NAME = "func";
     public static final String CONNECTION_DIRECTIVE_NAME = "connection";
     public static final String GRPC_DIRECTIVE_NAME = "grpc";
     public static final String UPDATE_DIRECTIVE_NAME = "update";
     public static final String DELETE_DIRECTIVE_NAME = "delete";
-    public static final String SORT_INPUT_NAME = "sort";
     public static final String INTROSPECTION_PREFIX = "__";
     public static final String INPUT_SUFFIX = "Input";
     public static final String ORDER_BY_SUFFIX = "OrderBy";
