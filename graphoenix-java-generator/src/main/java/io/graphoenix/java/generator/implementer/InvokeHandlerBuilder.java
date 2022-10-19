@@ -200,7 +200,7 @@ public class InvokeHandlerBuilder {
                                                                                         ClassName.get(Mono.class)
                                                                                 );
                                                                             } else {
-                                                                                return CodeBlock.of(".flatMap(next -> $T.just($L.get().$L(next)).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
+                                                                                return CodeBlock.of(".flatMap(next -> $T.justOrEmpty($L.get().$L(next)).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
                                                                                         ClassName.get(Mono.class),
                                                                                         typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
                                                                                         methodEntry.getKey(),

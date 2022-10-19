@@ -15,6 +15,7 @@ import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -54,12 +55,8 @@ public class ApiTest {
         return "";
     }
 
-    public PublisherBuilder<Integer> getOrgLevel2(@Source Organization organization) {
-        return null;
-    }
-
     public Mono<List<Integer>> getOrgLevel3(@Source Organization organization) {
-        return null;
+        return Mono.just(new ArrayList<>());
     }
 
     @Query
