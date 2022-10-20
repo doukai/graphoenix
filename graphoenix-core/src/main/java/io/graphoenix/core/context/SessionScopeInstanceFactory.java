@@ -93,4 +93,18 @@ public class SessionScopeInstanceFactory {
     public static <T> PublisherBuilder<T> getPublisherBuilderByMonoProvider(Class<T> beanClass, String name, Provider<Mono<T>> instanceMonoProvider) {
         return reactiveStreamsFactory.fromPublisher(getByMonoProvider(beanClass, name, instanceMonoProvider));
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Mono<T> putIfAbsent(T instance) {
+        return putIfAbsent((Class<T>) instance.getClass(), instance);
+    }
+
+    public static <T, E extends T> Mono<T> putIfAbsent(Class<T> beanClass, E instance) {
+        return putIfAbsent(beanClass, beanClass.getName(), instance);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T, E extends T> Mono<T> putIfAbsent(Class<T> beanClass, String name, E instance) {
+        return getScopeInstances().mapNotNull(scopeInstances -> (T) scopeInstances.get(beanClass).putIfAbsent(name, instance));
+    }
 }

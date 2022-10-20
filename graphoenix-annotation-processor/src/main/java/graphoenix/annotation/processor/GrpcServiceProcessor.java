@@ -66,10 +66,6 @@ public class GrpcServiceProcessor extends AbstractProcessor {
     private GrpcObjectHandlerBuilder grpcObjectHandlerBuilder;
     private GrpcRequestHandlerBuilder grpcRequestHandlerBuilder;
     private GrpcServiceImplementer grpcServiceImplementer;
-    private GrpcQueryHandlerBuilder grpcQueryHandlerBuilder;
-    private GrpcMutationHandlerBuilder grpcMutationHandlerBuilder;
-    private GrpcQueryDataLoaderBuilder grpcQueryDataLoaderBuilder;
-    private GrpcMutationDataLoaderBuilder grpcMutationDataLoaderBuilder;
     private GraphQLConfig graphQLConfig;
     private Types typeUtils;
     private Filer filer;
@@ -91,10 +87,6 @@ public class GrpcServiceProcessor extends AbstractProcessor {
         this.grpcObjectHandlerBuilder = BeanContext.get(GrpcObjectHandlerBuilder.class);
         this.grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
         this.grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
-        this.grpcQueryHandlerBuilder = BeanContext.get(GrpcQueryHandlerBuilder.class);
-        this.grpcMutationHandlerBuilder = BeanContext.get(GrpcMutationHandlerBuilder.class);
-        this.grpcQueryDataLoaderBuilder = BeanContext.get(GrpcQueryDataLoaderBuilder.class);
-        this.grpcMutationDataLoaderBuilder = BeanContext.get(GrpcMutationDataLoaderBuilder.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
@@ -171,10 +163,6 @@ public class GrpcServiceProcessor extends AbstractProcessor {
             grpcObjectHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
             grpcRequestHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
             grpcServiceImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
-            grpcQueryHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            grpcMutationHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            grpcQueryDataLoaderBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            grpcMutationDataLoaderBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

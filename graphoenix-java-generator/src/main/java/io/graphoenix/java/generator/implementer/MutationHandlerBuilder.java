@@ -1,4 +1,4 @@
-package io.graphoenix.java.generator.implementer.grpc;
+package io.graphoenix.java.generator.implementer;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -14,7 +14,7 @@ import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.core.operation.ValueWithVariable;
-import io.graphoenix.java.generator.implementer.TypeManager;
+import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.constant.Hammurabi;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -37,7 +37,7 @@ import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
 
 @ApplicationScoped
-public class GrpcMutationHandlerBuilder {
+public class MutationHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
@@ -45,13 +45,13 @@ public class GrpcMutationHandlerBuilder {
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public GrpcMutationHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public MutationHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
         this.manager = manager;
         this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
     }
 
-    public GrpcMutationHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
+    public MutationHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
@@ -59,18 +59,18 @@ public class GrpcMutationHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass(true).writeTo(filer);
-        Logger.info("GrpcMutationBeforeHandler build success");
+        Logger.info("MutationBeforeHandler build success");
         this.buildClass(false).writeTo(filer);
-        Logger.info("GrpcMutationAfterHandler build success");
+        Logger.info("MutationAfterHandler build success");
     }
 
     private JavaFile buildClass(boolean anchor) {
-        TypeSpec typeSpec = buildGrpcMutationHandler(anchor);
+        TypeSpec typeSpec = buildMutationHandler(anchor);
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildGrpcMutationHandler(boolean anchor) {
-        TypeSpec.Builder builder = TypeSpec.classBuilder(anchor ? "GrpcMutationBeforeHandler" : "GrpcMutationAfterHandler")
+    private TypeSpec buildMutationHandler(boolean anchor) {
+        TypeSpec.Builder builder = TypeSpec.classBuilder(anchor ? "MutationBeforeHandler" : "MutationAfterHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .addMethod(buildConstructor())

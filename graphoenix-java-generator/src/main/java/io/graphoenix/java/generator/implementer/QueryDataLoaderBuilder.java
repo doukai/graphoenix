@@ -1,4 +1,4 @@
-package io.graphoenix.java.generator.implementer.grpc;
+package io.graphoenix.java.generator.implementer;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -10,7 +10,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.handler.QueryDataLoader;
-import io.graphoenix.java.generator.implementer.TypeManager;
+import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
@@ -32,20 +32,34 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class GrpcQueryDataLoaderBuilder {
+public class QueryDataLoaderBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
     private final GrpcNameUtil grpcNameUtil;
-    private final Map<String, Map<String, Set<String>>> typeMap;
+    private Map<String, Map<String, Set<String>>> grpcTypeMap;
 
     @Inject
-    public GrpcQueryDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public QueryDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
         this.manager = manager;
         this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
-        this.typeMap = manager.getObjects()
+    }
+
+    public QueryDataLoaderBuilder setConfiguration(GraphQLConfig graphQLConfig) {
+        this.graphQLConfig = graphQLConfig;
+        this.typeManager.setGraphQLConfig(graphQLConfig);
+        return this;
+    }
+
+    public void writeToFiler(Filer filer) throws IOException {
+        this.buildClass().writeTo(filer);
+        Logger.info("QueryDataLoader build success");
+    }
+
+    private JavaFile buildClass() {
+        this.grpcTypeMap = manager.getObjects()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .filter(manager::isGrpcField)
                 .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(grpcNameUtil.getPackageName(fieldDefinitionContext), new AbstractMap.SimpleEntry<>(manager.getFieldTypeName(fieldDefinitionContext.type()), grpcNameUtil.getTo(fieldDefinitionContext))))
@@ -74,26 +88,12 @@ public class GrpcQueryDataLoaderBuilder {
                                         )
                         )
                 );
-    }
-
-    public GrpcQueryDataLoaderBuilder setConfiguration(GraphQLConfig graphQLConfig) {
-        this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
-    }
-
-    public void writeToFiler(Filer filer) throws IOException {
-        this.buildClass().writeTo(filer);
-        Logger.info("GrpcQueryDataLoader build success");
-    }
-
-    private JavaFile buildClass() {
-        TypeSpec typeSpec = buildGrpcQueryDataLoader();
+        TypeSpec typeSpec = buildQueryDataLoader();
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildGrpcQueryDataLoader() {
-        TypeSpec.Builder builder = TypeSpec.classBuilder("GrpcQueryDataLoader")
+    private TypeSpec buildQueryDataLoader() {
+        TypeSpec.Builder builder = TypeSpec.classBuilder("QueryDataLoaderImpl")
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(QueryDataLoader.class))
                 .addAnnotation(Dependent.class)
@@ -113,18 +113,20 @@ public class GrpcQueryDataLoaderBuilder {
                                 Modifier.FINAL
                         ).build()
                 )
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")),
-                                "channelManager",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
                 .addMethod(buildConstructor())
                 .addMethod(buildDispatchMethod());
 
-        typeMap.keySet().forEach(packageName ->
+        if (this.grpcTypeMap.size() > 0) {
+            builder.addField(
+                    FieldSpec.builder(
+                            ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")),
+                            "channelManager",
+                            Modifier.PRIVATE,
+                            Modifier.FINAL
+                    ).build()
+            );
+        }
+        grpcTypeMap.keySet().forEach(packageName ->
                 builder.addField(
                         FieldSpec.builder(
                                 ClassName.get(packageName, "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
@@ -150,12 +152,14 @@ public class GrpcQueryDataLoaderBuilder {
                 .addAnnotation(Inject.class)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
                 .addStatement("this.manager = manager")
-                .addStatement("this.jsonProvider = jsonProvider")
-                .addStatement("this.channelManager = channelManager");
+                .addStatement("this.jsonProvider = jsonProvider");
 
-        this.typeMap.keySet().forEach(packageName ->
+        if (this.grpcTypeMap.size() > 0) {
+            builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
+                    .addStatement("this.channelManager = channelManager");
+        }
+        this.grpcTypeMap.keySet().forEach(packageName ->
                 builder.addStatement("this.$L = $T.newReactorStub(channelManager.get().getChannel($S))",
                         grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
                         ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
@@ -173,7 +177,7 @@ public class GrpcQueryDataLoaderBuilder {
     private MethodSpec buildDispatchMethod() {
         List<CodeBlock> monoList = new ArrayList<>();
         int index = 0;
-        for (String packageName : this.typeMap.keySet()) {
+        for (String packageName : this.grpcTypeMap.keySet()) {
             if (index == 0) {
                 monoList.add(CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
                         grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),

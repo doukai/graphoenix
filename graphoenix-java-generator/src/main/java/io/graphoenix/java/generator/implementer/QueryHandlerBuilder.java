@@ -1,4 +1,4 @@
-package io.graphoenix.java.generator.implementer.grpc;
+package io.graphoenix.java.generator.implementer;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
@@ -9,7 +9,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.handler.QueryDataLoader;
-import io.graphoenix.java.generator.implementer.TypeManager;
+import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,7 +27,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @ApplicationScoped
-public class GrpcQueryHandlerBuilder {
+public class QueryHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
@@ -35,13 +35,13 @@ public class GrpcQueryHandlerBuilder {
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public GrpcQueryHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public QueryHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
         this.manager = manager;
         this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
     }
 
-    public GrpcQueryHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
+    public QueryHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
         this.typeManager.setGraphQLConfig(graphQLConfig);
         return this;
@@ -49,17 +49,17 @@ public class GrpcQueryHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
-        Logger.info("GrpcQueryHandler build success");
+        Logger.info("QueryHandler build success");
     }
 
     private JavaFile buildClass() {
-        TypeSpec typeSpec = buildGrpcQueryHandler();
+        TypeSpec typeSpec = buildQueryHandler();
 
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
 
-    private TypeSpec buildGrpcQueryHandler() {
-        TypeSpec.Builder builder = TypeSpec.classBuilder("GrpcQueryHandler")
+    private TypeSpec buildQueryHandler() {
+        TypeSpec.Builder builder = TypeSpec.classBuilder("QueryAfterHandler")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .addField(

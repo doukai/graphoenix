@@ -18,8 +18,12 @@ import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
 import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
 import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
+import io.graphoenix.java.generator.implementer.MutationDataLoaderBuilder;
 import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
 import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
+import io.graphoenix.java.generator.implementer.MutationHandlerBuilder;
+import io.graphoenix.java.generator.implementer.QueryDataLoaderBuilder;
+import io.graphoenix.java.generator.implementer.QueryHandlerBuilder;
 import io.graphoenix.spi.annotation.Skip;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
@@ -75,6 +79,10 @@ public class ApplicationProcessor extends AbstractProcessor {
     private ConnectionHandlerBuilder connectionHandlerBuilder;
     private SelectionFilterBuilder selectionFilterBuilder;
     private OperationHandlerImplementer operationHandlerImplementer;
+    private QueryDataLoaderBuilder queryDataLoaderBuilder;
+    private MutationDataLoaderBuilder mutationDataLoaderBuilder;
+    private QueryHandlerBuilder queryHandlerBuilder;
+    private MutationHandlerBuilder mutationHandlerBuilder;
     private JsonSchemaTranslator jsonSchemaTranslator;
     private GraphQLConfig graphQLConfig;
     private Types typeUtils;
@@ -97,6 +105,10 @@ public class ApplicationProcessor extends AbstractProcessor {
         this.connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
         this.selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
         this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
+        this.queryDataLoaderBuilder = BeanContext.get(QueryDataLoaderBuilder.class);
+        this.mutationDataLoaderBuilder = BeanContext.get(MutationDataLoaderBuilder.class);
+        this.queryHandlerBuilder = BeanContext.get(QueryHandlerBuilder.class);
+        this.mutationHandlerBuilder = BeanContext.get(MutationHandlerBuilder.class);
         this.jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
@@ -194,6 +206,10 @@ public class ApplicationProcessor extends AbstractProcessor {
             connectionHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
             operationHandlerImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
             selectionFilterBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            queryDataLoaderBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            mutationDataLoaderBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            queryHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            mutationHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
 
         } catch (IOException e) {
             Logger.error(e);
