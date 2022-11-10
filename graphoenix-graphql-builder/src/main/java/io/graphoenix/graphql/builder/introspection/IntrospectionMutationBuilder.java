@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 
@@ -64,22 +65,21 @@ public class IntrospectionMutationBuilder {
                         .setName("types")
                         .setValueWithVariable(
                                 Stream.concat(
-                                                manager.getObjects()
-                                                        .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
-                                                        .map(this::objectTypeDefinitionContextToType),
+                                        manager.getObjects()
+                                                .map(this::objectTypeDefinitionContextToType),
+                                        Stream.concat(
+                                                manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
                                                 Stream.concat(
-                                                        manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
+                                                        manager.getInputObjects()
+                                                                .filter(inputObjectTypeDefinitionContext -> !inputObjectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                                                                .map(this::inputObjectTypeDefinitionContextToType),
                                                         Stream.concat(
-                                                                manager.getInputObjects()
-                                                                        .filter(inputObjectTypeDefinitionContext -> !inputObjectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
-                                                                        .map(this::inputObjectTypeDefinitionContextToType),
-                                                                Stream.concat(
-                                                                        manager.getEnums().map(this::enumTypeDefinitionContextToType),
-                                                                        manager.getScalars().map(this::scalarTypeDefinitionContextToType)
-                                                                )
+                                                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                                                manager.getScalars().map(this::scalarTypeDefinitionContextToType)
                                                         )
                                                 )
-                                        ).map(__Type::toValue)
+                                        )
+                                ).map(__Type::toValue)
                                         .collect(Collectors.toList())
                         )
         );
@@ -109,7 +109,6 @@ public class IntrospectionMutationBuilder {
         schema.setTypes(
                 Stream.concat(
                         manager.getObjects()
-                                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
                                 .map(this::objectTypeDefinitionContextToType),
                         Stream.concat(
                                 manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
@@ -155,6 +154,7 @@ public class IntrospectionMutationBuilder {
         type.setName(objectTypeDefinitionContext.name().getText());
 
         if (level == 0) {
+            String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
             if (objectTypeDefinitionContext.implementsInterfaces() != null) {
                 type.setInterfaces(getInterfaceTypes(objectTypeDefinitionContext.implementsInterfaces(), level + 1));
             } else {
@@ -168,7 +168,10 @@ public class IntrospectionMutationBuilder {
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                             .filter(manager::isNotGrpcField)
                             .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
-                            .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                            .filter(fieldDefinitionContext ->
+                                    (objectTypeDefinitionContext.name().getText().equals(queryTypeName) && (fieldDefinitionContext.name().getText().equals("__schema") || fieldDefinitionContext.name().getText().equals("__type"))) ||
+                                            !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX)
+                            )
                             .map(fieldDefinitionContext -> fieldDefinitionContextToField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
                             .collect(Collectors.toCollection(LinkedHashSet::new))
             );
@@ -204,6 +207,7 @@ public class IntrospectionMutationBuilder {
                     interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                             .filter(manager::isNotGrpcField)
                             .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
+                            .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
                             .map(fieldDefinitionContext -> fieldDefinitionContextToField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
                             .collect(Collectors.toCollection(LinkedHashSet::new))
             );
@@ -222,6 +226,7 @@ public class IntrospectionMutationBuilder {
         if (fieldDefinitionContext.argumentsDefinition() != null) {
             field.setArgs(fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                     .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                    .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())) || !manager.getFieldTypeName(inputValueDefinitionContext.type()).startsWith(INTROSPECTION_PREFIX))
                     .map(this::inputValueDefinitionContextToInputValue).collect(Collectors.toCollection(LinkedHashSet::new)));
         } else {
             field.setArgs(new LinkedHashSet<>());
@@ -355,7 +360,8 @@ public class IntrospectionMutationBuilder {
                 type.setDescription(inputObjectTypeDefinitionContext.description().getText());
             }
             type.setInputFields(inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
-                    .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                    .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                    .filter(inputValueDefinitionContext -> !manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())) || !manager.getFieldTypeName(inputValueDefinitionContext.type()).startsWith(INTROSPECTION_PREFIX))
                     .map(inputValueDefinitionContext -> inputValueDefinitionContextToInputValue(inputValueDefinitionContext, level + 1))
                     .collect(Collectors.toCollection(LinkedHashSet::new)));
         }
