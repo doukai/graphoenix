@@ -478,7 +478,7 @@ public class GraphQLQueryToSelect {
                 Optional<String> idFieldName = manager.getObjectTypeIDFieldName(typeName);
                 if (idFieldName.isPresent()) {
                     if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                        Optional<GraphqlParser.InputValueDefinitionContext> listInputValueDefinition = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+                        Optional<GraphqlParser.InputValueDefinitionContext> listInputValueDefinition = Stream.ofNullable(fieldDefinitionContext.argumentsDefinition()).flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
                                 .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(LIST_INPUT_NAME))
                                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
                                 .findFirst();
@@ -593,11 +593,11 @@ public class GraphQLQueryToSelect {
     }
 
     protected void buildCursorArguments(PlainSelect plainSelect, String typeName, GraphqlParser.SelectionContext selectionContext, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
-        Optional<GraphqlParser.InputValueDefinitionContext> afterInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+        Optional<GraphqlParser.InputValueDefinitionContext> afterInput = Stream.ofNullable(fieldDefinitionContext.argumentsDefinition()).flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
                 .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(AFTER_INPUT_NAME))
                 .findFirst();
 
-        Optional<GraphqlParser.InputValueDefinitionContext> beforeInput = fieldDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
+        Optional<GraphqlParser.InputValueDefinitionContext> beforeInput = Stream.ofNullable(fieldDefinitionContext.argumentsDefinition()).flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
                 .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(BEFORE_INPUT_NAME))
                 .findFirst();
 
