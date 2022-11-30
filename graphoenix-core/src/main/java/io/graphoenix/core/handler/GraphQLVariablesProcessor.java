@@ -4,11 +4,15 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.json.JsonValue;
+import org.antlr.v4.runtime.RuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.tinylog.Logger;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
@@ -36,7 +40,22 @@ public class GraphQLVariablesProcessor {
     private void processSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         if (selectionContext.field() != null) {
             if (selectionContext.field().arguments() != null) {
-                selectionContext.field().arguments().argument().forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables, skipNullArguments(selectionContext.field(), variables)));
+                boolean skipNullArguments = skipNullArguments(selectionContext.field(), variables);
+                selectionContext.field().arguments().argument()
+                        .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables, skipNullArguments));
+                if (skipNullArguments) {
+                    List<GraphqlParser.ArgumentContext> argumentContextList = selectionContext.field().arguments().argument().stream().filter(argumentContext -> argumentContext.getChildCount() > 0).collect(Collectors.toList());
+                    ParseTree left = selectionContext.field().arguments().getChild(0);
+                    ParseTree right = selectionContext.field().arguments().getChild(selectionContext.field().arguments().getChildCount() - 1);
+                    IntStream.range(0, selectionContext.field().arguments().getChildCount()).forEach(index -> selectionContext.field().arguments().removeLastChild());
+                    if (argumentContextList.size() > 0) {
+                        selectionContext.field().arguments().addChild((RuleContext) left);
+                        for (GraphqlParser.ArgumentContext argumentContext : argumentContextList) {
+                            selectionContext.field().arguments().addChild(argumentContext);
+                        }
+                        selectionContext.field().arguments().addChild((RuleContext) right);
+                    }
+                }
             }
             if (selectionContext.field().selectionSet() != null) {
                 selectionContext.field().selectionSet().selection().forEach(subSelectionContext -> processSelection(subSelectionContext, operationDefinitionContext, variables));
