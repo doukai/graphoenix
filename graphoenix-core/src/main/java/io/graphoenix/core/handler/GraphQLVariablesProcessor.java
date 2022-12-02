@@ -4,8 +4,8 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.json.JsonValue;
-import org.antlr.v4.runtime.RuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.tinylog.Logger;
 
 import java.util.List;
@@ -49,11 +49,11 @@ public class GraphQLVariablesProcessor {
                     ParseTree right = selectionContext.field().arguments().getChild(selectionContext.field().arguments().getChildCount() - 1);
                     IntStream.range(0, selectionContext.field().arguments().getChildCount()).forEach(index -> selectionContext.field().arguments().removeLastChild());
                     if (argumentContextList.size() > 0) {
-                        selectionContext.field().arguments().addChild((RuleContext) left);
+                        selectionContext.field().arguments().addChild((TerminalNode) left);
                         for (GraphqlParser.ArgumentContext argumentContext : argumentContextList) {
                             selectionContext.field().arguments().addChild(argumentContext);
                         }
-                        selectionContext.field().arguments().addChild((RuleContext) right);
+                        selectionContext.field().arguments().addChild((TerminalNode) right);
                     }
                 }
             }
