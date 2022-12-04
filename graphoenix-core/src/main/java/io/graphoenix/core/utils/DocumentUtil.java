@@ -90,6 +90,12 @@ public enum DocumentUtil {
         return graphqlToEnumTypeDefinition(charStream);
     }
 
+    public GraphqlParser.EnumValueContext graphqlToEnumValue(String graphql) {
+        CodePointCharStream charStream;
+        charStream = CharStreams.fromString(graphql);
+        return graphqlToEnumValue(charStream);
+    }
+
     public GraphqlParser.InputObjectTypeDefinitionContext graphqlToInputObjectTypeDefinition(String graphql) {
         CodePointCharStream charStream;
         charStream = CharStreams.fromString(graphql);
@@ -140,6 +146,10 @@ public enum DocumentUtil {
 
     public GraphqlParser.EnumTypeDefinitionContext graphqlToEnumTypeDefinition(CharStream charStream) {
         return getGraphqlParser(charStream).enumTypeDefinition();
+    }
+
+    public GraphqlParser.EnumValueContext graphqlToEnumValue(CharStream charStream) {
+        return getGraphqlParser(charStream).enumValue();
     }
 
     public GraphqlParser.InputObjectTypeDefinitionContext graphqlToInputObjectTypeDefinition(CharStream charStream) {

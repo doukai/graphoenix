@@ -2,7 +2,9 @@ package io.graphoenix.core.handler;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.json.JsonValue;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -15,8 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static jakarta.json.JsonValue.ValueType.ARRAY;
 import static jakarta.json.JsonValue.ValueType.NULL;
@@ -25,6 +26,13 @@ import static jakarta.json.JsonValue.ValueType.TRUE;
 
 @ApplicationScoped
 public class GraphQLVariablesProcessor {
+
+    private IGraphQLDocumentManager manager;
+
+    @Inject
+    public GraphQLVariablesProcessor(IGraphQLDocumentManager manager) {
+        this.manager = manager;
+    }
 
     public GraphqlParser.OperationDefinitionContext buildVariables(String graphQL, Map<String, JsonValue> variables) {
         return buildVariables(DOCUMENT_UTIL.graphqlToOperation(graphQL), variables);
@@ -56,6 +64,8 @@ public class GraphQLVariablesProcessor {
                         selectionContext.field().arguments().addChild((TerminalNode) right);
                     }
                 }
+                selectionContext.field().arguments().argument()
+                        .forEach(argumentContext -> replaceEnumValue(argumentContext.valueWithVariable(), getArgumentType(argumentContext, selectionContext, operationDefinitionContext)));
             }
             if (selectionContext.field().selectionSet() != null) {
                 selectionContext.field().selectionSet().selection().forEach(subSelectionContext -> processSelection(subSelectionContext, operationDefinitionContext, variables));
@@ -105,6 +115,28 @@ public class GraphQLVariablesProcessor {
         } else if (valueWithVariableContext.arrayValueWithVariable() != null) {
             valueWithVariableContext.arrayValueWithVariable().valueWithVariable()
                     .forEach(subValueWithVariableContext -> replaceVariable(subValueWithVariableContext, operationDefinitionContext, variables, skipNullArguments));
+        }
+    }
+
+    private void replaceEnumValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.TypeContext typeContext) {
+        if (manager.fieldTypeIsList(typeContext)) {
+            if (valueWithVariableContext.arrayValueWithVariable() != null) {
+                valueWithVariableContext.arrayValueWithVariable().valueWithVariable()
+                        .forEach(subValueWithVariableContext -> replaceEnumValue(subValueWithVariableContext, typeContext));
+            }
+        } else if (manager.isInputObject(manager.getFieldTypeName(typeContext))) {
+            if (valueWithVariableContext.objectValueWithVariable() != null) {
+                valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable()
+                        .forEach(objectFieldWithVariableContext -> replaceEnumValue(objectFieldWithVariableContext.valueWithVariable(), getArgumentType(objectFieldWithVariableContext, typeContext)));
+            }
+        } else {
+            if (manager.isEnum(manager.getFieldTypeName(typeContext))) {
+                if (valueWithVariableContext.StringValue() != null) {
+                    GraphqlParser.EnumValueContext enumValueContext = DOCUMENT_UTIL.graphqlToEnumValue(DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()));
+                    valueWithVariableContext.removeLastChild();
+                    valueWithVariableContext.addChild(enumValueContext);
+                }
+            }
         }
     }
 
@@ -178,5 +210,38 @@ public class GraphQLVariablesProcessor {
                         }
                 )
                 .orElse(false);
+    }
+
+    private GraphqlParser.TypeContext getArgumentType(GraphqlParser.ArgumentContext argumentContext, GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext;
+        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+            objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+        } else if (operationDefinitionContext.operationType().MUTATION() != null) {
+            objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+        } else {
+            throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
+        }
+
+        return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(selectionContext.field().name().getText()))
+                .flatMap(fieldDefinitionContext ->
+                        Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                .flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
+                )
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(argumentContext.name().getText()))
+                .findFirst()
+                .map(GraphqlParser.InputValueDefinitionContext::type)
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind(argumentContext.name().getText())));
+    }
+
+
+    private GraphqlParser.TypeContext getArgumentType(GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext, GraphqlParser.TypeContext typeContext) {
+        return manager.getInputObject(manager.getFieldTypeName(typeContext))
+                .orElseThrow(() -> new GraphQLErrors(INPUT_OBJECT_NOT_EXIST.bind(manager.getFieldTypeName(typeContext))))
+                .inputObjectValueDefinitions().inputValueDefinition().stream()
+                .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(objectFieldWithVariableContext.name().getText()))
+                .findFirst()
+                .map(GraphqlParser.InputValueDefinitionContext::type)
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind(objectFieldWithVariableContext.name().getText())));
     }
 }
