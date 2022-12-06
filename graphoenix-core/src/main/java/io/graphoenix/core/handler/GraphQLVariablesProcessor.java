@@ -27,7 +27,7 @@ import static jakarta.json.JsonValue.ValueType.TRUE;
 @ApplicationScoped
 public class GraphQLVariablesProcessor {
 
-    private IGraphQLDocumentManager manager;
+    private final IGraphQLDocumentManager manager;
 
     @Inject
     public GraphQLVariablesProcessor(IGraphQLDocumentManager manager) {
