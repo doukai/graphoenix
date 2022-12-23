@@ -32,8 +32,12 @@ public class JsonSchemaTranslator {
     }
 
     public String objectToJsonSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return objectToJsonSchemaString(objectTypeDefinitionContext, false);
+    }
+
+    public String objectToJsonSchemaString(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean isUpdate) {
         StringWriter stringWriter = new StringWriter();
-        jsonProvider.createWriter(stringWriter).write(objectToJsonSchema(objectTypeDefinitionContext));
+        jsonProvider.createWriter(stringWriter).write(objectToJsonSchema(objectTypeDefinitionContext, isUpdate));
         return stringWriter.toString();
     }
 
@@ -43,16 +47,18 @@ public class JsonSchemaTranslator {
         return stringWriter.toString();
     }
 
-    public JsonValue objectToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    public JsonValue objectToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean isUpdate) {
         JsonObjectBuilder jsonSchemaBuilder = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
-        return jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(objectTypeDefinitionContext.name().getText())))
+        JsonObjectBuilder builder = jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(isUpdate ? "update".concat(objectTypeDefinitionContext.name().getText()) : objectTypeDefinitionContext.name().getText())))
                 .add("type", jsonProvider.createValue("object"))
-                .add("properties", objectToProperties(objectTypeDefinitionContext))
-                .add("required", buildRequired(objectTypeDefinitionContext))
-                .add("additionalProperties", TRUE)
-                .build();
+                .add("properties", objectToProperties(objectTypeDefinitionContext, isUpdate))
+                .add("additionalProperties", TRUE);
+        if (!isUpdate) {
+            builder.add("required", buildRequired(objectTypeDefinitionContext));
+        }
+        return builder.build();
     }
 
     public JsonValue objectListToJsonSchema(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -80,20 +86,19 @@ public class JsonSchemaTranslator {
         return requiredBuilder;
     }
 
-    protected JsonObjectBuilder objectToProperties(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+    protected JsonObjectBuilder objectToProperties(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean isUpdate) {
         JsonObjectBuilder propertiesBuilder = jsonProvider.createObjectBuilder();
         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-//                .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .forEach(fieldDefinitionContext ->
-                        propertiesBuilder.add(fieldDefinitionContext.name().getText(), fieldToProperty(fieldDefinitionContext))
+                        propertiesBuilder.add(fieldDefinitionContext.name().getText(), fieldToProperty(fieldDefinitionContext, isUpdate))
                 );
         return propertiesBuilder;
     }
 
-    protected JsonObjectBuilder fieldToProperty(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+    protected JsonObjectBuilder fieldToProperty(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, boolean isUpdate) {
         JsonObjectBuilder propertyBuilder = getValidationDirectiveContext(fieldDefinitionContext.directives())
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
@@ -103,14 +108,14 @@ public class JsonSchemaTranslator {
                     .flatMap(directiveContext -> getValidationObjectArgument(directiveContext, "items"))
                     .map(this::buildValidation)
                     .orElseGet(jsonProvider::createObjectBuilder);
-            propertyBuilder.add("items", buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), itemsBuilder));
+            propertyBuilder.add("items", buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.type().nonNullType() != null, itemsBuilder, isUpdate));
             return propertyBuilder;
         } else {
-            return buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), propertyBuilder);
+            return buildType(manager.getFieldTypeName(fieldDefinitionContext.type()), fieldDefinitionContext.type().nonNullType() != null, propertyBuilder, isUpdate);
         }
     }
 
-    protected JsonObjectBuilder buildType(String fieldTypeName, JsonObjectBuilder jsonObjectBuilder) {
+    protected JsonObjectBuilder buildType(String fieldTypeName, boolean isNonNull, JsonObjectBuilder jsonObjectBuilder, boolean isUpdate) {
         if (manager.isScalar(fieldTypeName)) {
             switch (fieldTypeName) {
                 case "ID":
@@ -119,16 +124,34 @@ public class JsonSchemaTranslator {
                 case "Time":
                 case "DateTime":
                 case "Timestamp":
-                    jsonObjectBuilder.add("type", jsonProvider.createValue("string"));
+                    if (isNonNull) {
+                        jsonObjectBuilder.add("type", jsonProvider.createValue("string"));
+                    } else {
+                        jsonObjectBuilder.add("type", jsonProvider.createArrayBuilder().add(jsonProvider.createValue("string")).add(jsonProvider.createValue("null")));
+                    }
                     break;
                 case "Boolean":
-                    jsonObjectBuilder.add("type", jsonProvider.createValue("boolean"));
+                    if (isNonNull) {
+                        jsonObjectBuilder.add("type", jsonProvider.createValue("boolean"));
+                    } else {
+                        jsonObjectBuilder.add("type", jsonProvider.createArrayBuilder().add(jsonProvider.createValue("boolean")).add(jsonProvider.createValue("null")));
+                    }
                     break;
                 case "Int":
                 case "BigInteger":
+                    if (isNonNull) {
+                        jsonObjectBuilder.add("type", jsonProvider.createValue("integer"));
+                    } else {
+                        jsonObjectBuilder.add("type", jsonProvider.createArrayBuilder().add(jsonProvider.createValue("integer")).add(jsonProvider.createValue("null")));
+                    }
+                    break;
                 case "Float":
                 case "BigDecimal":
-                    jsonObjectBuilder.add("type", jsonProvider.createValue("number"));
+                    if (isNonNull) {
+                        jsonObjectBuilder.add("type", jsonProvider.createValue("number"));
+                    } else {
+                        jsonObjectBuilder.add("type", jsonProvider.createArrayBuilder().add(jsonProvider.createValue("number")).add(jsonProvider.createValue("null")));
+                    }
                     break;
             }
         } else if (manager.isEnum(fieldTypeName)) {
@@ -137,11 +160,22 @@ public class JsonSchemaTranslator {
                     .ifPresent(enumTypeDefinitionContext -> {
                                 enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition()
                                         .forEach(enumValueDefinitionContext -> enumValuesBuilder.add(enumValueDefinitionContext.enumValue().getText()));
-                                jsonObjectBuilder.add("enum", enumValuesBuilder.build());
+                                if (!isNonNull) {
+                                    enumValuesBuilder.add(jsonProvider.createValue("null"));
+                                }
+                                jsonObjectBuilder.add("enum", enumValuesBuilder);
                             }
                     );
         } else if (manager.isObject(fieldTypeName)) {
-            jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
+            if (isNonNull) {
+                jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
+            } else {
+                jsonObjectBuilder.add("oneOf",
+                        jsonProvider.createArrayBuilder()
+                                .add(jsonProvider.createObjectBuilder().add("type", jsonProvider.createValue("null")))
+                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(isUpdate ? "update".concat(fieldTypeName) : fieldTypeName)))
+                );
+            }
         }
         return jsonObjectBuilder;
     }

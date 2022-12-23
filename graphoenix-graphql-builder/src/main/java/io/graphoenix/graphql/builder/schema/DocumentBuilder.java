@@ -80,8 +80,6 @@ public class DocumentBuilder {
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
-        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
-        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
         ObjectType queryType = new ObjectType().setName("QueryType").addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
         ObjectType mutationType = new ObjectType().setName("MutationType").addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
@@ -89,6 +87,8 @@ public class DocumentBuilder {
         manager.registerGraphQL(queryType.toString());
         manager.registerGraphQL(mutationType.toString());
         manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
+        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
+        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
         mapper.registerFieldMaps();
 
         Document document = getDocument();
@@ -530,9 +530,9 @@ public class DocumentBuilder {
             if (fieldDefinitionContext.name().getText().equals("__typename")) {
                 return new InputValue().setName("__typename").setTypeName("String").setDefaultValue(objectTypeDefinitionContext.name().getText());
             }
+            boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
             return new InputValue().setName(fieldDefinitionContext.name().getText())
-                    .setTypeName(fieldDefinitionContext.type().getText()
-                            .replace(fieldTypeName, fieldTypeName.concat(manager.isObject(fieldTypeName) ? inputType.toString() : "")));
+                    .setTypeName((isList ? "[".concat(fieldTypeName).concat("]") : fieldTypeName).replace(fieldTypeName, fieldTypeName.concat(manager.isObject(fieldTypeName) ? inputType.toString() : "")));
         } else if (inputType.equals(InputType.EXPRESSION)) {
             if (fieldDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME)) {
                 return new InputValue().setName(DEPRECATED_INPUT_NAME).setTypeName("Boolean").setDefaultValue("false");

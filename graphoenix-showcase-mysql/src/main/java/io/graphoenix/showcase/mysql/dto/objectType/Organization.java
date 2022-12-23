@@ -79,8 +79,6 @@ public class Organization implements Meta {
 
   private UserConnection usersConnection;
 
-  private Integer orgLevel2;
-
   private Collection<Integer> orgLevel3;
 
   private Collection<Boolean> roleDisable;
@@ -327,14 +325,6 @@ public class Organization implements Meta {
 
   public void setUsersConnection(UserConnection usersConnection) {
     this.usersConnection = usersConnection;
-  }
-
-  public Integer getOrgLevel2() {
-    return this.orgLevel2;
-  }
-
-  public void setOrgLevel2(Integer orgLevel2) {
-    this.orgLevel2 = orgLevel2;
   }
 
   public Collection<Integer> getOrgLevel3() {

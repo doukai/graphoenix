@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -24,10 +23,8 @@ public class __DirectiveInput {
 
   private String description;
 
-  @NonNull
   private Collection<__DirectiveLocation> locations;
 
-  @NonNull
   private Collection<__InputValueInput> args;
 
   private Boolean onOperation;

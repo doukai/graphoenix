@@ -13,7 +13,7 @@ public enum GraphQLErrorType {
     ARGUMENT_NOT_EXIST(-17, "argument not exist: %s"),
 
     FIELD_NOT_EXIST(-21, "field definition not exist in type %s: %s"),
-    TYPE_ID_FIELD_NOT_EXIST(-22, "input object definition not exist: %s"),
+    TYPE_ID_FIELD_NOT_EXIST(-22, "type id field not exist: %s"),
     FRAGMENT_NOT_EXIST(-23, "fragment not exist: %s"),
 
     QUERY_NOT_EXIST(-31, "query not exist in operation"),

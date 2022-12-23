@@ -36,8 +36,6 @@ public @interface OrganizationExpression2 {
 
   StringExpression __typename() default @StringExpression;
 
-  IntExpression orgLevel2() default @IntExpression;
-
   IntExpression orgLevel3() default @IntExpression;
 
   BooleanExpression roleDisable() default @BooleanExpression;

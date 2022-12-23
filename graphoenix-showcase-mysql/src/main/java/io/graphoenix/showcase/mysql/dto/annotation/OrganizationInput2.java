@@ -33,8 +33,6 @@ public @interface OrganizationInput2 {
 
   String __typename() default "";
 
-  int orgLevel2() default 0;
-
   int[] orgLevel3() default {};
 
   boolean[] roleDisable() default {};
@@ -72,8 +70,6 @@ public @interface OrganizationInput2 {
   String $usersAggregate() default "";
 
   String $usersConnection() default "";
-
-  String $orgLevel2() default "";
 
   String $orgLevel3() default "";
 

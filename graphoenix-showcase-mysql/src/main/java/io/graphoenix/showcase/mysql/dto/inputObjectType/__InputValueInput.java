@@ -9,7 +9,6 @@ import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -32,7 +31,6 @@ public class __InputValueInput {
 
   private String description;
 
-  @NonNull
   private __TypeInput type;
 
   private String defaultValue;

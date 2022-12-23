@@ -33,8 +33,6 @@ public @interface OrganizationOrderBy2 {
 
   Sort __typename() default Sort.ASC;
 
-  Sort orgLevel2() default Sort.ASC;
-
   Sort orgLevel3() default Sort.ASC;
 
   Sort roleDisable() default Sort.ASC;

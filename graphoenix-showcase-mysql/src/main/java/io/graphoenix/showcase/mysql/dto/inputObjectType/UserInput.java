@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -20,13 +19,10 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class UserInput {
   private String id;
 
-  @NonNull
   private String login;
 
-  @NonNull
   private String password;
 
-  @NonNull
   private String name;
 
   private Integer age;
@@ -43,13 +39,10 @@ public class UserInput {
 
   private Collection<RoleInput> roles;
 
-  @NonNull
   private Collection<String> phones;
 
-  @NonNull
   private Collection<Integer> test1;
 
-  @NonNull
   private Collection<Boolean> test2;
 
   private Boolean isDeprecated;

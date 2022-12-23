@@ -85,7 +85,7 @@ message IntroSchemaInput {
     optional string mutation_type_name = 3;
     optional string subscription_type_name = 4;
     repeated IntroTypeInput types = 5;
-    IntroTypeInput query_type = 6;
+    optional IntroTypeInput query_type = 6;
     optional IntroTypeInput mutation_type = 7;
     optional IntroTypeInput subscription_type = 8;
     repeated IntroDirectiveInput directives = 9;
@@ -100,9 +100,9 @@ message IntroSchemaInput {
     optional string intro_typename = 18;
 }
 message IntroTypeInput {
-    string name = 1;
+    optional string name = 1;
     optional int32 schema_id = 2;
-    IntroTypeKind kind = 3;
+    optional IntroTypeKind kind = 3;
     optional string description = 4;
     repeated IntroFieldInput fields = 5;
     repeated IntroTypeInput interfaces = 6;
@@ -123,8 +123,8 @@ message IntroTypeInput {
 }
 message IntroTypeInterfacesInput {
     optional string id = 1;
-    string type_name = 2;
-    string interface_name = 3;
+    optional string type_name = 2;
+    optional string interface_name = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
     optional string realm_id = 6;
@@ -137,8 +137,8 @@ message IntroTypeInterfacesInput {
 }
 message IntroTypePossibleTypesInput {
     optional string id = 1;
-    string type_name = 2;
-    string possible_type_name = 3;
+    optional string type_name = 2;
+    optional string possible_type_name = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
     optional string realm_id = 6;
@@ -157,7 +157,7 @@ message IntroFieldInput {
     optional IntroTypeInput of_type = 5;
     optional string description = 6;
     repeated IntroInputValueInput args = 7;
-    IntroTypeInput type = 8;
+    optional IntroTypeInput type = 8;
     optional string deprecation_reason = 9;
     optional string from = 10;
     optional string to = 11;
@@ -183,7 +183,7 @@ message IntroInputValueInput {
     optional int32 field_id = 6;
     optional string directive_name = 7;
     optional string description = 8;
-    IntroTypeInput type = 9;
+    optional IntroTypeInput type = 9;
     optional string default_value = 10;
     optional bool is_deprecated = 11;
     optional int32 version = 12;
@@ -233,8 +233,8 @@ message IntroDirectiveInput {
 }
 message IntroDirectiveLocationsInput {
     optional string id = 1;
-    string directive_name = 2;
-    IntroDirectiveLocation directive_location = 3;
+    optional string directive_name = 2;
+    optional IntroDirectiveLocation directive_location = 3;
     optional bool is_deprecated = 4;
     optional int32 version = 5;
     optional string realm_id = 6;
@@ -247,9 +247,9 @@ message IntroDirectiveLocationsInput {
 }
 message UserInput {
     optional string id = 1;
-    string login = 2;
-    string password = 3;
-    string name = 4;
+    optional string login = 2;
+    optional string password = 3;
+    optional string name = 4;
     optional int32 age = 5;
     optional bool disable = 6;
     optional Sex sex = 7;
@@ -345,7 +345,7 @@ message UserRoleInput {
 }
 message RoleInput {
     optional string id = 1;
-    string name = 2;
+    optional string name = 2;
     repeated RoleType type = 3;
     repeated UserInput users = 4;
     optional bool is_deprecated = 5;
@@ -377,7 +377,7 @@ message OrganizationInput {
     optional int32 above_id = 2;
     optional OrganizationInput above = 3;
     repeated UserInput users = 4;
-    string name = 5;
+    optional string name = 5;
     optional bool is_deprecated = 6;
     optional int32 version = 7;
     optional string realm_id = 8;

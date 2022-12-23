@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -25,17 +24,14 @@ public class __SchemaInput {
 
   private String subscriptionTypeName;
 
-  @NonNull
   private Collection<__TypeInput> types;
 
-  @NonNull
   private __TypeInput queryType;
 
   private __TypeInput mutationType;
 
   private __TypeInput subscriptionType;
 
-  @NonNull
   private Collection<__DirectiveInput> directives;
 
   private Boolean isDeprecated;

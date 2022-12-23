@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -20,10 +19,8 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class RoleInput {
   private String id;
 
-  @NonNull
   private String name;
 
-  @NonNull
   private Collection<RoleType> type;
 
   private Collection<UserInput> users;

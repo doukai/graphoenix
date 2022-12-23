@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -25,7 +24,6 @@ public class OrganizationInput {
 
   private Collection<UserInput> users;
 
-  @NonNull
   private String name;
 
   private Boolean isDeprecated;

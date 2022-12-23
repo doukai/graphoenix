@@ -9,7 +9,6 @@ import java.lang.String;
 import java.time.LocalDateTime;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
@@ -18,10 +17,8 @@ import org.eclipse.microprofile.graphql.NonNull;
 public class __TypePossibleTypesInput {
   private String id;
 
-  @NonNull
   private String typeName;
 
-  @NonNull
   private String possibleTypeName;
 
   private Boolean isDeprecated;

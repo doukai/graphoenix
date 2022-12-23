@@ -11,19 +11,16 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
-import org.eclipse.microprofile.graphql.NonNull;
 
 @Input
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Skip
 public class __TypeInput {
-  @NonNull
   private String name;
 
   private Integer schemaId;
 
-  @NonNull
   private __TypeKind kind;
 
   private String description;
