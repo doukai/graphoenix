@@ -25,6 +25,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.EXCLUDE_INPUT;
+import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
 import static jakarta.json.JsonValue.FALSE;
 import static jakarta.json.JsonValue.NULL;
 import static jakarta.json.JsonValue.TRUE;
@@ -47,8 +48,15 @@ public class JsonSchemaValidator {
         this.factory = new JsonSchemaFactory.Builder().defaultMetaSchemaURI(jsonMetaSchema.getUri()).addMetaSchema(jsonMetaSchema).addUrnFactory(jsonSchemaResourceURNFactory).build();
     }
 
-    public Set<ValidationMessage> validate(String objectName, boolean isList, String json) throws JsonProcessingException {
-        return factory.getSchema(jsonSchemaManager.getJsonSchema(isList ? objectName.concat("List") : objectName)).validate(mapper.readTree(json));
+    public Set<ValidationMessage> validate(String objectName, boolean isList, boolean isUpdate, String json) throws JsonProcessingException {
+        String schemaName = objectName;
+        if (isList) {
+            schemaName = schemaName.concat("List");
+        }
+        if (isUpdate) {
+            schemaName = schemaName.concat("Update");
+        }
+        return factory.getSchema(jsonSchemaManager.getJsonSchema(schemaName)).validate(mapper.readTree(json));
     }
 
     public void validateOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
@@ -74,7 +82,8 @@ public class JsonSchemaValidator {
                 selectionContext.field().name().getText()).orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(mutationTypeName, selectionContext.field().name().getText())));
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         boolean isList = manager.fieldTypeIsList(fieldDefinitionContext.type());
-        return validate(fieldTypeName, isList, argumentsToJsonElement(selectionContext.field().arguments()).toString());
+        boolean isUpdate = manager.getMutationType(selectionContext).equals(UPDATE);
+        return validate(fieldTypeName, isList, isUpdate, argumentsToJsonElement(selectionContext.field().arguments()).toString());
     }
 
     protected JsonValue argumentsToJsonElement(GraphqlParser.ArgumentsContext argumentsContext) {

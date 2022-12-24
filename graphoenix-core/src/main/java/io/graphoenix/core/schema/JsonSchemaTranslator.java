@@ -1,7 +1,6 @@
 package io.graphoenix.core.schema;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,15 +17,12 @@ import static jakarta.json.JsonValue.TRUE;
 @ApplicationScoped
 public class JsonSchemaTranslator {
 
-    private final GraphQLConfig graphQLConfig;
     private final JsonProvider jsonProvider;
     private final IGraphQLDocumentManager manager;
 
     @Inject
-    public JsonSchemaTranslator(GraphQLConfig graphQLConfig,
-                                IGraphQLDocumentManager manager,
+    public JsonSchemaTranslator(IGraphQLDocumentManager manager,
                                 JsonProvider jsonProvider) {
-        this.graphQLConfig = graphQLConfig;
         this.manager = manager;
         this.jsonProvider = jsonProvider;
     }
@@ -51,7 +47,7 @@ public class JsonSchemaTranslator {
         JsonObjectBuilder jsonSchemaBuilder = getValidationDirectiveContext(objectTypeDefinitionContext.directives())
                 .map(this::buildValidation)
                 .orElseGet(jsonProvider::createObjectBuilder);
-        JsonObjectBuilder builder = jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(isUpdate ? "update".concat(objectTypeDefinitionContext.name().getText()) : objectTypeDefinitionContext.name().getText())))
+        JsonObjectBuilder builder = jsonSchemaBuilder.add("$id", jsonProvider.createValue("#".concat(isUpdate ? objectTypeDefinitionContext.name().getText().concat("Update") : objectTypeDefinitionContext.name().getText())))
                 .add("type", jsonProvider.createValue("object"))
                 .add("properties", objectToProperties(objectTypeDefinitionContext, isUpdate))
                 .add("additionalProperties", TRUE);
@@ -167,13 +163,14 @@ public class JsonSchemaTranslator {
                             }
                     );
         } else if (manager.isObject(fieldTypeName)) {
+            String $ref = isUpdate ? fieldTypeName.concat("Update") : fieldTypeName;
             if (isNonNull) {
-                jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
+                jsonObjectBuilder.add("$ref", jsonProvider.createValue($ref));
             } else {
                 jsonObjectBuilder.add("oneOf",
                         jsonProvider.createArrayBuilder()
                                 .add(jsonProvider.createObjectBuilder().add("type", jsonProvider.createValue("null")))
-                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(isUpdate ? "update".concat(fieldTypeName) : fieldTypeName)))
+                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue($ref)))
                 );
             }
         }

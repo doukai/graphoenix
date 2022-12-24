@@ -200,7 +200,7 @@ public class ApplicationProcessor extends AbstractProcessor {
                 writer = schema.openWriter();
                 writer.write(jsonSchemaTranslator.objectListToJsonSchemaString(objectTypeDefinitionContext));
                 writer.close();
-                schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/update".concat(objectTypeDefinitionContext.name().getText()));
+                schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText().concat("Update")));
                 writer = schema.openWriter();
                 writer.write(jsonSchemaTranslator.objectToJsonSchemaString(objectTypeDefinitionContext, true));
                 writer.close();
