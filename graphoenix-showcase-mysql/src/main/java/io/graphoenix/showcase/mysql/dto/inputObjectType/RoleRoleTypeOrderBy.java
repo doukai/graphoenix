@@ -15,6 +15,8 @@ public class RoleRoleTypeOrderBy {
 
   private Sort roleId;
 
+  private Sort type;
+
   private Sort isDeprecated;
 
   private Sort version;
@@ -47,6 +49,14 @@ public class RoleRoleTypeOrderBy {
 
   public void setRoleId(Sort roleId) {
     this.roleId = roleId;
+  }
+
+  public Sort getType() {
+    return this.type;
+  }
+
+  public void setType(Sort type) {
+    this.type = type;
   }
 
   public Sort getIsDeprecated() {

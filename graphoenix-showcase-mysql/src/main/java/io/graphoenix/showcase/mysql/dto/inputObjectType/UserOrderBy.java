@@ -23,6 +23,8 @@ public class UserOrderBy {
 
   private Sort disable;
 
+  private Sort sex;
+
   private Sort organizationId;
 
   private Sort isDeprecated;
@@ -89,6 +91,14 @@ public class UserOrderBy {
 
   public void setDisable(Sort disable) {
     this.disable = disable;
+  }
+
+  public Sort getSex() {
+    return this.sex;
+  }
+
+  public void setSex(Sort sex) {
+    this.sex = sex;
   }
 
   public Sort getOrganizationId() {

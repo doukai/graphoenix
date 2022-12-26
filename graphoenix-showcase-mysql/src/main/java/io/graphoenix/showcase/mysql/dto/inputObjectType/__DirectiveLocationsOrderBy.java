@@ -15,6 +15,8 @@ public class __DirectiveLocationsOrderBy {
 
   private Sort directiveName;
 
+  private Sort directiveLocation;
+
   private Sort isDeprecated;
 
   private Sort version;
@@ -47,6 +49,14 @@ public class __DirectiveLocationsOrderBy {
 
   public void setDirectiveName(Sort directiveName) {
     this.directiveName = directiveName;
+  }
+
+  public Sort getDirectiveLocation() {
+    return this.directiveLocation;
+  }
+
+  public void setDirectiveLocation(Sort directiveLocation) {
+    this.directiveLocation = directiveLocation;
   }
 
   public Sort getIsDeprecated() {

@@ -15,6 +15,8 @@ public class __TypeOrderBy {
 
   private Sort schemaId;
 
+  private Sort kind;
+
   private Sort description;
 
   private Sort ofTypeName;
@@ -51,6 +53,14 @@ public class __TypeOrderBy {
 
   public void setSchemaId(Sort schemaId) {
     this.schemaId = schemaId;
+  }
+
+  public Sort getKind() {
+    return this.kind;
+  }
+
+  public void setKind(Sort kind) {
+    this.kind = kind;
   }
 
   public Sort getDescription() {
