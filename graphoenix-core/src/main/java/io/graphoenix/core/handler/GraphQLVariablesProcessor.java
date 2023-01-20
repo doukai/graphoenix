@@ -215,9 +215,9 @@ public class GraphQLVariablesProcessor {
     private GraphqlParser.TypeContext getArgumentType(GraphqlParser.ArgumentContext argumentContext, GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext;
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
-            objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+            objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
         } else if (operationDefinitionContext.operationType().MUTATION() != null) {
-            objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name)).orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+            objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
         } else {
             throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
         }

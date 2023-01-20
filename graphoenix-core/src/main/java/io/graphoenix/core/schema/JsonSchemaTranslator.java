@@ -163,14 +163,13 @@ public class JsonSchemaTranslator {
                             }
                     );
         } else if (manager.isObject(fieldTypeName)) {
-            String $ref = isUpdate ? fieldTypeName.concat("Update") : fieldTypeName;
             if (isNonNull) {
-                jsonObjectBuilder.add("$ref", jsonProvider.createValue($ref));
+                jsonObjectBuilder.add("$ref", jsonProvider.createValue(fieldTypeName));
             } else {
                 jsonObjectBuilder.add("oneOf",
                         jsonProvider.createArrayBuilder()
                                 .add(jsonProvider.createObjectBuilder().add("type", jsonProvider.createValue("null")))
-                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue($ref)))
+                                .add(jsonProvider.createObjectBuilder().add("$ref", jsonProvider.createValue(fieldTypeName)))
                 );
             }
         }
