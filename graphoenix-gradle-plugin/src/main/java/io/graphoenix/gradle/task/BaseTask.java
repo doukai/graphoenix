@@ -324,11 +324,11 @@ public class BaseTask extends DefaultTask {
     public String[] getArgumentClassNames(String className) {
         if (className.contains("<")) {
             int index = className.indexOf('<');
-            String argumentTypeNames = className.substring(index + 1, className.length() - 1);
-            if (argumentTypeNames.contains(",")) {
-                return argumentTypeNames.split(",");
+            String argumentClassNames = className.substring(index + 1, className.length() - 1);
+            if (argumentClassNames.contains(",")) {
+                return argumentClassNames.split(",");
             } else {
-                return new String[]{argumentTypeNames};
+                return new String[]{argumentClassNames};
             }
         } else {
             return null;
