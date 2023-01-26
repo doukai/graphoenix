@@ -5,11 +5,16 @@ import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
+import jakarta.json.spi.JsonProvider;
+import jakarta.json.stream.JsonCollectors;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.tinylog.Logger;
 
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,10 +33,12 @@ import static jakarta.json.JsonValue.ValueType.TRUE;
 public class GraphQLVariablesProcessor {
 
     private final IGraphQLDocumentManager manager;
+    private final JsonProvider jsonProvider;
 
     @Inject
-    public GraphQLVariablesProcessor(IGraphQLDocumentManager manager) {
+    public GraphQLVariablesProcessor(IGraphQLDocumentManager manager, JsonProvider jsonProvider) {
         this.manager = manager;
+        this.jsonProvider = jsonProvider;
     }
 
     public GraphqlParser.OperationDefinitionContext buildVariables(String graphQL, Map<String, JsonValue> variables) {
@@ -40,9 +47,46 @@ public class GraphQLVariablesProcessor {
 
     public GraphqlParser.OperationDefinitionContext buildVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         if (operationDefinitionContext.variableDefinitions() != null) {
-            operationDefinitionContext.selectionSet().selection().forEach(selectionContext -> processSelection(selectionContext, operationDefinitionContext, variables));
+            Map<String, JsonValue> processedDefaultValue = processDefaultValue(operationDefinitionContext, variables);
+            operationDefinitionContext.selectionSet().selection().forEach(selectionContext -> processSelection(selectionContext, operationDefinitionContext, processedDefaultValue));
         }
         return operationDefinitionContext;
+    }
+
+    private Map<String, JsonValue> processDefaultValue(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
+        JsonObject defaultValueObject = Stream.ofNullable(operationDefinitionContext.variableDefinitions())
+                .flatMap(variableDefinitionsContext -> variableDefinitionsContext.variableDefinition().stream())
+                .filter(variableDefinitionContext -> variableDefinitionContext.defaultValue() != null && variables.get(variableDefinitionContext.variable().name().getText()) == null)
+                .map(variableDefinitionContext -> new AbstractMap.SimpleEntry<>(variableDefinitionContext.variable().name().getText(), valueToJsonValue(variableDefinitionContext.defaultValue().value())))
+                .collect(JsonCollectors.toJsonObject());
+
+        if (!defaultValueObject.isEmpty()) {
+            return jsonProvider.createObjectBuilder(variables).addAll(jsonProvider.createObjectBuilder(defaultValueObject)).build();
+        }
+        return variables;
+    }
+
+    private JsonValue valueToJsonValue(GraphqlParser.ValueContext valueContext) {
+        if (valueContext.BooleanValue() != null) {
+            return Boolean.parseBoolean(valueContext.BooleanValue().getText()) ? JsonValue.TRUE : JsonValue.FALSE;
+        } else if (valueContext.IntValue() != null) {
+            return jsonProvider.createValue(Integer.parseInt(valueContext.IntValue().getText()));
+        } else if (valueContext.FloatValue() != null) {
+            return jsonProvider.createValue(Float.parseFloat(valueContext.FloatValue().getText()));
+        } else if (valueContext.StringValue() != null) {
+            return jsonProvider.createValue(DOCUMENT_UTIL.getStringValue(valueContext.StringValue()));
+        } else if (valueContext.NullValue() != null) {
+            return JsonValue.NULL;
+        } else if (valueContext.enumValue() != null) {
+            return jsonProvider.createValue(valueContext.enumValue().getText());
+        } else if (valueContext.objectValue() != null) {
+            return valueContext.objectValue().objectField().stream()
+                    .map(objectFieldContext -> new AbstractMap.SimpleEntry<>(objectFieldContext.name().getText(), valueToJsonValue(objectFieldContext.value())))
+                    .collect(JsonCollectors.toJsonObject());
+        } else if (valueContext.arrayValue() != null) {
+            return valueContext.arrayValue().value().stream().map(this::valueToJsonValue).collect(JsonCollectors.toJsonArray());
+        }
+        throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueContext.getText()));
     }
 
     private void processSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
