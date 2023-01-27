@@ -27,7 +27,7 @@ public class VariableDefinition {
             this.typeName = variableDefinitionContext.type().getText();
         }
         if (variableDefinitionContext.defaultValue() != null) {
-            this.defaultValue = variableDefinitionContext.defaultValue().getText();
+            this.defaultValue = variableDefinitionContext.defaultValue().value().getText();
         }
         if (variableDefinitionContext.directives() != null) {
             this.directives = variableDefinitionContext.directives().directive().stream().map(directiveContext -> new Directive(directiveContext).toString()).collect(Collectors.toCollection(LinkedHashSet::new));
