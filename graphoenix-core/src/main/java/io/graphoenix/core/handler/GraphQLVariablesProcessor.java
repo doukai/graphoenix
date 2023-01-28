@@ -6,7 +6,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
@@ -22,7 +21,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.*;
+import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.INPUT_OBJECT_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static jakarta.json.JsonValue.ValueType.ARRAY;
 import static jakarta.json.JsonValue.ValueType.NULL;
@@ -49,6 +55,9 @@ public class GraphQLVariablesProcessor {
         if (operationDefinitionContext.variableDefinitions() != null) {
             Map<String, JsonValue> processedDefaultValue = processDefaultValue(operationDefinitionContext, variables);
             operationDefinitionContext.selectionSet().selection().forEach(selectionContext -> processSelection(selectionContext, operationDefinitionContext, processedDefaultValue));
+            if (operationDefinitionContext.directives() != null) {
+                operationDefinitionContext.directives().directive().forEach(directiveContext -> processDirective(directiveContext, operationDefinitionContext, processedDefaultValue));
+            }
         }
         return operationDefinitionContext;
     }
@@ -89,6 +98,13 @@ public class GraphQLVariablesProcessor {
         throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueContext.getText()));
     }
 
+    private void processDirective(GraphqlParser.DirectiveContext directiveContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
+        if (directiveContext.arguments() != null) {
+            directiveContext.arguments().argument()
+                    .forEach(argumentContext -> replaceVariable(argumentContext.valueWithVariable(), operationDefinitionContext, variables));
+        }
+    }
+
     private void processSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         if (selectionContext.field() != null) {
             if (selectionContext.field().arguments() != null) {
@@ -114,7 +130,24 @@ public class GraphQLVariablesProcessor {
             if (selectionContext.field().selectionSet() != null) {
                 selectionContext.field().selectionSet().selection().forEach(subSelectionContext -> processSelection(subSelectionContext, operationDefinitionContext, variables));
             }
+            if (selectionContext.field().directives() != null) {
+                selectionContext.field().directives().directive().forEach(directiveContext -> processDirective(directiveContext, operationDefinitionContext, variables));
+            }
         }
+        if (selectionContext.fragmentSpread() != null) {
+            if (selectionContext.fragmentSpread().directives() != null) {
+                selectionContext.fragmentSpread().directives().directive().forEach(directiveContext -> processDirective(directiveContext, operationDefinitionContext, variables));
+            }
+        }
+        if (selectionContext.inlineFragment() != null) {
+            if (selectionContext.inlineFragment().directives() != null) {
+                selectionContext.inlineFragment().directives().directive().forEach(directiveContext -> processDirective(directiveContext, operationDefinitionContext, variables));
+            }
+        }
+    }
+
+    private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
+        replaceVariable(valueWithVariableContext, operationDefinitionContext, variables, false);
     }
 
     private void replaceVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables, boolean skipNullArguments) {

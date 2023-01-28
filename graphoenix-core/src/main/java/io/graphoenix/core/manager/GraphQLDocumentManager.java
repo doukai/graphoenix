@@ -187,11 +187,21 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .map(directivesContext ->
                         directivesContext.directive().stream()
                                 .filter(directiveContext -> directiveContext.name().getText().equals(UPDATE_DIRECTIVE_NAME))
+                                .filter(directiveContext ->
+                                        directiveContext.arguments().argument().stream()
+                                                .filter(argumentContext -> argumentContext.name().getText().equals("if"))
+                                                .anyMatch(argumentContext -> argumentContext.valueWithVariable().BooleanValue()!=null && Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
+                                )
                                 .findFirst()
                                 .map(directiveContext -> UPDATE)
                                 .orElseGet(() ->
                                         directivesContext.directive().stream()
                                                 .filter(directiveContext -> directiveContext.name().getText().equals(DELETE_DIRECTIVE_NAME))
+                                                .filter(directiveContext ->
+                                                        directiveContext.arguments().argument().stream()
+                                                                .filter(argumentContext -> argumentContext.name().getText().equals("if"))
+                                                                .anyMatch(argumentContext -> argumentContext.valueWithVariable().BooleanValue()!=null && Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
+                                                )
                                                 .findFirst()
                                                 .map(directiveContext -> DELETE)
                                                 .orElse(MERGE)

@@ -176,9 +176,9 @@ directive @containerType(className: String) on OBJECT
 
 directive @connection(field: String agg: String) on FIELD_DEFINITION
 
-directive @update on FIELD
+directive @update(if: Boolean!) on FIELD
 
-directive @delete on FIELD
+directive @delete(if: Boolean!) on FIELD
 
 directive @format(value: String locale: String) on FIELD | FIELD_DEFINITION
 
