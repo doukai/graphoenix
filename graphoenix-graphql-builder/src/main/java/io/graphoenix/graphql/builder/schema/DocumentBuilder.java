@@ -307,7 +307,12 @@ public class DocumentBuilder {
     public Field buildListObjectAggregateField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         Field field = new Field().setName(fieldDefinitionContext.name().getText().concat(AGGREGATE_SUFFIX))
                 .setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                .setStringDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
+                .setStringDirectives(fieldDefinitionContext.directives() == null ? null : fieldDefinitionContext.directives().directive().stream().map(this::buildDirective).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(LAST_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ORDER_BY.toString())))
+                .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> fieldObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
         fieldObjectTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> field.addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION)));
@@ -321,7 +326,12 @@ public class DocumentBuilder {
                         .setName(CONNECTION_DIRECTIVE_NAME)
                         .addArgument(new Argument().setName("field").setValueWithVariable(new StringValue(fieldDefinitionContext.name().getText())))
                         .addArgument(new Argument().setName("agg").setValueWithVariable(new StringValue(fieldDefinitionContext.name().getText().concat(AGGREGATE_SUFFIX))))
-                );
+                )
+                .addArgument(new InputValue().setName(FIRST_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(LAST_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(OFFSET_INPUT_NAME).setTypeName("Int"))
+                .addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(manager.getFieldTypeName(fieldDefinitionContext.type()).concat(InputType.ORDER_BY.toString())))
+                .addArgument(new InputValue().setName(GROUP_BY_INPUT_NAME).setTypeName("[String!]"));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> fieldObjectTypeDefinitionContext = manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()));
         fieldObjectTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> field.addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, InputType.EXPRESSION)));
@@ -615,7 +625,7 @@ public class DocumentBuilder {
     public ObjectType objectToConnection(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return new ObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.CONNECTION.toString()))
                 .addField(new Field().setName("totalCount").setTypeName("Int"))
-                .addField(new Field().setName("pageInfo").setTypeName("PageInfo!"))
+                .addField(new Field().setName("pageInfo").setTypeName("PageInfo"))
                 .addField(new Field().setName("edges").setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat(InputType.EDGE.toString()).concat("]")))
                 .addStringDirective("containerType");
     }
