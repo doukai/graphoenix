@@ -21,14 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.INPUT_OBJECT_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.NON_NULL_VALUE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_VARIABLE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static jakarta.json.JsonValue.ValueType.ARRAY;
 import static jakarta.json.JsonValue.ValueType.NULL;
@@ -52,9 +45,29 @@ public class GraphQLVariablesProcessor {
     }
 
     public GraphqlParser.OperationDefinitionContext buildVariables(GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext;
+        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+            objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
+        } else if (operationDefinitionContext.operationType().MUTATION() != null) {
+            objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
+        } else {
+            throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
+        }
         if (operationDefinitionContext.variableDefinitions() != null) {
             Map<String, JsonValue> processedDefaultValue = processDefaultValue(operationDefinitionContext, variables);
-            operationDefinitionContext.selectionSet().selection().forEach(selectionContext -> processSelection(selectionContext, operationDefinitionContext, processedDefaultValue));
+            operationDefinitionContext.selectionSet().selection()
+                    .forEach(selectionContext ->
+                            processSelection(
+                                    objectTypeDefinitionContext
+                                            .fieldsDefinition().fieldDefinition().stream()
+                                            .filter(subFieldDefinitionContext -> subFieldDefinitionContext.name().getText().equals(selectionContext.field().name().getText()))
+                                            .findFirst()
+                                            .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(objectTypeDefinitionContext.name().getText(), selectionContext.field().name().getText()))),
+                                    selectionContext,
+                                    operationDefinitionContext,
+                                    processedDefaultValue
+                            )
+                    );
             if (operationDefinitionContext.directives() != null) {
                 operationDefinitionContext.directives().directive().forEach(directiveContext -> processDirective(directiveContext, operationDefinitionContext, processedDefaultValue));
             }
@@ -105,7 +118,7 @@ public class GraphQLVariablesProcessor {
         }
     }
 
-    private void processSelection(GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
+    private void processSelection(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext, Map<String, JsonValue> variables) {
         if (selectionContext.field() != null) {
             if (selectionContext.field().arguments() != null) {
                 boolean skipNullArguments = skipNullArguments(selectionContext.field(), variables);
@@ -124,11 +137,25 @@ public class GraphQLVariablesProcessor {
                         selectionContext.field().arguments().addChild((TerminalNode) right);
                     }
                 }
+
                 selectionContext.field().arguments().argument()
-                        .forEach(argumentContext -> replaceEnumValue(argumentContext.valueWithVariable(), getArgumentType(argumentContext, selectionContext, operationDefinitionContext)));
+                        .forEach(argumentContext -> replaceEnumValue(getArgumentType(fieldDefinitionContext, argumentContext), argumentContext.valueWithVariable()));
             }
             if (selectionContext.field().selectionSet() != null) {
-                selectionContext.field().selectionSet().selection().forEach(subSelectionContext -> processSelection(subSelectionContext, operationDefinitionContext, variables));
+                selectionContext.field().selectionSet().selection()
+                        .forEach(subSelectionContext ->
+                                processSelection(
+                                        manager.getObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                .orElseThrow(() -> new GraphQLErrors(TYPE_DEFINITION_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()))))
+                                                .fieldsDefinition().fieldDefinition().stream()
+                                                .filter(subFieldDefinitionContext -> subFieldDefinitionContext.name().getText().equals(subSelectionContext.field().name().getText()))
+                                                .findFirst()
+                                                .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), subSelectionContext.field().name().getText()))),
+                                        subSelectionContext,
+                                        operationDefinitionContext,
+                                        variables
+                                )
+                        );
             }
             if (selectionContext.field().directives() != null) {
                 selectionContext.field().directives().directive().forEach(directiveContext -> processDirective(directiveContext, operationDefinitionContext, variables));
@@ -195,16 +222,16 @@ public class GraphQLVariablesProcessor {
         }
     }
 
-    private void replaceEnumValue(GraphqlParser.ValueWithVariableContext valueWithVariableContext, GraphqlParser.TypeContext typeContext) {
+    private void replaceEnumValue(GraphqlParser.TypeContext typeContext, GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         if (manager.fieldTypeIsList(typeContext)) {
             if (valueWithVariableContext.arrayValueWithVariable() != null) {
                 valueWithVariableContext.arrayValueWithVariable().valueWithVariable()
-                        .forEach(subValueWithVariableContext -> replaceEnumValue(subValueWithVariableContext, typeContext));
+                        .forEach(subValueWithVariableContext -> replaceEnumValue(typeContext, subValueWithVariableContext));
             }
         } else if (manager.isInputObject(manager.getFieldTypeName(typeContext))) {
             if (valueWithVariableContext.objectValueWithVariable() != null) {
                 valueWithVariableContext.objectValueWithVariable().objectFieldWithVariable()
-                        .forEach(objectFieldWithVariableContext -> replaceEnumValue(objectFieldWithVariableContext.valueWithVariable(), getArgumentType(objectFieldWithVariableContext, typeContext)));
+                        .forEach(objectFieldWithVariableContext -> replaceEnumValue(getObjectFieldWithVariableType(typeContext, objectFieldWithVariableContext), objectFieldWithVariableContext.valueWithVariable()));
             }
         } else {
             if (manager.isEnum(manager.getFieldTypeName(typeContext))) {
@@ -289,22 +316,9 @@ public class GraphQLVariablesProcessor {
                 .orElse(false);
     }
 
-    private GraphqlParser.TypeContext getArgumentType(GraphqlParser.ArgumentContext argumentContext, GraphqlParser.SelectionContext selectionContext, GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext;
-        if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
-            objectTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-        } else if (operationDefinitionContext.operationType().MUTATION() != null) {
-            objectTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject).orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-        } else {
-            throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE.bind(operationDefinitionContext.operationType().getText()));
-        }
-
-        return objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(selectionContext.field().name().getText()))
-                .flatMap(fieldDefinitionContext ->
-                        Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
-                                .flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
-                )
+    private GraphqlParser.TypeContext getArgumentType(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, GraphqlParser.ArgumentContext argumentContext) {
+        return Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                .flatMap(argumentsDefinitionContext -> argumentsDefinitionContext.inputValueDefinition().stream())
                 .filter(inputValueDefinitionContext -> inputValueDefinitionContext.name().getText().equals(argumentContext.name().getText()))
                 .findFirst()
                 .map(GraphqlParser.InputValueDefinitionContext::type)
@@ -312,7 +326,7 @@ public class GraphQLVariablesProcessor {
     }
 
 
-    private GraphqlParser.TypeContext getArgumentType(GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext, GraphqlParser.TypeContext typeContext) {
+    private GraphqlParser.TypeContext getObjectFieldWithVariableType(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectFieldWithVariableContext objectFieldWithVariableContext) {
         return manager.getInputObject(manager.getFieldTypeName(typeContext))
                 .orElseThrow(() -> new GraphQLErrors(INPUT_OBJECT_NOT_EXIST.bind(manager.getFieldTypeName(typeContext))))
                 .inputObjectValueDefinitions().inputValueDefinition().stream()
