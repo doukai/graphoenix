@@ -381,7 +381,7 @@ public class GraphQLQueryToSelect {
                             if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
                                 Set<Argument> arguments = selectionContext.field().arguments().argument().stream()
                                         .map(argumentContext -> {
-                                                    if (argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) {
+                                                    if ((argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) && argumentContext.valueWithVariable().IntValue() != null) {
                                                         return new Argument()
                                                                 .setName(argumentContext.name().getText())
                                                                 .setValueWithVariable(new IntValue(Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1));
