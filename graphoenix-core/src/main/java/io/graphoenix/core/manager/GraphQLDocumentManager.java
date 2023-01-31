@@ -36,11 +36,10 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.DELETE;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.MERGE;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
-import static io.graphoenix.spi.constant.Hammurabi.UPDATE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
@@ -190,7 +189,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                                 .filter(directiveContext ->
                                         directiveContext.arguments().argument().stream()
                                                 .filter(argumentContext -> argumentContext.name().getText().equals("if"))
-                                                .anyMatch(argumentContext -> argumentContext.valueWithVariable().BooleanValue()!=null && Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
+                                                .anyMatch(argumentContext -> argumentContext.valueWithVariable().BooleanValue() != null && Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
                                 )
                                 .findFirst()
                                 .map(directiveContext -> UPDATE)
@@ -200,7 +199,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                                                 .filter(directiveContext ->
                                                         directiveContext.arguments().argument().stream()
                                                                 .filter(argumentContext -> argumentContext.name().getText().equals("if"))
-                                                                .anyMatch(argumentContext -> argumentContext.valueWithVariable().BooleanValue()!=null && Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
+                                                                .anyMatch(argumentContext -> argumentContext.valueWithVariable().BooleanValue() != null && Boolean.parseBoolean(argumentContext.valueWithVariable().BooleanValue().getText()))
                                                 )
                                                 .findFirst()
                                                 .map(directiveContext -> DELETE)
@@ -209,6 +208,21 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 )
                 .findFirst()
                 .orElse(MERGE);
+    }
+
+    @Override
+    public boolean appendToList(GraphqlParser.SelectionContext selectionContext, String argumentName) {
+        return Stream.ofNullable(selectionContext.field())
+                .flatMap(fieldContext -> Stream.ofNullable(fieldContext.directives()))
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(APPEND_TO_LIST_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
+                .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("arguments"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable() != null)
+                .flatMap(argumentContext -> argumentContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream())
+                .filter(valueWithVariableContext -> valueWithVariableContext.StringValue() != null)
+                .anyMatch(valueWithVariableContext -> DOCUMENT_UTIL.getStringValue(valueWithVariableContext.StringValue()).equals(argumentName));
     }
 
     @Override

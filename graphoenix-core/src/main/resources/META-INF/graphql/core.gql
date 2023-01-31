@@ -180,6 +180,8 @@ directive @update(if: Boolean!) on FIELD
 
 directive @delete(if: Boolean!) on FIELD
 
+directive @appendToList(arguments: [String]) on FIELD
+
 directive @format(value: String locale: String) on FIELD | FIELD_DEFINITION
 
 directive @permitAll on FIELD | OBJECT

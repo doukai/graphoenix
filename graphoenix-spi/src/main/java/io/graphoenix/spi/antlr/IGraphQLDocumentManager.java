@@ -43,6 +43,8 @@ public interface IGraphQLDocumentManager {
 
     Hammurabi.MutationType getMutationType(GraphqlParser.SelectionContext selectionContext);
 
+    boolean appendToList(GraphqlParser.SelectionContext selectionContext, String argumentName);
+
     void registerFragment(String graphql);
 
     boolean isScalar(String name);
