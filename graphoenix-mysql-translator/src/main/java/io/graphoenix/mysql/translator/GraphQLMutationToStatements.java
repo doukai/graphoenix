@@ -907,13 +907,6 @@ public class GraphQLMutationToStatements {
                                                                                    Expression fromValueExpression,
                                                                                    int level) {
 
-        Stream<Statement> objectWithTypeRemoveStream = objectWithTypeRemoveStream(
-                parentFieldDefinitionContext,
-                parentIdValueExpression,
-                fieldDefinitionContext,
-                fromValueExpression
-        );
-
         Stream<Statement> listObjectValueInsertStatementStream =
                 arrayValueWithVariableContext == null ?
                         Stream.empty() :
@@ -933,6 +926,17 @@ public class GraphQLMutationToStatements {
                                         )
                                 )
                                 .flatMap(statementStream -> statementStream);
+
+        if (appendToList) {
+            return listObjectValueInsertStatementStream;
+        }
+
+        Stream<Statement> objectWithTypeRemoveStream = objectWithTypeRemoveStream(
+                parentFieldDefinitionContext,
+                parentIdValueExpression,
+                fieldDefinitionContext,
+                fromValueExpression
+        );
 
         List<Expression> idValueExpressionList =
                 arrayValueWithVariableContext == null ?
@@ -1063,14 +1067,7 @@ public class GraphQLMutationToStatements {
                                                                              boolean appendToList,
                                                                              Expression fromValueExpression) {
 
-        Stream<Statement> objectWithTypeRemoveStream = objectWithTypeRemoveStream(
-                parentFieldDefinitionContext,
-                parentIdValueExpression,
-                fieldDefinitionContext,
-                fromValueExpression
-        );
-
-        Stream<Insert> listValueInsertStatementStream =
+        Stream<Statement> listValueInsertStatementStream =
                 arrayValueWithVariableContext == null ?
                         Stream.empty() :
                         IntStream.range(0, arrayValueWithVariableContext.valueWithVariable().size())
@@ -1084,6 +1081,17 @@ public class GraphQLMutationToStatements {
                                         )
                                 )
                                 .flatMap(statementStream -> statementStream);
+
+        if (appendToList) {
+            return listValueInsertStatementStream;
+        }
+
+        Stream<Statement> objectWithTypeRemoveStream = objectWithTypeRemoveStream(
+                parentFieldDefinitionContext,
+                parentIdValueExpression,
+                fieldDefinitionContext,
+                fromValueExpression
+        );
 
         return Stream.concat(objectWithTypeRemoveStream, listValueInsertStatementStream);
     }
