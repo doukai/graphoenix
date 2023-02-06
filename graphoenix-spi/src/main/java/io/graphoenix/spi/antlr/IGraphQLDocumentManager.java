@@ -43,7 +43,7 @@ public interface IGraphQLDocumentManager {
 
     Hammurabi.MutationType getMutationType(GraphqlParser.SelectionContext selectionContext);
 
-    boolean appendToList(GraphqlParser.SelectionContext selectionContext, String argumentName);
+    boolean mergeToList(GraphqlParser.SelectionContext selectionContext, String argumentName);
 
     void registerFragment(String graphql);
 
@@ -163,6 +163,8 @@ public interface IGraphQLDocumentManager {
 
     Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIDFieldDefinition(String objectTypeName);
 
+    Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIsDeprecatedFieldDefinition(String objectTypeName);
+
     Optional<String> getObjectTypeIDFieldName(String objectTypeName);
 
     Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
@@ -193,6 +195,8 @@ public interface IGraphQLDocumentManager {
 
     Optional<GraphqlParser.ObjectFieldWithVariableContext> getIDObjectFieldWithVariable(GraphqlParser.TypeContext typeContext,
                                                                                         GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext);
+
+    Optional<GraphqlParser.ObjectFieldWithVariableContext> getIsDeprecatedObjectFieldWithVariable(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext);
 
     Optional<GraphqlParser.ObjectFieldContext> getIDObjectField(GraphqlParser.TypeContext typeContext,
                                                                 GraphqlParser.ObjectValueContext objectValueContext);

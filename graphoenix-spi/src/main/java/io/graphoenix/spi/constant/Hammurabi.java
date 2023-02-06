@@ -21,7 +21,7 @@ public class Hammurabi {
     public static final String GRPC_DIRECTIVE_NAME = "grpc";
     public static final String UPDATE_DIRECTIVE_NAME = "update";
     public static final String DELETE_DIRECTIVE_NAME = "delete";
-    public static final String APPEND_TO_LIST_DIRECTIVE_NAME = "appendToList";
+    public static final String MERGE_TO_LIST_DIRECTIVE_NAME = "mergeToList";
     public static final String INTROSPECTION_PREFIX = "__";
     public static final String INPUT_SUFFIX = "Input";
     public static final String ORDER_BY_SUFFIX = "OrderBy";

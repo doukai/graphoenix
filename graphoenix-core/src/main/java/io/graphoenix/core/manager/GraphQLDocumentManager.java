@@ -211,11 +211,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean appendToList(GraphqlParser.SelectionContext selectionContext, String argumentName) {
+    public boolean mergeToList(GraphqlParser.SelectionContext selectionContext, String argumentName) {
         return Stream.ofNullable(selectionContext.field())
                 .flatMap(fieldContext -> Stream.ofNullable(fieldContext.directives()))
                 .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals(APPEND_TO_LIST_DIRECTIVE_NAME))
+                .filter(directiveContext -> directiveContext.name().getText().equals(MERGE_TO_LIST_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
                 .flatMap(argumentsContext -> argumentsContext.argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("arguments"))
@@ -650,6 +650,13 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIsDeprecatedFieldDefinition(String objectTypeName) {
+        return graphQLFieldManager.getFieldDefinitions(objectTypeName)
+                .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
+                .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals(DEPRECATED_FIELD_NAME)).findFirst();
+    }
+
+    @Override
     public Optional<String> getObjectTypeIDFieldName(String objectTypeName) {
         return graphQLFieldManager.getFieldDefinitions(objectTypeName)
                 .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
@@ -745,6 +752,22 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                         objectValueWithVariableContext.objectFieldWithVariable().stream()
                                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().NullValue() == null)
                                 .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .findFirst()
+                );
+    }
+
+    @Override
+    public Optional<GraphqlParser.ObjectFieldWithVariableContext> getIsDeprecatedObjectFieldWithVariable(GraphqlParser.TypeContext typeContext, GraphqlParser.ObjectValueWithVariableContext objectValueWithVariableContext) {
+        if (objectValueWithVariableContext == null) {
+            return Optional.empty();
+        }
+        Optional<GraphqlParser.FieldDefinitionContext> isDeprecatedFieldDefinition = getObjectTypeIsDeprecatedFieldDefinition(getFieldTypeName(typeContext));
+        return isDeprecatedFieldDefinition
+                .flatMap(fieldDefinitionContext ->
+                        objectValueWithVariableContext.objectFieldWithVariable().stream()
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.name().getText().equals(fieldDefinitionContext.name().getText()))
+                                .filter(objectFieldWithVariableContext -> objectFieldWithVariableContext.valueWithVariable().BooleanValue() != null)
+                                .filter(objectFieldWithVariableContext -> Boolean.parseBoolean(objectFieldWithVariableContext.valueWithVariable().BooleanValue().getText()))
                                 .findFirst()
                 );
     }

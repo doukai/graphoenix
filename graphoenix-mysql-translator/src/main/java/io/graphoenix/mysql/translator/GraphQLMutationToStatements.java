@@ -37,11 +37,7 @@ import net.sf.jsqlparser.statement.update.Update;
 import net.sf.jsqlparser.statement.update.UpdateSet;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -258,17 +254,27 @@ public class GraphQLMutationToStatements {
                                                                                         argumentContext.valueWithVariable()
                                                                                 );
                                                                             } else {
-                                                                                return listObjectValueWithVariableToInsertStatementStream(
-                                                                                        fieldDefinitionContext,
-                                                                                        idValueExpression,
-                                                                                        subFieldDefinitionContext,
-                                                                                        inputObjectTypeDefinitionContext,
-                                                                                        argumentContext.valueWithVariable().arrayValueWithVariable(),
-                                                                                        manager.appendToList(selectionContext, argumentContext.name().getText()),
-                                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                        0
-                                                                                );
+                                                                                return manager.mergeToList(selectionContext, argumentContext.name().getText()) ?
+                                                                                        listObjectValueWithVariableToMergeStatementStream(
+                                                                                                fieldDefinitionContext,
+                                                                                                idValueExpression,
+                                                                                                subFieldDefinitionContext,
+                                                                                                inputObjectTypeDefinitionContext,
+                                                                                                argumentContext.valueWithVariable().arrayValueWithVariable(),
+                                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                                0
+                                                                                        ) :
+                                                                                        listObjectValueWithVariableToInsertStatementStream(
+                                                                                                fieldDefinitionContext,
+                                                                                                idValueExpression,
+                                                                                                subFieldDefinitionContext,
+                                                                                                inputObjectTypeDefinitionContext,
+                                                                                                argumentContext.valueWithVariable().arrayValueWithVariable(),
+                                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                                0
+                                                                                        );
                                                                             }
                                                                         }
                                                                 )
@@ -314,7 +320,7 @@ public class GraphQLMutationToStatements {
                                                                         idValueExpression,
                                                                         subFieldDefinitionContext,
                                                                         argumentContext.valueWithVariable().arrayValueWithVariable(),
-                                                                        manager.appendToList(selectionContext, argumentContext.name().getText()),
+                                                                        manager.mergeToList(selectionContext, argumentContext.name().getText()),
                                                                         mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
                                                                                 .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null)
                                                                 );
@@ -886,26 +892,13 @@ public class GraphQLMutationToStatements {
                                                                                    GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext,
                                                                                    Expression fromValueExpression,
                                                                                    int level) {
-        return listObjectValueWithVariableToInsertStatementStream(
+
+        Stream<Statement> objectWithTypeRemoveStream = objectWithTypeRemoveStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
-                inputObjectTypeDefinitionContext,
-                arrayValueWithVariableContext,
-                false,
-                fromValueExpression,
-                level
+                fromValueExpression
         );
-    }
-
-    protected Stream<Statement> listObjectValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                                   Expression parentIdValueExpression,
-                                                                                   GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                                   GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
-                                                                                   GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext,
-                                                                                   boolean appendToList,
-                                                                                   Expression fromValueExpression,
-                                                                                   int level) {
 
         Stream<Statement> listObjectValueInsertStatementStream =
                 arrayValueWithVariableContext == null ?
@@ -927,17 +920,6 @@ public class GraphQLMutationToStatements {
                                 )
                                 .flatMap(statementStream -> statementStream);
 
-        if (appendToList) {
-            return listObjectValueInsertStatementStream;
-        }
-
-        Stream<Statement> objectWithTypeRemoveStream = objectWithTypeRemoveStream(
-                parentFieldDefinitionContext,
-                parentIdValueExpression,
-                fieldDefinitionContext,
-                fromValueExpression
-        );
-
         List<Expression> idValueExpressionList =
                 arrayValueWithVariableContext == null ?
                         null :
@@ -958,6 +940,66 @@ public class GraphQLMutationToStatements {
         );
 
         return Stream.concat(objectWithTypeRemoveStream, Stream.concat(listObjectValueInsertStatementStream, objectTypeFieldRelationRemoveStream));
+    }
+
+    protected Stream<Statement> listObjectValueWithVariableToMergeStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                                  Expression parentIdValueExpression,
+                                                                                  GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                                  GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext,
+                                                                                  GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext,
+                                                                                  Expression fromValueExpression,
+                                                                                  int level) {
+
+        List<GraphqlParser.ValueWithVariableContext> mergeValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable()).flatMap(Collection::stream)
+                .filter((valueWithVariableContext -> manager.getIsDeprecatedObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).isEmpty()))
+                .collect(Collectors.toList());
+
+        List<GraphqlParser.ValueWithVariableContext> removeValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable()).flatMap(Collection::stream)
+                .filter((valueWithVariableContext -> manager.getIsDeprecatedObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).isPresent()))
+                .collect(Collectors.toList());
+
+        Stream<Statement> listObjectValueInsertStatementStream = Stream.empty();
+        Stream<Statement> objectWithTypeRemoveStream = Stream.empty();
+        Stream<Statement> objectTypeFieldRelationRemoveStream = Stream.empty();
+
+        if (!mergeValueWithVariableList.isEmpty()) {
+            listObjectValueInsertStatementStream = IntStream.range(0, mergeValueWithVariableList.size())
+                    .mapToObj(index ->
+                            objectValueWithVariableToInsertStatementStream(
+                                    parentFieldDefinitionContext,
+                                    parentIdValueExpression,
+                                    fieldDefinitionContext,
+                                    inputObjectTypeDefinitionContext,
+                                    mergeValueWithVariableList.get(index).objectValueWithVariable(),
+                                    fromValueExpression,
+                                    mapper.getMapToValueWithVariableFromObjectFieldWithVariable(fieldDefinitionContext, mergeValueWithVariableList.get(index).objectValueWithVariable())
+                                            .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                    level,
+                                    index
+                            )
+                    )
+                    .flatMap(statementStream -> statementStream);
+        }
+
+        if (!removeValueWithVariableList.isEmpty()) {
+            List<Expression> removeValueExpressionList = removeValueWithVariableList.stream().map(dbValueUtil::scalarValueWithVariableToDBValue).collect(Collectors.toList());
+            objectWithTypeRemoveStream = objectWithTypeRemoveStream(
+                    parentFieldDefinitionContext,
+                    parentIdValueExpression,
+                    fieldDefinitionContext,
+                    fromValueExpression,
+                    removeValueExpressionList
+            );
+            objectTypeFieldRelationRemoveStream = objectTypeFieldRelationRemoveStream(
+                    parentFieldDefinitionContext,
+                    parentIdValueExpression,
+                    fieldDefinitionContext,
+                    fromValueExpression,
+                    removeValueExpressionList
+            );
+        }
+
+        return Stream.concat(listObjectValueInsertStatementStream, Stream.concat(objectWithTypeRemoveStream, objectTypeFieldRelationRemoveStream));
     }
 
     protected Stream<Statement> listObjectValueToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
@@ -1484,6 +1526,80 @@ public class GraphQLMutationToStatements {
         return Stream.empty();
     }
 
+    protected Stream<Statement> objectWithTypeRemoveStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                           Expression parentIdValueExpression,
+                                                           GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                           Expression fromValueExpression,
+                                                           List<Expression> removeValueExpressionList) {
+
+        if (removeValueExpressionList == null || removeValueExpressionList.isEmpty()) {
+            return Stream.empty();
+        }
+
+        String parentTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
+        String fieldName = fieldDefinitionContext.name().getText();
+        boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
+
+        if (mapWithType) {
+            String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
+            Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
+            Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentTypeName, fieldName);
+
+            if (fromFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent()) {
+                Table parentTable = typeToTable(parentFieldDefinitionContext);
+                Column parentColumn = dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get());
+                Column parentIdColumn = dbNameUtil.fieldToColumn(parentTable, parentIdFieldDefinition.get());
+
+                Expression parentColumnExpression;
+                if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
+                    parentColumnExpression = parentIdValueExpression;
+                } else {
+                    parentColumnExpression = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
+                }
+
+                Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(parentTypeName, fieldName);
+                Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(parentTypeName, fieldName);
+                Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(parentFieldTypeName, fieldName);
+
+                if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
+                    Table withTable = dbNameUtil.typeToTable(mapWithObjectDefinition.get());
+                    Column withParentColumn = dbNameUtil.fieldToColumn(withTable, mapWithFromFieldDefinition.get());
+                    Column withColumn = dbNameUtil.fieldToColumn(withTable, mapWithToFieldDefinition.get());
+
+                    EqualsTo withParentColumnEqualsTo = new EqualsTo();
+                    withParentColumnEqualsTo.setLeftExpression(withParentColumn);
+                    if (fromValueExpression != null) {
+                        withParentColumnEqualsTo.setRightExpression(fromValueExpression);
+                    } else {
+                        withParentColumnEqualsTo.setRightExpression(parentColumnExpression);
+                    }
+                    InExpression inExpression = new InExpression().withLeftExpression(withColumn).withRightItemsList(new ExpressionList(removeValueExpressionList));
+                    return Stream.of(removeExpression(withTable, new MultiAndExpression(Arrays.asList(withParentColumnEqualsTo, inExpression))));
+
+                } else {
+                    GraphQLErrors graphQLErrors = new GraphQLErrors();
+                    if (mapWithObjectDefinition.isEmpty()) {
+                        graphQLErrors.add(MAP_WITH_TYPE_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    if (mapWithFromFieldDefinition.isEmpty()) {
+                        graphQLErrors.add(MAP_WITH_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                    }
+                    throw graphQLErrors;
+                }
+            } else {
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
+                if (fromFieldDefinition.isEmpty()) {
+                    graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                if (parentIdFieldDefinition.isEmpty()) {
+                    graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(parentTypeName));
+                }
+                throw graphQLErrors;
+            }
+        }
+        return Stream.empty();
+    }
+
     protected Stream<Statement> objectTypeFieldRelationRemoveStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                     Expression parentIdValueExpression,
                                                                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
@@ -1533,28 +1649,92 @@ public class GraphQLMutationToStatements {
 
                     if (anchor) {
                         return Stream.of(
-                                updateExpression(parentTable, new UpdateSet(parentColumn, new NullValue()), parentIdColumn, parentIdValueExpression),
-                                removeExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn)))
+                                updateExpression(parentTable, new UpdateSet(parentColumn, new NullValue()), parentIdColumn, parentIdValueExpression)
+//                                , removeExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn)))
                         );
                     } else {
                         return Stream.of(
-                                updateExpression(table, new UpdateSet(column, new NullValue()), new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn))),
-                                removeExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn)))
+                                updateExpression(table, new UpdateSet(column, new NullValue()), new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn)))
+//                                , removeExpression(table, new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, idColumnNotIn)))
                         );
                     }
                 } else {
                     if (anchor) {
                         return Stream.of(
-                                updateExpression(parentTable, new UpdateSet(parentColumn, new NullValue()), parentIdColumn, parentIdValueExpression),
-                                removeExpression(table, parentColumnEqualsTo)
+                                updateExpression(parentTable, new UpdateSet(parentColumn, new NullValue()), parentIdColumn, parentIdValueExpression)
+//                                , removeExpression(table, parentColumnEqualsTo)
                         );
                     } else {
                         return Stream.of(
-                                updateExpression(table, new UpdateSet(column, new NullValue()), parentColumnEqualsTo),
-                                removeExpression(table, parentColumnEqualsTo)
+                                updateExpression(table, new UpdateSet(column, new NullValue()), parentColumnEqualsTo)
+//                                , removeExpression(table, parentColumnEqualsTo)
                         );
                     }
                 }
+            } else {
+                GraphQLErrors graphQLErrors = new GraphQLErrors();
+                if (parentIdFieldDefinition.isEmpty()) {
+                    graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(parentFieldTypeName));
+                }
+                if (idFieldDefinition.isEmpty()) {
+                    graphQLErrors.add(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName));
+                }
+                if (fromFieldDefinition.isEmpty()) {
+                    graphQLErrors.add(MAP_FROM_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                if (toFieldDefinition.isEmpty()) {
+                    graphQLErrors.add(MAP_TO_FIELD_NOT_EXIST.bind(fieldDefinitionContext.getText()));
+                }
+                throw graphQLErrors;
+            }
+        }
+        return Stream.empty();
+    }
+
+    protected Stream<Statement> objectTypeFieldRelationRemoveStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
+                                                                    Expression parentIdValueExpression,
+                                                                    GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
+                                                                    Expression fromValueExpression,
+                                                                    List<Expression> removeValueExpressionList) {
+
+        if (removeValueExpressionList == null || removeValueExpressionList.isEmpty()) {
+            return Stream.empty();
+        }
+
+        String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
+        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+        String fieldName = fieldDefinitionContext.name().getText();
+        boolean mapWithType = mapper.mapWithType(parentFieldTypeName, fieldName);
+
+        if (!mapWithType) {
+            Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
+            Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = manager.getObjectTypeIDFieldDefinition(fieldTypeName);
+            Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentFieldTypeName, fieldName);
+            Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentFieldTypeName, fieldName);
+
+            if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent() && idFieldDefinition.isPresent()) {
+                Table parentTable = typeToTable(parentFieldDefinitionContext);
+                Table table = typeToTable(fieldDefinitionContext);
+                Column parentColumn = dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get());
+                Column parentIdColumn = dbNameUtil.fieldToColumn(parentTable, parentIdFieldDefinition.get());
+                Column column = dbNameUtil.fieldToColumn(table, toFieldDefinition.get());
+
+                Expression parentColumnExpression;
+                if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
+                    parentColumnExpression = parentIdValueExpression;
+                } else {
+                    parentColumnExpression = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
+                }
+
+                EqualsTo parentColumnEqualsTo = new EqualsTo();
+                parentColumnEqualsTo.setLeftExpression(column);
+                if (fromValueExpression != null) {
+                    parentColumnEqualsTo.setRightExpression(fromValueExpression);
+                } else {
+                    parentColumnEqualsTo.setRightExpression(parentColumnExpression);
+                }
+                InExpression inExpression = new InExpression().withLeftExpression(column).withRightItemsList(new ExpressionList(removeValueExpressionList));
+                return Stream.of(updateExpression(table, new UpdateSet(column, new NullValue()), new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, inExpression))));
             } else {
                 GraphQLErrors graphQLErrors = new GraphQLErrors();
                 if (parentIdFieldDefinition.isEmpty()) {
