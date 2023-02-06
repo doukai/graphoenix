@@ -951,10 +951,12 @@ public class GraphQLMutationToStatements {
                                                                                   int level) {
 
         List<GraphqlParser.ValueWithVariableContext> mergeValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable()).flatMap(Collection::stream)
+                .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
                 .filter((valueWithVariableContext -> manager.getIsDeprecatedObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).isEmpty()))
                 .collect(Collectors.toList());
 
         List<GraphqlParser.ValueWithVariableContext> removeValueWithVariableList = Stream.ofNullable(arrayValueWithVariableContext.valueWithVariable()).flatMap(Collection::stream)
+                .filter(valueWithVariableContext -> valueWithVariableContext.objectValueWithVariable() != null)
                 .filter((valueWithVariableContext -> manager.getIsDeprecatedObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable()).isPresent()))
                 .collect(Collectors.toList());
 
@@ -982,20 +984,27 @@ public class GraphQLMutationToStatements {
         }
 
         if (!removeValueWithVariableList.isEmpty()) {
-            List<Expression> removeValueExpressionList = removeValueWithVariableList.stream().map(dbValueUtil::scalarValueWithVariableToDBValue).collect(Collectors.toList());
+            List<GraphqlParser.ValueWithVariableContext> removeIDValueWithVariableList = removeValueWithVariableList.stream()
+                    .map(valueWithVariableContext ->
+                            manager.getIDObjectFieldWithVariable(fieldDefinitionContext.type(), valueWithVariableContext.objectValueWithVariable())
+                                    .orElseThrow(() -> new GraphQLErrors(ID_ARGUMENT_NOT_EXIST.bind(valueWithVariableContext.objectValueWithVariable().getText())))
+                    )
+                    .map(GraphqlParser.ObjectFieldWithVariableContext::valueWithVariable)
+                    .collect(Collectors.toList());
+
             objectWithTypeRemoveStream = objectWithTypeRemoveStream(
                     parentFieldDefinitionContext,
                     parentIdValueExpression,
                     fieldDefinitionContext,
                     fromValueExpression,
-                    removeValueExpressionList
+                    removeIDValueWithVariableList
             );
             objectTypeFieldRelationRemoveStream = objectTypeFieldRelationRemoveStream(
                     parentFieldDefinitionContext,
                     parentIdValueExpression,
                     fieldDefinitionContext,
                     fromValueExpression,
-                    removeValueExpressionList
+                    removeIDValueWithVariableList
             );
         }
 
@@ -1530,13 +1539,14 @@ public class GraphQLMutationToStatements {
                                                            Expression parentIdValueExpression,
                                                            GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                            Expression fromValueExpression,
-                                                           List<Expression> removeValueExpressionList) {
+                                                           List<GraphqlParser.ValueWithVariableContext> removeIDValueWithVariableList) {
 
-        if (removeValueExpressionList == null || removeValueExpressionList.isEmpty()) {
+        if (removeIDValueWithVariableList == null || removeIDValueWithVariableList.isEmpty()) {
             return Stream.empty();
         }
 
         String parentTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
+        String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         String fieldName = fieldDefinitionContext.name().getText();
         boolean mapWithType = mapper.mapWithType(parentTypeName, fieldName);
 
@@ -1544,11 +1554,17 @@ public class GraphQLMutationToStatements {
             String parentFieldTypeName = manager.getFieldTypeName(parentFieldDefinitionContext.type());
             Optional<GraphqlParser.FieldDefinitionContext> parentIdFieldDefinition = manager.getObjectTypeIDFieldDefinition(parentFieldTypeName);
             Optional<GraphqlParser.FieldDefinitionContext> fromFieldDefinition = mapper.getFromFieldDefinition(parentTypeName, fieldName);
+            Optional<GraphqlParser.FieldDefinitionContext> idFieldDefinition = manager.getObjectTypeIDFieldDefinition(fieldTypeName);
+            Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
 
-            if (fromFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent()) {
+            if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent() && idFieldDefinition.isPresent()) {
                 Table parentTable = typeToTable(parentFieldDefinitionContext);
                 Column parentColumn = dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get());
                 Column parentIdColumn = dbNameUtil.fieldToColumn(parentTable, parentIdFieldDefinition.get());
+
+                Table table = typeToTable(fieldDefinitionContext);
+                Column column = dbNameUtil.fieldToColumn(table, toFieldDefinition.get());
+                Column idColumn = dbNameUtil.fieldToColumn(table, idFieldDefinition.get());
 
                 Expression parentColumnExpression;
                 if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
@@ -1567,13 +1583,31 @@ public class GraphQLMutationToStatements {
                     Column withColumn = dbNameUtil.fieldToColumn(withTable, mapWithToFieldDefinition.get());
 
                     EqualsTo withParentColumnEqualsTo = new EqualsTo();
-                    withParentColumnEqualsTo.setLeftExpression(withParentColumn);
+                    withParentColumnEqualsTo.withLeftExpression(withParentColumn);
                     if (fromValueExpression != null) {
                         withParentColumnEqualsTo.setRightExpression(fromValueExpression);
                     } else {
                         withParentColumnEqualsTo.setRightExpression(parentColumnExpression);
                     }
-                    InExpression inExpression = new InExpression().withLeftExpression(withColumn).withRightItemsList(new ExpressionList(removeValueExpressionList));
+
+                    InExpression inExpression = new InExpression().withLeftExpression(withColumn);
+                    if (column.getColumnName().equals(idColumn.getColumnName())) {
+                        inExpression.setRightItemsList(
+                                new ExpressionList(
+                                        removeIDValueWithVariableList.stream()
+                                                .map(dbValueUtil::scalarValueWithVariableToDBValue)
+                                                .collect(Collectors.toList())
+                                )
+                        );
+                    } else {
+                        inExpression.setRightItemsList(
+                                new ExpressionList(
+                                        removeIDValueWithVariableList.stream()
+                                                .map(valueWithVariableContext -> selectFieldByIdExpression(table, column, idColumn, dbValueUtil.scalarValueWithVariableToDBValue(valueWithVariableContext)))
+                                                .collect(Collectors.toList())
+                                )
+                        );
+                    }
                     return Stream.of(removeExpression(withTable, new MultiAndExpression(Arrays.asList(withParentColumnEqualsTo, inExpression))));
 
                 } else {
@@ -1695,9 +1729,9 @@ public class GraphQLMutationToStatements {
                                                                     Expression parentIdValueExpression,
                                                                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                     Expression fromValueExpression,
-                                                                    List<Expression> removeValueExpressionList) {
+                                                                    List<GraphqlParser.ValueWithVariableContext> removeIDValueWithVariableList) {
 
-        if (removeValueExpressionList == null || removeValueExpressionList.isEmpty()) {
+        if (removeIDValueWithVariableList == null || removeIDValueWithVariableList.isEmpty()) {
             return Stream.empty();
         }
 
@@ -1718,6 +1752,7 @@ public class GraphQLMutationToStatements {
                 Column parentColumn = dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get());
                 Column parentIdColumn = dbNameUtil.fieldToColumn(parentTable, parentIdFieldDefinition.get());
                 Column column = dbNameUtil.fieldToColumn(table, toFieldDefinition.get());
+                Column idColumn = dbNameUtil.fieldToColumn(table, idFieldDefinition.get());
 
                 Expression parentColumnExpression;
                 if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
@@ -1733,8 +1768,10 @@ public class GraphQLMutationToStatements {
                 } else {
                     parentColumnEqualsTo.setRightExpression(parentColumnExpression);
                 }
-                InExpression inExpression = new InExpression().withLeftExpression(column).withRightItemsList(new ExpressionList(removeValueExpressionList));
-                return Stream.of(updateExpression(table, new UpdateSet(column, new NullValue()), new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, inExpression))));
+                InExpression inIDExpression = new InExpression()
+                        .withLeftExpression(idColumn)
+                        .withRightItemsList(new ExpressionList(removeIDValueWithVariableList.stream().map(dbValueUtil::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
+                return Stream.of(updateExpression(table, new UpdateSet(column, new NullValue()), new MultiAndExpression(Arrays.asList(parentColumnEqualsTo, inIDExpression))));
             } else {
                 GraphQLErrors graphQLErrors = new GraphQLErrors();
                 if (parentIdFieldDefinition.isEmpty()) {
