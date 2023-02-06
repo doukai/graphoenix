@@ -89,7 +89,6 @@ public class GraphQLMutationToStatements {
         return operationDefinitionToStatementStream(DOCUMENT_UTIL.graphqlToOperation(graphql));
     }
 
-
     public Stream<String> createStatementsSQL(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return operationDefinitionToStatementStream(operationDefinitionContext).map(Object::toString);
     }
@@ -320,7 +319,6 @@ public class GraphQLMutationToStatements {
                                                                         idValueExpression,
                                                                         subFieldDefinitionContext,
                                                                         argumentContext.valueWithVariable().arrayValueWithVariable(),
-                                                                        manager.mergeToList(selectionContext, argumentContext.name().getText()),
                                                                         mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
                                                                                 .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null)
                                                                 );
@@ -648,7 +646,6 @@ public class GraphQLMutationToStatements {
                                 )
                                 .orElseThrow(() -> new GraphQLErrors(FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()), inputValueDefinitionContext.name().getText())))
                 );
-
 
         Stream<Statement> listInsertStatementStream = inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream()
                 .filter(inputValueDefinitionContext -> manager.fieldTypeIsList(inputValueDefinitionContext.type()))
@@ -1095,28 +1092,18 @@ public class GraphQLMutationToStatements {
         return Stream.empty();
     }
 
-
     protected Stream<Statement> listValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
                                                                              Expression parentIdValueExpression,
                                                                              GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
                                                                              GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext,
                                                                              Expression fromValueExpression) {
-        return listValueWithVariableToInsertStatementStream(
+
+        Stream<Statement> objectWithTypeRemoveStream = objectWithTypeRemoveStream(
                 parentFieldDefinitionContext,
                 parentIdValueExpression,
                 fieldDefinitionContext,
-                arrayValueWithVariableContext,
-                false,
                 fromValueExpression
         );
-    }
-
-    protected Stream<Statement> listValueWithVariableToInsertStatementStream(GraphqlParser.FieldDefinitionContext parentFieldDefinitionContext,
-                                                                             Expression parentIdValueExpression,
-                                                                             GraphqlParser.FieldDefinitionContext fieldDefinitionContext,
-                                                                             GraphqlParser.ArrayValueWithVariableContext arrayValueWithVariableContext,
-                                                                             boolean appendToList,
-                                                                             Expression fromValueExpression) {
 
         Stream<Statement> listValueInsertStatementStream =
                 arrayValueWithVariableContext == null ?
@@ -1132,17 +1119,6 @@ public class GraphQLMutationToStatements {
                                         )
                                 )
                                 .flatMap(statementStream -> statementStream);
-
-        if (appendToList) {
-            return listValueInsertStatementStream;
-        }
-
-        Stream<Statement> objectWithTypeRemoveStream = objectWithTypeRemoveStream(
-                parentFieldDefinitionContext,
-                parentIdValueExpression,
-                fieldDefinitionContext,
-                fromValueExpression
-        );
 
         return Stream.concat(objectWithTypeRemoveStream, listValueInsertStatementStream);
     }
