@@ -1534,29 +1534,30 @@ public class GraphQLMutationToStatements {
             Optional<GraphqlParser.FieldDefinitionContext> toFieldDefinition = mapper.getToFieldDefinition(parentTypeName, fieldName);
 
             if (fromFieldDefinition.isPresent() && toFieldDefinition.isPresent() && parentIdFieldDefinition.isPresent() && idFieldDefinition.isPresent()) {
-                Table parentTable = typeToTable(parentFieldDefinitionContext);
-                Column parentColumn = dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get());
-                Column parentIdColumn = dbNameUtil.fieldToColumn(parentTable, parentIdFieldDefinition.get());
-
-                Table table = typeToTable(fieldDefinitionContext);
-                Column column = dbNameUtil.fieldToColumn(table, toFieldDefinition.get());
-                Column idColumn = dbNameUtil.fieldToColumn(table, idFieldDefinition.get());
-
-                Expression parentColumnExpression;
-                if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
-                    parentColumnExpression = parentIdValueExpression;
-                } else {
-                    parentColumnExpression = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
-                }
 
                 Optional<GraphqlParser.ObjectTypeDefinitionContext> mapWithObjectDefinition = mapper.getWithObjectTypeDefinition(parentTypeName, fieldName);
                 Optional<GraphqlParser.FieldDefinitionContext> mapWithFromFieldDefinition = mapper.getWithFromFieldDefinition(parentTypeName, fieldName);
                 Optional<GraphqlParser.FieldDefinitionContext> mapWithToFieldDefinition = mapper.getWithToFieldDefinition(parentFieldTypeName, fieldName);
 
                 if (mapWithObjectDefinition.isPresent() && mapWithFromFieldDefinition.isPresent() && mapWithToFieldDefinition.isPresent()) {
+                    Table parentTable = typeToTable(parentFieldDefinitionContext);
+                    Column parentColumn = dbNameUtil.fieldToColumn(parentTable, fromFieldDefinition.get());
+                    Column parentIdColumn = dbNameUtil.fieldToColumn(parentTable, parentIdFieldDefinition.get());
+
+                    Table table = typeToTable(fieldDefinitionContext);
+                    Column column = dbNameUtil.fieldToColumn(table, toFieldDefinition.get());
+                    Column idColumn = dbNameUtil.fieldToColumn(table, idFieldDefinition.get());
+
                     Table withTable = dbNameUtil.typeToTable(mapWithObjectDefinition.get());
                     Column withParentColumn = dbNameUtil.fieldToColumn(withTable, mapWithFromFieldDefinition.get());
                     Column withColumn = dbNameUtil.fieldToColumn(withTable, mapWithToFieldDefinition.get());
+
+                    Expression parentColumnExpression;
+                    if (parentColumn.getColumnName().equals(parentIdColumn.getColumnName())) {
+                        parentColumnExpression = parentIdValueExpression;
+                    } else {
+                        parentColumnExpression = selectFieldByIdExpression(parentTable, parentColumn, parentIdColumn, parentIdValueExpression);
+                    }
 
                     EqualsTo withParentColumnEqualsTo = new EqualsTo();
                     withParentColumnEqualsTo.withLeftExpression(withParentColumn);
