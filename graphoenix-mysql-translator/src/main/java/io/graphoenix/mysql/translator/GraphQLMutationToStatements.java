@@ -217,18 +217,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                objectDefaultValueToStatementStream(
-                                                                        fieldDefinitionContext,
-                                                                        idValueExpression,
-                                                                        subFieldDefinitionContext,
-                                                                        inputObjectTypeDefinitionContext,
-                                                                        inputValueDefinitionContext,
-                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                        0,
-                                                                        0
+                                                                        objectDefaultValueToStatementStream(
+                                                                                fieldDefinitionContext,
+                                                                                idValueExpression,
+                                                                                subFieldDefinitionContext,
+                                                                                inputObjectTypeDefinitionContext,
+                                                                                inputValueDefinitionContext,
+                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                                0,
+                                                                                0
+                                                                        )
                                                                 )
-                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )
@@ -1577,13 +1577,7 @@ public class GraphQLMutationToStatements {
                                 )
                         );
                     } else {
-                        inExpression.setRightItemsList(
-                                new ExpressionList(
-                                        removeIDValueWithVariableList.stream()
-                                                .map(valueWithVariableContext -> selectFieldByIdExpression(table, column, idColumn, dbValueUtil.scalarValueWithVariableToDBValue(valueWithVariableContext)))
-                                                .collect(Collectors.toList())
-                                )
-                        );
+                        inExpression.setRightExpression(selectFieldByIdExpressionList(table, column, idColumn, removeIDValueWithVariableList.stream().map(dbValueUtil::scalarValueWithVariableToDBValue).collect(Collectors.toList())));
                     }
                     return Stream.of(removeExpression(withTable, new MultiAndExpression(Arrays.asList(withParentColumnEqualsTo, inExpression))));
 
@@ -2428,6 +2422,24 @@ public class GraphQLMutationToStatements {
         subEqualsTo.setLeftExpression(idColumn);
         subEqualsTo.setRightExpression(idFieldValueExpression);
         subBody.setWhere(subEqualsTo);
+        subSelect.setSelectBody(subBody);
+        return subSelect;
+    }
+
+    protected SubSelect selectFieldByIdExpressionList(Table table,
+                                                      Column selectColumn,
+                                                      Column idColumn,
+                                                      List<Expression> idFieldValueExpressionList) {
+        SubSelect subSelect = new SubSelect();
+        PlainSelect subBody = new PlainSelect();
+        subBody.setFromItem(table);
+        SelectExpressionItem selectExpressionItem = new SelectExpressionItem();
+        selectExpressionItem.setExpression(selectColumn);
+        subBody.setSelectItems(Collections.singletonList(selectExpressionItem));
+        InExpression inExpression = new InExpression();
+        inExpression.setLeftExpression(idColumn);
+        inExpression.setRightItemsList(new ExpressionList(idFieldValueExpressionList));
+        subBody.setWhere(inExpression);
         subSelect.setSelectBody(subBody);
         return subSelect;
     }
