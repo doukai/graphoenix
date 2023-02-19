@@ -204,6 +204,10 @@ public class ApplicationProcessor extends AbstractProcessor {
                 writer = schema.openWriter();
                 writer.write(jsonSchemaTranslator.objectToJsonSchemaString(objectTypeDefinitionContext, true));
                 writer.close();
+                schema = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/schema/".concat(objectTypeDefinitionContext.name().getText().concat("ListUpdate")));
+                writer = schema.openWriter();
+                writer.write(jsonSchemaTranslator.objectListToJsonSchemaString(objectTypeDefinitionContext, true));
+                writer.close();
             }
 
             invokeHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);

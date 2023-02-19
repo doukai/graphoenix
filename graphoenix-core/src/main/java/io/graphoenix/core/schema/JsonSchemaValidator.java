@@ -50,10 +50,11 @@ public class JsonSchemaValidator {
 
     public Set<ValidationMessage> validate(String objectName, boolean isList, boolean isUpdate, String json) throws JsonProcessingException {
         String schemaName = objectName;
-        if (isList) {
+        if (isList && isUpdate) {
+            schemaName = schemaName.concat("ListUpdate");
+        } else if (isList) {
             schemaName = schemaName.concat("List");
-        }
-        if (isUpdate) {
+        } else if (isUpdate) {
             schemaName = schemaName.concat("Update");
         }
         return factory.getSchema(jsonSchemaManager.getJsonSchema(schemaName)).validate(mapper.readTree(json));
