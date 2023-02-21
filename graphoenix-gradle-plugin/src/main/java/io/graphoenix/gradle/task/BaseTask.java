@@ -134,22 +134,13 @@ public class BaseTask extends DefaultTask {
                                         .asString();
 
                                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
-
                                 Type type = methodDeclaration.getType();
-                                String className = type.asString();
-                                boolean listType = false;
-                                if (getClassName(type.asString()).equals(PublisherBuilder.class.getSimpleName()) ||
-                                        getClassName(type.asString()).equals(Mono.class.getSimpleName())) {
-                                    className = getArgumentClassNames(type.asString())[0];
-                                } else if (getClassName(type.asString()).equals(Flux.class.getSimpleName())) {
-                                    listType = true;
-                                    className = getArgumentClassNames(type.asString())[0];
+                                String typeName = type.asString();
+                                if (getClassName(typeName).equals(PublisherBuilder.class.getSimpleName()) ||
+                                        getClassName(typeName).equals(Mono.class.getSimpleName())) {
+                                    typeName = getArgumentClassNames(typeName)[0];
                                 }
-                                String invokeFieldTypeName = getInvokeFieldTypeName(className);
-                                if (listType) {
-                                    invokeFieldTypeName = "[".concat(invokeFieldTypeName).concat("]");
-                                }
-
+                                String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
                                         .addField(
                                                 new Field()
@@ -171,20 +162,12 @@ public class BaseTask extends DefaultTask {
                     )
                     .forEach(methodDeclaration -> {
                                 Type type = methodDeclaration.getType();
-                                String className = type.asString();
-                                boolean listType = false;
-                                if (getClassName(type.asString()).equals(PublisherBuilder.class.getSimpleName()) ||
-                                        getClassName(type.asString()).equals(Mono.class.getSimpleName())) {
-                                    className = getArgumentClassNames(type.asString())[0];
-                                } else if (getClassName(type.asString()).equals(Flux.class.getSimpleName())) {
-                                    listType = true;
-                                    className = getArgumentClassNames(type.asString())[0];
+                                String typeName = type.asString();
+                                if (getClassName(typeName).equals(PublisherBuilder.class.getSimpleName()) ||
+                                        getClassName(typeName).equals(Mono.class.getSimpleName())) {
+                                    typeName = getArgumentClassNames(typeName)[0];
                                 }
-                                String invokeFieldTypeName = getInvokeFieldTypeName(className);
-                                if (listType) {
-                                    invokeFieldTypeName = "[".concat(invokeFieldTypeName).concat("]");
-                                }
-
+                                String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
                                 ObjectType objectType = manager.getQueryOperationTypeName().flatMap(manager::getObject)
                                         .map(documentBuilder::buildObject)
                                         .orElseGet(() -> new ObjectType().setName("QueryType"));
@@ -216,20 +199,12 @@ public class BaseTask extends DefaultTask {
                     )
                     .forEach(methodDeclaration -> {
                                 Type type = methodDeclaration.getType();
-                                String className = type.asString();
-                                boolean listType = false;
-                                if (getClassName(type.asString()).equals(PublisherBuilder.class.getSimpleName()) ||
-                                        getClassName(type.asString()).equals(Mono.class.getSimpleName())) {
-                                    className = getArgumentClassNames(type.asString())[0];
-                                } else if (getClassName(type.asString()).equals(Flux.class.getSimpleName())) {
-                                    listType = true;
-                                    className = getArgumentClassNames(type.asString())[0];
+                                String typeName = type.asString();
+                                if (getClassName(typeName).equals(PublisherBuilder.class.getSimpleName()) ||
+                                        getClassName(typeName).equals(Mono.class.getSimpleName())) {
+                                    typeName = getArgumentClassNames(typeName)[0];
                                 }
-                                String invokeFieldTypeName = getInvokeFieldTypeName(className);
-                                if (listType) {
-                                    invokeFieldTypeName = "[".concat(invokeFieldTypeName).concat("]");
-                                }
-
+                                String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
                                 ObjectType objectType = manager.getMutationOperationTypeName().flatMap(manager::getObject)
                                         .map(documentBuilder::buildObject)
                                         .orElseGet(() -> new ObjectType().setName("MutationType"));
@@ -265,42 +240,45 @@ public class BaseTask extends DefaultTask {
         }
     }
 
-    private String getInvokeFieldTypeName(String className) {
-        if (getClassName(className).equals(int.class.getSimpleName()) ||
-                getClassName(className).equals(short.class.getSimpleName()) ||
-                getClassName(className).equals(byte.class.getSimpleName()) ||
-                getClassName(className).equals(Integer.class.getSimpleName()) ||
-                getClassName(className).equals(Short.class.getSimpleName()) ||
-                getClassName(className).equals(Byte.class.getSimpleName())) {
+    private String getInvokeFieldTypeName(String typeName) {
+        if (typeName.endsWith("[]")) {
+            return "[".concat(getInvokeFieldTypeName(typeName.replace("[]", ""))).concat("]");
+        } else if (getClassName(typeName).equals(Collection.class.getSimpleName()) ||
+                getClassName(typeName).equals(List.class.getSimpleName()) ||
+                getClassName(typeName).equals(Set.class.getSimpleName()) ||
+                getClassName(typeName).equals(Flux.class.getSimpleName())) {
+            return "[".concat(getInvokeFieldTypeName(getArgumentClassNames(typeName)[0])).concat("]");
+        } else if (getClassName(typeName).equals(int.class.getSimpleName()) ||
+                getClassName(typeName).equals(short.class.getSimpleName()) ||
+                getClassName(typeName).equals(byte.class.getSimpleName()) ||
+                getClassName(typeName).equals(Integer.class.getSimpleName()) ||
+                getClassName(typeName).equals(Short.class.getSimpleName()) ||
+                getClassName(typeName).equals(Byte.class.getSimpleName())) {
             return "Int";
-        } else if (getClassName(className).equals(float.class.getSimpleName()) ||
-                getClassName(className).equals(double.class.getSimpleName()) ||
-                getClassName(className).equals(Float.class.getSimpleName()) ||
-                getClassName(className).equals(Double.class.getSimpleName())) {
+        } else if (getClassName(typeName).equals(float.class.getSimpleName()) ||
+                getClassName(typeName).equals(double.class.getSimpleName()) ||
+                getClassName(typeName).equals(Float.class.getSimpleName()) ||
+                getClassName(typeName).equals(Double.class.getSimpleName())) {
             return "Float";
-        } else if (getClassName(className).equals(String.class.getSimpleName()) ||
-                getClassName(className).equals(char.class.getSimpleName()) ||
-                getClassName(className).equals(Character.class.getSimpleName())) {
+        } else if (getClassName(typeName).equals(String.class.getSimpleName()) ||
+                getClassName(typeName).equals(char.class.getSimpleName()) ||
+                getClassName(typeName).equals(Character.class.getSimpleName())) {
             return "String";
-        } else if (getClassName(className).equals(boolean.class.getSimpleName()) ||
-                getClassName(className).equals(Boolean.class.getSimpleName())) {
+        } else if (getClassName(typeName).equals(boolean.class.getSimpleName()) ||
+                getClassName(typeName).equals(Boolean.class.getSimpleName())) {
             return "Boolean";
-        } else if (getClassName(className).equals(BigInteger.class.getSimpleName())) {
+        } else if (getClassName(typeName).equals(BigInteger.class.getSimpleName())) {
             return "BigInteger";
-        } else if (getClassName(className).equals(BigDecimal.class.getSimpleName())) {
+        } else if (getClassName(typeName).equals(BigDecimal.class.getSimpleName())) {
             return "BigDecimal";
-        } else if (getClassName(className).equals(LocalDate.class.getSimpleName())) {
+        } else if (getClassName(typeName).equals(LocalDate.class.getSimpleName())) {
             return "Date";
-        } else if (getClassName(className).equals(LocalTime.class.getSimpleName())) {
+        } else if (getClassName(typeName).equals(LocalTime.class.getSimpleName())) {
             return "Time";
-        } else if (getClassName(className).equals(LocalDateTime.class.getSimpleName())) {
+        } else if (getClassName(typeName).equals(LocalDateTime.class.getSimpleName())) {
             return "DateTime";
-        } else if (getClassName(className).equals(Collection.class.getSimpleName()) ||
-                getClassName(className).equals(List.class.getSimpleName()) ||
-                getClassName(className).equals(Set.class.getSimpleName())) {
-            return "[".concat(getInvokeFieldTypeName(getArgumentClassNames(className)[0])).concat("]");
         } else {
-            return getClassName(className);
+            return getClassName(typeName);
         }
     }
 
@@ -326,7 +304,23 @@ public class BaseTask extends DefaultTask {
             int index = className.indexOf('<');
             String argumentClassNames = className.substring(index + 1, className.length() - 1);
             if (argumentClassNames.contains(",")) {
-                return argumentClassNames.split(",");
+                List<String> argumentClassNameList = new ArrayList<>();
+                Arrays.stream(argumentClassNames.split(","))
+                        .forEach(argumentClassName -> {
+                                    if (argumentClassNameList.size() > 0) {
+                                        int lastIndex = argumentClassNameList.size() - 1;
+                                        String lastArgumentClassName = argumentClassNameList.get(lastIndex);
+                                        if (lastArgumentClassName.contains("<") && !lastArgumentClassName.contains(">")) {
+                                            argumentClassNameList.set(lastIndex, lastArgumentClassName + "," + argumentClassName);
+                                        } else {
+                                            argumentClassNameList.add(argumentClassName);
+                                        }
+                                    } else {
+                                        argumentClassNameList.add(argumentClassName);
+                                    }
+                                }
+                        );
+                return argumentClassNameList.toArray(new String[]{});
             } else {
                 return new String[]{argumentClassNames};
             }
