@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
@@ -234,7 +235,8 @@ public class TypeManager {
     }
 
     public String getReturnClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives().directive().stream()
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()
@@ -246,35 +248,9 @@ public class TypeManager {
                 .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("returnClassName")));
     }
 
-    public TypeName getTypeNameByString(String className) {
-        if (className.contains("<")) {
-            int index = className.indexOf('<');
-            String className1 = className.substring(0, index);
-            String className2 = className.substring(index + 1, className.length() - 1);
-            if (className2.contains(",")) {
-                return ParameterizedTypeName.get(ClassName.bestGuess(className1), Arrays.stream(className2.split(",")).map(this::getTypeNameByString).toArray(TypeName[]::new));
-            } else {
-                return ParameterizedTypeName.get(ClassName.bestGuess(className1), getTypeNameByString(className2));
-            }
-        } else {
-            return ClassName.bestGuess(className);
-        }
-    }
-
-    public ClassName getClassNameByString(String className) {
-        if (className.contains("<")) {
-            int index = className.indexOf('<');
-            return ClassName.bestGuess(className.substring(0, index));
-        } else {
-            return ClassName.bestGuess(className);
-        }
-    }
-
     public Optional<String> getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        if (objectTypeDefinitionContext.directives() == null) {
-            return Optional.empty();
-        }
-        return objectTypeDefinitionContext.directives().directive().stream()
+        return Stream.ofNullable(objectTypeDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
                 .filter(directiveContext -> directiveContext.name().getText().equals("containerType"))
                 .filter(directiveContext -> directiveContext.arguments() != null)
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream())

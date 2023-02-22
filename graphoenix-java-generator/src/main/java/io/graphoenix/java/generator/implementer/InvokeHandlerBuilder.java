@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
+
 @ApplicationScoped
 public class InvokeHandlerBuilder {
 
@@ -177,7 +179,7 @@ public class InvokeHandlerBuilder {
                                                 .flatMap(entry ->
                                                         entry.getValue().stream()
                                                                 .map(methodEntry -> {
-                                                                            if (typeManager.getClassNameByString(methodEntry.getValue()).canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
+                                                                            if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
                                                                                 return CodeBlock.of(".flatMap(next -> $T.from($L.get().$L(next).buildRs()).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
                                                                                         ClassName.get(Mono.class),
                                                                                         typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
@@ -185,14 +187,14 @@ public class InvokeHandlerBuilder {
                                                                                         typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodEntry.getKey())),
                                                                                         ClassName.get(Mono.class)
                                                                                 );
-                                                                            } else if (typeManager.getClassNameByString(methodEntry.getValue()).canonicalName().equals(Mono.class.getCanonicalName())) {
+                                                                            } else if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(Mono.class.getCanonicalName())) {
                                                                                 return CodeBlock.of(".flatMap(next -> $L.get().$L(next).map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
                                                                                         typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
                                                                                         methodEntry.getKey(),
                                                                                         typeManager.getFieldSetterMethodName(typeManager.getInvokeFieldName(methodEntry.getKey())),
                                                                                         ClassName.get(Mono.class)
                                                                                 );
-                                                                            } else if (typeManager.getClassNameByString(methodEntry.getValue()).canonicalName().equals(Flux.class.getCanonicalName())) {
+                                                                            } else if (TYPE_UTIL.getClassName(methodEntry.getValue()).canonicalName().equals(Flux.class.getCanonicalName())) {
                                                                                 return CodeBlock.of(".flatMap(next -> $L.get().$L(next).collectList().map(result -> {next.$L(result); return next;}).switchIfEmpty($T.just(next)))",
                                                                                         typeManager.typeToLowerCamelName(ClassName.bestGuess(entry.getKey()).simpleName()),
                                                                                         methodEntry.getKey(),

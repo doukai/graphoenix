@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
+import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
@@ -387,14 +388,14 @@ public class OperationHandlerImplementer {
 
             builder.addStatement("String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()")
                     .addStatement("$T result = $L.get().$L($L)",
-                            typeManager.getTypeNameByString(returnClassName),
+                            TYPE_UTIL.getTypeName(returnClassName),
                             typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
                             methodName,
                             CodeBlock.join(parameters.stream()
                                     .map(parameter ->
                                             CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
                                                     parameter.getKey(),
-                                                    typeManager.getClassNameByString(parameter.getValue())
+                                                    TYPE_UTIL.getClassName(parameter.getValue())
                                             )
                                     )
                                     .collect(Collectors.toList()), ", ")
@@ -408,11 +409,11 @@ public class OperationHandlerImplementer {
                 } else {
                     filterMethodName = fieldTypeParameterName;
                 }
-                if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
+                if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
                     invokeCodeBlock = CodeBlock.of("return $T.from(result.buildRs()).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), filterMethodName);
-                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
+                } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
                     invokeCodeBlock = CodeBlock.of("return result.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
-                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName())) {
+                } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
                     invokeCodeBlock = CodeBlock.of("return result.collectList().map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", filterMethodName);
                 } else {
                     invokeCodeBlock = CodeBlock.of("return $T.just(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), filterMethodName);
@@ -433,11 +434,11 @@ public class OperationHandlerImplementer {
                 } else {
                     filterMethodName = "toJsonValue";
                 }
-                if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
+                if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
                     invokeCodeBlock = CodeBlock.of("return $T.from(result.buildRs()).map(item-> $L(item))", ClassName.get(Mono.class), filterMethodName);
-                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
+                } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
                     invokeCodeBlock = CodeBlock.of("return result.map(item-> $L(item))", filterMethodName);
-                } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName())) {
+                } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
                     invokeCodeBlock = CodeBlock.of("return result.collectList().map(item-> $L(item))", filterMethodName);
                 } else {
                     invokeCodeBlock = CodeBlock.of("return $T.just(result).map(item-> $L(item))", ClassName.get(Mono.class), filterMethodName);

@@ -49,6 +49,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
+import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
@@ -369,18 +370,18 @@ public class GrpcServiceImplementer {
                             .map(parameter ->
                                     CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
                                             parameter.getKey(),
-                                            typeManager.getClassNameByString(parameter.getValue())
+                                            TYPE_UTIL.getClassName(parameter.getValue())
                                     )
                             )
                             .collect(Collectors.toList()), ", ")
             );
 
             CodeBlock resultMapBlock;
-            if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
+            if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
                 resultMapBlock = CodeBlock.of(".flatMap(result -> $T.from(result.buildRs()))", ClassName.get(Mono.class));
-            } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Mono.class.getName())) {
+            } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
                 resultMapBlock = CodeBlock.of(".flatMap(result -> result)");
-            } else if (typeManager.getClassNameByString(returnClassName).canonicalName().equals(Flux.class.getName())) {
+            } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
                 resultMapBlock = CodeBlock.of(".flatMap(result -> result.collectList())");
             } else {
                 resultMapBlock = CodeBlock.of(".flatMap($T::just)", ClassName.get(Mono.class));
