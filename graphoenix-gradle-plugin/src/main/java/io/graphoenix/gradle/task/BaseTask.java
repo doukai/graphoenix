@@ -135,10 +135,10 @@ public class BaseTask extends DefaultTask {
                                         .asString();
 
                                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
-                                Type type = methodDeclaration.getType();
-                                String typeName = type.asString();
-                                if (TYPE_NAME_UTIL.getClassName(typeName).equals(PublisherBuilder.class.getSimpleName()) ||
-                                        TYPE_NAME_UTIL.getClassName(typeName).equals(Mono.class.getSimpleName())) {
+                                String typeName = methodDeclaration.getType().asString();
+                                String className = TYPE_NAME_UTIL.getClassName(typeName);
+                                if (className.equals(PublisherBuilder.class.getSimpleName()) ||
+                                        className.equals(Mono.class.getSimpleName())) {
                                     typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
                                 }
                                 String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
@@ -162,10 +162,10 @@ public class BaseTask extends DefaultTask {
                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
                     )
                     .forEach(methodDeclaration -> {
-                                Type type = methodDeclaration.getType();
-                                String typeName = type.asString();
-                                if (TYPE_NAME_UTIL.getClassName(typeName).equals(PublisherBuilder.class.getSimpleName()) ||
-                                        TYPE_NAME_UTIL.getClassName(typeName).equals(Mono.class.getSimpleName())) {
+                                String typeName = methodDeclaration.getType().asString();
+                                String className = TYPE_NAME_UTIL.getClassName(typeName);
+                                if (className.equals(PublisherBuilder.class.getSimpleName()) ||
+                                        className.equals(Mono.class.getSimpleName())) {
                                     typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
                                 }
                                 String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
@@ -199,10 +199,10 @@ public class BaseTask extends DefaultTask {
                                     .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Mutation.class))
                     )
                     .forEach(methodDeclaration -> {
-                                Type type = methodDeclaration.getType();
-                                String typeName = type.asString();
-                                if (TYPE_NAME_UTIL.getClassName(typeName).equals(PublisherBuilder.class.getSimpleName()) ||
-                                        TYPE_NAME_UTIL.getClassName(typeName).equals(Mono.class.getSimpleName())) {
+                                String typeName = methodDeclaration.getType().asString();
+                                String className = TYPE_NAME_UTIL.getClassName(typeName);
+                                if (className.equals(PublisherBuilder.class.getSimpleName()) ||
+                                        className.equals(Mono.class.getSimpleName())) {
                                     typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
                                 }
                                 String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
@@ -242,44 +242,45 @@ public class BaseTask extends DefaultTask {
     }
 
     private String getInvokeFieldTypeName(String typeName) {
+        String className = TYPE_NAME_UTIL.getClassName(typeName);
         if (typeName.endsWith("[]")) {
             return "[".concat(getInvokeFieldTypeName(typeName.replace("[]", ""))).concat("]");
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(Collection.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(List.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Set.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Flux.class.getSimpleName())) {
+        } else if (className.equals(Collection.class.getSimpleName()) ||
+                className.equals(List.class.getSimpleName()) ||
+                className.equals(Set.class.getSimpleName()) ||
+                className.equals(Flux.class.getSimpleName())) {
             return "[".concat(getInvokeFieldTypeName(TYPE_NAME_UTIL.getArgumentTypeName0(typeName))).concat("]");
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(int.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(short.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(byte.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Integer.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Short.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Byte.class.getSimpleName())) {
+        } else if (className.equals(int.class.getSimpleName()) ||
+                className.equals(short.class.getSimpleName()) ||
+                className.equals(byte.class.getSimpleName()) ||
+                className.equals(Integer.class.getSimpleName()) ||
+                className.equals(Short.class.getSimpleName()) ||
+                className.equals(Byte.class.getSimpleName())) {
             return "Int";
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(float.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(double.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Float.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Double.class.getSimpleName())) {
+        } else if (className.equals(float.class.getSimpleName()) ||
+                className.equals(double.class.getSimpleName()) ||
+                className.equals(Float.class.getSimpleName()) ||
+                className.equals(Double.class.getSimpleName())) {
             return "Float";
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(String.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(char.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Character.class.getSimpleName())) {
+        } else if (className.equals(String.class.getSimpleName()) ||
+                className.equals(char.class.getSimpleName()) ||
+                className.equals(Character.class.getSimpleName())) {
             return "String";
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(boolean.class.getSimpleName()) ||
-                TYPE_NAME_UTIL.getClassName(typeName).equals(Boolean.class.getSimpleName())) {
+        } else if (className.equals(boolean.class.getSimpleName()) ||
+                className.equals(Boolean.class.getSimpleName())) {
             return "Boolean";
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(BigInteger.class.getSimpleName())) {
+        } else if (className.equals(BigInteger.class.getSimpleName())) {
             return "BigInteger";
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(BigDecimal.class.getSimpleName())) {
+        } else if (className.equals(BigDecimal.class.getSimpleName())) {
             return "BigDecimal";
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(LocalDate.class.getSimpleName())) {
+        } else if (className.equals(LocalDate.class.getSimpleName())) {
             return "Date";
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(LocalTime.class.getSimpleName())) {
+        } else if (className.equals(LocalTime.class.getSimpleName())) {
             return "Time";
-        } else if (TYPE_NAME_UTIL.getClassName(typeName).equals(LocalDateTime.class.getSimpleName())) {
+        } else if (className.equals(LocalDateTime.class.getSimpleName())) {
             return "DateTime";
         } else {
-            return TYPE_NAME_UTIL.getClassName(typeName);
+            return className;
         }
     }
 
