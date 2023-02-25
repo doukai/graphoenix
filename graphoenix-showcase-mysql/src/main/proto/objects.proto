@@ -713,92 +713,92 @@ message MutationType {
 }
 message IntroSchemaConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroSchemaEdge edges = 3;
 }
 message IntroTypeConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroTypeEdge edges = 3;
 }
 message IntroTypeInterfacesConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroTypeInterfacesEdge edges = 3;
 }
 message IntroTypePossibleTypesConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroTypePossibleTypesEdge edges = 3;
 }
 message IntroFieldConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroFieldEdge edges = 3;
 }
 message IntroInputValueConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroInputValueEdge edges = 3;
 }
 message IntroEnumValueConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroEnumValueEdge edges = 3;
 }
 message IntroDirectiveConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroDirectiveEdge edges = 3;
 }
 message IntroDirectiveLocationsConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated IntroDirectiveLocationsEdge edges = 3;
 }
 message UserConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated UserEdge edges = 3;
 }
 message UserProfileConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated UserProfileEdge edges = 3;
 }
 message UserPhonesConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated UserPhonesEdge edges = 3;
 }
 message UserTest1Connection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated UserTest1Edge edges = 3;
 }
 message UserTest2Connection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated UserTest2Edge edges = 3;
 }
 message UserRoleConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated UserRoleEdge edges = 3;
 }
 message RoleConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated RoleEdge edges = 3;
 }
 message RoleRoleTypeConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated RoleRoleTypeEdge edges = 3;
 }
 message OrganizationConnection {
     optional int32 total_count = 1;
-    PageInfo page_info = 2;
+    optional PageInfo page_info = 2;
     repeated OrganizationEdge edges = 3;
 }
 message IntroSchemaEdge {

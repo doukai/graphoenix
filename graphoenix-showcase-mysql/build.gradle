@@ -11,7 +11,7 @@ buildscript {
 
 plugins {
     id 'java'
-    id 'com.google.protobuf' version '0.8.19'
+    id 'com.google.protobuf' version '0.9.1'
 }
 
 compileJava.options.sourcepath = files('src/main/resources')
@@ -26,11 +26,11 @@ graphql {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.19.2"
+        artifact = "com.google.protobuf:protoc:3.21.7"
     }
     plugins {
         grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.48.0'
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.52.1'
         }
         reactor {
             artifact = "com.salesforce.servicelibs:reactor-grpc:1.2.3"
@@ -47,8 +47,8 @@ protobuf {
 sourceSets {
     main {
         java {
-            srcDirs 'build/generated/source/proto/main/grpc'
             srcDirs 'build/generated/source/proto/main/java'
+            srcDirs 'build/generated/source/proto/main/grpc'
             srcDirs 'build/generated/source/proto/main/reactor'
         }
     }
@@ -71,10 +71,12 @@ dependencies {
     implementation project(':graphoenix-interceptor')
     implementation project(":graphoenix-mysql")
 
-    runtimeOnly 'io.grpc:grpc-netty-shaded:1.48.0'
+    runtimeOnly 'io.grpc:grpc-netty-shaded:1.52.1'
+    implementation 'io.grpc:grpc-protobuf:1.52.1'
+    implementation 'io.grpc:grpc-stub:1.52.1'
+    implementation 'com.salesforce.servicelibs:reactor-grpc-stub:1.2.3'
+
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
-    compile "com.salesforce.servicelibs:reactor-grpc-stub:1.2.3"
-    compile 'com.graphql-java:java-dataloader:3.2.0'
 
     annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-inject')

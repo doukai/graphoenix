@@ -199,7 +199,7 @@ public class ProtobufFileBuilder {
                 .setTopLevelDefs(buildMutationService().stream().map(Service::toString).collect(Collectors.toList()))
                 .toString()
         );
-        protoFileMap.put("graphql", new ProtoFile()
+        protoFileMap.put("graph_q_l", new ProtoFile()
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
@@ -226,9 +226,7 @@ public class ProtobufFileBuilder {
                                                         new Rpc()
                                                                 .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
                                                                 .setMessageType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                .setMessageStream(true)
                                                                 .setReturnType("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
-                                                                .setReturnStream(true)
                                                 )
                                                 .collect(Collectors.toList())
                                 )
@@ -246,9 +244,7 @@ public class ProtobufFileBuilder {
                                                         new Rpc()
                                                                 .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
                                                                 .setMessageType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
-                                                                .setMessageStream(true)
                                                                 .setReturnType("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
-                                                                .setReturnStream(true)
                                                 )
                                                 .collect(Collectors.toList())
                                 )
@@ -261,9 +257,7 @@ public class ProtobufFileBuilder {
                         new Rpc()
                                 .setName("operation")
                                 .setMessageType("GraphQLRequest")
-                                .setMessageStream(true)
                                 .setReturnType("GraphQLResponse")
-                                .setReturnStream(true)
                 );
     }
 
