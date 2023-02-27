@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.GRPC_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 
 @ApplicationScoped
@@ -84,7 +84,7 @@ public class GrpcNameUtil {
     public String getPackageName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("packageName"))
                 .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
@@ -96,7 +96,7 @@ public class GrpcNameUtil {
     public String getKey(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("key"))
                 .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
@@ -108,7 +108,7 @@ public class GrpcNameUtil {
     public String getFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("from"))
                 .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
@@ -120,7 +120,7 @@ public class GrpcNameUtil {
     public String getTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("to"))
                 .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
@@ -132,7 +132,7 @@ public class GrpcNameUtil {
     public boolean getAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME))
+                .filter(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("anchor"))
                 .filter(argumentContext -> argumentContext.valueWithVariable().BooleanValue() != null)

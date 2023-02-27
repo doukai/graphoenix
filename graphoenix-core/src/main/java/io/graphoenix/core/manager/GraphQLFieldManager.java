@@ -76,14 +76,14 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
-    public boolean isGrpcField(String objectTypeName, String fieldName) {
+    public boolean isFetchField(String objectTypeName, String fieldName) {
         GraphqlParser.FieldDefinitionContext fieldDefinitionContext = fieldDefinitionTree.get(objectTypeName).get(fieldName);
-        return isGrpcField(fieldDefinitionContext);
+        return isFetchField(fieldDefinitionContext);
     }
 
     @Override
-    public boolean isNotGrpcField(String objectTypeName, String fieldName) {
-        return !isGrpcField(objectTypeName, fieldName);
+    public boolean isNotFetchField(String objectTypeName, String fieldName) {
+        return !isFetchField(objectTypeName, fieldName);
     }
 
     @Override
@@ -119,13 +119,13 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
     }
 
     @Override
-    public boolean isGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(GRPC_DIRECTIVE_NAME));
+    public boolean isFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME));
     }
 
     @Override
-    public boolean isNotGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return !isGrpcField(fieldDefinitionContext);
+    public boolean isNotFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return !isFetchField(fieldDefinitionContext);
     }
 
     @Override

@@ -140,7 +140,7 @@ public class SelectionFilterBuilder {
 
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(manager::isNotGrpcField)
+                .filter(manager::isNotFetchField)
                 .collect(Collectors.toList());
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
             String fieldGetterMethodName = typeManager.getFieldGetterMethodName(fieldDefinitionContext);

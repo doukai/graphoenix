@@ -130,7 +130,7 @@ public class QueryHandlerBuilder {
 
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isGrpcField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isFetchField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .collect(Collectors.toList());
 
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
@@ -141,7 +141,7 @@ public class QueryHandlerBuilder {
                 builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
             }
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                if (manager.isGrpcField(fieldDefinitionContext)) {
+                if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);
@@ -161,7 +161,7 @@ public class QueryHandlerBuilder {
                     );
                 }
             } else {
-                if (manager.isGrpcField(fieldDefinitionContext)) {
+                if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
                     String from = grpcNameUtil.getFrom(fieldDefinitionContext);

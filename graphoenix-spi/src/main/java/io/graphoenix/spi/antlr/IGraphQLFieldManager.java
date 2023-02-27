@@ -22,9 +22,9 @@ public interface IGraphQLFieldManager {
 
     boolean isNotInvokeField(String objectTypeName, String fieldName);
 
-    boolean isGrpcField(String objectTypeName, String fieldName);
+    boolean isFetchField(String objectTypeName, String fieldName);
 
-    boolean isNotGrpcField(String objectTypeName, String fieldName);
+    boolean isNotFetchField(String objectTypeName, String fieldName);
 
     boolean isFunctionField(String objectTypeName, String fieldName);
 
@@ -38,9 +38,9 @@ public interface IGraphQLFieldManager {
 
     boolean isNotInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    boolean isGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    boolean isFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    boolean isNotGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    boolean isNotFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     boolean isFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 

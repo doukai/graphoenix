@@ -71,9 +71,9 @@ public interface IGraphQLDocumentManager {
 
     boolean isNotInvokeField(String objectTypeName, String name);
 
-    boolean isGrpcField(String objectTypeName, String name);
+    boolean isFetchField(String objectTypeName, String name);
 
-    boolean isNotGrpcField(String objectTypeName, String name);
+    boolean isNotFetchField(String objectTypeName, String name);
 
     boolean isFunctionField(String objectTypeName, String name);
 
@@ -87,9 +87,9 @@ public interface IGraphQLDocumentManager {
 
     boolean isNotInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    boolean isGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    boolean isFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
-    boolean isNotGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+    boolean isNotFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     boolean isFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 

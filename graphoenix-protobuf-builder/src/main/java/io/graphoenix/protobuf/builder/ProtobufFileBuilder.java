@@ -386,7 +386,7 @@ public class ProtobufFileBuilder {
 
     public Message buildMessage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(manager::isNotGrpcField)
+                .filter(manager::isNotFetchField)
                 .collect(Collectors.toList());
         return new Message()
                 .setName(getName(objectTypeDefinitionContext.name().getText()))

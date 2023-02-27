@@ -400,13 +400,13 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean isGrpcField(String objectTypeName, String name) {
-        return graphQLFieldManager.isGrpcField(objectTypeName, name);
+    public boolean isFetchField(String objectTypeName, String name) {
+        return graphQLFieldManager.isFetchField(objectTypeName, name);
     }
 
     @Override
-    public boolean isNotGrpcField(String objectTypeName, String name) {
-        return graphQLFieldManager.isNotGrpcField(objectTypeName, name);
+    public boolean isNotFetchField(String objectTypeName, String name) {
+        return graphQLFieldManager.isNotFetchField(objectTypeName, name);
     }
 
     @Override
@@ -440,13 +440,13 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean isGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return graphQLFieldManager.isGrpcField(fieldDefinitionContext);
+    public boolean isFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return graphQLFieldManager.isFetchField(fieldDefinitionContext);
     }
 
     @Override
-    public boolean isNotGrpcField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return graphQLFieldManager.isNotGrpcField(fieldDefinitionContext);
+    public boolean isNotFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return graphQLFieldManager.isNotFetchField(fieldDefinitionContext);
     }
 
     @Override

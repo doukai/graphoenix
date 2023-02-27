@@ -5,10 +5,13 @@ import io.graphoenix.spi.antlr.IGraphQLObjectManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.tinylog.Logger;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_DIRECTIVES;
 
 @ApplicationScoped
 public class GraphQLObjectManager implements IGraphQLObjectManager {
@@ -40,7 +43,7 @@ public class GraphQLObjectManager implements IGraphQLObjectManager {
     @Override
     public boolean isContainerType(String objectTypeName) {
         GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = objectTypeDefinitionMap.get(objectTypeName);
-        return objectTypeDefinitionContext != null && objectTypeDefinitionContext.directives() != null && objectTypeDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("containerType"));
+        return objectTypeDefinitionContext != null && objectTypeDefinitionContext.directives() != null && objectTypeDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> Arrays.stream(CONTAINER_DIRECTIVES).anyMatch(name -> directiveContext.name().getText().equals(name)));
     }
 
     @Override

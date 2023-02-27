@@ -162,7 +162,6 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                            .filter(manager::isNotGrpcField)
                             .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
                             .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
                             .map(fieldDefinitionContext -> fieldDefinitionContextToField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
@@ -198,7 +197,6 @@ public class IntrospectionMutationBuilder {
             }
             type.setFields(
                     interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                            .filter(manager::isNotGrpcField)
                             .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
                             .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
                             .map(fieldDefinitionContext -> fieldDefinitionContextToField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))

@@ -61,7 +61,7 @@ public class MutationDataLoaderBuilder {
     private JavaFile buildClass() {
         this.grpcTypeMap = manager.getObjects()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                .filter(manager::isGrpcField)
+                .filter(manager::isFetchField)
                 .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(grpcNameUtil.getPackageName(fieldDefinitionContext), Tuple.of(manager.getFieldTypeName(fieldDefinitionContext.type()), grpcNameUtil.getKey(fieldDefinitionContext))))
                 .collect(
                         Collectors.groupingBy(

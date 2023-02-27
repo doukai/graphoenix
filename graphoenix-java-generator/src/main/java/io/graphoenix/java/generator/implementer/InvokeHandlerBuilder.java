@@ -214,7 +214,7 @@ public class InvokeHandlerBuilder {
                                                                 )
                                                 ),
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(manager::isNotGrpcField)
+                                                .filter(manager::isNotFetchField)
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                 .map(fieldDefinitionContext ->
@@ -226,7 +226,7 @@ public class InvokeHandlerBuilder {
                                                         )
                                                 ),
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(manager::isNotGrpcField)
+                                                .filter(manager::isNotFetchField)
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                 .map(fieldDefinitionContext ->

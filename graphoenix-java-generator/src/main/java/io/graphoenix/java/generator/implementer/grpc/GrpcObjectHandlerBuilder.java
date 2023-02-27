@@ -92,7 +92,7 @@ public class GrpcObjectHandlerBuilder {
                 );
 
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(manager::isNotGrpcField)
+                .filter(manager::isNotFetchField)
                 .collect(Collectors.toList());
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContexts) {
             String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
