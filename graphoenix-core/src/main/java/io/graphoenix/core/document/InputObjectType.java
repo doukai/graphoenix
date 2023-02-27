@@ -73,6 +73,25 @@ public class InputObjectType {
         return this;
     }
 
+    public InputObjectType addStringDirective(String directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        if (!directive.startsWith("@")) {
+            directive = "@".concat(directive);
+        }
+        this.directives.add(directive);
+        return this;
+    }
+
+    public InputObjectType addDirective(Directive directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.add(directive.toString());
+        return this;
+    }
+
     public Set<InputValue> getInputValues() {
         return inputValues;
     }

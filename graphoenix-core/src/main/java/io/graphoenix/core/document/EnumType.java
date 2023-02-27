@@ -73,6 +73,25 @@ public class EnumType {
         return this;
     }
 
+    public EnumType addStringDirective(String directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        if (!directive.startsWith("@")) {
+            directive = "@".concat(directive);
+        }
+        this.directives.add(directive);
+        return this;
+    }
+
+    public EnumType addDirective(Directive directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.add(directive.toString());
+        return this;
+    }
+
     public Set<EnumValue> getEnumValues() {
         return enumValues;
     }

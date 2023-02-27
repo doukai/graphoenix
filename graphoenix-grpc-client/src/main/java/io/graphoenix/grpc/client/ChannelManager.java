@@ -4,6 +4,7 @@ import io.graphoenix.core.handler.PackageManager;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 
 import java.net.URI;
@@ -16,6 +17,7 @@ public class ChannelManager {
 
     private final Provider<PackageManager> packageManagerProvider;
 
+    @Inject
     public ChannelManager(Provider<PackageManager> packageManagerProvider) {
         this.packageManagerProvider = packageManagerProvider;
     }

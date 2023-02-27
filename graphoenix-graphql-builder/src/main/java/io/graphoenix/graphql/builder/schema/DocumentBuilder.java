@@ -42,7 +42,7 @@ import static io.graphoenix.spi.constant.Hammurabi.*;
 @ApplicationScoped
 public class DocumentBuilder {
 
-    private final GraphQLConfig graphQLConfig;
+    private GraphQLConfig graphQLConfig;
 
     private final IGraphQLDocumentManager manager;
 
@@ -59,6 +59,11 @@ public class DocumentBuilder {
         this.manager = manager;
         this.mapper = mapper;
         this.graphQLConfigRegister = graphQLConfigRegister;
+    }
+
+    public DocumentBuilder setGraphQLConfig(GraphQLConfig graphQLConfig) {
+        this.graphQLConfig = graphQLConfig;
+        return this;
     }
 
     public void startupManager() throws IOException, URISyntaxException {
@@ -106,6 +111,79 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                //TODO union type
+                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    public Document getExportDocument() {
+        Document document = new Document();
+        buildSchema().ifPresent(schema -> document.addDefinition(schema.toString()));
+        return document
+                .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(
+                        manager.getEnums()
+                                .map(this::buildEnum)
+                                .map(enumType ->
+                                        enumType.addDirective(
+                                                new Directive()
+                                                        .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                        .addArgument(
+                                                                new Argument()
+                                                                        .setName("className")
+                                                                        .setValueWithVariable(graphQLConfig.getPackageName().concat(".").concat(enumType.getName()))
+                                                        )
+                                        )
+                                )
+                                .map(EnumType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(
+                        manager.getInterfaces()
+                                .map(this::buildInterface)
+                                .map(interfaceType ->
+                                        interfaceType.addDirective(
+                                                new Directive()
+                                                        .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                        .addArgument(
+                                                                new Argument()
+                                                                        .setName("className")
+                                                                        .setValueWithVariable(graphQLConfig.getPackageName().concat(".").concat(interfaceType.getName()))
+                                                        )
+                                        )
+                                )
+                                .map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(
+                        manager.getObjects()
+                                .map(this::buildObject)
+                                .map(objectType ->
+                                        objectType.addDirective(
+                                                new Directive()
+                                                        .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                        .addArgument(
+                                                                new Argument()
+                                                                        .setName("className")
+                                                                        .setValueWithVariable(graphQLConfig.getPackageName().concat(".").concat(objectType.getName()))
+                                                        )
+                                        )
+                                )
+                                .map(ObjectType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
+                .addDefinitions(
+                        manager.getInputObjects()
+                                .map(this::buildInputObjectType)
+                                .map(inputObjectType ->
+                                        inputObjectType.addDirective(
+                                                new Directive()
+                                                        .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                        .addArgument(
+                                                                new Argument()
+                                                                        .setName("className")
+                                                                        .setValueWithVariable(graphQLConfig.getPackageName().concat(".").concat(inputObjectType.getName()))
+                                                        )
+                                        )
+                                )
+                                .map(InputObjectType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
                 //TODO union type
                 .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }

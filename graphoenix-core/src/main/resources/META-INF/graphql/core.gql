@@ -180,8 +180,6 @@ directive @func(name: Function field: String) on FIELD_DEFINITION
 
 directive @containerType(className: String) on OBJECT
 
-directive @fetchType(packageName: String typeName: String) on OBJECT
-
 directive @connection(field: String agg: String) on FIELD_DEFINITION
 
 directive @update(if: Boolean!) on FIELD

@@ -87,6 +87,25 @@ public class InterfaceType {
         return this;
     }
 
+    public InterfaceType addStringDirective(String directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        if (!directive.startsWith("@")) {
+            directive = "@".concat(directive);
+        }
+        this.directives.add(directive);
+        return this;
+    }
+
+    public InterfaceType addDirective(Directive directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.add(directive.toString());
+        return this;
+    }
+
     public Set<Field> getFields() {
         return fields;
     }

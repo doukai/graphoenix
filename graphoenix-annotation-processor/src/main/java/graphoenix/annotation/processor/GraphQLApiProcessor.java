@@ -79,7 +79,6 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.filer = processingEnv.getFiler();
         BeanContext.load(GraphQLApiProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
-        this.documentBuilder = BeanContext.get(DocumentBuilder.class);
         this.javaElementToEnum = BeanContext.get(JavaElementToEnum.class);
         this.javaElementToObject = BeanContext.get(JavaElementToObject.class);
         this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
@@ -87,6 +86,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
+        this.documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
         try {
             manager.clearAll();
             configRegister.registerConfig(graphQLConfig, filer);
@@ -150,9 +150,9 @@ public class GraphQLApiProcessor extends AbstractProcessor {
                 .forEach(element -> registerGraphQLApiElement(element, typeUtils));
 
         try {
-            FileObject microprofileGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/microprofile.gql");
-            Writer writer = microprofileGraphQL.openWriter();
-            writer.write(documentBuilder.getDocument().toString());
+            FileObject exportGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/export.gql");
+            Writer writer = exportGraphQL.openWriter();
+            writer.write(documentBuilder.getExportDocument().toString());
             writer.close();
 
         } catch (IOException e) {
