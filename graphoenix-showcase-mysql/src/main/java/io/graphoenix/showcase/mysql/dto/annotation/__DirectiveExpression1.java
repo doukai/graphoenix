@@ -68,23 +68,7 @@ public @interface __DirectiveExpression1 {
 
   String $before() default "";
 
-  StringExpression2 description() default @StringExpression2;
-
   __InputValueExpression2 args() default @__InputValueExpression2;
-
-  StringExpression2 realmId() default @StringExpression2;
-
-  StringExpression2 createUserId() default @StringExpression2;
-
-  StringExpression2 updateUserId() default @StringExpression2;
-
-  StringExpression2 createGroupId() default @StringExpression2;
-
-  StringExpression2 __typename() default @StringExpression2;
-
-  StringExpression2 descriptionMax() default @StringExpression2;
-
-  StringExpression2 descriptionMin() default @StringExpression2;
 
   __DirectiveExpression2[] exs() default {};
 }

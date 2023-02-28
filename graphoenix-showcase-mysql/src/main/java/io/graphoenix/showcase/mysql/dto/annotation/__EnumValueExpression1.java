@@ -64,41 +64,7 @@ public @interface __EnumValueExpression1 {
 
   String $before() default "";
 
-  StringExpression2 name() default @StringExpression2;
-
-  StringExpression2 ofTypeName() default @StringExpression2;
-
   __TypeExpression2 ofType() default @__TypeExpression2;
-
-  StringExpression2 description() default @StringExpression2;
-
-  StringExpression2 deprecationReason() default @StringExpression2;
-
-  StringExpression2 realmId() default @StringExpression2;
-
-  StringExpression2 createUserId() default @StringExpression2;
-
-  StringExpression2 updateUserId() default @StringExpression2;
-
-  StringExpression2 createGroupId() default @StringExpression2;
-
-  StringExpression2 __typename() default @StringExpression2;
-
-  StringExpression2 nameMax() default @StringExpression2;
-
-  StringExpression2 nameMin() default @StringExpression2;
-
-  StringExpression2 ofTypeNameMax() default @StringExpression2;
-
-  StringExpression2 ofTypeNameMin() default @StringExpression2;
-
-  StringExpression2 descriptionMax() default @StringExpression2;
-
-  StringExpression2 descriptionMin() default @StringExpression2;
-
-  StringExpression2 deprecationReasonMax() default @StringExpression2;
-
-  StringExpression2 deprecationReasonMin() default @StringExpression2;
 
   __EnumValueExpression2[] exs() default {};
 }

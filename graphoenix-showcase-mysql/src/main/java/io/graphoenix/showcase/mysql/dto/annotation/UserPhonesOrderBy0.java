@@ -32,20 +32,4 @@ public @interface UserPhonesOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  StringOrderBy1 phone() default @StringOrderBy1;
-
-  StringOrderBy1 realmId() default @StringOrderBy1;
-
-  StringOrderBy1 createUserId() default @StringOrderBy1;
-
-  StringOrderBy1 updateUserId() default @StringOrderBy1;
-
-  StringOrderBy1 createGroupId() default @StringOrderBy1;
-
-  StringOrderBy1 __typename() default @StringOrderBy1;
-
-  StringOrderBy1 phoneMax() default @StringOrderBy1;
-
-  StringOrderBy1 phoneMin() default @StringOrderBy1;
 }

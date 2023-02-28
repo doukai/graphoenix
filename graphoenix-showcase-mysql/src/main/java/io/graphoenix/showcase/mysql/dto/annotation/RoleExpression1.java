@@ -60,23 +60,7 @@ public @interface RoleExpression1 {
 
   String $before() default "";
 
-  StringExpression2 name() default @StringExpression2;
-
   UserExpression2 users() default @UserExpression2;
-
-  StringExpression2 realmId() default @StringExpression2;
-
-  StringExpression2 createUserId() default @StringExpression2;
-
-  StringExpression2 updateUserId() default @StringExpression2;
-
-  StringExpression2 createGroupId() default @StringExpression2;
-
-  StringExpression2 __typename() default @StringExpression2;
-
-  StringExpression2 nameMax() default @StringExpression2;
-
-  StringExpression2 nameMin() default @StringExpression2;
 
   RoleExpression2[] exs() default {};
 }

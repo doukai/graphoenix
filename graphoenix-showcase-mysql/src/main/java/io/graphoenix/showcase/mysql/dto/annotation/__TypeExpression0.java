@@ -64,8 +64,6 @@ public @interface __TypeExpression0 {
 
   String $before() default "";
 
-  StringExpression1 description() default @StringExpression1;
-
   __FieldExpression1 fields() default @__FieldExpression1;
 
   __TypeExpression1 interfaces() default @__TypeExpression1;
@@ -76,27 +74,7 @@ public @interface __TypeExpression0 {
 
   __InputValueExpression1 inputFields() default @__InputValueExpression1;
 
-  StringExpression1 ofTypeName() default @StringExpression1;
-
   __TypeExpression1 ofType() default @__TypeExpression1;
-
-  StringExpression1 realmId() default @StringExpression1;
-
-  StringExpression1 createUserId() default @StringExpression1;
-
-  StringExpression1 updateUserId() default @StringExpression1;
-
-  StringExpression1 createGroupId() default @StringExpression1;
-
-  StringExpression1 __typename() default @StringExpression1;
-
-  StringExpression1 descriptionMax() default @StringExpression1;
-
-  StringExpression1 descriptionMin() default @StringExpression1;
-
-  StringExpression1 ofTypeNameMax() default @StringExpression1;
-
-  StringExpression1 ofTypeNameMin() default @StringExpression1;
 
   __TypeExpression1[] exs() default {};
 }

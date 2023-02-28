@@ -108,12 +108,6 @@ public @interface UserInput0 {
 
   String $userDetail2() default "";
 
-  StringInput1 login() default "";
-
-  StringInput1 password() default "";
-
-  StringInput1 name() default "";
-
   UserProfileInput1 userProfile() default @UserProfileInput1;
 
   UserProfileInput1 rpcUserProfile() default @UserProfileInput1;
@@ -123,32 +117,6 @@ public @interface UserInput0 {
   OrganizationInput1 organization() default @OrganizationInput1;
 
   RoleInput1[] roles() default {};
-
-  StringInput1[] phones() default {};
-
-  StringInput1 realmId() default "";
-
-  StringInput1 createUserId() default "";
-
-  StringInput1 updateUserId() default "";
-
-  StringInput1 createGroupId() default "";
-
-  StringInput1 __typename() default "";
-
-  StringInput1 loginMax() default "";
-
-  StringInput1 loginMin() default "";
-
-  StringInput1 passwordMax() default "";
-
-  StringInput1 passwordMin() default "";
-
-  StringInput1 nameMax() default "";
-
-  StringInput1 nameMin() default "";
-
-  StringInput1 userDetail2() default "";
 
   UserInput1[] list() default {};
 

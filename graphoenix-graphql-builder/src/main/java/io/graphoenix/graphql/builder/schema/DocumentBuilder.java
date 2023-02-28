@@ -130,8 +130,8 @@ public class DocumentBuilder {
                                                         .setName(IMPORT_TYPE_DIRECTIVE_NAME)
                                                         .addArgument(
                                                                 new Argument()
-                                                                        .setName("className")
-                                                                        .setValueWithVariable(graphQLConfig.getPackageName().concat(".").concat(enumType.getName()))
+                                                                        .setName("packageName")
+                                                                        .setValueWithVariable(graphQLConfig.getPackageName())
                                                         )
                                         )
                                 )
@@ -145,8 +145,8 @@ public class DocumentBuilder {
                                                         .setName(IMPORT_TYPE_DIRECTIVE_NAME)
                                                         .addArgument(
                                                                 new Argument()
-                                                                        .setName("className")
-                                                                        .setValueWithVariable(graphQLConfig.getPackageName().concat(".").concat(interfaceType.getName()))
+                                                                        .setName("packageName")
+                                                                        .setValueWithVariable(graphQLConfig.getPackageName())
                                                         )
                                         )
                                 )
@@ -160,8 +160,8 @@ public class DocumentBuilder {
                                                         .setName(IMPORT_TYPE_DIRECTIVE_NAME)
                                                         .addArgument(
                                                                 new Argument()
-                                                                        .setName("className")
-                                                                        .setValueWithVariable(graphQLConfig.getPackageName().concat(".").concat(objectType.getName()))
+                                                                        .setName("packageName")
+                                                                        .setValueWithVariable(graphQLConfig.getPackageName())
                                                         )
                                         )
                                 )
@@ -177,8 +177,8 @@ public class DocumentBuilder {
                                                         .setName(IMPORT_TYPE_DIRECTIVE_NAME)
                                                         .addArgument(
                                                                 new Argument()
-                                                                        .setName("className")
-                                                                        .setValueWithVariable(graphQLConfig.getPackageName().concat(".").concat(inputObjectType.getName()))
+                                                                        .setName("packageName")
+                                                                        .setValueWithVariable(graphQLConfig.getPackageName())
                                                         )
                                         )
                                 )

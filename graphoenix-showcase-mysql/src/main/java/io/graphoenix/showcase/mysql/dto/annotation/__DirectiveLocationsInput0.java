@@ -58,22 +58,6 @@ public @interface __DirectiveLocationsInput0 {
 
   String $__typename() default "";
 
-  StringInput1 directiveName() default "";
-
-  StringInput1 realmId() default "";
-
-  StringInput1 createUserId() default "";
-
-  StringInput1 updateUserId() default "";
-
-  StringInput1 createGroupId() default "";
-
-  StringInput1 __typename() default "";
-
-  StringInput1 directiveNameMax() default "";
-
-  StringInput1 directiveNameMin() default "";
-
   __DirectiveLocationsInput1[] list() default {};
 
   String $list() default "";

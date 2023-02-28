@@ -37,41 +37,7 @@ public @interface UserProfileOrderBy1 {
 
   Sort __typename() default Sort.ASC;
 
-  StringOrderBy2 userId() default @StringOrderBy2;
-
-  StringOrderBy2 email() default @StringOrderBy2;
-
-  StringOrderBy2 address() default @StringOrderBy2;
-
-  StringOrderBy2 qq() default @StringOrderBy2;
-
   UserOrderBy2 user() default @UserOrderBy2;
 
   UserOrderBy2 rpcUser() default @UserOrderBy2;
-
-  StringOrderBy2 realmId() default @StringOrderBy2;
-
-  StringOrderBy2 createUserId() default @StringOrderBy2;
-
-  StringOrderBy2 updateUserId() default @StringOrderBy2;
-
-  StringOrderBy2 createGroupId() default @StringOrderBy2;
-
-  StringOrderBy2 __typename() default @StringOrderBy2;
-
-  StringOrderBy2 userIdMax() default @StringOrderBy2;
-
-  StringOrderBy2 userIdMin() default @StringOrderBy2;
-
-  StringOrderBy2 emailMax() default @StringOrderBy2;
-
-  StringOrderBy2 emailMin() default @StringOrderBy2;
-
-  StringOrderBy2 addressMax() default @StringOrderBy2;
-
-  StringOrderBy2 addressMin() default @StringOrderBy2;
-
-  StringOrderBy2 qqMax() default @StringOrderBy2;
-
-  StringOrderBy2 qqMin() default @StringOrderBy2;
 }

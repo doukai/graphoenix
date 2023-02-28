@@ -2,7 +2,7 @@ package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
 import io.graphoenix.showcase.mysql.dto.enumType.Operator;
-import io.graphoenix.spi.annotation.Skip;
+import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.lang.Integer;
@@ -13,7 +13,7 @@ import org.eclipse.microprofile.graphql.Input;
 @Input
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@Skip
+@Ignore
 public class IntExpression {
   @DefaultValue("EQ")
   private Operator opr;

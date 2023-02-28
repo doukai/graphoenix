@@ -70,55 +70,9 @@ public @interface __InputValueExpression0 {
 
   String $before() default "";
 
-  StringExpression1 name() default @StringExpression1;
-
-  StringExpression1 typeName() default @StringExpression1;
-
-  StringExpression1 ofTypeName() default @StringExpression1;
-
   __TypeExpression1 ofType() default @__TypeExpression1;
 
-  StringExpression1 directiveName() default @StringExpression1;
-
-  StringExpression1 description() default @StringExpression1;
-
   __TypeExpression1 type() default @__TypeExpression1;
-
-  StringExpression1 defaultValue() default @StringExpression1;
-
-  StringExpression1 realmId() default @StringExpression1;
-
-  StringExpression1 createUserId() default @StringExpression1;
-
-  StringExpression1 updateUserId() default @StringExpression1;
-
-  StringExpression1 createGroupId() default @StringExpression1;
-
-  StringExpression1 __typename() default @StringExpression1;
-
-  StringExpression1 nameMax() default @StringExpression1;
-
-  StringExpression1 nameMin() default @StringExpression1;
-
-  StringExpression1 typeNameMax() default @StringExpression1;
-
-  StringExpression1 typeNameMin() default @StringExpression1;
-
-  StringExpression1 ofTypeNameMax() default @StringExpression1;
-
-  StringExpression1 ofTypeNameMin() default @StringExpression1;
-
-  StringExpression1 directiveNameMax() default @StringExpression1;
-
-  StringExpression1 directiveNameMin() default @StringExpression1;
-
-  StringExpression1 descriptionMax() default @StringExpression1;
-
-  StringExpression1 descriptionMin() default @StringExpression1;
-
-  StringExpression1 defaultValueMax() default @StringExpression1;
-
-  StringExpression1 defaultValueMin() default @StringExpression1;
 
   __InputValueExpression1[] exs() default {};
 }

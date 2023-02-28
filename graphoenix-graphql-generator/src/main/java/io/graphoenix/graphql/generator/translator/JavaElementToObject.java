@@ -18,7 +18,7 @@ import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.spi.constant.Hammurabi.IMPORT_TYPE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class JavaElementToObject {
@@ -72,7 +72,7 @@ public class JavaElementToObject {
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
                 .addDirective(
-                        new Directive(IMPORT_TYPE_DIRECTIVE_NAME)
+                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
                                 .addArgument(
                                         new Argument()
                                                 .setName("className")

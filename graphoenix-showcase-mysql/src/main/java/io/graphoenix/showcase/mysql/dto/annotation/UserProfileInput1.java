@@ -69,43 +69,9 @@ public @interface UserProfileInput1 {
 
   String $__typename() default "";
 
-  StringInput2 userId() default "";
-
-  StringInput2 email() default "";
-
-  StringInput2 address() default "";
-
-  StringInput2 qq() default "";
-
   UserInput2 user() default @UserInput2;
 
   UserInput2 rpcUser() default @UserInput2;
-
-  StringInput2 realmId() default "";
-
-  StringInput2 createUserId() default "";
-
-  StringInput2 updateUserId() default "";
-
-  StringInput2 createGroupId() default "";
-
-  StringInput2 __typename() default "";
-
-  StringInput2 userIdMax() default "";
-
-  StringInput2 userIdMin() default "";
-
-  StringInput2 emailMax() default "";
-
-  StringInput2 emailMin() default "";
-
-  StringInput2 addressMax() default "";
-
-  StringInput2 addressMin() default "";
-
-  StringInput2 qqMax() default "";
-
-  StringInput2 qqMin() default "";
 
   UserProfileInput2[] list() default {};
 

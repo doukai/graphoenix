@@ -171,13 +171,21 @@ public interface IGraphQLDocumentManager {
 
     Optional<String> getObjectTypeIDFieldName(String objectTypeName);
 
-    Optional<String> getImportClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+    Optional<String> getContainerClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
-    Optional<String> getImportClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+    Optional<String> getContainerClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
 
-    Optional<String> getImportClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+    Optional<String> getContainerClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
-    Optional<String> getImportClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+    Optional<String> getContainerClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+
+    Optional<String> getImportPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
+    Optional<String> getImportPackageName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+
+    Optional<String> getImportPackageName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+
+    Optional<String> getImportPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
     Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
                                                                                                               GraphqlParser.ArgumentContext argumentContext);

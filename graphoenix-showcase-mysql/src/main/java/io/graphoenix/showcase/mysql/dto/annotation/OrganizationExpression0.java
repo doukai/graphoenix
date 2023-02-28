@@ -70,27 +70,9 @@ public @interface OrganizationExpression0 {
 
   UserExpression1 rpcUsers() default @UserExpression1;
 
-  StringExpression1 name() default @StringExpression1;
-
-  StringExpression1 realmId() default @StringExpression1;
-
-  StringExpression1 createUserId() default @StringExpression1;
-
-  StringExpression1 updateUserId() default @StringExpression1;
-
-  StringExpression1 createGroupId() default @StringExpression1;
-
-  StringExpression1 __typename() default @StringExpression1;
-
-  StringExpression1 nameMax() default @StringExpression1;
-
-  StringExpression1 nameMin() default @StringExpression1;
-
   UserExpression1 userByOrg() default @UserExpression1;
 
   OrganizationExpression1 parent() default @OrganizationExpression1;
-
-  ContainerTypeExpression1 containerType() default @ContainerTypeExpression1;
 
   OrganizationExpression1[] exs() default {};
 }

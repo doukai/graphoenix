@@ -67,41 +67,7 @@ public @interface __EnumValueInput1 {
 
   String $__typename() default "";
 
-  StringInput2 name() default "";
-
-  StringInput2 ofTypeName() default "";
-
   __TypeInput2 ofType() default @__TypeInput2;
-
-  StringInput2 description() default "";
-
-  StringInput2 deprecationReason() default "";
-
-  StringInput2 realmId() default "";
-
-  StringInput2 createUserId() default "";
-
-  StringInput2 updateUserId() default "";
-
-  StringInput2 createGroupId() default "";
-
-  StringInput2 __typename() default "";
-
-  StringInput2 nameMax() default "";
-
-  StringInput2 nameMin() default "";
-
-  StringInput2 ofTypeNameMax() default "";
-
-  StringInput2 ofTypeNameMin() default "";
-
-  StringInput2 descriptionMax() default "";
-
-  StringInput2 descriptionMin() default "";
-
-  StringInput2 deprecationReasonMax() default "";
-
-  StringInput2 deprecationReasonMin() default "";
 
   __EnumValueInput2[] list() default {};
 

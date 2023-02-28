@@ -62,12 +62,6 @@ public @interface __SchemaExpression1 {
 
   String $before() default "";
 
-  StringExpression2 queryTypeName() default @StringExpression2;
-
-  StringExpression2 mutationTypeName() default @StringExpression2;
-
-  StringExpression2 subscriptionTypeName() default @StringExpression2;
-
   __TypeExpression2 types() default @__TypeExpression2;
 
   __TypeExpression2 queryType() default @__TypeExpression2;
@@ -77,28 +71,6 @@ public @interface __SchemaExpression1 {
   __TypeExpression2 subscriptionType() default @__TypeExpression2;
 
   __DirectiveExpression2 directives() default @__DirectiveExpression2;
-
-  StringExpression2 realmId() default @StringExpression2;
-
-  StringExpression2 createUserId() default @StringExpression2;
-
-  StringExpression2 updateUserId() default @StringExpression2;
-
-  StringExpression2 createGroupId() default @StringExpression2;
-
-  StringExpression2 __typename() default @StringExpression2;
-
-  StringExpression2 queryTypeNameMax() default @StringExpression2;
-
-  StringExpression2 queryTypeNameMin() default @StringExpression2;
-
-  StringExpression2 mutationTypeNameMax() default @StringExpression2;
-
-  StringExpression2 mutationTypeNameMin() default @StringExpression2;
-
-  StringExpression2 subscriptionTypeNameMax() default @StringExpression2;
-
-  StringExpression2 subscriptionTypeNameMin() default @StringExpression2;
 
   __SchemaExpression2[] exs() default {};
 }

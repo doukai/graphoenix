@@ -1,7 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.spi.annotation.Skip;
+import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
 import java.util.Collection;
@@ -11,7 +11,7 @@ import org.eclipse.microprofile.graphql.NonNull;
 @Input
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@Skip
+@Ignore
 public class Property {
   @NonNull
   private String name;

@@ -675,31 +675,61 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public Optional<String> getImportClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    public Optional<String> getContainerClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
     }
 
     @Override
-    public Optional<String> getImportClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    public Optional<String> getContainerClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
     }
 
     @Override
-    public Optional<String> getImportClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    public Optional<String> getContainerClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
     }
 
     @Override
-    public Optional<String> getImportClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    public Optional<String> getContainerClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
     }
 
-    public Optional<String> getImportClassName(GraphqlParser.DirectivesContext directivesContext) {
+    public Optional<String> getContainerClassName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(CONTAINER_TYPE_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
+                .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    @Override
+    public Optional<String> getImportPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
+    }
+
+    @Override
+    public Optional<String> getImportPackageName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
+    }
+
+    @Override
+    public Optional<String> getImportPackageName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
+    }
+
+    @Override
+    public Optional<String> getImportPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
+    }
+
+    public Optional<String> getImportPackageName(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
                 .flatMap(argumentsContext -> argumentsContext.argument().stream())
-                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                .filter(argumentContext -> argumentContext.name().getText().equals("packageName"))
                 .findFirst()
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
     }

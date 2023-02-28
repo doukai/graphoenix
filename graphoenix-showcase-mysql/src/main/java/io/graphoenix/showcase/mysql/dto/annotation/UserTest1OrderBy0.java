@@ -32,14 +32,4 @@ public @interface UserTest1OrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  StringOrderBy1 realmId() default @StringOrderBy1;
-
-  StringOrderBy1 createUserId() default @StringOrderBy1;
-
-  StringOrderBy1 updateUserId() default @StringOrderBy1;
-
-  StringOrderBy1 createGroupId() default @StringOrderBy1;
-
-  StringOrderBy1 __typename() default @StringOrderBy1;
 }

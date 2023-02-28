@@ -26,8 +26,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.METHOD_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.IMPORT_TYPE_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class TypeManager {
@@ -252,7 +251,7 @@ public class TypeManager {
     public Optional<String> getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return Stream.ofNullable(objectTypeDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME))
+                .filter(directiveContext -> directiveContext.name().getText().equals(CONTAINER_TYPE_DIRECTIVE_NAME))
                 .filter(directiveContext -> directiveContext.arguments() != null)
                 .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("className"))

@@ -55,19 +55,19 @@ public class JavaFileBuilder {
                         )
                         .map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
                 manager.getEnums()
-                        .filter(enumTypeDefinitionContext -> manager.isNotImportType(enumTypeDefinitionContext.name().getText()))
+                        .filter(enumTypeDefinitionContext -> manager.getContainerClassName(enumTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildEnum)
                         .map(typeSpec -> JavaFile.builder(configuration.getEnumTypePackageName(), typeSpec).build()),
                 manager.getInterfaces()
-                        .filter(interfaceTypeDefinitionContext -> manager.isNotImportType(interfaceTypeDefinitionContext.name().getText()))
+                        .filter(interfaceTypeDefinitionContext -> manager.getContainerClassName(interfaceTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildInterface)
                         .map(typeSpec -> JavaFile.builder(configuration.getInterfaceTypePackageName(), typeSpec).build()),
                 manager.getInputObjects()
-                        .filter(inputObjectTypeDefinitionContext -> manager.isNotImportType(inputObjectTypeDefinitionContext.name().getText()))
+                        .filter(inputObjectTypeDefinitionContext -> manager.getContainerClassName(inputObjectTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildClass)
                         .map(typeSpec -> JavaFile.builder(configuration.getInputObjectTypePackageName(), typeSpec).build()),
                 manager.getObjects()
-                        .filter(objectTypeDefinitionContext -> manager.isNotImportType(objectTypeDefinitionContext.name().getText()))
+                        .filter(objectTypeDefinitionContext -> manager.getContainerClassName(objectTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildClass)
                         .map(typeSpec -> JavaFile.builder(configuration.getObjectTypePackageName(), typeSpec).build()),
                 typeSpecBuilder.buildScalarTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),

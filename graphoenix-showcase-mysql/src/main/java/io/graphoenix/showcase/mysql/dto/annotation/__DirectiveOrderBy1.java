@@ -41,21 +41,5 @@ public @interface __DirectiveOrderBy1 {
 
   Sort __typename() default Sort.ASC;
 
-  StringOrderBy2 description() default @StringOrderBy2;
-
   __InputValueOrderBy2 args() default @__InputValueOrderBy2;
-
-  StringOrderBy2 realmId() default @StringOrderBy2;
-
-  StringOrderBy2 createUserId() default @StringOrderBy2;
-
-  StringOrderBy2 updateUserId() default @StringOrderBy2;
-
-  StringOrderBy2 createGroupId() default @StringOrderBy2;
-
-  StringOrderBy2 __typename() default @StringOrderBy2;
-
-  StringOrderBy2 descriptionMax() default @StringOrderBy2;
-
-  StringOrderBy2 descriptionMin() default @StringOrderBy2;
 }

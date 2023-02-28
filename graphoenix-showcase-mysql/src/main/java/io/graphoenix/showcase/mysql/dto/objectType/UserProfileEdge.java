@@ -1,7 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.spi.annotation.Skip;
+import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
 import org.eclipse.microprofile.graphql.Id;
@@ -10,7 +10,7 @@ import org.eclipse.microprofile.graphql.Type;
 @Type
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
-@Skip
+@Ignore
 public class UserProfileEdge {
   private UserProfile node;
 

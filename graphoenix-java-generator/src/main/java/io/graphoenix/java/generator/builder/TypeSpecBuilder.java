@@ -14,7 +14,7 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.java.generator.implementer.TypeManager;
-import io.graphoenix.spi.annotation.Skip;
+import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.annotation.Generated;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -91,7 +91,7 @@ public class TypeSpecBuilder {
     }
 
     private AnnotationSpec getSchemaBeanAnnotationSpec() {
-        return AnnotationSpec.builder(Skip.class)
+        return AnnotationSpec.builder(Ignore.class)
                 .build();
     }
 
@@ -481,44 +481,44 @@ public class TypeSpecBuilder {
         } else if (manager.isObject(nameContext.getText())) {
             Optional<GraphqlParser.ObjectTypeDefinitionContext> object = manager.getObject(nameContext.getText());
             if (object.isPresent()) {
-                Optional<String> importClassName = manager.getImportClassName(object.get());
-                if (importClassName.isPresent()) {
-                    return ClassName.bestGuess(importClassName.get());
-                }
                 if (isAnnotation) {
                     return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + layer);
                 } else {
+                    Optional<String> containerClassName = manager.getContainerClassName(object.get());
+                    if (containerClassName.isPresent()) {
+                        return ClassName.bestGuess(containerClassName.get());
+                    }
                     return ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText());
                 }
             }
         } else if (manager.isEnum(nameContext.getText())) {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
             if (enumType.isPresent()) {
-                Optional<String> importClassName = manager.getImportClassName(enumType.get());
-                if (importClassName.isPresent()) {
-                    return ClassName.bestGuess(importClassName.get());
+                Optional<String> containerClassName = manager.getContainerClassName(enumType.get());
+                if (containerClassName.isPresent()) {
+                    return ClassName.bestGuess(containerClassName.get());
                 }
                 return ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText());
             }
         } else if (manager.isInterface(nameContext.getText())) {
             Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(nameContext.getText());
             if (interfaceType.isPresent()) {
-                Optional<String> importClassName = manager.getImportClassName(interfaceType.get());
-                if (importClassName.isPresent()) {
-                    return ClassName.bestGuess(importClassName.get());
+                Optional<String> containerClassName = manager.getContainerClassName(interfaceType.get());
+                if (containerClassName.isPresent()) {
+                    return ClassName.bestGuess(containerClassName.get());
                 }
                 return ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText());
             }
         } else if (manager.isInputObject(nameContext.getText())) {
             Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(nameContext.getText());
             if (inputObject.isPresent()) {
-                Optional<String> importClassName = manager.getImportClassName(inputObject.get());
-                if (importClassName.isPresent()) {
-                    return ClassName.bestGuess(importClassName.get());
-                }
                 if (isAnnotation) {
                     return ClassName.get(graphQLConfig.getDirectivePackageName(), inputObject.get().name().getText());
                 } else {
+                    Optional<String> containerClassName = manager.getContainerClassName(inputObject.get());
+                    if (containerClassName.isPresent()) {
+                        return ClassName.bestGuess(containerClassName.get());
+                    }
                     return ClassName.get(graphQLConfig.getInputObjectTypePackageName(), inputObject.get().name().getText());
                 }
             }
@@ -1018,9 +1018,8 @@ public class TypeSpecBuilder {
                             if (layer < graphQLConfig.getInputLayers() - 1) {
                                 builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext ->
-                                                        manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                                )
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                                                 .map(fieldDefinitionContext ->
@@ -1108,25 +1107,24 @@ public class TypeSpecBuilder {
                                     );
                             if (layer < graphQLConfig.getInputLayers() - 1) {
                                 builder.addMethods(
-                                                manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                        .filter(fieldDefinitionContext ->
-                                                                manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                                        )
-                                                        .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                                                        .map(fieldDefinitionContext ->
-                                                                MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                        .returns(
-                                                                                manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
-                                                                                        ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
-                                                                                        ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
-                                                                        )
-                                                                        .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
-                                                                        .build()
-                                                        )
-                                                        .collect(Collectors.toList())
-                                        )
+                                        manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                                                .map(fieldDefinitionContext ->
+                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                .returns(
+                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
+                                                                                ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
+                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
+                                                                )
+                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
+                                                                .build()
+                                                )
+                                                .collect(Collectors.toList())
+                                )
                                         .addMethod(
                                                 MethodSpec.methodBuilder(LIST_INPUT_NAME)
                                                         .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -1195,9 +1193,8 @@ public class TypeSpecBuilder {
                             if (layer < graphQLConfig.getInputLayers() - 1) {
                                 builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext ->
-                                                        manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
-                                                )
+                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                                                 .map(fieldDefinitionContext ->

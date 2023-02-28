@@ -87,27 +87,9 @@ public @interface OrganizationInput0 {
 
   UserInput1[] rpcUsers() default {};
 
-  StringInput1 name() default "";
-
-  StringInput1 realmId() default "";
-
-  StringInput1 createUserId() default "";
-
-  StringInput1 updateUserId() default "";
-
-  StringInput1 createGroupId() default "";
-
-  StringInput1 __typename() default "";
-
-  StringInput1 nameMax() default "";
-
-  StringInput1 nameMin() default "";
-
   UserInput1[] userByOrg() default {};
 
   OrganizationInput1 parent() default @OrganizationInput1;
-
-  ContainerTypeInput1 containerType() default @ContainerTypeInput1;
 
   OrganizationInput1[] list() default {};
 

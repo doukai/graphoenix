@@ -57,16 +57,6 @@ public @interface UserTest2Input0 {
 
   String $__typename() default "";
 
-  StringInput1 realmId() default "";
-
-  StringInput1 createUserId() default "";
-
-  StringInput1 updateUserId() default "";
-
-  StringInput1 createGroupId() default "";
-
-  StringInput1 __typename() default "";
-
   UserTest2Input1[] list() default {};
 
   String $list() default "";

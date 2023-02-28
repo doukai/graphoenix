@@ -37,39 +37,5 @@ public @interface __EnumValueOrderBy1 {
 
   Sort __typename() default Sort.ASC;
 
-  StringOrderBy2 name() default @StringOrderBy2;
-
-  StringOrderBy2 ofTypeName() default @StringOrderBy2;
-
   __TypeOrderBy2 ofType() default @__TypeOrderBy2;
-
-  StringOrderBy2 description() default @StringOrderBy2;
-
-  StringOrderBy2 deprecationReason() default @StringOrderBy2;
-
-  StringOrderBy2 realmId() default @StringOrderBy2;
-
-  StringOrderBy2 createUserId() default @StringOrderBy2;
-
-  StringOrderBy2 updateUserId() default @StringOrderBy2;
-
-  StringOrderBy2 createGroupId() default @StringOrderBy2;
-
-  StringOrderBy2 __typename() default @StringOrderBy2;
-
-  StringOrderBy2 nameMax() default @StringOrderBy2;
-
-  StringOrderBy2 nameMin() default @StringOrderBy2;
-
-  StringOrderBy2 ofTypeNameMax() default @StringOrderBy2;
-
-  StringOrderBy2 ofTypeNameMin() default @StringOrderBy2;
-
-  StringOrderBy2 descriptionMax() default @StringOrderBy2;
-
-  StringOrderBy2 descriptionMin() default @StringOrderBy2;
-
-  StringOrderBy2 deprecationReasonMax() default @StringOrderBy2;
-
-  StringOrderBy2 deprecationReasonMin() default @StringOrderBy2;
 }

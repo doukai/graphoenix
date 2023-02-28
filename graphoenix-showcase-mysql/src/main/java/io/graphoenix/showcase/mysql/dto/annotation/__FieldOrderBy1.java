@@ -49,79 +49,9 @@ public @interface __FieldOrderBy1 {
 
   Sort __typename() default Sort.ASC;
 
-  StringOrderBy2 name() default @StringOrderBy2;
-
-  StringOrderBy2 typeName() default @StringOrderBy2;
-
-  StringOrderBy2 ofTypeName() default @StringOrderBy2;
-
   __TypeOrderBy2 ofType() default @__TypeOrderBy2;
-
-  StringOrderBy2 description() default @StringOrderBy2;
 
   __InputValueOrderBy2 args() default @__InputValueOrderBy2;
 
   __TypeOrderBy2 type() default @__TypeOrderBy2;
-
-  StringOrderBy2 deprecationReason() default @StringOrderBy2;
-
-  StringOrderBy2 from() default @StringOrderBy2;
-
-  StringOrderBy2 to() default @StringOrderBy2;
-
-  StringOrderBy2 withType() default @StringOrderBy2;
-
-  StringOrderBy2 withFrom() default @StringOrderBy2;
-
-  StringOrderBy2 withTo() default @StringOrderBy2;
-
-  StringOrderBy2 realmId() default @StringOrderBy2;
-
-  StringOrderBy2 createUserId() default @StringOrderBy2;
-
-  StringOrderBy2 updateUserId() default @StringOrderBy2;
-
-  StringOrderBy2 createGroupId() default @StringOrderBy2;
-
-  StringOrderBy2 __typename() default @StringOrderBy2;
-
-  StringOrderBy2 nameMax() default @StringOrderBy2;
-
-  StringOrderBy2 nameMin() default @StringOrderBy2;
-
-  StringOrderBy2 typeNameMax() default @StringOrderBy2;
-
-  StringOrderBy2 typeNameMin() default @StringOrderBy2;
-
-  StringOrderBy2 ofTypeNameMax() default @StringOrderBy2;
-
-  StringOrderBy2 ofTypeNameMin() default @StringOrderBy2;
-
-  StringOrderBy2 descriptionMax() default @StringOrderBy2;
-
-  StringOrderBy2 descriptionMin() default @StringOrderBy2;
-
-  StringOrderBy2 deprecationReasonMax() default @StringOrderBy2;
-
-  StringOrderBy2 deprecationReasonMin() default @StringOrderBy2;
-
-  StringOrderBy2 fromMax() default @StringOrderBy2;
-
-  StringOrderBy2 fromMin() default @StringOrderBy2;
-
-  StringOrderBy2 toMax() default @StringOrderBy2;
-
-  StringOrderBy2 toMin() default @StringOrderBy2;
-
-  StringOrderBy2 withTypeMax() default @StringOrderBy2;
-
-  StringOrderBy2 withTypeMin() default @StringOrderBy2;
-
-  StringOrderBy2 withFromMax() default @StringOrderBy2;
-
-  StringOrderBy2 withFromMin() default @StringOrderBy2;
-
-  StringOrderBy2 withToMax() default @StringOrderBy2;
-
-  StringOrderBy2 withToMin() default @StringOrderBy2;
 }

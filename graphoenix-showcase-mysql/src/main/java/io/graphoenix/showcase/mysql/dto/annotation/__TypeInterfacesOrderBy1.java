@@ -32,26 +32,4 @@ public @interface __TypeInterfacesOrderBy1 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  StringOrderBy2 typeName() default @StringOrderBy2;
-
-  StringOrderBy2 interfaceName() default @StringOrderBy2;
-
-  StringOrderBy2 realmId() default @StringOrderBy2;
-
-  StringOrderBy2 createUserId() default @StringOrderBy2;
-
-  StringOrderBy2 updateUserId() default @StringOrderBy2;
-
-  StringOrderBy2 createGroupId() default @StringOrderBy2;
-
-  StringOrderBy2 __typename() default @StringOrderBy2;
-
-  StringOrderBy2 typeNameMax() default @StringOrderBy2;
-
-  StringOrderBy2 typeNameMin() default @StringOrderBy2;
-
-  StringOrderBy2 interfaceNameMax() default @StringOrderBy2;
-
-  StringOrderBy2 interfaceNameMin() default @StringOrderBy2;
 }

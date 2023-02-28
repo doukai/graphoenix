@@ -98,8 +98,6 @@ public @interface __TypeInput1 {
 
   String $inputFieldsConnection() default "";
 
-  StringInput2 description() default "";
-
   __FieldInput2[] fields() default {};
 
   __TypeInput2[] interfaces() default {};
@@ -110,27 +108,7 @@ public @interface __TypeInput1 {
 
   __InputValueInput2[] inputFields() default {};
 
-  StringInput2 ofTypeName() default "";
-
   __TypeInput2 ofType() default @__TypeInput2;
-
-  StringInput2 realmId() default "";
-
-  StringInput2 createUserId() default "";
-
-  StringInput2 updateUserId() default "";
-
-  StringInput2 createGroupId() default "";
-
-  StringInput2 __typename() default "";
-
-  StringInput2 descriptionMax() default "";
-
-  StringInput2 descriptionMin() default "";
-
-  StringInput2 ofTypeNameMax() default "";
-
-  StringInput2 ofTypeNameMin() default "";
 
   __TypeInput2[] list() default {};
 

@@ -60,15 +60,5 @@ public @interface RoleRoleTypeExpression0 {
 
   String $before() default "";
 
-  StringExpression1 realmId() default @StringExpression1;
-
-  StringExpression1 createUserId() default @StringExpression1;
-
-  StringExpression1 updateUserId() default @StringExpression1;
-
-  StringExpression1 createGroupId() default @StringExpression1;
-
-  StringExpression1 __typename() default @StringExpression1;
-
   RoleRoleTypeExpression1[] exs() default {};
 }

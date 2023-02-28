@@ -32,26 +32,4 @@ public @interface __TypePossibleTypesOrderBy0 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  StringOrderBy1 typeName() default @StringOrderBy1;
-
-  StringOrderBy1 possibleTypeName() default @StringOrderBy1;
-
-  StringOrderBy1 realmId() default @StringOrderBy1;
-
-  StringOrderBy1 createUserId() default @StringOrderBy1;
-
-  StringOrderBy1 updateUserId() default @StringOrderBy1;
-
-  StringOrderBy1 createGroupId() default @StringOrderBy1;
-
-  StringOrderBy1 __typename() default @StringOrderBy1;
-
-  StringOrderBy1 typeNameMax() default @StringOrderBy1;
-
-  StringOrderBy1 typeNameMin() default @StringOrderBy1;
-
-  StringOrderBy1 possibleTypeNameMax() default @StringOrderBy1;
-
-  StringOrderBy1 possibleTypeNameMin() default @StringOrderBy1;
 }

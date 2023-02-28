@@ -60,27 +60,5 @@ public @interface __TypePossibleTypesExpression1 {
 
   String $before() default "";
 
-  StringExpression2 typeName() default @StringExpression2;
-
-  StringExpression2 possibleTypeName() default @StringExpression2;
-
-  StringExpression2 realmId() default @StringExpression2;
-
-  StringExpression2 createUserId() default @StringExpression2;
-
-  StringExpression2 updateUserId() default @StringExpression2;
-
-  StringExpression2 createGroupId() default @StringExpression2;
-
-  StringExpression2 __typename() default @StringExpression2;
-
-  StringExpression2 typeNameMax() default @StringExpression2;
-
-  StringExpression2 typeNameMin() default @StringExpression2;
-
-  StringExpression2 possibleTypeNameMax() default @StringExpression2;
-
-  StringExpression2 possibleTypeNameMin() default @StringExpression2;
-
   __TypePossibleTypesExpression2[] exs() default {};
 }

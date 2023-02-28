@@ -1,7 +1,10 @@
 package io.graphoenix.graphql.generator.translator;
 
+import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.EnumType;
 import io.graphoenix.core.document.EnumValue;
+import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.StringValue;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Ignore;
@@ -10,6 +13,8 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
+
+import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class JavaElementToEnum {
@@ -35,6 +40,16 @@ public class JavaElementToEnum {
                                                 .setDescription(elementManager.getDescriptionFromElement(element))
                                 )
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
+                .addDirective(
+                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                .addArgument(
+                                        new Argument()
+                                                .setName("className")
+                                                .setValueWithVariable(
+                                                        new StringValue(typeElement.getQualifiedName().toString())
+                                                )
+                                )
                 );
     }
 }

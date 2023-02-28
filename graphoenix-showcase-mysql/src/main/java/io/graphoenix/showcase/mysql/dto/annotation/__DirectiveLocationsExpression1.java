@@ -60,21 +60,5 @@ public @interface __DirectiveLocationsExpression1 {
 
   String $before() default "";
 
-  StringExpression2 directiveName() default @StringExpression2;
-
-  StringExpression2 realmId() default @StringExpression2;
-
-  StringExpression2 createUserId() default @StringExpression2;
-
-  StringExpression2 updateUserId() default @StringExpression2;
-
-  StringExpression2 createGroupId() default @StringExpression2;
-
-  StringExpression2 __typename() default @StringExpression2;
-
-  StringExpression2 directiveNameMax() default @StringExpression2;
-
-  StringExpression2 directiveNameMin() default @StringExpression2;
-
   __DirectiveLocationsExpression2[] exs() default {};
 }

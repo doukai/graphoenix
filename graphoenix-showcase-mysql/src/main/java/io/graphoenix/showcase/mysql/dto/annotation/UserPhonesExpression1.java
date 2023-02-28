@@ -60,21 +60,5 @@ public @interface UserPhonesExpression1 {
 
   String $before() default "";
 
-  StringExpression2 phone() default @StringExpression2;
-
-  StringExpression2 realmId() default @StringExpression2;
-
-  StringExpression2 createUserId() default @StringExpression2;
-
-  StringExpression2 updateUserId() default @StringExpression2;
-
-  StringExpression2 createGroupId() default @StringExpression2;
-
-  StringExpression2 __typename() default @StringExpression2;
-
-  StringExpression2 phoneMax() default @StringExpression2;
-
-  StringExpression2 phoneMin() default @StringExpression2;
-
   UserPhonesExpression2[] exs() default {};
 }

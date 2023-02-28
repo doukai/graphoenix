@@ -1,7 +1,10 @@
 package io.graphoenix.graphql.generator.translator;
 
+import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.InputObjectType;
 import io.graphoenix.core.document.InputValue;
+import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.StringValue;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.Ignore;
@@ -12,6 +15,8 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
+
+import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class JavaElementToInputType {
@@ -39,6 +44,16 @@ public class JavaElementToInputType {
                                                 .setTypeName(elementManager.variableElementToTypeName((VariableElement) element, typeUtils))
                                 )
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
+                .addDirective(
+                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                .addArgument(
+                                        new Argument()
+                                                .setName("className")
+                                                .setValueWithVariable(
+                                                        new StringValue(typeElement.getQualifiedName().toString())
+                                                )
+                                )
                 );
     }
 }
