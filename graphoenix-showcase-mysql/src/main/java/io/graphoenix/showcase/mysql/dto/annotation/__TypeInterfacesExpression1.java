@@ -60,5 +60,27 @@ public @interface __TypeInterfacesExpression1 {
 
   String $before() default "";
 
+  StringExpression2 typeName() default @StringExpression2;
+
+  StringExpression2 interfaceName() default @StringExpression2;
+
+  StringExpression2 realmId() default @StringExpression2;
+
+  StringExpression2 createUserId() default @StringExpression2;
+
+  StringExpression2 updateUserId() default @StringExpression2;
+
+  StringExpression2 createGroupId() default @StringExpression2;
+
+  StringExpression2 __typename() default @StringExpression2;
+
+  StringExpression2 typeNameMax() default @StringExpression2;
+
+  StringExpression2 typeNameMin() default @StringExpression2;
+
+  StringExpression2 interfaceNameMax() default @StringExpression2;
+
+  StringExpression2 interfaceNameMin() default @StringExpression2;
+
   __TypeInterfacesExpression2[] exs() default {};
 }

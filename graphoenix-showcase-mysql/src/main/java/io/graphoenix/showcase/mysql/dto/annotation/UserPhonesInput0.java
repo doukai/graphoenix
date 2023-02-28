@@ -57,6 +57,22 @@ public @interface UserPhonesInput0 {
 
   String $__typename() default "";
 
+  StringInput1 phone() default "";
+
+  StringInput1 realmId() default "";
+
+  StringInput1 createUserId() default "";
+
+  StringInput1 updateUserId() default "";
+
+  StringInput1 createGroupId() default "";
+
+  StringInput1 __typename() default "";
+
+  StringInput1 phoneMax() default "";
+
+  StringInput1 phoneMin() default "";
+
   UserPhonesInput1[] list() default {};
 
   String $list() default "";

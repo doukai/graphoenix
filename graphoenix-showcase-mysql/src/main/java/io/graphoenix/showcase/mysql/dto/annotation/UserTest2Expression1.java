@@ -60,5 +60,15 @@ public @interface UserTest2Expression1 {
 
   String $before() default "";
 
+  StringExpression2 realmId() default @StringExpression2;
+
+  StringExpression2 createUserId() default @StringExpression2;
+
+  StringExpression2 updateUserId() default @StringExpression2;
+
+  StringExpression2 createGroupId() default @StringExpression2;
+
+  StringExpression2 __typename() default @StringExpression2;
+
   UserTest2Expression2[] exs() default {};
 }

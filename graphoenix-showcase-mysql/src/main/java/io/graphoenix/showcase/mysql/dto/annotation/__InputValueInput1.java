@@ -81,9 +81,55 @@ public @interface __InputValueInput1 {
 
   String $__typename() default "";
 
+  StringInput2 name() default "";
+
+  StringInput2 typeName() default "";
+
+  StringInput2 ofTypeName() default "";
+
   __TypeInput2 ofType() default @__TypeInput2;
 
+  StringInput2 directiveName() default "";
+
+  StringInput2 description() default "";
+
   __TypeInput2 type() default @__TypeInput2;
+
+  StringInput2 defaultValue() default "";
+
+  StringInput2 realmId() default "";
+
+  StringInput2 createUserId() default "";
+
+  StringInput2 updateUserId() default "";
+
+  StringInput2 createGroupId() default "";
+
+  StringInput2 __typename() default "";
+
+  StringInput2 nameMax() default "";
+
+  StringInput2 nameMin() default "";
+
+  StringInput2 typeNameMax() default "";
+
+  StringInput2 typeNameMin() default "";
+
+  StringInput2 ofTypeNameMax() default "";
+
+  StringInput2 ofTypeNameMin() default "";
+
+  StringInput2 directiveNameMax() default "";
+
+  StringInput2 directiveNameMin() default "";
+
+  StringInput2 descriptionMax() default "";
+
+  StringInput2 descriptionMin() default "";
+
+  StringInput2 defaultValueMax() default "";
+
+  StringInput2 defaultValueMin() default "";
 
   __InputValueInput2[] list() default {};
 

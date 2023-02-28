@@ -390,6 +390,16 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean isImportType(String objectTypeName) {
+        return graphQLObjectManager.isImportType(objectTypeName);
+    }
+
+    @Override
+    public boolean isNotImportType(String objectTypeName) {
+        return graphQLObjectManager.isNotImportType(objectTypeName);
+    }
+
+    @Override
     public boolean isInvokeField(String objectTypeName, String name) {
         return graphQLFieldManager.isInvokeField(objectTypeName, name);
     }
@@ -662,6 +672,36 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(fieldDefinitionContext -> !fieldTypeIsList(fieldDefinitionContext.type()))
                 .filter(fieldDefinitionContext -> getFieldTypeName(fieldDefinitionContext.type()).equals("ID")).findFirst()
                 .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText());
+    }
+
+    @Override
+    public Optional<String> getImportClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    }
+
+    @Override
+    public Optional<String> getImportClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    }
+
+    @Override
+    public Optional<String> getImportClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    }
+
+    @Override
+    public Optional<String> getImportClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    }
+
+    public Optional<String> getImportClassName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
+                .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
     }
 
     @Override

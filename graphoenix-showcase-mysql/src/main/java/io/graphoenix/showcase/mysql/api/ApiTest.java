@@ -76,6 +76,10 @@ public class ApiTest {
         return organization.getAbove();
     }
 
+    public ContainerType getContainerType(@Source Organization organization) {
+        return new ContainerType();
+    }
+
     public List<Role> findRole(String name, Integer type, Boolean disable) {
         return null;
     }
@@ -93,5 +97,10 @@ public class ApiTest {
     @Query
     public PublisherBuilder<List<Role>> findRole2(String name, Integer type, Boolean disable) {
         return null;
+    }
+
+    @Query
+    public ContainerType findContainerType(String name) {
+        return new ContainerType();
     }
 }

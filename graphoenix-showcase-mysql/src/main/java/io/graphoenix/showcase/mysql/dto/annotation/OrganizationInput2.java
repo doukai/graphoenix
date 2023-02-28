@@ -78,4 +78,6 @@ public @interface OrganizationInput2 {
   String $userByOrg() default "";
 
   String $parent() default "";
+
+  String $containerType() default "";
 }

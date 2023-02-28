@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.showcase.mysql.api.ContainerType;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -156,6 +157,8 @@ public class QueryType implements Meta {
   private Organization parent2;
 
   private Collection<Role> findRole2;
+
+  private ContainerType findContainerType;
 
   public __Schema get__schema() {
     return this.__schema;
@@ -734,5 +737,13 @@ public class QueryType implements Meta {
 
   public void setFindRole2(Collection<Role> findRole2) {
     this.findRole2 = findRole2;
+  }
+
+  public ContainerType getFindContainerType() {
+    return this.findContainerType;
+  }
+
+  public void setFindContainerType(ContainerType findContainerType) {
+    this.findContainerType = findContainerType;
   }
 }

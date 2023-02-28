@@ -43,7 +43,53 @@ public @interface __InputValueOrderBy1 {
 
   Sort __typename() default Sort.ASC;
 
+  StringOrderBy2 name() default @StringOrderBy2;
+
+  StringOrderBy2 typeName() default @StringOrderBy2;
+
+  StringOrderBy2 ofTypeName() default @StringOrderBy2;
+
   __TypeOrderBy2 ofType() default @__TypeOrderBy2;
 
+  StringOrderBy2 directiveName() default @StringOrderBy2;
+
+  StringOrderBy2 description() default @StringOrderBy2;
+
   __TypeOrderBy2 type() default @__TypeOrderBy2;
+
+  StringOrderBy2 defaultValue() default @StringOrderBy2;
+
+  StringOrderBy2 realmId() default @StringOrderBy2;
+
+  StringOrderBy2 createUserId() default @StringOrderBy2;
+
+  StringOrderBy2 updateUserId() default @StringOrderBy2;
+
+  StringOrderBy2 createGroupId() default @StringOrderBy2;
+
+  StringOrderBy2 __typename() default @StringOrderBy2;
+
+  StringOrderBy2 nameMax() default @StringOrderBy2;
+
+  StringOrderBy2 nameMin() default @StringOrderBy2;
+
+  StringOrderBy2 typeNameMax() default @StringOrderBy2;
+
+  StringOrderBy2 typeNameMin() default @StringOrderBy2;
+
+  StringOrderBy2 ofTypeNameMax() default @StringOrderBy2;
+
+  StringOrderBy2 ofTypeNameMin() default @StringOrderBy2;
+
+  StringOrderBy2 directiveNameMax() default @StringOrderBy2;
+
+  StringOrderBy2 directiveNameMin() default @StringOrderBy2;
+
+  StringOrderBy2 descriptionMax() default @StringOrderBy2;
+
+  StringOrderBy2 descriptionMin() default @StringOrderBy2;
+
+  StringOrderBy2 defaultValueMax() default @StringOrderBy2;
+
+  StringOrderBy2 defaultValueMin() default @StringOrderBy2;
 }

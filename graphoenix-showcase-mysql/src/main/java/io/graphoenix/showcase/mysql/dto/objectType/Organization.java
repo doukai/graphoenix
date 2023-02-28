@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.showcase.mysql.api.ContainerType;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
@@ -86,6 +87,8 @@ public class Organization implements Meta {
   private Collection<User> userByOrg;
 
   private Organization parent;
+
+  private ContainerType containerType;
 
   public String getId() {
     return this.id;
@@ -357,5 +360,13 @@ public class Organization implements Meta {
 
   public void setParent(Organization parent) {
     this.parent = parent;
+  }
+
+  public ContainerType getContainerType() {
+    return this.containerType;
+  }
+
+  public void setContainerType(ContainerType containerType) {
+    this.containerType = containerType;
   }
 }

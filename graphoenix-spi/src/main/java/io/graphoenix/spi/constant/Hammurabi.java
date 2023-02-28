@@ -23,6 +23,7 @@ public class Hammurabi {
     public static final String UPDATE_DIRECTIVE_NAME = "update";
     public static final String DELETE_DIRECTIVE_NAME = "delete";
     public static final String CONTAINER_TYPE_DIRECTIVE_NAME = "containerType";
+    public static final String IMPORT_TYPE_DIRECTIVE_NAME = "importType";
     public static final String MERGE_TO_LIST_DIRECTIVE_NAME = "mergeToList";
     public static final String INTROSPECTION_PREFIX = "__";
     public static final String INPUT_SUFFIX = "Input";

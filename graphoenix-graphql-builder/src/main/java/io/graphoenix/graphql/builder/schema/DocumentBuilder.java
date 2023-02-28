@@ -83,6 +83,7 @@ public class DocumentBuilder {
     public Document buildDocument() throws IOException {
         manager.getObjects()
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> manager.isNotImportType(objectTypeDefinitionContext.name().getText()))
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
@@ -126,7 +127,7 @@ public class DocumentBuilder {
                                 .map(enumType ->
                                         enumType.addDirective(
                                                 new Directive()
-                                                        .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
                                                         .addArgument(
                                                                 new Argument()
                                                                         .setName("className")
@@ -141,7 +142,7 @@ public class DocumentBuilder {
                                 .map(interfaceType ->
                                         interfaceType.addDirective(
                                                 new Directive()
-                                                        .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
                                                         .addArgument(
                                                                 new Argument()
                                                                         .setName("className")
@@ -156,7 +157,7 @@ public class DocumentBuilder {
                                 .map(objectType ->
                                         objectType.addDirective(
                                                 new Directive()
-                                                        .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
                                                         .addArgument(
                                                                 new Argument()
                                                                         .setName("className")
@@ -173,7 +174,7 @@ public class DocumentBuilder {
                                 .map(inputObjectType ->
                                         inputObjectType.addDirective(
                                                 new Directive()
-                                                        .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
                                                         .addArgument(
                                                                 new Argument()
                                                                         .setName("className")
@@ -470,6 +471,7 @@ public class DocumentBuilder {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> manager.isNotImportType(objectTypeDefinitionContext.name().getText()))
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
                                 buildSchemaTypeField(objectTypeDefinitionContext, InputType.EXPRESSION),
@@ -488,6 +490,7 @@ public class DocumentBuilder {
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> manager.isNotImportType(objectTypeDefinitionContext.name().getText()))
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
                                 buildSchemaTypeField(objectTypeDefinitionContext, InputType.INPUT),
@@ -659,6 +662,7 @@ public class DocumentBuilder {
     public List<InputObjectType> buildArgumentInputObjects() {
         List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> manager.isNotImportType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -677,6 +681,7 @@ public class DocumentBuilder {
     public List<ObjectType> buildContainerTypeObjects() {
         List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> manager.isNotImportType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -705,7 +710,7 @@ public class DocumentBuilder {
                 .addField(new Field().setName("totalCount").setTypeName("Int"))
                 .addField(new Field().setName("pageInfo").setTypeName("PageInfo"))
                 .addField(new Field().setName("edges").setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat(InputType.EDGE.toString()).concat("]")))
-                .addStringDirective("containerType");
+                .addStringDirective(CONTAINER_TYPE_DIRECTIVE_NAME);
     }
 
     public ObjectType objectToEdge(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -717,7 +722,7 @@ public class DocumentBuilder {
         return new ObjectType().setName(objectTypeDefinitionContext.name().getText().concat(InputType.EDGE.toString()))
                 .addField(new Field().setName("node").setTypeName(objectTypeDefinitionContext.name().getText()))
                 .addField(new Field().setName("cursor").setTypeName(manager.getFieldTypeName(cursorFieldDefinitionContext.type())))
-                .addStringDirective("containerType");
+                .addStringDirective(CONTAINER_TYPE_DIRECTIVE_NAME);
     }
 
     public InputObjectType objectToExpression(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {

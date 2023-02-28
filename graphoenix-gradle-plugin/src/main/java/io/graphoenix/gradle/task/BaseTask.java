@@ -2,6 +2,8 @@ package io.graphoenix.gradle.task;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
+import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
@@ -12,12 +14,15 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.document.InputValue;
 import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
+import io.graphoenix.core.operation.Argument;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
+import io.graphoenix.spi.annotation.Skip;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -46,11 +51,16 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.IMPORT_TYPE_DIRECTIVE_NAME;
 
 public class BaseTask extends DefaultTask {
 
@@ -58,12 +68,14 @@ public class BaseTask extends DefaultTask {
     private final GraphQLConfigRegister configRegister;
     private final DocumentBuilder documentBuilder;
     private final IGraphQLFieldMapManager mapper;
+    private final GraphQLConfig graphQLConfig;
 
     public BaseTask() {
         manager = BeanContext.get(IGraphQLDocumentManager.class);
         configRegister = BeanContext.get(GraphQLConfigRegister.class);
         documentBuilder = BeanContext.get(DocumentBuilder.class);
         mapper = BeanContext.get(IGraphQLFieldMapManager.class);
+        graphQLConfig = BeanContext.get(GraphQLConfig.class);
     }
 
     protected void init() throws IOException, URISyntaxException {
@@ -115,6 +127,57 @@ public class BaseTask extends DefaultTask {
             sourceRoot.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
             sourceRoot.tryToParse();
             List<CompilationUnit> compilations = sourceRoot.getCompilationUnits();
+
+            compilations.stream()
+                    .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))
+                    .flatMap(typeDeclaration -> typeDeclaration.getMethods().stream())
+                    .forEach(methodDeclaration -> {
+                                Type type = methodDeclaration.getType();
+                                if (type.isArrayType()) {
+                                    type = type.asArrayType().getElementType();
+                                }
+                                try {
+                                    if (type.resolve().isReferenceType()) {
+                                        ResolvedReferenceType resolvedReferenceType = type.resolve().asReferenceType();
+                                        resolvedReferenceType.getTypeDeclaration()
+                                                .ifPresent(resolvedReferenceTypeDeclaration -> {
+                                                            if (!resolvedReferenceTypeDeclaration.hasAnnotation(Skip.class.getCanonicalName())) {
+                                                                String qualifiedName = resolvedReferenceType.getQualifiedName();
+                                                                if (qualifiedName.equals(PublisherBuilder.class.getCanonicalName()) ||
+                                                                        qualifiedName.equals(Mono.class.getCanonicalName()) ||
+                                                                        qualifiedName.equals(Flux.class.getCanonicalName()) ||
+                                                                        qualifiedName.equals(Collection.class.getCanonicalName()) ||
+                                                                        qualifiedName.equals(List.class.getCanonicalName()) ||
+                                                                        qualifiedName.equals(Set.class.getCanonicalName())) {
+
+                                                                    qualifiedName = resolvedReferenceType.typeParametersValues().get(0).asReferenceType().getQualifiedName();
+                                                                }
+
+                                                                String typeName = resolvedReferenceTypeDeclaration.getName();
+                                                                manager.mergeDocument(
+                                                                        new ObjectType()
+                                                                                .setName(typeName)
+                                                                                .addDirective(
+                                                                                        new Directive()
+                                                                                                .setName(IMPORT_TYPE_DIRECTIVE_NAME)
+                                                                                                .addArgument(
+                                                                                                        new Argument()
+                                                                                                                .setName("className")
+                                                                                                                .setValueWithVariable(qualifiedName)
+                                                                                                )
+                                                                                )
+                                                                                .toString()
+                                                                );
+                                                            }
+                                                        }
+                                                );
+                                    }
+                                } catch (UnsolvedSymbolException e) {
+                                    Logger.warn(e);
+                                }
+                            }
+                    );
+
             compilations.stream()
                     .flatMap(compilationUnit ->
                             compilationUnit.getTypes().stream()

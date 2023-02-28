@@ -54,10 +54,22 @@ public class JavaFileBuilder {
                                         .map(Optional::get)
                         )
                         .map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
-                manager.getEnums().map(typeSpecBuilder::buildEnum).map(typeSpec -> JavaFile.builder(configuration.getEnumTypePackageName(), typeSpec).build()),
-                manager.getInterfaces().map(typeSpecBuilder::buildInterface).map(typeSpec -> JavaFile.builder(configuration.getInterfaceTypePackageName(), typeSpec).build()),
-                manager.getInputObjects().map(typeSpecBuilder::buildClass).map(typeSpec -> JavaFile.builder(configuration.getInputObjectTypePackageName(), typeSpec).build()),
-                manager.getObjects().map(typeSpecBuilder::buildClass).map(typeSpec -> JavaFile.builder(configuration.getObjectTypePackageName(), typeSpec).build()),
+                manager.getEnums()
+                        .filter(enumTypeDefinitionContext -> manager.isNotImportType(enumTypeDefinitionContext.name().getText()))
+                        .map(typeSpecBuilder::buildEnum)
+                        .map(typeSpec -> JavaFile.builder(configuration.getEnumTypePackageName(), typeSpec).build()),
+                manager.getInterfaces()
+                        .filter(interfaceTypeDefinitionContext -> manager.isNotImportType(interfaceTypeDefinitionContext.name().getText()))
+                        .map(typeSpecBuilder::buildInterface)
+                        .map(typeSpec -> JavaFile.builder(configuration.getInterfaceTypePackageName(), typeSpec).build()),
+                manager.getInputObjects()
+                        .filter(inputObjectTypeDefinitionContext -> manager.isNotImportType(inputObjectTypeDefinitionContext.name().getText()))
+                        .map(typeSpecBuilder::buildClass)
+                        .map(typeSpec -> JavaFile.builder(configuration.getInputObjectTypePackageName(), typeSpec).build()),
+                manager.getObjects()
+                        .filter(objectTypeDefinitionContext -> manager.isNotImportType(objectTypeDefinitionContext.name().getText()))
+                        .map(typeSpecBuilder::buildClass)
+                        .map(typeSpec -> JavaFile.builder(configuration.getObjectTypePackageName(), typeSpec).build()),
                 typeSpecBuilder.buildScalarTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
                 typeSpecBuilder.buildEnumTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
                 typeSpecBuilder.buildObjectTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),

@@ -20,5 +20,9 @@ public interface IGraphQLObjectManager {
 
     boolean isNotContainerType(String objectTypeName);
 
+    boolean isImportType(String objectTypeName);
+
+    boolean isNotImportType(String objectTypeName);
+
     void clear();
 }

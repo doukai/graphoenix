@@ -35,6 +35,12 @@ public @interface __SchemaOrderBy1 {
 
   Sort __typename() default Sort.ASC;
 
+  StringOrderBy2 queryTypeName() default @StringOrderBy2;
+
+  StringOrderBy2 mutationTypeName() default @StringOrderBy2;
+
+  StringOrderBy2 subscriptionTypeName() default @StringOrderBy2;
+
   __TypeOrderBy2 types() default @__TypeOrderBy2;
 
   __TypeOrderBy2 queryType() default @__TypeOrderBy2;
@@ -44,4 +50,26 @@ public @interface __SchemaOrderBy1 {
   __TypeOrderBy2 subscriptionType() default @__TypeOrderBy2;
 
   __DirectiveOrderBy2 directives() default @__DirectiveOrderBy2;
+
+  StringOrderBy2 realmId() default @StringOrderBy2;
+
+  StringOrderBy2 createUserId() default @StringOrderBy2;
+
+  StringOrderBy2 updateUserId() default @StringOrderBy2;
+
+  StringOrderBy2 createGroupId() default @StringOrderBy2;
+
+  StringOrderBy2 __typename() default @StringOrderBy2;
+
+  StringOrderBy2 queryTypeNameMax() default @StringOrderBy2;
+
+  StringOrderBy2 queryTypeNameMin() default @StringOrderBy2;
+
+  StringOrderBy2 mutationTypeNameMax() default @StringOrderBy2;
+
+  StringOrderBy2 mutationTypeNameMin() default @StringOrderBy2;
+
+  StringOrderBy2 subscriptionTypeNameMax() default @StringOrderBy2;
+
+  StringOrderBy2 subscriptionTypeNameMin() default @StringOrderBy2;
 }

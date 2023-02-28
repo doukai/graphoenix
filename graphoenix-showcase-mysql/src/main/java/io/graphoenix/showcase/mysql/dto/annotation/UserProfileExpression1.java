@@ -64,9 +64,43 @@ public @interface UserProfileExpression1 {
 
   String $before() default "";
 
+  StringExpression2 userId() default @StringExpression2;
+
+  StringExpression2 email() default @StringExpression2;
+
+  StringExpression2 address() default @StringExpression2;
+
+  StringExpression2 qq() default @StringExpression2;
+
   UserExpression2 user() default @UserExpression2;
 
   UserExpression2 rpcUser() default @UserExpression2;
+
+  StringExpression2 realmId() default @StringExpression2;
+
+  StringExpression2 createUserId() default @StringExpression2;
+
+  StringExpression2 updateUserId() default @StringExpression2;
+
+  StringExpression2 createGroupId() default @StringExpression2;
+
+  StringExpression2 __typename() default @StringExpression2;
+
+  StringExpression2 userIdMax() default @StringExpression2;
+
+  StringExpression2 userIdMin() default @StringExpression2;
+
+  StringExpression2 emailMax() default @StringExpression2;
+
+  StringExpression2 emailMin() default @StringExpression2;
+
+  StringExpression2 addressMax() default @StringExpression2;
+
+  StringExpression2 addressMin() default @StringExpression2;
+
+  StringExpression2 qqMax() default @StringExpression2;
+
+  StringExpression2 qqMin() default @StringExpression2;
 
   UserProfileExpression2[] exs() default {};
 }

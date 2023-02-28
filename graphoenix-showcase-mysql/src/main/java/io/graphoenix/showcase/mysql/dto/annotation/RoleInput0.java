@@ -64,7 +64,23 @@ public @interface RoleInput0 {
 
   String $usersConnection() default "";
 
+  StringInput1 name() default "";
+
   UserInput1[] users() default {};
+
+  StringInput1 realmId() default "";
+
+  StringInput1 createUserId() default "";
+
+  StringInput1 updateUserId() default "";
+
+  StringInput1 createGroupId() default "";
+
+  StringInput1 __typename() default "";
+
+  StringInput1 nameMax() default "";
+
+  StringInput1 nameMin() default "";
 
   RoleInput1[] list() default {};
 

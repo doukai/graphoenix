@@ -78,6 +78,12 @@ public @interface UserExpression1 {
 
   String $before() default "";
 
+  StringExpression2 login() default @StringExpression2;
+
+  StringExpression2 password() default @StringExpression2;
+
+  StringExpression2 name() default @StringExpression2;
+
   UserProfileExpression2 userProfile() default @UserProfileExpression2;
 
   UserProfileExpression2 rpcUserProfile() default @UserProfileExpression2;
@@ -87,6 +93,32 @@ public @interface UserExpression1 {
   OrganizationExpression2 organization() default @OrganizationExpression2;
 
   RoleExpression2 roles() default @RoleExpression2;
+
+  StringExpression2 phones() default @StringExpression2;
+
+  StringExpression2 realmId() default @StringExpression2;
+
+  StringExpression2 createUserId() default @StringExpression2;
+
+  StringExpression2 updateUserId() default @StringExpression2;
+
+  StringExpression2 createGroupId() default @StringExpression2;
+
+  StringExpression2 __typename() default @StringExpression2;
+
+  StringExpression2 loginMax() default @StringExpression2;
+
+  StringExpression2 loginMin() default @StringExpression2;
+
+  StringExpression2 passwordMax() default @StringExpression2;
+
+  StringExpression2 passwordMin() default @StringExpression2;
+
+  StringExpression2 nameMax() default @StringExpression2;
+
+  StringExpression2 nameMin() default @StringExpression2;
+
+  StringExpression2 userDetail2() default @StringExpression2;
 
   UserExpression2[] exs() default {};
 }

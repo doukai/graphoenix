@@ -43,7 +43,25 @@ public @interface OrganizationOrderBy1 {
 
   UserOrderBy2 rpcUsers() default @UserOrderBy2;
 
+  StringOrderBy2 name() default @StringOrderBy2;
+
+  StringOrderBy2 realmId() default @StringOrderBy2;
+
+  StringOrderBy2 createUserId() default @StringOrderBy2;
+
+  StringOrderBy2 updateUserId() default @StringOrderBy2;
+
+  StringOrderBy2 createGroupId() default @StringOrderBy2;
+
+  StringOrderBy2 __typename() default @StringOrderBy2;
+
+  StringOrderBy2 nameMax() default @StringOrderBy2;
+
+  StringOrderBy2 nameMin() default @StringOrderBy2;
+
   UserOrderBy2 userByOrg() default @UserOrderBy2;
 
   OrganizationOrderBy2 parent() default @OrganizationOrderBy2;
+
+  ContainerTypeOrderBy2 containerType() default @ContainerTypeOrderBy2;
 }

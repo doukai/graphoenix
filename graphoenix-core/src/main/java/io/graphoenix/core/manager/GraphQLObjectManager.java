@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_DIRECTIVES;
+import static io.graphoenix.spi.constant.Hammurabi.IMPORT_TYPE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class GraphQLObjectManager implements IGraphQLObjectManager {
@@ -49,6 +50,17 @@ public class GraphQLObjectManager implements IGraphQLObjectManager {
     @Override
     public boolean isNotContainerType(String objectTypeName) {
         return !isContainerType(objectTypeName);
+    }
+
+    @Override
+    public boolean isImportType(String objectTypeName) {
+        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = objectTypeDefinitionMap.get(objectTypeName);
+        return objectTypeDefinitionContext != null && objectTypeDefinitionContext.directives() != null && objectTypeDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME));
+    }
+
+    @Override
+    public boolean isNotImportType(String objectTypeName) {
+        return !isImportType(objectTypeName);
     }
 
     @Override

@@ -57,6 +57,28 @@ public @interface __TypePossibleTypesInput1 {
 
   String $__typename() default "";
 
+  StringInput2 typeName() default "";
+
+  StringInput2 possibleTypeName() default "";
+
+  StringInput2 realmId() default "";
+
+  StringInput2 createUserId() default "";
+
+  StringInput2 updateUserId() default "";
+
+  StringInput2 createGroupId() default "";
+
+  StringInput2 __typename() default "";
+
+  StringInput2 typeNameMax() default "";
+
+  StringInput2 typeNameMin() default "";
+
+  StringInput2 possibleTypeNameMax() default "";
+
+  StringInput2 possibleTypeNameMin() default "";
+
   __TypePossibleTypesInput2[] list() default {};
 
   String $list() default "";

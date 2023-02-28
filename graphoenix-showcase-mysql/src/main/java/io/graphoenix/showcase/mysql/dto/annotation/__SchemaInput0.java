@@ -79,6 +79,12 @@ public @interface __SchemaInput0 {
 
   String $directivesConnection() default "";
 
+  StringInput1 queryTypeName() default "";
+
+  StringInput1 mutationTypeName() default "";
+
+  StringInput1 subscriptionTypeName() default "";
+
   __TypeInput1[] types() default {};
 
   __TypeInput1 queryType() default @__TypeInput1;
@@ -88,6 +94,28 @@ public @interface __SchemaInput0 {
   __TypeInput1 subscriptionType() default @__TypeInput1;
 
   __DirectiveInput1[] directives() default {};
+
+  StringInput1 realmId() default "";
+
+  StringInput1 createUserId() default "";
+
+  StringInput1 updateUserId() default "";
+
+  StringInput1 createGroupId() default "";
+
+  StringInput1 __typename() default "";
+
+  StringInput1 queryTypeNameMax() default "";
+
+  StringInput1 queryTypeNameMin() default "";
+
+  StringInput1 mutationTypeNameMax() default "";
+
+  StringInput1 mutationTypeNameMin() default "";
+
+  StringInput1 subscriptionTypeNameMax() default "";
+
+  StringInput1 subscriptionTypeNameMin() default "";
 
   __SchemaInput1[] list() default {};
 

@@ -80,7 +80,23 @@ public @interface __DirectiveInput1 {
 
   String $argsConnection() default "";
 
+  StringInput2 description() default "";
+
   __InputValueInput2[] args() default {};
+
+  StringInput2 realmId() default "";
+
+  StringInput2 createUserId() default "";
+
+  StringInput2 updateUserId() default "";
+
+  StringInput2 createGroupId() default "";
+
+  StringInput2 __typename() default "";
+
+  StringInput2 descriptionMax() default "";
+
+  StringInput2 descriptionMin() default "";
 
   __DirectiveInput2[] list() default {};
 

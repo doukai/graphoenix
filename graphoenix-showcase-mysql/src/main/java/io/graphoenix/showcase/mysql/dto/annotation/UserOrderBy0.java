@@ -51,6 +51,12 @@ public @interface UserOrderBy0 {
 
   Sort userDetail2() default Sort.ASC;
 
+  StringOrderBy1 login() default @StringOrderBy1;
+
+  StringOrderBy1 password() default @StringOrderBy1;
+
+  StringOrderBy1 name() default @StringOrderBy1;
+
   UserProfileOrderBy1 userProfile() default @UserProfileOrderBy1;
 
   UserProfileOrderBy1 rpcUserProfile() default @UserProfileOrderBy1;
@@ -60,4 +66,30 @@ public @interface UserOrderBy0 {
   OrganizationOrderBy1 organization() default @OrganizationOrderBy1;
 
   RoleOrderBy1 roles() default @RoleOrderBy1;
+
+  StringOrderBy1 phones() default @StringOrderBy1;
+
+  StringOrderBy1 realmId() default @StringOrderBy1;
+
+  StringOrderBy1 createUserId() default @StringOrderBy1;
+
+  StringOrderBy1 updateUserId() default @StringOrderBy1;
+
+  StringOrderBy1 createGroupId() default @StringOrderBy1;
+
+  StringOrderBy1 __typename() default @StringOrderBy1;
+
+  StringOrderBy1 loginMax() default @StringOrderBy1;
+
+  StringOrderBy1 loginMin() default @StringOrderBy1;
+
+  StringOrderBy1 passwordMax() default @StringOrderBy1;
+
+  StringOrderBy1 passwordMin() default @StringOrderBy1;
+
+  StringOrderBy1 nameMax() default @StringOrderBy1;
+
+  StringOrderBy1 nameMin() default @StringOrderBy1;
+
+  StringOrderBy1 userDetail2() default @StringOrderBy1;
 }

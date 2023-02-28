@@ -33,5 +33,21 @@ public @interface RoleOrderBy0 {
 
   Sort __typename() default Sort.ASC;
 
+  StringOrderBy1 name() default @StringOrderBy1;
+
   UserOrderBy1 users() default @UserOrderBy1;
+
+  StringOrderBy1 realmId() default @StringOrderBy1;
+
+  StringOrderBy1 createUserId() default @StringOrderBy1;
+
+  StringOrderBy1 updateUserId() default @StringOrderBy1;
+
+  StringOrderBy1 createGroupId() default @StringOrderBy1;
+
+  StringOrderBy1 __typename() default @StringOrderBy1;
+
+  StringOrderBy1 nameMax() default @StringOrderBy1;
+
+  StringOrderBy1 nameMin() default @StringOrderBy1;
 }

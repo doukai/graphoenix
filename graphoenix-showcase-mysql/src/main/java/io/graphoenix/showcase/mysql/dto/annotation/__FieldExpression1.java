@@ -76,11 +76,81 @@ public @interface __FieldExpression1 {
 
   String $before() default "";
 
+  StringExpression2 name() default @StringExpression2;
+
+  StringExpression2 typeName() default @StringExpression2;
+
+  StringExpression2 ofTypeName() default @StringExpression2;
+
   __TypeExpression2 ofType() default @__TypeExpression2;
+
+  StringExpression2 description() default @StringExpression2;
 
   __InputValueExpression2 args() default @__InputValueExpression2;
 
   __TypeExpression2 type() default @__TypeExpression2;
+
+  StringExpression2 deprecationReason() default @StringExpression2;
+
+  StringExpression2 from() default @StringExpression2;
+
+  StringExpression2 to() default @StringExpression2;
+
+  StringExpression2 withType() default @StringExpression2;
+
+  StringExpression2 withFrom() default @StringExpression2;
+
+  StringExpression2 withTo() default @StringExpression2;
+
+  StringExpression2 realmId() default @StringExpression2;
+
+  StringExpression2 createUserId() default @StringExpression2;
+
+  StringExpression2 updateUserId() default @StringExpression2;
+
+  StringExpression2 createGroupId() default @StringExpression2;
+
+  StringExpression2 __typename() default @StringExpression2;
+
+  StringExpression2 nameMax() default @StringExpression2;
+
+  StringExpression2 nameMin() default @StringExpression2;
+
+  StringExpression2 typeNameMax() default @StringExpression2;
+
+  StringExpression2 typeNameMin() default @StringExpression2;
+
+  StringExpression2 ofTypeNameMax() default @StringExpression2;
+
+  StringExpression2 ofTypeNameMin() default @StringExpression2;
+
+  StringExpression2 descriptionMax() default @StringExpression2;
+
+  StringExpression2 descriptionMin() default @StringExpression2;
+
+  StringExpression2 deprecationReasonMax() default @StringExpression2;
+
+  StringExpression2 deprecationReasonMin() default @StringExpression2;
+
+  StringExpression2 fromMax() default @StringExpression2;
+
+  StringExpression2 fromMin() default @StringExpression2;
+
+  StringExpression2 toMax() default @StringExpression2;
+
+  StringExpression2 toMin() default @StringExpression2;
+
+  StringExpression2 withTypeMax() default @StringExpression2;
+
+  StringExpression2 withTypeMin() default @StringExpression2;
+
+  StringExpression2 withFromMax() default @StringExpression2;
+
+  StringExpression2 withFromMin() default @StringExpression2;
+
+  StringExpression2 withToMax() default @StringExpression2;
+
+  StringExpression2 withToMin() default @StringExpression2;
 
   __FieldExpression2[] exs() default {};
 }

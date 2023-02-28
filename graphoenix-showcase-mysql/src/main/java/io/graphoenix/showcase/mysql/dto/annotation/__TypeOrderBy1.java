@@ -37,6 +37,8 @@ public @interface __TypeOrderBy1 {
 
   Sort __typename() default Sort.ASC;
 
+  StringOrderBy2 description() default @StringOrderBy2;
+
   __FieldOrderBy2 fields() default @__FieldOrderBy2;
 
   __TypeOrderBy2 interfaces() default @__TypeOrderBy2;
@@ -47,5 +49,25 @@ public @interface __TypeOrderBy1 {
 
   __InputValueOrderBy2 inputFields() default @__InputValueOrderBy2;
 
+  StringOrderBy2 ofTypeName() default @StringOrderBy2;
+
   __TypeOrderBy2 ofType() default @__TypeOrderBy2;
+
+  StringOrderBy2 realmId() default @StringOrderBy2;
+
+  StringOrderBy2 createUserId() default @StringOrderBy2;
+
+  StringOrderBy2 updateUserId() default @StringOrderBy2;
+
+  StringOrderBy2 createGroupId() default @StringOrderBy2;
+
+  StringOrderBy2 __typename() default @StringOrderBy2;
+
+  StringOrderBy2 descriptionMax() default @StringOrderBy2;
+
+  StringOrderBy2 descriptionMin() default @StringOrderBy2;
+
+  StringOrderBy2 ofTypeNameMax() default @StringOrderBy2;
+
+  StringOrderBy2 ofTypeNameMin() default @StringOrderBy2;
 }

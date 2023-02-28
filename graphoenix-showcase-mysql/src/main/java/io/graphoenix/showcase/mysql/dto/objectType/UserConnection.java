@@ -5,7 +5,6 @@ import io.graphoenix.spi.annotation.Skip;
 import jakarta.annotation.Generated;
 import java.lang.Integer;
 import java.util.Collection;
-import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
@@ -15,7 +14,6 @@ import org.eclipse.microprofile.graphql.Type;
 public class UserConnection {
   private Integer totalCount;
 
-  @NonNull
   private PageInfo pageInfo;
 
   private Collection<UserEdge> edges;

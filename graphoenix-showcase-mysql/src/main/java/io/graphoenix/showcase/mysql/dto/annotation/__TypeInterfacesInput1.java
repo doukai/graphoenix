@@ -57,6 +57,28 @@ public @interface __TypeInterfacesInput1 {
 
   String $__typename() default "";
 
+  StringInput2 typeName() default "";
+
+  StringInput2 interfaceName() default "";
+
+  StringInput2 realmId() default "";
+
+  StringInput2 createUserId() default "";
+
+  StringInput2 updateUserId() default "";
+
+  StringInput2 createGroupId() default "";
+
+  StringInput2 __typename() default "";
+
+  StringInput2 typeNameMax() default "";
+
+  StringInput2 typeNameMin() default "";
+
+  StringInput2 interfaceNameMax() default "";
+
+  StringInput2 interfaceNameMin() default "";
+
   __TypeInterfacesInput2[] list() default {};
 
   String $list() default "";

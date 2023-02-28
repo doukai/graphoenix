@@ -481,6 +481,10 @@ public class TypeSpecBuilder {
         } else if (manager.isObject(nameContext.getText())) {
             Optional<GraphqlParser.ObjectTypeDefinitionContext> object = manager.getObject(nameContext.getText());
             if (object.isPresent()) {
+                Optional<String> importClassName = manager.getImportClassName(object.get());
+                if (importClassName.isPresent()) {
+                    return ClassName.bestGuess(importClassName.get());
+                }
                 if (isAnnotation) {
                     return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + layer);
                 } else {
@@ -490,16 +494,28 @@ public class TypeSpecBuilder {
         } else if (manager.isEnum(nameContext.getText())) {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
             if (enumType.isPresent()) {
+                Optional<String> importClassName = manager.getImportClassName(enumType.get());
+                if (importClassName.isPresent()) {
+                    return ClassName.bestGuess(importClassName.get());
+                }
                 return ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText());
             }
         } else if (manager.isInterface(nameContext.getText())) {
             Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(nameContext.getText());
             if (interfaceType.isPresent()) {
+                Optional<String> importClassName = manager.getImportClassName(interfaceType.get());
+                if (importClassName.isPresent()) {
+                    return ClassName.bestGuess(importClassName.get());
+                }
                 return ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText());
             }
         } else if (manager.isInputObject(nameContext.getText())) {
             Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(nameContext.getText());
             if (inputObject.isPresent()) {
+                Optional<String> importClassName = manager.getImportClassName(inputObject.get());
+                if (importClassName.isPresent()) {
+                    return ClassName.bestGuess(importClassName.get());
+                }
                 if (isAnnotation) {
                     return ClassName.get(graphQLConfig.getDirectivePackageName(), inputObject.get().name().getText());
                 } else {
