@@ -219,3 +219,6 @@ message QueryParent2Response {
 message QueryFindRole2Response {
     repeated Role find_role2 = 1;
 }
+message QueryFindContainerTypeResponse {
+    optional ContainerType find_container_type = 1;
+}

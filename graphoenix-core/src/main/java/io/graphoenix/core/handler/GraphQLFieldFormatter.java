@@ -105,6 +105,19 @@ public class GraphQLFieldFormatter {
         }
     }
 
+    public JsonValue format(String value, String locale, Float number) throws ClassCastException {
+        if (number == null) {
+            return NULL;
+        }
+        if (value != null) {
+            DecimalFormat decimalFormat = new DecimalFormat(value);
+            decimalFormat.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(locale == null ? Locale.getDefault() : Locale.forLanguageTag(locale)));
+            return jsonProvider.createValue(decimalFormat.format(number));
+        } else {
+            return jsonProvider.createValue(number);
+        }
+    }
+
     public JsonValue format(String value, String locale, BigInteger number) throws ClassCastException {
         if (number == null) {
             return NULL;

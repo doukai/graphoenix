@@ -82,4 +82,5 @@ service QueryTypeService {
     rpc UserByOrg2 (QueryUserByOrg2Request) returns (QueryUserByOrg2Response);
     rpc Parent2 (QueryParent2Request) returns (QueryParent2Response);
     rpc FindRole2 (QueryFindRole2Request) returns (QueryFindRole2Response);
+    rpc FindContainerType (QueryFindContainerTypeRequest) returns (QueryFindContainerTypeResponse);
 }

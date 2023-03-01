@@ -592,6 +592,13 @@ message Organization {
     repeated bool role_disable = 29;
     repeated User user_by_org = 30;
     optional Organization parent = 31;
+    optional ContainerType container_type = 32;
+}
+message ContainerType {
+    optional string name = 1;
+    optional float height = 2;
+    optional int32 age = 3;
+    optional bool sex = 4;
 }
 message QueryType {
     optional IntroSchema intro_schema = 1;
@@ -664,6 +671,7 @@ message QueryType {
     repeated User user_by_org2 = 68;
     optional Organization parent2 = 69;
     repeated Role find_role2 = 70;
+    optional ContainerType find_container_type = 71;
 }
 message MutationType {
     optional IntroSchema intro_schema = 1;

@@ -1442,3 +1442,8 @@ message QueryFindRole2Request {
     optional int32 type = 4;
     optional bool disable = 5;
 }
+message QueryFindContainerTypeRequest {
+    optional string selectionSet = 1;
+    optional string arguments = 2;
+    optional string name = 3;
+}
