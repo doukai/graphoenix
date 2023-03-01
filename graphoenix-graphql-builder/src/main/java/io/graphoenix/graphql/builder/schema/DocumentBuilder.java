@@ -131,7 +131,7 @@ public class DocumentBuilder {
                                                         .addArgument(
                                                                 new Argument()
                                                                         .setName("packageName")
-                                                                        .setValueWithVariable(graphQLConfig.getPackageName())
+                                                                        .setValueWithVariable(graphQLConfig.getEnumTypePackageName())
                                                         )
                                         )
                                 )
@@ -146,7 +146,7 @@ public class DocumentBuilder {
                                                         .addArgument(
                                                                 new Argument()
                                                                         .setName("packageName")
-                                                                        .setValueWithVariable(graphQLConfig.getPackageName())
+                                                                        .setValueWithVariable(graphQLConfig.getInterfaceTypePackageName())
                                                         )
                                         )
                                 )
@@ -161,7 +161,7 @@ public class DocumentBuilder {
                                                         .addArgument(
                                                                 new Argument()
                                                                         .setName("packageName")
-                                                                        .setValueWithVariable(graphQLConfig.getPackageName())
+                                                                        .setValueWithVariable(graphQLConfig.getObjectTypePackageName())
                                                         )
                                         )
                                 )
@@ -178,7 +178,7 @@ public class DocumentBuilder {
                                                         .addArgument(
                                                                 new Argument()
                                                                         .setName("packageName")
-                                                                        .setValueWithVariable(graphQLConfig.getPackageName())
+                                                                        .setValueWithVariable(graphQLConfig.getInputObjectTypePackageName())
                                                         )
                                         )
                                 )

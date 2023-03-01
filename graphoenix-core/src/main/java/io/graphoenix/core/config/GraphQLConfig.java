@@ -3,6 +3,8 @@ package io.graphoenix.core.config;
 import com.typesafe.config.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
 
+import java.util.Set;
+
 @ConfigProperties(prefix = "graphql")
 public class GraphQLConfig {
 
@@ -28,6 +30,15 @@ public class GraphQLConfig {
     private Boolean compensating = false;
 
     private String packageName;
+
+    @Optional
+    private Set<String> localPackageNames;
+
+    @Optional
+    private Boolean patchToMap = false;
+
+    @Optional
+    private Boolean mapToFetch = false;
 
     @Optional
     private String grpcPackageName;
@@ -133,6 +144,30 @@ public class GraphQLConfig {
 
     public void setPackageName(String packageName) {
         this.packageName = packageName;
+    }
+
+    public Set<String> getLocalPackageNames() {
+        return localPackageNames;
+    }
+
+    public void setLocalPackageNames(Set<String> localPackageNames) {
+        this.localPackageNames = localPackageNames;
+    }
+
+    public Boolean getPatchToMap() {
+        return patchToMap;
+    }
+
+    public void setPatchToMap(Boolean patchToMap) {
+        this.patchToMap = patchToMap;
+    }
+
+    public Boolean getMapToFetch() {
+        return mapToFetch;
+    }
+
+    public void setMapToFetch(Boolean mapToFetch) {
+        this.mapToFetch = mapToFetch;
     }
 
     public String getGrpcPackageName() {

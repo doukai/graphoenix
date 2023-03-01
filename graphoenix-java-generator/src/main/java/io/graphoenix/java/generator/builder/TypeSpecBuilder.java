@@ -484,30 +484,36 @@ public class TypeSpecBuilder {
                 if (isAnnotation) {
                     return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + layer);
                 } else {
-                    Optional<String> containerClassName = manager.getContainerClassName(object.get());
-                    if (containerClassName.isPresent()) {
-                        return ClassName.bestGuess(containerClassName.get());
-                    }
-                    return ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText());
+                    return manager.getContainerClassName(object.get())
+                            .map(ClassName::bestGuess)
+                            .orElseGet(() ->
+                                    manager.getImportPackageName(object.get())
+                                            .map(packageName -> ClassName.get(packageName, object.get().name().getText()))
+                                            .orElse(ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText()))
+                            );
                 }
             }
         } else if (manager.isEnum(nameContext.getText())) {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
             if (enumType.isPresent()) {
-                Optional<String> containerClassName = manager.getContainerClassName(enumType.get());
-                if (containerClassName.isPresent()) {
-                    return ClassName.bestGuess(containerClassName.get());
-                }
-                return ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText());
+                return manager.getContainerClassName(enumType.get())
+                        .map(ClassName::bestGuess)
+                        .orElseGet(() ->
+                                manager.getImportPackageName(enumType.get())
+                                        .map(packageName -> ClassName.get(packageName, enumType.get().name().getText()))
+                                        .orElse(ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()))
+                        );
             }
         } else if (manager.isInterface(nameContext.getText())) {
             Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(nameContext.getText());
             if (interfaceType.isPresent()) {
-                Optional<String> containerClassName = manager.getContainerClassName(interfaceType.get());
-                if (containerClassName.isPresent()) {
-                    return ClassName.bestGuess(containerClassName.get());
-                }
-                return ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText());
+                return manager.getContainerClassName(interfaceType.get())
+                        .map(ClassName::bestGuess)
+                        .orElseGet(() ->
+                                manager.getImportPackageName(interfaceType.get())
+                                        .map(packageName -> ClassName.get(packageName, interfaceType.get().name().getText()))
+                                        .orElse(ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText()))
+                        );
             }
         } else if (manager.isInputObject(nameContext.getText())) {
             Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(nameContext.getText());
@@ -515,11 +521,13 @@ public class TypeSpecBuilder {
                 if (isAnnotation) {
                     return ClassName.get(graphQLConfig.getDirectivePackageName(), inputObject.get().name().getText());
                 } else {
-                    Optional<String> containerClassName = manager.getContainerClassName(inputObject.get());
-                    if (containerClassName.isPresent()) {
-                        return ClassName.bestGuess(containerClassName.get());
-                    }
-                    return ClassName.get(graphQLConfig.getInputObjectTypePackageName(), inputObject.get().name().getText());
+                    return manager.getContainerClassName(inputObject.get())
+                            .map(ClassName::bestGuess)
+                            .orElseGet(() ->
+                                    manager.getImportPackageName(inputObject.get())
+                                            .map(packageName -> ClassName.get(packageName, inputObject.get().name().getText()))
+                                            .orElse(ClassName.get(graphQLConfig.getInterfaceTypePackageName(), inputObject.get().name().getText()))
+                            );
                 }
             }
         }

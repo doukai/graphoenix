@@ -1,6 +1,7 @@
 package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -11,10 +12,7 @@ import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,16 +25,28 @@ public class GraphQLTypeToTable {
 
     private final IGraphQLDocumentManager manager;
     private final DBNameUtil dbNameUtil;
+    private final GraphQLConfig config;
 
     @Inject
-    public GraphQLTypeToTable(IGraphQLDocumentManager manager, DBNameUtil dbNameUtil) {
+    public GraphQLTypeToTable(IGraphQLDocumentManager manager, DBNameUtil dbNameUtil, GraphQLConfig config) {
         this.manager = manager;
         this.dbNameUtil = dbNameUtil;
+        this.config = config;
     }
 
     public Stream<String> createTablesSQL() {
         return manager.getObjects()
                 .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext ->
+                        Stream.concat(
+                                Stream.ofNullable(config.getLocalPackageNames()).flatMap(Collection::stream),
+                                Stream.of(config.getPackageName())
+                        ).anyMatch(packageName ->
+                                manager.getImportPackageName(objectTypeDefinitionContext)
+                                        .orElse(config.getObjectTypePackageName())
+                                        .startsWith(packageName)
+                        )
+                )
                 .filter(objectTypeDefinitionContext ->
                         !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
@@ -44,14 +54,6 @@ public class GraphQLTypeToTable {
                 )
                 .map(this::createTable)
                 .map(CreateTable::toString);
-    }
-
-    public Stream<String> createTablesSQL(IGraphQLDocumentManager manager) {
-        return manager.getObjects().map(this::createTable).map(CreateTable::toString);
-    }
-
-    public Stream<String> createTablesSQL(GraphqlParser.DocumentContext documentContext) {
-        return createTables(documentContext).map(CreateTable::toString);
     }
 
     public Stream<CreateTable> createTables(GraphqlParser.DocumentContext documentContext) {

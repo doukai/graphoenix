@@ -86,7 +86,11 @@ public class GrpcObjectHandlerBuilder {
 
         ClassName className = manager.getContainerClassName(objectTypeDefinitionContext)
                 .map(ClassName::bestGuess)
-                .orElse(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()));
+                .orElseGet(() ->
+                        manager.getImportPackageName(objectTypeDefinitionContext)
+                                .map(packageName -> ClassName.get(packageName, objectTypeDefinitionContext.name().getText()))
+                                .orElse(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()))
+                );
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
                 .addModifiers(Modifier.PUBLIC)
