@@ -123,64 +123,78 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(
                         manager.getEnums()
-                                .map(this::buildEnum)
-                                .map(enumType ->
-                                        enumType.addDirective(
-                                                new Directive()
-                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
-                                                        .addArgument(
-                                                                new Argument()
-                                                                        .setName("packageName")
-                                                                        .setValueWithVariable(graphQLConfig.getEnumTypePackageName())
+                                .map(enumTypeDefinitionContext ->
+                                        manager.getContainerClassName(enumTypeDefinitionContext)
+                                                .map(className -> buildEnum(enumTypeDefinitionContext))
+                                                .orElse(buildEnum(enumTypeDefinitionContext)
+                                                        .addDirective(
+                                                                new Directive()
+                                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
+                                                                        .addArgument(
+                                                                                new Argument()
+                                                                                        .setName("packageName")
+                                                                                        .setValueWithVariable(graphQLConfig.getEnumTypePackageName())
+                                                                        )
                                                         )
-                                        )
+                                                )
                                 )
-                                .map(EnumType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                                .map(EnumType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(
                         manager.getInterfaces()
-                                .map(this::buildInterface)
-                                .map(interfaceType ->
-                                        interfaceType.addDirective(
-                                                new Directive()
-                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
-                                                        .addArgument(
-                                                                new Argument()
-                                                                        .setName("packageName")
-                                                                        .setValueWithVariable(graphQLConfig.getInterfaceTypePackageName())
+                                .map(interfaceTypeDefinitionContext ->
+                                        manager.getContainerClassName(interfaceTypeDefinitionContext)
+                                                .map(className -> buildInterface(interfaceTypeDefinitionContext))
+                                                .orElse(buildInterface(interfaceTypeDefinitionContext)
+                                                        .addDirective(
+                                                                new Directive()
+                                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
+                                                                        .addArgument(
+                                                                                new Argument()
+                                                                                        .setName("packageName")
+                                                                                        .setValueWithVariable(graphQLConfig.getInterfaceTypePackageName())
+                                                                        )
                                                         )
-                                        )
+                                                )
                                 )
-                                .map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                                .map(InterfaceType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(
                         manager.getObjects()
-                                .map(this::buildObject)
-                                .map(objectType ->
-                                        objectType.addDirective(
-                                                new Directive()
-                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
-                                                        .addArgument(
-                                                                new Argument()
-                                                                        .setName("packageName")
-                                                                        .setValueWithVariable(graphQLConfig.getObjectTypePackageName())
+                                .map(objectTypeDefinitionContext ->
+                                        manager.getContainerClassName(objectTypeDefinitionContext)
+                                                .map(className -> buildObject(objectTypeDefinitionContext))
+                                                .orElse(buildObject(objectTypeDefinitionContext)
+                                                        .addDirective(
+                                                                new Directive()
+                                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
+                                                                        .addArgument(
+                                                                                new Argument()
+                                                                                        .setName("packageName")
+                                                                                        .setValueWithVariable(graphQLConfig.getObjectTypePackageName())
+                                                                        )
                                                         )
-                                        )
+                                                )
                                 )
                                 .map(ObjectType::toString)
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
                 .addDefinitions(
                         manager.getInputObjects()
-                                .map(this::buildInputObjectType)
-                                .map(inputObjectType ->
-                                        inputObjectType.addDirective(
-                                                new Directive()
-                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
-                                                        .addArgument(
-                                                                new Argument()
-                                                                        .setName("packageName")
-                                                                        .setValueWithVariable(graphQLConfig.getInputObjectTypePackageName())
+                                .map(inputObjectTypeDefinitionContext ->
+                                        manager.getContainerClassName(inputObjectTypeDefinitionContext)
+                                                .map(className -> buildInputObjectType(inputObjectTypeDefinitionContext))
+                                                .orElse(buildInputObjectType(inputObjectTypeDefinitionContext)
+                                                        .addDirective(
+                                                                new Directive()
+                                                                        .setName(IMPORT_TYPE_DIRECTIVE_NAME)
+                                                                        .addArgument(
+                                                                                new Argument()
+                                                                                        .setName("packageName")
+                                                                                        .setValueWithVariable(graphQLConfig.getInputObjectTypePackageName())
+                                                                        )
                                                         )
-                                        )
+                                                )
                                 )
                                 .map(InputObjectType::toString)
                                 .collect(Collectors.toCollection(LinkedHashSet::new))

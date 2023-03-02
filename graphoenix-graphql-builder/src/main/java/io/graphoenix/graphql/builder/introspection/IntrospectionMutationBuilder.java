@@ -244,7 +244,7 @@ public class IntrospectionMutationBuilder {
 
         if (typeContext.typeName() != null) {
             if (manager.isScalar(typeContext.typeName().getText())) {
-                return manager.getScaLar(typeContext.typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null);
+                return manager.getScalar(typeContext.typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null);
             } else if (manager.isObject(typeContext.typeName().getText())) {
                 return manager.getObject(typeContext.typeName().getText()).map(objectTypeDefinitionContext -> objectTypeDefinitionContextToType(objectTypeDefinitionContext, level)).orElse(null);
             } else if (manager.isEnum(typeContext.typeName().getText())) {
@@ -263,7 +263,7 @@ public class IntrospectionMutationBuilder {
             nonNullType.setKind(__TypeKind.NON_NULL);
             if (typeContext.nonNullType().typeName() != null) {
                 if (manager.isScalar(typeContext.nonNullType().typeName().getText())) {
-                    nonNullType.setOfType(manager.getScaLar(typeContext.nonNullType().typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null));
+                    nonNullType.setOfType(manager.getScalar(typeContext.nonNullType().typeName().getText()).map(scalarTypeDefinitionContext -> scalarTypeDefinitionContextToType(scalarTypeDefinitionContext, level)).orElse(null));
                 } else if (manager.isObject(typeContext.nonNullType().typeName().getText())) {
                     nonNullType.setOfType(manager.getObject(typeContext.nonNullType().typeName().getText()).map(objectTypeDefinitionContext -> objectTypeDefinitionContextToType(objectTypeDefinitionContext, level)).orElse(null));
                 } else if (manager.isEnum(typeContext.nonNullType().typeName().getText())) {

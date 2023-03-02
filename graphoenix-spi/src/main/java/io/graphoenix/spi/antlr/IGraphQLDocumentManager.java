@@ -107,7 +107,7 @@ public interface IGraphQLDocumentManager {
 
     Optional<GraphqlParser.DirectiveDefinitionContext> getDirective(String name);
 
-    Optional<GraphqlParser.ScalarTypeDefinitionContext> getScaLar(String name);
+    Optional<GraphqlParser.ScalarTypeDefinitionContext> getScalar(String name);
 
     Optional<GraphqlParser.EnumTypeDefinitionContext> getEnum(String name);
 

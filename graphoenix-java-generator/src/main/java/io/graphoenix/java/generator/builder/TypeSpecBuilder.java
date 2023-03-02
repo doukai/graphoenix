@@ -470,7 +470,7 @@ public class TypeSpecBuilder {
 
     public TypeName buildType(GraphqlParser.NameContext nameContext, boolean isAnnotation, int layer) {
         if (manager.isScalar(nameContext.getText())) {
-            Optional<GraphqlParser.ScalarTypeDefinitionContext> scalarType = manager.getScaLar(nameContext.getText());
+            Optional<GraphqlParser.ScalarTypeDefinitionContext> scalarType = manager.getScalar(nameContext.getText());
             if (scalarType.isPresent()) {
                 if (isAnnotation) {
                     return buildAnnotationType(scalarType.get());
@@ -536,7 +536,7 @@ public class TypeSpecBuilder {
 
     public TypeName buildExpressionType(GraphqlParser.NameContext nameContext, boolean isAnnotation) {
         if (manager.isScalar(nameContext.getText())) {
-            Optional<GraphqlParser.ScalarTypeDefinitionContext> scalarType = manager.getScaLar(nameContext.getText());
+            Optional<GraphqlParser.ScalarTypeDefinitionContext> scalarType = manager.getScalar(nameContext.getText());
             if (scalarType.isPresent()) {
                 if (isAnnotation) {
                     return buildAnnotationType(scalarType.get());
@@ -646,7 +646,7 @@ public class TypeSpecBuilder {
             return CodeBlock.of("$L", "{}");
         }
         if (manager.isScalar(manager.getFieldTypeName(typeContext))) {
-            Optional<GraphqlParser.ScalarTypeDefinitionContext> scalarType = manager.getScaLar(manager.getFieldTypeName(typeContext));
+            Optional<GraphqlParser.ScalarTypeDefinitionContext> scalarType = manager.getScalar(manager.getFieldTypeName(typeContext));
             if (scalarType.isPresent()) {
                 return buildAnnotationDefaultValue(scalarType.get());
             }

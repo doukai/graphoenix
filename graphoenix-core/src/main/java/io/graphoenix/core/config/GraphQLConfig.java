@@ -35,7 +35,7 @@ public class GraphQLConfig {
     private Set<String> localPackageNames;
 
     @Optional
-    private Boolean patchToMap = false;
+    private Boolean fetchToMap = false;
 
     @Optional
     private Boolean mapToFetch = false;
@@ -154,12 +154,12 @@ public class GraphQLConfig {
         this.localPackageNames = localPackageNames;
     }
 
-    public Boolean getPatchToMap() {
-        return patchToMap;
+    public Boolean getFetchToMap() {
+        return fetchToMap;
     }
 
-    public void setPatchToMap(Boolean patchToMap) {
-        this.patchToMap = patchToMap;
+    public void setFetchToMap(Boolean fetchToMap) {
+        this.fetchToMap = fetchToMap;
     }
 
     public Boolean getMapToFetch() {

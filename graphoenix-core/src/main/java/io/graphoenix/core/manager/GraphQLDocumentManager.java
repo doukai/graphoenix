@@ -490,7 +490,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public Optional<GraphqlParser.ScalarTypeDefinitionContext> getScaLar(String name) {
+    public Optional<GraphqlParser.ScalarTypeDefinitionContext> getScalar(String name) {
         return graphQLScalarManager.getScalarTypeDefinition(name);
     }
 
