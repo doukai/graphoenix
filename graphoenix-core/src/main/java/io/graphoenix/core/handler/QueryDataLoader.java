@@ -4,10 +4,7 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.operation.Argument;
-import io.graphoenix.core.operation.Field;
-import io.graphoenix.core.operation.ObjectValueWithVariable;
-import io.graphoenix.core.operation.Operation;
+import io.graphoenix.core.operation.*;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.json.JsonObject;
@@ -25,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 import static jakarta.json.JsonValue.NULL;
 
@@ -56,12 +54,12 @@ public abstract class QueryDataLoader {
                 Optional.of(conditionMap)
                         .filter(map -> !map.isEmpty())
                         .flatMap(map -> Optional.ofNullable(map.get(packageName)))
-                        .filter(map -> !map.get(packageName).isEmpty())
+                        .filter(map -> !map.isEmpty())
                         .map(map ->
                                 new Operation()
                                         .setOperationType("query")
                                         .setFields(
-                                                map.get(packageName).entrySet().stream()
+                                                map.entrySet().stream()
                                                         .flatMap(typeEntry ->
                                                                 typeEntry.getValue().entrySet().stream()
                                                                         .filter(fieldEntry -> fieldEntry.getValue().keySet().size() > 0)
@@ -70,8 +68,8 @@ public abstract class QueryDataLoader {
                                                                                         .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
                                                                                         .setAlias(getQueryFieldAlias(typeEntry.getKey(), fieldEntry.getKey()))
                                                                                         .addArgument(
-                                                                                                new Argument().setName(fieldEntry.getKey())
-                                                                                                        .setValueWithVariable(new ObjectValueWithVariable(Map.of("in", fieldEntry.getValue().keySet())))
+                                                                                                fieldEntry.getKey(),
+                                                                                                new ObjectValueWithVariable().put("in", new ArrayValueWithVariable(fieldEntry.getValue().keySet()))
                                                                                         )
                                                                                         .setFields(fieldTree.get(packageName).get(typeEntry.getKey()).get(fieldEntry.getKey()))
                                                                         )

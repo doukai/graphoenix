@@ -10,7 +10,7 @@ import io.graphoenix.core.introspection.__InputValue;
 import io.graphoenix.core.introspection.__Schema;
 import io.graphoenix.core.introspection.__Type;
 import io.graphoenix.core.introspection.__TypeKind;
-import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.Arguments;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -45,50 +45,43 @@ public class IntrospectionMutationBuilder {
     }
 
     public Operation buildIntrospectionSchemaMutation() {
-        Set<Argument> arguments = new LinkedHashSet<>();
+        Arguments arguments = new Arguments();
         Optional<GraphqlParser.ObjectTypeDefinitionContext> queryTypeDefinitionContext = manager.getQueryOperationTypeName().flatMap(manager::getObject);
-        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("queryType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue())));
+        queryTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.put("queryType", this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue()));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> mutationTypeDefinitionContext = manager.getMutationOperationTypeName().flatMap(manager::getObject);
-        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("mutationType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue())));
+        mutationTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.put("mutationType", this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue()));
 
         Optional<GraphqlParser.ObjectTypeDefinitionContext> subscriptionTypeDefinitionContext = manager.getSubscriptionOperationTypeName().flatMap(manager::getObject);
-        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.add(new Argument().setName("subscriptionType").setValueWithVariable(this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue())));
+        subscriptionTypeDefinitionContext.ifPresent(objectTypeDefinitionContext -> arguments.put("subscriptionType", this.objectTypeDefinitionContextToType(objectTypeDefinitionContext).toValue()));
 
-        arguments.add(
-                new Argument()
-                        .setName("types")
-                        .setValueWithVariable(
+        arguments.put("types",
+                Stream.concat(
+                        manager.getObjects()
+                                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                                .map(this::objectTypeDefinitionContextToType),
+                        Stream.concat(
+                                manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
                                 Stream.concat(
-                                                manager.getObjects()
-                                                        .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
-                                                        .map(this::objectTypeDefinitionContextToType),
-                                                Stream.concat(
-                                                        manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
-                                                        Stream.concat(
-                                                                manager.getInputObjects()
-                                                                        .filter(inputObjectTypeDefinitionContext -> !inputObjectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
-                                                                        .map(this::inputObjectTypeDefinitionContextToType),
-                                                                Stream.concat(
-                                                                        manager.getEnums().map(this::enumTypeDefinitionContextToType),
-                                                                        manager.getScalars().map(this::scalarTypeDefinitionContextToType)
-                                                                )
-                                                        )
-                                                )
-                                        ).map(__Type::toValue)
-                                        .collect(Collectors.toList())
+                                        manager.getInputObjects()
+                                                .filter(inputObjectTypeDefinitionContext -> !inputObjectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                                                .map(this::inputObjectTypeDefinitionContextToType),
+                                        Stream.concat(
+                                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                                manager.getScalars().map(this::scalarTypeDefinitionContextToType)
+                                        )
+                                )
                         )
+                ).map(__Type::toValue)
+                        .collect(Collectors.toList())
         );
 
-        arguments.add(
-                new Argument()
-                        .setName("directives")
-                        .setValueWithVariable(
-                                manager.getDirectives()
-                                        .map(this::directiveDefinitionContextToDirective)
-                                        .map(__Directive::toValue)
-                                        .collect(Collectors.toList())
-                        )
+        arguments.put(
+                "directives",
+                manager.getDirectives()
+                        .map(this::directiveDefinitionContextToDirective)
+                        .map(__Directive::toValue)
+                        .collect(Collectors.toList())
         );
 
         Operation operation = new Operation()

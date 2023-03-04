@@ -1,13 +1,9 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
-import jakarta.json.JsonNumber;
-import jakarta.json.JsonString;
+import jakarta.json.JsonException;
 import jakarta.json.JsonValue;
-import jakarta.json.spi.JsonProvider;
-import jakarta.json.stream.JsonCollectors;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -17,104 +13,45 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_VALUE;
 
-public class ValueWithVariable {
+public class ValueWithVariable implements JsonValue {
 
-    private final Object valueWithVariable;
-
-    private final JsonProvider jsonProvider;
+    private final JsonValue valueWithVariable;
 
     public ValueWithVariable(Object value) {
         if (value instanceof BooleanValue) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (BooleanValue) value;
         } else if (value instanceof IntValue) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (IntValue) value;
         } else if (value instanceof FloatValue) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (FloatValue) value;
         } else if (value instanceof StringValue) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (StringValue) value;
         } else if (value instanceof EnumValue) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (EnumValue) value;
         } else if (value instanceof NullValue) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (NullValue) value;
         } else if (value instanceof ObjectValueWithVariable) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (ObjectValueWithVariable) value;
         } else if (value instanceof ArrayValueWithVariable) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (ArrayValueWithVariable) value;
         } else if (value instanceof Variable) {
-            this.valueWithVariable = value;
+            this.valueWithVariable = (Variable) value;
         } else if (value instanceof JsonValue) {
-            this.valueWithVariable = getValueWithVariable((JsonValue) value);
+            this.valueWithVariable = (JsonValue) value;
         } else if (value instanceof GraphqlParser.ValueWithVariableContext) {
             this.valueWithVariable = getValueWithVariable((GraphqlParser.ValueWithVariableContext) value);
         } else {
             this.valueWithVariable = getValueWithVariable(value);
         }
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
     }
 
-    public ValueWithVariable(JsonValue value) {
-        this.valueWithVariable = getValueWithVariable(value);
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(BooleanValue value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(IntValue value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(FloatValue value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(StringValue value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(EnumValue value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(NullValue value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(ObjectValueWithVariable value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(ArrayValueWithVariable value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(Variable value) {
-        this.valueWithVariable = value;
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    public ValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
-        this.valueWithVariable = getValueWithVariable(valueWithVariableContext);
-        this.jsonProvider = BeanContext.get(JsonProvider.class);
-    }
-
-    private Object getValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
+    private JsonValue getValueWithVariable(GraphqlParser.ValueWithVariableContext valueWithVariableContext) {
         if (valueWithVariableContext.NullValue() != null) {
             return new NullValue();
         } else if (valueWithVariableContext.variable() != null) {
@@ -137,28 +74,7 @@ public class ValueWithVariable {
         throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(valueWithVariableContext.getText()));
     }
 
-    private Object getValueWithVariable(JsonValue value) {
-        if (value == null) {
-            return new NullValue();
-        } else if (value.getValueType().equals(JsonValue.ValueType.NULL)) {
-            return new NullValue();
-        } else if (value.getValueType().equals(JsonValue.ValueType.TRUE)) {
-            return new BooleanValue(true);
-        } else if (value.getValueType().equals(JsonValue.ValueType.FALSE)) {
-            return new BooleanValue(false);
-        } else if (value.getValueType().equals(JsonValue.ValueType.NUMBER)) {
-            return new FloatValue(((JsonNumber) value).numberValue());
-        } else if (value.getValueType().equals(JsonValue.ValueType.STRING)) {
-            return new StringValue(((JsonString) value).getString());
-        } else if (value.getValueType().equals(JsonValue.ValueType.OBJECT)) {
-            return new ObjectValueWithVariable(value.asJsonObject());
-        } else if (value.getValueType().equals(JsonValue.ValueType.ARRAY)) {
-            return new ArrayValueWithVariable(value.asJsonArray());
-        }
-        throw new GraphQLErrors(UNSUPPORTED_VALUE.bind(value.getValueType().name()));
-    }
-
-    private Object getValueWithVariable(Object value) {
+    private JsonValue getValueWithVariable(Object value) {
         if (value == null) {
             return new NullValue();
         } else if (value instanceof VariableElement) {
@@ -285,28 +201,29 @@ public class ValueWithVariable {
     }
 
     @Override
-    public String toString() {
-        return valueWithVariable.toString();
+    public ValueType getValueType() {
+        if (isNull()) {
+            return ValueType.NULL;
+        } else if (isBoolean()) {
+            return asBoolean().getValue() ? ValueType.TRUE : ValueType.FALSE;
+        } else if (isString()) {
+            return ValueType.STRING;
+        } else if (isInteger()) {
+            return ValueType.NUMBER;
+        } else if (isFloat()) {
+            return ValueType.NUMBER;
+        } else if (isEnum()) {
+            return ValueType.STRING;
+        } else if (isObject()) {
+            return ValueType.OBJECT;
+        } else if (isArray()) {
+            return ValueType.ARRAY;
+        }
+        throw new JsonException("unknown json value type:" + this);
     }
 
-    public JsonValue toJson() {
-        if (isNull()) {
-            return JsonValue.NULL;
-        } else if (isBoolean()) {
-            return asBoolean().getValue() ? JsonValue.TRUE : JsonValue.FALSE;
-        } else if (isString()) {
-            return jsonProvider.createValue(asString().getValue());
-        } else if (isInteger()) {
-            return jsonProvider.createValue(asInteger().getValue());
-        } else if (isFloat()) {
-            return jsonProvider.createValue(asFloat().getValue());
-        } else if (isEnum()) {
-            return jsonProvider.createValue(asEnum().getValue());
-        } else if (isObject()) {
-            return asObject().entrySet().stream().map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), entry.getValue().toJson())).collect(JsonCollectors.toJsonObject());
-        } else if (isArray()) {
-            return asArray().stream().map(ValueWithVariable::toJson).collect(JsonCollectors.toJsonArray());
-        }
-        return null;
+    @Override
+    public String toString() {
+        return valueWithVariable.toString();
     }
 }

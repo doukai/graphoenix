@@ -1,24 +1,23 @@
 package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.operation.Argument;
-import io.graphoenix.core.operation.Field;
-import io.graphoenix.core.operation.Operation;
-import io.graphoenix.core.operation.VariableDefinition;
+import io.graphoenix.core.operation.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonValue;
+import jakarta.json.stream.JsonCollectors;
 import org.tinylog.Logger;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Types;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
@@ -89,22 +88,21 @@ public class MethodToOperation {
                 .findFirst();
     }
 
-    private Stream<Argument> inputAnnotationToArgument(ExecutableElement executableElement, AnnotationMirror input) {
-        return input.getElementValues().entrySet().stream()
-                .map(entry -> {
-                            String fieldName = entry.getKey().getSimpleName().toString();
-                            Object value = entry.getValue().getValue();
-                            Argument argument = new Argument();
-                            if (fieldName.startsWith("$")) {
-                                argument.setName(fieldName.substring(1));
-                                argument.setValueWithVariable(rebuildVariable(executableElement, value));
-                            } else {
-                                argument.setName(fieldName);
-                                argument.setValueWithVariable(rebuildValue(executableElement, value));
-                            }
-                            return argument;
-                        }
-                );
+    private Arguments inputAnnotationToArgument(ExecutableElement executableElement, AnnotationMirror input) {
+        return new Arguments(
+                input.getElementValues().entrySet().stream()
+                        .map(entry -> {
+                                    String fieldName = entry.getKey().getSimpleName().toString();
+                                    Object value = entry.getValue().getValue();
+                                    if (fieldName.startsWith("$")) {
+                                        return new AbstractMap.SimpleEntry<>(fieldName.substring(1), (JsonValue) new ValueWithVariable(rebuildVariable(executableElement, value)));
+                                    } else {
+                                        return new AbstractMap.SimpleEntry<>(fieldName, (JsonValue) new ValueWithVariable(rebuildValue(executableElement, value)));
+                                    }
+                                }
+                        )
+                        .collect(JsonCollectors.toJsonObject())
+        );
     }
 
     private Object rebuildValue(ExecutableElement executableElement, Object value) {

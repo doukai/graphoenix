@@ -1,10 +1,11 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import jakarta.json.JsonString;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-public class Variable {
+public class Variable implements JsonString {
 
     private String name;
 
@@ -22,6 +23,21 @@ public class Variable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getString() {
+        return toString();
+    }
+
+    @Override
+    public CharSequence getChars() {
+        return toString();
+    }
+
+    @Override
+    public ValueType getValueType() {
+        return ValueType.STRING;
     }
 
     @Override

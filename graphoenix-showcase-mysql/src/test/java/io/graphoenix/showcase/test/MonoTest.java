@@ -11,11 +11,14 @@ import reactor.util.context.Context;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+
 public class MonoTest {
 
     List<String> stringList = new ArrayList<>();
 
     Mono<List<String>> mono = Mono.just(stringList);
+    String test1;
 
     @Test
     void test1() {
@@ -122,7 +125,16 @@ public class MonoTest {
 //                .contextWrite(Context.of(key, NanoIdUtils.randomNanoId()))
 //                .block();
 
-        Mono.empty().then(Mono.just("test")).doOnSuccess(System.out::println).block();
+        Boolean test = true;
+        Mono<Void> test2 = Mono.justOrEmpty(test)
+                .filter(backUp -> backUp)
+                .thenReturn(Mono.just("test"))
+                .flatMap(operation -> Mono.justOrEmpty(operation + "1"))
+                .doOnNext(jsonString -> test1 = jsonString)
+                .then();
+
+        test2.block();
+        System.out.println(test1);
 
     }
 

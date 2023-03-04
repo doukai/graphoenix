@@ -1,12 +1,13 @@
 package io.graphoenix.core.operation;
 
 import graphql.parser.antlr.GraphqlParser;
+import jakarta.json.JsonString;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
 
-public class EnumValue {
+public class EnumValue implements JsonString {
 
     private String value;
 
@@ -32,6 +33,21 @@ public class EnumValue {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String getString() {
+        return value;
+    }
+
+    @Override
+    public CharSequence getChars() {
+        return value;
+    }
+
+    @Override
+    public ValueType getValueType() {
+        return ValueType.STRING;
     }
 
     @Override

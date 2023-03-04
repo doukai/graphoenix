@@ -4,22 +4,18 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.document.Directive;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
-import jakarta.json.stream.JsonCollectors;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.AbstractMap;
 import java.util.LinkedHashSet;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Field {
 
     private String name;
     private String alias;
-    private Set<Argument> arguments;
+    private Arguments arguments;
     private Set<String> directives;
     private Set<Field> fields;
     private String selections;
@@ -41,7 +37,7 @@ public class Field {
             this.alias = fieldContext.alias().name().getText();
         }
         if (fieldContext.arguments() != null) {
-            this.arguments = fieldContext.arguments().argument().stream().map(Argument::new).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.arguments = new Arguments(fieldContext.arguments());
         }
         if (fieldContext.selectionSet() != null) {
             this.fields = fieldContext.selectionSet().selection().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -70,68 +66,44 @@ public class Field {
         return this;
     }
 
-    public Set<Argument> getArguments() {
+    public Arguments getArguments() {
         return arguments;
     }
 
-    public Field setArguments(Set<Argument> arguments) {
+    public Field setArguments(Arguments arguments) {
         this.arguments = arguments;
         return this;
     }
 
     public Field setArguments(JsonObject jsonObject) {
-        this.arguments = jsonObject.entrySet().stream().map(entry -> new Argument().setName(entry.getKey()).setValueWithVariable(entry.getValue())).collect(Collectors.toSet());
+        this.arguments = new Arguments(jsonObject);
         return this;
     }
 
-    public Optional<Argument> getArgument(String name) {
-        return arguments.stream().filter(argument -> argument.getName().equals(name)).findFirst();
-    }
-
-    public Argument getOrCreateArgument(String name) {
-        Optional<Argument> argument = getArgument(name);
-        if (argument.isPresent()) {
-            return argument.get();
-        } else {
-            Argument newArgument = new Argument(name);
-            this.arguments.add(newArgument);
-            return newArgument;
-        }
-    }
-
-    public Optional<ValueWithVariable> getValueWithVariable(String name) {
-        return getArgument(name).map(Argument::getValueWithVariable);
-    }
-
-    public ValueWithVariable getValueWithVariableOrEmpty(String name) {
-        return getArgument(name).map(Argument::getValueWithVariable).orElseGet(() -> new ValueWithVariable(new NullValue()));
-    }
-
-    public Field addArgument(Argument argument) {
+    public Field addArguments(Arguments arguments) {
         if (this.arguments == null) {
-            this.arguments = new LinkedHashSet<>();
+            this.arguments = new Arguments();
         }
-        this.arguments.add(argument);
+        this.arguments.putAll(arguments);
         return this;
     }
 
-    public Field addArgument(String name, JsonValue jsonValue) {
-        this.addArgument(new Argument(name, jsonValue));
-        return this;
-    }
-
-    public Field addArguments(Stream<Argument> argumentStream) {
+    public Field addArguments(JsonObject jsonObject) {
         if (this.arguments == null) {
-            this.arguments = new LinkedHashSet<>();
+            this.arguments = new Arguments();
         }
-        this.arguments.addAll(argumentStream.collect(Collectors.toList()));
+        this.arguments.putAll(jsonObject);
         return this;
     }
 
-    public JsonObject getArgumentsJson() {
-        return this.getArguments().stream()
-                .map(argument -> new AbstractMap.SimpleEntry<>(argument.getName(), argument.getValueWithVariable().toJson()))
-                .collect(JsonCollectors.toJsonObject());
+    public Field addArgument(String name, ValueWithVariable valueWithVariable) {
+        this.arguments.put(name, valueWithVariable);
+        return this;
+    }
+
+    public Field addArgument(String name, JsonValue valueWithVariable) {
+        this.arguments.put(name, valueWithVariable);
+        return this;
     }
 
     public Set<String> getDirectives() {

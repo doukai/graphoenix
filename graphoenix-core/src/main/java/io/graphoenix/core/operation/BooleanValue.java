@@ -1,12 +1,13 @@
 package io.graphoenix.core.operation;
 
+import jakarta.json.JsonValue;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import javax.lang.model.element.AnnotationValue;
 
-public class BooleanValue {
+public class BooleanValue implements JsonValue {
 
     private Boolean value;
 
@@ -28,6 +29,11 @@ public class BooleanValue {
 
     public void setValue(Boolean value) {
         this.value = value;
+    }
+
+    @Override
+    public ValueType getValueType() {
+        return value ? ValueType.TRUE : ValueType.FALSE;
     }
 
     @Override

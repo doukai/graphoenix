@@ -9,14 +9,10 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.MutationDataLoader;
-import io.graphoenix.core.operation.Argument;
 import io.graphoenix.core.operation.ArrayValueWithVariable;
-import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.Operation;
-import io.graphoenix.core.operation.ValueWithVariable;
 import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.constant.Hammurabi;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.json.JsonValue;
@@ -98,149 +94,27 @@ public class MutationHandlerBuilder {
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
-                                buildTypeFieldMethod(objectTypeDefinitionContext, anchor),
                                 buildTypeMethod(objectTypeDefinitionContext, anchor),
-                                buildListTypeFieldMethod(objectTypeDefinitionContext, anchor),
                                 buildListTypeMethod(objectTypeDefinitionContext, anchor)
                         )
                 )
                 .collect(Collectors.toList());
     }
 
-    private MethodSpec buildTypeFieldMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean anchor) {
-        String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(Field.class), "field")
-                .addParameter(ClassName.get(MutationDataLoader.class), "loader");
-
-        if (anchor) {
-            builder.beginControlFlow("if (field != null && field.getArguments() != null && field.getArguments().size() > 0)");
-        } else {
-            builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
-                    .beginControlFlow("if (field != null && field.getArguments() != null && field.getArguments().size() > 0 && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class));
-        }
-        builder.beginControlFlow("for ($T argument : field.getArguments())", ClassName.get(Argument.class));
-
-        String idFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
-        int index = 0;
-        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isFetchField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
-                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                .collect(Collectors.toList());
-
-        for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
-            String fieldParameterName = typeManager.typeToLowerCamelName(fieldDefinitionContext.type());
-            if (index == 0) {
-                builder.beginControlFlow("if (argument.getName().equals($S))", fieldDefinitionContext.name().getText());
-            } else {
-                builder.nextControlFlow("else if (argument.getName().equals($S))", fieldDefinitionContext.name().getText());
-            }
-            if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                if (manager.isFetchField(fieldDefinitionContext)) {
-                    String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
-                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
-                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
-                    String key = grpcNameUtil.getKey(fieldDefinitionContext);
-
-                    if (anchor) {
-                        builder.addStatement("loader.registerArray($S, $S, $S, argument.getValueWithVariable())",
-                                packageName,
-                                typeName,
-                                key
-                        );
-                    } else {
-                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                                .addStatement("argument.getValueWithVariable().asArray().forEach(item -> item.asObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
-                                .addStatement("loader.registerArray($S, $S, $S, argument.getValueWithVariable())",
-                                        packageName,
-                                        typeName,
-                                        key
-                                )
-                                .endControlFlow();
-                    }
-                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    if (anchor) {
-                        builder.addStatement("$L(argument.getValueWithVariable(), loader)", fieldParameterName.concat("List"));
-                    } else {
-                        builder.addStatement("$L(argument.getValueWithVariable(), loader, jsonValue.asJsonObject().get($S))",
-                                fieldParameterName.concat("List"),
-                                fieldDefinitionContext.name().getText()
-                        );
-                    }
-                }
-            } else {
-                if (fieldDefinitionContext.name().getText().equals(idFieldName)) {
-                    if (anchor) {
-                        builder.addStatement("loader.registerUpdate($S, argument.getValueWithVariable())",
-                                objectTypeDefinitionContext.name().getText()
-                        );
-                    } else {
-                        builder.addStatement("loader.registerCreate($S, jsonValue.asJsonObject().get($S))",
-                                objectTypeDefinitionContext.name().getText(),
-                                fieldDefinitionContext.name().getText()
-                        );
-                    }
-                } else if (manager.isFetchField(fieldDefinitionContext)) {
-                    String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
-                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
-                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
-                    String key = grpcNameUtil.getKey(fieldDefinitionContext);
-                    if (anchor) {
-                        builder.addStatement("loader.register($S, $S, $S, $S, (jsonObject) -> field.addArgument($S, jsonObject.get($S)), argument.getValueWithVariable())",
-                                packageName,
-                                typeName,
-                                to,
-                                key,
-                                from,
-                                to
-                        );
-                    } else {
-                        builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                                .addStatement("argument.getValueWithVariable().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
-                                .addStatement("loader.register($S, $S, $S, argument.getValueWithVariable())",
-                                        packageName,
-                                        typeName,
-                                        key
-                                )
-                                .endControlFlow();
-                    }
-                } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    if (anchor) {
-                        builder.addStatement("$L(argument.getValueWithVariable(), loader)", fieldParameterName);
-                    } else {
-                        builder.addStatement("$L(argument.getValueWithVariable(), loader, jsonValue.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText());
-                    }
-                }
-            }
-            if (index == fieldDefinitionContextList.size() - 1) {
-                builder.endControlFlow();
-            }
-            index++;
-        }
-        builder.endControlFlow()
-                .endControlFlow();
-        return builder.build();
-    }
-
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean anchor) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
+                .addParameter(ClassName.get(JsonValue.class), "valueWithVariable")
                 .addParameter(ClassName.get(MutationDataLoader.class), "loader");
 
         if (anchor) {
-            builder.beginControlFlow("if (valueWithVariable != null && valueWithVariable.isObject() && valueWithVariable.asObject().size() > 0)");
+            builder.beginControlFlow("if (valueWithVariable != null && valueWithVariable.getValueType().equals($T.ValueType.OBJECT) && valueWithVariable.asJsonObject().size() > 0)", ClassName.get(JsonValue.class));
         } else {
             builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
-                    .beginControlFlow("if (valueWithVariable != null && valueWithVariable.isObject() && valueWithVariable.asObject().size() > 0 && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class));
+                    .beginControlFlow("if (valueWithVariable != null && valueWithVariable.getValueType().equals($T.ValueType.OBJECT) && valueWithVariable.asJsonObject().size() > 0 && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.OBJECT))", ClassName.get(JsonValue.class), ClassName.get(JsonValue.class));
         }
-        builder.beginControlFlow("for ($T field : valueWithVariable.asObject().entrySet())", ParameterizedTypeName.get(Map.Entry.class, String.class, ValueWithVariable.class));
+        builder.beginControlFlow("for ($T field : valueWithVariable.asJsonObject().entrySet())", ParameterizedTypeName.get(Map.Entry.class, String.class, JsonValue.class));
 
         String idFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
         int index = 0;
@@ -274,7 +148,7 @@ public class MutationHandlerBuilder {
                         );
                     } else {
                         builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                                .addStatement("field.getValue().asArray().forEach(item -> item.asObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
+                                .addStatement("field.getValue().asArray().forEach(item -> item.asJsonObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
                                 .addStatement("loader.registerArray($S, $S, $S, field.getValue())",
                                         packageName,
                                         typeName,
@@ -309,7 +183,7 @@ public class MutationHandlerBuilder {
                     String key = grpcNameUtil.getKey(fieldDefinitionContext);
 
                     if (anchor) {
-                        builder.addStatement("loader.register($S, $S, $S, $S, (jsonObject) -> valueWithVariable.asObject().put($S, jsonObject.get($S)), field.getValue())",
+                        builder.addStatement("loader.register($S, $S, $S, $S, (jsonObject) -> valueWithVariable.asJsonObject().put($S, jsonObject.get($S)), field.getValue())",
                                 packageName,
                                 typeName,
                                 to,
@@ -319,7 +193,7 @@ public class MutationHandlerBuilder {
                         );
                     } else {
                         builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                                .addStatement("field.getValue().asObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
+                                .addStatement("field.getValue().asJsonObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
                                 .addStatement("loader.register($S, $S, $S, field.getValue())",
                                         packageName,
                                         typeName,
@@ -345,53 +219,12 @@ public class MutationHandlerBuilder {
         return builder.build();
     }
 
-    private MethodSpec buildListTypeFieldMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean anchor) {
-        String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
-        String listTypeParameterName = typeParameterName.concat("List");
-        MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
-                .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(Field.class), "field")
-                .addParameter(ClassName.get(MutationDataLoader.class), "loader");
-
-        if (anchor) {
-            builder.beginControlFlow(
-                    "if (field != null && field.getArgument($T.LIST_INPUT_NAME).isPresent() && field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().isArray())",
-                    ClassName.get(Hammurabi.class),
-                    ClassName.get(Hammurabi.class)
-            ).addStatement("$T valueWithVariables = field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray()",
-                    ClassName.get(ArrayValueWithVariable.class),
-                    ClassName.get(Hammurabi.class)
-            ).addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader))",
-                    ClassName.get(IntStream.class),
-                    typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
-            ).endControlFlow();
-        } else {
-            builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
-                    .beginControlFlow(
-                            "if (field != null && field.getArgument($T.LIST_INPUT_NAME).isPresent() && field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().isArray() && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))",
-                            ClassName.get(Hammurabi.class),
-                            ClassName.get(Hammurabi.class),
-                            ClassName.get(JsonValue.class)
-                    )
-                    .addStatement("$T valueWithVariables = field.getArgument($T.LIST_INPUT_NAME).get().getValueWithVariable().asArray()",
-                            ClassName.get(ArrayValueWithVariable.class),
-                            ClassName.get(Hammurabi.class)
-                    )
-                    .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, jsonValue.asJsonArray().get(index)))",
-                            ClassName.get(IntStream.class),
-                            typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
-                    )
-                    .endControlFlow();
-        }
-        return builder.build();
-    }
-
     private MethodSpec buildListTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean anchor) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         String listTypeParameterName = typeParameterName.concat("List");
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ClassName.get(ValueWithVariable.class), "valueWithVariable")
+                .addParameter(ClassName.get(JsonValue.class), "valueWithVariable")
                 .addParameter(ClassName.get(MutationDataLoader.class), "loader");
 
         if (anchor) {

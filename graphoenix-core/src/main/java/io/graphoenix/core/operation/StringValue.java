@@ -1,5 +1,6 @@
 package io.graphoenix.core.operation;
 
+import jakarta.json.JsonString;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
@@ -9,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-public class StringValue {
+public class StringValue implements JsonString {
 
     private String value;
 
@@ -47,6 +48,21 @@ public class StringValue {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    @Override
+    public String getString() {
+        return value;
+    }
+
+    @Override
+    public CharSequence getChars() {
+        return value;
+    }
+
+    @Override
+    public ValueType getValueType() {
+        return ValueType.STRING;
     }
 
     @Override

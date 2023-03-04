@@ -2,9 +2,7 @@ package io.graphoenix.mysql.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.operation.Argument;
-import io.graphoenix.core.operation.Field;
-import io.graphoenix.core.operation.IntValue;
+import io.graphoenix.core.operation.*;
 import io.graphoenix.mysql.expression.JsonArrayAggregateFunction;
 import io.graphoenix.mysql.utils.DBNameUtil;
 import io.graphoenix.mysql.utils.DBValueUtil;
@@ -14,6 +12,8 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonValue;
+import jakarta.json.stream.JsonCollectors;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -39,12 +39,7 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 import net.sf.jsqlparser.util.cnfexpression.MultiAndExpression;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -379,20 +374,18 @@ public class GraphQLQueryToSelect {
                             Field field = new Field(connectionFieldDefinitionContext.name().getText())
                                     .setFields(fieldStream.collect(Collectors.toCollection(LinkedHashSet::new)));
                             if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
-                                Set<Argument> arguments = selectionContext.field().arguments().argument().stream()
-                                        .map(argumentContext -> {
-                                                    if ((argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) && argumentContext.valueWithVariable().IntValue() != null) {
-                                                        return new Argument()
-                                                                .setName(argumentContext.name().getText())
-                                                                .setValueWithVariable(new IntValue(Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1));
-                                                    } else {
-                                                        return new Argument()
-                                                                .setName(argumentContext.name().getText())
-                                                                .setValueWithVariable(argumentContext.valueWithVariable());
-                                                    }
-                                                }
-                                        )
-                                        .collect(Collectors.toCollection(LinkedHashSet::new));
+                                Arguments arguments = new Arguments(
+                                        selectionContext.field().arguments().argument().stream()
+                                                .map(argumentContext -> {
+                                                            if ((argumentContext.name().getText().equals(FIRST_INPUT_NAME) || argumentContext.name().getText().equals(LAST_INPUT_NAME)) && argumentContext.valueWithVariable().IntValue() != null) {
+                                                                return new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), (JsonValue) new IntValue(Integer.parseInt(argumentContext.valueWithVariable().IntValue().getText()) + 1));
+                                                            } else {
+                                                                return new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), (JsonValue) new ValueWithVariable(argumentContext.valueWithVariable()));
+                                                            }
+                                                        }
+                                                )
+                                                .collect(JsonCollectors.toJsonObject())
+                                );
                                 field.setArguments(arguments);
                             }
                             return DOCUMENT_UTIL.graphqlToSelection(field.toString());
@@ -409,10 +402,12 @@ public class GraphQLQueryToSelect {
                 .addField(new Field(manager.getObjectTypeIDFieldName(fieldTypeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName))).concat("Count")));
 
         if (selectionContext.field().arguments() != null && selectionContext.field().arguments().argument().size() > 0) {
-            LinkedHashSet<Argument> arguments = selectionContext.field().arguments().argument().stream()
-                    .filter(argumentContext -> !argumentContext.name().getText().equals(FIRST_INPUT_NAME) && !argumentContext.name().getText().equals(LAST_INPUT_NAME))
-                    .map(Argument::new)
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
+            Arguments arguments = new Arguments(
+                    selectionContext.field().arguments().argument().stream()
+                            .filter(argumentContext -> !argumentContext.name().getText().equals(FIRST_INPUT_NAME) && !argumentContext.name().getText().equals(LAST_INPUT_NAME))
+                            .map(argumentContext -> new AbstractMap.SimpleEntry<>(argumentContext.name().getText(), (JsonValue) new ValueWithVariable(argumentContext.valueWithVariable())))
+                            .collect(JsonCollectors.toJsonObject())
+            );
             field.setArguments(arguments);
         }
 
