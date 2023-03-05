@@ -97,11 +97,17 @@ public class Field {
     }
 
     public Field addArgument(String name, ValueWithVariable valueWithVariable) {
+        if (this.arguments == null) {
+            this.arguments = new Arguments();
+        }
         this.arguments.put(name, valueWithVariable);
         return this;
     }
 
     public Field addArgument(String name, JsonValue valueWithVariable) {
+        if (this.arguments == null) {
+            this.arguments = new Arguments();
+        }
         this.arguments.put(name, valueWithVariable);
         return this;
     }

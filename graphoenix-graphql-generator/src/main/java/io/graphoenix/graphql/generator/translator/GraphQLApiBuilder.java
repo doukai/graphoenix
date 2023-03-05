@@ -4,9 +4,7 @@ import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.document.InputValue;
-import io.graphoenix.core.operation.Argument;
 import io.graphoenix.core.operation.ArrayValueWithVariable;
-import io.graphoenix.core.operation.StringValue;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.annotation.security.DenyAll;
@@ -55,43 +53,28 @@ public class GraphQLApiBuilder {
                 .addDirective(
                         new Directive()
                                 .setName("invoke")
+                                .addArgument("className", executableElement.getEnclosingElement().toString())
+                                .addArgument("methodName", executableElement.getSimpleName().toString())
                                 .addArgument(
-                                        new Argument()
-                                                .setName("className")
-                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
+                                        "parameters",
+                                        new ArrayValueWithVariable(
+                                                executableElement.getParameters().stream()
+                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
+                                                        .collect(Collectors.toList())
+                                        )
                                 )
-                                .addArgument(
-                                        new Argument()
-                                                .setName("methodName")
-                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
-                                )
-                                .addArgument(
-                                        new Argument()
-                                                .setName("parameters")
-                                                .setValueWithVariable(
-                                                        new ArrayValueWithVariable(
-                                                                executableElement.getParameters().stream()
-                                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
-                                                                        .collect(Collectors.toList())
-                                                        )
-                                                )
-                                )
-                                .addArgument(
-                                        new Argument()
-                                                .setName("returnClassName")
-                                                .setValueWithVariable(new StringValue(executableElement.getReturnType().toString()))
-                                )
+                                .addArgument("returnClassName", executableElement.getReturnType().toString())
                 );
         if (executableElement.getAnnotation(PermitAll.class) != null) {
-            field.addStringDirective("permitAll");
+            field.addDirective(new Directive("permitAll"));
         }
         if (executableElement.getAnnotation(DenyAll.class) != null) {
-            field.addStringDirective("denyAll");
+            field.addDirective(new Directive("denyAll"));
         }
         if (executableElement.getAnnotation(RolesAllowed.class) != null) {
             Directive directive = new Directive()
                     .setName("rolesAllowed")
-                    .addArgument(new Argument().setName("roles").setValueWithVariable(executableElement.getAnnotation(RolesAllowed.class).value()));
+                    .addArgument("roles", executableElement.getAnnotation(RolesAllowed.class).value());
             field.addDirective(directive);
         }
         return field;
@@ -111,38 +94,21 @@ public class GraphQLApiBuilder {
                         .setDescription(elementManager.getDescriptionFromElement(executableElement))
                         .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
                         .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
-                        .setStringDirectives(
+                        .setDirectives(
                                 Stream.of(new Directive()
-                                                .setName("invoke")
-                                                .addArgument(
-                                                        new Argument()
-                                                                .setName("className")
-                                                                .setValueWithVariable(new StringValue(executableElement.getEnclosingElement().toString()))
-                                                )
-                                                .addArgument(
-                                                        new Argument()
-                                                                .setName("methodName")
-                                                                .setValueWithVariable(new StringValue(executableElement.getSimpleName().toString()))
-                                                )
-                                                .addArgument(
-                                                        new Argument()
-                                                                .setName("parameters")
-                                                                .setValueWithVariable(
-                                                                        new ArrayValueWithVariable(
-                                                                                executableElement.getParameters().stream()
-                                                                                        .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
-                                                                                        .collect(Collectors.toList())
-                                                                        )
-                                                                )
-                                                )
-                                                .addArgument(
-                                                        new Argument()
-                                                                .setName("returnClassName")
-                                                                .setValueWithVariable(new StringValue(executableElement.getReturnType().toString()))
+                                        .setName("invoke")
+                                        .addArgument("className", executableElement.getEnclosingElement().toString())
+                                        .addArgument("methodName", executableElement.getSimpleName().toString())
+                                        .addArgument(
+                                                "parameters",
+                                                new ArrayValueWithVariable(
+                                                        executableElement.getParameters().stream()
+                                                                .map(parameter -> Map.of("name", parameter.getSimpleName().toString(), "className", parameter.asType().toString()))
+                                                                .collect(Collectors.toList())
                                                 )
                                         )
-                                        .map(Directive::toString)
-                                        .collect(Collectors.toCollection(LinkedHashSet::new))
+                                        .addArgument("returnClassName", executableElement.getReturnType().toString())
+                                ).collect(Collectors.toCollection(LinkedHashSet::new))
                         )
         );
     }

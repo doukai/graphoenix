@@ -68,19 +68,10 @@ public class InputObjectType {
         return directives;
     }
 
-    public InputObjectType setDirectives(Set<String> directives) {
-        this.directives = directives;
-        return this;
-    }
-
-    public InputObjectType addStringDirective(String directive) {
-        if (this.directives == null) {
-            this.directives = new LinkedHashSet<>();
+    public InputObjectType setDirectives(Set<Directive> directives) {
+        if (directives != null) {
+            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
-        if (!directive.startsWith("@")) {
-            directive = "@".concat(directive);
-        }
-        this.directives.add(directive);
         return this;
     }
 

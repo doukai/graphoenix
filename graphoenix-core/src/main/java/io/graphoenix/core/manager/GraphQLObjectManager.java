@@ -42,28 +42,6 @@ public class GraphQLObjectManager implements IGraphQLObjectManager {
     }
 
     @Override
-    public boolean isContainerType(String objectTypeName) {
-        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = objectTypeDefinitionMap.get(objectTypeName);
-        return objectTypeDefinitionContext != null && objectTypeDefinitionContext.directives() != null && objectTypeDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> Arrays.stream(CONTAINER_DIRECTIVES).anyMatch(name -> directiveContext.name().getText().equals(name)));
-    }
-
-    @Override
-    public boolean isNotContainerType(String objectTypeName) {
-        return !isContainerType(objectTypeName);
-    }
-
-    @Override
-    public boolean isImportType(String objectTypeName) {
-        GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = objectTypeDefinitionMap.get(objectTypeName);
-        return objectTypeDefinitionContext != null && objectTypeDefinitionContext.directives() != null && objectTypeDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME));
-    }
-
-    @Override
-    public boolean isNotImportType(String objectTypeName) {
-        return !isImportType(objectTypeName);
-    }
-
-    @Override
     public void clear() {
         objectTypeDefinitionMap.clear();
         Logger.debug("clear all objectType");

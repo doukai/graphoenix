@@ -1,18 +1,17 @@
 package io.graphoenix.core.document;
 
 import graphql.parser.antlr.GraphqlParser;
-import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.Arguments;
+import io.graphoenix.core.operation.ValueWithVariable;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Directive {
 
     private String name;
-    private Set<Argument> arguments;
+    private Arguments arguments;
 
     public String getName() {
         return name;
@@ -24,7 +23,7 @@ public class Directive {
     public Directive(GraphqlParser.DirectiveContext directiveContext) {
         this.name = directiveContext.name().getText();
         if (directiveContext.arguments() != null) {
-            this.arguments = directiveContext.arguments().argument().stream().map(Argument::new).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.arguments = new Arguments(directiveContext.arguments());
         }
     }
 
@@ -37,20 +36,62 @@ public class Directive {
         return this;
     }
 
-    public Set<Argument> getArguments() {
+    public Arguments getArguments() {
         return arguments;
     }
 
-    public Directive setArguments(Set<Argument> arguments) {
+    public Directive setArguments(GraphqlParser.ArgumentsContext argumentsContext) {
+        this.arguments = new Arguments(argumentsContext);
+        return this;
+    }
+
+    public Directive setArguments(Arguments arguments) {
         this.arguments = arguments;
         return this;
     }
 
-    public Directive addArgument(Argument argument) {
-        if (arguments == null) {
-            arguments = new LinkedHashSet<>();
+    public Directive setArguments(JsonObject jsonObject) {
+        this.arguments = new Arguments(jsonObject);
+        return this;
+    }
+
+    public Directive addArguments(Arguments arguments) {
+        if (this.arguments == null) {
+            this.arguments = new Arguments();
         }
-        this.arguments.add(argument);
+        this.arguments.putAll(arguments);
+        return this;
+    }
+
+    public Directive addArguments(JsonObject jsonObject) {
+        if (this.arguments == null) {
+            this.arguments = new Arguments();
+        }
+        this.arguments.putAll(jsonObject);
+        return this;
+    }
+
+    public Directive addArgument(String name, Object valueWithVariable) {
+        if (this.arguments == null) {
+            this.arguments = new Arguments();
+        }
+        this.arguments.put(name, valueWithVariable);
+        return this;
+    }
+
+    public Directive addArgument(String name, ValueWithVariable valueWithVariable) {
+        if (this.arguments == null) {
+            this.arguments = new Arguments();
+        }
+        this.arguments.put(name, valueWithVariable);
+        return this;
+    }
+
+    public Directive addArgument(String name, JsonValue valueWithVariable) {
+        if (this.arguments == null) {
+            this.arguments = new Arguments();
+        }
+        this.arguments.put(name, valueWithVariable);
         return this;
     }
 

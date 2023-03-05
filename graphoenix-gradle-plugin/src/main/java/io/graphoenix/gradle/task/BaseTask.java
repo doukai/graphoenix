@@ -159,11 +159,7 @@ public class BaseTask extends DefaultTask {
                                                                                     .addDirective(
                                                                                             new Directive()
                                                                                                     .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
-                                                                                                    .addArgument(
-                                                                                                            new Argument()
-                                                                                                                    .setName("className")
-                                                                                                                    .setValueWithVariable(qualifiedName)
-                                                                                                    )
+                                                                                                    .addArgument("className", qualifiedName)
                                                                                     )
                                                                                     .toString()
                                                                     );
@@ -174,11 +170,7 @@ public class BaseTask extends DefaultTask {
                                                                                     .addDirective(
                                                                                             new Directive()
                                                                                                     .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
-                                                                                                    .addArgument(
-                                                                                                            new Argument()
-                                                                                                                    .setName("className")
-                                                                                                                    .setValueWithVariable(qualifiedName)
-                                                                                                    )
+                                                                                                    .addArgument("className", qualifiedName)
                                                                                     )
                                                                                     .toString()
                                                                     );
@@ -189,11 +181,7 @@ public class BaseTask extends DefaultTask {
                                                                                     .addDirective(
                                                                                             new Directive()
                                                                                                     .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
-                                                                                                    .addArgument(
-                                                                                                            new Argument()
-                                                                                                                    .setName("className")
-                                                                                                                    .setValueWithVariable(qualifiedName)
-                                                                                                    )
+                                                                                                    .addArgument("className", qualifiedName)
                                                                                     )
                                                                                     .toString()
                                                                     );

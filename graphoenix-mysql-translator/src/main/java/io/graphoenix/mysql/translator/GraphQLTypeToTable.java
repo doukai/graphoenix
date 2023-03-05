@@ -36,15 +36,15 @@ public class GraphQLTypeToTable {
 
     public Stream<String> createTablesSQL() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext ->
                         Stream.concat(
                                 Stream.ofNullable(config.getLocalPackageNames()).flatMap(Collection::stream),
                                 Stream.of(config.getPackageName())
                         ).anyMatch(packageName ->
                                 manager.getImportPackageName(objectTypeDefinitionContext)
-                                        .orElse(config.getObjectTypePackageName())
-                                        .startsWith(packageName)
+                                        .orElse(config.getPackageName())
+                                        .equals(packageName)
                         )
                 )
                 .filter(objectTypeDefinitionContext ->

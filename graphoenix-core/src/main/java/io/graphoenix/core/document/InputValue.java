@@ -76,8 +76,10 @@ public class InputValue {
         return directives;
     }
 
-    public InputValue setDirectives(Set<String> directives) {
-        this.directives = directives;
+    public InputValue setDirectives(Set<Directive> directives) {
+        if (directives != null) {
+            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
         return this;
     }
 

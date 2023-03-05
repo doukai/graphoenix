@@ -3,8 +3,6 @@ package io.graphoenix.graphql.generator.translator;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.document.InterfaceType;
-import io.graphoenix.core.operation.Argument;
-import io.graphoenix.core.operation.StringValue;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.DateFormat;
@@ -48,8 +46,8 @@ public class JavaElementToInterface {
                                                 field.addDirective(
                                                         new Directive()
                                                                 .setName("format")
-                                                                .addArgument(new Argument("value", numberFormat.value()))
-                                                                .addArgument(new Argument("locale", numberFormat.locale()))
+                                                                .addArgument("value", numberFormat.value())
+                                                                .addArgument("locale", numberFormat.locale())
                                                 );
                                             }
                                             DateFormat dateFormat = element.getAnnotation(DateFormat.class);
@@ -57,8 +55,8 @@ public class JavaElementToInterface {
                                                 field.addDirective(
                                                         new Directive()
                                                                 .setName("format")
-                                                                .addArgument(new Argument("value", dateFormat.value()))
-                                                                .addArgument(new Argument("locale", dateFormat.locale()))
+                                                                .addArgument("value", dateFormat.value())
+                                                                .addArgument("locale", dateFormat.locale())
                                                 );
                                             }
                                             return field;
@@ -73,13 +71,7 @@ public class JavaElementToInterface {
                 )
                 .addDirective(
                         new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
-                                .addArgument(
-                                        new Argument()
-                                                .setName("className")
-                                                .setValueWithVariable(
-                                                        new StringValue(typeElement.getQualifiedName().toString())
-                                                )
-                                )
+                                .addArgument("className", typeElement.getQualifiedName().toString())
                 );
     }
 }

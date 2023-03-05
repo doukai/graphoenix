@@ -95,7 +95,6 @@ public class ApplicationProcessor extends AbstractProcessor {
         this.filer = processingEnv.getFiler();
         BeanContext.load(ApplicationProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
-        this.documentBuilder = BeanContext.get(DocumentBuilder.class);
         this.javaElementToEnum = BeanContext.get(JavaElementToEnum.class);
         this.javaElementToObject = BeanContext.get(JavaElementToObject.class);
         this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
@@ -113,6 +112,7 @@ public class ApplicationProcessor extends AbstractProcessor {
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
         graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
+        this.documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
 
         try {
             manager.clearAll();
@@ -188,7 +188,7 @@ public class ApplicationProcessor extends AbstractProcessor {
             writer.close();
 
             List<GraphqlParser.ObjectTypeDefinitionContext> schemaObjectList = manager.getObjects()
-                    .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                    .filter(manager::isNotContainerType)
                     .collect(Collectors.toList());
 
             for (GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext : schemaObjectList) {

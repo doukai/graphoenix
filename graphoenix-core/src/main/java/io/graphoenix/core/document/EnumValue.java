@@ -46,8 +46,10 @@ public class EnumValue {
         return directives;
     }
 
-    public EnumValue setDirectives(Set<String> directives) {
-        this.directives = directives;
+    public EnumValue setDirectives(Set<Directive> directives) {
+        if (directives != null) {
+            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
         return this;
     }
 

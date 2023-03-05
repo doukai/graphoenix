@@ -89,7 +89,7 @@ public class MutationHandlerBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .flatMap(objectTypeDefinitionContext ->
@@ -120,7 +120,7 @@ public class MutationHandlerBuilder {
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isFetchField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldType(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .collect(Collectors.toList());
@@ -148,7 +148,7 @@ public class MutationHandlerBuilder {
                         );
                     } else {
                         builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                                .addStatement("field.getValue().asArray().forEach(item -> item.asJsonObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
+                                .addStatement("field.getValue().asJsonArray().forEach(item -> item.asJsonObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
                                 .addStatement("loader.registerArray($S, $S, $S, field.getValue())",
                                         packageName,
                                         typeName,
@@ -228,8 +228,8 @@ public class MutationHandlerBuilder {
                 .addParameter(ClassName.get(MutationDataLoader.class), "loader");
 
         if (anchor) {
-            builder.beginControlFlow("if (valueWithVariable != null && valueWithVariable.isArray())")
-                    .addStatement("$T valueWithVariables = valueWithVariable.asArray()",
+            builder.beginControlFlow("if (valueWithVariable != null && valueWithVariable.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
+                    .addStatement("$T valueWithVariables = valueWithVariable.asJsonArray()",
                             ClassName.get(ArrayValueWithVariable.class)
                     )
                     .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader))",
@@ -239,8 +239,8 @@ public class MutationHandlerBuilder {
                     .endControlFlow();
         } else {
             builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
-                    .beginControlFlow("if (valueWithVariable != null && valueWithVariable.isArray() && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
-                    .addStatement("$T valueWithVariables = valueWithVariable.asArray()",
+                    .beginControlFlow("if (valueWithVariable != null && valueWithVariable.getValueType().equals($T.ValueType.ARRAY) && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class), ClassName.get(JsonValue.class))
+                    .addStatement("$T valueWithVariables = valueWithVariable.asJsonArray()",
                             ClassName.get(ArrayValueWithVariable.class)
                     )
                     .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, jsonValue.asJsonArray().get(index)))",

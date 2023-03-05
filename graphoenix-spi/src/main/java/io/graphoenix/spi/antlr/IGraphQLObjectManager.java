@@ -16,13 +16,5 @@ public interface IGraphQLObjectManager {
 
     Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitions();
 
-    boolean isContainerType(String objectTypeName);
-
-    boolean isNotContainerType(String objectTypeName);
-
-    boolean isImportType(String objectTypeName);
-
-    boolean isNotImportType(String objectTypeName);
-
     void clear();
 }

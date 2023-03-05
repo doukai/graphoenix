@@ -487,8 +487,8 @@ public class TypeSpecBuilder {
                     return manager.getContainerClassName(object.get())
                             .map(ClassName::bestGuess)
                             .orElseGet(() ->
-                                    manager.getImportPackageName(object.get())
-                                            .map(packageName -> ClassName.get(packageName, object.get().name().getText()))
+                                    manager.getImportClassName(object.get())
+                                            .map(ClassName::bestGuess)
                                             .orElse(ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText()))
                             );
                 }
@@ -499,8 +499,8 @@ public class TypeSpecBuilder {
                 return manager.getContainerClassName(enumType.get())
                         .map(ClassName::bestGuess)
                         .orElseGet(() ->
-                                manager.getImportPackageName(enumType.get())
-                                        .map(packageName -> ClassName.get(packageName, enumType.get().name().getText()))
+                                manager.getImportClassName(enumType.get())
+                                        .map(ClassName::bestGuess)
                                         .orElse(ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()))
                         );
             }
@@ -510,8 +510,8 @@ public class TypeSpecBuilder {
                 return manager.getContainerClassName(interfaceType.get())
                         .map(ClassName::bestGuess)
                         .orElseGet(() ->
-                                manager.getImportPackageName(interfaceType.get())
-                                        .map(packageName -> ClassName.get(packageName, interfaceType.get().name().getText()))
+                                manager.getImportClassName(interfaceType.get())
+                                        .map(ClassName::bestGuess)
                                         .orElse(ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText()))
                         );
             }
@@ -524,8 +524,8 @@ public class TypeSpecBuilder {
                     return manager.getContainerClassName(inputObject.get())
                             .map(ClassName::bestGuess)
                             .orElseGet(() ->
-                                    manager.getImportPackageName(inputObject.get())
-                                            .map(packageName -> ClassName.get(packageName, inputObject.get().name().getText()))
+                                    manager.getImportClassName(inputObject.get())
+                                            .map(ClassName::bestGuess)
                                             .orElse(ClassName.get(graphQLConfig.getInterfaceTypePackageName(), inputObject.get().name().getText()))
                             );
                 }
@@ -892,7 +892,7 @@ public class TypeSpecBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
                             TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText().concat(EXPRESSION_SUFFIX) + layer)
@@ -1027,7 +1027,7 @@ public class TypeSpecBuilder {
                                 builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldType(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                                                 .map(fieldDefinitionContext ->
@@ -1070,7 +1070,7 @@ public class TypeSpecBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
                             TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText().concat(INPUT_SUFFIX) + layer)
@@ -1117,7 +1117,7 @@ public class TypeSpecBuilder {
                                 builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldType(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                                                 .map(fieldDefinitionContext ->
@@ -1167,7 +1167,7 @@ public class TypeSpecBuilder {
                                 !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
                                 !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
                 )
-                .filter(objectTypeDefinitionContext -> manager.isNotContainerType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
                             TypeSpec.Builder builder = TypeSpec.annotationBuilder(objectTypeDefinitionContext.name().getText().concat(ORDER_BY_SUFFIX) + layer)
@@ -1202,7 +1202,7 @@ public class TypeSpecBuilder {
                                 builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldType(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                                                 .map(fieldDefinitionContext ->

@@ -68,19 +68,10 @@ public class EnumType {
         return directives;
     }
 
-    public EnumType setDirectives(Set<String> directives) {
-        this.directives = directives;
-        return this;
-    }
-
-    public EnumType addStringDirective(String directive) {
-        if (this.directives == null) {
-            this.directives = new LinkedHashSet<>();
+    public EnumType setDirectives(Set<Directive> directives) {
+        if (directives != null) {
+            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
-        if (!directive.startsWith("@")) {
-            directive = "@".concat(directive);
-        }
-        this.directives.add(directive);
         return this;
     }
 

@@ -30,6 +30,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -380,26 +381,6 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean isContainerType(String objectTypeName) {
-        return graphQLObjectManager.isContainerType(objectTypeName);
-    }
-
-    @Override
-    public boolean isNotContainerType(String objectTypeName) {
-        return graphQLObjectManager.isNotContainerType(objectTypeName);
-    }
-
-    @Override
-    public boolean isImportType(String objectTypeName) {
-        return graphQLObjectManager.isImportType(objectTypeName);
-    }
-
-    @Override
-    public boolean isNotImportType(String objectTypeName) {
-        return graphQLObjectManager.isNotImportType(objectTypeName);
-    }
-
-    @Override
     public boolean isInvokeField(String objectTypeName, String name) {
         return graphQLFieldManager.isInvokeField(objectTypeName, name);
     }
@@ -675,6 +656,52 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean isContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return isContainerType(objectTypeDefinitionContext.directives());
+    }
+
+    @Override
+    public boolean isContainerType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return isContainerType(enumTypeDefinitionContext.directives());
+    }
+
+    @Override
+    public boolean isContainerType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return isContainerType(inputObjectTypeDefinitionContext.directives());
+    }
+
+    @Override
+    public boolean isContainerType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return isContainerType(interfaceTypeDefinitionContext.directives());
+    }
+
+    @Override
+    public boolean isNotContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return !isContainerType(objectTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotContainerType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return !isContainerType(enumTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotContainerType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return !isContainerType(inputObjectTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotContainerType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return !isContainerType(interfaceTypeDefinitionContext);
+    }
+
+    public boolean isContainerType(GraphqlParser.DirectivesContext directivesContext) {
+        return Stream.ofNullable(directivesContext)
+                .flatMap(directives -> directives.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(CONTAINER_TYPE_DIRECTIVE_NAME));
+    }
+
+    @Override
     public Optional<String> getContainerClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
     }
@@ -705,6 +732,52 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public boolean isImportType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return isImportType(objectTypeDefinitionContext.directives());
+    }
+
+    @Override
+    public boolean isImportType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return isImportType(enumTypeDefinitionContext.directives());
+    }
+
+    @Override
+    public boolean isImportType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return isImportType(inputObjectTypeDefinitionContext.directives());
+    }
+
+    @Override
+    public boolean isImportType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return isImportType(interfaceTypeDefinitionContext.directives());
+    }
+
+    @Override
+    public boolean isNotImportType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return !isImportType(objectTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotImportType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return !isImportType(enumTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotImportType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return !isImportType(inputObjectTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotImportType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return !isImportType(interfaceTypeDefinitionContext);
+    }
+
+    public boolean isImportType(GraphqlParser.DirectivesContext directivesContext) {
+        return Stream.ofNullable(directivesContext)
+                .flatMap(directives -> directives.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME));
+    }
+
+    @Override
     public Optional<String> getImportPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
     }
@@ -730,6 +803,36 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
                 .flatMap(argumentsContext -> argumentsContext.argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("packageName"))
+                .findFirst()
+                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    @Override
+    public Optional<String> getImportClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    }
+
+    @Override
+    public Optional<String> getImportClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    }
+
+    @Override
+    public Optional<String> getImportClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    }
+
+    @Override
+    public Optional<String> getImportClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
+    }
+
+    public Optional<String> getImportClassName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME))
+                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
+                .flatMap(argumentsContext -> argumentsContext.argument().stream())
+                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
                 .findFirst()
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
     }
@@ -871,6 +974,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             return getFieldTypeName(typeContext.listType().type());
         }
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+    }
+
+    @Override
+    public GraphqlParser.ObjectTypeDefinitionContext getFieldType(GraphqlParser.TypeContext typeContext) {
+        return getObject(getFieldTypeName(typeContext)).orElseThrow(() -> new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText())));
     }
 
     @Override

@@ -1,4 +1,4 @@
-import "stg/operation/Argument.stg"
+import "stg/operation/Arguments.stg"
 directiveDefinition(directive) ::= <<
-@<directive.name><if(directive.arguments)>(<directive.arguments:{argument|<argumentDefinition(argument)>};separator=" ">)<endif>
+@<directive.name><if(directive.arguments)><argumentsDefinition(directive.arguments)><endif>
 >>

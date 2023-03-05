@@ -152,7 +152,7 @@ public class GraphQLApiProcessor extends AbstractProcessor {
         try {
             FileObject exportGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/export.gql");
             Writer writer = exportGraphQL.openWriter();
-            writer.write(documentBuilder.getExportDocument().toString());
+            writer.write(documentBuilder.getDocument().toString());
             writer.close();
 
         } catch (IOException e) {

@@ -42,8 +42,10 @@ public class ScalarType {
         return directives;
     }
 
-    public ScalarType setDirectives(Set<String> directives) {
-        this.directives = directives;
+    public ScalarType setDirectives(Set<Directive> directives) {
+        if (directives != null) {
+            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
         return this;
     }
 

@@ -43,13 +43,7 @@ public class JavaElementToEnum {
                 )
                 .addDirective(
                         new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
-                                .addArgument(
-                                        new Argument()
-                                                .setName("className")
-                                                .setValueWithVariable(
-                                                        new StringValue(typeElement.getQualifiedName().toString())
-                                                )
-                                )
+                                .addArgument("className", typeElement.getQualifiedName().toString())
                 );
     }
 }

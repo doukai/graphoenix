@@ -82,28 +82,10 @@ public class Field {
         return directives;
     }
 
-    public Field setStringDirectives(Set<String> directives) {
-        if (directives != null) {
-            this.directives = directives.stream().map(directive -> !directive.startsWith("@") ? "@".concat(directive) : directive).collect(Collectors.toCollection(LinkedHashSet::new));
-        }
-        return this;
-    }
-
     public Field setDirectives(Set<Directive> directives) {
         if (directives != null) {
             this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
-        return this;
-    }
-
-    public Field addStringDirective(String directive) {
-        if (this.directives == null) {
-            this.directives = new LinkedHashSet<>();
-        }
-        if (!directive.startsWith("@")) {
-            directive = "@".concat(directive);
-        }
-        this.directives.add(directive);
         return this;
     }
 

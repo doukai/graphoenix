@@ -82,19 +82,10 @@ public class InterfaceType {
         return directives;
     }
 
-    public InterfaceType setDirectives(Set<String> directives) {
-        this.directives = directives;
-        return this;
-    }
-
-    public InterfaceType addStringDirective(String directive) {
-        if (this.directives == null) {
-            this.directives = new LinkedHashSet<>();
+    public InterfaceType setDirectives(Set<Directive> directives) {
+        if (directives != null) {
+            this.directives = directives.stream().map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
         }
-        if (!directive.startsWith("@")) {
-            directive = "@".concat(directive);
-        }
-        this.directives.add(directive);
         return this;
     }
 
