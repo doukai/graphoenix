@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
@@ -17,6 +18,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
@@ -91,7 +93,8 @@ public class MutationDataLoaderBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethod(buildDispatchMethod());
+                .addMethod(buildDispatchMethod())
+                .addMethod(buildLoadMethod());
 
         if (this.grpcTypeMap.size() > 0) {
             builder.addField(
@@ -170,10 +173,42 @@ public class MutationDataLoaderBuilder {
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
             monoList.add(
-                    CodeBlock.of(".then($T.fromRunnable(() -> dispatch()))",
+                    CodeBlock.of(".then($T.fromSupplier(() -> dispatch(jsonValue.asJsonObject())))",
                             ClassName.get(Mono.class)
                     )
             );
+            codeBlock = CodeBlock.join(monoList, System.lineSeparator());
+        } else {
+            codeBlock = CodeBlock.of("return Mono.empty()");
+        }
+        return MethodSpec.methodBuilder("load")
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addParameter(ParameterSpec.builder(ClassName.get(JsonValue.class), "jsonValue").build())
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)))
+                .addStatement(codeBlock)
+                .build();
+    }
+
+    private MethodSpec buildLoadMethod() {
+        List<CodeBlock> monoList = new ArrayList<>();
+        int index = 0;
+        for (String packageName : this.grpcTypeMap.keySet()) {
+            if (index == 0) {
+                monoList.add(CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        ClassName.get(Mono.class),
+                        packageName));
+            } else {
+                monoList.add(CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
+                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        ClassName.get(Mono.class),
+                        packageName));
+            }
+            index++;
+        }
+        CodeBlock codeBlock;
+        if (monoList.size() > 0) {
             codeBlock = CodeBlock.join(monoList, System.lineSeparator());
         } else {
             codeBlock = CodeBlock.of("return Mono.empty()");

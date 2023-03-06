@@ -4,14 +4,13 @@ import com.google.common.base.CaseFormat;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.graphoenix.core.operation.Field;
-import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
-import io.graphoenix.core.operation.ValueWithVariable;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.constant.Hammurabi;
 import io.graphoenix.spi.handler.OperationHandler;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import jakarta.json.*;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
@@ -35,9 +34,9 @@ public abstract class MutationDataLoader {
     private final GraphQLConfig graphQLConfig;
     private final JsonProvider jsonProvider;
     private final OperationHandler operationHandler;
-    private final Map<String, Map<String, Map<String, ObjectValueWithVariable>>> objectValueMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Map<String, JsonObject>>> objectValueMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Set<String>>> selectionMap = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, Map<Integer, List<String>>>> indexMap = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Map<Integer, List<Tuple2<String, String>>>>> indexMap = new ConcurrentHashMap<>();
     private final Map<String, JsonValue> resultMap = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> updateMap = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> createMap = new ConcurrentHashMap<>();
@@ -58,50 +57,27 @@ public abstract class MutationDataLoader {
         return this;
     }
 
-    public void register(String packageName, String typeName, String selectionName, String keyName, String jsonPointer, JsonValue jsonValue) {
+    public void register(String packageName, String typeName, String selectionName, String keyName, String jsonPointer, String from, JsonValue jsonValue) {
         addSelection(packageName, typeName, keyName);
         if (selectionName != null) {
             addSelection(packageName, typeName, selectionName);
         }
-        addObjectValue(packageName, typeName, keyName, jsonPointer, jsonValue.asJsonObject());
+        addObjectValue(packageName, typeName, keyName, jsonPointer, from, jsonValue.asJsonObject());
     }
 
-    public void register(String packageName, String typeName, String selectionName, String keyName, String jsonPointer, ValueWithVariable valueWithVariable) {
-        addSelection(packageName, typeName, keyName);
-        if (selectionName != null) {
-            addSelection(packageName, typeName, selectionName);
-        }
-        addObjectValue(packageName, typeName, keyName, jsonPointer, valueWithVariable.asObject());
-    }
-
-    public void registerArray(String packageName, String typeName, String selectionName, String keyName, String jsonPointer, JsonValue jsonValue) {
+    public void registerArray(String packageName, String typeName, String selectionName, String keyName, String jsonPointer, String from, JsonValue jsonValue) {
         if (jsonValue != null && jsonValue.getValueType().equals(JsonValue.ValueType.ARRAY)) {
             JsonArray jsonArray = jsonValue.asJsonArray();
-            IntStream.range(0, jsonArray.size()).forEach(index -> register(packageName, typeName, selectionName, keyName, jsonPointer, jsonArray.get(index)));
-        }
-    }
-
-    public void registerArray(String packageName, String typeName, String selectionName, String keyName, String jsonPointer, ValueWithVariable valueWithVariable) {
-        if (valueWithVariable != null && valueWithVariable.isArray()) {
-            ArrayValueWithVariable arrayValueWithVariable = valueWithVariable.asArray();
-            IntStream.range(0, arrayValueWithVariable.size()).forEach(index -> register(packageName, typeName, selectionName, keyName, jsonPointer, arrayValueWithVariable.get(index)));
+            IntStream.range(0, jsonArray.size()).forEach(index -> register(packageName, typeName, selectionName, keyName, jsonPointer, from, jsonArray.get(index)));
         }
     }
 
     public void register(String packageName, String typeName, String keyName, JsonValue jsonValue) {
-        register(packageName, typeName, null, keyName, null, jsonValue);
-    }
-
-    public void register(String packageName, String typeName, String keyName, ValueWithVariable valueWithVariable) {
-        register(packageName, typeName, null, keyName, null, valueWithVariable);
+        register(packageName, typeName, null, keyName, null, null, jsonValue);
     }
 
     public void registerArray(String packageName, String typeName, String keyName, JsonValue jsonValue) {
-        registerArray(packageName, typeName, null, keyName, null, jsonValue);
-    }
-
-    public void registerArray(String packageName, String typeName, String keyName, ValueWithVariable valueWithVariable) {
-        registerArray(packageName, typeName, null, keyName, null, valueWithVariable);
+        registerArray(packageName, typeName, null, keyName, null, null, jsonValue);
     }
 
     public void registerUpdate(String typeName, JsonValue jsonValue) {
@@ -138,7 +114,7 @@ public abstract class MutationDataLoader {
                                                                         .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
                                                                         .addArgument(
                                                                                 LIST_INPUT_NAME,
-                                                                                new ArrayValueWithVariable(typeEntry.getValue().values())
+                                                                                typeEntry.getValue().values()
                                                                         )
                                                                         .setFields(selectionMap.get(packageName).get(typeEntry.getKey()).stream().map(Field::new).collect(Collectors.toSet()))
                                                         )
@@ -168,7 +144,7 @@ public abstract class MutationDataLoader {
                                                 .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
                                                 .addArgument(
                                                         manager.getObjectTypeIDFieldName(typeEntry.getKey()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST)),
-                                                        new ObjectValueWithVariable().put("in", new ArrayValueWithVariable(typeEntry.getValue()))
+                                                        Map.of("in", typeEntry.getValue())
                                                 )
                                                 .setFields(
                                                         manager.getFields(typeEntry.getKey())
@@ -199,10 +175,8 @@ public abstract class MutationDataLoader {
                         new Operation()
                                 .setOperationType("mutation")
                                 .setFields(
-                                        Stream.concat(
-                                                updateMap.keySet().stream(),
-                                                createMap.keySet().stream()
-                                        ).collect(Collectors.toSet())
+                                        Stream.concat(updateMap.keySet().stream(), createMap.keySet().stream())
+                                                .collect(Collectors.toSet())
                                                 .stream()
                                                 .map(typeName ->
                                                         new Field()
@@ -235,35 +209,37 @@ public abstract class MutationDataLoader {
         String idFieldName = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
         return createMap.get(typeName).stream()
                 .map(id -> {
-                            ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
-                            objectValueWithVariable.put(idFieldName, id);
-                            objectValueWithVariable.put(Hammurabi.DEPRECATED_FIELD_NAME, true);
-                            return objectValueWithVariable;
+                            JsonObjectBuilder jsonObjectBuilder = jsonProvider.createObjectBuilder();
+                            jsonObjectBuilder.add(idFieldName, id);
+                            jsonObjectBuilder.add(Hammurabi.DEPRECATED_FIELD_NAME, true);
+                            return jsonObjectBuilder.build();
                         }
                 );
     }
 
-    public void addObjectValue(String packageName, String typeName, String keyName, String jsonPointer, ObjectValueWithVariable objectValueWithVariable) {
+    public void addObjectValue(String packageName, String typeName, String keyName, String jsonPointer, String from, JsonObject objectValueWithVariable) {
         objectValueMap.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
         objectValueMap.get(packageName).computeIfAbsent(typeName, k -> new LinkedHashMap<>());
         JsonValue keyField = objectValueWithVariable.get(keyName);
-        Map<String, ObjectValueWithVariable> typeValueMap = objectValueMap.get(packageName).get(typeName);
+        Map<String, JsonObject> typeValueMap = objectValueMap.get(packageName).get(typeName);
         if (keyField != null && keyField.getValueType().equals(JsonValue.ValueType.STRING)) {
             String key = ((JsonString) keyField).getString();
             if (typeValueMap.containsKey(key)) {
-                addJsonPointer(packageName, typeName, new ArrayList<>(typeValueMap.keySet()).indexOf(key), jsonPointer);
+                if (jsonPointer != null && from != null) {
+                    addJsonPointer(packageName, typeName, new ArrayList<>(typeValueMap.keySet()).indexOf(key), jsonPointer, from);
+                }
             } else {
                 typeValueMap.put(key, objectValueWithVariable);
-                addJsonPointer(packageName, typeName, typeValueMap.size() - 1, jsonPointer);
+                if (jsonPointer != null && from != null) {
+                    addJsonPointer(packageName, typeName, typeValueMap.size() - 1, jsonPointer, from);
+                }
             }
         } else {
             typeValueMap.put(UUID.randomUUID().toString(), objectValueWithVariable);
-            addJsonPointer(packageName, typeName, typeValueMap.size() - 1, jsonPointer);
+            if (jsonPointer != null && from != null) {
+                addJsonPointer(packageName, typeName, typeValueMap.size() - 1, jsonPointer, from);
+            }
         }
-    }
-
-    public void addObjectValue(String packageName, String typeName, String keyName, String jsonPointer, JsonObject jsonObject) {
-        addObjectValue(packageName, typeName, keyName, jsonPointer, new ObjectValueWithVariable(jsonObject));
     }
 
     public void addSelection(String packageName, String typeName, String selectionName) {
@@ -272,11 +248,11 @@ public abstract class MutationDataLoader {
         selectionMap.get(packageName).get(typeName).add(selectionName);
     }
 
-    public void addJsonPointer(String packageName, String typeName, int index, String jsonPointer) {
+    public void addJsonPointer(String packageName, String typeName, int index, String jsonPointer, String from) {
         indexMap.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
         indexMap.get(packageName).computeIfAbsent(typeName, k -> new ConcurrentHashMap<>());
         indexMap.get(packageName).get(typeName).computeIfAbsent(index, k -> new ArrayList<>());
-        indexMap.get(packageName).get(typeName).get(index).add(jsonPointer);
+        indexMap.get(packageName).get(typeName).get(index).add(Tuple.of(jsonPointer, from));
     }
 
     protected void addResult(String packageName, String response) {
@@ -284,7 +260,7 @@ public abstract class MutationDataLoader {
         resultMap.put(packageName, jsonObject);
     }
 
-    protected void dispatch() {
+    protected JsonValue dispatch(JsonObject jsonObject) {
         JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
         Optional.of(indexMap)
                 .filter(map -> !map.isEmpty()).stream()
@@ -304,14 +280,14 @@ public abstract class MutationDataLoader {
                                             JsonArray jsonArray = fieldValue.asJsonArray();
                                             IntStream.range(0, jsonArray.size())
                                                     .forEach(index -> {
-                                                        List<String> jsonPointerList = typeMap.get(index);
+                                                        List<Tuple2<String, String>> jsonPointerList = typeMap.get(index);
                                                         Stream.ofNullable(jsonPointerList)
                                                                 .filter(list -> !list.isEmpty())
                                                                 .flatMap(Collection::stream)
                                                                 .forEach(jsonPointer ->
-                                                                        patchBuilder.add(
-                                                                                jsonPointer,
-                                                                                jsonArray.get(index).asJsonObject()
+                                                                        patchBuilder.replace(
+                                                                                jsonPointer._1(),
+                                                                                jsonArray.get(index).asJsonObject().get(jsonPointer._2())
                                                                         )
                                                                 );
                                                     });
@@ -320,6 +296,7 @@ public abstract class MutationDataLoader {
                                 }
                             });
                 });
+        return patchBuilder.build().apply(jsonObject);
     }
 
     private String typeToLowerCamelName(String fieldTypeName) {
@@ -329,6 +306,22 @@ public abstract class MutationDataLoader {
             return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, fieldTypeName);
         }
     }
+
+    public JsonObject buildOperationArguments(Operation operation) {
+        return operation.getFields().stream()
+                .filter(field -> field.getArguments() != null && !field.getArguments().isEmpty())
+                .map(field -> new AbstractMap.SimpleEntry<>(field.getAlias() != null ? field.getAlias() : field.getName(), (JsonValue) field.getArguments()))
+                .collect(JsonCollectors.toJsonObject());
+    }
+
+    public Operation dispatchOperationArguments(JsonValue arguments, Operation operation) {
+        operation.getFields().stream()
+                .filter(field -> arguments.asJsonObject().containsKey(field.getAlias() != null ? field.getAlias() : field.getName()))
+                .forEach(field -> field.setArguments(arguments.asJsonObject().getJsonObject(field.getAlias() != null ? field.getAlias() : field.getName())));
+        return operation;
+    }
+
+    public abstract Mono<JsonValue> load(JsonValue jsonValue);
 
     public abstract Mono<Void> load();
 }

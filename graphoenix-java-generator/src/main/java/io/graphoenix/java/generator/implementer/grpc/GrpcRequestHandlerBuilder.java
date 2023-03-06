@@ -10,7 +10,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.operation.Argument;
+import io.graphoenix.core.operation.EnumValue;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.java.generator.implementer.TypeManager;
@@ -185,15 +185,13 @@ public class GrpcRequestHandlerBuilder {
                 if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
                     String rpcGetInputValueListName = grpcNameUtil.getGrpcGetListMethodName(inputValueDefinitionContext);
                     if (manager.isScalar(fieldTypeName)) {
-                        codeBlock = CodeBlock.of("field.addArgument(new $T().setName($S).setValueWithVariable($L.$L()))",
-                                ClassName.get(Argument.class),
+                        codeBlock = CodeBlock.of("field.addArgument($S, $L.$L())",
                                 inputValueDefinitionContext.name().getText(),
                                 requestParameterName,
                                 rpcGetInputValueListName
                         );
                     } else if (manager.isEnum(fieldTypeName)) {
-                        codeBlock = CodeBlock.of("field.addArgument(new $T().setName($S).setValueWithVariable($L.$L().stream().map(item -> item.getValueDescriptor().getName().replaceFirst($S, EMPTY)).collect($T.toList())))",
-                                ClassName.get(Argument.class),
+                        codeBlock = CodeBlock.of("field.addArgument($S, $L.$L().stream().map(item -> item.getValueDescriptor().getName().replaceFirst($S, EMPTY)).collect($T.toList()))",
                                 inputValueDefinitionContext.name().getText(),
                                 requestParameterName,
                                 rpcGetInputValueListName,
@@ -201,8 +199,7 @@ public class GrpcRequestHandlerBuilder {
                                 ClassName.get(Collectors.class)
                         );
                     } else if (manager.isInputObject(fieldTypeName)) {
-                        codeBlock = CodeBlock.of("field.addArgument(new $T().setName($S).setValueWithVariable($L.$L().stream().map(item -> inputObjectHandler.get().$L(item)).collect($T.toList())))",
-                                ClassName.get(Argument.class),
+                        codeBlock = CodeBlock.of("field.addArgument($S, $L.$L().stream().map(item -> inputObjectHandler.get().$L(item)).collect($T.toList()))",
                                 inputValueDefinitionContext.name().getText(),
                                 requestParameterName,
                                 rpcGetInputValueListName,
@@ -222,23 +219,21 @@ public class GrpcRequestHandlerBuilder {
                 } else {
                     String rpcGetInputValueName = grpcNameUtil.getGrpcGetMethodName(inputValueDefinitionContext);
                     if (manager.isScalar(fieldTypeName)) {
-                        codeBlock = CodeBlock.of("field.addArgument(new $T().setName($S).setValueWithVariable($L.$L()))",
-                                ClassName.get(Argument.class),
+                        codeBlock = CodeBlock.of("field.addArgument($S, $L.$L())",
                                 inputValueDefinitionContext.name().getText(),
                                 requestParameterName,
                                 rpcGetInputValueName
                         );
                     } else if (manager.isEnum(fieldTypeName)) {
-                        codeBlock = CodeBlock.of("field.addArgument(new $T().setName($S).setValueWithVariable($L.$L().getValueDescriptor().getName().replaceFirst($S, EMPTY)))",
-                                ClassName.get(Argument.class),
+                        codeBlock = CodeBlock.of("field.addArgument($S, new $T($L.$L().getValueDescriptor().getName().replaceFirst($S, EMPTY)))",
                                 inputValueDefinitionContext.name().getText(),
+                                ClassName.get(EnumValue.class),
                                 requestParameterName,
                                 rpcGetInputValueName,
                                 rpcEnumValueSuffixName
                         );
                     } else if (manager.isInputObject(fieldTypeName)) {
-                        codeBlock = CodeBlock.of("field.addArgument(new $T().setName($S).setValueWithVariable(inputObjectHandler.get().$L($L.$L())))",
-                                ClassName.get(Argument.class),
+                        codeBlock = CodeBlock.of("field.addArgument($S, inputObjectHandler.get().$L($L.$L()))",
                                 inputValueDefinitionContext.name().getText(),
                                 inputObjectFieldMethodName,
                                 requestParameterName,

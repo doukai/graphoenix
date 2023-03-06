@@ -179,6 +179,10 @@ public interface IGraphQLDocumentManager {
 
     boolean isNotContainerType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
+    boolean isContainerType(String typeName);
+
+    boolean isNotContainerType(String typeName);
+
     Optional<String> getContainerClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
     Optional<String> getContainerClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
@@ -201,6 +205,10 @@ public interface IGraphQLDocumentManager {
 
     boolean isNotImportType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
+    boolean isImportType(String typeName);
+
+    boolean isNotImportType(String typeName);
+
     boolean isNotImportType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
     Optional<String> getImportPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
@@ -218,6 +226,16 @@ public interface IGraphQLDocumentManager {
     Optional<String> getImportClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
     Optional<String> getImportClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+
+    String getPackageName(String typeName);
+
+    String getProtocol(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getFrom(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    String getTo(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
+
+    boolean getAnchor(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
     Optional<GraphqlParser.InputValueDefinitionContext> getInputValueDefinitionFromArgumentsDefinitionContext(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext,
                                                                                                               GraphqlParser.ArgumentContext argumentContext);
@@ -254,8 +272,6 @@ public interface IGraphQLDocumentManager {
                                                                 GraphqlParser.ObjectValueContext objectValueContext);
 
     String getFieldTypeName(GraphqlParser.TypeContext typeContext);
-
-    GraphqlParser.ObjectTypeDefinitionContext getFieldType(GraphqlParser.TypeContext typeContext);
 
     boolean fieldTypeIsList(GraphqlParser.TypeContext typeContext);
 

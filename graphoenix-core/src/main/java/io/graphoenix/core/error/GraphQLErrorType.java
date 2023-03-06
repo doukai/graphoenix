@@ -48,6 +48,7 @@ public enum GraphQLErrorType {
 
     CLASS_NAME_ARGUMENT_NOT_EXIST(-71, "className not exist in @invoke directive: %s"),
     METHOD_NAME_ARGUMENT_NOT_EXIST(-72, "methodName not exist in @invoke directive: %s"),
+    PACKAGE_NAME_ARGUMENT_NOT_EXIST(-73, "packageName not exist in @invoke directive: %s"),
 
     FUNC_NAME_NOT_EXIST(-81, "@func name argument not exist in function filed: %s"),
     FUNC_FIELD_NOT_EXIST(-82, "@func field argument not exist in function filed: %s"),

@@ -1,5 +1,7 @@
 package io.graphoenix.core.utils;
 
+import com.squareup.javapoet.ClassName;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,5 +53,14 @@ public enum TypeNameUtil {
             throw new RuntimeException("argument type not exist in " + typeName);
         }
         return argumentTypeNames[0];
+    }
+
+    public ClassName bestGuess(String classNameString) {
+        int i = classNameString.lastIndexOf(".");
+        return ClassName.get(classNameString.substring(0, i), classNameString.substring(i + 1));
+    }
+
+    public String packageNameToUnderline(String packageName) {
+        return String.join("_", packageName.split("\\."));
     }
 }

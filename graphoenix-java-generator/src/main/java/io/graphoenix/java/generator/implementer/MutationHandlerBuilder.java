@@ -9,12 +9,13 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.MutationDataLoader;
-import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
@@ -106,7 +107,8 @@ public class MutationHandlerBuilder {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "valueWithVariable")
-                .addParameter(ClassName.get(MutationDataLoader.class), "loader");
+                .addParameter(ClassName.get(MutationDataLoader.class), "loader")
+                .addParameter(ClassName.get(String.class), "jsonPointer");
 
         if (anchor) {
             builder.beginControlFlow("if (valueWithVariable != null && valueWithVariable.getValueType().equals($T.ValueType.OBJECT) && valueWithVariable.asJsonObject().size() > 0)", ClassName.get(JsonValue.class));
@@ -120,7 +122,7 @@ public class MutationHandlerBuilder {
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isFetchField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldType(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .collect(Collectors.toList());
@@ -158,9 +160,9 @@ public class MutationHandlerBuilder {
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
-                        builder.addStatement("$L(field.getValue(), loader)", fieldParameterName.concat("List"));
+                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S)", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText());
                     } else {
-                        builder.addStatement("$L(field.getValue(), loader, jsonValue.asJsonObject().get($S))", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText());
+                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, jsonValue.asJsonObject().get($S))", fieldParameterName.concat("List"), fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
                     }
                 }
             } else {
@@ -183,13 +185,13 @@ public class MutationHandlerBuilder {
                     String key = grpcNameUtil.getKey(fieldDefinitionContext);
 
                     if (anchor) {
-                        builder.addStatement("loader.register($S, $S, $S, $S, (jsonObject) -> valueWithVariable.asJsonObject().put($S, jsonObject.get($S)), field.getValue())",
+                        builder.addStatement("loader.register($S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue())",
                                 packageName,
                                 typeName,
                                 to,
                                 key,
-                                from,
-                                to
+                                fieldDefinitionContext.name().getText(),
+                                from
                         );
                     } else {
                         builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
@@ -203,9 +205,9 @@ public class MutationHandlerBuilder {
                     }
                 } else if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (anchor) {
-                        builder.addStatement("$L(field.getValue(), loader)", fieldParameterName);
+                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S)", fieldParameterName, fieldDefinitionContext.name().getText());
                     } else {
-                        builder.addStatement("$L(field.getValue(), loader, jsonValue.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText());
+                        builder.addStatement("$L(field.getValue(), loader, jsonPointer + \"/\" + $S, jsonValue.asJsonObject().get($S))", fieldParameterName, fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText());
                     }
                 }
             }
@@ -225,14 +227,15 @@ public class MutationHandlerBuilder {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonValue.class), "valueWithVariable")
-                .addParameter(ClassName.get(MutationDataLoader.class), "loader");
+                .addParameter(ClassName.get(MutationDataLoader.class), "loader")
+                .addParameter(ClassName.get(String.class), "jsonPointer");
 
         if (anchor) {
             builder.beginControlFlow("if (valueWithVariable != null && valueWithVariable.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class))
                     .addStatement("$T valueWithVariables = valueWithVariable.asJsonArray()",
-                            ClassName.get(ArrayValueWithVariable.class)
+                            ClassName.get(JsonArray.class)
                     )
-                    .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader))",
+                    .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, jsonPointer + \"/\" + index))",
                             ClassName.get(IntStream.class),
                             typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                     )
@@ -241,9 +244,9 @@ public class MutationHandlerBuilder {
             builder.addParameter(ClassName.get(JsonValue.class), "jsonValue")
                     .beginControlFlow("if (valueWithVariable != null && valueWithVariable.getValueType().equals($T.ValueType.ARRAY) && jsonValue != null && jsonValue.getValueType().equals($T.ValueType.ARRAY))", ClassName.get(JsonValue.class), ClassName.get(JsonValue.class))
                     .addStatement("$T valueWithVariables = valueWithVariable.asJsonArray()",
-                            ClassName.get(ArrayValueWithVariable.class)
+                            ClassName.get(JsonArray.class)
                     )
-                    .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, jsonValue.asJsonArray().get(index)))",
+                    .addStatement("$T.range(0, valueWithVariables.size()).forEach(index -> $L(valueWithVariables.get(index), loader, jsonPointer + \"/\" + index, jsonValue.asJsonArray().get(index)))",
                             ClassName.get(IntStream.class),
                             typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                     )
@@ -261,7 +264,8 @@ public class MutationHandlerBuilder {
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Operation.class)));
 
         if (anchor) {
-            builder.addStatement("$T operation = new $T(operationDefinition)", ClassName.get(Operation.class), ClassName.get(Operation.class));
+            builder.addStatement("$T operation = new $T(operationDefinition)", ClassName.get(Operation.class), ClassName.get(Operation.class))
+                    .addStatement("$T operationArguments = loader.buildOperationArguments(operation)",ClassName.get(JsonObject.class));
         } else {
             builder.addParameter(ClassName.get(Operation.class), "operation")
                     .addParameter(ClassName.get(JsonValue.class), "jsonValue");
@@ -284,9 +288,9 @@ public class MutationHandlerBuilder {
                 builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", typeMethodName);
             }
             if (anchor) {
-                builder.addStatement("$L(operation.getField(selectionName), loader)", typeMethodName);
+                builder.addStatement("$L(operationArguments.get(selectionName), loader, \"/\" + selectionName)", typeMethodName);
             } else {
-                builder.addStatement("$L(operation.getField(selectionName), loader, jsonValue.asJsonObject().get(selectionName))", typeMethodName);
+                builder.addStatement("$L(operation.getField(selectionName).getArguments(), loader, \"/\" + selectionName, jsonValue.asJsonObject().get(selectionName))", typeMethodName);
             }
             index++;
         }
@@ -294,7 +298,7 @@ public class MutationHandlerBuilder {
                 .endControlFlow();
 
         if (anchor) {
-            builder.addStatement("return loader.backup().then(loader.load()).thenReturn(operation)");
+            builder.addStatement("return loader.backup().then(loader.load(operationArguments)).map(jsonValue -> loader.dispatchOperationArguments(jsonValue, operation))");
         } else {
             builder.addStatement("return loader.load().thenReturn(operation)");
         }

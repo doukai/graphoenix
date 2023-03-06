@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+
 @ApplicationScoped
 public class SelectionFilterBuilder {
 
@@ -119,7 +121,7 @@ public class SelectionFilterBuilder {
         ClassName typeClassName;
         Optional<String> className = typeManager.getClassName(objectTypeDefinitionContext);
         if (className.isPresent()) {
-            typeClassName = ClassName.bestGuess(className.get());
+            typeClassName = TYPE_NAME_UTIL.bestGuess(className.get());
         } else {
             typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
         }
@@ -251,7 +253,7 @@ public class SelectionFilterBuilder {
         ClassName typeClassName;
         Optional<String> className = typeManager.getClassName(objectTypeDefinitionContext);
         if (className.isPresent()) {
-            typeClassName = ClassName.bestGuess(className.get());
+            typeClassName = TYPE_NAME_UTIL.bestGuess(className.get());
         } else {
             typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
         }

@@ -60,6 +60,12 @@ enum Function {
     AVG
 }
 
+enum PROTOCOL {
+    LOCAL
+    GRPC
+    RSOCKET
+}
+
 enum __TypeKind {
     SCALAR
     OBJECT
@@ -153,16 +159,18 @@ directive @dataType(
 ) on FIELD_DEFINITION
 
 directive @map(
-    from: String
-    anchor: Boolean
+    from: String!
     with: MapWith
     to: String
+    anchor: Boolean
 ) on FIELD_DEFINITION
 
 directive @fetch(
-    from: String
-    anchor: Boolean
+    protocol: PROTOCOL
+    from: String!
+    with: MapWith
     to: String
+    anchor: Boolean
 ) on FIELD_DEFINITION
 
 directive @invoke(

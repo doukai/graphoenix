@@ -10,7 +10,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.handler.QueryDataLoader;
-import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
@@ -31,20 +30,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+
 @ApplicationScoped
 public class QueryDataLoaderBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
-    private final GrpcNameUtil grpcNameUtil;
-    private Map<String, Map<String, Set<String>>> grpcTypeMap;
+    private Map<String, Map<String, Map<String, Set<String>>>> fetchTypeMap;
 
     @Inject
-    public QueryDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public QueryDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
-        this.grpcNameUtil = grpcNameUtil;
     }
 
     public QueryDataLoaderBuilder setConfiguration(GraphQLConfig graphQLConfig) {
@@ -59,35 +58,43 @@ public class QueryDataLoaderBuilder {
     }
 
     private JavaFile buildClass() {
-        this.grpcTypeMap = manager.getObjects()
+        fetchTypeMap = manager.getObjects()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .filter(manager::isFetchField)
-                .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(grpcNameUtil.getPackageName(fieldDefinitionContext), new AbstractMap.SimpleEntry<>(manager.getFieldTypeName(fieldDefinitionContext.type()), grpcNameUtil.getTo(fieldDefinitionContext))))
-                .collect(
-                        Collectors.groupingBy(
-                                AbstractMap.SimpleEntry<String, AbstractMap.SimpleEntry<String, String>>::getKey,
-                                Collectors.mapping(
-                                        AbstractMap.SimpleEntry<String, AbstractMap.SimpleEntry<String, String>>::getValue,
-                                        Collectors.toSet()
+                .map(fieldDefinitionContext ->
+                        new AbstractMap.SimpleEntry<>(
+                                manager.getPackageName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                new AbstractMap.SimpleEntry<>(
+                                        manager.getProtocol(fieldDefinitionContext),
+                                        new AbstractMap.SimpleEntry<>(
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.getTo(fieldDefinitionContext)
+                                        )
                                 )
                         )
                 )
-                .entrySet().stream()
                 .collect(
-                        Collectors.toMap(
-                                Map.Entry::getKey,
-                                entry -> entry.getValue().stream()
-                                        .collect(
-                                                Collectors.groupingBy(
-                                                        AbstractMap.SimpleEntry<String, String>::getKey,
-                                                        Collectors.mapping(
-                                                                AbstractMap.SimpleEntry<String, String>::getValue,
-                                                                Collectors.toSet()
+                        Collectors.groupingBy(
+                                Map.Entry<String, AbstractMap.SimpleEntry<String, AbstractMap.SimpleEntry<String, String>>>::getKey,
+                                Collectors.mapping(
+                                        Map.Entry<String, AbstractMap.SimpleEntry<String, AbstractMap.SimpleEntry<String, String>>>::getValue,
+                                        Collectors.groupingBy(
+                                                Map.Entry<String, AbstractMap.SimpleEntry<String, String>>::getKey,
+                                                Collectors.mapping(
+                                                        Map.Entry<String, AbstractMap.SimpleEntry<String, String>>::getValue,
+                                                        Collectors.groupingBy(
+                                                                Map.Entry<String, String>::getKey,
+                                                                Collectors.mapping(
+                                                                        Map.Entry<String, String>::getValue,
+                                                                        Collectors.toSet()
+                                                                )
                                                         )
                                                 )
                                         )
+                                )
                         )
                 );
+
         TypeSpec typeSpec = buildQueryDataLoader();
         return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
     }
@@ -97,26 +104,10 @@ public class QueryDataLoaderBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(QueryDataLoader.class))
                 .addAnnotation(Dependent.class)
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
-                                "manager",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
-                                "jsonProvider",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
                 .addMethod(buildConstructor())
                 .addMethod(buildDispatchMethod());
 
-        if (this.grpcTypeMap.size() > 0) {
+        if (this.fetchTypeMap.size() > 0) {
             builder.addField(
                     FieldSpec.builder(
                             ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")),
@@ -126,18 +117,18 @@ public class QueryDataLoaderBuilder {
                     ).build()
             );
         }
-        grpcTypeMap.keySet().forEach(packageName ->
+        fetchTypeMap.keySet().forEach(packageName ->
                 builder.addField(
                         FieldSpec.builder(
                                 ClassName.get(packageName, "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
-                                grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                                fetchTypeNameUtil.getGraphQLServiceStubParameterName(packageName),
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
                 ).addField(
                         FieldSpec.builder(
                                 ParameterizedTypeName.get(Mono.class, String.class),
-                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                                TYPE_NAME_UTIL.packageNameToUnderline(packageName).concat("_JsonMono"),
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
@@ -155,19 +146,19 @@ public class QueryDataLoaderBuilder {
                 .addStatement("this.manager = manager")
                 .addStatement("this.jsonProvider = jsonProvider");
 
-        if (this.grpcTypeMap.size() > 0) {
+        if (this.fetchTypeMap.size() > 0) {
             builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
                     .addStatement("this.channelManager = channelManager");
         }
-        this.grpcTypeMap.keySet().forEach(packageName ->
+        this.fetchTypeMap.keySet().forEach(packageName ->
                 builder.addStatement("this.$L = $T.newReactorStub(channelManager.get().getChannel($S))",
-                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                        fetchTypeNameUtil.getGraphQLServiceStubParameterName(packageName),
                         ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
                         packageName
                 ).addStatement("this.$L = build($S).flatMap(operation -> this.$L.operation($T.newBuilder().setRequest(operation.toString()).build())).map(response -> response.getResponse())",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        fetchTypeNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                         packageName,
-                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                        fetchTypeNameUtil.getGraphQLServiceStubParameterName(packageName),
                         ClassName.get(packageName, "GraphQLRequest")
                 )
         );
@@ -177,15 +168,15 @@ public class QueryDataLoaderBuilder {
     private MethodSpec buildDispatchMethod() {
         List<CodeBlock> monoList = new ArrayList<>();
         int index = 0;
-        for (String packageName : this.grpcTypeMap.keySet()) {
+        for (String packageName : this.fetchTypeMap.keySet()) {
             if (index == 0) {
                 monoList.add(CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        fetchTypeNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                         ClassName.get(Mono.class),
                         packageName));
             } else {
                 monoList.add(CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
+                        fetchTypeNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
                         ClassName.get(Mono.class),
                         packageName));
             }

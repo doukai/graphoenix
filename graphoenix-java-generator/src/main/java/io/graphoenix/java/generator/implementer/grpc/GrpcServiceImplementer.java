@@ -49,6 +49,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.java.generator.utils.TypeUtil.TYPE_UTIL;
 import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
 import static io.graphoenix.spi.dto.type.OperationType.QUERY;
@@ -287,10 +288,10 @@ public class GrpcServiceImplementer {
 
         switch (operationType) {
             case QUERY:
-                queryInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()), ClassName.get(BeanContext.class), ClassName.bestGuess(className)));
+                queryInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.bestGuess(className)));
                 break;
             case MUTATION:
-                mutationInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()), ClassName.get(BeanContext.class), ClassName.bestGuess(className)));
+                mutationInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.bestGuess(className)));
                 builder.addStatement("this.validator = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(JsonSchemaValidator.class));
                 break;
             default:
@@ -302,7 +303,7 @@ public class GrpcServiceImplementer {
     private Set<FieldSpec> buildQueryFields() {
         return queryInvokeClassNames.stream()
                 .map(className ->
-                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()))
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -312,7 +313,7 @@ public class GrpcServiceImplementer {
     private Set<FieldSpec> buildMutationFields() {
         return mutationInvokeClassNames.stream()
                 .map(className ->
-                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.bestGuess(className)), typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()))
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -364,7 +365,7 @@ public class GrpcServiceImplementer {
             List<AbstractMap.SimpleEntry<String, String>> parameters = typeManager.getParameters(fieldDefinitionContext);
             String returnClassName = typeManager.getReturnClassName(fieldDefinitionContext);
             invokeCodeBlock = CodeBlock.of(".map(selectionContext -> $L.get().$L($L))",
-                    typeManager.typeToLowerCamelName(ClassName.bestGuess(className).simpleName()),
+                    typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
                     invokeMethodName,
                     CodeBlock.join(parameters.stream()
                             .map(parameter ->

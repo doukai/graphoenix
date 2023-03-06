@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 
 @ApplicationScoped
 public class GrpcObjectHandlerBuilder {
@@ -85,10 +86,10 @@ public class GrpcObjectHandlerBuilder {
         String rpcObjectName = grpcNameUtil.getGrpcTypeName(objectTypeDefinitionContext);
 
         ClassName className = manager.getContainerClassName(objectTypeDefinitionContext)
-                .map(ClassName::bestGuess)
+                .map(TYPE_NAME_UTIL::bestGuess)
                 .orElseGet(() ->
                         manager.getImportClassName(objectTypeDefinitionContext)
-                                .map(ClassName::bestGuess)
+                                .map(TYPE_NAME_UTIL::bestGuess)
                                 .orElse(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()))
                 );
 

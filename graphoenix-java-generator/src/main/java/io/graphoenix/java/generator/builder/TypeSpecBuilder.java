@@ -51,6 +51,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
@@ -485,10 +486,10 @@ public class TypeSpecBuilder {
                     return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + layer);
                 } else {
                     return manager.getContainerClassName(object.get())
-                            .map(ClassName::bestGuess)
+                            .map(TYPE_NAME_UTIL::bestGuess)
                             .orElseGet(() ->
                                     manager.getImportClassName(object.get())
-                                            .map(ClassName::bestGuess)
+                                            .map(TYPE_NAME_UTIL::bestGuess)
                                             .orElse(ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText()))
                             );
                 }
@@ -497,10 +498,10 @@ public class TypeSpecBuilder {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
             if (enumType.isPresent()) {
                 return manager.getContainerClassName(enumType.get())
-                        .map(ClassName::bestGuess)
+                        .map(TYPE_NAME_UTIL::bestGuess)
                         .orElseGet(() ->
                                 manager.getImportClassName(enumType.get())
-                                        .map(ClassName::bestGuess)
+                                        .map(TYPE_NAME_UTIL::bestGuess)
                                         .orElse(ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()))
                         );
             }
@@ -508,10 +509,10 @@ public class TypeSpecBuilder {
             Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(nameContext.getText());
             if (interfaceType.isPresent()) {
                 return manager.getContainerClassName(interfaceType.get())
-                        .map(ClassName::bestGuess)
+                        .map(TYPE_NAME_UTIL::bestGuess)
                         .orElseGet(() ->
                                 manager.getImportClassName(interfaceType.get())
-                                        .map(ClassName::bestGuess)
+                                        .map(TYPE_NAME_UTIL::bestGuess)
                                         .orElse(ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText()))
                         );
             }
@@ -522,10 +523,10 @@ public class TypeSpecBuilder {
                     return ClassName.get(graphQLConfig.getDirectivePackageName(), inputObject.get().name().getText());
                 } else {
                     return manager.getContainerClassName(inputObject.get())
-                            .map(ClassName::bestGuess)
+                            .map(TYPE_NAME_UTIL::bestGuess)
                             .orElseGet(() ->
                                     manager.getImportClassName(inputObject.get())
-                                            .map(ClassName::bestGuess)
+                                            .map(TYPE_NAME_UTIL::bestGuess)
                                             .orElse(ClassName.get(graphQLConfig.getInterfaceTypePackageName(), inputObject.get().name().getText()))
                             );
                 }
@@ -1027,7 +1028,7 @@ public class TypeSpecBuilder {
                                 builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldType(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                                                 .map(fieldDefinitionContext ->
@@ -1117,7 +1118,7 @@ public class TypeSpecBuilder {
                                 builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldType(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                                                 .map(fieldDefinitionContext ->
@@ -1202,7 +1203,7 @@ public class TypeSpecBuilder {
                                 builder.addMethods(
                                         manager.getFields(objectTypeDefinitionContext.name().getText())
                                                 .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldType(fieldDefinitionContext.type())))
+                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                                                 .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
                                                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                                                 .map(fieldDefinitionContext ->
