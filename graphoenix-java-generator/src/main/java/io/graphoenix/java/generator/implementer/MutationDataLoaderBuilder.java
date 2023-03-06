@@ -9,9 +9,12 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.MutationDataLoader;
 import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.handler.FetchHandler;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -33,6 +36,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
+import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
+
 @ApplicationScoped
 public class MutationDataLoaderBuilder {
 
@@ -40,7 +46,7 @@ public class MutationDataLoaderBuilder {
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
     private final GrpcNameUtil grpcNameUtil;
-    private Map<String, Set<Tuple2<String, String>>> grpcTypeMap;
+    private Map<String, Map<String, Set<Tuple2<String, String>>>> fetchTypeMap;
 
     @Inject
     public MutationDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
@@ -61,16 +67,34 @@ public class MutationDataLoaderBuilder {
     }
 
     private JavaFile buildClass() {
-        this.grpcTypeMap = manager.getObjects()
+        this.fetchTypeMap = manager.getObjects()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .filter(manager::isFetchField)
-                .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(grpcNameUtil.getPackageName(fieldDefinitionContext), Tuple.of(manager.getFieldTypeName(fieldDefinitionContext.type()), grpcNameUtil.getKey(fieldDefinitionContext))))
+                .map(fieldDefinitionContext ->
+                        new AbstractMap.SimpleEntry<>(
+                                manager.getPackageName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                new AbstractMap.SimpleEntry<>(
+                                        manager.getProtocol(fieldDefinitionContext),
+                                        Tuple.of(
+                                                manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                                manager.getObjectTypeIDFieldName(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                                        .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(manager.getFieldTypeName(fieldDefinitionContext.type()))))
+                                        )
+                                )
+                        )
+                )
                 .collect(
                         Collectors.groupingBy(
-                                AbstractMap.SimpleEntry<String, Tuple2<String, String>>::getKey,
+                                Map.Entry<String, AbstractMap.SimpleEntry<String, Tuple2<String, String>>>::getKey,
                                 Collectors.mapping(
-                                        AbstractMap.SimpleEntry<String, Tuple2<String, String>>::getValue,
-                                        Collectors.toSet()
+                                        Map.Entry<String, AbstractMap.SimpleEntry<String, Tuple2<String, String>>>::getValue,
+                                        Collectors.groupingBy(
+                                                Map.Entry<String, Tuple2<String, String>>::getKey,
+                                                Collectors.mapping(
+                                                        AbstractMap.SimpleEntry<String, Tuple2<String, String>>::getValue,
+                                                        Collectors.toSet()
+                                                )
+                                        )
                                 )
                         )
                 );
@@ -84,89 +108,96 @@ public class MutationDataLoaderBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .superclass(ClassName.get(MutationDataLoader.class))
                 .addAnnotation(Dependent.class)
-                .addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)),
-                                "jsonProvider",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
                 .addMethod(buildConstructor())
                 .addMethod(buildDispatchMethod())
                 .addMethod(buildLoadMethod());
 
-        if (this.grpcTypeMap.size() > 0) {
-            builder.addField(
-                    FieldSpec.builder(
-                            ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")),
-                            "channelManager",
-                            Modifier.PRIVATE,
-                            Modifier.FINAL
-                    ).build()
-            );
-        }
-        this.grpcTypeMap.keySet().forEach(packageName ->
-                builder.addField(
-                        FieldSpec.builder(
-                                ClassName.get(packageName, "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
-                                grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                ).addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(Mono.class, String.class),
-                                grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
+        fetchTypeMap.entrySet().stream()
+                .flatMap(packageEntry ->
+                        packageEntry.getValue().keySet().stream()
+                                .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
                 )
-        );
+                .forEach(protocol ->
+                        builder.addField(
+                                FieldSpec.builder(
+                                        ParameterizedTypeName.get(Mono.class, String.class),
+                                        String.join(
+                                                "_",
+                                                TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
+                                                protocol._2(),
+                                                "JsonMono"
+                                        ),
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL
+                                ).build()
+                        )
+                );
         return builder.build();
     }
 
     private MethodSpec buildConstructor() {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addAnnotation(Inject.class)
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonProvider.class)), "jsonProvider")
-                .addStatement("this.jsonProvider = jsonProvider");
+                .addAnnotation(Inject.class);
 
-        if (this.grpcTypeMap.size() > 0) {
-            builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManager")
-                    .addStatement("this.channelManager = channelManager");
-        }
-
-        this.grpcTypeMap.keySet().forEach(packageName ->
-                builder.addStatement("this.$L = $T.newReactorStub(channelManager.get().getChannel($S))",
-                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                        ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
-                        packageName
-                ).addStatement("this.$L = build($S).flatMap(operation -> this.$L.operation($T.newBuilder().setRequest(operation.toString()).build())).map(response -> response.getResponse())",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        packageName,
-                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                        ClassName.get(packageName, "GraphQLRequest")
+        fetchTypeMap.entrySet().stream()
+                .flatMap(packageEntry ->
+                        packageEntry.getValue().keySet().stream()
+                                .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
                 )
-        );
+                .forEach(protocol ->
+                        builder.addStatement("this.$L = build($S).flatMap(operation -> $T.get($T.class, $S).operation($S, operation.toString()))",
+                                String.join(
+                                        "_",
+                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
+                                        protocol._2(),
+                                        "JsonMono"
+                                ),
+                                protocol._1(),
+                                ClassName.get(BeanContext.class),
+                                ClassName.get(FetchHandler.class),
+                                protocol._2(),
+                                protocol._1()
+
+                        )
+                );
         return builder.build();
     }
 
     private MethodSpec buildDispatchMethod() {
         List<CodeBlock> monoList = new ArrayList<>();
         int index = 0;
-        for (String packageName : this.grpcTypeMap.keySet()) {
+        for (Tuple2<String, String> protocol : fetchTypeMap.entrySet().stream()
+                .flatMap(packageEntry ->
+                        packageEntry.getValue().keySet().stream()
+                                .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
+                ).collect(Collectors.toList())) {
             if (index == 0) {
-                monoList.add(CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        ClassName.get(Mono.class),
-                        packageName));
+                monoList.add(
+                        CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
+                                String.join(
+                                        "_",
+                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
+                                        protocol._2(),
+                                        "JsonMono"
+                                ),
+                                ClassName.get(Mono.class),
+                                protocol._1()
+                        )
+                );
             } else {
-                monoList.add(CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        ClassName.get(Mono.class),
-                        packageName));
+                monoList.add(
+                        CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
+                                String.join(
+                                        "_",
+                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
+                                        protocol._2(),
+                                        "JsonMono"
+                                ),
+                                ClassName.get(Mono.class),
+                                protocol._1()
+                        )
+                );
             }
             index++;
         }
@@ -193,17 +224,37 @@ public class MutationDataLoaderBuilder {
     private MethodSpec buildLoadMethod() {
         List<CodeBlock> monoList = new ArrayList<>();
         int index = 0;
-        for (String packageName : this.grpcTypeMap.keySet()) {
+        for (Tuple2<String, String> protocol : fetchTypeMap.entrySet().stream()
+                .flatMap(packageEntry ->
+                        packageEntry.getValue().keySet().stream()
+                                .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
+                ).collect(Collectors.toList())) {
             if (index == 0) {
-                monoList.add(CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        ClassName.get(Mono.class),
-                        packageName));
+                monoList.add(
+                        CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
+                                String.join(
+                                        "_",
+                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
+                                        protocol._2(),
+                                        "JsonMono"
+                                ),
+                                ClassName.get(Mono.class),
+                                protocol._1()
+                        )
+                );
             } else {
-                monoList.add(CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
-                        grpcNameUtil.packageNameToUnderline(packageName).concat("_JsonMono"),
-                        ClassName.get(Mono.class),
-                        packageName));
+                monoList.add(
+                        CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
+                                String.join(
+                                        "_",
+                                        TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
+                                        protocol._2(),
+                                        "JsonMono"
+                                ),
+                                ClassName.get(Mono.class),
+                                protocol._1()
+                        )
+                );
             }
             index++;
         }

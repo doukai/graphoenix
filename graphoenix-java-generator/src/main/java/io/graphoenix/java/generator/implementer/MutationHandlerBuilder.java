@@ -121,7 +121,7 @@ public class MutationHandlerBuilder {
         String idFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isFetchField(fieldDefinitionContext) && grpcNameUtil.getAnchor(fieldDefinitionContext) == anchor || !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isFetchField(fieldDefinitionContext) && manager.getAnchor(fieldDefinitionContext) == anchor || !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -137,10 +137,10 @@ public class MutationHandlerBuilder {
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
-                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
-                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
-                    String key = grpcNameUtil.getKey(fieldDefinitionContext);
+                    String packageName = manager.getPackageName(typeName);
+                    String from = manager.getFrom(fieldDefinitionContext);
+                    String to = manager.getTo(fieldDefinitionContext);
+                    String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
                     if (anchor) {
                         builder.addStatement("loader.registerArray($S, $S, $S, field.getValue())",
@@ -179,10 +179,10 @@ public class MutationHandlerBuilder {
                     }
                 } else if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
-                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
-                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
-                    String key = grpcNameUtil.getKey(fieldDefinitionContext);
+                    String packageName = manager.getPackageName(typeName);
+                    String from = manager.getFrom(fieldDefinitionContext);
+                    String to = manager.getTo(fieldDefinitionContext);
+                    String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
                     if (anchor) {
                         builder.addStatement("loader.register($S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue())",
@@ -265,7 +265,7 @@ public class MutationHandlerBuilder {
 
         if (anchor) {
             builder.addStatement("$T operation = new $T(operationDefinition)", ClassName.get(Operation.class), ClassName.get(Operation.class))
-                    .addStatement("$T operationArguments = loader.buildOperationArguments(operation)",ClassName.get(JsonObject.class));
+                    .addStatement("$T operationArguments = loader.buildOperationArguments(operation)", ClassName.get(JsonObject.class));
         } else {
             builder.addParameter(ClassName.get(Operation.class), "operation")
                     .addParameter(ClassName.get(JsonValue.class), "jsonValue");

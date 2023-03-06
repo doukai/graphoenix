@@ -143,9 +143,9 @@ public class QueryHandlerBuilder {
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
-                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
-                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
+                    String packageName = manager.getPackageName(typeName);
+                    String from = manager.getFrom(fieldDefinitionContext);
+                    String to = manager.getTo(fieldDefinitionContext);
 
                     builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
                             .addStatement("loader.registerArray($S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
@@ -163,9 +163,9 @@ public class QueryHandlerBuilder {
             } else {
                 if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String packageName = grpcNameUtil.getPackageName(fieldDefinitionContext);
-                    String from = grpcNameUtil.getFrom(fieldDefinitionContext);
-                    String to = grpcNameUtil.getTo(fieldDefinitionContext);
+                    String packageName = manager.getPackageName(typeName);
+                    String from = manager.getFrom(fieldDefinitionContext);
+                    String to = manager.getTo(fieldDefinitionContext);
 
                     builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
                             .addStatement("loader.register($S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",

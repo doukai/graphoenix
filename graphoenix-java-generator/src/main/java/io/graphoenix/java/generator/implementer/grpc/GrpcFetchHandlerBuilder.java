@@ -60,7 +60,15 @@ public class GrpcFetchHandlerBuilder {
         this.grpcTypeMap = manager.getObjects()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .filter(manager::isFetchField)
-                .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(grpcNameUtil.getPackageName(fieldDefinitionContext), new AbstractMap.SimpleEntry<>(manager.getFieldTypeName(fieldDefinitionContext.type()), grpcNameUtil.getTo(fieldDefinitionContext))))
+                .map(fieldDefinitionContext ->
+                        new AbstractMap.SimpleEntry<>(
+                                manager.getPackageName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                new AbstractMap.SimpleEntry<>(
+                                        manager.getFieldTypeName(fieldDefinitionContext.type()),
+                                        manager.getTo(fieldDefinitionContext)
+                                )
+                        )
+                )
                 .collect(
                         Collectors.groupingBy(
                                 AbstractMap.SimpleEntry<String, AbstractMap.SimpleEntry<String, String>>::getKey,
@@ -128,16 +136,17 @@ public class GrpcFetchHandlerBuilder {
                     ).build()
             );
         }
-        grpcTypeMap.keySet().forEach(packageName ->
-                builder.addField(
-                        FieldSpec.builder(
-                                ClassName.get(packageName, "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
-                                grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
-        );
+        grpcTypeMap.keySet()
+                .forEach(packageName ->
+                        builder.addField(
+                                FieldSpec.builder(
+                                        ClassName.get(packageName.concat(".grpc"), "ReactorGraphQLServiceGrpc", "ReactorGraphQLServiceStub"),
+                                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL
+                                ).build()
+                        )
+                );
         return builder.build();
     }
 
@@ -150,18 +159,19 @@ public class GrpcFetchHandlerBuilder {
             builder.addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get("io.graphoenix.grpc.client", "ChannelManager")), "channelManagerProvider")
                     .addStatement("this.channelManagerProvider = channelManagerProvider");
         }
-        this.grpcTypeMap.keySet().forEach(packageName ->
-                builder.addStatement("this.$L = $T.newReactorStub(channelManagerProvider.get().getChannel($S))",
-                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                        ClassName.get(packageName, "ReactorGraphQLServiceGrpc"),
-                        packageName
-                ).addStatement("operationMap.put($S, ($T graphql) -> this.$L.operation($T.newBuilder().setRequest(graphql).build()).map(response -> response.getResponse()))",
-                        packageName,
-                        ClassName.get(String.class),
-                        grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
-                        ClassName.get(packageName, "GraphQLRequest")
-                )
-        );
+        this.grpcTypeMap.keySet()
+                .forEach(packageName ->
+                        builder.addStatement("this.$L = $T.newReactorStub(channelManagerProvider.get().getChannel($S))",
+                                grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                                ClassName.get(packageName.concat(".grpc"), "ReactorGraphQLServiceGrpc"),
+                                packageName
+                        ).addStatement("operationMap.put($S, ($T graphql) -> this.$L.operation($T.newBuilder().setRequest(graphql).build()).map(response -> response.getResponse()))",
+                                packageName,
+                                ClassName.get(String.class),
+                                grpcNameUtil.getGraphQLServiceStubParameterName(packageName),
+                                ClassName.get(packageName.concat(".grpc"), "GraphQLRequest")
+                        )
+                );
         return builder.build();
     }
 
