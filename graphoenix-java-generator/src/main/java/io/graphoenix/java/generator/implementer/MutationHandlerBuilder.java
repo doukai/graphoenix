@@ -10,7 +10,6 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.MutationDataLoader;
 import io.graphoenix.core.operation.Operation;
-import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,14 +37,12 @@ public class MutationHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
-    private final GrpcNameUtil grpcNameUtil;
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public MutationHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public MutationHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
-        this.grpcNameUtil = grpcNameUtil;
     }
 
     public MutationHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
@@ -138,21 +135,24 @@ public class MutationHandlerBuilder {
                 if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = manager.getPackageName(typeName);
+                    String protocol = manager.getProtocol(fieldDefinitionContext);
                     String from = manager.getFrom(fieldDefinitionContext);
                     String to = manager.getTo(fieldDefinitionContext);
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
                     if (anchor) {
-                        builder.addStatement("loader.registerArray($S, $S, $S, field.getValue())",
+                        builder.addStatement("loader.registerArray($S, $S, $S, $S, field.getValue())",
                                 packageName,
+                                protocol,
                                 typeName,
                                 key
                         );
                     } else {
                         builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
                                 .addStatement("field.getValue().asJsonArray().forEach(item -> item.asJsonObject().put($S, jsonValue.asJsonObject().get($S)))", to, from)
-                                .addStatement("loader.registerArray($S, $S, $S, field.getValue())",
+                                .addStatement("loader.registerArray($S, $S, $S, $S, field.getValue())",
                                         packageName,
+                                        protocol,
                                         typeName,
                                         key
                                 )
@@ -180,13 +180,15 @@ public class MutationHandlerBuilder {
                 } else if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = manager.getPackageName(typeName);
+                    String protocol = manager.getProtocol(fieldDefinitionContext);
                     String from = manager.getFrom(fieldDefinitionContext);
                     String to = manager.getTo(fieldDefinitionContext);
                     String key = manager.getObjectTypeIDFieldName(typeName).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
                     if (anchor) {
-                        builder.addStatement("loader.register($S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue())",
+                        builder.addStatement("loader.register($S, $S, $S, $S, $S, jsonPointer + \"/\" + $S, $S, field.getValue())",
                                 packageName,
+                                protocol,
                                 typeName,
                                 to,
                                 key,
@@ -196,8 +198,9 @@ public class MutationHandlerBuilder {
                     } else {
                         builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
                                 .addStatement("field.getValue().asJsonObject().put($S, jsonValue.asJsonObject().get($S))", to, from)
-                                .addStatement("loader.register($S, $S, $S, field.getValue())",
+                                .addStatement("loader.register($S, $S, $S, $S, field.getValue())",
                                         packageName,
+                                        protocol,
                                         typeName,
                                         key
                                 )

@@ -5,14 +5,10 @@ import io.graphoenix.spi.antlr.IGraphQLObjectManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.tinylog.Logger;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_DIRECTIVES;
-import static io.graphoenix.spi.constant.Hammurabi.IMPORT_TYPE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class GraphQLObjectManager implements IGraphQLObjectManager {

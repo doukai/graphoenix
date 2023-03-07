@@ -33,8 +33,6 @@ public class Hammurabi {
     public static final String AGGREGATE_SUFFIX = "Aggregate";
     public static final String EDGE_SUFFIX = "Edge";
     public static final String EXPRESSION_SUFFIX = "Expression";
-    public static final String[] INVOKE_DIRECTIVES = {INVOKE_DIRECTIVE_NAME, FETCH_DIRECTIVE_NAME};
-    public static final String[] CONTAINER_DIRECTIVES = {CONTAINER_TYPE_DIRECTIVE_NAME};
     public static final String REQUEST_ID = "requestId";
     public static final String SESSION_ID = "sessionId";
     public static final String TRANSACTION_ID = "TransactionId";

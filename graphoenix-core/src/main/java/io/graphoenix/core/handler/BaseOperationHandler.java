@@ -2,7 +2,7 @@ package io.graphoenix.core.handler;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.context.BeanContext;
-import io.vavr.Function3;
+import io.vavr.Function2;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import jakarta.json.stream.JsonCollectors;
@@ -22,7 +22,7 @@ import static jakarta.json.JsonValue.TRUE;
 
 public abstract class BaseOperationHandler {
 
-    private final Map<String, Function3<JsonValue, GraphqlParser.SelectionContext, QueryDataLoader, Mono<JsonValue>>> operationHandlers;
+    private final Map<String, Function2<JsonValue, GraphqlParser.SelectionContext, Mono<JsonValue>>> operationHandlers;
     private final JsonProvider jsonProvider;
 
     public BaseOperationHandler() {
@@ -30,15 +30,15 @@ public abstract class BaseOperationHandler {
         this.jsonProvider = BeanContext.get(JsonProvider.class);
     }
 
-    private Function3<JsonValue, GraphqlParser.SelectionContext, QueryDataLoader, Mono<JsonValue>> getOperationHandler(String name) {
+    private Function2<JsonValue, GraphqlParser.SelectionContext, Mono<JsonValue>> getOperationHandler(String name) {
         return operationHandlers.get(name);
     }
 
-    protected void put(String name, Function3<JsonValue, GraphqlParser.SelectionContext, QueryDataLoader, Mono<JsonValue>> function3) {
-        operationHandlers.put(name, function3);
+    protected void put(String name, Function2<JsonValue, GraphqlParser.SelectionContext, Mono<JsonValue>> function2) {
+        operationHandlers.put(name, function2);
     }
 
-    protected Mono<JsonValue> invoke(JsonValue jsonValue, GraphqlParser.OperationDefinitionContext operationDefinitionContext, QueryDataLoader loader) {
+    protected Mono<JsonValue> invoke(JsonValue jsonValue, GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return Flux.fromIterable(operationDefinitionContext.selectionSet().selection())
                 .flatMap(selectionContext -> {
                             String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText();
@@ -47,7 +47,7 @@ public abstract class BaseOperationHandler {
                                 return Mono.just(new AbstractMap.SimpleEntry<>(selectionName, fieldValue));
                             } else {
                                 return getOperationHandler(selectionContext.field().name().getText())
-                                        .apply(fieldValue, selectionContext, loader)
+                                        .apply(fieldValue, selectionContext)
                                         .map(subJsonValue -> new AbstractMap.SimpleEntry<>(selectionName, subJsonValue));
                             }
                         }

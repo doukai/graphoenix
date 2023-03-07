@@ -12,7 +12,6 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.MutationDataLoader;
-import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.FetchHandler;
 import io.vavr.Tuple;
@@ -20,9 +19,7 @@ import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import jakarta.json.JsonValue;
-import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
@@ -45,14 +42,12 @@ public class MutationDataLoaderBuilder {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private GraphQLConfig graphQLConfig;
-    private final GrpcNameUtil grpcNameUtil;
     private Map<String, Map<String, Set<Tuple2<String, String>>>> fetchTypeMap;
 
     @Inject
-    public MutationDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public MutationDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
-        this.grpcNameUtil = grpcNameUtil;
     }
 
     public MutationDataLoaderBuilder setConfiguration(GraphQLConfig graphQLConfig) {
@@ -146,7 +141,7 @@ public class MutationDataLoaderBuilder {
                                 .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
                 )
                 .forEach(protocol ->
-                        builder.addStatement("this.$L = build($S).flatMap(operation -> $T.get($T.class, $S).operation($S, operation.toString()))",
+                        builder.addStatement("this.$L = build($S, $S).flatMap(operation -> $T.get($T.class, $S).operation($S, operation.toString()))",
                                 String.join(
                                         "_",
                                         TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
@@ -154,6 +149,7 @@ public class MutationDataLoaderBuilder {
                                         "JsonMono"
                                 ),
                                 protocol._1(),
+                                protocol._2(),
                                 ClassName.get(BeanContext.class),
                                 ClassName.get(FetchHandler.class),
                                 protocol._2(),
@@ -174,28 +170,28 @@ public class MutationDataLoaderBuilder {
                 ).collect(Collectors.toList())) {
             if (index == 0) {
                 monoList.add(
-                        CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
+                        CodeBlock.of("return this.$L.doOnNext(response -> addResult($S, $S, response))",
                                 String.join(
                                         "_",
                                         TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
                                         protocol._2(),
                                         "JsonMono"
                                 ),
-                                ClassName.get(Mono.class),
-                                protocol._1()
+                                protocol._1(),
+                                protocol._2()
                         )
                 );
             } else {
                 monoList.add(
-                        CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
+                        CodeBlock.of(".then(this.$L.doOnNext(response -> addResult($S, $S, response)))",
                                 String.join(
                                         "_",
                                         TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
                                         protocol._2(),
                                         "JsonMono"
                                 ),
-                                ClassName.get(Mono.class),
-                                protocol._1()
+                                protocol._1(),
+                                protocol._2()
                         )
                 );
             }
@@ -204,7 +200,7 @@ public class MutationDataLoaderBuilder {
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
             monoList.add(
-                    CodeBlock.of(".then($T.fromSupplier(() -> dispatch(jsonValue.asJsonObject())))",
+                    CodeBlock.of(".thenReturn(dispatch(jsonValue.asJsonObject()))",
                             ClassName.get(Mono.class)
                     )
             );
@@ -231,28 +227,28 @@ public class MutationDataLoaderBuilder {
                 ).collect(Collectors.toList())) {
             if (index == 0) {
                 monoList.add(
-                        CodeBlock.of("return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
+                        CodeBlock.of("return this.$L.doOnNext(response -> addResult($S, $S, response))",
                                 String.join(
                                         "_",
                                         TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
                                         protocol._2(),
                                         "JsonMono"
                                 ),
-                                ClassName.get(Mono.class),
-                                protocol._1()
+                                protocol._1(),
+                                protocol._2()
                         )
                 );
             } else {
                 monoList.add(
-                        CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
+                        CodeBlock.of(".then(this.$L.doOnNext(response -> addResult($S, $S, response)))",
                                 String.join(
                                         "_",
                                         TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
                                         protocol._2(),
                                         "JsonMono"
                                 ),
-                                ClassName.get(Mono.class),
-                                protocol._1()
+                                protocol._1(),
+                                protocol._2()
                         )
                 );
             }
@@ -260,6 +256,7 @@ public class MutationDataLoaderBuilder {
         }
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
+            monoList.add(CodeBlock.of(".then()"));
             codeBlock = CodeBlock.join(monoList, System.lineSeparator());
         } else {
             codeBlock = CodeBlock.of("return Mono.empty()");

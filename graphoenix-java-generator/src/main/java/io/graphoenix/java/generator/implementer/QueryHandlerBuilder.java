@@ -9,14 +9,15 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.handler.QueryDataLoader;
-import io.graphoenix.java.generator.implementer.grpc.GrpcNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import jakarta.json.JsonObject;
 import jakarta.json.JsonValue;
 import jakarta.json.spi.JsonProvider;
 import org.tinylog.Logger;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
@@ -31,14 +32,12 @@ public class QueryHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
-    private final GrpcNameUtil grpcNameUtil;
     private GraphQLConfig graphQLConfig;
 
     @Inject
-    public QueryHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public QueryHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
         this.manager = manager;
         this.typeManager = typeManager;
-        this.grpcNameUtil = grpcNameUtil;
     }
 
     public QueryHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
@@ -79,7 +78,8 @@ public class QueryHandlerBuilder {
                         ).build()
                 )
                 .addMethod(buildConstructor())
-                .addMethods(buildTypeMethods());
+                .addMethods(buildTypeMethods())
+                .addMethod(buildHandleMethod());
 
         return builder.build();
     }
@@ -144,12 +144,14 @@ public class QueryHandlerBuilder {
                 if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = manager.getPackageName(typeName);
+                    String protocol = manager.getProtocol(fieldDefinitionContext);
                     String from = manager.getFrom(fieldDefinitionContext);
                     String to = manager.getTo(fieldDefinitionContext);
 
                     builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                            .addStatement("loader.registerArray($S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
+                            .addStatement("loader.registerArray($S, $S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
                                     packageName,
+                                    protocol,
                                     typeName,
                                     to,
                                     from
@@ -164,12 +166,14 @@ public class QueryHandlerBuilder {
                 if (manager.isFetchField(fieldDefinitionContext)) {
                     String typeName = manager.getFieldTypeName(fieldDefinitionContext.type());
                     String packageName = manager.getPackageName(typeName);
+                    String protocol = manager.getProtocol(fieldDefinitionContext);
                     String from = manager.getFrom(fieldDefinitionContext);
                     String to = manager.getTo(fieldDefinitionContext);
 
                     builder.beginControlFlow("if(jsonValue.asJsonObject().containsKey($S) && !jsonValue.asJsonObject().isNull($S))", from, from)
-                            .addStatement("loader.register($S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
+                            .addStatement("loader.register($S, $S, $S, $S, jsonValue.asJsonObject().get($S), jsonPointer + \"/\" + selectionName, selectionContext.field().selectionSet())",
                                     packageName,
+                                    protocol,
                                     typeName,
                                     to,
                                     from
@@ -207,6 +211,42 @@ public class QueryHandlerBuilder {
                         typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText())
                 )
                 .endControlFlow();
+        return builder.build();
+    }
+
+    private MethodSpec buildHandleMethod() {
+
+        MethodSpec.Builder builder = MethodSpec.methodBuilder("handle")
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(ClassName.get(JsonObject.class), "jsonObject")
+                .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinition")
+                .addParameter(ClassName.get(QueryDataLoader.class), "loader")
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)));
+
+
+        builder.beginControlFlow("for ($T selectionContext : operationDefinition.selectionSet().selection()) ", ClassName.get(GraphqlParser.SelectionContext.class))
+                .addStatement("$T selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()", ClassName.get(String.class));
+        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = manager.getMutationOperationTypeName().flatMap(manager::getObject).stream()
+                .flatMap(objectTypeDefinitionContext ->
+                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                )
+                .collect(Collectors.toList());
+
+        int index = 0;
+        for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {
+            String typeMethodName = fieldDefinitionContext.name().getText();
+            if (index == 0) {
+                builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", typeMethodName);
+            } else {
+                builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", typeMethodName);
+            }
+            builder.addStatement("$L(jsonObject.get(selectionName), selectionContext.field().selectionSet(), loader, \"/\" + selectionName)", typeMethodName);
+            index++;
+        }
+        builder.endControlFlow()
+                .endControlFlow()
+                .addStatement("return loader.load(jsonObject)");
         return builder.build();
     }
 }

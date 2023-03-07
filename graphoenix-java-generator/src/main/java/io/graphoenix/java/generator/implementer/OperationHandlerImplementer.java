@@ -334,15 +334,16 @@ public class OperationHandlerImplementer {
                                                     ClassName.get(Tuple.class),
                                                     ClassName.get(StringReader.class)
                                             ),
-                                            CodeBlock.of(".flatMap(tuple2 -> invoke(connectionHandler.get().$L(tuple2._2(), operationDefinitionContext), operationDefinitionContext, queryLoader).map(jsonValue -> Tuple.of(tuple2._1(), jsonValue)))", typeManager.typeToLowerCamelName(operationTypeName)),
                                             CodeBlock.of(".flatMap(tuple2 -> mutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), tuple2._1(), tuple2._2()).thenReturn(tuple2._2()))"),
                                             CodeBlock.of(".onErrorResume(throwable -> mutationLoader.compensating().then($T.error(throwable)))", ClassName.get(Mono.class)),
-                                            CodeBlock.of(".flatMap(jsonValue -> queryLoader.load(jsonValue))")
+                                            CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationDefinitionContext, queryLoader))"),
+                                            CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                            CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))")
                                     ),
                                     System.lineSeparator()
                             )
                     );
-        } else {
+        } else if (type.equals(QUERY)) {
             builder.addStatement("$T queryLoader = queryDataLoader.get()", ClassName.get(QueryDataLoader.class))
                     .addStatement(
                             CodeBlock.join(
@@ -351,12 +352,15 @@ public class OperationHandlerImplementer {
                                                     operationName,
                                                     ClassName.get(StringReader.class)
                                             ),
-                                            CodeBlock.of(".flatMap(jsonValue -> invoke(connectionHandler.get().$L(jsonValue, operationDefinitionContext), operationDefinitionContext, queryLoader))", typeManager.typeToLowerCamelName(operationTypeName)),
-                                            CodeBlock.of(".flatMap(jsonValue -> queryLoader.load(jsonValue))")
+                                            CodeBlock.of(".flatMap(jsonObject -> queryHandler.get().handle(jsonObject, operationDefinitionContext, queryLoader))"),
+                                            CodeBlock.of(".map(jsonValue -> connectionHandler.get().$L(jsonValue, operationDefinitionContext))", typeManager.typeToLowerCamelName(operationTypeName)),
+                                            CodeBlock.of(".flatMap(jsonValue -> invoke(jsonValue, operationDefinitionContext))")
                                     ),
                                     System.lineSeparator()
                             )
                     );
+        } else {
+            throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
         }
         return builder.build();
     }
@@ -366,20 +370,11 @@ public class OperationHandlerImplementer {
                 .addModifiers(Modifier.PRIVATE)
                 .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                 .addParameter(ClassName.get(GraphqlParser.SelectionContext.class), "selectionContext")
-                .addParameter(ClassName.get(QueryDataLoader.class), "loader")
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)));
 
         boolean fieldTypeIsList = manager.fieldTypeIsList(fieldDefinitionContext.type());
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         String fieldTypeParameterName = typeManager.typeToLowerCamelName(manager.getFieldTypeName(fieldDefinitionContext.type()));
-
-        String handleMethodName;
-        if (fieldTypeIsList) {
-            handleMethodName = fieldTypeParameterName.concat("List");
-        } else {
-            handleMethodName = fieldTypeParameterName;
-        }
-        CodeBlock handleCodeBlock = CodeBlock.of(".flatMap(filtered -> Mono.fromRunnable(() -> queryHandler.get().$L(filtered, selectionContext.field().selectionSet(), loader, \"/\" + selectionName)).thenReturn(filtered))", handleMethodName);
 
         if (manager.isInvokeField(fieldDefinitionContext)) {
             String className = typeManager.getClassName(fieldDefinitionContext);
@@ -387,20 +382,19 @@ public class OperationHandlerImplementer {
             List<AbstractMap.SimpleEntry<String, String>> parameters = typeManager.getParameters(fieldDefinitionContext);
             String returnClassName = typeManager.getReturnClassName(fieldDefinitionContext);
 
-            builder.addStatement("String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()")
-                    .addStatement("$T result = $L.get().$L($L)",
-                            TYPE_UTIL.getTypeName(returnClassName),
-                            typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
-                            methodName,
-                            CodeBlock.join(parameters.stream()
-                                    .map(parameter ->
-                                            CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
-                                                    parameter.getKey(),
-                                                    TYPE_UTIL.getClassName(parameter.getValue())
-                                            )
+            builder.addStatement("$T result = $L.get().$L($L)",
+                    TYPE_UTIL.getTypeName(returnClassName),
+                    typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
+                    methodName,
+                    CodeBlock.join(parameters.stream()
+                            .map(parameter ->
+                                    CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
+                                            parameter.getKey(),
+                                            TYPE_UTIL.getClassName(parameter.getValue())
                                     )
-                                    .collect(Collectors.toList()), ", ")
-                    );
+                            )
+                            .collect(Collectors.toList()), ", ")
+            );
 
             CodeBlock invokeCodeBlock;
             if (manager.isObject(fieldTypeName)) {
@@ -419,15 +413,7 @@ public class OperationHandlerImplementer {
                 } else {
                     invokeCodeBlock = CodeBlock.of("return $T.just(result).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), filterMethodName);
                 }
-                builder.addStatement(
-                        CodeBlock.join(
-                                List.of(
-                                        invokeCodeBlock,
-                                        handleCodeBlock
-                                ),
-                                System.lineSeparator()
-                        )
-                );
+                builder.addStatement(invokeCodeBlock);
             } else {
                 String filterMethodName;
                 if (fieldTypeIsList) {
@@ -447,8 +433,6 @@ public class OperationHandlerImplementer {
                 builder.addStatement(invokeCodeBlock);
             }
         } else {
-            builder.addStatement("String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()");
-
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
@@ -463,16 +447,10 @@ public class OperationHandlerImplementer {
                             .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                             .endControlFlow()
                             .addStatement(
-                                    CodeBlock.join(
-                                            List.of(
-                                                    CodeBlock.of("return $T.fromIterable(result).flatMap(item -> invokeHandler.get().$L(item)).collectList().map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
-                                                            ClassName.get(Flux.class),
-                                                            fieldTypeParameterName,
-                                                            fieldTypeParameterName.concat("List")
-                                                    ),
-                                                    handleCodeBlock
-                                            ),
-                                            System.lineSeparator()
+                                    CodeBlock.of("return $T.fromIterable(result).flatMap(item -> invokeHandler.get().$L(item)).collectList().map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
+                                            ClassName.get(Flux.class),
+                                            fieldTypeParameterName,
+                                            fieldTypeParameterName.concat("List")
                                     )
 
                             );
@@ -482,15 +460,9 @@ public class OperationHandlerImplementer {
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
                             typeManager.typeContextToTypeName(fieldDefinitionContext.type())
                     ).addStatement(
-                            CodeBlock.join(
-                                    List.of(
-                                            CodeBlock.of("return invokeHandler.get().$L(result).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
-                                                    fieldTypeParameterName,
-                                                    fieldTypeParameterName
-                                            ),
-                                            handleCodeBlock
-                                    ),
-                                    System.lineSeparator()
+                            CodeBlock.of("return invokeHandler.get().$L(result).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
+                                    fieldTypeParameterName,
+                                    fieldTypeParameterName
                             )
                     );
                 }

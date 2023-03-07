@@ -182,6 +182,7 @@ public class DocumentBuilder {
             objectType.addFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                             .filter(manager::isNotInvokeField)
+                            .filter(manager::isNotFetchField)
                             .filter(manager::isNotFunctionField)
                             .filter(manager::isNotConnectionField)
                             .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -195,6 +196,7 @@ public class DocumentBuilder {
             objectType.addFields(
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                             .filter(manager::isNotInvokeField)
+                            .filter(manager::isNotFetchField)
                             .filter(manager::isNotFunctionField)
                             .filter(manager::isNotConnectionField)
                             .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -720,6 +722,7 @@ public class DocumentBuilder {
         return Stream.concat(
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                         .filter(manager::isNotInvokeField)
+                        .filter(manager::isNotFetchField)
                         .filter(manager::isNotFunctionField)
                         .filter(manager::isNotConnectionField)
                         .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -758,6 +761,7 @@ public class DocumentBuilder {
                         ),
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                         .filter(manager::isNotInvokeField)
+                        .filter(manager::isNotFetchField)
                         .filter(manager::isNotFunctionField)
                         .filter(manager::isNotConnectionField)
                         .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))

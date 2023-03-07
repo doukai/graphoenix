@@ -110,7 +110,9 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     @Override
     public boolean isInvokeField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> Arrays.stream(INVOKE_DIRECTIVES).anyMatch(name -> directiveContext.name().getText().equals(name)));
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME));
     }
 
     @Override
@@ -120,7 +122,9 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     @Override
     public boolean isFetchField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME));
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(FETCH_DIRECTIVE_NAME));
     }
 
     @Override
@@ -130,7 +134,9 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     @Override
     public boolean isFunctionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME));
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(FUNC_DIRECTIVE_NAME));
     }
 
     @Override
@@ -140,7 +146,9 @@ public class GraphQLFieldManager implements IGraphQLFieldManager {
 
     @Override
     public boolean isConnectionField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives() != null && fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME));
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME));
     }
 
     @Override

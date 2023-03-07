@@ -174,6 +174,7 @@ public class ConnectionHandlerBuilder {
             List<GraphqlParser.FieldDefinitionContext> objectFieldList = manager.getFields(objectTypeDefinitionContext.name().getText())
                     .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                     .filter(manager::isNotInvokeField)
+                    .filter(manager::isNotFetchField)
                     .collect(Collectors.toList());
 
             int index = 0;

@@ -143,7 +143,7 @@ public class QueryDataLoaderBuilder {
                                 .map(protocol -> Tuple.of(packageEntry.getKey(), protocol))
                 )
                 .forEach(protocol ->
-                        builder.addStatement("this.$L = build($S).flatMap(operation -> $T.get($T.class, $S).operation($S, operation.toString()))",
+                        builder.addStatement("this.$L = build($S, $S).flatMap(operation -> $T.get($T.class, $S).operation($S, operation.toString()))",
                                 String.join(
                                         "_",
                                         TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
@@ -151,6 +151,7 @@ public class QueryDataLoaderBuilder {
                                         "JsonMono"
                                 ),
                                 protocol._1(),
+                                protocol._2(),
                                 ClassName.get(BeanContext.class),
                                 ClassName.get(FetchHandler.class),
                                 protocol._2(),
@@ -171,28 +172,29 @@ public class QueryDataLoaderBuilder {
             if (index == 0) {
                 monoList.add(
                         CodeBlock.of(
-                                "return this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response)))",
+                                "return this.$L.doOnNext(response -> addResult($S, $S, response))",
                                 String.join(
                                         "_",
                                         TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
                                         protocol._2(),
                                         "JsonMono"
                                 ),
-                                ClassName.get(Mono.class),
-                                protocol._1()
+                                protocol._1(),
+                                protocol._2()
                         )
                 );
             } else {
                 monoList.add(
-                        CodeBlock.of(".then(this.$L.flatMap(response -> $T.fromRunnable(() -> addResult($S, response))))",
+                        CodeBlock.of(
+                                ".then(this.$L.doOnNext(response -> addResult($S, $S, response)))",
                                 String.join(
                                         "_",
                                         TYPE_NAME_UTIL.packageNameToUnderline(protocol._1()),
                                         protocol._2(),
                                         "JsonMono"
                                 ),
-                                ClassName.get(Mono.class),
-                                protocol._1()
+                                protocol._1(),
+                                protocol._2()
                         )
                 );
             }
@@ -201,7 +203,8 @@ public class QueryDataLoaderBuilder {
         CodeBlock codeBlock;
         if (monoList.size() > 0) {
             monoList.add(
-                    CodeBlock.of(".then($T.fromSupplier(() -> dispatch(jsonValue.asJsonObject())))",
+                    CodeBlock.of(
+                            ".thenReturn(dispatch(jsonValue.asJsonObject()))",
                             ClassName.get(Mono.class)
                     )
             );

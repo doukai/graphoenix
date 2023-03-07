@@ -35,16 +35,15 @@ public class GraphQLFieldMapManager implements IGraphQLFieldMapManager {
     public void registerFieldMaps() {
         manager.getObjects()
                 .filter(manager::isNotContainerType)
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                )
+                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
                 .forEach(objectTypeDefinitionContext ->
                         manager.getFields(objectTypeDefinitionContext.name().getText())
-                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                .filter(fieldDefinitionContext -> manager.isNotInvokeField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                .filter(fieldDefinitionContext -> manager.isNotFunctionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                .filter(manager::isNotConnectionField)
+                                .filter(manager::isNotInvokeField)
+                                .filter(manager::isNotFetchField)
+                                .filter(manager::isNotFunctionField)
                                 .forEach(fieldDefinitionContext -> {
                                             if (manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())) ||
                                                     (manager.fieldTypeIsList(fieldDefinitionContext.type()) && manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) ||
