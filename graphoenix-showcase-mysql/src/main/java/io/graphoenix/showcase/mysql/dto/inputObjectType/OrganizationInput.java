@@ -8,6 +8,7 @@ import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import null.dto.inputObjectType.UserInput;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -20,7 +21,7 @@ public class OrganizationInput {
 
   private Integer aboveId;
 
-  private OrganizationInput above;
+  private null.dto.inputObjectType.OrganizationInput above;
 
   private Collection<UserInput> users;
 
@@ -61,11 +62,11 @@ public class OrganizationInput {
     this.aboveId = aboveId;
   }
 
-  public OrganizationInput getAbove() {
+  public null.dto.inputObjectType.OrganizationInput getAbove() {
     return this.above;
   }
 
-  public void setAbove(OrganizationInput above) {
+  public void setAbove(null.dto.inputObjectType.OrganizationInput above) {
     this.above = above;
   }
 

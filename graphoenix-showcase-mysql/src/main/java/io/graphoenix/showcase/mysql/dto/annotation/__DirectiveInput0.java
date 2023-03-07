@@ -1,11 +1,11 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import null.dto.enumType.__DirectiveLocation;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)

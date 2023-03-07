@@ -8,6 +8,7 @@ import java.lang.Float;
 import java.lang.Integer;
 import java.lang.String;
 import java.util.Collection;
+import null.dto.inputObjectType.Property;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.Name;
 
@@ -44,7 +45,7 @@ public class ValidationInput {
   @Name("enum")
   private Collection<String> _enum;
 
-  private ValidationInput items;
+  private null.dto.inputObjectType.ValidationInput items;
 
   private Integer minItems;
 
@@ -52,23 +53,23 @@ public class ValidationInput {
 
   private Boolean uniqueItems;
 
-  private Collection<ValidationInput> allOf;
+  private Collection<null.dto.inputObjectType.ValidationInput> allOf;
 
-  private Collection<ValidationInput> anyOf;
+  private Collection<null.dto.inputObjectType.ValidationInput> anyOf;
 
-  private Collection<ValidationInput> oneOf;
+  private Collection<null.dto.inputObjectType.ValidationInput> oneOf;
 
-  private ValidationInput not;
+  private null.dto.inputObjectType.ValidationInput not;
 
   private Collection<Property> properties;
 
   @Name("if")
-  private ValidationInput _if;
+  private null.dto.inputObjectType.ValidationInput _if;
 
-  private ValidationInput then;
+  private null.dto.inputObjectType.ValidationInput then;
 
   @Name("else")
-  private ValidationInput _else;
+  private null.dto.inputObjectType.ValidationInput _else;
 
   private Collection<Property> dependentRequired;
 
@@ -176,11 +177,11 @@ public class ValidationInput {
     this._enum = _enum;
   }
 
-  public ValidationInput getItems() {
+  public null.dto.inputObjectType.ValidationInput getItems() {
     return this.items;
   }
 
-  public void setItems(ValidationInput items) {
+  public void setItems(null.dto.inputObjectType.ValidationInput items) {
     this.items = items;
   }
 
@@ -208,35 +209,35 @@ public class ValidationInput {
     this.uniqueItems = uniqueItems;
   }
 
-  public Collection<ValidationInput> getAllOf() {
+  public Collection<null.dto.inputObjectType.ValidationInput> getAllOf() {
     return this.allOf;
   }
 
-  public void setAllOf(Collection<ValidationInput> allOf) {
+  public void setAllOf(Collection<null.dto.inputObjectType.ValidationInput> allOf) {
     this.allOf = allOf;
   }
 
-  public Collection<ValidationInput> getAnyOf() {
+  public Collection<null.dto.inputObjectType.ValidationInput> getAnyOf() {
     return this.anyOf;
   }
 
-  public void setAnyOf(Collection<ValidationInput> anyOf) {
+  public void setAnyOf(Collection<null.dto.inputObjectType.ValidationInput> anyOf) {
     this.anyOf = anyOf;
   }
 
-  public Collection<ValidationInput> getOneOf() {
+  public Collection<null.dto.inputObjectType.ValidationInput> getOneOf() {
     return this.oneOf;
   }
 
-  public void setOneOf(Collection<ValidationInput> oneOf) {
+  public void setOneOf(Collection<null.dto.inputObjectType.ValidationInput> oneOf) {
     this.oneOf = oneOf;
   }
 
-  public ValidationInput getNot() {
+  public null.dto.inputObjectType.ValidationInput getNot() {
     return this.not;
   }
 
-  public void setNot(ValidationInput not) {
+  public void setNot(null.dto.inputObjectType.ValidationInput not) {
     this.not = not;
   }
 
@@ -248,27 +249,27 @@ public class ValidationInput {
     this.properties = properties;
   }
 
-  public ValidationInput get_if() {
+  public null.dto.inputObjectType.ValidationInput get_if() {
     return this._if;
   }
 
-  public void set_if(ValidationInput _if) {
+  public void set_if(null.dto.inputObjectType.ValidationInput _if) {
     this._if = _if;
   }
 
-  public ValidationInput getThen() {
+  public null.dto.inputObjectType.ValidationInput getThen() {
     return this.then;
   }
 
-  public void setThen(ValidationInput then) {
+  public void setThen(null.dto.inputObjectType.ValidationInput then) {
     this.then = then;
   }
 
-  public ValidationInput get_else() {
+  public null.dto.inputObjectType.ValidationInput get_else() {
     return this._else;
   }
 
-  public void set_else(ValidationInput _else) {
+  public void set_else(null.dto.inputObjectType.ValidationInput _else) {
     this._else = _else;
   }
 

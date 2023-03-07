@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.mysql.dto.enumType.__TypeKind;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -9,6 +8,10 @@ import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import null.dto.enumType.__TypeKind;
+import null.dto.inputObjectType.__EnumValueInput;
+import null.dto.inputObjectType.__FieldInput;
+import null.dto.inputObjectType.__InputValueInput;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -27,9 +30,9 @@ public class __TypeInput {
 
   private Collection<__FieldInput> fields;
 
-  private Collection<__TypeInput> interfaces;
+  private Collection<null.dto.inputObjectType.__TypeInput> interfaces;
 
-  private Collection<__TypeInput> possibleTypes;
+  private Collection<null.dto.inputObjectType.__TypeInput> possibleTypes;
 
   private Collection<__EnumValueInput> enumValues;
 
@@ -37,7 +40,7 @@ public class __TypeInput {
 
   private String ofTypeName;
 
-  private __TypeInput ofType;
+  private null.dto.inputObjectType.__TypeInput ofType;
 
   private Boolean isDeprecated;
 
@@ -98,19 +101,19 @@ public class __TypeInput {
     this.fields = fields;
   }
 
-  public Collection<__TypeInput> getInterfaces() {
+  public Collection<null.dto.inputObjectType.__TypeInput> getInterfaces() {
     return this.interfaces;
   }
 
-  public void setInterfaces(Collection<__TypeInput> interfaces) {
+  public void setInterfaces(Collection<null.dto.inputObjectType.__TypeInput> interfaces) {
     this.interfaces = interfaces;
   }
 
-  public Collection<__TypeInput> getPossibleTypes() {
+  public Collection<null.dto.inputObjectType.__TypeInput> getPossibleTypes() {
     return this.possibleTypes;
   }
 
-  public void setPossibleTypes(Collection<__TypeInput> possibleTypes) {
+  public void setPossibleTypes(Collection<null.dto.inputObjectType.__TypeInput> possibleTypes) {
     this.possibleTypes = possibleTypes;
   }
 
@@ -138,11 +141,11 @@ public class __TypeInput {
     this.ofTypeName = ofTypeName;
   }
 
-  public __TypeInput getOfType() {
+  public null.dto.inputObjectType.__TypeInput getOfType() {
     return this.ofType;
   }
 
-  public void setOfType(__TypeInput ofType) {
+  public void setOfType(null.dto.inputObjectType.__TypeInput ofType) {
     this.ofType = ofType;
   }
 

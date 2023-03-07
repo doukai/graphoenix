@@ -21,6 +21,7 @@ import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -127,24 +128,23 @@ public class ConnectionHandlerBuilder {
                     .addParameter(ClassName.get(String.class), "path")
                     .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                     .addParameter(ClassName.get(String.class), "typeName")
-                    .addParameter(ClassName.get(GraphqlParser.SelectionContext.class), "selectionContext");
+                    .addParameter(ClassName.get(GraphqlParser.SelectionContext.class), "parentSelectionContext");
         }
 
         if (objectTypeDefinitionContext.name().getText().endsWith(CONNECTION_SUFFIX)) {
             String typeName = objectTypeDefinitionContext.name().getText().substring(0, objectTypeDefinitionContext.name().getText().length() - CONNECTION_SUFFIX.length());
-            builder.beginControlFlow("if (jsonValue != null && !jsonValue.getValueType().equals($L.NULL) && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)", ClassName.get(JsonValue.ValueType.class))
-                    .addStatement("String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()")
-                    .addStatement("$T connection = builder.build(jsonValue, typeName, selectionContext)", ClassName.get(JsonValue.class))
+            builder.beginControlFlow("if (jsonValue != null && !jsonValue.getValueType().equals($T.ValueType.NULL) && parentSelectionContext.field().selectionSet() != null && parentSelectionContext.field().selectionSet().selection().size() > 0)", ClassName.get(JsonValue.class))
+                    .addStatement("$T connection = builder.build(jsonValue, typeName, parentSelectionContext)", ClassName.get(JsonValue.class))
                     .addStatement("jsonPatchBuilder.add(path, connection)")
-                    .beginControlFlow("for ($T subSelectionContext : selectionContext.field().selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
+                    .beginControlFlow("for ($T selectionContext : parentSelectionContext.field().selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
                             ClassName.get(GraphqlParser.SelectionContext.class),
                             objectTypeDefinitionContext.name().getText(),
                             ClassName.get(Collectors.class)
                     )
-                    .beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", "edges")
-                    .addStatement("String subSelectionName = subSelectionContext.field().alias() != null ? subSelectionContext.field().alias().name().getText() : subSelectionContext.field().name().getText()")
-                    .addStatement("$T jsonArray = connection.asJsonObject().get(subSelectionName).asJsonArray()", ClassName.get(JsonArray.class))
-                    .addStatement("$T.range(0, jsonArray.size()).forEach(index -> $L(jsonPatchBuilder, path + \"/\" + subSelectionName + \"/\" + index, jsonArray.get(index), $S, subSelectionContext))",
+                    .beginControlFlow("if (selectionContext.field().name().getText().equals($S))", "edges")
+                    .addStatement("String selectionName = $T.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText())", ClassName.get(Optional.class))
+                    .addStatement("$T jsonArray = connection.asJsonObject().get(selectionName).asJsonArray()", ClassName.get(JsonArray.class))
+                    .addStatement("$T.range(0, jsonArray.size()).forEach(index -> $L(jsonPatchBuilder, path + \"/\" + selectionName + \"/\" + index, jsonArray.get(index), $S, selectionContext))",
                             ClassName.get(IntStream.class),
                             getObjectMethodName(typeName.concat(EDGE_SUFFIX)),
                             objectTypeDefinitionContext.name().getText()
@@ -157,20 +157,20 @@ public class ConnectionHandlerBuilder {
                     manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) ||
                     manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())) {
                 builder.beginControlFlow("if (operationDefinitionContext.selectionSet() != null && operationDefinitionContext.selectionSet().selection().size() > 0)")
-                        .beginControlFlow("for ($T subSelectionContext : operationDefinitionContext.selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
+                        .beginControlFlow("for ($T selectionContext : operationDefinitionContext.selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
                                 ClassName.get(GraphqlParser.SelectionContext.class),
                                 objectTypeDefinitionContext.name().getText(),
                                 ClassName.get(Collectors.class)
                         );
             } else {
-                builder.beginControlFlow("if (jsonValue != null && !jsonValue.getValueType().equals($L.NULL) && selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0)", ClassName.get(JsonValue.ValueType.class))
-                        .beginControlFlow("for ($T subSelectionContext : selectionContext.field().selectionSet().selection().stream().flatMap(subSelectionContext -> manager.fragmentUnzip($S, subSelectionContext)).collect($T.toList()))",
+                builder.beginControlFlow("if (jsonValue != null && !jsonValue.getValueType().equals($T.ValueType.NULL) && parentSelectionContext.field().selectionSet() != null && parentSelectionContext.field().selectionSet().selection().size() > 0)", ClassName.get(JsonValue.class))
+                        .beginControlFlow("for ($T selectionContext : parentSelectionContext.field().selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
                                 ClassName.get(GraphqlParser.SelectionContext.class),
                                 objectTypeDefinitionContext.name().getText(),
                                 ClassName.get(Collectors.class)
                         );
             }
-            builder.addStatement("String subSelectionName = subSelectionContext.field().alias() != null ? subSelectionContext.field().alias().name().getText() : subSelectionContext.field().name().getText()");
+            builder.addStatement("String selectionName = $T.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText())", ClassName.get(Optional.class));
             List<GraphqlParser.FieldDefinitionContext> objectFieldList = manager.getFields(objectTypeDefinitionContext.name().getText())
                     .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
                     .filter(manager::isNotInvokeField)
@@ -180,23 +180,23 @@ public class ConnectionHandlerBuilder {
             int index = 0;
             for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : objectFieldList) {
                 if (index == 0) {
-                    builder.beginControlFlow("if (subSelectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+                    builder.beginControlFlow("if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
                 } else {
-                    builder.nextControlFlow("else if (subSelectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
+                    builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", fieldDefinitionContext.name().getText());
                 }
                 if (manager.isConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText())) {
-                    builder.addStatement("$L(jsonPatchBuilder, path + \"/\" + subSelectionName, jsonValue, $S, subSelectionContext)",
+                    builder.addStatement("$L(jsonPatchBuilder, path + \"/\" + selectionName, jsonValue, $S, selectionContext)",
                             getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                             objectTypeDefinitionContext.name().getText()
                     );
                 } else if (!manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                    builder.addStatement("$L(jsonPatchBuilder, path + \"/\" + subSelectionName, jsonValue.asJsonObject().get(subSelectionName), $S, subSelectionContext)",
+                    builder.addStatement("$L(jsonPatchBuilder, path + \"/\" + selectionName, jsonValue.asJsonObject().get(selectionName), $S, selectionContext)",
                             getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                             objectTypeDefinitionContext.name().getText()
                     );
                 } else {
-                    builder.addStatement("$T jsonArray = jsonValue.asJsonObject().get(subSelectionName).asJsonArray()", ClassName.get(JsonArray.class))
-                            .addStatement("$T.range(0, jsonArray.size()).forEach(index -> $L(jsonPatchBuilder, path + \"/\" + subSelectionName + \"/\" + index, jsonArray.get(index), $S, subSelectionContext))",
+                    builder.addStatement("$T jsonArray = jsonValue.asJsonObject().get(selectionName).asJsonArray()", ClassName.get(JsonArray.class))
+                            .addStatement("$T.range(0, jsonArray.size()).forEach(index -> $L(jsonPatchBuilder, path + \"/\" + selectionName + \"/\" + index, jsonArray.get(index), $S, selectionContext))",
                                     ClassName.get(IntStream.class),
                                     getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                                     objectTypeDefinitionContext.name().getText()

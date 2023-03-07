@@ -110,6 +110,12 @@ public class GraphQLMutationToStatements {
                                         )
                                 )
                                 .filter(selectionContext ->
+                                        manager.isNotFetchField(
+                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
+                                                selectionContext.field().name().getText()
+                                        )
+                                )
+                                .filter(selectionContext ->
                                         manager.isNotFunctionField(
                                                 manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
                                                 selectionContext.field().name().getText()

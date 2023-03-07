@@ -16,4 +16,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface importType {
   String packageName();
+
+  String className();
 }

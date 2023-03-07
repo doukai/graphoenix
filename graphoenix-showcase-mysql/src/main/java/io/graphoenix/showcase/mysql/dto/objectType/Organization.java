@@ -11,6 +11,8 @@ import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import null.dto.objectType.User;
+import null.dto.objectType.UserConnection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
@@ -25,7 +27,7 @@ public class Organization implements Meta {
 
   private Integer aboveId;
 
-  private Organization above;
+  private null.dto.objectType.Organization above;
 
   private Collection<User> users;
 
@@ -86,7 +88,7 @@ public class Organization implements Meta {
 
   private Collection<User> userByOrg;
 
-  private Organization parent;
+  private null.dto.objectType.Organization parent;
 
   private ContainerType containerType;
 
@@ -106,11 +108,11 @@ public class Organization implements Meta {
     this.aboveId = aboveId;
   }
 
-  public Organization getAbove() {
+  public null.dto.objectType.Organization getAbove() {
     return this.above;
   }
 
-  public void setAbove(Organization above) {
+  public void setAbove(null.dto.objectType.Organization above) {
     this.above = above;
   }
 
@@ -354,11 +356,11 @@ public class Organization implements Meta {
     this.userByOrg = userByOrg;
   }
 
-  public Organization getParent() {
+  public null.dto.objectType.Organization getParent() {
     return this.parent;
   }
 
-  public void setParent(Organization parent) {
+  public void setParent(null.dto.objectType.Organization parent) {
     this.parent = parent;
   }
 

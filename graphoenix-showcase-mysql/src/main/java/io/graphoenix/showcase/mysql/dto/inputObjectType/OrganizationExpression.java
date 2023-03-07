@@ -1,11 +1,14 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.util.Collection;
+import null.dto.enumType.Conditional;
+import null.dto.inputObjectType.IntExpression;
+import null.dto.inputObjectType.StringExpression;
+import null.dto.inputObjectType.UserExpression;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -18,7 +21,7 @@ public class OrganizationExpression {
 
   private IntExpression aboveId;
 
-  private OrganizationExpression above;
+  private null.dto.inputObjectType.OrganizationExpression above;
 
   private UserExpression users;
 
@@ -46,7 +49,7 @@ public class OrganizationExpression {
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<OrganizationExpression> exs;
+  private Collection<null.dto.inputObjectType.OrganizationExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -64,11 +67,11 @@ public class OrganizationExpression {
     this.aboveId = aboveId;
   }
 
-  public OrganizationExpression getAbove() {
+  public null.dto.inputObjectType.OrganizationExpression getAbove() {
     return this.above;
   }
 
-  public void setAbove(OrganizationExpression above) {
+  public void setAbove(null.dto.inputObjectType.OrganizationExpression above) {
     this.above = above;
   }
 
@@ -168,11 +171,11 @@ public class OrganizationExpression {
     this.cond = cond;
   }
 
-  public Collection<OrganizationExpression> getExs() {
+  public Collection<null.dto.inputObjectType.OrganizationExpression> getExs() {
     return this.exs;
   }
 
-  public void setExs(Collection<OrganizationExpression> exs) {
+  public void setExs(Collection<null.dto.inputObjectType.OrganizationExpression> exs) {
     this.exs = exs;
   }
 }

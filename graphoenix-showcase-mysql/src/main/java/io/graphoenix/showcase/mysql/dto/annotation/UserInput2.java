@@ -1,11 +1,11 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import null.dto.enumType.Sex;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
@@ -22,7 +22,7 @@ public @interface UserInput2 {
 
   boolean disable() default false;
 
-  Sex sex() default Sex.MAN;
+  Sex sex() default io.graphoenix.showcase.mysql.dto.enumType.Sex.MAN;
 
   int organizationId() default 0;
 

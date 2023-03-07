@@ -17,9 +17,9 @@ import java.lang.annotation.Target;
 public @interface map {
   String from();
 
-  boolean anchor();
-
   MapWith with();
 
   String to();
+
+  boolean anchor();
 }

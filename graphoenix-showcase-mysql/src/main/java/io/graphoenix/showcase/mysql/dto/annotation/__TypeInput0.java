@@ -1,11 +1,11 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.__TypeKind;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import null.dto.enumType.__TypeKind;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
@@ -14,7 +14,7 @@ public @interface __TypeInput0 {
 
   int schemaId() default 0;
 
-  __TypeKind kind() default __TypeKind.SCALAR;
+  __TypeKind kind() default io.graphoenix.showcase.mysql.dto.enumType.__TypeKind.SCALAR;
 
   String description() default "";
 

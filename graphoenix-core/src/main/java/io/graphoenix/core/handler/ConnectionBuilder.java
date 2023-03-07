@@ -43,25 +43,28 @@ public class ConnectionBuilder {
     }
 
     public JsonValue build(JsonValue jsonValue, String typeName, GraphqlParser.SelectionContext selectionContext) {
-        if (jsonValue == null || jsonValue.getValueType().equals(JsonValue.ValueType.NULL) || jsonValue.asJsonObject().isEmpty()) {
+        if (jsonValue == null || jsonValue.getValueType().equals(JsonValue.ValueType.NULL)) {
+            return NULL;
+        }
+        if (jsonValue.asJsonObject().isEmpty()) {
             return EMPTY_JSON_OBJECT;
         }
         JsonObjectBuilder connectionObjectBuilder = jsonProvider.createObjectBuilder();
         if (selectionContext.field().selectionSet() != null && selectionContext.field().selectionSet().selection().size() > 0) {
             GraphqlParser.FieldDefinitionContext connectionFieldDefinitionContext = manager.getField(typeName, selectionContext.field().name().getText())
                     .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, selectionContext.field().name().getText())));
-            Optional<GraphqlParser.DirectiveContext> connection = connectionFieldDefinitionContext.directives().directive().stream()
+            Optional<GraphqlParser.DirectiveContext> connectionDirectiveContext = connectionFieldDefinitionContext.directives().directive().stream()
                     .filter(directiveContext -> directiveContext.name().getText().equals(CONNECTION_DIRECTIVE_NAME))
                     .findFirst();
 
-            if (connection.isPresent()) {
-                Optional<String> connectionFieldName = connection.get().arguments().argument().stream()
+            if (connectionDirectiveContext.isPresent()) {
+                Optional<String> connectionFieldName = connectionDirectiveContext.get().arguments().argument().stream()
                         .filter(argumentContext -> argumentContext.name().getText().equals("field"))
                         .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                         .findFirst()
                         .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
 
-                Optional<String> connectionAggFieldName = connection.get().arguments().argument().stream()
+                Optional<String> connectionAggFieldName = connectionDirectiveContext.get().arguments().argument().stream()
                         .filter(argumentContext -> argumentContext.name().getText().equals("agg"))
                         .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                         .findFirst()

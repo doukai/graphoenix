@@ -5,7 +5,7 @@ import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.util.Collection;
 import null.dto.enumType.Operator;
-import null.dto.enumType.__DirectiveLocation;
+import null.dto.enumType.Protocol;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -13,13 +13,13 @@ import org.eclipse.microprofile.graphql.Input;
 @CompiledJson
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
-public class __DirectiveLocationExpression {
+public class ProtocolExpression {
   @DefaultValue("EQ")
   private Operator opr;
 
-  private __DirectiveLocation val;
+  private Protocol val;
 
-  private Collection<__DirectiveLocation> in;
+  private Collection<Protocol> in;
 
   public Operator getOpr() {
     return this.opr;
@@ -29,19 +29,19 @@ public class __DirectiveLocationExpression {
     this.opr = opr;
   }
 
-  public __DirectiveLocation getVal() {
+  public Protocol getVal() {
     return this.val;
   }
 
-  public void setVal(__DirectiveLocation val) {
+  public void setVal(Protocol val) {
     this.val = val;
   }
 
-  public Collection<__DirectiveLocation> getIn() {
+  public Collection<Protocol> getIn() {
     return this.in;
   }
 
-  public void setIn(Collection<__DirectiveLocation> in) {
+  public void setIn(Collection<Protocol> in) {
     this.in = in;
   }
 }

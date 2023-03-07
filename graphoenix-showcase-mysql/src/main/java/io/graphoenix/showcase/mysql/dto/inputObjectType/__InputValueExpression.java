@@ -1,11 +1,14 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.util.Collection;
+import null.dto.enumType.Conditional;
+import null.dto.inputObjectType.IntExpression;
+import null.dto.inputObjectType.StringExpression;
+import null.dto.inputObjectType.__TypeExpression;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -56,7 +59,7 @@ public class __InputValueExpression {
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<__InputValueExpression> exs;
+  private Collection<null.dto.inputObjectType.__InputValueExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -218,11 +221,11 @@ public class __InputValueExpression {
     this.cond = cond;
   }
 
-  public Collection<__InputValueExpression> getExs() {
+  public Collection<null.dto.inputObjectType.__InputValueExpression> getExs() {
     return this.exs;
   }
 
-  public void setExs(Collection<__InputValueExpression> exs) {
+  public void setExs(Collection<null.dto.inputObjectType.__InputValueExpression> exs) {
     this.exs = exs;
   }
 }

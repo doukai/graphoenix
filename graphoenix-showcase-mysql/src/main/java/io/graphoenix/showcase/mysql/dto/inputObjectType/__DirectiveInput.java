@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -9,6 +8,8 @@ import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import null.dto.enumType.__DirectiveLocation;
+import null.dto.inputObjectType.__InputValueInput;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 

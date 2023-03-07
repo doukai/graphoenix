@@ -47,11 +47,9 @@ public class GraphQLTypeToTable {
                                         .equals(packageName)
                         )
                 )
-                .filter(objectTypeDefinitionContext ->
-                        !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) &&
-                                !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())
-                )
+                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
                 .map(this::createTable)
                 .map(CreateTable::toString);
     }
@@ -90,24 +88,10 @@ public class GraphQLTypeToTable {
         createTable.setTable(table);
         createTable.setColumnDefinitions(
                 objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                        .filter(fieldDefinitionContext ->
-                                manager.isNotInvokeField(
-                                        objectTypeDefinitionContext.name().getText(),
-                                        fieldDefinitionContext.name().getText()
-                                )
-                        )
-                        .filter(fieldDefinitionContext ->
-                                manager.isNotFunctionField(
-                                        objectTypeDefinitionContext.name().getText(),
-                                        fieldDefinitionContext.name().getText()
-                                )
-                        )
-                        .filter(fieldDefinitionContext ->
-                                manager.isNotConnectionField(
-                                        objectTypeDefinitionContext.name().getText(),
-                                        fieldDefinitionContext.name().getText()
-                                )
-                        )
+                        .filter(manager::isNotInvokeField)
+                        .filter(manager::isNotFetchField)
+                        .filter(manager::isNotFunctionField)
+                        .filter(manager::isNotConnectionField)
                         .map(this::createColumn)
                         .filter(Optional::isPresent)
                         .map(Optional::get)

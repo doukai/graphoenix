@@ -1,11 +1,17 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.util.Collection;
+import null.dto.enumType.Conditional;
+import null.dto.inputObjectType.IntExpression;
+import null.dto.inputObjectType.StringExpression;
+import null.dto.inputObjectType.__EnumValueExpression;
+import null.dto.inputObjectType.__FieldExpression;
+import null.dto.inputObjectType.__InputValueExpression;
+import null.dto.inputObjectType.__TypeKindExpression;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -24,9 +30,9 @@ public class __TypeExpression {
 
   private __FieldExpression fields;
 
-  private __TypeExpression interfaces;
+  private null.dto.inputObjectType.__TypeExpression interfaces;
 
-  private __TypeExpression possibleTypes;
+  private null.dto.inputObjectType.__TypeExpression possibleTypes;
 
   private __EnumValueExpression enumValues;
 
@@ -34,7 +40,7 @@ public class __TypeExpression {
 
   private StringExpression ofTypeName;
 
-  private __TypeExpression ofType;
+  private null.dto.inputObjectType.__TypeExpression ofType;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -58,7 +64,7 @@ public class __TypeExpression {
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<__TypeExpression> exs;
+  private Collection<null.dto.inputObjectType.__TypeExpression> exs;
 
   public StringExpression getName() {
     return this.name;
@@ -100,19 +106,19 @@ public class __TypeExpression {
     this.fields = fields;
   }
 
-  public __TypeExpression getInterfaces() {
+  public null.dto.inputObjectType.__TypeExpression getInterfaces() {
     return this.interfaces;
   }
 
-  public void setInterfaces(__TypeExpression interfaces) {
+  public void setInterfaces(null.dto.inputObjectType.__TypeExpression interfaces) {
     this.interfaces = interfaces;
   }
 
-  public __TypeExpression getPossibleTypes() {
+  public null.dto.inputObjectType.__TypeExpression getPossibleTypes() {
     return this.possibleTypes;
   }
 
-  public void setPossibleTypes(__TypeExpression possibleTypes) {
+  public void setPossibleTypes(null.dto.inputObjectType.__TypeExpression possibleTypes) {
     this.possibleTypes = possibleTypes;
   }
 
@@ -140,11 +146,11 @@ public class __TypeExpression {
     this.ofTypeName = ofTypeName;
   }
 
-  public __TypeExpression getOfType() {
+  public null.dto.inputObjectType.__TypeExpression getOfType() {
     return this.ofType;
   }
 
-  public void setOfType(__TypeExpression ofType) {
+  public void setOfType(null.dto.inputObjectType.__TypeExpression ofType) {
     this.ofType = ofType;
   }
 
@@ -228,11 +234,11 @@ public class __TypeExpression {
     this.cond = cond;
   }
 
-  public Collection<__TypeExpression> getExs() {
+  public Collection<null.dto.inputObjectType.__TypeExpression> getExs() {
     return this.exs;
   }
 
-  public void setExs(Collection<__TypeExpression> exs) {
+  public void setExs(Collection<null.dto.inputObjectType.__TypeExpression> exs) {
     this.exs = exs;
   }
 }

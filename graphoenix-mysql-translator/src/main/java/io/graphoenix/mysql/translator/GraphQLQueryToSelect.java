@@ -185,6 +185,7 @@ public class GraphQLQueryToSelect {
                                 .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
                                 .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
                                 .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
+                                .filter(subSelectionContext -> manager.isNotFetchField(typeName, subSelectionContext.field().name().getText()))
                                 .flatMap(subSelectionContext -> selectionToExpressionStream(typeName, subSelectionContext, level, parentTypeName == null))
                                 .collect(Collectors.toList())
                 )
