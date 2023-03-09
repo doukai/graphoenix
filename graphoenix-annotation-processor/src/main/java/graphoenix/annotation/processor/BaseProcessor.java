@@ -11,6 +11,7 @@ import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.translator.*;
 import io.graphoenix.spi.annotation.Ignore;
+import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.vavr.Tuple2;
@@ -22,10 +23,7 @@ import org.tinylog.Logger;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.io.IOException;
@@ -36,6 +34,7 @@ import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 @ApplicationScoped
 public class BaseProcessor {
 
+    private GraphQLConfig graphQLConfig;
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
     private GraphQLApiBuilder graphQLApiBuilder;
@@ -48,21 +47,21 @@ public class BaseProcessor {
     public void init(ProcessingEnvironment processingEnv) {
         Filer filer = processingEnv.getFiler();
         this.typeUtils = processingEnv.getTypeUtils();
-        GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
+        this.graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
+        documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
+        graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
+        javaElementToEnum = BeanContext.get(JavaElementToEnum.class);
+        javaElementToObject = BeanContext.get(JavaElementToObject.class);
+        javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
+        javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
         BeanContext.load(BaseProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
-        this.documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
-        this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
-        this.javaElementToEnum = BeanContext.get(JavaElementToEnum.class);
-        this.javaElementToObject = BeanContext.get(JavaElementToObject.class);
-        this.javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
-        this.javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
 
         try {
             manager.clearAll();
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
-            configRegister.registerConfig(graphQLConfig, filer);
+            configRegister.registerConfig(this.graphQLConfig, filer);
             IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
             mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
@@ -71,7 +70,17 @@ public class BaseProcessor {
         }
     }
 
+
     public void registerElements(RoundEnvironment roundEnv) {
+        if (graphQLConfig.getPackageName() == null) {
+            roundEnv.getElementsAnnotatedWith(Package.class).stream()
+                    .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
+                    .findFirst()
+                    .map(element -> (PackageElement) element)
+                    .ifPresent(packageElement -> graphQLConfig.setPackageName(packageElement.getQualifiedName().toString()));
+            documentBuilder.setGraphQLConfig(graphQLConfig);
+        }
+
         roundEnv.getElementsAnnotatedWith(Enum.class).stream()
                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.ENUM))

@@ -42,7 +42,7 @@ public class GraphQLTypeToTable {
                                 Stream.ofNullable(config.getLocalPackageNames()).flatMap(Collection::stream),
                                 Stream.of(config.getPackageName())
                         ).anyMatch(packageName ->
-                                manager.getImportPackageName(objectTypeDefinitionContext)
+                                manager.getPackageName(objectTypeDefinitionContext)
                                         .orElse(config.getPackageName())
                                         .equals(packageName)
                         )

@@ -117,7 +117,7 @@ public class MutationHandlerBuilder {
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isFetchField(fieldDefinitionContext) && manager.getAnchor(fieldDefinitionContext) == anchor || !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                .filter(fieldDefinitionContext -> manager.isNotContainerType(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .collect(Collectors.toList());

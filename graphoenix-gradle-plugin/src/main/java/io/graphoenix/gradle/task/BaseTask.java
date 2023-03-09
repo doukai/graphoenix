@@ -24,6 +24,7 @@ import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.annotation.Ignore;
+import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import org.eclipse.microprofile.graphql.GraphQLApi;
@@ -65,6 +66,7 @@ import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 
 public class BaseTask extends DefaultTask {
 
+    private GraphQLConfig graphQLConfig;
     private final IGraphQLDocumentManager manager;
     private final GraphQLConfigRegister configRegister;
     private final DocumentBuilder documentBuilder;
@@ -78,8 +80,10 @@ public class BaseTask extends DefaultTask {
     }
 
     protected void init() throws IOException, URISyntaxException {
-        GraphQLConfig graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
-        assert graphQLConfig != null;
+        graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
+        if (graphQLConfig == null) {
+            graphQLConfig = new GraphQLConfig();
+        }
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String resourcesPath = sourceSet.getResources().getSourceDirectories().getAsPath();
 
@@ -126,6 +130,15 @@ public class BaseTask extends DefaultTask {
             sourceRoot.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
             sourceRoot.tryToParse();
             List<CompilationUnit> compilations = sourceRoot.getCompilationUnits();
+
+            if (graphQLConfig.getPackageName() == null) {
+                compilations.stream()
+                        .flatMap(compilationUnit -> compilationUnit.getPackageDeclaration().stream())
+                        .filter(packageDeclaration -> packageDeclaration.getAnnotationByName(Package.class.getCanonicalName()).isPresent())
+                        .findFirst()
+                        .ifPresent(packageDeclaration -> graphQLConfig.setPackageName(packageDeclaration.getNameAsString()));
+                documentBuilder.setGraphQLConfig(graphQLConfig);
+            }
 
             compilations.stream()
                     .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))

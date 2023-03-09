@@ -83,13 +83,9 @@ public class GrpcObjectHandlerBuilder {
         String objectParameterName = grpcNameUtil.getLowerCamelName(objectTypeDefinitionContext);
         String rpcObjectName = grpcNameUtil.getGrpcTypeName(objectTypeDefinitionContext);
 
-        ClassName className = manager.getContainerClassName(objectTypeDefinitionContext)
+        ClassName className = manager.getClassName(objectTypeDefinitionContext)
                 .map(TYPE_NAME_UTIL::bestGuess)
-                .orElseGet(() ->
-                        manager.getImportClassName(objectTypeDefinitionContext)
-                                .map(TYPE_NAME_UTIL::bestGuess)
-                                .orElse(ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()))
-                );
+                .orElseGet(() -> ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()));
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
                 .addModifiers(Modifier.PUBLIC)

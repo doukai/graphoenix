@@ -1,7 +1,21 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
+    }
+}
+
 plugins {
     id 'java'
 }
 apply plugin: 'maven'
+apply plugin: 'io.graphoenix'
+
+compileJava.options.sourcepath = files('src/main/resources')
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'

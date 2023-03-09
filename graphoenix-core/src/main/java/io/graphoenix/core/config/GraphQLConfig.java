@@ -29,6 +29,7 @@ public class GraphQLConfig {
     @Optional
     private Boolean compensating = false;
 
+    @Optional
     private String packageName;
 
     @Optional

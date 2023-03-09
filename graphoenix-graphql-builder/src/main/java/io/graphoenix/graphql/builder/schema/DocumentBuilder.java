@@ -255,11 +255,11 @@ public class DocumentBuilder {
     }
 
     public List<Field> getMetaInterfaceFields() {
-        GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext = manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLErrors(META_INTERFACE_NOT_EXIST));
-
-        return manager.getInterface(META_INTERFACE_NAME).orElseThrow(() -> new GraphQLErrors(META_INTERFACE_NOT_EXIST))
-                .fieldsDefinition().fieldDefinition().stream()
-                .map(fieldDefinitionContext -> buildField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, false))
+        return manager.getInterface(META_INTERFACE_NAME).stream()
+                .flatMap(interfaceTypeDefinitionContext ->
+                        interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                .map(fieldDefinitionContext -> buildField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, false))
+                )
                 .collect(Collectors.toList());
     }
 
