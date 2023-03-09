@@ -49,6 +49,7 @@ public class BaseProcessor {
         Filer filer = processingEnv.getFiler();
         this.typeUtils = processingEnv.getTypeUtils();
         GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
+        BeanContext.load(BaseProcessor.class.getClassLoader());
         this.manager = BeanContext.get(IGraphQLDocumentManager.class);
         this.documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
         this.graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);

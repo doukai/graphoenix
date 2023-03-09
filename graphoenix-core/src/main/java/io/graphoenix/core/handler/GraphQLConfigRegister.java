@@ -91,7 +91,7 @@ public class GraphQLConfigRegister {
                 pathList = Files.list(fileSystem.getPath("META-INF/graphql")).collect(Collectors.toList());
             }
             try {
-                Optional<Path> exportGraphQLFile = pathList.stream().filter(path -> path.getFileName().getFileName().toString().equals("export.gql")).findFirst();
+                Optional<Path> exportGraphQLFile = pathList.stream().filter(path -> path.getFileName().getFileName().toString().equals("package.gql")).findFirst();
                 if (exportGraphQLFile.isPresent()) {
                     manager.mergePath(exportGraphQLFile.get());
                 } else {

@@ -165,67 +165,39 @@ public interface IGraphQLDocumentManager {
 
     boolean isContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
-    boolean isContainerType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
-
-    boolean isContainerType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
-
-    boolean isContainerType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
-
     boolean isNotContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
-    boolean isNotContainerType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+    boolean isContainerType(GraphqlParser.TypeContext typeContext);
 
-    boolean isNotContainerType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+    boolean isNotContainerType(GraphqlParser.TypeContext typeContext);
 
-    boolean isNotContainerType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+    boolean hasClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
-    boolean isContainerType(String typeName);
+    boolean hasClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
 
-    boolean isNotContainerType(String typeName);
+    boolean hasClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
-    Optional<String> getContainerClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+    boolean hasClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
-    Optional<String> getContainerClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+    boolean hasClassName(String typeName);
 
-    Optional<String> getContainerClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+    Optional<String> getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
-    Optional<String> getContainerClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+    Optional<String> getClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
 
-    boolean isImportType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+    Optional<String> getClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
-    boolean isImportType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+    Optional<String> getClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
-    boolean isImportType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
+    String getClassName(String typeName);
 
-    boolean isImportType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+    Optional<String> getPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
 
-    boolean isNotImportType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+    Optional<String> getPackageName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
 
-    boolean isNotImportType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
+    Optional<String> getPackageName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
 
-    boolean isNotImportType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
-
-    boolean isImportType(String typeName);
-
-    boolean isNotImportType(String typeName);
-
-    boolean isNotImportType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
-
-    Optional<String> getImportPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
-
-    Optional<String> getImportPackageName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
-
-    Optional<String> getImportPackageName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
-
-    Optional<String> getImportPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
-
-    Optional<String> getImportClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
-
-    Optional<String> getImportClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
-
-    Optional<String> getImportClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
-
-    Optional<String> getImportClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
+    Optional<String> getPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
     String getPackageName(String typeName);
 

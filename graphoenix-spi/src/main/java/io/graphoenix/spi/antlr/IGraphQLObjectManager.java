@@ -16,5 +16,9 @@ public interface IGraphQLObjectManager {
 
     Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitions();
 
+    boolean isContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
+    boolean isNotContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
     void clear();
 }

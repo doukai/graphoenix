@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
+
 @ApplicationScoped
 public class GraphQLObjectManager implements IGraphQLObjectManager {
 
@@ -35,6 +37,18 @@ public class GraphQLObjectManager implements IGraphQLObjectManager {
     @Override
     public Stream<GraphqlParser.ObjectTypeDefinitionContext> getObjectTypeDefinitions() {
         return objectTypeDefinitionMap.values().stream();
+    }
+
+    @Override
+    public boolean isContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Stream.ofNullable(objectTypeDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME));
+    }
+
+    @Override
+    public boolean isNotContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return !isContainerType(objectTypeDefinitionContext);
     }
 
     @Override

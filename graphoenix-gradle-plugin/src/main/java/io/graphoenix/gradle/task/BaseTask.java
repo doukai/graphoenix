@@ -14,10 +14,14 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.document.*;
+import io.graphoenix.core.document.Directive;
+import io.graphoenix.core.document.EnumType;
+import io.graphoenix.core.document.Field;
+import io.graphoenix.core.document.InputValue;
+import io.graphoenix.core.document.InterfaceType;
+import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
-import io.graphoenix.core.operation.Argument;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -57,7 +61,7 @@ import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 
 public class BaseTask extends DefaultTask {
 
@@ -158,7 +162,7 @@ public class BaseTask extends DefaultTask {
                                                                                     .setName(typeName)
                                                                                     .addDirective(
                                                                                             new Directive()
-                                                                                                    .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                                                                    .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                     .addArgument("className", qualifiedName)
                                                                                     )
                                                                                     .toString()
@@ -169,7 +173,7 @@ public class BaseTask extends DefaultTask {
                                                                                     .setName(typeName)
                                                                                     .addDirective(
                                                                                             new Directive()
-                                                                                                    .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                                                                    .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                     .addArgument("className", qualifiedName)
                                                                                     )
                                                                                     .toString()
@@ -180,7 +184,7 @@ public class BaseTask extends DefaultTask {
                                                                                     .setName(typeName)
                                                                                     .addDirective(
                                                                                             new Directive()
-                                                                                                    .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                                                                    .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                     .addArgument("className", qualifiedName)
                                                                                     )
                                                                                     .toString()

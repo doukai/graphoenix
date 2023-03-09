@@ -35,6 +35,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.CLASS_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.PACKAGE_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
@@ -659,22 +660,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public boolean isContainerType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return isContainerType(objectTypeDefinitionContext.directives());
-    }
-
-    @Override
-    public boolean isContainerType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return isContainerType(enumTypeDefinitionContext.directives());
-    }
-
-    @Override
-    public boolean isContainerType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return isContainerType(inputObjectTypeDefinitionContext.directives());
-    }
-
-    @Override
-    public boolean isContainerType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return isContainerType(interfaceTypeDefinitionContext.directives());
+        return graphQLObjectManager.isContainerType(objectTypeDefinitionContext);
     }
 
     @Override
@@ -683,68 +669,77 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean isNotContainerType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return !isContainerType(enumTypeDefinitionContext);
+    public boolean isContainerType(GraphqlParser.TypeContext typeContext) {
+        return getObject(getFieldTypeName(typeContext)).map(this::isContainerType).orElse(false);
     }
 
     @Override
-    public boolean isNotContainerType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return !isContainerType(inputObjectTypeDefinitionContext);
+    public boolean isNotContainerType(GraphqlParser.TypeContext typeContext) {
+        return !isContainerType(typeContext);
     }
 
     @Override
-    public boolean isNotContainerType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return !isContainerType(interfaceTypeDefinitionContext);
+    public boolean hasClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).map(this::hasClassName).orElse(false);
     }
 
     @Override
-    public boolean isContainerType(String typeName) {
-        if (isObject(typeName)) {
-            return getObject(typeName).map(this::isContainerType).orElse(false);
-        } else if (isInterface(typeName)) {
-            return getInterface(typeName).map(this::isContainerType).orElse(false);
-        } else if (isEnum(typeName)) {
-            return getEnum(typeName).map(this::isContainerType).orElse(false);
-        } else if (isInputObject(typeName)) {
-            return getInputObject(typeName).map(this::isContainerType).orElse(false);
-        }
-        return false;
+    public boolean hasClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).map(this::hasClassName).orElse(false);
     }
 
     @Override
-    public boolean isNotContainerType(String typeName) {
-        return !isContainerType(typeName);
-    }
-
-    public boolean isContainerType(GraphqlParser.DirectivesContext directivesContext) {
-        return Stream.ofNullable(directivesContext)
-                .flatMap(directives -> directives.directive().stream())
-                .anyMatch(directiveContext -> directiveContext.name().getText().equals(CONTAINER_TYPE_DIRECTIVE_NAME));
+    public boolean hasClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).map(this::hasClassName).orElse(false);
     }
 
     @Override
-    public Optional<String> getContainerClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
+    public boolean hasClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).map(this::hasClassName).orElse(false);
     }
 
-    @Override
-    public Optional<String> getContainerClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
-    }
-
-    @Override
-    public Optional<String> getContainerClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
-    }
-
-    @Override
-    public Optional<String> getContainerClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getContainerClassName);
-    }
-
-    public Optional<String> getContainerClassName(GraphqlParser.DirectivesContext directivesContext) {
+    public boolean hasClassName(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals(CONTAINER_TYPE_DIRECTIVE_NAME))
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(CLASS_INFO_DIRECTIVE_NAME));
+    }
+
+    @Override
+    public boolean hasClassName(String typeName) {
+        if (isObject(typeName)) {
+            return getObject(typeName).map(this::hasClassName).orElse(false);
+        } else if (isInterface(typeName)) {
+            return getInterface(typeName).map(this::hasClassName).orElse(false);
+        } else if (isEnum(typeName)) {
+            return getEnum(typeName).map(this::hasClassName).orElse(false);
+        } else if (isInputObject(typeName)) {
+            return getInputObject(typeName).map(this::hasClassName).orElse(false);
+        }
+        throw new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName));
+    }
+
+    @Override
+    public Optional<String> getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getClassName);
+    }
+
+    @Override
+    public Optional<String> getClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getClassName);
+    }
+
+    @Override
+    public Optional<String> getClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getClassName);
+    }
+
+    @Override
+    public Optional<String> getClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getClassName);
+    }
+
+    public Optional<String> getClassName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .filter(directiveContext -> directiveContext.name().getText().equals(CLASS_INFO_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
                 .flatMap(argumentsContext -> argumentsContext.argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("className"))
@@ -753,93 +748,42 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public boolean isImportType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return isImportType(objectTypeDefinitionContext.directives());
-    }
-
-    @Override
-    public boolean isImportType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return isImportType(enumTypeDefinitionContext.directives());
-    }
-
-    @Override
-    public boolean isImportType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return isImportType(inputObjectTypeDefinitionContext.directives());
-    }
-
-    @Override
-    public boolean isImportType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return isImportType(interfaceTypeDefinitionContext.directives());
-    }
-
-    @Override
-    public boolean isNotImportType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return !isImportType(objectTypeDefinitionContext);
-    }
-
-    @Override
-    public boolean isNotImportType(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return !isImportType(enumTypeDefinitionContext);
-    }
-
-    @Override
-    public boolean isNotImportType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return !isImportType(inputObjectTypeDefinitionContext);
-    }
-
-    @Override
-    public boolean isImportType(String typeName) {
+    public String getClassName(String typeName) {
         if (isObject(typeName)) {
-            return getObject(typeName).map(this::isImportType).orElse(false);
+            return getObject(typeName).flatMap(this::getClassName).orElseThrow(() -> new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         } else if (isInterface(typeName)) {
-            return getInterface(typeName).map(this::isImportType).orElse(false);
+            return getInterface(typeName).flatMap(this::getClassName).orElseThrow(() -> new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         } else if (isEnum(typeName)) {
-            return getEnum(typeName).map(this::isImportType).orElse(false);
+            return getEnum(typeName).flatMap(this::getClassName).orElseThrow(() -> new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         } else if (isInputObject(typeName)) {
-            return getInputObject(typeName).map(this::isImportType).orElse(false);
+            return getInputObject(typeName).flatMap(this::getClassName).orElseThrow(() -> new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         }
-        return false;
+        throw new GraphQLErrors(CLASS_NAME_ARGUMENT_NOT_EXIST.bind(typeName));
     }
 
     @Override
-    public boolean isNotImportType(String typeName) {
-        return !isImportType(typeName);
+    public Optional<String> getPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getPackageName);
     }
 
     @Override
-    public boolean isNotImportType(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return !isImportType(interfaceTypeDefinitionContext);
-    }
-
-    public boolean isImportType(GraphqlParser.DirectivesContext directivesContext) {
-        return Stream.ofNullable(directivesContext)
-                .flatMap(directives -> directives.directive().stream())
-                .anyMatch(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME));
+    public Optional<String> getPackageName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getPackageName);
     }
 
     @Override
-    public Optional<String> getImportPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
+    public Optional<String> getPackageName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getPackageName);
     }
 
     @Override
-    public Optional<String> getImportPackageName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
+    public Optional<String> getPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getPackageName);
     }
 
-    @Override
-    public Optional<String> getImportPackageName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
-    }
-
-    @Override
-    public Optional<String> getImportPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getImportPackageName);
-    }
-
-    public Optional<String> getImportPackageName(GraphqlParser.DirectivesContext directivesContext) {
+    public Optional<String> getPackageName(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME))
+                .filter(directiveContext -> directiveContext.name().getText().equals(PACKAGE_INFO_DIRECTIVE_NAME))
                 .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
                 .flatMap(argumentsContext -> argumentsContext.argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("packageName"))
@@ -848,45 +792,15 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public Optional<String> getImportClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return Optional.ofNullable(objectTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
-    }
-
-    @Override
-    public Optional<String> getImportClassName(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return Optional.ofNullable(enumTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
-    }
-
-    @Override
-    public Optional<String> getImportClassName(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
-    }
-
-    @Override
-    public Optional<String> getImportClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).flatMap(this::getImportClassName);
-    }
-
-    public Optional<String> getImportClassName(GraphqlParser.DirectivesContext directivesContext) {
-        return directivesContext.directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals(IMPORT_TYPE_DIRECTIVE_NAME))
-                .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
-                .flatMap(argumentsContext -> argumentsContext.argument().stream())
-                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
-                .findFirst()
-                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
-    }
-
-    @Override
     public String getPackageName(String typeName) {
         if (isObject(typeName)) {
-            return getObject(typeName).flatMap(this::getImportPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+            return getObject(typeName).flatMap(this::getPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         } else if (isInterface(typeName)) {
-            return getInterface(typeName).flatMap(this::getImportPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+            return getInterface(typeName).flatMap(this::getPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         } else if (isEnum(typeName)) {
-            return getEnum(typeName).flatMap(this::getImportPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+            return getEnum(typeName).flatMap(this::getPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         } else if (isInputObject(typeName)) {
-            return getInputObject(typeName).flatMap(this::getImportPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
+            return getInputObject(typeName).flatMap(this::getPackageName).orElseThrow(() -> new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName)));
         }
         throw new GraphQLErrors(PACKAGE_NAME_ARGUMENT_NOT_EXIST.bind(typeName));
     }

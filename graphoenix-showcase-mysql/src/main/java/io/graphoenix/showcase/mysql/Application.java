@@ -3,9 +3,8 @@ package io.graphoenix.showcase.mysql;
 import io.graphoenix.core.bootstrap.GraphoenixStarter;
 import io.graphoenix.grpc.server.GraphQLGrpcGraphoenixServer;
 import io.graphoenix.http.server.GraphQLHttpGraphoenixServer;
-import io.graphoenix.spi.annotation.GraphoenixApplication;
 
-@GraphoenixApplication
+@io.graphoenix.spi.annotation.Application
 public class Application {
 
     public static void main(String[] args) {
