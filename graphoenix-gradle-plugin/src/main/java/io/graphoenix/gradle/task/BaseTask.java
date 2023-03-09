@@ -88,7 +88,7 @@ public class BaseTask extends DefaultTask {
         String resourcesPath = sourceSet.getResources().getSourceDirectories().getAsPath();
 
         configRegister.registerPreset(createClassLoader());
-        configRegister.registerConfig(graphQLConfig, resourcesPath);
+        configRegister.registerConfig();
         if (graphQLConfig.getBuild()) {
             manager.registerGraphQL(documentBuilder.buildDocument().toString());
         }

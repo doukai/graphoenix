@@ -15,7 +15,7 @@ plugins {
 apply plugin: 'maven'
 apply plugin: 'io.graphoenix'
 
-compileJava.options.sourcepath = files('src/main/resources')
+//compileJava.options.sourcepath = files('src/main/resources')
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'

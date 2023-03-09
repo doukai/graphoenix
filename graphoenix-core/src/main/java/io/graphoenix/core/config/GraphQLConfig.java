@@ -15,7 +15,7 @@ public class GraphQLConfig {
     private String graphQLFileName;
 
     @Optional
-    private String graphQLPath;
+    private String graphQLPath = "graphql";
 
     @Optional
     private Boolean build = true;
