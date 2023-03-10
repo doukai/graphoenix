@@ -53,7 +53,8 @@ public class JavaFileBuilder {
                                         .filter(Optional::isPresent)
                                         .map(Optional::get)
                         )
-                        .map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
+                        .map(typeSpecBuilder::buildAnnotation)
+                        .map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
                 manager.getEnums()
                         .map(typeSpecBuilder::buildEnum)
                         .map(typeSpec -> JavaFile.builder(configuration.getEnumTypePackageName(), typeSpec).build()),

@@ -1,13 +1,13 @@
-buildscript {
-    repositories {
-        mavenLocal()
-        jcenter()
-        gradlePluginPortal()
-    }
-    dependencies {
-        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
-    }
-}
+//buildscript {
+//    repositories {
+//        mavenLocal()
+//        jcenter()
+//        gradlePluginPortal()
+//    }
+//    dependencies {
+//        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
+//    }
+//}
 
 plugins {
     id 'java'
@@ -16,13 +16,12 @@ plugins {
 
 compileJava.options.sourcepath = files('src/main/resources')
 
-apply plugin: 'io.graphoenix'
-graphql {
-    graphQLFileName = "auth.gql"
-    packageName = "io.graphoenix.showcase.mysql"
-    inputLayers = 3
-    outputPath = "D:/Work"
-}
+//apply plugin: 'io.graphoenix'
+//graphql {
+//    graphQLFileName = "auth.gql"
+//    packageName = "io.graphoenix.showcase.mysql"
+//    inputLayers = 3
+//}
 
 protobuf {
     protoc {

@@ -17,13 +17,17 @@ public interface IGraphQLDocumentManager {
 
     void registerInputStream(InputStream inputStream) throws IOException;
 
-    void registerFileByName(String graphqlFileName) throws IOException;
+    void registerFileByName(String graphqlFileName) throws IOException, URISyntaxException;
+
+    void registerFileByName(String graphqlFileName, ClassLoader classLoader) throws IOException, URISyntaxException;
 
     void registerFile(File graphqlFile) throws IOException;
 
     void registerPathByName(String graphqlPathName) throws IOException, URISyntaxException;
 
     void registerPath(Path graphqlPath) throws IOException;
+
+    void registerPathByName(String graphqlPathName, ClassLoader classLoader) throws IOException, URISyntaxException;
 
     void mergePath(Path graphqlPath) throws IOException;
 

@@ -31,17 +31,18 @@ public class PackageProcessor extends AbstractProcessor {
 
     private BaseProcessor baseProcessor;
     private DocumentBuilder documentBuilder;
+    private GraphQLConfig graphQLConfig;
     private Filer filer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.filer = processingEnv.getFiler();
-        GraphQLConfig graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
+        filer = processingEnv.getFiler();
+        graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
         BeanContext.load(PackageProcessor.class.getClassLoader());
-        this.documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
-        this.baseProcessor = BeanContext.get(BaseProcessor.class);
-        this.baseProcessor.init(processingEnv);
+        documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
+        baseProcessor = BeanContext.get(BaseProcessor.class);
+        baseProcessor.init(processingEnv);
     }
 
     @Override
@@ -49,8 +50,10 @@ public class PackageProcessor extends AbstractProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
+        if (graphQLConfig.getPackageName() == null) {
+            baseProcessor.getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
+        }
         baseProcessor.registerElements(roundEnv);
-
         try {
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/package.gql");
             Writer writer = packageGraphQL.openWriter();

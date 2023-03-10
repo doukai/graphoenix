@@ -60,31 +60,22 @@ public class ApplicationProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.filer = processingEnv.getFiler();
+        filer = processingEnv.getFiler();
         graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
         BeanContext.load(PackageProcessor.class.getClassLoader());
-        this.manager = BeanContext.get(IGraphQLDocumentManager.class);
-        this.documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
-        this.jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
-        this.invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
-        this.connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
-        this.selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
-        this.operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
-        this.queryDataLoaderBuilder = BeanContext.get(QueryDataLoaderBuilder.class);
-        this.mutationDataLoaderBuilder = BeanContext.get(MutationDataLoaderBuilder.class);
-        this.queryHandlerBuilder = BeanContext.get(QueryHandlerBuilder.class);
-        this.mutationHandlerBuilder = BeanContext.get(MutationHandlerBuilder.class);
-        this.baseProcessor = BeanContext.get(BaseProcessor.class);
-        this.baseProcessor.init(processingEnv);
-
-        try {
-            if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
-            }
-        } catch (IOException e) {
-            Logger.error(e);
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
-        }
+        manager = BeanContext.get(IGraphQLDocumentManager.class);
+        documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
+        jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
+        invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
+        connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
+        selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
+        operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
+        queryDataLoaderBuilder = BeanContext.get(QueryDataLoaderBuilder.class);
+        mutationDataLoaderBuilder = BeanContext.get(MutationDataLoaderBuilder.class);
+        queryHandlerBuilder = BeanContext.get(QueryHandlerBuilder.class);
+        mutationHandlerBuilder = BeanContext.get(MutationHandlerBuilder.class);
+        baseProcessor = BeanContext.get(BaseProcessor.class);
+        baseProcessor.init(processingEnv);
     }
 
     @Override
@@ -92,9 +83,14 @@ public class ApplicationProcessor extends AbstractProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
+        if (graphQLConfig.getPackageName() == null) {
+            baseProcessor.getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
+        }
         baseProcessor.registerElements(roundEnv);
-
         try {
+            if (graphQLConfig.getBuild()) {
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            }
             FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
             Writer writer = mainGraphQL.openWriter();
             writer.write(documentBuilder.getDocument().toString());

@@ -29,9 +29,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
@@ -40,10 +48,16 @@ import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.PACKAGE_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.MERGE_TO_LIST_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.DELETE;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.MERGE;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
+import static io.graphoenix.spi.constant.Hammurabi.PACKAGE_INFO_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.UPDATE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
@@ -110,13 +124,25 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public void registerFileByName(String graphqlFileName) throws IOException {
+    public void registerFileByName(String graphqlFileName) throws IOException, URISyntaxException {
+        registerFileByName(graphqlFileName, this.getClass().getClassLoader());
+    }
+
+    @Override
+    public void registerFileByName(String graphqlFileName, ClassLoader classLoader) throws IOException, URISyntaxException {
         if (Files.exists(Path.of(graphqlFileName))) {
             registerFile(new File(graphqlFileName));
         } else {
-            InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(graphqlFileName);
-            if (inputStream != null) {
-                registerInputStream(inputStream);
+            try {
+                InputStream inputStream = classLoader.getResourceAsStream(graphqlFileName);
+                if (inputStream != null) {
+                    registerInputStream(inputStream);
+                }
+            } catch (FileSystemNotFoundException fileSystemNotFoundException) {
+                Map<String, String> env = new HashMap<>();
+                URL resource = classLoader.getResource(graphqlFileName);
+                FileSystem fileSystem = FileSystems.newFileSystem(Objects.requireNonNull(resource).toURI(), env);
+                registerDocument(DOCUMENT_UTIL.graphqlPathToDocument(fileSystem.getPath(graphqlFileName)));
             }
         }
     }
@@ -128,19 +154,33 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public void registerPathByName(String graphqlPathName) throws IOException, URISyntaxException {
-        if (Files.exists(Path.of(graphqlPathName))) {
-            registerPath(Path.of(graphqlPathName));
-        } else {
-            URL resource = this.getClass().getClassLoader().getResource(graphqlPathName);
-            if (resource != null) {
-                registerPath(Path.of(resource.toURI()));
-            }
-        }
+        registerPathByName(graphqlPathName, this.getClass().getClassLoader());
     }
 
     @Override
     public void registerPath(Path graphqlPath) throws IOException {
         registerDocument(DOCUMENT_UTIL.graphqlPathToDocument(graphqlPath));
+    }
+
+    @Override
+    public void registerPathByName(String graphqlPathName, ClassLoader classLoader) throws IOException, URISyntaxException {
+        if (Files.exists(Path.of(graphqlPathName))) {
+            registerPath(Path.of(graphqlPathName));
+        } else {
+            URL resource = classLoader.getResource(graphqlPathName);
+            try {
+                if (resource != null) {
+                    registerPath(Path.of(resource.toURI()));
+                }
+            } catch (FileSystemNotFoundException fileSystemNotFoundException) {
+                Map<String, String> env = new HashMap<>();
+                FileSystem fileSystem = FileSystems.newFileSystem(Objects.requireNonNull(resource).toURI(), env);
+                List<Path> pathList = Files.list(fileSystem.getPath(graphqlPathName)).collect(Collectors.toList());
+                for (Path path : pathList) {
+                    registerPath(path);
+                }
+            }
+        }
     }
 
     @Override

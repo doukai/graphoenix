@@ -9,13 +9,21 @@ import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
 import javax.tools.StandardLocation;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -45,22 +53,17 @@ public class GraphQLConfigRegister {
         }
     }
 
-    public void registerConfig(String path) throws IOException, URISyntaxException {
-        registerConfig(graphQLConfig, path);
-    }
-
-    public void registerConfig(GraphQLConfig config, String path) throws IOException, URISyntaxException {
-        if (!path.endsWith(File.separator)) {
-            path = path.concat(File.separator);
-        }
-        if (config.getGraphQL() != null) {
-            manager.registerGraphQL(config.getGraphQL());
+    public void registerConfig(ClassLoader classLoader) throws IOException, URISyntaxException {
+        if (graphQLConfig.getGraphQL() != null) {
+            manager.registerGraphQL(graphQLConfig.getGraphQL());
             Logger.info("registered graphql {}", graphQLConfig.getGraphQL());
-        } else if (config.getGraphQLFileName() != null) {
-            manager.registerFileByName(path.concat(config.getGraphQLFileName()));
+        }
+        if (graphQLConfig.getGraphQLFileName() != null) {
+            manager.registerFileByName(graphQLConfig.getGraphQLFileName(), classLoader);
             Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
-        } else if (config.getGraphQLPath() != null) {
-            manager.registerPathByName(path.concat(config.getGraphQLPath()));
+        }
+        if (graphQLConfig.getGraphQLPath() != null) {
+            manager.registerPathByName(graphQLConfig.getGraphQLPath(), classLoader);
             Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
         }
     }

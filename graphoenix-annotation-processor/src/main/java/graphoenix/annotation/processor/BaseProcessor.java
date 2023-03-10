@@ -9,25 +9,40 @@ import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.graphql.generator.translator.*;
+import io.graphoenix.graphql.generator.translator.GraphQLApiBuilder;
+import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
+import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
+import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
+import io.graphoenix.graphql.generator.translator.JavaElementToObject;
 import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.eclipse.microprofile.graphql.*;
 import org.eclipse.microprofile.graphql.Enum;
+import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.Interface;
+import org.eclipse.microprofile.graphql.Mutation;
+import org.eclipse.microprofile.graphql.Query;
+import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.graphql.Type;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 
@@ -61,7 +76,7 @@ public class BaseProcessor {
             manager.clearAll();
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
-            configRegister.registerConfig(this.graphQLConfig, filer);
+            configRegister.registerConfig(graphQLConfig, filer);
             IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
             mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
@@ -70,17 +85,18 @@ public class BaseProcessor {
         }
     }
 
+    public Optional<String> getDefaultPackageName(RoundEnvironment roundEnv) {
+        return roundEnv.getElementsAnnotatedWith(Package.class).stream()
+                .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
+                .findFirst()
+                .map(element -> (PackageElement) element)
+                .map(packageElement -> packageElement.getQualifiedName().toString());
+    }
 
     public void registerElements(RoundEnvironment roundEnv) {
         if (graphQLConfig.getPackageName() == null) {
-            roundEnv.getElementsAnnotatedWith(Package.class).stream()
-                    .filter(element -> element.getKind().equals(ElementKind.PACKAGE))
-                    .findFirst()
-                    .map(element -> (PackageElement) element)
-                    .ifPresent(packageElement -> graphQLConfig.setPackageName(packageElement.getQualifiedName().toString()));
-            documentBuilder.setGraphQLConfig(graphQLConfig);
+            getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
         }
-
         roundEnv.getElementsAnnotatedWith(Enum.class).stream()
                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.ENUM))

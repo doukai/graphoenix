@@ -1,6 +1,7 @@
 package io.graphoenix.gradle.task;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
@@ -57,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -84,14 +86,9 @@ public class BaseTask extends DefaultTask {
         if (graphQLConfig == null) {
             graphQLConfig = new GraphQLConfig();
         }
-        SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        String resourcesPath = sourceSet.getResources().getSourceDirectories().getAsPath();
-
+        documentBuilder.setGraphQLConfig(graphQLConfig);
         configRegister.registerPreset(createClassLoader());
-        configRegister.registerConfig();
-        if (graphQLConfig.getBuild()) {
-            manager.registerGraphQL(documentBuilder.buildDocument().toString());
-        }
+        configRegister.registerConfig(createClassLoader());
         mapper.registerFieldMaps();
     }
 
@@ -114,32 +111,39 @@ public class BaseTask extends DefaultTask {
         return new URLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
     }
 
-    protected void registerInvoke(IGraphQLDocumentManager manager) {
+    protected List<CompilationUnit> getCompilationUnits() throws IOException {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath();
+        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(Path.of(javaPath));
+        ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(createClassLoader());
+        ReflectionTypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
+        combinedTypeSolver.add(javaParserTypeSolver);
+        combinedTypeSolver.add(classLoaderTypeSolver);
+        combinedTypeSolver.add(reflectionTypeSolver);
+        JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(combinedTypeSolver);
+        SourceRoot sourceRoot = new SourceRoot(Path.of(javaPath));
+        sourceRoot.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
+        sourceRoot.tryToParse();
+        return sourceRoot.getCompilationUnits();
+    }
+
+    public Optional<String> getDefaultPackageName(List<CompilationUnit> compilations) throws IOException {
+        return compilations.stream()
+                .flatMap(compilationUnit -> compilationUnit.getPackageDeclaration().stream())
+                .filter(packageDeclaration -> packageDeclaration.getAnnotationByClass(Package.class).isPresent())
+                .findFirst()
+                .map(NodeWithName::getNameAsString);
+    }
+
+    protected void registerInvoke(List<CompilationUnit> compilations) {
         try {
-            CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-            JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(Path.of(javaPath));
-            ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(createClassLoader());
-            ReflectionTypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
-            combinedTypeSolver.add(javaParserTypeSolver);
-            combinedTypeSolver.add(classLoaderTypeSolver);
-            combinedTypeSolver.add(reflectionTypeSolver);
-            JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(combinedTypeSolver);
-            SourceRoot sourceRoot = new SourceRoot(Path.of(javaPath));
-            sourceRoot.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
-            sourceRoot.tryToParse();
-            List<CompilationUnit> compilations = sourceRoot.getCompilationUnits();
-
             if (graphQLConfig.getPackageName() == null) {
-                compilations.stream()
-                        .flatMap(compilationUnit -> compilationUnit.getPackageDeclaration().stream())
-                        .filter(packageDeclaration -> packageDeclaration.getAnnotationByName(Package.class.getCanonicalName()).isPresent())
-                        .findFirst()
-                        .ifPresent(packageDeclaration -> graphQLConfig.setPackageName(packageDeclaration.getNameAsString()));
-                documentBuilder.setGraphQLConfig(graphQLConfig);
+                getDefaultPackageName(compilations).ifPresent(graphQLConfig::setPackageName);
             }
-
+            if (graphQLConfig.getBuild()) {
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            }
             compilations.stream()
                     .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))
                     .flatMap(typeDeclaration -> typeDeclaration.getMethods().stream())
