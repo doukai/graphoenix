@@ -38,19 +38,14 @@ public class InvokeHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
     private Map<String, Map<String, List<Map.Entry<String, String>>>> invokeMethods;
 
     @Inject
-    public InvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public InvokeHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
         this.typeManager = typeManager;
-    }
-
-    public InvokeHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

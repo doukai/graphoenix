@@ -9,7 +9,6 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.utils.CodecUtil;
-import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -28,21 +27,14 @@ import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 public class GrpcObjectHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final TypeManager typeManager;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
     private final GrpcNameUtil grpcNameUtil;
 
     @Inject
-    public GrpcObjectHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public GrpcObjectHandlerBuilder(IGraphQLDocumentManager manager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-        this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
-    }
-
-    public GrpcObjectHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

@@ -9,7 +9,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.FetchHandler;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -33,22 +32,15 @@ import java.util.stream.Collectors;
 public class GrpcFetchHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final TypeManager typeManager;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
     private final GrpcNameUtil grpcNameUtil;
     private Map<String, Map<String, Set<String>>> grpcTypeMap;
 
     @Inject
-    public GrpcFetchHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public GrpcFetchHandlerBuilder(IGraphQLDocumentManager manager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-        this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
-    }
-
-    public GrpcFetchHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

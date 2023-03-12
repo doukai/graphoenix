@@ -62,6 +62,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
@@ -69,27 +70,30 @@ import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 public class BaseTask extends DefaultTask {
 
     private GraphQLConfig graphQLConfig;
-    private final IGraphQLDocumentManager manager;
-    private final GraphQLConfigRegister configRegister;
-    private final DocumentBuilder documentBuilder;
-    private final IGraphQLFieldMapManager mapper;
+    private IGraphQLDocumentManager manager;
+    private DocumentBuilder documentBuilder;
 
-    public BaseTask() {
+    protected void init() {
+//        SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+//        String resourcePath = sourceSet.getResources().getSourceDirectories().getAsPath();
+        ClassLoader classLoader = createClassLoader();
+        CONFIG_UTIL.load(classLoader);
+        BeanContext.load(classLoader);
+        graphQLConfig = BeanContext.get(GraphQLConfig.class);
         manager = BeanContext.get(IGraphQLDocumentManager.class);
-        configRegister = BeanContext.get(GraphQLConfigRegister.class);
+        GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         documentBuilder = BeanContext.get(DocumentBuilder.class);
-        mapper = BeanContext.get(IGraphQLFieldMapManager.class);
-    }
+        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
 
-    protected void init() throws IOException, URISyntaxException {
-        graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
-        if (graphQLConfig == null) {
-            graphQLConfig = new GraphQLConfig();
+        try {
+            manager.clearAll();
+            configRegister.registerPreset(classLoader);
+            configRegister.registerConfig(classLoader);
+            mapper.registerFieldMaps();
+        } catch (IOException | URISyntaxException e) {
+            Logger.error(e);
+            throw new TaskExecutionException(this, e);
         }
-        documentBuilder.setGraphQLConfig(graphQLConfig);
-        configRegister.registerPreset(createClassLoader());
-        configRegister.registerConfig(createClassLoader());
-        mapper.registerFieldMaps();
     }
 
     protected ClassLoader createClassLoader() throws TaskExecutionException {
@@ -111,7 +115,7 @@ public class BaseTask extends DefaultTask {
         return new URLClassLoader(urls.toArray(new URL[0]), getClass().getClassLoader());
     }
 
-    protected List<CompilationUnit> getCompilationUnits() throws IOException {
+    protected List<CompilationUnit> buildCompilationUnits() throws IOException {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath();
         CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
@@ -128,7 +132,7 @@ public class BaseTask extends DefaultTask {
         return sourceRoot.getCompilationUnits();
     }
 
-    public Optional<String> getDefaultPackageName(List<CompilationUnit> compilations) throws IOException {
+    public Optional<String> getDefaultPackageName(List<CompilationUnit> compilations) {
         return compilations.stream()
                 .flatMap(compilationUnit -> compilationUnit.getPackageDeclaration().stream())
                 .filter(packageDeclaration -> packageDeclaration.getAnnotationByClass(Package.class).isPresent())
@@ -137,200 +141,192 @@ public class BaseTask extends DefaultTask {
     }
 
     protected void registerInvoke(List<CompilationUnit> compilations) {
-        try {
-            if (graphQLConfig.getPackageName() == null) {
-                getDefaultPackageName(compilations).ifPresent(graphQLConfig::setPackageName);
-            }
-            if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
-            }
-            compilations.stream()
-                    .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))
-                    .flatMap(typeDeclaration -> typeDeclaration.getMethods().stream())
-                    .forEach(methodDeclaration -> {
-                                Type type = methodDeclaration.getType();
-                                if (type.isArrayType()) {
-                                    type = type.asArrayType().getElementType();
-                                }
-                                try {
-                                    if (type.resolve().isReferenceType()) {
-                                        ResolvedReferenceType resolvedReferenceType = type.resolve().asReferenceType();
-                                        resolvedReferenceType.getTypeDeclaration()
-                                                .ifPresent(resolvedReferenceTypeDeclaration -> {
-                                                            if ((resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()) ||
-                                                                    resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName()) ||
-                                                                    resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName())) &&
-                                                                    !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName())) {
-                                                                String qualifiedName = resolvedReferenceType.getQualifiedName();
-                                                                if (qualifiedName.equals(PublisherBuilder.class.getCanonicalName()) ||
-                                                                        qualifiedName.equals(Mono.class.getCanonicalName()) ||
-                                                                        qualifiedName.equals(Flux.class.getCanonicalName()) ||
-                                                                        qualifiedName.equals(Collection.class.getCanonicalName()) ||
-                                                                        qualifiedName.equals(List.class.getCanonicalName()) ||
-                                                                        qualifiedName.equals(Set.class.getCanonicalName())) {
+        if (graphQLConfig.getPackageName() == null) {
+            getDefaultPackageName(compilations).ifPresent(graphQLConfig::setPackageName);
+        }
+        compilations.stream()
+                .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))
+                .flatMap(typeDeclaration -> typeDeclaration.getMethods().stream())
+                .forEach(methodDeclaration -> {
+                            Type type = methodDeclaration.getType();
+                            if (type.isArrayType()) {
+                                type = type.asArrayType().getElementType();
+                            }
+                            try {
+                                if (type.resolve().isReferenceType()) {
+                                    ResolvedReferenceType resolvedReferenceType = type.resolve().asReferenceType();
+                                    resolvedReferenceType.getTypeDeclaration()
+                                            .ifPresent(resolvedReferenceTypeDeclaration -> {
+                                                        if ((resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()) ||
+                                                                resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName()) ||
+                                                                resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName())) &&
+                                                                !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName())) {
+                                                            String qualifiedName = resolvedReferenceType.getQualifiedName();
+                                                            if (qualifiedName.equals(PublisherBuilder.class.getCanonicalName()) ||
+                                                                    qualifiedName.equals(Mono.class.getCanonicalName()) ||
+                                                                    qualifiedName.equals(Flux.class.getCanonicalName()) ||
+                                                                    qualifiedName.equals(Collection.class.getCanonicalName()) ||
+                                                                    qualifiedName.equals(List.class.getCanonicalName()) ||
+                                                                    qualifiedName.equals(Set.class.getCanonicalName())) {
 
-                                                                    qualifiedName = resolvedReferenceType.typeParametersValues().get(0).asReferenceType().getQualifiedName();
-                                                                }
+                                                                qualifiedName = resolvedReferenceType.typeParametersValues().get(0).asReferenceType().getQualifiedName();
+                                                            }
 
-                                                                String typeName = resolvedReferenceTypeDeclaration.getName();
-                                                                if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName())) {
-                                                                    manager.mergeDocument(
-                                                                            new ObjectType()
-                                                                                    .setName(typeName)
-                                                                                    .addDirective(
-                                                                                            new Directive()
-                                                                                                    .setName(CLASS_INFO_DIRECTIVE_NAME)
-                                                                                                    .addArgument("className", qualifiedName)
-                                                                                    )
-                                                                                    .toString()
-                                                                    );
-                                                                } else if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName())) {
-                                                                    manager.mergeDocument(
-                                                                            new EnumType()
-                                                                                    .setName(typeName)
-                                                                                    .addDirective(
-                                                                                            new Directive()
-                                                                                                    .setName(CLASS_INFO_DIRECTIVE_NAME)
-                                                                                                    .addArgument("className", qualifiedName)
-                                                                                    )
-                                                                                    .toString()
-                                                                    );
-                                                                } else if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName())) {
-                                                                    manager.mergeDocument(
-                                                                            new InterfaceType()
-                                                                                    .setName(typeName)
-                                                                                    .addDirective(
-                                                                                            new Directive()
-                                                                                                    .setName(CLASS_INFO_DIRECTIVE_NAME)
-                                                                                                    .addArgument("className", qualifiedName)
-                                                                                    )
-                                                                                    .toString()
-                                                                    );
-                                                                }
+                                                            String typeName = resolvedReferenceTypeDeclaration.getName();
+                                                            if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName())) {
+                                                                manager.mergeDocument(
+                                                                        new ObjectType()
+                                                                                .setName(typeName)
+                                                                                .addDirective(
+                                                                                        new Directive()
+                                                                                                .setName(CLASS_INFO_DIRECTIVE_NAME)
+                                                                                                .addArgument("className", qualifiedName)
+                                                                                )
+                                                                                .toString()
+                                                                );
+                                                            } else if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName())) {
+                                                                manager.mergeDocument(
+                                                                        new EnumType()
+                                                                                .setName(typeName)
+                                                                                .addDirective(
+                                                                                        new Directive()
+                                                                                                .setName(CLASS_INFO_DIRECTIVE_NAME)
+                                                                                                .addArgument("className", qualifiedName)
+                                                                                )
+                                                                                .toString()
+                                                                );
+                                                            } else if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName())) {
+                                                                manager.mergeDocument(
+                                                                        new InterfaceType()
+                                                                                .setName(typeName)
+                                                                                .addDirective(
+                                                                                        new Directive()
+                                                                                                .setName(CLASS_INFO_DIRECTIVE_NAME)
+                                                                                                .addArgument("className", qualifiedName)
+                                                                                )
+                                                                                .toString()
+                                                                );
                                                             }
                                                         }
-                                                );
-                                    }
-                                } catch (UnsolvedSymbolException e) {
-                                    Logger.warn(e);
+                                                    }
+                                            );
                                 }
+                            } catch (UnsolvedSymbolException e) {
+                                Logger.warn(e);
                             }
-                    );
+                        }
+                );
 
-            compilations.stream()
-                    .flatMap(compilationUnit ->
-                            compilationUnit.getTypes().stream()
-                                    .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
-                    )
-                    .flatMap(typeDeclaration ->
-                            typeDeclaration.getMethods().stream()
-                                    .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Query.class))
-                                    .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Mutation.class))
-                                    .filter(methodDeclaration -> methodDeclaration.getParameters().stream().anyMatch(parameter -> parameter.isAnnotationPresent(Source.class)))
-                    )
-                    .forEach(methodDeclaration -> {
-                                String objectName = methodDeclaration.getParameters().stream()
-                                        .filter(parameter -> parameter.isAnnotationPresent(Source.class))
-                                        .findFirst()
-                                        .orElseThrow()
-                                        .getType()
-                                        .asString();
+        compilations.stream()
+                .flatMap(compilationUnit ->
+                        compilationUnit.getTypes().stream()
+                                .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
+                )
+                .flatMap(typeDeclaration ->
+                        typeDeclaration.getMethods().stream()
+                                .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Query.class))
+                                .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Mutation.class))
+                                .filter(methodDeclaration -> methodDeclaration.getParameters().stream().anyMatch(parameter -> parameter.isAnnotationPresent(Source.class)))
+                )
+                .forEach(methodDeclaration -> {
+                            String objectName = methodDeclaration.getParameters().stream()
+                                    .filter(parameter -> parameter.isAnnotationPresent(Source.class))
+                                    .findFirst()
+                                    .orElseThrow()
+                                    .getType()
+                                    .asString();
 
-                                GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
-                                String typeName = methodDeclaration.getType().asString();
-                                String className = TYPE_NAME_UTIL.getClassName(typeName);
-                                if (className.equals(PublisherBuilder.class.getSimpleName()) ||
-                                        className.equals(Mono.class.getSimpleName())) {
-                                    typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
-                                }
-                                String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
-                                ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
-                                        .addField(
-                                                new Field()
-                                                        .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                                        .setTypeName(invokeFieldTypeName)
-                                        );
-                                manager.mergeDocument(objectType.toString());
+                            GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
+                            String typeName = methodDeclaration.getType().asString();
+                            String className = TYPE_NAME_UTIL.getClassName(typeName);
+                            if (className.equals(PublisherBuilder.class.getSimpleName()) ||
+                                    className.equals(Mono.class.getSimpleName())) {
+                                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
                             }
-                    );
+                            String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
+                            ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
+                                    .addField(
+                                            new Field()
+                                                    .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
+                                                    .setTypeName(invokeFieldTypeName)
+                                    );
+                            manager.mergeDocument(objectType.toString());
+                        }
+                );
 
-            compilations.stream()
-                    .flatMap(compilationUnit ->
-                            compilationUnit.getTypes().stream()
-                                    .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
-                    )
-                    .flatMap(typeDeclaration ->
-                            typeDeclaration.getMethods().stream()
-                                    .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
-                    )
-                    .forEach(methodDeclaration -> {
-                                String typeName = methodDeclaration.getType().asString();
-                                String className = TYPE_NAME_UTIL.getClassName(typeName);
-                                if (className.equals(PublisherBuilder.class.getSimpleName()) ||
-                                        className.equals(Mono.class.getSimpleName())) {
-                                    typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
-                                }
-                                String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
-                                ObjectType objectType = manager.getQueryOperationTypeName().flatMap(manager::getObject)
-                                        .map(documentBuilder::buildObject)
-                                        .orElseGet(() -> new ObjectType().setName("QueryType"));
-                                objectType.addField(
-                                        new Field()
-                                                .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                                .setTypeName(invokeFieldTypeName)
-                                                .setArguments(
-                                                        methodDeclaration.getParameters().stream()
-                                                                .map(parameter ->
-                                                                        new InputValue()
-                                                                                .setName(parameter.getName().getIdentifier())
-                                                                                .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
-                                                                .collect(Collectors.toCollection(LinkedHashSet::new))
-                                                )
-                                );
-                                manager.mergeDocument(objectType.toString());
+        compilations.stream()
+                .flatMap(compilationUnit ->
+                        compilationUnit.getTypes().stream()
+                                .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
+                )
+                .flatMap(typeDeclaration ->
+                        typeDeclaration.getMethods().stream()
+                                .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
+                )
+                .forEach(methodDeclaration -> {
+                            String typeName = methodDeclaration.getType().asString();
+                            String className = TYPE_NAME_UTIL.getClassName(typeName);
+                            if (className.equals(PublisherBuilder.class.getSimpleName()) ||
+                                    className.equals(Mono.class.getSimpleName())) {
+                                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
                             }
-                    );
+                            String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
+                            ObjectType objectType = manager.getQueryOperationTypeName().flatMap(manager::getObject)
+                                    .map(documentBuilder::buildObject)
+                                    .orElseGet(() -> new ObjectType().setName("QueryType"));
+                            objectType.addField(
+                                    new Field()
+                                            .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
+                                            .setTypeName(invokeFieldTypeName)
+                                            .setArguments(
+                                                    methodDeclaration.getParameters().stream()
+                                                            .map(parameter ->
+                                                                    new InputValue()
+                                                                            .setName(parameter.getName().getIdentifier())
+                                                                            .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
+                                                            .collect(Collectors.toCollection(LinkedHashSet::new))
+                                            )
+                            );
+                            manager.mergeDocument(objectType.toString());
+                        }
+                );
 
-            compilations.stream()
-                    .flatMap(compilationUnit ->
-                            compilationUnit.getTypes().stream()
-                                    .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
-                    )
-                    .flatMap(typeDeclaration ->
-                            typeDeclaration.getMethods().stream()
-                                    .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Mutation.class))
-                    )
-                    .forEach(methodDeclaration -> {
-                                String typeName = methodDeclaration.getType().asString();
-                                String className = TYPE_NAME_UTIL.getClassName(typeName);
-                                if (className.equals(PublisherBuilder.class.getSimpleName()) ||
-                                        className.equals(Mono.class.getSimpleName())) {
-                                    typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
-                                }
-                                String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
-                                ObjectType objectType = manager.getMutationOperationTypeName().flatMap(manager::getObject)
-                                        .map(documentBuilder::buildObject)
-                                        .orElseGet(() -> new ObjectType().setName("MutationType"));
-                                objectType.addField(
-                                        new Field()
-                                                .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                                .setTypeName(invokeFieldTypeName)
-                                                .setArguments(
-                                                        methodDeclaration.getParameters().stream()
-                                                                .map(parameter ->
-                                                                        new InputValue()
-                                                                                .setName(parameter.getName().getIdentifier())
-                                                                                .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
-                                                                .collect(Collectors.toCollection(LinkedHashSet::new))
-                                                )
-                                );
-                                manager.mergeDocument(objectType.toString());
+        compilations.stream()
+                .flatMap(compilationUnit ->
+                        compilationUnit.getTypes().stream()
+                                .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
+                )
+                .flatMap(typeDeclaration ->
+                        typeDeclaration.getMethods().stream()
+                                .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Mutation.class))
+                )
+                .forEach(methodDeclaration -> {
+                            String typeName = methodDeclaration.getType().asString();
+                            String className = TYPE_NAME_UTIL.getClassName(typeName);
+                            if (className.equals(PublisherBuilder.class.getSimpleName()) ||
+                                    className.equals(Mono.class.getSimpleName())) {
+                                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
                             }
-                    );
-        } catch (IOException e) {
-            Logger.error(e);
-            throw new TaskExecutionException(this, e);
-        }
+                            String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
+                            ObjectType objectType = manager.getMutationOperationTypeName().flatMap(manager::getObject)
+                                    .map(documentBuilder::buildObject)
+                                    .orElseGet(() -> new ObjectType().setName("MutationType"));
+                            objectType.addField(
+                                    new Field()
+                                            .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
+                                            .setTypeName(invokeFieldTypeName)
+                                            .setArguments(
+                                                    methodDeclaration.getParameters().stream()
+                                                            .map(parameter ->
+                                                                    new InputValue()
+                                                                            .setName(parameter.getName().getIdentifier())
+                                                                            .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
+                                                            .collect(Collectors.toCollection(LinkedHashSet::new))
+                                            )
+                            );
+                            manager.mergeDocument(objectType.toString());
+                        }
+                );
     }
 
     private String getInvokeFieldName(String methodName) {

@@ -19,7 +19,6 @@ import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import io.vavr.Tuple2;
-import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.graphql.Enum;
 import org.eclipse.microprofile.graphql.GraphQLApi;
 import org.eclipse.microprofile.graphql.Input;
@@ -30,6 +29,7 @@ import org.eclipse.microprofile.graphql.Source;
 import org.eclipse.microprofile.graphql.Type;
 import org.tinylog.Logger;
 
+import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
@@ -46,8 +46,7 @@ import java.util.Optional;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 
-@ApplicationScoped
-public class BaseProcessor {
+public abstract class BaseProcessor extends AbstractProcessor {
 
     private GraphQLConfig graphQLConfig;
     private IGraphQLDocumentManager manager;
@@ -59,25 +58,28 @@ public class BaseProcessor {
     private JavaElementToInputType javaElementToInputType;
     private Types typeUtils;
 
+    @Override
     public void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        typeUtils = processingEnv.getTypeUtils();
         Filer filer = processingEnv.getFiler();
-        this.typeUtils = processingEnv.getTypeUtils();
-        this.graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
-        documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
+        CONFIG_UTIL.load(filer);
+        BeanContext.load(BaseProcessor.class.getClassLoader());
+        manager = BeanContext.get(IGraphQLDocumentManager.class);
+        graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        documentBuilder = BeanContext.get(DocumentBuilder.class);
         graphQLApiBuilder = BeanContext.get(GraphQLApiBuilder.class);
         javaElementToEnum = BeanContext.get(JavaElementToEnum.class);
         javaElementToObject = BeanContext.get(JavaElementToObject.class);
         javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
         javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
-        BeanContext.load(BaseProcessor.class.getClassLoader());
-        this.manager = BeanContext.get(IGraphQLDocumentManager.class);
+        GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+        IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
 
         try {
             manager.clearAll();
-            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
             configRegister.registerConfig(graphQLConfig, filer);
-            IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
             mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);

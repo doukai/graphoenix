@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     implementation project(':graphoenix-core')
+    implementation project(':graphoenix-config')
     implementation project(':graphoenix-java-generator')
     implementation project(':graphoenix-graphql-builder')
     implementation project(':graphoenix-protobuf-builder')

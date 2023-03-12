@@ -22,6 +22,7 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -33,7 +34,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.META_INTERFACE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
 import static io.graphoenix.spi.constant.Hammurabi.*;
 
@@ -57,11 +57,6 @@ public class DocumentBuilder {
         this.manager = manager;
         this.mapper = mapper;
         this.graphQLConfigRegister = graphQLConfigRegister;
-    }
-
-    public DocumentBuilder setGraphQLConfig(GraphQLConfig graphQLConfig) {
-        this.graphQLConfig = graphQLConfig;
-        return this;
     }
 
     public void startupManager() throws IOException, URISyntaxException {

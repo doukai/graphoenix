@@ -16,7 +16,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.handler.GeneratorHandler;
 import org.tinylog.Logger;
 
-import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
@@ -40,15 +39,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.GraphQLOperation")
 @SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
-public class GraphQLOperationProcessor extends AbstractProcessor {
+public class GraphQLOperationProcessor extends BaseProcessor {
 
-    private BaseProcessor baseProcessor;
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
     private GraphQLOperationRouter operationRouter;
@@ -66,16 +63,13 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
         elementUtils = processingEnv.getElementUtils();
         typeUtils = processingEnv.getTypeUtils();
         filer = processingEnv.getFiler();
-        graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
-        BeanContext.load(GraphQLOperationProcessor.class.getClassLoader());
+        graphQLConfig = BeanContext.get(GraphQLConfig.class);
         manager = BeanContext.get(IGraphQLDocumentManager.class);
-        documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
+        documentBuilder = BeanContext.get(DocumentBuilder.class);
         operationRouter = BeanContext.get(GraphQLOperationRouter.class);
         generatorHandler = BeanContext.get(GeneratorHandler.class);
         javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
-        baseProcessor = BeanContext.get(BaseProcessor.class);
-        baseProcessor.init(processingEnv);
     }
 
     @Override
@@ -84,7 +78,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
             return false;
         }
         if (graphQLConfig.getPackageName() == null) {
-            baseProcessor.getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
+            getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
         }
         try {
             if (graphQLConfig.getBuild()) {
@@ -141,7 +135,7 @@ public class GraphQLOperationProcessor extends AbstractProcessor {
                             writer.write(value);
                             writer.close();
                         }
-                        operationInterfaceImplementer.setGraphQLConfig(graphQLConfig).writeToFiler(packageElement, typeElement, operationDAO, generatorHandler.extension(), filer);
+                        operationInterfaceImplementer.writeToFiler(packageElement, typeElement, operationDAO, generatorHandler.extension(), filer);
                     }
                 }
             }

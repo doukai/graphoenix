@@ -10,7 +10,6 @@ import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.ObjectValueWithVariable;
-import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -28,21 +27,14 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 public class GrpcInputObjectHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final TypeManager typeManager;
     private final GrpcNameUtil grpcNameUtil;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public GrpcInputObjectHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public GrpcInputObjectHandlerBuilder(IGraphQLDocumentManager manager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-        this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
-    }
-
-    public GrpcInputObjectHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

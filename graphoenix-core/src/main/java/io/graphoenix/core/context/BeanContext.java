@@ -21,11 +21,7 @@ public class BeanContext {
     private static final BeanProviders CONTEXT_CACHE = new BeanProviders();
 
     static {
-        Logger.info("load ModuleContext from {}", BeanContext.class.getClassLoader().getName());
-        moduleContexts = ServiceLoader.load(ModuleContext.class, BeanContext.class.getClassLoader()).stream()
-                .map(ServiceLoader.Provider::get)
-                .collect(Collectors.toSet());
-        Logger.info(moduleContexts.size() + " ModuleContext loaded");
+        load(BeanContext.class.getClassLoader());
     }
 
     private BeanContext() {

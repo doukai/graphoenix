@@ -12,7 +12,6 @@ import io.graphoenix.java.generator.implementer.grpc.GrpcServiceImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.tinylog.Logger;
 
-import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
@@ -24,15 +23,13 @@ import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.util.Set;
 
-import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes("io.grpc.stub.annotations.GrpcGenerated")
 @SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
-public class GrpcServiceProcessor extends AbstractProcessor {
+public class GrpcServiceProcessor extends BaseProcessor {
 
-    private BaseProcessor baseProcessor;
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
     private GrpcInputObjectHandlerBuilder grpcInputObjectHandlerBuilder;
@@ -47,17 +44,14 @@ public class GrpcServiceProcessor extends AbstractProcessor {
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         filer = processingEnv.getFiler();
-        graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
-        BeanContext.load(GrpcServiceProcessor.class.getClassLoader());
+        graphQLConfig = BeanContext.get(GraphQLConfig.class);
         manager = BeanContext.get(IGraphQLDocumentManager.class);
-        documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
+        documentBuilder = BeanContext.get(DocumentBuilder.class);
         grpcInputObjectHandlerBuilder = BeanContext.get(GrpcInputObjectHandlerBuilder.class);
         grpcObjectHandlerBuilder = BeanContext.get(GrpcObjectHandlerBuilder.class);
         grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
         grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
         grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
-        baseProcessor = BeanContext.get(BaseProcessor.class);
-        baseProcessor.init(processingEnv);
     }
 
     @Override
@@ -66,18 +60,18 @@ public class GrpcServiceProcessor extends AbstractProcessor {
             return false;
         }
         if (graphQLConfig.getPackageName() == null) {
-            baseProcessor.getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
+            getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
         }
-        baseProcessor.registerElements(roundEnv);
+        registerElements(roundEnv);
         try {
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
-            grpcInputObjectHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            grpcObjectHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            grpcRequestHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            grpcServiceImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
-            grpcFetchHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
+            grpcInputObjectHandlerBuilder.writeToFiler(filer);
+            grpcObjectHandlerBuilder.writeToFiler(filer);
+            grpcRequestHandlerBuilder.writeToFiler(filer);
+            grpcServiceImplementer.writeToFiler(filer);
+            grpcFetchHandlerBuilder.writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

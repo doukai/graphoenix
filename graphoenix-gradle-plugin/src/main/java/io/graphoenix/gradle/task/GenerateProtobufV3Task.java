@@ -11,7 +11,6 @@ import org.gradle.api.tasks.TaskExecutionException;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -20,38 +19,30 @@ import java.util.Set;
 
 public class GenerateProtobufV3Task extends BaseTask {
 
-    private final ProtobufFileBuilder protobufFileBuilder;
-
-    public GenerateProtobufV3Task() {
-        this.protobufFileBuilder = BeanContext.get(ProtobufFileBuilder.class);
-    }
-
     @TaskAction
     public void generateGraphQLSource() {
-        GraphQLConfig graphQLConfig = getProject().getExtensions().findByType(GraphQLConfig.class);
-        if (graphQLConfig == null) {
-            graphQLConfig = new GraphQLConfig();
-        }
+        init();
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        ProtobufFileBuilder protobufFileBuilder = BeanContext.get(ProtobufFileBuilder.class);
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         Path protoPath = Path.of(sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath()).getParent().resolve("proto");
         try {
-            init();
-            List<CompilationUnit> compilationUnits = getCompilationUnits();
-            registerInvoke(compilationUnits);
+            List<CompilationUnit> compilationUnits = buildCompilationUnits();
             if (graphQLConfig.getPackageName() == null) {
                 getDefaultPackageName(compilationUnits).ifPresent(graphQLConfig::setPackageName);
             }
+            registerInvoke(compilationUnits);
             if (Files.notExists(protoPath)) {
                 Files.createDirectories(protoPath);
             }
-            Set<Map.Entry<String, String>> entries = protobufFileBuilder.setGraphQLConfig(graphQLConfig).buildProto3().entrySet();
+            Set<Map.Entry<String, String>> entries = protobufFileBuilder.buildProto3().entrySet();
             for (Map.Entry<String, String> entry : entries) {
                 Files.writeString(
                         protoPath.resolve(entry.getKey().concat(".proto")),
                         entry.getValue()
                 );
             }
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             Logger.error(e);
             throw new TaskExecutionException(this, e);
         }

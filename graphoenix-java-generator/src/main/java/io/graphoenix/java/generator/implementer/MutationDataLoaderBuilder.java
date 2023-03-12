@@ -40,20 +40,13 @@ import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 public class MutationDataLoaderBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final TypeManager typeManager;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
     private Map<String, Map<String, Set<Tuple2<String, String>>>> fetchTypeMap;
 
     @Inject
-    public MutationDataLoaderBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public MutationDataLoaderBuilder(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-        this.typeManager = typeManager;
-    }
-
-    public MutationDataLoaderBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

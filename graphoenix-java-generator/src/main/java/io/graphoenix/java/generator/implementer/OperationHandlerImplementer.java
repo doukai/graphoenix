@@ -63,18 +63,13 @@ public class OperationHandlerImplementer {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public OperationHandlerImplementer(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public OperationHandlerImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
         this.typeManager = typeManager;
-    }
-
-    public OperationHandlerImplementer setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

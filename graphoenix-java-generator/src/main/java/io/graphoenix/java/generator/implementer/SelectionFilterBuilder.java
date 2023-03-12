@@ -34,18 +34,13 @@ public class SelectionFilterBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public SelectionFilterBuilder(IGraphQLDocumentManager manager, TypeManager typeManager) {
+    public SelectionFilterBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
         this.typeManager = typeManager;
-    }
-
-    public SelectionFilterBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

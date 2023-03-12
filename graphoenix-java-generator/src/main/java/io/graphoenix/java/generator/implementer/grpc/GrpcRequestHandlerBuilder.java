@@ -40,21 +40,14 @@ import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 public class GrpcRequestHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
-    private final TypeManager typeManager;
     private final GrpcNameUtil grpcNameUtil;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public GrpcRequestHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public GrpcRequestHandlerBuilder(IGraphQLDocumentManager manager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-        this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
-    }
-
-    public GrpcRequestHandlerBuilder setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

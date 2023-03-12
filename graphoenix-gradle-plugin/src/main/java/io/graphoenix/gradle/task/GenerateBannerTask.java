@@ -1,10 +1,10 @@
 package io.graphoenix.gradle.task;
 
 import io.graphoenix.core.config.BannerConfig;
+import io.graphoenix.core.context.BeanContext;
 import io.leego.banana.Ansi;
 import io.leego.banana.BananaUtils;
 import io.leego.banana.Font;
-import org.gradle.api.DefaultTask;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
@@ -20,14 +20,12 @@ import java.util.stream.Stream;
 
 import static io.graphoenix.core.utils.BannerUtil.BANNER_FILE_NAME;
 
-public class GenerateBannerTask extends DefaultTask {
+public class GenerateBannerTask extends BaseTask {
 
     @TaskAction
     public void GenerateIntrospectionSQL() {
-        BannerConfig bannerConfig = getProject().getExtensions().findByType(BannerConfig.class);
-        if (bannerConfig == null) {
-            bannerConfig = new BannerConfig();
-        }
+        init();
+        BannerConfig bannerConfig = BeanContext.get(BannerConfig.class);
         try {
             SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
             String resourcePath = sourceSet.getResources().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\resource")).getAsPath();

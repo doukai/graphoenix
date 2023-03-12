@@ -60,21 +60,16 @@ public class GrpcServiceImplementer {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private final GrpcNameUtil grpcNameUtil;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
     private List<String> queryInvokeClassNames;
     private List<String> mutationInvokeClassNames;
 
     @Inject
-    public GrpcServiceImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil) {
+    public GrpcServiceImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
         this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
-    }
-
-    public GrpcServiceImplementer setConfiguration(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        this.typeManager.setGraphQLConfig(graphQLConfig);
-        return this;
     }
 
     public void writeToFiler(Filer filer) throws IOException {

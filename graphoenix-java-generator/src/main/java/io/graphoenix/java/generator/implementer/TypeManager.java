@@ -32,17 +32,12 @@ import static io.graphoenix.spi.constant.Hammurabi.*;
 public class TypeManager {
 
     private final IGraphQLDocumentManager manager;
-
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public TypeManager(IGraphQLDocumentManager manager) {
+    public TypeManager(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-    }
-
-    public TypeManager setGraphQLConfig(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        return this;
     }
 
     public String getInvokeFieldName(String methodName) {

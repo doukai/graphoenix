@@ -29,17 +29,12 @@ import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 public class ProtobufFileBuilder {
 
     private final IGraphQLDocumentManager manager;
-
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public ProtobufFileBuilder(IGraphQLDocumentManager manager) {
+    public ProtobufFileBuilder(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
-    }
-
-    public ProtobufFileBuilder setGraphQLConfig(GraphQLConfig graphQLConfig) {
         this.graphQLConfig = graphQLConfig;
-        return this;
     }
 
     public Map<String, String> buildProto3() {

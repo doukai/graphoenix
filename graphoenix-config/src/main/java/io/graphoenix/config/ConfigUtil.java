@@ -3,46 +3,83 @@ package io.graphoenix.config;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigFactory;
-import io.vavr.CheckedFunction0;
-import io.vavr.CheckedFunction3;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
+import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
+import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.UUID;
 
 public enum ConfigUtil {
     CONFIG_UTIL;
 
-    private final String[] configNames = {"application.conf", "application.json", "application.properties", "reference.conf"};
     private Config config;
+    private final TypesafeConfig typesafeConfig;
 
     ConfigUtil() {
-        this.config = ConfigFactory.load();
+        config = ConfigFactory.load();
+        typesafeConfig = new TypesafeConfig(config);
     }
 
-    public ConfigUtil scan(String path) {
-        this.config = Arrays.stream(Objects.requireNonNull(new File(path).listFiles()))
-                .filter(file -> Arrays.asList(configNames).contains(file.getName()))
-                .findFirst()
-                .map(ConfigFactory::parseFile)
-                .orElse(null);
-        return this;
+    public TypesafeConfig load() {
+        return typesafeConfig;
     }
 
-    public ConfigUtil scan(Filer filer) {
-        this.config = Stream.of(configNames)
-                .map(configName -> CheckedFunction3.lift(filer::getResource).apply(StandardLocation.SOURCE_PATH, "", configName).getOrElse(() -> null))
-                .filter(Objects::nonNull)
-                .map(fileObject -> CheckedFunction0.of(fileObject.toUri()::toURL).unchecked().get())
-                .map(ConfigFactory::parseURL)
-                .findFirst()
-                .orElse(null);
-        return this;
+    public TypesafeConfig load(ClassLoader classLoader) {
+        config = ConfigFactory.load(classLoader);
+        return typesafeConfig;
+    }
+
+    public TypesafeConfig load(String path) {
+        try {
+            File file = new File(path);
+            URL url = file.toURI().toURL();
+            URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+            Class<URLClassLoader> urlClass = URLClassLoader.class;
+            Method method = urlClass.getDeclaredMethod("addURL", URL.class);
+            method.setAccessible(true);
+            method.invoke(urlClassLoader, url);
+            config = ConfigFactory.load(urlClassLoader);
+        } catch (NoSuchMethodException | MalformedURLException | InvocationTargetException | IllegalAccessException e) {
+            Logger.error(e);
+        }
+        return typesafeConfig;
+    }
+
+    public TypesafeConfig load(Filer filer) {
+        config = ConfigFactory.load(Objects.requireNonNull(getSourcePath(filer)).toString());
+        return typesafeConfig;
+    }
+
+    private Path getSourcePath(Filer filer) {
+        try {
+            FileObject tmp = filer.createResource(StandardLocation.SOURCE_PATH, "", UUID.randomUUID().toString());
+            Writer writer = tmp.openWriter();
+            writer.write("");
+            writer.close();
+            Path path = Paths.get(tmp.toUri());
+            Files.deleteIfExists(path);
+            Path generatedSourcePath = path.getParent();
+            Logger.info("source path: {}", generatedSourcePath.toString());
+            return generatedSourcePath;
+        } catch (IOException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     public <T> T getValue(Class<T> propertyType) {

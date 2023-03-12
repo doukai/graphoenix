@@ -17,7 +17,6 @@ import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.tinylog.Logger;
 
-import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
@@ -34,15 +33,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
 @SupportedAnnotationTypes("io.graphoenix.spi.annotation.Application")
 @SupportedSourceVersion(RELEASE_11)
 @AutoService(Processor.class)
-public class ApplicationProcessor extends AbstractProcessor {
+public class ApplicationProcessor extends BaseProcessor {
 
-    private BaseProcessor baseProcessor;
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
     private InvokeHandlerBuilder invokeHandlerBuilder;
@@ -61,10 +58,9 @@ public class ApplicationProcessor extends AbstractProcessor {
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         filer = processingEnv.getFiler();
-        graphQLConfig = CONFIG_UTIL.scan(filer).getOptionalValue(GraphQLConfig.class).orElseGet(GraphQLConfig::new);
-        BeanContext.load(PackageProcessor.class.getClassLoader());
+        graphQLConfig = BeanContext.get(GraphQLConfig.class);
         manager = BeanContext.get(IGraphQLDocumentManager.class);
-        documentBuilder = BeanContext.get(DocumentBuilder.class).setGraphQLConfig(graphQLConfig);
+        documentBuilder = BeanContext.get(DocumentBuilder.class);
         jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
         invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
         connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
@@ -74,8 +70,6 @@ public class ApplicationProcessor extends AbstractProcessor {
         mutationDataLoaderBuilder = BeanContext.get(MutationDataLoaderBuilder.class);
         queryHandlerBuilder = BeanContext.get(QueryHandlerBuilder.class);
         mutationHandlerBuilder = BeanContext.get(MutationHandlerBuilder.class);
-        baseProcessor = BeanContext.get(BaseProcessor.class);
-        baseProcessor.init(processingEnv);
     }
 
     @Override
@@ -84,9 +78,9 @@ public class ApplicationProcessor extends AbstractProcessor {
             return false;
         }
         if (graphQLConfig.getPackageName() == null) {
-            baseProcessor.getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
+            getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
         }
-        baseProcessor.registerElements(roundEnv);
+        registerElements(roundEnv);
         try {
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
@@ -118,16 +112,14 @@ public class ApplicationProcessor extends AbstractProcessor {
                 writer.write(jsonSchemaTranslator.objectListToJsonSchemaString(objectTypeDefinitionContext, true));
                 writer.close();
             }
-
-            invokeHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            connectionHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            operationHandlerImplementer.setConfiguration(graphQLConfig).writeToFiler(filer);
-            selectionFilterBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            queryDataLoaderBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            mutationDataLoaderBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            queryHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-            mutationHandlerBuilder.setConfiguration(graphQLConfig).writeToFiler(filer);
-
+            invokeHandlerBuilder.writeToFiler(filer);
+            connectionHandlerBuilder.writeToFiler(filer);
+            operationHandlerImplementer.writeToFiler(filer);
+            selectionFilterBuilder.writeToFiler(filer);
+            queryDataLoaderBuilder.writeToFiler(filer);
+            mutationDataLoaderBuilder.writeToFiler(filer);
+            queryHandlerBuilder.writeToFiler(filer);
+            mutationHandlerBuilder.writeToFiler(filer);
         } catch (IOException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
