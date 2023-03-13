@@ -70,8 +70,11 @@ public class JavaElementToObject {
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
                 .addDirective(
-                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
+                        new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())
+                )
+                .addDirective(
+                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
                 );
     }
 }

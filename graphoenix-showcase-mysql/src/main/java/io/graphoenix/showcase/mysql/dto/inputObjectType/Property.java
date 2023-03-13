@@ -5,7 +5,6 @@ import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
 import java.util.Collection;
-import null.dto.inputObjectType.ValidationInput;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.NonNull;
 

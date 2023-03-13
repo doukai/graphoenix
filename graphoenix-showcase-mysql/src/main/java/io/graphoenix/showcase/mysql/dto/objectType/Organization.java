@@ -11,8 +11,6 @@ import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import null.dto.objectType.User;
-import null.dto.objectType.UserConnection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
@@ -27,7 +25,7 @@ public class Organization implements Meta {
 
   private Integer aboveId;
 
-  private null.dto.objectType.Organization above;
+  private Organization above;
 
   private Collection<User> users;
 
@@ -35,6 +33,16 @@ public class Organization implements Meta {
 
   @NonNull
   private String name;
+
+  private Collection<Integer> orgLevel3;
+
+  private Collection<Boolean> roleDisable;
+
+  private Collection<User> userByOrg;
+
+  private Organization parent;
+
+  private ContainerType containerType;
 
   private Boolean isDeprecated;
 
@@ -82,16 +90,6 @@ public class Organization implements Meta {
 
   private UserConnection usersConnection;
 
-  private Collection<Integer> orgLevel3;
-
-  private Collection<Boolean> roleDisable;
-
-  private Collection<User> userByOrg;
-
-  private null.dto.objectType.Organization parent;
-
-  private ContainerType containerType;
-
   public String getId() {
     return this.id;
   }
@@ -108,11 +106,11 @@ public class Organization implements Meta {
     this.aboveId = aboveId;
   }
 
-  public null.dto.objectType.Organization getAbove() {
+  public Organization getAbove() {
     return this.above;
   }
 
-  public void setAbove(null.dto.objectType.Organization above) {
+  public void setAbove(Organization above) {
     this.above = above;
   }
 
@@ -138,6 +136,46 @@ public class Organization implements Meta {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public Collection<Integer> getOrgLevel3() {
+    return this.orgLevel3;
+  }
+
+  public void setOrgLevel3(Collection<Integer> orgLevel3) {
+    this.orgLevel3 = orgLevel3;
+  }
+
+  public Collection<Boolean> getRoleDisable() {
+    return this.roleDisable;
+  }
+
+  public void setRoleDisable(Collection<Boolean> roleDisable) {
+    this.roleDisable = roleDisable;
+  }
+
+  public Collection<User> getUserByOrg() {
+    return this.userByOrg;
+  }
+
+  public void setUserByOrg(Collection<User> userByOrg) {
+    this.userByOrg = userByOrg;
+  }
+
+  public Organization getParent() {
+    return this.parent;
+  }
+
+  public void setParent(Organization parent) {
+    this.parent = parent;
+  }
+
+  public ContainerType getContainerType() {
+    return this.containerType;
+  }
+
+  public void setContainerType(ContainerType containerType) {
+    this.containerType = containerType;
   }
 
   @Override
@@ -330,45 +368,5 @@ public class Organization implements Meta {
 
   public void setUsersConnection(UserConnection usersConnection) {
     this.usersConnection = usersConnection;
-  }
-
-  public Collection<Integer> getOrgLevel3() {
-    return this.orgLevel3;
-  }
-
-  public void setOrgLevel3(Collection<Integer> orgLevel3) {
-    this.orgLevel3 = orgLevel3;
-  }
-
-  public Collection<Boolean> getRoleDisable() {
-    return this.roleDisable;
-  }
-
-  public void setRoleDisable(Collection<Boolean> roleDisable) {
-    this.roleDisable = roleDisable;
-  }
-
-  public Collection<User> getUserByOrg() {
-    return this.userByOrg;
-  }
-
-  public void setUserByOrg(Collection<User> userByOrg) {
-    this.userByOrg = userByOrg;
-  }
-
-  public null.dto.objectType.Organization getParent() {
-    return this.parent;
-  }
-
-  public void setParent(null.dto.objectType.Organization parent) {
-    this.parent = parent;
-  }
-
-  public ContainerType getContainerType() {
-    return this.containerType;
-  }
-
-  public void setContainerType(ContainerType containerType) {
-    this.containerType = containerType;
   }
 }

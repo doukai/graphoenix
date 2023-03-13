@@ -1,11 +1,11 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
+import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import null.dto.enumType.Sex;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.METHOD)
@@ -22,7 +22,7 @@ public @interface UserInput0 {
 
   boolean disable() default false;
 
-  Sex sex() default io.graphoenix.showcase.mysql.dto.enumType.Sex.MAN;
+  Sex sex() default Sex.MAN;
 
   int organizationId() default 0;
 
@@ -31,6 +31,8 @@ public @interface UserInput0 {
   int[] test1() default {};
 
   boolean[] test2() default {};
+
+  String userDetail2() default "";
 
   boolean isDeprecated() default false;
 
@@ -49,8 +51,6 @@ public @interface UserInput0 {
   String createGroupId() default "";
 
   String __typename() default "";
-
-  String userDetail2() default "";
 
   String $id() default "";
 
@@ -84,6 +84,8 @@ public @interface UserInput0 {
 
   String $test2() default "";
 
+  String $userDetail2() default "";
+
   String $isDeprecated() default "";
 
   String $version() default "";
@@ -105,8 +107,6 @@ public @interface UserInput0 {
   String $rolesAggregate() default "";
 
   String $rolesConnection() default "";
-
-  String $userDetail2() default "";
 
   UserProfileInput1 userProfile() default @UserProfileInput1;
 

@@ -40,6 +40,12 @@ enum Function {
     SUM_FUNCTION = 3;
     AVG_FUNCTION = 4;
 }
+enum Protocol {
+    LOCAL_PROTOCOL = 0;
+    GRPC_PROTOCOL = 1;
+    HTTP_PROTOCOL = 2;
+    RSOCKET_PROTOCOL = 3;
+}
 enum IntroTypeKind {
     SCALAR_INTRO_TYPE_KIND = 0;
     OBJECT_INTRO_TYPE_KIND = 1;

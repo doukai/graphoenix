@@ -31,6 +31,8 @@ public @interface UserOrderBy1 {
 
   Sort test2() default Sort.ASC;
 
+  Sort userDetail2() default Sort.ASC;
+
   Sort isDeprecated() default Sort.ASC;
 
   Sort version() default Sort.ASC;
@@ -48,8 +50,6 @@ public @interface UserOrderBy1 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  Sort userDetail2() default Sort.ASC;
 
   UserProfileOrderBy2 userProfile() default @UserProfileOrderBy2;
 

@@ -1,11 +1,11 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
+import io.graphoenix.showcase.mysql.dto.enumType.Operator;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.util.Collection;
-import null.dto.enumType.Conditional;
-import null.dto.enumType.Operator;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 

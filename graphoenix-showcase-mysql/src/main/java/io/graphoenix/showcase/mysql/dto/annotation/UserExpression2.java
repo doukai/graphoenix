@@ -34,6 +34,8 @@ public @interface UserExpression2 {
 
   BooleanExpression test2() default @BooleanExpression;
 
+  StringExpression userDetail2() default @StringExpression;
+
   BooleanExpression isDeprecated() default @BooleanExpression;
 
   IntExpression version() default @IntExpression;
@@ -51,8 +53,6 @@ public @interface UserExpression2 {
   StringExpression createGroupId() default @StringExpression;
 
   StringExpression __typename() default @StringExpression;
-
-  StringExpression userDetail2() default @StringExpression;
 
   String[] groupBy() default {};
 

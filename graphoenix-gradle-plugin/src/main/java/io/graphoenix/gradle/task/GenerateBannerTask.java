@@ -23,7 +23,7 @@ import static io.graphoenix.core.utils.BannerUtil.BANNER_FILE_NAME;
 public class GenerateBannerTask extends BaseTask {
 
     @TaskAction
-    public void GenerateIntrospectionSQL() {
+    public void process() {
         init();
         BannerConfig bannerConfig = BeanContext.get(BannerConfig.class);
         try {

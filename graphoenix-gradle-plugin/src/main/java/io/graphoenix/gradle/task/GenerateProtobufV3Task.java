@@ -20,7 +20,7 @@ import java.util.Set;
 public class GenerateProtobufV3Task extends BaseTask {
 
     @TaskAction
-    public void generateGraphQLSource() {
+    public void process() {
         init();
         GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
         ProtobufFileBuilder protobufFileBuilder = BeanContext.get(ProtobufFileBuilder.class);

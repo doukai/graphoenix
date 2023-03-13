@@ -208,27 +208,27 @@ public class OperationHandlerImplementer {
                 break;
             case MUTATION:
                 builder.addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "MutationBeforeHandler")),
-                                "mutationBeforeHandler",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                ).addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "MutationAfterHandler")),
-                                "mutationAfterHandler",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                ).addField(
-                        FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(MutationDataLoader.class)),
-                                "mutationDataLoader",
-                                Modifier.PRIVATE,
-                                Modifier.FINAL
-                        ).build()
-                )
+                                FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "MutationBeforeHandler")),
+                                        "mutationBeforeHandler",
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL
+                                ).build()
+                        ).addField(
+                                FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "MutationAfterHandler")),
+                                        "mutationAfterHandler",
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL
+                                ).build()
+                        ).addField(
+                                FieldSpec.builder(
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(MutationDataLoader.class)),
+                                        "mutationDataLoader",
+                                        Modifier.PRIVATE,
+                                        Modifier.FINAL
+                                ).build()
+                        )
                         .addFields(buildMutationFields())
                         .addField(
                                 FieldSpec.builder(
@@ -262,8 +262,7 @@ public class OperationHandlerImplementer {
 
     private Set<FieldSpec> buildQueryFields() {
         return manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                .filter(manager::isInvokeField)
                 .map(typeManager::getClassName)
                 .distinct()
                 .collect(Collectors.toList()).stream()
@@ -278,7 +277,7 @@ public class OperationHandlerImplementer {
     private Set<FieldSpec> buildMutationFields() {
         return manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
                 .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                .filter(manager::isInvokeField)
                 .map(typeManager::getClassName)
                 .distinct()
                 .collect(Collectors.toList()).stream()
@@ -431,14 +430,14 @@ public class OperationHandlerImplementer {
             if (manager.isObject(fieldTypeName)) {
                 if (fieldTypeIsList) {
                     builder.addStatement(
-                            "$T type = new $T<$T>() {}.getType()",
-                            ClassName.get(Type.class),
-                            ClassName.get(TypeToken.class),
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement(
-                            "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).beginControlFlow("if(result == null)")
+                                    "$T type = new $T<$T>() {}.getType()",
+                                    ClassName.get(Type.class),
+                                    ClassName.get(TypeToken.class),
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).addStatement(
+                                    "$T result = jsonb.get().fromJson(jsonValue.toString(), type)",
+                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                            ).beginControlFlow("if(result == null)")
                             .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
                             .endControlFlow()
                             .addStatement(
@@ -498,8 +497,7 @@ public class OperationHandlerImplementer {
         switch (type) {
             case QUERY:
                 manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
-                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                        .filter(manager::isInvokeField)
                         .map(typeManager::getClassName)
                         .distinct()
                         .collect(Collectors.toList())
@@ -530,8 +528,7 @@ public class OperationHandlerImplementer {
                         .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(JsonSchemaValidator.class)), "validator")
                         .addStatement("this.validator = validator");
                 manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
-                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                        .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                        .filter(manager::isInvokeField)
                         .map(typeManager::getClassName)
                         .distinct()
                         .collect(Collectors.toList())

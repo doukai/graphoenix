@@ -22,7 +22,6 @@ import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -40,7 +39,7 @@ import static io.graphoenix.spi.constant.Hammurabi.*;
 @ApplicationScoped
 public class DocumentBuilder {
 
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
 
     private final IGraphQLDocumentManager manager;
 
@@ -79,12 +78,13 @@ public class DocumentBuilder {
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
-        ObjectType queryType = new ObjectType().setName("QueryType").addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
-        ObjectType mutationType = new ObjectType().setName("MutationType").addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+        ObjectType queryType = new ObjectType().setName(QUERY_TYPE_NAME).addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+        ObjectType mutationType = new ObjectType().setName(MUTATION_TYPE_NAME).addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
 
         manager.registerGraphQL(queryType.toString());
         manager.registerGraphQL(mutationType.toString());
         manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
+
         buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
         buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
         mapper.registerFieldMaps();
@@ -431,9 +431,9 @@ public class DocumentBuilder {
 
     public List<Field> buildQueryTypeFields() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(QUERY_TYPE_NAME))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(MUTATION_TYPE_NAME))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(SUBSCRIPTION_TYPE_NAME))
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -447,9 +447,9 @@ public class DocumentBuilder {
 
     public List<Field> buildMutationTypeFields() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(QUERY_TYPE_NAME))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(MUTATION_TYPE_NAME))
+                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(SUBSCRIPTION_TYPE_NAME))
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(

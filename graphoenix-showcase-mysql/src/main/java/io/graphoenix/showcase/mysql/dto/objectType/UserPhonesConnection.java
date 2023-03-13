@@ -5,7 +5,6 @@ import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Integer;
 import java.util.Collection;
-import null.dto.objectType.UserPhonesEdge;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type

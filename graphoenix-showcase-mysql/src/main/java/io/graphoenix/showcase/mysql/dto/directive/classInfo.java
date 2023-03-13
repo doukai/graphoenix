@@ -14,8 +14,6 @@ import java.lang.annotation.Target;
 @Documented
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE})
-public @interface importType {
-  String packageName();
-
+public @interface classInfo {
   String className();
 }

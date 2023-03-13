@@ -1,6 +1,5 @@
 package io.graphoenix.config;
 
-import com.typesafe.config.Config;
 import com.typesafe.config.ConfigBeanFactory;
 import com.typesafe.config.ConfigFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperties;
@@ -9,14 +8,8 @@ import org.tinylog.Logger;
 import javax.annotation.processing.Filer;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,12 +20,10 @@ import java.util.UUID;
 public enum ConfigUtil {
     CONFIG_UTIL;
 
-    private Config config;
     private final TypesafeConfig typesafeConfig;
 
     ConfigUtil() {
-        config = ConfigFactory.load();
-        typesafeConfig = new TypesafeConfig(config);
+        typesafeConfig = new TypesafeConfig(ConfigFactory.load());
     }
 
     public TypesafeConfig load() {
@@ -40,46 +31,45 @@ public enum ConfigUtil {
     }
 
     public TypesafeConfig load(ClassLoader classLoader) {
-        config = ConfigFactory.load(classLoader);
-        return typesafeConfig;
+        return typesafeConfig.mergeConfig(ConfigFactory.load(classLoader));
     }
 
     public TypesafeConfig load(String path) {
         try {
-            File file = new File(path);
-            URL url = file.toURI().toURL();
-            URLClassLoader urlClassLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            Class<URLClassLoader> urlClass = URLClassLoader.class;
-            Method method = urlClass.getDeclaredMethod("addURL", URL.class);
-            method.setAccessible(true);
-            method.invoke(urlClassLoader, url);
-            config = ConfigFactory.load(urlClassLoader);
-        } catch (NoSuchMethodException | MalformedURLException | InvocationTargetException | IllegalAccessException e) {
+            Files.list(Paths.get(path))
+                    .filter(filePath -> filePath.toString().endsWith(".conf") || filePath.toString().endsWith(".json") || filePath.toString().endsWith(".properties"))
+                    .forEach(filePath -> typesafeConfig.mergeConfig(ConfigFactory.parseFile(filePath.toFile())));
+        } catch (IOException e) {
             Logger.error(e);
         }
         return typesafeConfig;
     }
 
     public TypesafeConfig load(Filer filer) {
-        config = ConfigFactory.load(Objects.requireNonNull(getSourcePath(filer)).toString());
-        return typesafeConfig;
+        return load(getResourcesPath(filer).toString());
     }
 
-    private Path getSourcePath(Filer filer) {
+    private Path getGeneratedSourcePath(Filer filer) {
         try {
-            FileObject tmp = filer.createResource(StandardLocation.SOURCE_PATH, "", UUID.randomUUID().toString());
+            FileObject tmp = filer.createResource(StandardLocation.SOURCE_OUTPUT, "", UUID.randomUUID().toString());
             Writer writer = tmp.openWriter();
             writer.write("");
             writer.close();
             Path path = Paths.get(tmp.toUri());
             Files.deleteIfExists(path);
             Path generatedSourcePath = path.getParent();
-            Logger.info("source path: {}", generatedSourcePath.toString());
+            Logger.info("generated source path: {}", generatedSourcePath.toString());
             return generatedSourcePath;
         } catch (IOException e) {
             Logger.error(e);
             return null;
         }
+    }
+
+    private Path getResourcesPath(Filer filer) {
+        Path sourcePath = Objects.requireNonNull(getGeneratedSourcePath(filer)).getParent().getParent().getParent().getParent().getParent().getParent().resolve("src/main/resources");
+        Logger.info("resources path: {}", sourcePath.toString());
+        return sourcePath;
     }
 
     public <T> T getValue(Class<T> propertyType) {
@@ -88,7 +78,7 @@ public enum ConfigUtil {
     }
 
     public <T> T getValue(String propertyName, Class<T> propertyType) {
-        return ConfigBeanFactory.create(config.getConfig(propertyName), propertyType);
+        return ConfigBeanFactory.create(typesafeConfig.getConfig().getConfig(propertyName), propertyType);
     }
 
     public <T> Optional<T> getOptionalValue(Class<T> propertyType) {
@@ -97,8 +87,8 @@ public enum ConfigUtil {
     }
 
     public <T> Optional<T> getOptionalValue(String propertyName, Class<T> propertyType) {
-        if (config != null && config.hasPath(propertyName)) {
-            return Optional.of(ConfigBeanFactory.create(config.getConfig(propertyName), propertyType));
+        if (typesafeConfig.getConfig() != null && typesafeConfig.getConfig().hasPath(propertyName)) {
+            return Optional.of(ConfigBeanFactory.create(typesafeConfig.getConfig().getConfig(propertyName), propertyType));
         }
         return Optional.empty();
     }

@@ -12,10 +12,24 @@ import java.util.stream.Collectors;
 
 public class TypesafeConfig implements Config {
 
-    private final com.typesafe.config.Config config;
+    private com.typesafe.config.Config config;
 
     public TypesafeConfig(com.typesafe.config.Config config) {
         this.config = config;
+    }
+
+    public com.typesafe.config.Config getConfig() {
+        return config;
+    }
+
+    public TypesafeConfig setConfig(com.typesafe.config.Config config) {
+        this.config = config;
+        return this;
+    }
+
+    public TypesafeConfig mergeConfig(com.typesafe.config.Config config) {
+        this.config = this.config.withFallback(config);
+        return this;
     }
 
     @Override

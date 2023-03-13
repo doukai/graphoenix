@@ -19,7 +19,7 @@ import java.util.List;
 public class GenerateGraphQLSourceTask extends BaseTask {
 
     @TaskAction
-    public void generateGraphQLSource() {
+    public void process() {
         init();
         IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
         GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);

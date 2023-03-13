@@ -1,0 +1,249 @@
+scalar ID
+scalar Int
+scalar Float
+scalar String
+scalar Boolean
+scalar BigInteger
+scalar BigDecimal
+scalar Date
+scalar Time
+scalar DateTime
+scalar Timestamp
+enum Operator @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Operator") {
+  EQ
+
+  NEQ
+
+  LK
+
+  NLK
+
+  GT
+
+  NLTE
+
+  GTE
+
+  NLT
+
+  LT
+
+  NGTE
+
+  LTE
+
+  NGT
+
+  NIL
+
+  NNIL
+
+  IN
+
+  NIN
+
+  BT
+
+  NBT
+}
+enum Conditional @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Conditional") {
+  AND
+
+  OR
+}
+enum Sort @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Sort") {
+  ASC
+
+  DESC
+}
+enum Function @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Function") {
+  COUNT
+
+  MAX
+
+  MIN
+
+  SUM
+
+  AVG
+}
+enum Protocol @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Protocol") {
+  LOCAL
+
+  GRPC
+
+  HTTP
+
+  RSOCKET
+}
+enum __TypeKind @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.__TypeKind") {
+  SCALAR
+
+  OBJECT
+
+  INTERFACE
+
+  UNION
+
+  ENUM
+
+  INPUT_OBJECT
+
+  LIST
+
+  NON_NULL
+}
+enum __DirectiveLocation @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.__DirectiveLocation") {
+  QUERY
+
+  MUTATION
+
+  SUBSCRIPTION
+
+  FIELD
+
+  FRAGMENT_DEFINITION
+
+  FRAGMENT_SPREAD
+
+  INLINE_FRAGMENT
+
+  SCHEMA
+
+  SCALAR
+
+  OBJECT
+
+  FIELD_DEFINITION
+
+  ARGUMENT_DEFINITION
+
+  INTERFACE
+
+  UNION
+
+  ENUM
+
+  ENUM_VALUE
+
+  INPUT_OBJECT
+
+  INPUT_FIELD_DEFINITION
+}
+interface Meta @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.interfaceType.Meta") {
+  isDeprecated: Boolean
+
+  version: Int
+
+  realmId: String
+
+  createUserId: String
+
+  createTime: Timestamp
+
+  updateUserId: String
+
+  updateTime: Timestamp
+
+  createGroupId: String
+}
+type PageInfo @containerType @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.PageInfo") {
+  hasNextPage: Boolean!
+
+  hasPreviousPage: Boolean!
+
+  startCursor: String!
+
+  endCursor: String!
+}
+input ValidationInput @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ValidationInput") {
+  minLength: Int
+  maxLength: Int
+  pattern: String
+  format: String
+  contentMediaType: String
+  contentEncoding: String
+  minimum: Float
+  exclusiveMinimum: Float
+  maximum: Float
+  exclusiveMaximum: Float
+  multipleOf: Float
+  const: String
+  enum: [String]
+  items: ValidationInput
+  minItems: Int
+  maxItems: Int
+  uniqueItems: Boolean
+  allOf: [ValidationInput]
+  anyOf: [ValidationInput]
+  oneOf: [ValidationInput]
+  not: ValidationInput
+  properties: [Property]
+  if: ValidationInput
+  then: ValidationInput
+  else: ValidationInput
+  dependentRequired: [Property]
+}
+input Property @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.Property") {
+  name: String!
+  validation: ValidationInput
+  required: [String]
+}
+input IDExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.IDExpression") {
+  opr: Operator = EQ
+  val: ID
+  in: [ID]
+  skipNull: Boolean = false
+}
+input StringExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.StringExpression") {
+  opr: Operator = EQ
+  val: String
+  in: [String]
+  skipNull: Boolean = false
+}
+input BooleanExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.BooleanExpression") {
+  opr: Operator = EQ
+  val: Boolean
+  in: [Boolean]
+  skipNull: Boolean = false
+}
+input IntExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.IntExpression") {
+  opr: Operator = EQ
+  val: Int
+  in: [Int]
+  skipNull: Boolean = false
+}
+input FloatExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.FloatExpression") {
+  opr: Operator = EQ
+  val: Float
+  in: [Float]
+  skipNull: Boolean = false
+}
+input MapWith @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.MapWith") {
+  type: String
+  from: String
+  to: String
+}
+input InvokeParameter @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter") {
+  name: String
+  className: String
+}
+directive @validation(minLength: Int maxLength: Int pattern: String format: String contentMediaType: String contentEncoding: String minimum: Float exclusiveMinimum: Float maximum: Float exclusiveMaximum: Float multipleOf: Float const: String enum: [String] items: ValidationInput minItems: Int maxItems: Int uniqueItems: Boolean allOf: [ValidationInput] anyOf: [ValidationInput] oneOf: [ValidationInput] not: ValidationInput properties: [Property] if: ValidationInput then: ValidationInput else: ValidationInput dependentRequired: [Property]) on FIELD_DEFINITION
+directive @dataType(type: String length: Int decimals: Int default: String) on FIELD_DEFINITION
+directive @map(from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
+directive @fetch(protocol: Protocol from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
+directive @invoke(className: String methodName: String parameters: [InvokeParameter] returnClassName: String) on FIELD_DEFINITION
+directive @skipNullArguments(if: Boolean!) on FIELD
+directive @cursor on FIELD_DEFINITION
+directive @func(name: Function field: String) on FIELD_DEFINITION
+directive @containerType on OBJECT
+directive @classInfo(className: String!) on OBJECT
+directive @packageInfo(packageName: String!) on OBJECT
+directive @connection(field: String agg: String) on FIELD_DEFINITION
+directive @update(if: Boolean!) on FIELD
+directive @delete(if: Boolean!) on FIELD
+directive @mergeToList(arguments: [String]) on FIELD
+directive @format(value: String locale: String) on FIELD_DEFINITION
+directive @permitAll on OBJECT
+directive @denyAll on OBJECT
+directive @rolesAllowed(roles: [String]) on OBJECT

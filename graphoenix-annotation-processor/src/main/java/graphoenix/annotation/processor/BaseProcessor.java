@@ -45,6 +45,8 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
+import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 
 public abstract class BaseProcessor extends AbstractProcessor {
 
@@ -154,13 +156,13 @@ public abstract class BaseProcessor extends AbstractProcessor {
                             if (subElement.getAnnotation(Query.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
                                 ObjectType objectType = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name))
                                         .map(objectTypeDefinitionContext -> documentBuilder.buildObject(objectTypeDefinitionContext))
-                                        .orElseGet(() -> new ObjectType().setName("QueryType"));
+                                        .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME));
                                 objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.registerGraphQL(objectType.toString());
                             } else if (subElement.getAnnotation(Mutation.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
                                 ObjectType objectType = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name))
                                         .map(objectTypeDefinitionContext -> documentBuilder.buildObject(objectTypeDefinitionContext))
-                                        .orElseGet(() -> new ObjectType().setName("MutationType"));
+                                        .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME));
                                 objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.registerGraphQL(objectType.toString());
                             } else if (subElement.getKind().equals(ElementKind.METHOD) && ((ExecutableElement) subElement).getParameters().stream().anyMatch(variableElement -> variableElement.getAnnotation(Source.class) != null)) {

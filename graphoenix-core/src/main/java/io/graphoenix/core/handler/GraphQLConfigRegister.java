@@ -42,12 +42,10 @@ public class GraphQLConfigRegister {
         if (graphQLConfig.getGraphQL() != null) {
             manager.registerGraphQL(graphQLConfig.getGraphQL());
             Logger.info("registered graphql {}", graphQLConfig.getGraphQL());
-        }
-        if (graphQLConfig.getGraphQLFileName() != null) {
+        } else if (graphQLConfig.getGraphQLFileName() != null) {
             manager.registerFileByName(graphQLConfig.getGraphQLFileName());
             Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
-        }
-        if (graphQLConfig.getGraphQLPath() != null) {
+        } else if (graphQLConfig.getGraphQLPath() != null) {
             manager.registerPathByName(graphQLConfig.getGraphQLPath());
             Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
         }
@@ -57,12 +55,10 @@ public class GraphQLConfigRegister {
         if (graphQLConfig.getGraphQL() != null) {
             manager.registerGraphQL(graphQLConfig.getGraphQL());
             Logger.info("registered graphql {}", graphQLConfig.getGraphQL());
-        }
-        if (graphQLConfig.getGraphQLFileName() != null) {
+        } else if (graphQLConfig.getGraphQLFileName() != null) {
             manager.registerFileByName(graphQLConfig.getGraphQLFileName(), classLoader);
             Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
-        }
-        if (graphQLConfig.getGraphQLPath() != null) {
+        } else if (graphQLConfig.getGraphQLPath() != null) {
             manager.registerPathByName(graphQLConfig.getGraphQLPath(), classLoader);
             Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
         }

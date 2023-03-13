@@ -16,6 +16,7 @@ import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
+import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
 
 @ApplicationScoped
@@ -70,8 +71,11 @@ public class JavaElementToInterface {
                                 .collect(Collectors.toCollection(LinkedHashSet::new))
                 )
                 .addDirective(
-                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
+                        new Directive(CLASS_INFO_DIRECTIVE_NAME)
                                 .addArgument("className", typeElement.getQualifiedName().toString())
+                )
+                .addDirective(
+                        new Directive(CONTAINER_TYPE_DIRECTIVE_NAME)
                 );
     }
 }

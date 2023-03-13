@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.showcase.mysql.dto.enumType.__TypeKind;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -10,14 +11,6 @@ import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import null.dto.enumType.__TypeKind;
-import null.dto.objectType.__EnumValue;
-import null.dto.objectType.__EnumValueConnection;
-import null.dto.objectType.__Field;
-import null.dto.objectType.__FieldConnection;
-import null.dto.objectType.__InputValue;
-import null.dto.objectType.__InputValueConnection;
-import null.dto.objectType.__TypeConnection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
@@ -40,9 +33,9 @@ public class __Type implements Meta {
 
   private Collection<__Field> fields;
 
-  private Collection<null.dto.objectType.__Type> interfaces;
+  private Collection<__Type> interfaces;
 
-  private Collection<null.dto.objectType.__Type> possibleTypes;
+  private Collection<__Type> possibleTypes;
 
   private Collection<__EnumValue> enumValues;
 
@@ -50,7 +43,7 @@ public class __Type implements Meta {
 
   private String ofTypeName;
 
-  private null.dto.objectType.__Type ofType;
+  private __Type ofType;
 
   private Boolean isDeprecated;
 
@@ -102,9 +95,9 @@ public class __Type implements Meta {
 
   private __Field fieldsAggregate;
 
-  private null.dto.objectType.__Type interfacesAggregate;
+  private __Type interfacesAggregate;
 
-  private null.dto.objectType.__Type possibleTypesAggregate;
+  private __Type possibleTypesAggregate;
 
   private __EnumValue enumValuesAggregate;
 
@@ -160,19 +153,19 @@ public class __Type implements Meta {
     this.fields = fields;
   }
 
-  public Collection<null.dto.objectType.__Type> getInterfaces() {
+  public Collection<__Type> getInterfaces() {
     return this.interfaces;
   }
 
-  public void setInterfaces(Collection<null.dto.objectType.__Type> interfaces) {
+  public void setInterfaces(Collection<__Type> interfaces) {
     this.interfaces = interfaces;
   }
 
-  public Collection<null.dto.objectType.__Type> getPossibleTypes() {
+  public Collection<__Type> getPossibleTypes() {
     return this.possibleTypes;
   }
 
-  public void setPossibleTypes(Collection<null.dto.objectType.__Type> possibleTypes) {
+  public void setPossibleTypes(Collection<__Type> possibleTypes) {
     this.possibleTypes = possibleTypes;
   }
 
@@ -200,11 +193,11 @@ public class __Type implements Meta {
     this.ofTypeName = ofTypeName;
   }
 
-  public null.dto.objectType.__Type getOfType() {
+  public __Type getOfType() {
     return this.ofType;
   }
 
-  public void setOfType(null.dto.objectType.__Type ofType) {
+  public void setOfType(__Type ofType) {
     this.ofType = ofType;
   }
 
@@ -416,19 +409,19 @@ public class __Type implements Meta {
     this.fieldsAggregate = fieldsAggregate;
   }
 
-  public null.dto.objectType.__Type getInterfacesAggregate() {
+  public __Type getInterfacesAggregate() {
     return this.interfacesAggregate;
   }
 
-  public void setInterfacesAggregate(null.dto.objectType.__Type interfacesAggregate) {
+  public void setInterfacesAggregate(__Type interfacesAggregate) {
     this.interfacesAggregate = interfacesAggregate;
   }
 
-  public null.dto.objectType.__Type getPossibleTypesAggregate() {
+  public __Type getPossibleTypesAggregate() {
     return this.possibleTypesAggregate;
   }
 
-  public void setPossibleTypesAggregate(null.dto.objectType.__Type possibleTypesAggregate) {
+  public void setPossibleTypesAggregate(__Type possibleTypesAggregate) {
     this.possibleTypesAggregate = possibleTypesAggregate;
   }
 

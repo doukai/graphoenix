@@ -15,6 +15,10 @@ public @interface OrganizationInput1 {
 
   String name() default "";
 
+  int[] orgLevel3() default {};
+
+  boolean[] roleDisable() default {};
+
   boolean isDeprecated() default false;
 
   int version() default 0;
@@ -33,10 +37,6 @@ public @interface OrganizationInput1 {
 
   String __typename() default "";
 
-  int[] orgLevel3() default {};
-
-  boolean[] roleDisable() default {};
-
   String $id() default "";
 
   String $aboveId() default "";
@@ -48,6 +48,16 @@ public @interface OrganizationInput1 {
   String $rpcUsers() default "";
 
   String $name() default "";
+
+  String $orgLevel3() default "";
+
+  String $roleDisable() default "";
+
+  String $userByOrg() default "";
+
+  String $parent() default "";
+
+  String $containerType() default "";
 
   String $isDeprecated() default "";
 
@@ -70,16 +80,6 @@ public @interface OrganizationInput1 {
   String $usersAggregate() default "";
 
   String $usersConnection() default "";
-
-  String $orgLevel3() default "";
-
-  String $roleDisable() default "";
-
-  String $userByOrg() default "";
-
-  String $parent() default "";
-
-  String $containerType() default "";
 
   OrganizationInput2 above() default @OrganizationInput2;
 

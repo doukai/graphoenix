@@ -15,6 +15,10 @@ public @interface OrganizationOrderBy2 {
 
   Sort name() default Sort.ASC;
 
+  Sort orgLevel3() default Sort.ASC;
+
+  Sort roleDisable() default Sort.ASC;
+
   Sort isDeprecated() default Sort.ASC;
 
   Sort version() default Sort.ASC;
@@ -32,8 +36,4 @@ public @interface OrganizationOrderBy2 {
   Sort createGroupId() default Sort.ASC;
 
   Sort __typename() default Sort.ASC;
-
-  Sort orgLevel3() default Sort.ASC;
-
-  Sort roleDisable() default Sort.ASC;
 }

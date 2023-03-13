@@ -4,7 +4,6 @@ import com.dslplatform.json.CompiledJson;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;
-import null.dto.objectType.__Schema;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.Type;
 

@@ -1,9 +1,9 @@
 package io.graphoenix.graphql.generator.translator;
 
-import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.document.InputValue;
+import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.vavr.Tuple;
 import io.vavr.Tuple2;
@@ -19,9 +19,9 @@ import javax.lang.model.util.Types;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.ElementProcessErrorType.SOURCE_ANNOTATION_NOT_EXIST;
+import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
 
 @ApplicationScoped
 public class GraphQLApiBuilder {
@@ -52,7 +52,7 @@ public class GraphQLApiBuilder {
                 )
                 .addDirective(
                         new Directive()
-                                .setName("invoke")
+                                .setName(INVOKE_DIRECTIVE_NAME)
                                 .addArgument("className", executableElement.getEnclosingElement().toString())
                                 .addArgument("methodName", executableElement.getSimpleName().toString())
                                 .addArgument(
@@ -94,9 +94,9 @@ public class GraphQLApiBuilder {
                         .setDescription(elementManager.getDescriptionFromElement(executableElement))
                         .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
                         .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
-                        .setDirectives(
-                                Stream.of(new Directive()
-                                        .setName("invoke")
+                        .addDirective(
+                                new Directive()
+                                        .setName(INVOKE_DIRECTIVE_NAME)
                                         .addArgument("className", executableElement.getEnclosingElement().toString())
                                         .addArgument("methodName", executableElement.getSimpleName().toString())
                                         .addArgument(
@@ -108,7 +108,6 @@ public class GraphQLApiBuilder {
                                                 )
                                         )
                                         .addArgument("returnClassName", executableElement.getReturnType().toString())
-                                ).collect(Collectors.toCollection(LinkedHashSet::new))
                         )
         );
     }

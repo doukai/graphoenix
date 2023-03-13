@@ -74,15 +74,13 @@ public class GrpcServiceImplementer {
 
     public void writeToFiler(Filer filer) throws IOException {
         queryInvokeClassNames = manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                .filter(manager::isInvokeField)
                 .map(typeManager::getClassName)
                 .distinct()
                 .collect(Collectors.toList());
 
         mutationInvokeClassNames = manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives() != null)
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.directives().directive().stream().anyMatch(directiveContext -> directiveContext.name().getText().equals("invoke")))
+                .filter(manager::isInvokeField)
                 .map(typeManager::getClassName)
                 .distinct()
                 .collect(Collectors.toList());

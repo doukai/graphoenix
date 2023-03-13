@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.mysql.api.ContainerType;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -11,42 +10,6 @@ import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import null.dto.objectType.Organization;
-import null.dto.objectType.OrganizationConnection;
-import null.dto.objectType.Role;
-import null.dto.objectType.RoleConnection;
-import null.dto.objectType.RoleRoleType;
-import null.dto.objectType.RoleRoleTypeConnection;
-import null.dto.objectType.User;
-import null.dto.objectType.UserConnection;
-import null.dto.objectType.UserPhones;
-import null.dto.objectType.UserPhonesConnection;
-import null.dto.objectType.UserProfile;
-import null.dto.objectType.UserProfileConnection;
-import null.dto.objectType.UserRole;
-import null.dto.objectType.UserRoleConnection;
-import null.dto.objectType.UserTest1;
-import null.dto.objectType.UserTest1Connection;
-import null.dto.objectType.UserTest2;
-import null.dto.objectType.UserTest2Connection;
-import null.dto.objectType.__Directive;
-import null.dto.objectType.__DirectiveConnection;
-import null.dto.objectType.__DirectiveLocations;
-import null.dto.objectType.__DirectiveLocationsConnection;
-import null.dto.objectType.__EnumValue;
-import null.dto.objectType.__EnumValueConnection;
-import null.dto.objectType.__Field;
-import null.dto.objectType.__FieldConnection;
-import null.dto.objectType.__InputValue;
-import null.dto.objectType.__InputValueConnection;
-import null.dto.objectType.__Schema;
-import null.dto.objectType.__SchemaConnection;
-import null.dto.objectType.__Type;
-import null.dto.objectType.__TypeConnection;
-import null.dto.objectType.__TypeInterfaces;
-import null.dto.objectType.__TypeInterfacesConnection;
-import null.dto.objectType.__TypePossibleTypes;
-import null.dto.objectType.__TypePossibleTypesConnection;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type
@@ -177,24 +140,6 @@ public class QueryType implements Meta {
   private LocalDateTime updateTime;
 
   private String createGroupId;
-
-  private String userDetail;
-
-  private Collection<String> userDetail6;
-
-  private Integer orgLevel;
-
-  private Collection<Boolean> roleDisable2;
-
-  private Collection<Integer> orgLevel5;
-
-  private Collection<User> userByOrg2;
-
-  private Organization parent2;
-
-  private Collection<Role> findRole2;
-
-  private ContainerType findContainerType;
 
   public __Schema get__schema() {
     return this.__schema;
@@ -709,77 +654,5 @@ public class QueryType implements Meta {
   @Override
   public void setCreateGroupId(String createGroupId) {
     this.createGroupId = createGroupId;
-  }
-
-  public String getUserDetail() {
-    return this.userDetail;
-  }
-
-  public void setUserDetail(String userDetail) {
-    this.userDetail = userDetail;
-  }
-
-  public Collection<String> getUserDetail6() {
-    return this.userDetail6;
-  }
-
-  public void setUserDetail6(Collection<String> userDetail6) {
-    this.userDetail6 = userDetail6;
-  }
-
-  public Integer getOrgLevel() {
-    return this.orgLevel;
-  }
-
-  public void setOrgLevel(Integer orgLevel) {
-    this.orgLevel = orgLevel;
-  }
-
-  public Collection<Boolean> getRoleDisable2() {
-    return this.roleDisable2;
-  }
-
-  public void setRoleDisable2(Collection<Boolean> roleDisable2) {
-    this.roleDisable2 = roleDisable2;
-  }
-
-  public Collection<Integer> getOrgLevel5() {
-    return this.orgLevel5;
-  }
-
-  public void setOrgLevel5(Collection<Integer> orgLevel5) {
-    this.orgLevel5 = orgLevel5;
-  }
-
-  public Collection<User> getUserByOrg2() {
-    return this.userByOrg2;
-  }
-
-  public void setUserByOrg2(Collection<User> userByOrg2) {
-    this.userByOrg2 = userByOrg2;
-  }
-
-  public Organization getParent2() {
-    return this.parent2;
-  }
-
-  public void setParent2(Organization parent2) {
-    this.parent2 = parent2;
-  }
-
-  public Collection<Role> getFindRole2() {
-    return this.findRole2;
-  }
-
-  public void setFindRole2(Collection<Role> findRole2) {
-    this.findRole2 = findRole2;
-  }
-
-  public ContainerType getFindContainerType() {
-    return this.findContainerType;
-  }
-
-  public void setFindContainerType(ContainerType findContainerType) {
-    this.findContainerType = findContainerType;
   }
 }

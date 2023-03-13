@@ -1,6 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
@@ -10,11 +11,6 @@ import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import null.dto.enumType.Sex;
-import null.dto.objectType.Organization;
-import null.dto.objectType.Role;
-import null.dto.objectType.RoleConnection;
-import null.dto.objectType.UserProfile;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
@@ -59,6 +55,8 @@ public class User implements Meta {
   private Collection<Integer> test1;
 
   private Collection<Boolean> test2;
+
+  private String userDetail2;
 
   private Boolean isDeprecated;
 
@@ -127,8 +125,6 @@ public class User implements Meta {
   private Role rolesAggregate;
 
   private RoleConnection rolesConnection;
-
-  private String userDetail2;
 
   public String getId() {
     return this.id;
@@ -256,6 +252,14 @@ public class User implements Meta {
 
   public void setTest2(Collection<Boolean> test2) {
     this.test2 = test2;
+  }
+
+  public String getUserDetail2() {
+    return this.userDetail2;
+  }
+
+  public void setUserDetail2(String userDetail2) {
+    this.userDetail2 = userDetail2;
   }
 
   @Override
@@ -536,13 +540,5 @@ public class User implements Meta {
 
   public void setRolesConnection(RoleConnection rolesConnection) {
     this.rolesConnection = rolesConnection;
-  }
-
-  public String getUserDetail2() {
-    return this.userDetail2;
-  }
-
-  public void setUserDetail2(String userDetail2) {
-    this.userDetail2 = userDetail2;
   }
 }

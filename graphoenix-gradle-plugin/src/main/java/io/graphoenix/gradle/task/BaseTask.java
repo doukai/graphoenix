@@ -66,6 +66,10 @@ import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 
 public class BaseTask extends DefaultTask {
 
@@ -74,10 +78,10 @@ public class BaseTask extends DefaultTask {
     private DocumentBuilder documentBuilder;
 
     protected void init() {
-//        SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-//        String resourcePath = sourceSet.getResources().getSourceDirectories().getAsPath();
+        SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+        String resourcePath = sourceSet.getResources().getSourceDirectories().getAsPath();
         ClassLoader classLoader = createClassLoader();
-        CONFIG_UTIL.load(classLoader);
+        CONFIG_UTIL.load(resourcePath);
         BeanContext.load(classLoader);
         graphQLConfig = BeanContext.get(GraphQLConfig.class);
         manager = BeanContext.get(IGraphQLDocumentManager.class);
@@ -106,6 +110,9 @@ public class BaseTask extends DefaultTask {
                 }
                 for (File classesDir : sourceSet.getOutput().getClassesDirs()) {
                     urls.add(classesDir.toURI().toURL());
+                }
+                for (File sourceDirectories : sourceSet.getResources().getSourceDirectories()) {
+                    urls.add(sourceDirectories.toURI().toURL());
                 }
             }
         } catch (MalformedURLException e) {
@@ -182,6 +189,10 @@ public class BaseTask extends DefaultTask {
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
                                                                                 )
+                                                                                .addDirective(
+                                                                                        new Directive()
+                                                                                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                                                )
                                                                                 .toString()
                                                                 );
                                                             } else if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName())) {
@@ -193,6 +204,10 @@ public class BaseTask extends DefaultTask {
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
                                                                                 )
+                                                                                .addDirective(
+                                                                                        new Directive()
+                                                                                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                                                                                )
                                                                                 .toString()
                                                                 );
                                                             } else if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName())) {
@@ -203,6 +218,10 @@ public class BaseTask extends DefaultTask {
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
+                                                                                )
+                                                                                .addDirective(
+                                                                                        new Directive()
+                                                                                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
                                                                                 )
                                                                                 .toString()
                                                                 );
@@ -249,6 +268,7 @@ public class BaseTask extends DefaultTask {
                                             new Field()
                                                     .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
                                                     .setTypeName(invokeFieldTypeName)
+                                                    .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
                                     );
                             manager.mergeDocument(objectType.toString());
                         }
@@ -273,7 +293,7 @@ public class BaseTask extends DefaultTask {
                             String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
                             ObjectType objectType = manager.getQueryOperationTypeName().flatMap(manager::getObject)
                                     .map(documentBuilder::buildObject)
-                                    .orElseGet(() -> new ObjectType().setName("QueryType"));
+                                    .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME));
                             objectType.addField(
                                     new Field()
                                             .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
@@ -286,6 +306,7 @@ public class BaseTask extends DefaultTask {
                                                                             .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
                                                             .collect(Collectors.toCollection(LinkedHashSet::new))
                                             )
+                                            .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
                             );
                             manager.mergeDocument(objectType.toString());
                         }
@@ -310,7 +331,7 @@ public class BaseTask extends DefaultTask {
                             String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
                             ObjectType objectType = manager.getMutationOperationTypeName().flatMap(manager::getObject)
                                     .map(documentBuilder::buildObject)
-                                    .orElseGet(() -> new ObjectType().setName("MutationType"));
+                                    .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME));
                             objectType.addField(
                                     new Field()
                                             .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
@@ -323,6 +344,7 @@ public class BaseTask extends DefaultTask {
                                                                             .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
                                                             .collect(Collectors.toCollection(LinkedHashSet::new))
                                             )
+                                            .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
                             );
                             manager.mergeDocument(objectType.toString());
                         }

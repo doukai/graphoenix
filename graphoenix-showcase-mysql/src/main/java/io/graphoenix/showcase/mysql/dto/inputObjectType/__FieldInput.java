@@ -8,8 +8,6 @@ import java.lang.Integer;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import null.dto.inputObjectType.__InputValueInput;
-import null.dto.inputObjectType.__TypeInput;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 

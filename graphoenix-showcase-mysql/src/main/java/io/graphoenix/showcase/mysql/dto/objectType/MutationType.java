@@ -10,24 +10,6 @@ import java.lang.Override;
 import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import null.dto.objectType.Organization;
-import null.dto.objectType.Role;
-import null.dto.objectType.RoleRoleType;
-import null.dto.objectType.User;
-import null.dto.objectType.UserPhones;
-import null.dto.objectType.UserProfile;
-import null.dto.objectType.UserRole;
-import null.dto.objectType.UserTest1;
-import null.dto.objectType.UserTest2;
-import null.dto.objectType.__Directive;
-import null.dto.objectType.__DirectiveLocations;
-import null.dto.objectType.__EnumValue;
-import null.dto.objectType.__Field;
-import null.dto.objectType.__InputValue;
-import null.dto.objectType.__Schema;
-import null.dto.objectType.__Type;
-import null.dto.objectType.__TypeInterfaces;
-import null.dto.objectType.__TypePossibleTypes;
 import org.eclipse.microprofile.graphql.Type;
 
 @Type

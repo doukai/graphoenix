@@ -75,12 +75,9 @@ public class TypeManager {
     }
 
     public Optional<Tuple2<String, String>> getInvokeDirective(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        if (fieldDefinitionContext.directives() == null) {
-            return Optional.empty();
-        }
-
-        return fieldDefinitionContext.directives().directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(directivesContext -> directivesContext.directive().stream())
+                .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .map(directiveContext ->
                         Tuple.of(directiveContext.arguments().argument().stream()
                                         .filter(argumentContext -> argumentContext.name().getText().equals("className"))
@@ -177,7 +174,7 @@ public class TypeManager {
 
     public String getClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return fieldDefinitionContext.directives().directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()
                                 .filter(argumentContext -> argumentContext.name().getText().equals("className"))
@@ -190,7 +187,7 @@ public class TypeManager {
 
     public String getMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return fieldDefinitionContext.directives().directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()
                                 .filter(argumentContext -> argumentContext.name().getText().equals("methodName"))
@@ -203,7 +200,7 @@ public class TypeManager {
 
     public List<AbstractMap.SimpleEntry<String, String>> getParameters(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return fieldDefinitionContext.directives().directive().stream()
-                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()
                                 .filter(argumentContext -> argumentContext.name().getText().equals("parameters"))
@@ -232,7 +229,7 @@ public class TypeManager {
     public String getReturnClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         return Stream.ofNullable(fieldDefinitionContext.directives())
                 .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals("invoke"))
+                .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()
                                 .filter(argumentContext -> argumentContext.name().getText().equals("returnClassName"))

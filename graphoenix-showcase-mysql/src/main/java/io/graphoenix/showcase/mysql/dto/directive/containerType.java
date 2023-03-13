@@ -2,7 +2,6 @@ package io.graphoenix.showcase.mysql.dto.directive;
 
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
-import java.lang.String;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,5 +14,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE})
 public @interface containerType {
-  String className();
 }

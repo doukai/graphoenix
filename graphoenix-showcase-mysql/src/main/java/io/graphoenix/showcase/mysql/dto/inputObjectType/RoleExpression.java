@@ -1,15 +1,11 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
 import java.util.Collection;
-import null.dto.enumType.Conditional;
-import null.dto.inputObjectType.IntExpression;
-import null.dto.inputObjectType.RoleTypeExpression;
-import null.dto.inputObjectType.StringExpression;
-import null.dto.inputObjectType.UserExpression;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Input;
 
@@ -48,7 +44,7 @@ public class RoleExpression {
   @DefaultValue("AND")
   private Conditional cond;
 
-  private Collection<null.dto.inputObjectType.RoleExpression> exs;
+  private Collection<RoleExpression> exs;
 
   public StringExpression getId() {
     return this.id;
@@ -162,11 +158,11 @@ public class RoleExpression {
     this.cond = cond;
   }
 
-  public Collection<null.dto.inputObjectType.RoleExpression> getExs() {
+  public Collection<RoleExpression> getExs() {
     return this.exs;
   }
 
-  public void setExs(Collection<null.dto.inputObjectType.RoleExpression> exs) {
+  public void setExs(Collection<RoleExpression> exs) {
     this.exs = exs;
   }
 }
