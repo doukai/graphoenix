@@ -188,6 +188,7 @@ public class BaseTask extends DefaultTask {
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
+                                                                                                .addArgument("ignore", true)
                                                                                 )
                                                                                 .addDirective(
                                                                                         new Directive()
@@ -203,6 +204,7 @@ public class BaseTask extends DefaultTask {
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
+                                                                                                .addArgument("ignore", true)
                                                                                 )
                                                                                 .addDirective(
                                                                                         new Directive()
@@ -218,6 +220,7 @@ public class BaseTask extends DefaultTask {
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
+                                                                                                .addArgument("ignore", true)
                                                                                 )
                                                                                 .addDirective(
                                                                                         new Directive()

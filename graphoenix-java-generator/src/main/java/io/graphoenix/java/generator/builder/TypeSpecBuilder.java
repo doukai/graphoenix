@@ -71,18 +71,13 @@ public class TypeSpecBuilder {
 
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
-    private GraphQLConfig graphQLConfig;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
     public TypeSpecBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
-    }
-
-    public TypeSpecBuilder setConfiguration(GraphQLConfig graphQLConfig) {
-        this.graphQLConfig = graphQLConfig;
-        return this;
     }
 
     private AnnotationSpec getGeneratedAnnotationSpec() {
@@ -875,6 +870,7 @@ public class TypeSpecBuilder {
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotIgnore)
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
@@ -1051,6 +1047,7 @@ public class TypeSpecBuilder {
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotIgnore)
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {
@@ -1146,6 +1143,7 @@ public class TypeSpecBuilder {
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotIgnore)
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .map(objectTypeDefinitionContext -> {

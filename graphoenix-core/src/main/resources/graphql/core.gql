@@ -181,6 +181,8 @@ directive @invoke(
     returnClassName: String
 ) on FIELD_DEFINITION
 
+directive @ignore on OBJECT
+
 directive @skipNullArguments(if: Boolean!) on FIELD
 
 directive @cursor on FIELD_DEFINITION

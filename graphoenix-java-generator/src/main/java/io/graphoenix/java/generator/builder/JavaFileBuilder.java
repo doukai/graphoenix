@@ -32,18 +32,9 @@ public class JavaFileBuilder {
         Logger.info("all graphql entity generated");
     }
 
-    public void writeToPath(File path, GraphQLConfig graphQLConfig) {
-        this.buildJavaFileList(graphQLConfig, typeSpecBuilder.setConfiguration(graphQLConfig)).forEach(javaFile -> Try.run(() -> javaFile.writeTo(path)));
-        Logger.info("all graphql entity generated");
-    }
-
     public Stream<JavaFile> buildJavaFileList() {
-        return buildJavaFileList(graphQLConfig, typeSpecBuilder);
-    }
-
-    public Stream<JavaFile> buildJavaFileList(GraphQLConfig configuration, TypeSpecBuilder typeSpecBuilder) {
         return Streams.concat(
-                manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
+                manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(graphQLConfig.getDirectivePackageName(), typeSpec).build()),
                 manager.getDirectives()
                         .filter(directiveDefinitionContext -> directiveDefinitionContext.argumentsDefinition() != null)
                         .flatMap(directiveDefinitionContext ->
@@ -54,24 +45,28 @@ public class JavaFileBuilder {
                                         .map(Optional::get)
                         )
                         .map(typeSpecBuilder::buildAnnotation)
-                        .map(typeSpec -> JavaFile.builder(configuration.getDirectivePackageName(), typeSpec).build()),
+                        .map(typeSpec -> JavaFile.builder(graphQLConfig.getDirectivePackageName(), typeSpec).build()),
                 manager.getEnums()
+                        .filter(manager::isNotIgnore)
                         .map(typeSpecBuilder::buildEnum)
-                        .map(typeSpec -> JavaFile.builder(configuration.getEnumTypePackageName(), typeSpec).build()),
+                        .map(typeSpec -> JavaFile.builder(graphQLConfig.getEnumTypePackageName(), typeSpec).build()),
                 manager.getInterfaces()
+                        .filter(manager::isNotIgnore)
                         .map(typeSpecBuilder::buildInterface)
-                        .map(typeSpec -> JavaFile.builder(configuration.getInterfaceTypePackageName(), typeSpec).build()),
+                        .map(typeSpec -> JavaFile.builder(graphQLConfig.getInterfaceTypePackageName(), typeSpec).build()),
                 manager.getInputObjects()
+                        .filter(manager::isNotIgnore)
                         .map(typeSpecBuilder::buildClass)
-                        .map(typeSpec -> JavaFile.builder(configuration.getInputObjectTypePackageName(), typeSpec).build()),
+                        .map(typeSpec -> JavaFile.builder(graphQLConfig.getInputObjectTypePackageName(), typeSpec).build()),
                 manager.getObjects()
+                        .filter(manager::isNotIgnore)
                         .map(typeSpecBuilder::buildClass)
-                        .map(typeSpec -> JavaFile.builder(configuration.getObjectTypePackageName(), typeSpec).build()),
-                typeSpecBuilder.buildScalarTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
-                typeSpecBuilder.buildEnumTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
-                typeSpecBuilder.buildObjectTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
-                typeSpecBuilder.buildObjectTypeInputAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build()),
-                typeSpecBuilder.buildObjectTypeOrderByAnnotations().map(typeSpec -> JavaFile.builder(configuration.getAnnotationPackageName(), typeSpec).build())
+                        .map(typeSpec -> JavaFile.builder(graphQLConfig.getObjectTypePackageName(), typeSpec).build()),
+                typeSpecBuilder.buildScalarTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),
+                typeSpecBuilder.buildEnumTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),
+                typeSpecBuilder.buildObjectTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),
+                typeSpecBuilder.buildObjectTypeInputAnnotations().map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),
+                typeSpecBuilder.buildObjectTypeOrderByAnnotations().map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build())
         );
     }
 }

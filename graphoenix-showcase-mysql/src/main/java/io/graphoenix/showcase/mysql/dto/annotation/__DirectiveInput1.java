@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
+import io.graphoenix.core.dto.enumType.__DirectiveLocation;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

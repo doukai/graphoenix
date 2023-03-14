@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -27,6 +28,7 @@ import static javax.lang.model.SourceVersion.RELEASE_11;
 @AutoService(Processor.class)
 public class PackageProcessor extends BaseProcessor {
 
+    private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
     private GraphQLConfig graphQLConfig;
     private Filer filer;
@@ -36,6 +38,7 @@ public class PackageProcessor extends BaseProcessor {
         super.init(processingEnv);
         filer = processingEnv.getFiler();
         graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        manager = BeanContext.get(IGraphQLDocumentManager.class);
         documentBuilder = BeanContext.get(DocumentBuilder.class);
     }
 
@@ -49,9 +52,12 @@ public class PackageProcessor extends BaseProcessor {
         }
         registerElements(roundEnv);
         try {
+            if (graphQLConfig.getBuild()) {
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            }
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/package.gql");
             Writer writer = packageGraphQL.openWriter();
-            writer.write(documentBuilder.getDocument().toString());
+            writer.write(documentBuilder.getPackageDocument().toString());
             writer.close();
 
         } catch (IOException e) {

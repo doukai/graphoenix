@@ -34,6 +34,7 @@ import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.IGNORE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MERGE_TO_LIST_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.DELETE;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.MERGE;
@@ -169,8 +171,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         } else {
             URL resource = classLoader.getResource(graphqlPathName);
             try {
-                if (resource != null) {
-                    registerPath(Path.of(resource.toURI()));
+                List<Path> pathList = Files.list(Paths.get(Objects.requireNonNull(resource).toURI())).collect(Collectors.toList());
+                for (Path path : pathList) {
+                    registerPath(path);
                 }
             } catch (FileSystemNotFoundException fileSystemNotFoundException) {
                 Map<String, String> env = new HashMap<>();
@@ -783,8 +786,54 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
                 .flatMap(argumentsContext -> argumentsContext.argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("className"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                 .findFirst()
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    @Override
+    public boolean isIgnore(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return Optional.ofNullable(objectTypeDefinitionContext.directives()).map(this::isIgnore).orElse(false);
+    }
+
+    @Override
+    public boolean isIgnore(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return Optional.ofNullable(enumTypeDefinitionContext.directives()).map(this::isIgnore).orElse(false);
+    }
+
+    @Override
+    public boolean isIgnore(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).map(this::isIgnore).orElse(false);
+    }
+
+    @Override
+    public boolean isIgnore(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).map(this::isIgnore).orElse(false);
+    }
+
+    @Override
+    public boolean isNotIgnore(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return !isIgnore(objectTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotIgnore(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
+        return !isIgnore(enumTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotIgnore(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
+        return !isIgnore(inputObjectTypeDefinitionContext);
+    }
+
+    @Override
+    public boolean isNotIgnore(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return !isIgnore(interfaceTypeDefinitionContext);
+    }
+
+    public boolean isIgnore(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
+                .anyMatch(directiveContext -> directiveContext.name().getText().equals(IGNORE_DIRECTIVE_NAME));
     }
 
     @Override
@@ -827,6 +876,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .flatMap(directiveContext -> Stream.ofNullable(directiveContext.arguments()))
                 .flatMap(argumentsContext -> argumentsContext.argument().stream())
                 .filter(argumentContext -> argumentContext.name().getText().equals("packageName"))
+                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                 .findFirst()
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
     }

@@ -1,7 +1,21 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
+    }
+}
+
 plugins {
     id 'java'
 }
 apply plugin: 'maven'
+apply plugin: 'io.graphoenix'
+
+compileJava.options.sourcepath = files('src/main/resources')
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'
@@ -13,12 +27,14 @@ repositories {
 
 dependencies {
     implementation project(':graphoenix-core')
+    implementation project(':graphoenix-json')
     implementation 'com.github.jsqlparser:jsqlparser:4.3'
     implementation 'com.github.vertical-blank:sql-formatter:2.0.3'
 
     annotationProcessor project(':graphoenix-core')
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')
+    annotationProcessor project(':graphoenix-json')
     annotationProcessor project(':graphoenix-config')
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'

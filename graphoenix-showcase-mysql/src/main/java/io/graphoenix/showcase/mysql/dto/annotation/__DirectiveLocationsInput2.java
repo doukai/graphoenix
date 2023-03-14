@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.annotation;
 
-import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
+import io.graphoenix.core.dto.enumType.__DirectiveLocation;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -14,7 +14,8 @@ public @interface __DirectiveLocationsInput2 {
 
   String directiveName() default "";
 
-  __DirectiveLocation directiveLocation() default __DirectiveLocation.QUERY;
+  __DirectiveLocation directiveLocation(
+      ) default io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation.QUERY;
 
   boolean isDeprecated() default false;
 

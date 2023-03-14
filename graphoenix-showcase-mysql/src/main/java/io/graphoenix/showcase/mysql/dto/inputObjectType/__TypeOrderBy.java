@@ -1,7 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.mysql.dto.enumType.Sort;
+import io.graphoenix.core.dto.enumType.Sort;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import org.eclipse.microprofile.graphql.Input;

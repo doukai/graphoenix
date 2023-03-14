@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
@@ -20,6 +21,7 @@ public class GeneratePackageGraphQLTask extends BaseTask {
     @TaskAction
     public void process() {
         init();
+        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
         GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
@@ -30,13 +32,16 @@ public class GeneratePackageGraphQLTask extends BaseTask {
                 getDefaultPackageName(compilationUnits).ifPresent(graphQLConfig::setPackageName);
             }
             registerInvoke(compilationUnits);
+            if (graphQLConfig.getBuild()) {
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            }
             Path filePath = Path.of(resourcePath).resolve("META-INF").resolve("graphql");
             if (Files.notExists(filePath)) {
                 Files.createDirectories(filePath);
             }
             Files.writeString(
                     filePath.resolve("package.gql"),
-                    documentBuilder.getDocument().toString()
+                    documentBuilder.getPackageDocument().toString()
             );
         } catch (IOException e) {
             Logger.error(e);

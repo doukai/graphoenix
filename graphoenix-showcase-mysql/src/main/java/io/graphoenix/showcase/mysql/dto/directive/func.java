@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.directive;
 
-import io.graphoenix.showcase.mysql.dto.enumType.Function;
+import io.graphoenix.core.dto.enumType.Function;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.String;

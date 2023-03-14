@@ -237,7 +237,7 @@ directive @skipNullArguments(if: Boolean!) on FIELD
 directive @cursor on FIELD_DEFINITION
 directive @func(name: Function field: String) on FIELD_DEFINITION
 directive @containerType on OBJECT
-directive @classInfo(className: String!) on OBJECT
+directive @classInfo(className: String! ignore: Boolean) on OBJECT
 directive @packageInfo(packageName: String!) on OBJECT
 directive @connection(field: String agg: String) on FIELD_DEFINITION
 directive @update(if: Boolean!) on FIELD
