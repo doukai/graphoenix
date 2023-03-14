@@ -41,7 +41,7 @@ public class GeneratePackageGraphQLTask extends BaseTask {
             }
             Files.writeString(
                     filePath.resolve("package.gql"),
-                    documentBuilder.getPackageDocument().toString()
+                    documentBuilder.getDocument().toString()
             );
         } catch (IOException e) {
             Logger.error(e);

@@ -74,7 +74,7 @@ public class DocumentBuilder {
 
     public Document buildDocument() throws IOException {
         manager.getObjects()
-                .filter(manager::isNotIgnore)
+                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
@@ -105,20 +105,6 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                //TODO union type
-                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-
-    public Document getPackageDocument() {
-        Document document = new Document();
-        buildSchema().ifPresent(schema -> document.addDefinition(schema.toString()));
-        return document
-                .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .addDefinitions(manager.getEnums().map(this::buildEnum).map(enumType -> enumType.addDirective(new Directive(IGNORE_DIRECTIVE_NAME))).map(EnumType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(interfaceType -> interfaceType.addDirective(new Directive(IGNORE_DIRECTIVE_NAME))).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .addDefinitions(manager.getObjects().map(this::buildObject).map(objectType -> objectType.addDirective(new Directive(IGNORE_DIRECTIVE_NAME))).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(inputObjectType -> inputObjectType.addDirective(new Directive(IGNORE_DIRECTIVE_NAME))).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 //TODO union type
                 .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
@@ -449,7 +435,7 @@ public class DocumentBuilder {
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(QUERY_TYPE_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(MUTATION_TYPE_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(SUBSCRIPTION_TYPE_NAME))
-                .filter(manager::isNotIgnore)
+                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -466,7 +452,7 @@ public class DocumentBuilder {
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(QUERY_TYPE_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(MUTATION_TYPE_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(SUBSCRIPTION_TYPE_NAME))
-                .filter(manager::isNotIgnore)
+                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -640,7 +626,7 @@ public class DocumentBuilder {
 
     public List<InputObjectType> buildArgumentInputObjects() {
         List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
-                .filter(manager::isNotIgnore)
+                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
@@ -657,7 +643,7 @@ public class DocumentBuilder {
 
     public List<ObjectType> buildContainerTypeObjects() {
         List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
-                .filter(manager::isNotIgnore)
+                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))

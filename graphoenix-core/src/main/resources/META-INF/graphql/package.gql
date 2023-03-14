@@ -13,7 +13,7 @@ scalar Date
 scalar Time
 scalar DateTime
 scalar Timestamp
-enum Operator @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Operator") @ignore {
+enum Operator @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Operator") {
   EQ
 
   NEQ
@@ -50,17 +50,17 @@ enum Operator @packageInfo(packageName: "io.graphoenix.core") @classInfo(classNa
 
   NBT
 }
-enum Conditional @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Conditional") @ignore {
+enum Conditional @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Conditional") {
   AND
 
   OR
 }
-enum Sort @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Sort") @ignore {
+enum Sort @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Sort") {
   ASC
 
   DESC
 }
-enum Function @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Function") @ignore {
+enum Function @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Function") {
   COUNT
 
   MAX
@@ -71,7 +71,7 @@ enum Function @packageInfo(packageName: "io.graphoenix.core") @classInfo(classNa
 
   AVG
 }
-enum Protocol @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Protocol") @ignore {
+enum Protocol @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.Protocol") {
   LOCAL
 
   GRPC
@@ -80,7 +80,7 @@ enum Protocol @packageInfo(packageName: "io.graphoenix.core") @classInfo(classNa
 
   RSOCKET
 }
-enum __TypeKind @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.__TypeKind") @ignore {
+enum __TypeKind @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.__TypeKind") {
   SCALAR
 
   OBJECT
@@ -97,7 +97,7 @@ enum __TypeKind @packageInfo(packageName: "io.graphoenix.core") @classInfo(class
 
   NON_NULL
 }
-enum __DirectiveLocation @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.__DirectiveLocation") @ignore {
+enum __DirectiveLocation @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.enumType.__DirectiveLocation") {
   QUERY
 
   MUTATION
@@ -134,7 +134,7 @@ enum __DirectiveLocation @packageInfo(packageName: "io.graphoenix.core") @classI
 
   INPUT_FIELD_DEFINITION
 }
-interface Meta @packageInfo(packageName: "io.graphoenix.core") @ignore {
+interface Meta @packageInfo(packageName: "io.graphoenix.core") {
   isDeprecated: Boolean
 
   version: Int
@@ -151,7 +151,7 @@ interface Meta @packageInfo(packageName: "io.graphoenix.core") @ignore {
 
   createGroupId: String
 }
-type PageInfo @containerType @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.PageInfo") @ignore {
+type PageInfo @containerType @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.PageInfo") {
   hasNextPage: Boolean!
 
   hasPreviousPage: Boolean!
@@ -160,7 +160,7 @@ type PageInfo @containerType @packageInfo(packageName: "io.graphoenix.core") @cl
 
   endCursor: String!
 }
-type QueryType implements Meta @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.QueryType") @ignore {
+type QueryType implements Meta @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.QueryType") {
   isDeprecated: Boolean
 
   version: Int
@@ -177,7 +177,7 @@ type QueryType implements Meta @packageInfo(packageName: "io.graphoenix.core") @
 
   createGroupId: String
 }
-type MutationType implements Meta @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.MutationType") @ignore {
+type MutationType implements Meta @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.MutationType") {
   isDeprecated: Boolean
 
   version: Int
@@ -194,7 +194,7 @@ type MutationType implements Meta @packageInfo(packageName: "io.graphoenix.core"
 
   createGroupId: String
 }
-input ValidationInput @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ValidationInput") @ignore {
+input ValidationInput @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ValidationInput") {
   minLength: Int
   maxLength: Int
   pattern: String
@@ -222,81 +222,81 @@ input ValidationInput @packageInfo(packageName: "io.graphoenix.core") @classInfo
   else: ValidationInput
   dependentRequired: [Property]
 }
-input Property @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.Property") @ignore {
+input Property @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.Property") {
   name: String!
   validation: ValidationInput
   required: [String]
 }
-input IDExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.IDExpression") @ignore {
+input IDExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.IDExpression") {
   opr: Operator = EQ
   val: ID
   in: [ID]
   skipNull: Boolean = false
 }
-input StringExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.StringExpression") @ignore {
+input StringExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.StringExpression") {
   opr: Operator = EQ
   val: String
   in: [String]
   skipNull: Boolean = false
 }
-input BooleanExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.BooleanExpression") @ignore {
+input BooleanExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.BooleanExpression") {
   opr: Operator = EQ
   val: Boolean
   in: [Boolean]
   skipNull: Boolean = false
 }
-input IntExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.IntExpression") @ignore {
+input IntExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.IntExpression") {
   opr: Operator = EQ
   val: Int
   in: [Int]
   skipNull: Boolean = false
 }
-input FloatExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.FloatExpression") @ignore {
+input FloatExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.FloatExpression") {
   opr: Operator = EQ
   val: Float
   in: [Float]
   skipNull: Boolean = false
 }
-input MapWith @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.MapWith") @ignore {
+input MapWith @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.MapWith") {
   type: String
   from: String
   to: String
 }
-input InvokeParameter @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter") @ignore {
+input InvokeParameter @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter") {
   name: String
   className: String
 }
-input OperatorExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.OperatorExpression") @ignore {
+input OperatorExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.OperatorExpression") {
   opr: Operator = EQ
   val: Operator
   in: [Operator]
 }
-input ConditionalExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ConditionalExpression") @ignore {
+input ConditionalExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ConditionalExpression") {
   opr: Operator = EQ
   val: Conditional
   in: [Conditional]
 }
-input SortExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.SortExpression") @ignore {
+input SortExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.SortExpression") {
   opr: Operator = EQ
   val: Sort
   in: [Sort]
 }
-input FunctionExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.FunctionExpression") @ignore {
+input FunctionExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.FunctionExpression") {
   opr: Operator = EQ
   val: Function
   in: [Function]
 }
-input ProtocolExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ProtocolExpression") @ignore {
+input ProtocolExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ProtocolExpression") {
   opr: Operator = EQ
   val: Protocol
   in: [Protocol]
 }
-input __TypeKindExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.__TypeKindExpression") @ignore {
+input __TypeKindExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.__TypeKindExpression") {
   opr: Operator = EQ
   val: __TypeKind
   in: [__TypeKind]
 }
-input __DirectiveLocationExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.__DirectiveLocationExpression") @ignore {
+input __DirectiveLocationExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.__DirectiveLocationExpression") {
   opr: Operator = EQ
   val: __DirectiveLocation
   in: [__DirectiveLocation]
@@ -320,4 +320,3 @@ directive @format(value: String locale: String) on FIELD_DEFINITION
 directive @permitAll on OBJECT
 directive @denyAll on OBJECT
 directive @rolesAllowed(roles: [String]) on OBJECT
-directive @ignore on OBJECT

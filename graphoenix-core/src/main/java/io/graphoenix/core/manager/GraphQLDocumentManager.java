@@ -55,7 +55,6 @@ import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.IGNORE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MERGE_TO_LIST_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.DELETE;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.MERGE;
@@ -813,51 +812,6 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                 .findFirst()
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
-    }
-
-    @Override
-    public boolean isIgnore(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return Optional.ofNullable(objectTypeDefinitionContext.directives()).map(this::isIgnore).orElse(false);
-    }
-
-    @Override
-    public boolean isIgnore(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return Optional.ofNullable(enumTypeDefinitionContext.directives()).map(this::isIgnore).orElse(false);
-    }
-
-    @Override
-    public boolean isIgnore(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return Optional.ofNullable(inputObjectTypeDefinitionContext.directives()).map(this::isIgnore).orElse(false);
-    }
-
-    @Override
-    public boolean isIgnore(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).map(this::isIgnore).orElse(false);
-    }
-
-    @Override
-    public boolean isNotIgnore(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return !isIgnore(objectTypeDefinitionContext);
-    }
-
-    @Override
-    public boolean isNotIgnore(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        return !isIgnore(enumTypeDefinitionContext);
-    }
-
-    @Override
-    public boolean isNotIgnore(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        return !isIgnore(inputObjectTypeDefinitionContext);
-    }
-
-    @Override
-    public boolean isNotIgnore(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        return !isIgnore(interfaceTypeDefinitionContext);
-    }
-
-    public boolean isIgnore(GraphqlParser.DirectivesContext directivesContext) {
-        return directivesContext.directive().stream()
-                .anyMatch(directiveContext -> directiveContext.name().getText().equals(IGNORE_DIRECTIVE_NAME));
     }
 
     @Override

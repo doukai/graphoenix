@@ -196,22 +196,6 @@ public interface IGraphQLDocumentManager {
 
     Optional<String> getClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
-    boolean isIgnore(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
-
-    boolean isIgnore(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
-
-    boolean isIgnore(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
-
-    boolean isIgnore(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
-
-    boolean isNotIgnore(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
-
-    boolean isNotIgnore(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext);
-
-    boolean isNotIgnore(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext);
-
-    boolean isNotIgnore(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
-
     String getClassName(String typeName);
 
     Optional<String> getPackageName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);

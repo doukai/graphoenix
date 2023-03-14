@@ -52,7 +52,7 @@ public class ProtobufFileBuilder {
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
-                .setTopLevelDefs(manager.getObjects().filter(manager::isNotIgnore).map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
+                .setTopLevelDefs(manager.getObjects().map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
         protoFileMap.put("input_objects", new ProtoFile()
@@ -68,7 +68,7 @@ public class ProtobufFileBuilder {
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
-                .setTopLevelDefs(manager.getInputObjects().filter(manager::isNotIgnore).map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
+                .setTopLevelDefs(manager.getInputObjects().map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
         protoFileMap.put("enums", new ProtoFile()
@@ -79,7 +79,7 @@ public class ProtobufFileBuilder {
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
-                .setTopLevelDefs(manager.getEnums().filter(manager::isNotIgnore).map(this::buildEnum).map(Enum::toString).collect(Collectors.toList()))
+                .setTopLevelDefs(manager.getEnums().map(this::buildEnum).map(Enum::toString).collect(Collectors.toList()))
                 .toString()
         );
         protoFileMap.put("query_requests", new ProtoFile()
@@ -259,7 +259,6 @@ public class ProtobufFileBuilder {
     public Stream<Message> buildQueryRpcRequest() {
         return manager.getQueryOperationTypeName()
                 .flatMap(manager::getObject).stream()
-                .filter(manager::isNotIgnore)
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .map(fieldDefinitionContext ->
                         new Message()
@@ -287,7 +286,6 @@ public class ProtobufFileBuilder {
     public Stream<Message> buildQueryRpcResponse() {
         return manager.getQueryOperationTypeName()
                 .flatMap(manager::getObject).stream()
-                .filter(manager::isNotIgnore)
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .map(fieldDefinitionContext ->
                         new Message()
@@ -306,7 +304,6 @@ public class ProtobufFileBuilder {
     public Stream<Message> buildMutationRpcRequest() {
         return manager.getMutationOperationTypeName()
                 .flatMap(manager::getObject).stream()
-                .filter(manager::isNotIgnore)
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .map(fieldDefinitionContext ->
                         new Message()
@@ -336,7 +333,6 @@ public class ProtobufFileBuilder {
     public Stream<Message> buildMutationRpcResponse() {
         return manager.getMutationOperationTypeName()
                 .flatMap(manager::getObject).stream()
-                .filter(manager::isNotIgnore)
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
                 .map(fieldDefinitionContext ->
                         new Message()

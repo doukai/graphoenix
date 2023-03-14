@@ -54,7 +54,7 @@ public class PackageProcessor extends BaseProcessor {
             }
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/package.gql");
             Writer writer = packageGraphQL.openWriter();
-            writer.write(documentBuilder.getPackageDocument().toString());
+            writer.write(documentBuilder.getDocument().toString());
             writer.close();
 
         } catch (IOException e) {
