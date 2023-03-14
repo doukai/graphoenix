@@ -3,6 +3,7 @@ package io.graphoenix.spi.antlr;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.spi.constant.Hammurabi;
 
+import javax.annotation.processing.Filer;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,8 @@ public interface IGraphQLDocumentManager {
     void registerPath(Path graphqlPath) throws IOException;
 
     void registerPathByName(String graphqlPathName, ClassLoader classLoader) throws IOException, URISyntaxException;
+
+    void registerPathByName(String graphqlPathName, Filer filer) throws IOException, URISyntaxException;
 
     void mergePath(Path graphqlPath) throws IOException;
 

@@ -46,13 +46,6 @@ import static javax.lang.model.SourceVersion.RELEASE_11;
 @AutoService(Processor.class)
 public class GraphQLOperationProcessor extends BaseProcessor {
 
-    private IGraphQLDocumentManager manager;
-    private DocumentBuilder documentBuilder;
-    private GraphQLOperationRouter operationRouter;
-    private GeneratorHandler generatorHandler;
-    private JavaElementToOperation javaElementToOperation;
-    private OperationInterfaceImplementer operationInterfaceImplementer;
-    private GraphQLConfig graphQLConfig;
     private Elements elementUtils;
     private Types typeUtils;
     private Filer filer;
@@ -63,13 +56,6 @@ public class GraphQLOperationProcessor extends BaseProcessor {
         elementUtils = processingEnv.getElementUtils();
         typeUtils = processingEnv.getTypeUtils();
         filer = processingEnv.getFiler();
-        graphQLConfig = BeanContext.get(GraphQLConfig.class);
-        manager = BeanContext.get(IGraphQLDocumentManager.class);
-        documentBuilder = BeanContext.get(DocumentBuilder.class);
-        operationRouter = BeanContext.get(GraphQLOperationRouter.class);
-        generatorHandler = BeanContext.get(GeneratorHandler.class);
-        javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
-        operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
     }
 
     @Override
@@ -77,8 +63,15 @@ public class GraphQLOperationProcessor extends BaseProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
+        GraphQLOperationRouter operationRouter = BeanContext.get(GraphQLOperationRouter.class);
+        GeneratorHandler generatorHandler = BeanContext.get(GeneratorHandler.class);
+        JavaElementToOperation javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
+        OperationInterfaceImplementer operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
         if (graphQLConfig.getPackageName() == null) {
-            getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
+            getDefaultPackageName(roundEnv).ifPresent(graphQLConfig::setPackageName);
         }
         try {
             if (graphQLConfig.getBuild()) {

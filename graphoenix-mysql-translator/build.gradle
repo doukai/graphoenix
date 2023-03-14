@@ -31,6 +31,7 @@ dependencies {
     implementation 'com.github.jsqlparser:jsqlparser:4.3'
     implementation 'com.github.vertical-blank:sql-formatter:2.0.3'
 
+    annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-core')
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')

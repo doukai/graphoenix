@@ -30,28 +30,12 @@ import static javax.lang.model.SourceVersion.RELEASE_11;
 @AutoService(Processor.class)
 public class GrpcServiceProcessor extends BaseProcessor {
 
-    private IGraphQLDocumentManager manager;
-    private DocumentBuilder documentBuilder;
-    private GrpcInputObjectHandlerBuilder grpcInputObjectHandlerBuilder;
-    private GrpcObjectHandlerBuilder grpcObjectHandlerBuilder;
-    private GrpcRequestHandlerBuilder grpcRequestHandlerBuilder;
-    private GrpcServiceImplementer grpcServiceImplementer;
-    private GrpcFetchHandlerBuilder grpcFetchHandlerBuilder;
-    private GraphQLConfig graphQLConfig;
     private Filer filer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         filer = processingEnv.getFiler();
-        graphQLConfig = BeanContext.get(GraphQLConfig.class);
-        manager = BeanContext.get(IGraphQLDocumentManager.class);
-        documentBuilder = BeanContext.get(DocumentBuilder.class);
-        grpcInputObjectHandlerBuilder = BeanContext.get(GrpcInputObjectHandlerBuilder.class);
-        grpcObjectHandlerBuilder = BeanContext.get(GrpcObjectHandlerBuilder.class);
-        grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
-        grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
-        grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
     }
 
     @Override
@@ -59,8 +43,16 @@ public class GrpcServiceProcessor extends BaseProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
+        GrpcInputObjectHandlerBuilder grpcInputObjectHandlerBuilder = BeanContext.get(GrpcInputObjectHandlerBuilder.class);
+        GrpcObjectHandlerBuilder grpcObjectHandlerBuilder = BeanContext.get(GrpcObjectHandlerBuilder.class);
+        GrpcRequestHandlerBuilder grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
+        GrpcServiceImplementer grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
+        GrpcFetchHandlerBuilder grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
         if (graphQLConfig.getPackageName() == null) {
-            getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
+            getDefaultPackageName(roundEnv).ifPresent(graphQLConfig::setPackageName);
         }
         registerElements(roundEnv);
         try {

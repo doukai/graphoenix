@@ -28,18 +28,12 @@ import static javax.lang.model.SourceVersion.RELEASE_11;
 @AutoService(Processor.class)
 public class PackageProcessor extends BaseProcessor {
 
-    private IGraphQLDocumentManager manager;
-    private DocumentBuilder documentBuilder;
-    private GraphQLConfig graphQLConfig;
     private Filer filer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         filer = processingEnv.getFiler();
-        graphQLConfig = BeanContext.get(GraphQLConfig.class);
-        manager = BeanContext.get(IGraphQLDocumentManager.class);
-        documentBuilder = BeanContext.get(DocumentBuilder.class);
     }
 
     @Override
@@ -47,8 +41,11 @@ public class PackageProcessor extends BaseProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         if (graphQLConfig.getPackageName() == null) {
-            getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
+            getDefaultPackageName(roundEnv).ifPresent(graphQLConfig::setPackageName);
         }
         registerElements(roundEnv);
         try {

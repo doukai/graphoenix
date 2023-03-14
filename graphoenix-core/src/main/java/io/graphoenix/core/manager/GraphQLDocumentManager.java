@@ -24,6 +24,7 @@ import io.graphoenix.spi.constant.Hammurabi;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import javax.annotation.processing.Filer;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +50,7 @@ import static io.graphoenix.core.error.GraphQLErrorType.FRAGMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.PACKAGE_NAME_ARGUMENT_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
+import static io.graphoenix.core.utils.FilerUtil.FILER_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
@@ -178,6 +180,28 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             } catch (FileSystemNotFoundException fileSystemNotFoundException) {
                 Map<String, String> env = new HashMap<>();
                 FileSystem fileSystem = FileSystems.newFileSystem(Objects.requireNonNull(resource).toURI(), env);
+                List<Path> pathList = Files.list(fileSystem.getPath(graphqlPathName)).collect(Collectors.toList());
+                for (Path path : pathList) {
+                    registerPath(path);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void registerPathByName(String graphqlPathName, Filer filer) throws IOException, URISyntaxException {
+        if (Files.exists(Path.of(graphqlPathName))) {
+            registerPath(Path.of(graphqlPathName));
+        } else {
+            Path resource = FILER_UTIL.getResourcesPath(filer).resolve(graphqlPathName);
+            try {
+                List<Path> pathList = Files.list(resource).collect(Collectors.toList());
+                for (Path path : pathList) {
+                    registerPath(path);
+                }
+            } catch (FileSystemNotFoundException fileSystemNotFoundException) {
+                Map<String, String> env = new HashMap<>();
+                FileSystem fileSystem = FileSystems.newFileSystem(resource.toUri(), env);
                 List<Path> pathList = Files.list(fileSystem.getPath(graphqlPathName)).collect(Collectors.toList());
                 for (Path path : pathList) {
                     registerPath(path);

@@ -72,7 +72,7 @@ public class GraphQLConfigRegister {
             manager.registerInputStream(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLFileName()).openInputStream());
             Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
         } else if (config.getGraphQLPath() != null) {
-            manager.registerPath(Path.of(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLPath()).toUri()));
+            manager.registerPathByName(config.getGraphQLPath(), filer);
             Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
         }
     }
