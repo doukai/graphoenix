@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
@@ -29,6 +30,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -82,6 +84,8 @@ public class ApplicationProcessor extends BaseProcessor {
         }
         registerElements(roundEnv);
         try {
+            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+            configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
@@ -120,7 +124,7 @@ public class ApplicationProcessor extends BaseProcessor {
             mutationDataLoaderBuilder.writeToFiler(filer);
             queryHandlerBuilder.writeToFiler(filer);
             mutationHandlerBuilder.writeToFiler(filer);
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
         }

@@ -1,7 +1,3 @@
-schema {
-  query: QueryType
-  mutation: MutationType
-}
 scalar ID
 scalar Int
 scalar Float
@@ -134,7 +130,7 @@ enum __DirectiveLocation @packageInfo(packageName: "io.graphoenix.core") @classI
 
   INPUT_FIELD_DEFINITION
 }
-interface Meta @packageInfo(packageName: "io.graphoenix.core") {
+interface Meta @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.interfaceType.Meta") {
   isDeprecated: Boolean
 
   version: Int
@@ -159,40 +155,6 @@ type PageInfo @containerType @packageInfo(packageName: "io.graphoenix.core") @cl
   startCursor: String!
 
   endCursor: String!
-}
-type QueryType implements Meta @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.QueryType") {
-  isDeprecated: Boolean
-
-  version: Int
-
-  realmId: String
-
-  createUserId: String
-
-  createTime: Timestamp
-
-  updateUserId: String
-
-  updateTime: Timestamp
-
-  createGroupId: String
-}
-type MutationType implements Meta @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.objectType.MutationType") {
-  isDeprecated: Boolean
-
-  version: Int
-
-  realmId: String
-
-  createUserId: String
-
-  createTime: Timestamp
-
-  updateUserId: String
-
-  updateTime: Timestamp
-
-  createGroupId: String
 }
 input ValidationInput @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ValidationInput") {
   minLength: Int
@@ -265,41 +227,6 @@ input MapWith @packageInfo(packageName: "io.graphoenix.core") @classInfo(classNa
 input InvokeParameter @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.InvokeParameter") {
   name: String
   className: String
-}
-input OperatorExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.OperatorExpression") {
-  opr: Operator = EQ
-  val: Operator
-  in: [Operator]
-}
-input ConditionalExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ConditionalExpression") {
-  opr: Operator = EQ
-  val: Conditional
-  in: [Conditional]
-}
-input SortExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.SortExpression") {
-  opr: Operator = EQ
-  val: Sort
-  in: [Sort]
-}
-input FunctionExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.FunctionExpression") {
-  opr: Operator = EQ
-  val: Function
-  in: [Function]
-}
-input ProtocolExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.ProtocolExpression") {
-  opr: Operator = EQ
-  val: Protocol
-  in: [Protocol]
-}
-input __TypeKindExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.__TypeKindExpression") {
-  opr: Operator = EQ
-  val: __TypeKind
-  in: [__TypeKind]
-}
-input __DirectiveLocationExpression @packageInfo(packageName: "io.graphoenix.core") @classInfo(className: "io.graphoenix.core.dto.inputObjectType.__DirectiveLocationExpression") {
-  opr: Operator = EQ
-  val: __DirectiveLocation
-  in: [__DirectiveLocation]
 }
 directive @validation(minLength: Int maxLength: Int pattern: String format: String contentMediaType: String contentEncoding: String minimum: Float exclusiveMinimum: Float maximum: Float exclusiveMaximum: Float multipleOf: Float const: String enum: [String] items: ValidationInput minItems: Int maxItems: Int uniqueItems: Boolean allOf: [ValidationInput] anyOf: [ValidationInput] oneOf: [ValidationInput] not: ValidationInput properties: [Property] if: ValidationInput then: ValidationInput else: ValidationInput dependentRequired: [Property]) on FIELD_DEFINITION
 directive @dataType(type: String length: Int decimals: Int default: String) on FIELD_DEFINITION

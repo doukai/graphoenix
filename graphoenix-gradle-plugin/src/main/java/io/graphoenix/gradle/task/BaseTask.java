@@ -91,8 +91,7 @@ public class BaseTask extends DefaultTask {
 
         try {
             manager.clearAll();
-            configRegister.registerPreset(classLoader);
-            configRegister.registerConfig(classLoader);
+            configRegister.registerConfig(resourcePath);
             mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
@@ -110,9 +109,6 @@ public class BaseTask extends DefaultTask {
                 }
                 for (File classesDir : sourceSet.getOutput().getClassesDirs()) {
                     urls.add(classesDir.toURI().toURL());
-                }
-                for (File sourceDirectories : sourceSet.getResources().getSourceDirectories()) {
-                    urls.add(sourceDirectories.toURI().toURL());
                 }
             }
         } catch (MalformedURLException e) {
@@ -188,7 +184,6 @@ public class BaseTask extends DefaultTask {
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
-                                                                                                .addArgument("ignore", true)
                                                                                 )
                                                                                 .addDirective(
                                                                                         new Directive()
@@ -204,7 +199,6 @@ public class BaseTask extends DefaultTask {
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
-                                                                                                .addArgument("ignore", true)
                                                                                 )
                                                                                 .addDirective(
                                                                                         new Directive()
@@ -220,7 +214,6 @@ public class BaseTask extends DefaultTask {
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
                                                                                                 .addArgument("className", qualifiedName)
-                                                                                                .addArgument("ignore", true)
                                                                                 )
                                                                                 .addDirective(
                                                                                         new Directive()

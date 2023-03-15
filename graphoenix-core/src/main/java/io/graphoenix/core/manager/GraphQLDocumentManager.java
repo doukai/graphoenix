@@ -188,23 +188,37 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public void registerPathByName(String graphqlPathName, Filer filer) throws IOException, URISyntaxException {
-        if (Files.exists(Path.of(graphqlPathName))) {
-            registerPath(Path.of(graphqlPathName));
-        } else {
-            Path resource = FILER_UTIL.getResourcesPath(filer).resolve(graphqlPathName);
-            try {
-                List<Path> pathList = Files.list(resource).collect(Collectors.toList());
-                for (Path path : pathList) {
-                    registerPath(path);
-                }
-            } catch (FileSystemNotFoundException fileSystemNotFoundException) {
-                Map<String, String> env = new HashMap<>();
-                FileSystem fileSystem = FileSystems.newFileSystem(resource.toUri(), env);
-                List<Path> pathList = Files.list(fileSystem.getPath(graphqlPathName)).collect(Collectors.toList());
-                for (Path path : pathList) {
-                    registerPath(path);
-                }
+    public void registerPathByName(String graphqlPathName, String resourcePath) throws IOException {
+        Path resource = Paths.get(resourcePath).resolve(graphqlPathName);
+        try {
+            List<Path> pathList = Files.list(resource).collect(Collectors.toList());
+            for (Path path : pathList) {
+                registerPath(path);
+            }
+        } catch (FileSystemNotFoundException fileSystemNotFoundException) {
+            Map<String, String> env = new HashMap<>();
+            FileSystem fileSystem = FileSystems.newFileSystem(resource.toUri(), env);
+            List<Path> pathList = Files.list(fileSystem.getPath(graphqlPathName)).collect(Collectors.toList());
+            for (Path path : pathList) {
+                registerPath(path);
+            }
+        }
+    }
+
+    @Override
+    public void registerPathByName(String graphqlPathName, Filer filer) throws IOException {
+        Path resource = FILER_UTIL.getResourcesPath(filer).resolve(graphqlPathName);
+        try {
+            List<Path> pathList = Files.list(resource).collect(Collectors.toList());
+            for (Path path : pathList) {
+                registerPath(path);
+            }
+        } catch (FileSystemNotFoundException fileSystemNotFoundException) {
+            Map<String, String> env = new HashMap<>();
+            FileSystem fileSystem = FileSystems.newFileSystem(resource.toUri(), env);
+            List<Path> pathList = Files.list(fileSystem.getPath(graphqlPathName)).collect(Collectors.toList());
+            for (Path path : pathList) {
+                registerPath(path);
             }
         }
     }

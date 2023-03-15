@@ -3,6 +3,7 @@ package graphoenix.annotation.processor;
 import com.google.auto.service.AutoService;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.java.generator.implementer.grpc.GrpcFetchHandlerBuilder;
 import io.graphoenix.java.generator.implementer.grpc.GrpcInputObjectHandlerBuilder;
@@ -21,6 +22,7 @@ import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 import static javax.lang.model.SourceVersion.RELEASE_11;
@@ -56,6 +58,8 @@ public class GrpcServiceProcessor extends BaseProcessor {
         }
         registerElements(roundEnv);
         try {
+            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+            configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
@@ -64,7 +68,7 @@ public class GrpcServiceProcessor extends BaseProcessor {
             grpcRequestHandlerBuilder.writeToFiler(filer);
             grpcServiceImplementer.writeToFiler(filer);
             grpcFetchHandlerBuilder.writeToFiler(filer);
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
         }

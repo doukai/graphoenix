@@ -80,8 +80,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
 
         try {
             manager.clearAll();
-            configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
-            configRegister.registerConfig(graphQLConfig, filer);
+            configRegister.registerConfig(filer);
             mapper.registerFieldMaps();
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);

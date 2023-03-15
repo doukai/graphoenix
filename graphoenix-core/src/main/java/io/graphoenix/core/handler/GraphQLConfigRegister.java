@@ -9,6 +9,8 @@ import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
 import javax.tools.StandardLocation;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -18,6 +20,7 @@ import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -64,15 +67,28 @@ public class GraphQLConfigRegister {
         }
     }
 
-    public void registerConfig(GraphQLConfig config, Filer filer) throws IOException, URISyntaxException {
-        if (config.getGraphQL() != null) {
-            manager.registerGraphQL(config.getGraphQL());
+    public void registerConfig(String resourcePath) throws IOException, URISyntaxException {
+        if (graphQLConfig.getGraphQL() != null) {
+            manager.registerGraphQL(graphQLConfig.getGraphQL());
             Logger.info("registered graphql {}", graphQLConfig.getGraphQL());
-        } else if (config.getGraphQLFileName() != null) {
-            manager.registerInputStream(filer.getResource(StandardLocation.SOURCE_PATH, "", config.getGraphQLFileName()).openInputStream());
+        } else if (graphQLConfig.getGraphQLFileName() != null) {
+            manager.registerInputStream(new FileInputStream(new File(Paths.get(resourcePath).resolve(graphQLConfig.getGraphQLFileName()).toUri())));
             Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
-        } else if (config.getGraphQLPath() != null) {
-            manager.registerPathByName(config.getGraphQLPath(), filer);
+        } else if (graphQLConfig.getGraphQLPath() != null) {
+            manager.registerPathByName(graphQLConfig.getGraphQLPath(), resourcePath);
+            Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
+        }
+    }
+
+    public void registerConfig(Filer filer) throws IOException, URISyntaxException {
+        if (graphQLConfig.getGraphQL() != null) {
+            manager.registerGraphQL(graphQLConfig.getGraphQL());
+            Logger.info("registered graphql {}", graphQLConfig.getGraphQL());
+        } else if (graphQLConfig.getGraphQLFileName() != null) {
+            manager.registerInputStream(filer.getResource(StandardLocation.SOURCE_PATH, "", graphQLConfig.getGraphQLFileName()).openInputStream());
+            Logger.info("registered file {}", graphQLConfig.getGraphQLFileName());
+        } else if (graphQLConfig.getGraphQLPath() != null) {
+            manager.registerPathByName(graphQLConfig.getGraphQLPath(), filer);
             Logger.info("registered path {}", graphQLConfig.getGraphQLPath());
         }
     }

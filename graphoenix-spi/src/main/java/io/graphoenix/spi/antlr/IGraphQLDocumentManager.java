@@ -30,6 +30,8 @@ public interface IGraphQLDocumentManager {
 
     void registerPathByName(String graphqlPathName, ClassLoader classLoader) throws IOException, URISyntaxException;
 
+    void registerPathByName(String graphqlPathName, String resourcePath) throws IOException, URISyntaxException;
+
     void registerPathByName(String graphqlPathName, Filer filer) throws IOException, URISyntaxException;
 
     void mergePath(Path graphqlPath) throws IOException;

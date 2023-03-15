@@ -16,6 +16,9 @@ apply plugin: 'maven'
 apply plugin: 'io.graphoenix'
 
 compileJava.options.sourcepath = files('src/main/resources')
+graphql {
+    packageName = "io.graphoenix.mysql"
+}
 
 group 'io.graphoenix'
 version '0.0.1-SNAPSHOT'

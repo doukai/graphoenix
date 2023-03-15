@@ -14,7 +14,7 @@ public @interface __TypeInput2 {
 
   int schemaId() default 0;
 
-  __TypeKind kind() default io.graphoenix.showcase.mysql.dto.enumType.__TypeKind.SCALAR;
+  __TypeKind kind() default __TypeKind.SCALAR;
 
   String description() default "";
 
