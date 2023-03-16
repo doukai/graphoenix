@@ -1,8 +1,8 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.enumType.Function;
-import io.graphoenix.core.dto.enumType.Operator;
+import io.graphoenix.showcase.mysql.dto.enumType.Function;
+import io.graphoenix.showcase.mysql.dto.enumType.Operator;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.util.Collection;

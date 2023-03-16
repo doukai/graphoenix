@@ -1,10 +1,19 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.graphoenix.showcase.mysql.grpc";
+option java_package = "io.graphoenix.showcase.mysql.dto.enumType.grpc";
 
 package io.graphoenix.showcase.mysql.grpc;
 
+enum Sex {
+    MAN_SEX = 0;
+    FEMALE_SEX = 1;
+}
+enum RoleType {
+    ADMIN_ROLE_TYPE = 0;
+    USER_ROLE_TYPE = 1;
+    ANONYMOUS_ROLE_TYPE = 2;
+}
 enum Operator {
     EQ_OPERATOR = 0;
     NEQ_OPERATOR = 1;
@@ -75,13 +84,4 @@ enum IntroDirectiveLocation {
     ENUM_VALUE_INTRO_DIRECTIVE_LOCATION = 15;
     INPUT_OBJECT_INTRO_DIRECTIVE_LOCATION = 16;
     INPUT_FIELD_DEFINITION_INTRO_DIRECTIVE_LOCATION = 17;
-}
-enum Sex {
-    MAN_SEX = 0;
-    FEMALE_SEX = 1;
-}
-enum RoleType {
-    ADMIN_ROLE_TYPE = 0;
-    USER_ROLE_TYPE = 1;
-    ANONYMOUS_ROLE_TYPE = 2;
 }

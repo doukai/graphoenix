@@ -1,7 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.enumType.__TypeKind;
+import io.graphoenix.showcase.mysql.dto.enumType.__TypeKind;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;

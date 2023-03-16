@@ -9,60 +9,6 @@ import "enums.proto";
 import "objects.proto";
 import "input_objects.proto";
 
-message MutationIntroSchemaResponse {
-    optional IntroSchema intro_schema = 1;
-}
-message MutationIntroSchemaListResponse {
-    repeated IntroSchema intro_schema_list = 1;
-}
-message MutationIntroTypeResponse {
-    optional IntroType intro_type = 1;
-}
-message MutationIntroTypeListResponse {
-    repeated IntroType intro_type_list = 1;
-}
-message MutationIntroTypeInterfacesResponse {
-    optional IntroTypeInterfaces intro_type_interfaces = 1;
-}
-message MutationIntroTypeInterfacesListResponse {
-    repeated IntroTypeInterfaces intro_type_interfaces_list = 1;
-}
-message MutationIntroTypePossibleTypesResponse {
-    optional IntroTypePossibleTypes intro_type_possible_types = 1;
-}
-message MutationIntroTypePossibleTypesListResponse {
-    repeated IntroTypePossibleTypes intro_type_possible_types_list = 1;
-}
-message MutationIntroFieldResponse {
-    optional IntroField intro_field = 1;
-}
-message MutationIntroFieldListResponse {
-    repeated IntroField intro_field_list = 1;
-}
-message MutationIntroInputValueResponse {
-    optional IntroInputValue intro_input_value = 1;
-}
-message MutationIntroInputValueListResponse {
-    repeated IntroInputValue intro_input_value_list = 1;
-}
-message MutationIntroEnumValueResponse {
-    optional IntroEnumValue intro_enum_value = 1;
-}
-message MutationIntroEnumValueListResponse {
-    repeated IntroEnumValue intro_enum_value_list = 1;
-}
-message MutationIntroDirectiveResponse {
-    optional IntroDirective intro_directive = 1;
-}
-message MutationIntroDirectiveListResponse {
-    repeated IntroDirective intro_directive_list = 1;
-}
-message MutationIntroDirectiveLocationsResponse {
-    optional IntroDirectiveLocations intro_directive_locations = 1;
-}
-message MutationIntroDirectiveLocationsListResponse {
-    repeated IntroDirectiveLocations intro_directive_locations_list = 1;
-}
 message MutationUserResponse {
     optional User user = 1;
 }
@@ -116,6 +62,60 @@ message MutationOrganizationResponse {
 }
 message MutationOrganizationListResponse {
     repeated Organization organization_list = 1;
+}
+message MutationIntroSchemaResponse {
+    optional IntroSchema intro_schema = 1;
+}
+message MutationIntroSchemaListResponse {
+    repeated IntroSchema intro_schema_list = 1;
+}
+message MutationIntroTypeResponse {
+    optional IntroType intro_type = 1;
+}
+message MutationIntroTypeListResponse {
+    repeated IntroType intro_type_list = 1;
+}
+message MutationIntroTypeInterfacesResponse {
+    optional IntroTypeInterfaces intro_type_interfaces = 1;
+}
+message MutationIntroTypeInterfacesListResponse {
+    repeated IntroTypeInterfaces intro_type_interfaces_list = 1;
+}
+message MutationIntroTypePossibleTypesResponse {
+    optional IntroTypePossibleTypes intro_type_possible_types = 1;
+}
+message MutationIntroTypePossibleTypesListResponse {
+    repeated IntroTypePossibleTypes intro_type_possible_types_list = 1;
+}
+message MutationIntroFieldResponse {
+    optional IntroField intro_field = 1;
+}
+message MutationIntroFieldListResponse {
+    repeated IntroField intro_field_list = 1;
+}
+message MutationIntroInputValueResponse {
+    optional IntroInputValue intro_input_value = 1;
+}
+message MutationIntroInputValueListResponse {
+    repeated IntroInputValue intro_input_value_list = 1;
+}
+message MutationIntroEnumValueResponse {
+    optional IntroEnumValue intro_enum_value = 1;
+}
+message MutationIntroEnumValueListResponse {
+    repeated IntroEnumValue intro_enum_value_list = 1;
+}
+message MutationIntroDirectiveResponse {
+    optional IntroDirective intro_directive = 1;
+}
+message MutationIntroDirectiveListResponse {
+    repeated IntroDirective intro_directive_list = 1;
+}
+message MutationIntroDirectiveLocationsResponse {
+    optional IntroDirectiveLocations intro_directive_locations = 1;
+}
+message MutationIntroDirectiveLocationsListResponse {
+    repeated IntroDirectiveLocations intro_directive_locations_list = 1;
 }
 message MutationIsDeprecatedResponse {
     optional bool is_deprecated = 1;

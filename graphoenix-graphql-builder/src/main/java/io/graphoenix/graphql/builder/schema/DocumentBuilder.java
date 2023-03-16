@@ -74,7 +74,6 @@ public class DocumentBuilder {
 
     public Document buildDocument() throws IOException {
         manager.getObjects()
-                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
@@ -105,6 +104,75 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                //TODO union type
+                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
+    }
+
+    public Document getDocumentWithClassName() {
+        Document document = new Document();
+        buildSchema().ifPresent(schema -> document.addDefinition(schema.toString()));
+        return document
+                .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(
+                        manager.getEnums()
+                                .map(enumTypeDefinitionContext ->
+                                        manager.getClassName(enumTypeDefinitionContext)
+                                                .map(className -> buildEnum(enumTypeDefinitionContext))
+                                                .orElseGet(() ->
+                                                        buildEnum(enumTypeDefinitionContext).addDirective(
+                                                                new Directive(CLASS_INFO_DIRECTIVE_NAME)
+                                                                        .addArgument("className", graphQLConfig.getEnumTypePackageName().concat(".").concat(enumTypeDefinitionContext.name().getText()))
+                                                        )
+                                                )
+                                )
+                                .map(EnumType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
+                .addDefinitions(
+                        manager.getInterfaces()
+                                .map(interfaceTypeDefinitionContext ->
+                                        manager.getClassName(interfaceTypeDefinitionContext)
+                                                .map(className -> buildInterface(interfaceTypeDefinitionContext))
+                                                .orElseGet(() ->
+                                                        buildInterface(interfaceTypeDefinitionContext).addDirective(
+                                                                new Directive(CLASS_INFO_DIRECTIVE_NAME)
+                                                                        .addArgument("className", graphQLConfig.getInterfaceTypePackageName().concat(".").concat(interfaceTypeDefinitionContext.name().getText()))
+                                                        )
+                                                )
+                                )
+                                .map(InterfaceType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
+                .addDefinitions(
+                        manager.getObjects()
+                                .map(objectTypeDefinitionContext ->
+                                        manager.getClassName(objectTypeDefinitionContext)
+                                                .map(className -> buildObject(objectTypeDefinitionContext))
+                                                .orElseGet(() ->
+                                                        buildObject(objectTypeDefinitionContext).addDirective(
+                                                                new Directive(CLASS_INFO_DIRECTIVE_NAME)
+                                                                        .addArgument("className", graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
+                                                        )
+                                                )
+                                )
+                                .map(ObjectType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
+                .addDefinitions(
+                        manager.getInputObjects()
+                                .map(inputObjectTypeDefinitionContext ->
+                                        manager.getClassName(inputObjectTypeDefinitionContext)
+                                                .map(className -> buildInputObjectType(inputObjectTypeDefinitionContext))
+                                                .orElseGet(() ->
+                                                        buildInputObjectType(inputObjectTypeDefinitionContext).addDirective(
+                                                                new Directive(CLASS_INFO_DIRECTIVE_NAME)
+                                                                        .addArgument("className", graphQLConfig.getInputObjectTypePackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()))
+                                                        )
+                                                )
+                                )
+                                .map(InputObjectType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
                 //TODO union type
                 .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
@@ -165,13 +233,6 @@ public class DocumentBuilder {
                                 .addArgument("packageName", graphQLConfig.getPackageName())
                 );
 
-        if (!manager.hasClassName(objectTypeDefinitionContext)) {
-            objectType.addDirective(
-                    new Directive(CLASS_INFO_DIRECTIVE_NAME)
-                            .addArgument("className", graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
-            );
-        }
-
         if (buildInterface) {
             objectType.addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields().stream().filter(metaField -> objectType.getFields().stream().noneMatch(field -> field.getName().equals(metaField.getName()))).collect(Collectors.toList()));
         }
@@ -211,7 +272,7 @@ public class DocumentBuilder {
     }
 
     public InputObjectType buildInputObjectType(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
-        InputObjectType inputObjectType = new InputObjectType()
+        return new InputObjectType()
                 .setName(inputObjectTypeDefinitionContext.name().getText())
                 .setDescription(inputObjectTypeDefinitionContext.description() == null ? null : inputObjectTypeDefinitionContext.description().getText())
                 .setInputValues(inputObjectTypeDefinitionContext.inputObjectValueDefinitions() == null ? null : inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream().map(this::buildInputValue).collect(Collectors.toCollection(LinkedHashSet::new)))
@@ -220,18 +281,10 @@ public class DocumentBuilder {
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
                 );
-
-        if (!manager.hasClassName(inputObjectTypeDefinitionContext)) {
-            inputObjectType.addDirective(
-                    new Directive(CLASS_INFO_DIRECTIVE_NAME)
-                            .addArgument("className", graphQLConfig.getInputObjectTypePackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()))
-            );
-        }
-        return inputObjectType;
     }
 
     public InterfaceType buildInterface(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
-        InterfaceType interfaceType = new InterfaceType()
+        return new InterfaceType()
                 .setName(interfaceTypeDefinitionContext.name().getText())
                 .setDescription(interfaceTypeDefinitionContext.description() == null ? null : interfaceTypeDefinitionContext.description().getText())
                 .setInterfaces(interfaceTypeDefinitionContext.implementsInterfaces() == null ? new LinkedHashSet<>() : interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toCollection(LinkedHashSet::new)))
@@ -240,14 +293,6 @@ public class DocumentBuilder {
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
                 );
-
-        if (!manager.hasClassName(interfaceTypeDefinitionContext)) {
-            interfaceType.addDirective(
-                    new Directive(CLASS_INFO_DIRECTIVE_NAME)
-                            .addArgument("className", graphQLConfig.getInterfaceTypePackageName().concat(".").concat(interfaceTypeDefinitionContext.name().getText()))
-            );
-        }
-        return interfaceType;
     }
 
     public List<Field> getMetaInterfaceFields() {
@@ -270,7 +315,7 @@ public class DocumentBuilder {
     }
 
     public EnumType buildEnum(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
-        EnumType enumType = new EnumType()
+        return new EnumType()
                 .setName(enumTypeDefinitionContext.name().getText())
                 .setDescription(enumTypeDefinitionContext.description() == null ? null : enumTypeDefinitionContext.description().getText())
                 .setEnumValues(enumTypeDefinitionContext.enumValueDefinitions() == null ? null : enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition().stream().map(this::buildEnumValue).collect(Collectors.toCollection(LinkedHashSet::new)))
@@ -279,14 +324,6 @@ public class DocumentBuilder {
                         new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
                                 .addArgument("packageName", graphQLConfig.getPackageName())
                 );
-
-        if (!manager.hasClassName(enumTypeDefinitionContext)) {
-            enumType.addDirective(
-                    new Directive(CLASS_INFO_DIRECTIVE_NAME)
-                            .addArgument("className", graphQLConfig.getEnumTypePackageName().concat(".").concat(enumTypeDefinitionContext.name().getText()))
-            );
-        }
-        return enumType;
     }
 
     public Field buildField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
@@ -435,7 +472,6 @@ public class DocumentBuilder {
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(QUERY_TYPE_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(MUTATION_TYPE_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(SUBSCRIPTION_TYPE_NAME))
-                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -452,7 +488,6 @@ public class DocumentBuilder {
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(QUERY_TYPE_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(MUTATION_TYPE_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(SUBSCRIPTION_TYPE_NAME))
-                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -626,7 +661,6 @@ public class DocumentBuilder {
 
     public List<InputObjectType> buildArgumentInputObjects() {
         List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
-                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
@@ -643,7 +677,6 @@ public class DocumentBuilder {
 
     public List<ObjectType> buildContainerTypeObjects() {
         List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
-                .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))

@@ -16,11 +16,14 @@ dependencies {
     compile project(':graphoenix-r2dbc-connector')
 
     implementation project(':graphoenix-core')
+    implementation project(':graphoenix-json')
     implementation project(':graphoenix-config')
     implementation project(':graphoenix-graphql-builder')
 
+    annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')
+    annotationProcessor project(':graphoenix-json')
     annotationProcessor project(':graphoenix-config')
     annotationProcessor project(':graphoenix-graphql-builder')
     annotationProcessor project(':graphoenix-mysql-translator')

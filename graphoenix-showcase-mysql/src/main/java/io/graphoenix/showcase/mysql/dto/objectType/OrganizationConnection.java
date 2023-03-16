@@ -1,12 +1,11 @@
 package io.graphoenix.showcase.mysql.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.objectType.PageInfo;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
-import org.eclipse.microprofile.graphql.Type;
-
+import java.lang.Integer;
 import java.util.Collection;
+import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @CompiledJson

@@ -1,6 +1,5 @@
 package io.graphoenix.gradle.task;
 
-import com.github.javaparser.ast.CompilationUnit;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
@@ -16,7 +15,6 @@ import org.tinylog.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.List;
 
 public class GenerateGraphQLSourceTask extends BaseTask {
 
@@ -30,13 +28,9 @@ public class GenerateGraphQLSourceTask extends BaseTask {
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         JavaFileBuilder javaFileBuilder = BeanContext.get(JavaFileBuilder.class);
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath();
+        String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath();
         try {
-            List<CompilationUnit> compilationUnits = buildCompilationUnits();
-            if (graphQLConfig.getPackageName() == null) {
-                getDefaultPackageName(compilationUnits).ifPresent(graphQLConfig::setPackageName);
-            }
-            registerInvoke(compilationUnits);
+            registerInvoke();
             configRegister.registerPreset(createClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());

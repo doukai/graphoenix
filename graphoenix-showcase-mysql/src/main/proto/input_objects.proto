@@ -1,45 +1,12 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "io.graphoenix.showcase.mysql.grpc";
+option java_package = "io.graphoenix.showcase.mysql.dto.inputObjectType.grpc";
 
 package io.graphoenix.showcase.mysql.grpc;
 
 import "enums.proto";
 
-message ValidationInput {
-    optional int32 min_length = 1;
-    optional int32 max_length = 2;
-    optional string pattern = 3;
-    optional string format = 4;
-    optional string content_media_type = 5;
-    optional string content_encoding = 6;
-    optional float minimum = 7;
-    optional float exclusive_minimum = 8;
-    optional float maximum = 9;
-    optional float exclusive_maximum = 10;
-    optional float multiple_of = 11;
-    optional string const = 12;
-    repeated string enum = 13;
-    optional ValidationInput items = 14;
-    optional int32 min_items = 15;
-    optional int32 max_items = 16;
-    optional bool unique_items = 17;
-    repeated ValidationInput all_of = 18;
-    repeated ValidationInput any_of = 19;
-    repeated ValidationInput one_of = 20;
-    optional ValidationInput not = 21;
-    repeated Property properties = 22;
-    optional ValidationInput if = 23;
-    optional ValidationInput then = 24;
-    optional ValidationInput else = 25;
-    repeated Property dependent_required = 26;
-}
-message Property {
-    string name = 1;
-    optional ValidationInput validation = 2;
-    repeated string required = 3;
-}
 message IDExpression {
     optional Operator opr = 1;
     optional string val = 2;
@@ -78,6 +45,182 @@ message MapWith {
 message InvokeParameter {
     optional string name = 1;
     optional string class_name = 2;
+}
+message ValidationInput {
+    optional int32 min_length = 1;
+    optional int32 max_length = 2;
+    optional string pattern = 3;
+    optional string format = 4;
+    optional string content_media_type = 5;
+    optional string content_encoding = 6;
+    optional float minimum = 7;
+    optional float exclusive_minimum = 8;
+    optional float maximum = 9;
+    optional float exclusive_maximum = 10;
+    optional float multiple_of = 11;
+    optional string const = 12;
+    repeated string enum = 13;
+    optional ValidationInput items = 14;
+    optional int32 min_items = 15;
+    optional int32 max_items = 16;
+    optional bool unique_items = 17;
+    repeated ValidationInput all_of = 18;
+    repeated ValidationInput any_of = 19;
+    repeated ValidationInput one_of = 20;
+    optional ValidationInput not = 21;
+    repeated Property properties = 22;
+    optional ValidationInput if = 23;
+    optional ValidationInput then = 24;
+    optional ValidationInput else = 25;
+    repeated Property dependent_required = 26;
+}
+message Property {
+    string name = 1;
+    optional ValidationInput validation = 2;
+    repeated string required = 3;
+}
+message UserInput {
+    optional string id = 1;
+    optional string login = 2;
+    optional string password = 3;
+    optional string name = 4;
+    optional int32 age = 5;
+    optional bool disable = 6;
+    optional Sex sex = 7;
+    optional UserProfileInput user_profile = 8;
+    optional int32 organization_id = 9;
+    optional OrganizationInput organization = 10;
+    repeated RoleInput roles = 11;
+    repeated string phones = 12;
+    repeated int32 test1 = 13;
+    repeated bool test2 = 14;
+    optional bool is_deprecated = 15;
+    optional int32 version = 16;
+    optional string realm_id = 17;
+    optional string create_user_id = 18;
+    optional string create_time = 19;
+    optional string update_user_id = 20;
+    optional string update_time = 21;
+    optional string create_group_id = 22;
+    optional string intro_typename = 23;
+}
+message UserProfileInput {
+    optional string id = 1;
+    optional string user_id = 2;
+    optional string email = 3;
+    optional string address = 4;
+    optional string qq = 5;
+    optional UserInput user = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional string create_time = 11;
+    optional string update_user_id = 12;
+    optional string update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+}
+message UserPhonesInput {
+    optional string id = 1;
+    optional int32 user_id = 2;
+    optional string phone = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+}
+message UserTest1Input {
+    optional string id = 1;
+    optional int32 user_id = 2;
+    optional int32 test1 = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+}
+message UserTest2Input {
+    optional string id = 1;
+    optional int32 user_id = 2;
+    optional bool test2 = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+}
+message UserRoleInput {
+    optional string id = 1;
+    optional int32 user_id = 2;
+    optional int32 role_id = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+}
+message RoleInput {
+    optional string id = 1;
+    optional string name = 2;
+    repeated RoleType type = 3;
+    repeated UserInput users = 4;
+    optional bool is_deprecated = 5;
+    optional int32 version = 6;
+    optional string realm_id = 7;
+    optional string create_user_id = 8;
+    optional string create_time = 9;
+    optional string update_user_id = 10;
+    optional string update_time = 11;
+    optional string create_group_id = 12;
+    optional string intro_typename = 13;
+}
+message RoleRoleTypeInput {
+    optional string id = 1;
+    optional int32 role_id = 2;
+    optional RoleType type = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+}
+message OrganizationInput {
+    optional string id = 1;
+    optional int32 above_id = 2;
+    optional OrganizationInput above = 3;
+    repeated UserInput users = 4;
+    optional string name = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional string create_time = 10;
+    optional string update_user_id = 11;
+    optional string update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
 }
 message IntroSchemaInput {
     optional string id = 1;
@@ -245,148 +388,137 @@ message IntroDirectiveLocationsInput {
     optional string create_group_id = 11;
     optional string intro_typename = 12;
 }
-message UserInput {
-    optional string id = 1;
-    optional string login = 2;
-    optional string password = 3;
-    optional string name = 4;
-    optional int32 age = 5;
-    optional bool disable = 6;
-    optional Sex sex = 7;
-    optional UserProfileInput user_profile = 8;
-    optional int32 organization_id = 9;
-    optional OrganizationInput organization = 10;
-    repeated RoleInput roles = 11;
-    repeated string phones = 12;
-    repeated int32 test1 = 13;
-    repeated bool test2 = 14;
-    optional bool is_deprecated = 15;
-    optional int32 version = 16;
-    optional string realm_id = 17;
-    optional string create_user_id = 18;
-    optional string create_time = 19;
-    optional string update_user_id = 20;
-    optional string update_time = 21;
-    optional string create_group_id = 22;
-    optional string intro_typename = 23;
+message UserOrderBy {
+    optional Sort id = 1;
+    optional Sort login = 2;
+    optional Sort password = 3;
+    optional Sort name = 4;
+    optional Sort age = 5;
+    optional Sort disable = 6;
+    optional Sort sex = 7;
+    optional Sort organization_id = 8;
+    optional Sort is_deprecated = 9;
+    optional Sort version = 10;
+    optional Sort realm_id = 11;
+    optional Sort create_user_id = 12;
+    optional Sort create_time = 13;
+    optional Sort update_user_id = 14;
+    optional Sort update_time = 15;
+    optional Sort create_group_id = 16;
+    optional Sort intro_typename = 17;
 }
-message UserProfileInput {
-    optional string id = 1;
-    optional string user_id = 2;
-    optional string email = 3;
-    optional string address = 4;
-    optional string qq = 5;
-    optional UserInput user = 6;
-    optional bool is_deprecated = 7;
-    optional int32 version = 8;
-    optional string realm_id = 9;
-    optional string create_user_id = 10;
-    optional string create_time = 11;
-    optional string update_user_id = 12;
-    optional string update_time = 13;
-    optional string create_group_id = 14;
-    optional string intro_typename = 15;
+message UserProfileOrderBy {
+    optional Sort id = 1;
+    optional Sort user_id = 2;
+    optional Sort email = 3;
+    optional Sort address = 4;
+    optional Sort qq = 5;
+    optional Sort is_deprecated = 6;
+    optional Sort version = 7;
+    optional Sort realm_id = 8;
+    optional Sort create_user_id = 9;
+    optional Sort create_time = 10;
+    optional Sort update_user_id = 11;
+    optional Sort update_time = 12;
+    optional Sort create_group_id = 13;
+    optional Sort intro_typename = 14;
 }
-message UserPhonesInput {
-    optional string id = 1;
-    optional int32 user_id = 2;
-    optional string phone = 3;
-    optional bool is_deprecated = 4;
-    optional int32 version = 5;
-    optional string realm_id = 6;
-    optional string create_user_id = 7;
-    optional string create_time = 8;
-    optional string update_user_id = 9;
-    optional string update_time = 10;
-    optional string create_group_id = 11;
-    optional string intro_typename = 12;
+message UserPhonesOrderBy {
+    optional Sort id = 1;
+    optional Sort user_id = 2;
+    optional Sort phone = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
-message UserTest1Input {
-    optional string id = 1;
-    optional int32 user_id = 2;
-    optional int32 test1 = 3;
-    optional bool is_deprecated = 4;
-    optional int32 version = 5;
-    optional string realm_id = 6;
-    optional string create_user_id = 7;
-    optional string create_time = 8;
-    optional string update_user_id = 9;
-    optional string update_time = 10;
-    optional string create_group_id = 11;
-    optional string intro_typename = 12;
+message UserTest1OrderBy {
+    optional Sort id = 1;
+    optional Sort user_id = 2;
+    optional Sort test1 = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
-message UserTest2Input {
-    optional string id = 1;
-    optional int32 user_id = 2;
-    optional bool test2 = 3;
-    optional bool is_deprecated = 4;
-    optional int32 version = 5;
-    optional string realm_id = 6;
-    optional string create_user_id = 7;
-    optional string create_time = 8;
-    optional string update_user_id = 9;
-    optional string update_time = 10;
-    optional string create_group_id = 11;
-    optional string intro_typename = 12;
+message UserTest2OrderBy {
+    optional Sort id = 1;
+    optional Sort user_id = 2;
+    optional Sort test2 = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
-message UserRoleInput {
-    optional string id = 1;
-    optional int32 user_id = 2;
-    optional int32 role_id = 3;
-    optional bool is_deprecated = 4;
-    optional int32 version = 5;
-    optional string realm_id = 6;
-    optional string create_user_id = 7;
-    optional string create_time = 8;
-    optional string update_user_id = 9;
-    optional string update_time = 10;
-    optional string create_group_id = 11;
-    optional string intro_typename = 12;
+message UserRoleOrderBy {
+    optional Sort id = 1;
+    optional Sort user_id = 2;
+    optional Sort role_id = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
-message RoleInput {
-    optional string id = 1;
-    optional string name = 2;
-    repeated RoleType type = 3;
-    repeated UserInput users = 4;
-    optional bool is_deprecated = 5;
-    optional int32 version = 6;
-    optional string realm_id = 7;
-    optional string create_user_id = 8;
-    optional string create_time = 9;
-    optional string update_user_id = 10;
-    optional string update_time = 11;
-    optional string create_group_id = 12;
-    optional string intro_typename = 13;
+message RoleOrderBy {
+    optional Sort id = 1;
+    optional Sort name = 2;
+    optional Sort is_deprecated = 3;
+    optional Sort version = 4;
+    optional Sort realm_id = 5;
+    optional Sort create_user_id = 6;
+    optional Sort create_time = 7;
+    optional Sort update_user_id = 8;
+    optional Sort update_time = 9;
+    optional Sort create_group_id = 10;
+    optional Sort intro_typename = 11;
 }
-message RoleRoleTypeInput {
-    optional string id = 1;
-    optional int32 role_id = 2;
-    optional RoleType type = 3;
-    optional bool is_deprecated = 4;
-    optional int32 version = 5;
-    optional string realm_id = 6;
-    optional string create_user_id = 7;
-    optional string create_time = 8;
-    optional string update_user_id = 9;
-    optional string update_time = 10;
-    optional string create_group_id = 11;
-    optional string intro_typename = 12;
+message RoleRoleTypeOrderBy {
+    optional Sort id = 1;
+    optional Sort role_id = 2;
+    optional Sort type = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
-message OrganizationInput {
-    optional string id = 1;
-    optional int32 above_id = 2;
-    optional OrganizationInput above = 3;
-    repeated UserInput users = 4;
-    optional string name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional string create_time = 10;
-    optional string update_user_id = 11;
-    optional string update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
+message OrganizationOrderBy {
+    optional Sort id = 1;
+    optional Sort above_id = 2;
+    optional Sort name = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
 message IntroSchemaOrderBy {
     optional Sort id = 1;
@@ -535,137 +667,166 @@ message IntroDirectiveLocationsOrderBy {
     optional Sort create_group_id = 11;
     optional Sort intro_typename = 12;
 }
-message UserOrderBy {
-    optional Sort id = 1;
-    optional Sort login = 2;
-    optional Sort password = 3;
-    optional Sort name = 4;
-    optional Sort age = 5;
-    optional Sort disable = 6;
-    optional Sort sex = 7;
-    optional Sort organization_id = 8;
-    optional Sort is_deprecated = 9;
-    optional Sort version = 10;
-    optional Sort realm_id = 11;
-    optional Sort create_user_id = 12;
-    optional Sort create_time = 13;
-    optional Sort update_user_id = 14;
-    optional Sort update_time = 15;
-    optional Sort create_group_id = 16;
-    optional Sort intro_typename = 17;
+message UserExpression {
+    optional StringExpression id = 1;
+    optional StringExpression login = 2;
+    optional StringExpression password = 3;
+    optional StringExpression name = 4;
+    optional IntExpression age = 5;
+    optional BooleanExpression disable = 6;
+    optional SexExpression sex = 7;
+    optional UserProfileExpression user_profile = 8;
+    optional IntExpression organization_id = 9;
+    optional OrganizationExpression organization = 10;
+    optional RoleExpression roles = 11;
+    optional StringExpression phones = 12;
+    optional IntExpression test1 = 13;
+    optional BooleanExpression test2 = 14;
+    optional bool include_deprecated = 15;
+    optional IntExpression version = 16;
+    optional StringExpression realm_id = 17;
+    optional StringExpression create_user_id = 18;
+    optional StringExpression create_time = 19;
+    optional StringExpression update_user_id = 20;
+    optional StringExpression update_time = 21;
+    optional StringExpression create_group_id = 22;
+    optional StringExpression intro_typename = 23;
+    optional Conditional cond = 24;
+    repeated UserExpression exs = 25;
 }
-message UserProfileOrderBy {
-    optional Sort id = 1;
-    optional Sort user_id = 2;
-    optional Sort email = 3;
-    optional Sort address = 4;
-    optional Sort qq = 5;
-    optional Sort is_deprecated = 6;
-    optional Sort version = 7;
-    optional Sort realm_id = 8;
-    optional Sort create_user_id = 9;
-    optional Sort create_time = 10;
-    optional Sort update_user_id = 11;
-    optional Sort update_time = 12;
-    optional Sort create_group_id = 13;
-    optional Sort intro_typename = 14;
+message UserProfileExpression {
+    optional StringExpression id = 1;
+    optional StringExpression user_id = 2;
+    optional StringExpression email = 3;
+    optional StringExpression address = 4;
+    optional StringExpression qq = 5;
+    optional UserExpression user = 6;
+    optional bool include_deprecated = 7;
+    optional IntExpression version = 8;
+    optional StringExpression realm_id = 9;
+    optional StringExpression create_user_id = 10;
+    optional StringExpression create_time = 11;
+    optional StringExpression update_user_id = 12;
+    optional StringExpression update_time = 13;
+    optional StringExpression create_group_id = 14;
+    optional StringExpression intro_typename = 15;
+    optional Conditional cond = 16;
+    repeated UserProfileExpression exs = 17;
 }
-message UserPhonesOrderBy {
-    optional Sort id = 1;
-    optional Sort user_id = 2;
-    optional Sort phone = 3;
-    optional Sort is_deprecated = 4;
-    optional Sort version = 5;
-    optional Sort realm_id = 6;
-    optional Sort create_user_id = 7;
-    optional Sort create_time = 8;
-    optional Sort update_user_id = 9;
-    optional Sort update_time = 10;
-    optional Sort create_group_id = 11;
-    optional Sort intro_typename = 12;
+message UserPhonesExpression {
+    optional StringExpression id = 1;
+    optional IntExpression user_id = 2;
+    optional StringExpression phone = 3;
+    optional bool include_deprecated = 4;
+    optional IntExpression version = 5;
+    optional StringExpression realm_id = 6;
+    optional StringExpression create_user_id = 7;
+    optional StringExpression create_time = 8;
+    optional StringExpression update_user_id = 9;
+    optional StringExpression update_time = 10;
+    optional StringExpression create_group_id = 11;
+    optional StringExpression intro_typename = 12;
+    optional Conditional cond = 13;
+    repeated UserPhonesExpression exs = 14;
 }
-message UserTest1OrderBy {
-    optional Sort id = 1;
-    optional Sort user_id = 2;
-    optional Sort test1 = 3;
-    optional Sort is_deprecated = 4;
-    optional Sort version = 5;
-    optional Sort realm_id = 6;
-    optional Sort create_user_id = 7;
-    optional Sort create_time = 8;
-    optional Sort update_user_id = 9;
-    optional Sort update_time = 10;
-    optional Sort create_group_id = 11;
-    optional Sort intro_typename = 12;
+message UserTest1Expression {
+    optional StringExpression id = 1;
+    optional IntExpression user_id = 2;
+    optional IntExpression test1 = 3;
+    optional bool include_deprecated = 4;
+    optional IntExpression version = 5;
+    optional StringExpression realm_id = 6;
+    optional StringExpression create_user_id = 7;
+    optional StringExpression create_time = 8;
+    optional StringExpression update_user_id = 9;
+    optional StringExpression update_time = 10;
+    optional StringExpression create_group_id = 11;
+    optional StringExpression intro_typename = 12;
+    optional Conditional cond = 13;
+    repeated UserTest1Expression exs = 14;
 }
-message UserTest2OrderBy {
-    optional Sort id = 1;
-    optional Sort user_id = 2;
-    optional Sort test2 = 3;
-    optional Sort is_deprecated = 4;
-    optional Sort version = 5;
-    optional Sort realm_id = 6;
-    optional Sort create_user_id = 7;
-    optional Sort create_time = 8;
-    optional Sort update_user_id = 9;
-    optional Sort update_time = 10;
-    optional Sort create_group_id = 11;
-    optional Sort intro_typename = 12;
+message UserTest2Expression {
+    optional StringExpression id = 1;
+    optional IntExpression user_id = 2;
+    optional BooleanExpression test2 = 3;
+    optional bool include_deprecated = 4;
+    optional IntExpression version = 5;
+    optional StringExpression realm_id = 6;
+    optional StringExpression create_user_id = 7;
+    optional StringExpression create_time = 8;
+    optional StringExpression update_user_id = 9;
+    optional StringExpression update_time = 10;
+    optional StringExpression create_group_id = 11;
+    optional StringExpression intro_typename = 12;
+    optional Conditional cond = 13;
+    repeated UserTest2Expression exs = 14;
 }
-message UserRoleOrderBy {
-    optional Sort id = 1;
-    optional Sort user_id = 2;
-    optional Sort role_id = 3;
-    optional Sort is_deprecated = 4;
-    optional Sort version = 5;
-    optional Sort realm_id = 6;
-    optional Sort create_user_id = 7;
-    optional Sort create_time = 8;
-    optional Sort update_user_id = 9;
-    optional Sort update_time = 10;
-    optional Sort create_group_id = 11;
-    optional Sort intro_typename = 12;
+message UserRoleExpression {
+    optional StringExpression id = 1;
+    optional IntExpression user_id = 2;
+    optional IntExpression role_id = 3;
+    optional bool include_deprecated = 4;
+    optional IntExpression version = 5;
+    optional StringExpression realm_id = 6;
+    optional StringExpression create_user_id = 7;
+    optional StringExpression create_time = 8;
+    optional StringExpression update_user_id = 9;
+    optional StringExpression update_time = 10;
+    optional StringExpression create_group_id = 11;
+    optional StringExpression intro_typename = 12;
+    optional Conditional cond = 13;
+    repeated UserRoleExpression exs = 14;
 }
-message RoleOrderBy {
-    optional Sort id = 1;
-    optional Sort name = 2;
-    optional Sort is_deprecated = 3;
-    optional Sort version = 4;
-    optional Sort realm_id = 5;
-    optional Sort create_user_id = 6;
-    optional Sort create_time = 7;
-    optional Sort update_user_id = 8;
-    optional Sort update_time = 9;
-    optional Sort create_group_id = 10;
-    optional Sort intro_typename = 11;
+message RoleExpression {
+    optional StringExpression id = 1;
+    optional StringExpression name = 2;
+    optional RoleTypeExpression type = 3;
+    optional UserExpression users = 4;
+    optional bool include_deprecated = 5;
+    optional IntExpression version = 6;
+    optional StringExpression realm_id = 7;
+    optional StringExpression create_user_id = 8;
+    optional StringExpression create_time = 9;
+    optional StringExpression update_user_id = 10;
+    optional StringExpression update_time = 11;
+    optional StringExpression create_group_id = 12;
+    optional StringExpression intro_typename = 13;
+    optional Conditional cond = 14;
+    repeated RoleExpression exs = 15;
 }
-message RoleRoleTypeOrderBy {
-    optional Sort id = 1;
-    optional Sort role_id = 2;
-    optional Sort type = 3;
-    optional Sort is_deprecated = 4;
-    optional Sort version = 5;
-    optional Sort realm_id = 6;
-    optional Sort create_user_id = 7;
-    optional Sort create_time = 8;
-    optional Sort update_user_id = 9;
-    optional Sort update_time = 10;
-    optional Sort create_group_id = 11;
-    optional Sort intro_typename = 12;
+message RoleRoleTypeExpression {
+    optional StringExpression id = 1;
+    optional IntExpression role_id = 2;
+    optional RoleTypeExpression type = 3;
+    optional bool include_deprecated = 4;
+    optional IntExpression version = 5;
+    optional StringExpression realm_id = 6;
+    optional StringExpression create_user_id = 7;
+    optional StringExpression create_time = 8;
+    optional StringExpression update_user_id = 9;
+    optional StringExpression update_time = 10;
+    optional StringExpression create_group_id = 11;
+    optional StringExpression intro_typename = 12;
+    optional Conditional cond = 13;
+    repeated RoleRoleTypeExpression exs = 14;
 }
-message OrganizationOrderBy {
-    optional Sort id = 1;
-    optional Sort above_id = 2;
-    optional Sort name = 3;
-    optional Sort is_deprecated = 4;
-    optional Sort version = 5;
-    optional Sort realm_id = 6;
-    optional Sort create_user_id = 7;
-    optional Sort create_time = 8;
-    optional Sort update_user_id = 9;
-    optional Sort update_time = 10;
-    optional Sort create_group_id = 11;
-    optional Sort intro_typename = 12;
+message OrganizationExpression {
+    optional StringExpression id = 1;
+    optional IntExpression above_id = 2;
+    optional OrganizationExpression above = 3;
+    optional UserExpression users = 4;
+    optional StringExpression name = 5;
+    optional bool include_deprecated = 6;
+    optional IntExpression version = 7;
+    optional StringExpression realm_id = 8;
+    optional StringExpression create_user_id = 9;
+    optional StringExpression create_time = 10;
+    optional StringExpression update_user_id = 11;
+    optional StringExpression update_time = 12;
+    optional StringExpression create_group_id = 13;
+    optional StringExpression intro_typename = 14;
+    optional Conditional cond = 15;
+    repeated OrganizationExpression exs = 16;
 }
 message IntroSchemaExpression {
     optional StringExpression id = 1;
@@ -851,166 +1012,15 @@ message IntroDirectiveLocationsExpression {
     optional Conditional cond = 13;
     repeated IntroDirectiveLocationsExpression exs = 14;
 }
-message UserExpression {
-    optional StringExpression id = 1;
-    optional StringExpression login = 2;
-    optional StringExpression password = 3;
-    optional StringExpression name = 4;
-    optional IntExpression age = 5;
-    optional BooleanExpression disable = 6;
-    optional SexExpression sex = 7;
-    optional UserProfileExpression user_profile = 8;
-    optional IntExpression organization_id = 9;
-    optional OrganizationExpression organization = 10;
-    optional RoleExpression roles = 11;
-    optional StringExpression phones = 12;
-    optional IntExpression test1 = 13;
-    optional BooleanExpression test2 = 14;
-    optional bool include_deprecated = 15;
-    optional IntExpression version = 16;
-    optional StringExpression realm_id = 17;
-    optional StringExpression create_user_id = 18;
-    optional StringExpression create_time = 19;
-    optional StringExpression update_user_id = 20;
-    optional StringExpression update_time = 21;
-    optional StringExpression create_group_id = 22;
-    optional StringExpression intro_typename = 23;
-    optional Conditional cond = 24;
-    repeated UserExpression exs = 25;
+message SexExpression {
+    optional Operator opr = 1;
+    optional Sex val = 2;
+    repeated Sex in = 3;
 }
-message UserProfileExpression {
-    optional StringExpression id = 1;
-    optional StringExpression user_id = 2;
-    optional StringExpression email = 3;
-    optional StringExpression address = 4;
-    optional StringExpression qq = 5;
-    optional UserExpression user = 6;
-    optional bool include_deprecated = 7;
-    optional IntExpression version = 8;
-    optional StringExpression realm_id = 9;
-    optional StringExpression create_user_id = 10;
-    optional StringExpression create_time = 11;
-    optional StringExpression update_user_id = 12;
-    optional StringExpression update_time = 13;
-    optional StringExpression create_group_id = 14;
-    optional StringExpression intro_typename = 15;
-    optional Conditional cond = 16;
-    repeated UserProfileExpression exs = 17;
-}
-message UserPhonesExpression {
-    optional StringExpression id = 1;
-    optional IntExpression user_id = 2;
-    optional StringExpression phone = 3;
-    optional bool include_deprecated = 4;
-    optional IntExpression version = 5;
-    optional StringExpression realm_id = 6;
-    optional StringExpression create_user_id = 7;
-    optional StringExpression create_time = 8;
-    optional StringExpression update_user_id = 9;
-    optional StringExpression update_time = 10;
-    optional StringExpression create_group_id = 11;
-    optional StringExpression intro_typename = 12;
-    optional Conditional cond = 13;
-    repeated UserPhonesExpression exs = 14;
-}
-message UserTest1Expression {
-    optional StringExpression id = 1;
-    optional IntExpression user_id = 2;
-    optional IntExpression test1 = 3;
-    optional bool include_deprecated = 4;
-    optional IntExpression version = 5;
-    optional StringExpression realm_id = 6;
-    optional StringExpression create_user_id = 7;
-    optional StringExpression create_time = 8;
-    optional StringExpression update_user_id = 9;
-    optional StringExpression update_time = 10;
-    optional StringExpression create_group_id = 11;
-    optional StringExpression intro_typename = 12;
-    optional Conditional cond = 13;
-    repeated UserTest1Expression exs = 14;
-}
-message UserTest2Expression {
-    optional StringExpression id = 1;
-    optional IntExpression user_id = 2;
-    optional BooleanExpression test2 = 3;
-    optional bool include_deprecated = 4;
-    optional IntExpression version = 5;
-    optional StringExpression realm_id = 6;
-    optional StringExpression create_user_id = 7;
-    optional StringExpression create_time = 8;
-    optional StringExpression update_user_id = 9;
-    optional StringExpression update_time = 10;
-    optional StringExpression create_group_id = 11;
-    optional StringExpression intro_typename = 12;
-    optional Conditional cond = 13;
-    repeated UserTest2Expression exs = 14;
-}
-message UserRoleExpression {
-    optional StringExpression id = 1;
-    optional IntExpression user_id = 2;
-    optional IntExpression role_id = 3;
-    optional bool include_deprecated = 4;
-    optional IntExpression version = 5;
-    optional StringExpression realm_id = 6;
-    optional StringExpression create_user_id = 7;
-    optional StringExpression create_time = 8;
-    optional StringExpression update_user_id = 9;
-    optional StringExpression update_time = 10;
-    optional StringExpression create_group_id = 11;
-    optional StringExpression intro_typename = 12;
-    optional Conditional cond = 13;
-    repeated UserRoleExpression exs = 14;
-}
-message RoleExpression {
-    optional StringExpression id = 1;
-    optional StringExpression name = 2;
-    optional RoleTypeExpression type = 3;
-    optional UserExpression users = 4;
-    optional bool include_deprecated = 5;
-    optional IntExpression version = 6;
-    optional StringExpression realm_id = 7;
-    optional StringExpression create_user_id = 8;
-    optional StringExpression create_time = 9;
-    optional StringExpression update_user_id = 10;
-    optional StringExpression update_time = 11;
-    optional StringExpression create_group_id = 12;
-    optional StringExpression intro_typename = 13;
-    optional Conditional cond = 14;
-    repeated RoleExpression exs = 15;
-}
-message RoleRoleTypeExpression {
-    optional StringExpression id = 1;
-    optional IntExpression role_id = 2;
-    optional RoleTypeExpression type = 3;
-    optional bool include_deprecated = 4;
-    optional IntExpression version = 5;
-    optional StringExpression realm_id = 6;
-    optional StringExpression create_user_id = 7;
-    optional StringExpression create_time = 8;
-    optional StringExpression update_user_id = 9;
-    optional StringExpression update_time = 10;
-    optional StringExpression create_group_id = 11;
-    optional StringExpression intro_typename = 12;
-    optional Conditional cond = 13;
-    repeated RoleRoleTypeExpression exs = 14;
-}
-message OrganizationExpression {
-    optional StringExpression id = 1;
-    optional IntExpression above_id = 2;
-    optional OrganizationExpression above = 3;
-    optional UserExpression users = 4;
-    optional StringExpression name = 5;
-    optional bool include_deprecated = 6;
-    optional IntExpression version = 7;
-    optional StringExpression realm_id = 8;
-    optional StringExpression create_user_id = 9;
-    optional StringExpression create_time = 10;
-    optional StringExpression update_user_id = 11;
-    optional StringExpression update_time = 12;
-    optional StringExpression create_group_id = 13;
-    optional StringExpression intro_typename = 14;
-    optional Conditional cond = 15;
-    repeated OrganizationExpression exs = 16;
+message RoleTypeExpression {
+    optional Operator opr = 1;
+    optional RoleType val = 2;
+    repeated RoleType in = 3;
 }
 message OperatorExpression {
     optional Operator opr = 1;
@@ -1046,14 +1056,4 @@ message IntroDirectiveLocationExpression {
     optional Operator opr = 1;
     optional IntroDirectiveLocation val = 2;
     repeated IntroDirectiveLocation in = 3;
-}
-message SexExpression {
-    optional Operator opr = 1;
-    optional Sex val = 2;
-    repeated Sex in = 3;
-}
-message RoleTypeExpression {
-    optional Operator opr = 1;
-    optional RoleType val = 2;
-    repeated RoleType in = 3;
 }

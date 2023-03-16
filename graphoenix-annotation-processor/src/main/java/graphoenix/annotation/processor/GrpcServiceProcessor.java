@@ -53,13 +53,10 @@ public class GrpcServiceProcessor extends BaseProcessor {
         GrpcRequestHandlerBuilder grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
         GrpcServiceImplementer grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
         GrpcFetchHandlerBuilder grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
-        if (graphQLConfig.getPackageName() == null) {
-            getDefaultPackageName(roundEnv).ifPresent(graphQLConfig::setPackageName);
-        }
         registerElements(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-            configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
+            configRegister.registerPreset(GrpcServiceProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }

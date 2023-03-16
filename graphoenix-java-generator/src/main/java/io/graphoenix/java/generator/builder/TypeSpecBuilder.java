@@ -800,6 +800,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildEnumTypeExpressionAnnotations() {
         return manager.getEnums()
+                .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).isEmpty())
                 .map(this::enumTypeToInputExpressionAnnotation);
     }
 
@@ -867,6 +868,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildObjectTypeExpressionAnnotations(int layer) {
         return manager.getObjects()
+                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
@@ -1044,6 +1046,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildObjectTypeInputAnnotations(int layer) {
         return manager.getObjects()
+                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
@@ -1140,6 +1143,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildObjectTypeOrderByAnnotations(int layer) {
         return manager.getObjects()
+                .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))

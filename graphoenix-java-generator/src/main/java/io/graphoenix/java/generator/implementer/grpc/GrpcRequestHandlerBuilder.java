@@ -13,7 +13,6 @@ import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.EnumValue;
 import io.graphoenix.core.operation.Field;
 import io.graphoenix.core.operation.Operation;
-import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dto.type.OperationType;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -59,12 +58,12 @@ public class GrpcRequestHandlerBuilder {
 
     private JavaFile buildGrpcQueryRequestHandler() {
         TypeSpec typeSpec = buildGrpcRequestHandler(QUERY);
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private JavaFile buildGrpcMutationRequestHandler() {
         TypeSpec typeSpec = buildGrpcRequestHandler(MUTATION);
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private TypeSpec buildGrpcRequestHandler(OperationType operationType) {
@@ -88,7 +87,7 @@ public class GrpcRequestHandlerBuilder {
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcInputObjectHandler")),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcInputObjectHandler")),
                                 "inputObjectHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -126,7 +125,7 @@ public class GrpcRequestHandlerBuilder {
     private MethodSpec buildConstructor() {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcInputObjectHandler")), "inputObjectHandler")
+                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcInputObjectHandler")), "inputObjectHandler")
                 .addStatement("this.inputObjectHandler = inputObjectHandler")
                 .build();
     }
@@ -173,7 +172,7 @@ public class GrpcRequestHandlerBuilder {
             for (GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext : inputValueDefinitionContexts) {
                 CodeBlock codeBlock;
                 String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
-                String rpcEnumValueSuffixName = grpcNameUtil.getGrpcEnumValueSuffixName(inputValueDefinitionContext.type());
+                String grpcEnumValueSuffixName = grpcNameUtil.getGrpcEnumValueSuffixName(inputValueDefinitionContext.type());
                 String inputObjectFieldMethodName = grpcNameUtil.getLowerCamelName(inputValueDefinitionContext.type());
                 if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
                     String rpcGetInputValueListName = grpcNameUtil.getGrpcGetListMethodName(inputValueDefinitionContext);
@@ -188,7 +187,7 @@ public class GrpcRequestHandlerBuilder {
                                 inputValueDefinitionContext.name().getText(),
                                 requestParameterName,
                                 rpcGetInputValueListName,
-                                rpcEnumValueSuffixName,
+                                grpcEnumValueSuffixName,
                                 ClassName.get(Collectors.class)
                         );
                     } else if (manager.isInputObject(fieldTypeName)) {
@@ -223,7 +222,7 @@ public class GrpcRequestHandlerBuilder {
                                 ClassName.get(EnumValue.class),
                                 requestParameterName,
                                 rpcGetInputValueName,
-                                rpcEnumValueSuffixName
+                                grpcEnumValueSuffixName
                         );
                     } else if (manager.isInputObject(fieldTypeName)) {
                         codeBlock = CodeBlock.of("field.addArgument($S, inputObjectHandler.get().$L($L.$L()))",

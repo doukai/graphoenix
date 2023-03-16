@@ -17,60 +17,6 @@ import org.eclipse.microprofile.graphql.Type;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class QueryType implements Meta {
-  private __Schema __schema;
-
-  private Collection<__Schema> __schemaList;
-
-  private __SchemaConnection __schemaConnection;
-
-  private __Type __type;
-
-  private Collection<__Type> __typeList;
-
-  private __TypeConnection __typeConnection;
-
-  private __TypeInterfaces __typeInterfaces;
-
-  private Collection<__TypeInterfaces> __typeInterfacesList;
-
-  private __TypeInterfacesConnection __typeInterfacesConnection;
-
-  private __TypePossibleTypes __typePossibleTypes;
-
-  private Collection<__TypePossibleTypes> __typePossibleTypesList;
-
-  private __TypePossibleTypesConnection __typePossibleTypesConnection;
-
-  private __Field __field;
-
-  private Collection<__Field> __fieldList;
-
-  private __FieldConnection __fieldConnection;
-
-  private __InputValue __inputValue;
-
-  private Collection<__InputValue> __inputValueList;
-
-  private __InputValueConnection __inputValueConnection;
-
-  private __EnumValue __enumValue;
-
-  private Collection<__EnumValue> __enumValueList;
-
-  private __EnumValueConnection __enumValueConnection;
-
-  private __Directive __directive;
-
-  private Collection<__Directive> __directiveList;
-
-  private __DirectiveConnection __directiveConnection;
-
-  private __DirectiveLocations __directiveLocations;
-
-  private Collection<__DirectiveLocations> __directiveLocationsList;
-
-  private __DirectiveLocationsConnection __directiveLocationsConnection;
-
   private User user;
 
   private Collection<User> userList;
@@ -125,6 +71,60 @@ public class QueryType implements Meta {
 
   private OrganizationConnection organizationConnection;
 
+  private __Schema __schema;
+
+  private Collection<__Schema> __schemaList;
+
+  private __SchemaConnection __schemaConnection;
+
+  private __Type __type;
+
+  private Collection<__Type> __typeList;
+
+  private __TypeConnection __typeConnection;
+
+  private __TypeInterfaces __typeInterfaces;
+
+  private Collection<__TypeInterfaces> __typeInterfacesList;
+
+  private __TypeInterfacesConnection __typeInterfacesConnection;
+
+  private __TypePossibleTypes __typePossibleTypes;
+
+  private Collection<__TypePossibleTypes> __typePossibleTypesList;
+
+  private __TypePossibleTypesConnection __typePossibleTypesConnection;
+
+  private __Field __field;
+
+  private Collection<__Field> __fieldList;
+
+  private __FieldConnection __fieldConnection;
+
+  private __InputValue __inputValue;
+
+  private Collection<__InputValue> __inputValueList;
+
+  private __InputValueConnection __inputValueConnection;
+
+  private __EnumValue __enumValue;
+
+  private Collection<__EnumValue> __enumValueList;
+
+  private __EnumValueConnection __enumValueConnection;
+
+  private __Directive __directive;
+
+  private Collection<__Directive> __directiveList;
+
+  private __DirectiveConnection __directiveConnection;
+
+  private __DirectiveLocations __directiveLocations;
+
+  private Collection<__DirectiveLocations> __directiveLocationsList;
+
+  private __DirectiveLocationsConnection __directiveLocationsConnection;
+
   private Boolean isDeprecated;
 
   private Integer version;
@@ -140,6 +140,222 @@ public class QueryType implements Meta {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  public User getUser() {
+    return this.user;
+  }
+
+  public void setUser(User user) {
+    this.user = user;
+  }
+
+  public Collection<User> getUserList() {
+    return this.userList;
+  }
+
+  public void setUserList(Collection<User> userList) {
+    this.userList = userList;
+  }
+
+  public UserConnection getUserConnection() {
+    return this.userConnection;
+  }
+
+  public void setUserConnection(UserConnection userConnection) {
+    this.userConnection = userConnection;
+  }
+
+  public UserProfile getUserProfile() {
+    return this.userProfile;
+  }
+
+  public void setUserProfile(UserProfile userProfile) {
+    this.userProfile = userProfile;
+  }
+
+  public Collection<UserProfile> getUserProfileList() {
+    return this.userProfileList;
+  }
+
+  public void setUserProfileList(Collection<UserProfile> userProfileList) {
+    this.userProfileList = userProfileList;
+  }
+
+  public UserProfileConnection getUserProfileConnection() {
+    return this.userProfileConnection;
+  }
+
+  public void setUserProfileConnection(UserProfileConnection userProfileConnection) {
+    this.userProfileConnection = userProfileConnection;
+  }
+
+  public UserPhones getUserPhones() {
+    return this.userPhones;
+  }
+
+  public void setUserPhones(UserPhones userPhones) {
+    this.userPhones = userPhones;
+  }
+
+  public Collection<UserPhones> getUserPhonesList() {
+    return this.userPhonesList;
+  }
+
+  public void setUserPhonesList(Collection<UserPhones> userPhonesList) {
+    this.userPhonesList = userPhonesList;
+  }
+
+  public UserPhonesConnection getUserPhonesConnection() {
+    return this.userPhonesConnection;
+  }
+
+  public void setUserPhonesConnection(UserPhonesConnection userPhonesConnection) {
+    this.userPhonesConnection = userPhonesConnection;
+  }
+
+  public UserTest1 getUserTest1() {
+    return this.userTest1;
+  }
+
+  public void setUserTest1(UserTest1 userTest1) {
+    this.userTest1 = userTest1;
+  }
+
+  public Collection<UserTest1> getUserTest1List() {
+    return this.userTest1List;
+  }
+
+  public void setUserTest1List(Collection<UserTest1> userTest1List) {
+    this.userTest1List = userTest1List;
+  }
+
+  public UserTest1Connection getUserTest1Connection() {
+    return this.userTest1Connection;
+  }
+
+  public void setUserTest1Connection(UserTest1Connection userTest1Connection) {
+    this.userTest1Connection = userTest1Connection;
+  }
+
+  public UserTest2 getUserTest2() {
+    return this.userTest2;
+  }
+
+  public void setUserTest2(UserTest2 userTest2) {
+    this.userTest2 = userTest2;
+  }
+
+  public Collection<UserTest2> getUserTest2List() {
+    return this.userTest2List;
+  }
+
+  public void setUserTest2List(Collection<UserTest2> userTest2List) {
+    this.userTest2List = userTest2List;
+  }
+
+  public UserTest2Connection getUserTest2Connection() {
+    return this.userTest2Connection;
+  }
+
+  public void setUserTest2Connection(UserTest2Connection userTest2Connection) {
+    this.userTest2Connection = userTest2Connection;
+  }
+
+  public UserRole getUserRole() {
+    return this.userRole;
+  }
+
+  public void setUserRole(UserRole userRole) {
+    this.userRole = userRole;
+  }
+
+  public Collection<UserRole> getUserRoleList() {
+    return this.userRoleList;
+  }
+
+  public void setUserRoleList(Collection<UserRole> userRoleList) {
+    this.userRoleList = userRoleList;
+  }
+
+  public UserRoleConnection getUserRoleConnection() {
+    return this.userRoleConnection;
+  }
+
+  public void setUserRoleConnection(UserRoleConnection userRoleConnection) {
+    this.userRoleConnection = userRoleConnection;
+  }
+
+  public Role getRole() {
+    return this.role;
+  }
+
+  public void setRole(Role role) {
+    this.role = role;
+  }
+
+  public Collection<Role> getRoleList() {
+    return this.roleList;
+  }
+
+  public void setRoleList(Collection<Role> roleList) {
+    this.roleList = roleList;
+  }
+
+  public RoleConnection getRoleConnection() {
+    return this.roleConnection;
+  }
+
+  public void setRoleConnection(RoleConnection roleConnection) {
+    this.roleConnection = roleConnection;
+  }
+
+  public RoleRoleType getRoleRoleType() {
+    return this.roleRoleType;
+  }
+
+  public void setRoleRoleType(RoleRoleType roleRoleType) {
+    this.roleRoleType = roleRoleType;
+  }
+
+  public Collection<RoleRoleType> getRoleRoleTypeList() {
+    return this.roleRoleTypeList;
+  }
+
+  public void setRoleRoleTypeList(Collection<RoleRoleType> roleRoleTypeList) {
+    this.roleRoleTypeList = roleRoleTypeList;
+  }
+
+  public RoleRoleTypeConnection getRoleRoleTypeConnection() {
+    return this.roleRoleTypeConnection;
+  }
+
+  public void setRoleRoleTypeConnection(RoleRoleTypeConnection roleRoleTypeConnection) {
+    this.roleRoleTypeConnection = roleRoleTypeConnection;
+  }
+
+  public Organization getOrganization() {
+    return this.organization;
+  }
+
+  public void setOrganization(Organization organization) {
+    this.organization = organization;
+  }
+
+  public Collection<Organization> getOrganizationList() {
+    return this.organizationList;
+  }
+
+  public void setOrganizationList(Collection<Organization> organizationList) {
+    this.organizationList = organizationList;
+  }
+
+  public OrganizationConnection getOrganizationConnection() {
+    return this.organizationConnection;
+  }
+
+  public void setOrganizationConnection(OrganizationConnection organizationConnection) {
+    this.organizationConnection = organizationConnection;
+  }
 
   public __Schema get__schema() {
     return this.__schema;
@@ -358,222 +574,6 @@ public class QueryType implements Meta {
   public void set__directiveLocationsConnection(
       __DirectiveLocationsConnection __directiveLocationsConnection) {
     this.__directiveLocationsConnection = __directiveLocationsConnection;
-  }
-
-  public User getUser() {
-    return this.user;
-  }
-
-  public void setUser(User user) {
-    this.user = user;
-  }
-
-  public Collection<User> getUserList() {
-    return this.userList;
-  }
-
-  public void setUserList(Collection<User> userList) {
-    this.userList = userList;
-  }
-
-  public UserConnection getUserConnection() {
-    return this.userConnection;
-  }
-
-  public void setUserConnection(UserConnection userConnection) {
-    this.userConnection = userConnection;
-  }
-
-  public UserProfile getUserProfile() {
-    return this.userProfile;
-  }
-
-  public void setUserProfile(UserProfile userProfile) {
-    this.userProfile = userProfile;
-  }
-
-  public Collection<UserProfile> getUserProfileList() {
-    return this.userProfileList;
-  }
-
-  public void setUserProfileList(Collection<UserProfile> userProfileList) {
-    this.userProfileList = userProfileList;
-  }
-
-  public UserProfileConnection getUserProfileConnection() {
-    return this.userProfileConnection;
-  }
-
-  public void setUserProfileConnection(UserProfileConnection userProfileConnection) {
-    this.userProfileConnection = userProfileConnection;
-  }
-
-  public UserPhones getUserPhones() {
-    return this.userPhones;
-  }
-
-  public void setUserPhones(UserPhones userPhones) {
-    this.userPhones = userPhones;
-  }
-
-  public Collection<UserPhones> getUserPhonesList() {
-    return this.userPhonesList;
-  }
-
-  public void setUserPhonesList(Collection<UserPhones> userPhonesList) {
-    this.userPhonesList = userPhonesList;
-  }
-
-  public UserPhonesConnection getUserPhonesConnection() {
-    return this.userPhonesConnection;
-  }
-
-  public void setUserPhonesConnection(UserPhonesConnection userPhonesConnection) {
-    this.userPhonesConnection = userPhonesConnection;
-  }
-
-  public UserTest1 getUserTest1() {
-    return this.userTest1;
-  }
-
-  public void setUserTest1(UserTest1 userTest1) {
-    this.userTest1 = userTest1;
-  }
-
-  public Collection<UserTest1> getUserTest1List() {
-    return this.userTest1List;
-  }
-
-  public void setUserTest1List(Collection<UserTest1> userTest1List) {
-    this.userTest1List = userTest1List;
-  }
-
-  public UserTest1Connection getUserTest1Connection() {
-    return this.userTest1Connection;
-  }
-
-  public void setUserTest1Connection(UserTest1Connection userTest1Connection) {
-    this.userTest1Connection = userTest1Connection;
-  }
-
-  public UserTest2 getUserTest2() {
-    return this.userTest2;
-  }
-
-  public void setUserTest2(UserTest2 userTest2) {
-    this.userTest2 = userTest2;
-  }
-
-  public Collection<UserTest2> getUserTest2List() {
-    return this.userTest2List;
-  }
-
-  public void setUserTest2List(Collection<UserTest2> userTest2List) {
-    this.userTest2List = userTest2List;
-  }
-
-  public UserTest2Connection getUserTest2Connection() {
-    return this.userTest2Connection;
-  }
-
-  public void setUserTest2Connection(UserTest2Connection userTest2Connection) {
-    this.userTest2Connection = userTest2Connection;
-  }
-
-  public UserRole getUserRole() {
-    return this.userRole;
-  }
-
-  public void setUserRole(UserRole userRole) {
-    this.userRole = userRole;
-  }
-
-  public Collection<UserRole> getUserRoleList() {
-    return this.userRoleList;
-  }
-
-  public void setUserRoleList(Collection<UserRole> userRoleList) {
-    this.userRoleList = userRoleList;
-  }
-
-  public UserRoleConnection getUserRoleConnection() {
-    return this.userRoleConnection;
-  }
-
-  public void setUserRoleConnection(UserRoleConnection userRoleConnection) {
-    this.userRoleConnection = userRoleConnection;
-  }
-
-  public Role getRole() {
-    return this.role;
-  }
-
-  public void setRole(Role role) {
-    this.role = role;
-  }
-
-  public Collection<Role> getRoleList() {
-    return this.roleList;
-  }
-
-  public void setRoleList(Collection<Role> roleList) {
-    this.roleList = roleList;
-  }
-
-  public RoleConnection getRoleConnection() {
-    return this.roleConnection;
-  }
-
-  public void setRoleConnection(RoleConnection roleConnection) {
-    this.roleConnection = roleConnection;
-  }
-
-  public RoleRoleType getRoleRoleType() {
-    return this.roleRoleType;
-  }
-
-  public void setRoleRoleType(RoleRoleType roleRoleType) {
-    this.roleRoleType = roleRoleType;
-  }
-
-  public Collection<RoleRoleType> getRoleRoleTypeList() {
-    return this.roleRoleTypeList;
-  }
-
-  public void setRoleRoleTypeList(Collection<RoleRoleType> roleRoleTypeList) {
-    this.roleRoleTypeList = roleRoleTypeList;
-  }
-
-  public RoleRoleTypeConnection getRoleRoleTypeConnection() {
-    return this.roleRoleTypeConnection;
-  }
-
-  public void setRoleRoleTypeConnection(RoleRoleTypeConnection roleRoleTypeConnection) {
-    this.roleRoleTypeConnection = roleRoleTypeConnection;
-  }
-
-  public Organization getOrganization() {
-    return this.organization;
-  }
-
-  public void setOrganization(Organization organization) {
-    this.organization = organization;
-  }
-
-  public Collection<Organization> getOrganizationList() {
-    return this.organizationList;
-  }
-
-  public void setOrganizationList(Collection<Organization> organizationList) {
-    this.organizationList = organizationList;
-  }
-
-  public OrganizationConnection getOrganizationConnection() {
-    return this.organizationConnection;
-  }
-
-  public void setOrganizationConnection(OrganizationConnection organizationConnection) {
-    this.organizationConnection = organizationConnection;
   }
 
   @Override

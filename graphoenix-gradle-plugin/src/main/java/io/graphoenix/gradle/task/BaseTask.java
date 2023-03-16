@@ -73,9 +73,12 @@ import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
 
 public class BaseTask extends DefaultTask {
 
-    private GraphQLConfig graphQLConfig;
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
+
+    protected static final String MAIN_PATH = "src".concat(File.separator).concat("main");
+    protected static final String MAIN_JAVA_PATH = MAIN_PATH.concat(File.separator).concat("java");
+    protected static final String MAIN_RESOURCES_PATH = MAIN_PATH.concat(File.separator).concat("resources");
 
     protected void init() {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
@@ -83,13 +86,16 @@ public class BaseTask extends DefaultTask {
         ClassLoader classLoader = createClassLoader();
         CONFIG_UTIL.load(resourcePath);
         BeanContext.load(classLoader);
-        graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
         manager = BeanContext.get(IGraphQLDocumentManager.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         documentBuilder = BeanContext.get(DocumentBuilder.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
 
         try {
+            if (graphQLConfig.getPackageName() == null) {
+                getDefaultPackageName().ifPresent(graphQLConfig::setPackageName);
+            }
             manager.clearAll();
             configRegister.registerConfig(resourcePath);
             mapper.registerFieldMaps();
@@ -120,7 +126,7 @@ public class BaseTask extends DefaultTask {
 
     protected List<CompilationUnit> buildCompilationUnits() throws IOException {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath();
+        String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath();
         CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
         JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(Path.of(javaPath));
         ClassLoaderTypeSolver classLoaderTypeSolver = new ClassLoaderTypeSolver(createClassLoader());
@@ -135,18 +141,28 @@ public class BaseTask extends DefaultTask {
         return sourceRoot.getCompilationUnits();
     }
 
-    public Optional<String> getDefaultPackageName(List<CompilationUnit> compilations) {
-        return compilations.stream()
+    public Optional<String> getDefaultPackageName() throws IOException {
+        SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+        String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath();
+        JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(Path.of(javaPath));
+        SourceRoot sourceRoot = new SourceRoot(Path.of(javaPath));
+        JavaSymbolSolver javaSymbolSolver = new JavaSymbolSolver(javaParserTypeSolver);
+        sourceRoot.getParserConfiguration().setSymbolResolver(javaSymbolSolver);
+        sourceRoot.tryToParse();
+
+        return sourceRoot.getCompilationUnits().stream()
                 .flatMap(compilationUnit -> compilationUnit.getPackageDeclaration().stream())
                 .filter(packageDeclaration -> packageDeclaration.getAnnotationByClass(Package.class).isPresent())
                 .findFirst()
                 .map(NodeWithName::getNameAsString);
     }
 
+
+    protected void registerInvoke() throws IOException {
+        registerInvoke(buildCompilationUnits());
+    }
+
     protected void registerInvoke(List<CompilationUnit> compilations) {
-        if (graphQLConfig.getPackageName() == null) {
-            getDefaultPackageName(compilations).ifPresent(graphQLConfig::setPackageName);
-        }
         compilations.stream()
                 .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))
                 .flatMap(typeDeclaration -> typeDeclaration.getMethods().stream())

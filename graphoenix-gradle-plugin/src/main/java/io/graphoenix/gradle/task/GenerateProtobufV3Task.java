@@ -1,6 +1,5 @@
 package io.graphoenix.gradle.task;
 
-import com.github.javaparser.ast.CompilationUnit;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
@@ -17,7 +16,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,13 +30,9 @@ public class GenerateProtobufV3Task extends BaseTask {
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         ProtobufFileBuilder protobufFileBuilder = BeanContext.get(ProtobufFileBuilder.class);
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        Path protoPath = Path.of(sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\java")).getAsPath()).getParent().resolve("proto");
+        Path protoPath = Path.of(sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath()).getParent().resolve("proto");
         try {
-            List<CompilationUnit> compilationUnits = buildCompilationUnits();
-            if (graphQLConfig.getPackageName() == null) {
-                getDefaultPackageName(compilationUnits).ifPresent(graphQLConfig::setPackageName);
-            }
-            registerInvoke(compilationUnits);
+            registerInvoke();
             configRegister.registerPreset(createClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());

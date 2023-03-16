@@ -48,7 +48,7 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcObjectTypePackageName())
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
@@ -64,7 +64,7 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcInputObjectTypePackageName())
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
@@ -75,7 +75,7 @@ public class ProtobufFileBuilder {
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcEnumTypePackageName())
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
@@ -194,7 +194,7 @@ public class ProtobufFileBuilder {
                 .setTopLevelDefs(buildMutationService().stream().map(Service::toString).collect(Collectors.toList()))
                 .toString()
         );
-        protoFileMap.put("graph_q_l", new ProtoFile()
+        protoFileMap.put("graphql", new ProtoFile()
                 .setOptions(
                         List.of(
                                 new Option().setName("java_multiple_files").setValue(true),
@@ -250,7 +250,7 @@ public class ProtobufFileBuilder {
         return new Service().setName("GraphQLService")
                 .addRpc(
                         new Rpc()
-                                .setName("operation")
+                                .setName("Operation")
                                 .setMessageType("GraphQLRequest")
                                 .setReturnType("GraphQLResponse")
                 );
@@ -265,7 +265,7 @@ public class ProtobufFileBuilder {
                                 .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
                                 .setFields(
                                         Stream.concat(
-                                                Stream.of(new Field().setName("selectionSet").setOptional(true).setType("string").setNumber(1), new Field().setName("arguments").setOptional(true).setType("string").setNumber(2)),
+                                                Stream.of(new Field().setName("selection_set").setOptional(true).setType("string").setNumber(1), new Field().setName("arguments").setOptional(true).setType("string").setNumber(2)),
                                                 Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
                                                         .flatMap(argumentsDefinitionContext ->
                                                                 IntStream.range(0, argumentsDefinitionContext.inputValueDefinition().size())
@@ -311,7 +311,7 @@ public class ProtobufFileBuilder {
                                 .setFields(
                                         Stream.concat(
                                                 Stream.of(
-                                                        new Field().setName("selectionSet").setOptional(true).setType("string").setNumber(1), new Field().setName("arguments").setOptional(true).setType("string").setNumber(2)
+                                                        new Field().setName("selection_set").setOptional(true).setType("string").setNumber(1), new Field().setName("arguments").setOptional(true).setType("string").setNumber(2)
                                                 ),
                                                 Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
                                                         .flatMap(argumentsDefinitionContext ->

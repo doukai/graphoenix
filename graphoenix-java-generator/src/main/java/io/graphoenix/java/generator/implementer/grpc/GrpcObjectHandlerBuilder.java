@@ -44,7 +44,7 @@ public class GrpcObjectHandlerBuilder {
 
     private JavaFile buildClass() {
         TypeSpec typeSpec = buildGrpcObjectHandler();
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private TypeSpec buildGrpcObjectHandler() {

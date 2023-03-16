@@ -79,9 +79,6 @@ public class ApplicationProcessor extends BaseProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
-        if (graphQLConfig.getPackageName() == null) {
-            getDefaultPackageName(roundEnv).ifPresent(packageName -> graphQLConfig.setPackageName(packageName));
-        }
         registerElements(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
@@ -91,7 +88,7 @@ public class ApplicationProcessor extends BaseProcessor {
             }
             FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
             Writer writer = mainGraphQL.openWriter();
-            writer.write(documentBuilder.getDocument().toString());
+            writer.write(documentBuilder.getDocumentWithClassName().toString());
             writer.close();
 
             List<GraphqlParser.ObjectTypeDefinitionContext> schemaObjectList = manager.getObjects()

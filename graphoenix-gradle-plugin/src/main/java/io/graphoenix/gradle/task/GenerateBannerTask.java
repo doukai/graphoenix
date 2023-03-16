@@ -28,7 +28,7 @@ public class GenerateBannerTask extends BaseTask {
         BannerConfig bannerConfig = BeanContext.get(BannerConfig.class);
         try {
             SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-            String resourcePath = sourceSet.getResources().getSourceDirectories().filter(file -> file.getPath().contains("src\\main\\resource")).getAsPath();
+            String resourcePath = sourceSet.getResources().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_RESOURCES_PATH)).getAsPath();
             Ansi[] styles = Stream.of(bannerConfig.getArgs()).map(Ansi::get).toArray(Ansi[]::new);
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(

@@ -47,19 +47,19 @@ public class JavaFileBuilder {
                         .map(typeSpecBuilder::buildAnnotation)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getDirectivePackageName(), typeSpec).build()),
                 manager.getEnums()
-//                        .filter(enumTypeDefinitionContext -> manager.getPackageName(enumTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
+                        .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildEnum)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getEnumTypePackageName(), typeSpec).build()),
                 manager.getInterfaces()
-//                        .filter(interfaceTypeDefinitionContext -> manager.getPackageName(interfaceTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
+                        .filter(interfaceTypeDefinitionContext -> manager.getClassName(interfaceTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildInterface)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getInterfaceTypePackageName(), typeSpec).build()),
                 manager.getInputObjects()
-//                        .filter(inputObjectTypeDefinitionContext -> manager.getPackageName(inputObjectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
+                        .filter(inputObjectTypeDefinitionContext -> manager.getClassName(inputObjectTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildClass)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getInputObjectTypePackageName(), typeSpec).build()),
                 manager.getObjects()
-//                        .filter(objectTypeDefinitionContext -> manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.equals(graphQLConfig.getPackageName())).orElse(false))
+                        .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildClass)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getObjectTypePackageName(), typeSpec).build()),
                 typeSpecBuilder.buildScalarTypeExpressionAnnotations().map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),

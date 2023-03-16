@@ -97,22 +97,22 @@ public class GrpcServiceImplementer {
 
     private JavaFile buildGrpcServerProducerClass() {
         TypeSpec typeSpec = buildGrpcServerBuilder();
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private JavaFile buildQueryTypeServiceImplClass() {
         TypeSpec typeSpec = buildQueryTypeServiceImpl(QUERY);
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private JavaFile buildMutationTypeServiceImplClass() {
         TypeSpec typeSpec = buildQueryTypeServiceImpl(MUTATION);
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private JavaFile buildGraphQLServiceImplClass() {
         TypeSpec typeSpec = buildGraphQLServiceImpl();
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private TypeSpec buildGrpcServerBuilder() {
@@ -142,9 +142,9 @@ public class GrpcServiceImplementer {
                                 .returns(Server.class)
                                 .addStatement("return $T.forPort(grpcServerConfig.getPort()).addService(new $T()).addService(new $T()).addService(new $T()).build()",
                                         ClassName.get(ServerBuilder.class),
-                                        ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcQueryTypeServiceImpl"),
-                                        ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcMutationTypeServiceImpl"),
-                                        ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcGraphQLServiceImpl")
+                                        ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcQueryTypeServiceImpl"),
+                                        ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcMutationTypeServiceImpl"),
+                                        ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcGraphQLServiceImpl")
                                 )
                                 .build()
                 )
@@ -184,7 +184,7 @@ public class GrpcServiceImplementer {
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), requestHandlerName)),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), requestHandlerName)),
                                 "requestHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -192,7 +192,7 @@ public class GrpcServiceImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcInputObjectHandler")),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcInputObjectHandler")),
                                 "inputObjectHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -200,7 +200,7 @@ public class GrpcServiceImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcObjectHandler")),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcObjectHandler")),
                                 "objectHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -216,7 +216,7 @@ public class GrpcServiceImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "InvokeHandler")),
                                 "invokeHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -271,11 +271,11 @@ public class GrpcServiceImplementer {
 
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
-                .addStatement("this.requestHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getHandlerPackageName(), requestHandlerName))
-                .addStatement("this.inputObjectHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcInputObjectHandler"))
-                .addStatement("this.objectHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "GrpcObjectHandler"))
+                .addStatement("this.requestHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), requestHandlerName))
+                .addStatement("this.inputObjectHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcInputObjectHandler"))
+                .addStatement("this.objectHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcObjectHandler"))
                 .addStatement("this.operationHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(OperationHandler.class))
-                .addStatement("this.invokeHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler"))
+                .addStatement("this.invokeHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "InvokeHandler"))
                 .addStatement("this.jsonb = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(Jsonb.class))
                 .addStatement("this.argumentBuilder = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(ArgumentBuilder.class));
 

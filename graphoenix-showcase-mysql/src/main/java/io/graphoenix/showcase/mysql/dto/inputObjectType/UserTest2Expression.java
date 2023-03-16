@@ -1,10 +1,7 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.enumType.Conditional;
-import io.graphoenix.core.dto.inputObjectType.BooleanExpression;
-import io.graphoenix.core.dto.inputObjectType.IntExpression;
-import io.graphoenix.core.dto.inputObjectType.StringExpression;
+import io.graphoenix.showcase.mysql.dto.enumType.Conditional;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;

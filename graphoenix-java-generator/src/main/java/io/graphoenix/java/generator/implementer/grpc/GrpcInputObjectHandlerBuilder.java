@@ -44,7 +44,7 @@ public class GrpcInputObjectHandlerBuilder {
 
     private JavaFile buildClass() {
         TypeSpec typeSpec = buildGrpcInputObjectHandler();
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private TypeSpec buildGrpcInputObjectHandler() {
@@ -89,7 +89,7 @@ public class GrpcInputObjectHandlerBuilder {
         for (GraphqlParser.InputValueDefinitionContext inputValueDefinitionContext : inputValueDefinitionContexts) {
             CodeBlock codeBlock;
             String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
-            String rpcEnumValueSuffixName = grpcNameUtil.getGrpcEnumValueSuffixName(inputValueDefinitionContext.type());
+            String grpcEnumValueSuffixName = grpcNameUtil.getGrpcEnumValueSuffixName(inputValueDefinitionContext.type());
             String inputObjectFieldMethodName = grpcNameUtil.getLowerCamelName(inputValueDefinitionContext.type());
             if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
                 String rpcGetInputValueListName = grpcNameUtil.getGrpcGetListMethodName(inputValueDefinitionContext);
@@ -104,7 +104,7 @@ public class GrpcInputObjectHandlerBuilder {
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
                             rpcGetInputValueListName,
-                            rpcEnumValueSuffixName,
+                            grpcEnumValueSuffixName,
                             ClassName.get(Collectors.class)
                     );
                 } else if (manager.isInputObject(fieldTypeName)) {
@@ -138,7 +138,7 @@ public class GrpcInputObjectHandlerBuilder {
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
                             rpcGetInputValueName,
-                            rpcEnumValueSuffixName
+                            grpcEnumValueSuffixName
                     );
                 } else if (manager.isInputObject(fieldTypeName)) {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L($L.$L()))",

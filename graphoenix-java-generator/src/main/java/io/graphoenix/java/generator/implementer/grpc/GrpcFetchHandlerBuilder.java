@@ -87,7 +87,7 @@ public class GrpcFetchHandlerBuilder {
                         )
                 );
         TypeSpec typeSpec = buildGrpcFetchHandler();
-        return JavaFile.builder(graphQLConfig.getHandlerPackageName(), typeSpec).build();
+        return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
     private TypeSpec buildGrpcFetchHandler() {

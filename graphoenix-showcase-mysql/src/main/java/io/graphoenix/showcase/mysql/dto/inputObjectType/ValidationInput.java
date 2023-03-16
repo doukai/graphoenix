@@ -1,7 +1,6 @@
 package io.graphoenix.showcase.mysql.dto.inputObjectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.core.dto.inputObjectType.Property;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -45,7 +44,7 @@ public class ValidationInput {
   @Name("enum")
   private Collection<String> _enum;
 
-  private io.graphoenix.core.dto.inputObjectType.ValidationInput items;
+  private ValidationInput items;
 
   private Integer minItems;
 
@@ -53,23 +52,23 @@ public class ValidationInput {
 
   private Boolean uniqueItems;
 
-  private Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> allOf;
+  private Collection<ValidationInput> allOf;
 
-  private Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> anyOf;
+  private Collection<ValidationInput> anyOf;
 
-  private Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> oneOf;
+  private Collection<ValidationInput> oneOf;
 
-  private io.graphoenix.core.dto.inputObjectType.ValidationInput not;
+  private ValidationInput not;
 
   private Collection<Property> properties;
 
   @Name("if")
-  private io.graphoenix.core.dto.inputObjectType.ValidationInput _if;
+  private ValidationInput _if;
 
-  private io.graphoenix.core.dto.inputObjectType.ValidationInput then;
+  private ValidationInput then;
 
   @Name("else")
-  private io.graphoenix.core.dto.inputObjectType.ValidationInput _else;
+  private ValidationInput _else;
 
   private Collection<Property> dependentRequired;
 
@@ -177,11 +176,11 @@ public class ValidationInput {
     this._enum = _enum;
   }
 
-  public io.graphoenix.core.dto.inputObjectType.ValidationInput getItems() {
+  public ValidationInput getItems() {
     return this.items;
   }
 
-  public void setItems(io.graphoenix.core.dto.inputObjectType.ValidationInput items) {
+  public void setItems(ValidationInput items) {
     this.items = items;
   }
 
@@ -209,35 +208,35 @@ public class ValidationInput {
     this.uniqueItems = uniqueItems;
   }
 
-  public Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> getAllOf() {
+  public Collection<ValidationInput> getAllOf() {
     return this.allOf;
   }
 
-  public void setAllOf(Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> allOf) {
+  public void setAllOf(Collection<ValidationInput> allOf) {
     this.allOf = allOf;
   }
 
-  public Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> getAnyOf() {
+  public Collection<ValidationInput> getAnyOf() {
     return this.anyOf;
   }
 
-  public void setAnyOf(Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> anyOf) {
+  public void setAnyOf(Collection<ValidationInput> anyOf) {
     this.anyOf = anyOf;
   }
 
-  public Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> getOneOf() {
+  public Collection<ValidationInput> getOneOf() {
     return this.oneOf;
   }
 
-  public void setOneOf(Collection<io.graphoenix.core.dto.inputObjectType.ValidationInput> oneOf) {
+  public void setOneOf(Collection<ValidationInput> oneOf) {
     this.oneOf = oneOf;
   }
 
-  public io.graphoenix.core.dto.inputObjectType.ValidationInput getNot() {
+  public ValidationInput getNot() {
     return this.not;
   }
 
-  public void setNot(io.graphoenix.core.dto.inputObjectType.ValidationInput not) {
+  public void setNot(ValidationInput not) {
     this.not = not;
   }
 
@@ -249,27 +248,27 @@ public class ValidationInput {
     this.properties = properties;
   }
 
-  public io.graphoenix.core.dto.inputObjectType.ValidationInput get_if() {
+  public ValidationInput get_if() {
     return this._if;
   }
 
-  public void set_if(io.graphoenix.core.dto.inputObjectType.ValidationInput _if) {
+  public void set_if(ValidationInput _if) {
     this._if = _if;
   }
 
-  public io.graphoenix.core.dto.inputObjectType.ValidationInput getThen() {
+  public ValidationInput getThen() {
     return this.then;
   }
 
-  public void setThen(io.graphoenix.core.dto.inputObjectType.ValidationInput then) {
+  public void setThen(ValidationInput then) {
     this.then = then;
   }
 
-  public io.graphoenix.core.dto.inputObjectType.ValidationInput get_else() {
+  public ValidationInput get_else() {
     return this._else;
   }
 
-  public void set_else(io.graphoenix.core.dto.inputObjectType.ValidationInput _else) {
+  public void set_else(ValidationInput _else) {
     this._else = _else;
   }
 

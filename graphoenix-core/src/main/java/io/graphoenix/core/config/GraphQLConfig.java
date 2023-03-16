@@ -72,6 +72,27 @@ public class GraphQLConfig {
     private String handlerPackageName;
 
     @Optional
+    private String grpcObjectTypePackageName;
+
+    @Optional
+    private String grpcInterfaceTypePackageName;
+
+    @Optional
+    private String grpcUnionTypePackageName;
+
+    @Optional
+    private String grpcEnumTypePackageName;
+
+    @Optional
+    private String grpcInputObjectTypePackageName;
+
+    @Optional
+    private String grpcDirectivePackageName;
+
+    @Optional
+    private String grpcHandlerPackageName;
+
+    @Optional
     private String conditionalInputName;
 
     @Optional
@@ -250,6 +271,62 @@ public class GraphQLConfig {
 
     public void setHandlerPackageName(String handlerPackageName) {
         this.handlerPackageName = handlerPackageName;
+    }
+
+    public String getGrpcObjectTypePackageName() {
+        return grpcObjectTypePackageName != null ? grpcObjectTypePackageName : getObjectTypePackageName() + ".grpc";
+    }
+
+    public void setGrpcObjectTypePackageName(String grpcObjectTypePackageName) {
+        this.grpcObjectTypePackageName = grpcObjectTypePackageName;
+    }
+
+    public String getGrpcInterfaceTypePackageName() {
+        return grpcInterfaceTypePackageName != null ? grpcInterfaceTypePackageName : getInterfaceTypePackageName() + ".grpc";
+    }
+
+    public void setGrpcInterfaceTypePackageName(String grpcInterfaceTypePackageName) {
+        this.grpcInterfaceTypePackageName = grpcInterfaceTypePackageName;
+    }
+
+    public String getGrpcUnionTypePackageName() {
+        return grpcUnionTypePackageName != null ? grpcUnionTypePackageName : getUnionTypePackageName() + ".grpc";
+    }
+
+    public void setGrpcUnionTypePackageName(String grpcUnionTypePackageName) {
+        this.grpcUnionTypePackageName = grpcUnionTypePackageName;
+    }
+
+    public String getGrpcEnumTypePackageName() {
+        return grpcEnumTypePackageName != null ? grpcEnumTypePackageName : getEnumTypePackageName() + ".grpc";
+    }
+
+    public void setGrpcEnumTypePackageName(String grpcEnumTypePackageName) {
+        this.grpcEnumTypePackageName = grpcEnumTypePackageName;
+    }
+
+    public String getGrpcInputObjectTypePackageName() {
+        return grpcInputObjectTypePackageName != null ? grpcInputObjectTypePackageName : getInputObjectTypePackageName() + ".grpc";
+    }
+
+    public void setGrpcInputObjectTypePackageName(String grpcInputObjectTypePackageName) {
+        this.grpcInputObjectTypePackageName = grpcInputObjectTypePackageName;
+    }
+
+    public String getGrpcDirectivePackageName() {
+        return grpcDirectivePackageName != null ? grpcDirectivePackageName : getDirectivePackageName() + ".grpc";
+    }
+
+    public void setGrpcDirectivePackageName(String grpcDirectivePackageName) {
+        this.grpcDirectivePackageName = grpcDirectivePackageName;
+    }
+
+    public String getGrpcHandlerPackageName() {
+        return grpcHandlerPackageName != null ? grpcHandlerPackageName : getHandlerPackageName() + ".grpc";
+    }
+
+    public void setGrpcHandlerPackageName(String grpcHandlerPackageName) {
+        this.grpcHandlerPackageName = grpcHandlerPackageName;
     }
 
     public String getConditionalInputName() {

@@ -1,7 +1,6 @@
 package graphoenix.annotation.processor;
 
 import com.google.auto.service.AutoService;
-import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import org.tinylog.Logger;
@@ -40,11 +39,7 @@ public class PackageProcessor extends BaseProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
-        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
-        if (graphQLConfig.getPackageName() == null) {
-            getDefaultPackageName(roundEnv).ifPresent(graphQLConfig::setPackageName);
-        }
         registerElements(roundEnv);
         try {
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/package.gql");
