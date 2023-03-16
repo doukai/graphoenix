@@ -7,6 +7,7 @@ import io.graphoenix.core.error.ElementProcessErrorType;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.handler.GraphQLOperationRouter;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.graphql.generator.translator.JavaElementToOperation;
@@ -70,10 +71,9 @@ public class GraphQLOperationProcessor extends BaseProcessor {
         GeneratorHandler generatorHandler = BeanContext.get(GeneratorHandler.class);
         JavaElementToOperation javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         OperationInterfaceImplementer operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
-        if (graphQLConfig.getPackageName() == null) {
-            getDefaultPackageName(roundEnv).ifPresent(graphQLConfig::setPackageName);
-        }
         try {
+            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+            configRegister.registerPreset(GraphQLOperationProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }

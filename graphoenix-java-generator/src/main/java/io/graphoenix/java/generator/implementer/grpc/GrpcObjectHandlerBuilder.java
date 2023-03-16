@@ -81,11 +81,11 @@ public class GrpcObjectHandlerBuilder {
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(graphQLConfig.getGrpcPackageName(), rpcObjectName))
+                .returns(ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), rpcObjectName))
                 .addParameter(className, objectParameterName)
                 .addStatement("$T builder = $T.newBuilder()",
-                        ClassName.get(graphQLConfig.getGrpcPackageName(), rpcObjectName, "Builder"),
-                        ClassName.get(graphQLConfig.getGrpcPackageName(), rpcObjectName)
+                        ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), rpcObjectName, "Builder"),
+                        ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), rpcObjectName)
                 );
 
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
@@ -119,7 +119,7 @@ public class GrpcObjectHandlerBuilder {
                             rpcFieldAddAllName,
                             objectParameterName,
                             fieldGetterName,
-                            ClassName.get(graphQLConfig.getGrpcPackageName(), fieldRpcObjectName),
+                            ClassName.get(graphQLConfig.getGrpcEnumTypePackageName(), fieldRpcObjectName),
                             ClassName.get(Collectors.class)
                     );
                 } else if (manager.isObject(fieldTypeName)) {
@@ -153,7 +153,7 @@ public class GrpcObjectHandlerBuilder {
                 } else if (manager.isEnum(fieldTypeName)) {
                     codeBlock = CodeBlock.of("builder.$L($T.forNumber($L.$L().ordinal()))",
                             rpcFieldSetterName,
-                            ClassName.get(graphQLConfig.getGrpcPackageName(), fieldRpcObjectName),
+                            ClassName.get(graphQLConfig.getGrpcEnumTypePackageName(), fieldRpcObjectName),
                             objectParameterName,
                             fieldGetterName
                     );

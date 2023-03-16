@@ -112,7 +112,7 @@ public class SelectionFilterBuilder {
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         ClassName typeClassName;
-        Optional<String> className = typeManager.getClassName(objectTypeDefinitionContext);
+        Optional<String> className = manager.getClassName(objectTypeDefinitionContext);
         if (className.isPresent()) {
             typeClassName = TYPE_NAME_UTIL.bestGuess(className.get());
         } else {
@@ -242,7 +242,7 @@ public class SelectionFilterBuilder {
         String typeParameterName = typeManager.typeToLowerCamelName(objectTypeDefinitionContext.name().getText());
         String listTypeParameterName = typeParameterName.concat("List");
         ClassName typeClassName;
-        Optional<String> className = typeManager.getClassName(objectTypeDefinitionContext);
+        Optional<String> className = manager.getClassName(objectTypeDefinitionContext);
         if (className.isPresent()) {
             typeClassName = TYPE_NAME_UTIL.bestGuess(className.get());
         } else {

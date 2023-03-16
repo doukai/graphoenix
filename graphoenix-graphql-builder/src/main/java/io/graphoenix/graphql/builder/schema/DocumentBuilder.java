@@ -72,7 +72,7 @@ public class DocumentBuilder {
         mapper.registerFieldMaps();
     }
 
-    public Document buildDocument() throws IOException {
+    public void build() throws IOException {
         manager.getObjects()
                 .filter(manager::isNotContainerType)
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
@@ -88,8 +88,19 @@ public class DocumentBuilder {
         buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
         buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
         mapper.registerFieldMaps();
+    }
 
+    public Document buildDocument() throws IOException {
+        build();
         Document document = getDocument();
+        Logger.info("document build success");
+        Logger.debug("\r\n{}", document.toString());
+        return document;
+    }
+
+    public Document buildDocumentWithClassName() throws IOException {
+        build();
+        Document document = getDocumentWithClassName();
         Logger.info("document build success");
         Logger.debug("\r\n{}", document.toString());
         return document;

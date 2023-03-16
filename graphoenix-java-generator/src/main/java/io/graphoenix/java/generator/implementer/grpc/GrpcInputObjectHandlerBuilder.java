@@ -78,7 +78,7 @@ public class GrpcInputObjectHandlerBuilder {
 
     private MethodSpec buildTypeMethod(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         String inputObjectParameterName = grpcNameUtil.getLowerCamelName(inputObjectTypeDefinitionContext);
-        ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), grpcNameUtil.getGrpcTypeName(inputObjectTypeDefinitionContext));
+        ClassName typeClassName = ClassName.get(graphQLConfig.getGrpcInputObjectTypePackageName(), grpcNameUtil.getGrpcTypeName(inputObjectTypeDefinitionContext));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(inputObjectParameterName)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(ObjectValueWithVariable.class))

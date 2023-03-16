@@ -42,36 +42,12 @@ import static javax.lang.model.SourceVersion.RELEASE_11;
 @AutoService(Processor.class)
 public class ApplicationProcessor extends BaseProcessor {
 
-    private IGraphQLDocumentManager manager;
-    private DocumentBuilder documentBuilder;
-    private InvokeHandlerBuilder invokeHandlerBuilder;
-    private ConnectionHandlerBuilder connectionHandlerBuilder;
-    private SelectionFilterBuilder selectionFilterBuilder;
-    private OperationHandlerImplementer operationHandlerImplementer;
-    private QueryDataLoaderBuilder queryDataLoaderBuilder;
-    private MutationDataLoaderBuilder mutationDataLoaderBuilder;
-    private QueryHandlerBuilder queryHandlerBuilder;
-    private MutationHandlerBuilder mutationHandlerBuilder;
-    private JsonSchemaTranslator jsonSchemaTranslator;
-    private GraphQLConfig graphQLConfig;
     private Filer filer;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         filer = processingEnv.getFiler();
-        graphQLConfig = BeanContext.get(GraphQLConfig.class);
-        manager = BeanContext.get(IGraphQLDocumentManager.class);
-        documentBuilder = BeanContext.get(DocumentBuilder.class);
-        jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
-        invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
-        connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
-        selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
-        operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
-        queryDataLoaderBuilder = BeanContext.get(QueryDataLoaderBuilder.class);
-        mutationDataLoaderBuilder = BeanContext.get(MutationDataLoaderBuilder.class);
-        queryHandlerBuilder = BeanContext.get(QueryHandlerBuilder.class);
-        mutationHandlerBuilder = BeanContext.get(MutationHandlerBuilder.class);
     }
 
     @Override
@@ -79,16 +55,28 @@ public class ApplicationProcessor extends BaseProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
+        JsonSchemaTranslator jsonSchemaTranslator = BeanContext.get(JsonSchemaTranslator.class);
+        InvokeHandlerBuilder invokeHandlerBuilder = BeanContext.get(InvokeHandlerBuilder.class);
+        ConnectionHandlerBuilder connectionHandlerBuilder = BeanContext.get(ConnectionHandlerBuilder.class);
+        SelectionFilterBuilder selectionFilterBuilder = BeanContext.get(SelectionFilterBuilder.class);
+        OperationHandlerImplementer operationHandlerImplementer = BeanContext.get(OperationHandlerImplementer.class);
+        QueryDataLoaderBuilder queryDataLoaderBuilder = BeanContext.get(QueryDataLoaderBuilder.class);
+        MutationDataLoaderBuilder mutationDataLoaderBuilder = BeanContext.get(MutationDataLoaderBuilder.class);
+        QueryHandlerBuilder queryHandlerBuilder = BeanContext.get(QueryHandlerBuilder.class);
+        MutationHandlerBuilder mutationHandlerBuilder = BeanContext.get(MutationHandlerBuilder.class);
         registerElements(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+                manager.registerGraphQL(documentBuilder.buildDocumentWithClassName().toString());
             }
             FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
             Writer writer = mainGraphQL.openWriter();
-            writer.write(documentBuilder.getDocumentWithClassName().toString());
+            writer.write(documentBuilder.getDocument().toString());
             writer.close();
 
             List<GraphqlParser.ObjectTypeDefinitionContext> schemaObjectList = manager.getObjects()

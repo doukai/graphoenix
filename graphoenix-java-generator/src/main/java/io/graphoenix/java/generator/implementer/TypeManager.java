@@ -239,16 +239,4 @@ public class TypeManager {
                 .findFirst()
                 .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("returnClassName")));
     }
-
-    public Optional<String> getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return Stream.ofNullable(objectTypeDefinitionContext.directives())
-                .flatMap(directivesContext -> directivesContext.directive().stream())
-                .filter(directiveContext -> directiveContext.name().getText().equals(CONTAINER_TYPE_DIRECTIVE_NAME))
-                .filter(directiveContext -> directiveContext.arguments() != null)
-                .flatMap(directiveContext -> directiveContext.arguments().argument().stream())
-                .filter(argumentContext -> argumentContext.name().getText().equals("className"))
-                .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
-                .findFirst()
-                .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
-    }
 }

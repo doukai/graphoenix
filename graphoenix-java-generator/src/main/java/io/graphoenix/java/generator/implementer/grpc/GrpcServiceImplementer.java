@@ -216,7 +216,7 @@ public class GrpcServiceImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "InvokeHandler")),
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")),
                                 "invokeHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
@@ -275,7 +275,7 @@ public class GrpcServiceImplementer {
                 .addStatement("this.inputObjectHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcInputObjectHandler"))
                 .addStatement("this.objectHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "GrpcObjectHandler"))
                 .addStatement("this.operationHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(OperationHandler.class))
-                .addStatement("this.invokeHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getGrpcHandlerPackageName(), "InvokeHandler"))
+                .addStatement("this.invokeHandler = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler"))
                 .addStatement("this.jsonb = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(Jsonb.class))
                 .addStatement("this.argumentBuilder = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(ArgumentBuilder.class));
 
