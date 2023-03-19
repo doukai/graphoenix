@@ -72,7 +72,7 @@ public class ApplicationProcessor extends BaseProcessor {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPreset(ApplicationProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocumentWithClassName().toString());
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
             FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
             Writer writer = mainGraphQL.openWriter();

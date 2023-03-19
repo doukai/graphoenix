@@ -98,14 +98,6 @@ public class DocumentBuilder {
         return document;
     }
 
-    public Document buildDocumentWithClassName() throws IOException {
-        build();
-        Document document = getDocumentWithClassName();
-        Logger.info("document build success");
-        Logger.debug("\r\n{}", document.toString());
-        return document;
-    }
-
     public Document getDocument() {
         Document document = new Document();
         buildSchema().ifPresent(schema -> document.addDefinition(schema.toString()));
@@ -115,75 +107,6 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                //TODO union type
-                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    public Document getDocumentWithClassName() {
-        Document document = new Document();
-        buildSchema().ifPresent(schema -> document.addDefinition(schema.toString()));
-        return document
-                .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .addDefinitions(
-                        manager.getEnums()
-                                .map(enumTypeDefinitionContext ->
-                                        manager.getClassName(enumTypeDefinitionContext)
-                                                .map(className -> buildEnum(enumTypeDefinitionContext))
-                                                .orElseGet(() ->
-                                                        buildEnum(enumTypeDefinitionContext).addDirective(
-                                                                new Directive(CLASS_INFO_DIRECTIVE_NAME)
-                                                                        .addArgument("className", graphQLConfig.getEnumTypePackageName().concat(".").concat(enumTypeDefinitionContext.name().getText()))
-                                                        )
-                                                )
-                                )
-                                .map(EnumType::toString)
-                                .collect(Collectors.toCollection(LinkedHashSet::new))
-                )
-                .addDefinitions(
-                        manager.getInterfaces()
-                                .map(interfaceTypeDefinitionContext ->
-                                        manager.getClassName(interfaceTypeDefinitionContext)
-                                                .map(className -> buildInterface(interfaceTypeDefinitionContext))
-                                                .orElseGet(() ->
-                                                        buildInterface(interfaceTypeDefinitionContext).addDirective(
-                                                                new Directive(CLASS_INFO_DIRECTIVE_NAME)
-                                                                        .addArgument("className", graphQLConfig.getInterfaceTypePackageName().concat(".").concat(interfaceTypeDefinitionContext.name().getText()))
-                                                        )
-                                                )
-                                )
-                                .map(InterfaceType::toString)
-                                .collect(Collectors.toCollection(LinkedHashSet::new))
-                )
-                .addDefinitions(
-                        manager.getObjects()
-                                .map(objectTypeDefinitionContext ->
-                                        manager.getClassName(objectTypeDefinitionContext)
-                                                .map(className -> buildObject(objectTypeDefinitionContext))
-                                                .orElseGet(() ->
-                                                        buildObject(objectTypeDefinitionContext).addDirective(
-                                                                new Directive(CLASS_INFO_DIRECTIVE_NAME)
-                                                                        .addArgument("className", graphQLConfig.getObjectTypePackageName().concat(".").concat(objectTypeDefinitionContext.name().getText()))
-                                                        )
-                                                )
-                                )
-                                .map(ObjectType::toString)
-                                .collect(Collectors.toCollection(LinkedHashSet::new))
-                )
-                .addDefinitions(
-                        manager.getInputObjects()
-                                .map(inputObjectTypeDefinitionContext ->
-                                        manager.getClassName(inputObjectTypeDefinitionContext)
-                                                .map(className -> buildInputObjectType(inputObjectTypeDefinitionContext))
-                                                .orElseGet(() ->
-                                                        buildInputObjectType(inputObjectTypeDefinitionContext).addDirective(
-                                                                new Directive(CLASS_INFO_DIRECTIVE_NAME)
-                                                                        .addArgument("className", graphQLConfig.getInputObjectTypePackageName().concat(".").concat(inputObjectTypeDefinitionContext.name().getText()))
-                                                        )
-                                                )
-                                )
-                                .map(InputObjectType::toString)
-                                .collect(Collectors.toCollection(LinkedHashSet::new))
-                )
                 //TODO union type
                 .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }

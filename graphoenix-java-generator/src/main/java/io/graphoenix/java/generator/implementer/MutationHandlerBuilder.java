@@ -24,6 +24,7 @@ import javax.lang.model.element.Modifier;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -77,10 +78,10 @@ public class MutationHandlerBuilder {
 
     private List<MethodSpec> buildTypeMethods(boolean anchor) {
         return manager.getObjects()
+                .filter(objectTypeDefinitionContext -> !manager.hasClassName(objectTypeDefinitionContext))
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .flatMap(objectTypeDefinitionContext ->
@@ -108,10 +109,14 @@ public class MutationHandlerBuilder {
         }
         builder.beginControlFlow("for ($T field : valueWithVariable.asJsonObject().entrySet())", ParameterizedTypeName.get(Map.Entry.class, String.class, JsonValue.class));
 
-        String idFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST));
+        Optional<String> idFieldName = manager.getObjectTypeIDFieldName(objectTypeDefinitionContext.name().getText());
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> fieldDefinitionContext.name().getText().equals(idFieldName) || manager.isFetchField(fieldDefinitionContext) && manager.getAnchor(fieldDefinitionContext) == anchor || !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext ->
+                        idFieldName.isPresent() && fieldDefinitionContext.name().getText().equals(idFieldName.get()) ||
+                                manager.isFetchField(fieldDefinitionContext) && manager.getAnchor(fieldDefinitionContext) == anchor ||
+                                !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                )
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))
                 .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
@@ -159,7 +164,7 @@ public class MutationHandlerBuilder {
                     }
                 }
             } else {
-                if (fieldDefinitionContext.name().getText().equals(idFieldName)) {
+                if (idFieldName.isPresent() && fieldDefinitionContext.name().getText().equals(idFieldName.get())) {
                     if (anchor) {
                         builder.addStatement("loader.registerUpdate($S, field.getValue())",
                                 objectTypeDefinitionContext.name().getText()

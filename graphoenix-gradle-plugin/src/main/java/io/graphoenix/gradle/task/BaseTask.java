@@ -94,7 +94,7 @@ public class BaseTask extends DefaultTask {
 
         try {
             if (graphQLConfig.getPackageName() == null) {
-                getDefaultPackageName().ifPresent(graphQLConfig::setPackageName);
+                findDefaultPackageName().ifPresent(graphQLConfig::setPackageName);
             }
             manager.clearAll();
             configRegister.registerConfig(resourcePath);
@@ -141,7 +141,7 @@ public class BaseTask extends DefaultTask {
         return sourceRoot.getCompilationUnits();
     }
 
-    public Optional<String> getDefaultPackageName() throws IOException {
+    public Optional<String> findDefaultPackageName() throws IOException {
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath();
         JavaParserTypeSolver javaParserTypeSolver = new JavaParserTypeSolver(Path.of(javaPath));
