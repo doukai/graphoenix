@@ -21,6 +21,10 @@ public class Field {
     public Field() {
     }
 
+    public Field(String name) {
+        this.name = name;
+    }
+
     public Field(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
         this.name = fieldDefinitionContext.name().getText();
         this.typeName = fieldDefinitionContext.type().getText();

@@ -115,7 +115,7 @@ public class MutationHandlerBuilder {
                 .filter(fieldDefinitionContext ->
                         idFieldName.isPresent() && fieldDefinitionContext.name().getText().equals(idFieldName.get()) ||
                                 manager.isFetchField(fieldDefinitionContext) && manager.getAnchor(fieldDefinitionContext) == anchor ||
-                                !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type()))
+                                !manager.isFetchField(fieldDefinitionContext) && manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())) && !manager.hasClassName(fieldDefinitionContext.type())
                 )
                 .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
                 .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(PAGE_INFO_NAME))

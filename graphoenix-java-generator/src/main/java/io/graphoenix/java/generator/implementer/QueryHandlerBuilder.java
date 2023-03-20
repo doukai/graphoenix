@@ -125,7 +125,10 @@ public class QueryHandlerBuilder {
 
         int index = 0;
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(fieldDefinitionContext -> manager.isFetchField(fieldDefinitionContext) || manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                .filter(fieldDefinitionContext ->
+                        manager.isFetchField(fieldDefinitionContext) ||
+                                manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())) && !manager.hasClassName(fieldDefinitionContext.type())
+                )
                 .collect(Collectors.toList());
 
         for (GraphqlParser.FieldDefinitionContext fieldDefinitionContext : fieldDefinitionContextList) {

@@ -778,6 +778,20 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         return Optional.ofNullable(interfaceTypeDefinitionContext.directives()).map(this::hasClassName).orElse(false);
     }
 
+    @Override
+    public boolean hasClassName(GraphqlParser.TypeContext typeContext) {
+        if (isObject(getFieldTypeName(typeContext))) {
+            return getObject(getFieldTypeName(typeContext)).map(this::hasClassName).orElse(false);
+        } else if (isEnum(getFieldTypeName(typeContext))) {
+            return getEnum(getFieldTypeName(typeContext)).map(this::hasClassName).orElse(false);
+        } else if (isInterface(getFieldTypeName(typeContext))) {
+            return getInterface(getFieldTypeName(typeContext)).map(this::hasClassName).orElse(false);
+        } else if (isInputObject(getFieldTypeName(typeContext))) {
+            return getInputObject(getFieldTypeName(typeContext)).map(this::hasClassName).orElse(false);
+        }
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(getFieldTypeName(typeContext)));
+    }
+
     public boolean hasClassName(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()
                 .anyMatch(directiveContext -> directiveContext.name().getText().equals(CLASS_INFO_DIRECTIVE_NAME));

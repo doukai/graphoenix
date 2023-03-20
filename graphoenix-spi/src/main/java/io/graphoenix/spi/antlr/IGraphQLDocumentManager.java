@@ -188,6 +188,8 @@ public interface IGraphQLDocumentManager {
 
     boolean hasClassName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
+    boolean hasClassName(GraphqlParser.TypeContext typeContext);
+
     boolean hasClassName(String typeName);
 
     Optional<String> getClassName(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);

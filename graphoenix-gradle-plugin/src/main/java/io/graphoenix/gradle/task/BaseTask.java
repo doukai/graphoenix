@@ -4,6 +4,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
+import com.github.javaparser.resolution.declarations.ResolvedEnumConstantDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
@@ -17,6 +19,7 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.EnumType;
+import io.graphoenix.core.document.EnumValue;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.document.InputValue;
 import io.graphoenix.core.document.InterfaceType;
@@ -196,6 +199,11 @@ public class BaseTask extends DefaultTask {
                                                                 manager.mergeDocument(
                                                                         new ObjectType()
                                                                                 .setName(typeName)
+                                                                                .setFields(
+                                                                                        resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                                                                                                .map(this::buildField)
+                                                                                                .collect(Collectors.toSet())
+                                                                                )
                                                                                 .addDirective(
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
@@ -211,6 +219,11 @@ public class BaseTask extends DefaultTask {
                                                                 manager.mergeDocument(
                                                                         new EnumType()
                                                                                 .setName(typeName)
+                                                                                .setEnumValues(
+                                                                                        resolvedReferenceTypeDeclaration.asEnum().getEnumConstants().stream()
+                                                                                                .map(this::buildEnumValue)
+                                                                                                .collect(Collectors.toSet())
+                                                                                )
                                                                                 .addDirective(
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
@@ -226,6 +239,11 @@ public class BaseTask extends DefaultTask {
                                                                 manager.mergeDocument(
                                                                         new InterfaceType()
                                                                                 .setName(typeName)
+                                                                                .setFields(
+                                                                                        resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                                                                                                .map(this::buildField)
+                                                                                                .collect(Collectors.toSet())
+                                                                                )
                                                                                 .addDirective(
                                                                                         new Directive()
                                                                                                 .setName(CLASS_INFO_DIRECTIVE_NAME)
@@ -361,6 +379,15 @@ public class BaseTask extends DefaultTask {
                             manager.mergeDocument(objectType.toString());
                         }
                 );
+    }
+
+    protected Field buildField(ResolvedMethodDeclaration resolvedMethodDeclaration) {
+        return new Field(getInvokeFieldName(resolvedMethodDeclaration.getName()))
+                .setTypeName(getInvokeFieldTypeName(resolvedMethodDeclaration.getReturnType().toString()));
+    }
+
+    protected EnumValue buildEnumValue(ResolvedEnumConstantDeclaration resolvedEnumConstantDeclaration) {
+        return new EnumValue(getInvokeFieldName(resolvedEnumConstantDeclaration.getName()));
     }
 
     private String getInvokeFieldName(String methodName) {

@@ -380,19 +380,16 @@ public class ProtobufFileBuilder {
     }
 
     public Message buildMessage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
-                .filter(manager::isNotFetchField)
-                .collect(Collectors.toList());
         return new Message()
                 .setName(getName(objectTypeDefinitionContext.name().getText()))
                 .setFields(
-                        IntStream.range(0, fieldDefinitionContextList.size())
+                        IntStream.range(0, objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().size())
                                 .mapToObj(index ->
                                         new Field()
-                                                .setName(getMessageFiledName(fieldDefinitionContextList.get(index).name().getText()))
-                                                .setType(buildType(fieldDefinitionContextList.get(index).type()))
-                                                .setOptional(fieldDefinitionContextList.get(index).type().nonNullType() == null)
-                                                .setRepeated(manager.fieldTypeIsList(fieldDefinitionContextList.get(index).type()))
+                                                .setName(getMessageFiledName(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).name().getText()))
+                                                .setType(buildType(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
+                                                .setOptional(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type().nonNullType() == null)
+                                                .setRepeated(manager.fieldTypeIsList(objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
                                                 .setNumber(index + 1)
                                 )
                                 .collect(Collectors.toList())
