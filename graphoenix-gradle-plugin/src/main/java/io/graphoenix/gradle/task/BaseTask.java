@@ -6,6 +6,7 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedEnumConstantDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
@@ -31,10 +32,7 @@ import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import org.eclipse.microprofile.graphql.GraphQLApi;
-import org.eclipse.microprofile.graphql.Mutation;
-import org.eclipse.microprofile.graphql.Query;
-import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.graphql.*;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.plugins.JavaPluginConvention;
@@ -160,111 +158,41 @@ public class BaseTask extends DefaultTask {
                 .map(NodeWithName::getNameAsString);
     }
 
-
     protected void registerInvoke() throws IOException {
         registerInvoke(buildCompilationUnits());
     }
 
     protected void registerInvoke(List<CompilationUnit> compilations) {
-        compilations.stream()
+        List<ResolvedReferenceTypeDeclaration> objectTypeList = compilations.stream()
                 .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))
                 .flatMap(typeDeclaration -> typeDeclaration.getMethods().stream())
-                .forEach(methodDeclaration -> {
-                            Type type = methodDeclaration.getType();
-                            if (type.isArrayType()) {
-                                type = type.asArrayType().getElementType();
-                            }
-                            try {
-                                if (type.resolve().isReferenceType()) {
-                                    ResolvedReferenceType resolvedReferenceType = type.resolve().asReferenceType();
-                                    resolvedReferenceType.getTypeDeclaration()
-                                            .ifPresent(resolvedReferenceTypeDeclaration -> {
-                                                        if ((resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()) ||
-                                                                resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName()) ||
-                                                                resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName())) &&
-                                                                !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName())) {
-                                                            String qualifiedName = resolvedReferenceType.getQualifiedName();
-                                                            if (qualifiedName.equals(PublisherBuilder.class.getCanonicalName()) ||
-                                                                    qualifiedName.equals(Mono.class.getCanonicalName()) ||
-                                                                    qualifiedName.equals(Flux.class.getCanonicalName()) ||
-                                                                    qualifiedName.equals(Collection.class.getCanonicalName()) ||
-                                                                    qualifiedName.equals(List.class.getCanonicalName()) ||
-                                                                    qualifiedName.equals(Set.class.getCanonicalName())) {
+                .flatMap(methodDeclaration -> resolve(methodDeclaration.getType()).stream())
+                .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .collect(Collectors.toList());
 
-                                                                qualifiedName = resolvedReferenceType.typeParametersValues().get(0).asReferenceType().getQualifiedName();
-                                                            }
+        List<ResolvedReferenceTypeDeclaration> interfaceTypeList = compilations.stream()
+                .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))
+                .flatMap(typeDeclaration -> typeDeclaration.getMethods().stream())
+                .flatMap(methodDeclaration -> resolve(methodDeclaration.getType()).stream())
+                .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .collect(Collectors.toList());
 
-                                                            String typeName = resolvedReferenceTypeDeclaration.getName();
-                                                            if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName())) {
-                                                                manager.mergeDocument(
-                                                                        new ObjectType()
-                                                                                .setName(typeName)
-                                                                                .setFields(
-                                                                                        resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
-                                                                                                .map(this::buildField)
-                                                                                                .collect(Collectors.toSet())
-                                                                                )
-                                                                                .addDirective(
-                                                                                        new Directive()
-                                                                                                .setName(CLASS_INFO_DIRECTIVE_NAME)
-                                                                                                .addArgument("className", qualifiedName)
-                                                                                )
-                                                                                .addDirective(
-                                                                                        new Directive()
-                                                                                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
-                                                                                )
-                                                                                .toString()
-                                                                );
-                                                            } else if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName())) {
-                                                                manager.mergeDocument(
-                                                                        new EnumType()
-                                                                                .setName(typeName)
-                                                                                .setEnumValues(
-                                                                                        resolvedReferenceTypeDeclaration.asEnum().getEnumConstants().stream()
-                                                                                                .map(this::buildEnumValue)
-                                                                                                .collect(Collectors.toSet())
-                                                                                )
-                                                                                .addDirective(
-                                                                                        new Directive()
-                                                                                                .setName(CLASS_INFO_DIRECTIVE_NAME)
-                                                                                                .addArgument("className", qualifiedName)
-                                                                                )
-                                                                                .addDirective(
-                                                                                        new Directive()
-                                                                                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
-                                                                                )
-                                                                                .toString()
-                                                                );
-                                                            } else if (resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName())) {
-                                                                manager.mergeDocument(
-                                                                        new InterfaceType()
-                                                                                .setName(typeName)
-                                                                                .setFields(
-                                                                                        resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
-                                                                                                .map(this::buildField)
-                                                                                                .collect(Collectors.toSet())
-                                                                                )
-                                                                                .addDirective(
-                                                                                        new Directive()
-                                                                                                .setName(CLASS_INFO_DIRECTIVE_NAME)
-                                                                                                .addArgument("className", qualifiedName)
-                                                                                )
-                                                                                .addDirective(
-                                                                                        new Directive()
-                                                                                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
-                                                                                )
-                                                                                .toString()
-                                                                );
-                                                            }
-                                                        }
-                                                    }
-                                            );
-                                }
-                            } catch (UnsolvedSymbolException e) {
-                                Logger.warn(e);
-                            }
-                        }
-                );
+        List<ResolvedReferenceTypeDeclaration> enumTypeList = compilations.stream()
+                .flatMap(compilationUnit -> compilationUnit.getTypes().stream().filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class)))
+                .flatMap(typeDeclaration -> typeDeclaration.getMethods().stream())
+                .flatMap(methodDeclaration -> resolve(methodDeclaration.getType()).stream())
+                .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .collect(Collectors.toList());
+
+        objectTypeList.stream().map(this::buildObject).map(ObjectType::toString).forEach(manager::mergeDocument);
+        interfaceTypeList.stream().map(this::buildInterface).map(InterfaceType::toString).forEach(manager::mergeDocument);
+        enumTypeList.stream().map(this::buildEnum).map(EnumType::toString).forEach(manager::mergeDocument);
+
+        objectTypeList.forEach(this::registerFields);
+        interfaceTypeList.forEach(this::registerFields);
 
         compilations.stream()
                 .flatMap(compilationUnit ->
@@ -281,23 +209,16 @@ public class BaseTask extends DefaultTask {
                             String objectName = methodDeclaration.getParameters().stream()
                                     .filter(parameter -> parameter.isAnnotationPresent(Source.class))
                                     .findFirst()
-                                    .orElseThrow()
+                                    .orElseThrow(() -> new RuntimeException("@Source annotation not exist"))
                                     .getType()
                                     .asString();
 
                             GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
-                            String typeName = methodDeclaration.getType().asString();
-                            String className = TYPE_NAME_UTIL.getClassName(typeName);
-                            if (className.equals(PublisherBuilder.class.getSimpleName()) ||
-                                    className.equals(Mono.class.getSimpleName())) {
-                                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
-                            }
-                            String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
                             ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
                                     .addField(
                                             new Field()
                                                     .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                                    .setTypeName(invokeFieldTypeName)
+                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType().asString()))
                                                     .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
                                     );
                             manager.mergeDocument(objectType.toString());
@@ -314,30 +235,24 @@ public class BaseTask extends DefaultTask {
                                 .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
                 )
                 .forEach(methodDeclaration -> {
-                            String typeName = methodDeclaration.getType().asString();
-                            String className = TYPE_NAME_UTIL.getClassName(typeName);
-                            if (className.equals(PublisherBuilder.class.getSimpleName()) ||
-                                    className.equals(Mono.class.getSimpleName())) {
-                                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
-                            }
-                            String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
-                            ObjectType objectType = manager.getQueryOperationTypeName().flatMap(manager::getObject)
+                            ObjectType objectType = manager.getQueryOperationTypeName()
+                                    .flatMap(manager::getObject)
                                     .map(documentBuilder::buildObject)
-                                    .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME));
-                            objectType.addField(
-                                    new Field()
-                                            .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                            .setTypeName(invokeFieldTypeName)
-                                            .setArguments(
-                                                    methodDeclaration.getParameters().stream()
-                                                            .map(parameter ->
-                                                                    new InputValue()
-                                                                            .setName(parameter.getName().getIdentifier())
-                                                                            .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
-                                                            .collect(Collectors.toCollection(LinkedHashSet::new))
-                                            )
-                                            .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
-                            );
+                                    .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME))
+                                    .addField(
+                                            new Field()
+                                                    .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
+                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType().asString()))
+                                                    .setArguments(
+                                                            methodDeclaration.getParameters().stream()
+                                                                    .map(parameter ->
+                                                                            new InputValue()
+                                                                                    .setName(parameter.getName().getIdentifier())
+                                                                                    .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
+                                                                    .collect(Collectors.toCollection(LinkedHashSet::new))
+                                                    )
+                                                    .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
+                                    );
                             manager.mergeDocument(objectType.toString());
                         }
                 );
@@ -352,32 +267,141 @@ public class BaseTask extends DefaultTask {
                                 .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Mutation.class))
                 )
                 .forEach(methodDeclaration -> {
-                            String typeName = methodDeclaration.getType().asString();
-                            String className = TYPE_NAME_UTIL.getClassName(typeName);
-                            if (className.equals(PublisherBuilder.class.getSimpleName()) ||
-                                    className.equals(Mono.class.getSimpleName())) {
-                                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
-                            }
-                            String invokeFieldTypeName = getInvokeFieldTypeName(typeName);
-                            ObjectType objectType = manager.getMutationOperationTypeName().flatMap(manager::getObject)
+                            ObjectType objectType = manager.getMutationOperationTypeName()
+                                    .flatMap(manager::getObject)
                                     .map(documentBuilder::buildObject)
-                                    .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME));
-                            objectType.addField(
-                                    new Field()
-                                            .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                            .setTypeName(invokeFieldTypeName)
-                                            .setArguments(
-                                                    methodDeclaration.getParameters().stream()
-                                                            .map(parameter ->
-                                                                    new InputValue()
-                                                                            .setName(parameter.getName().getIdentifier())
-                                                                            .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
-                                                            .collect(Collectors.toCollection(LinkedHashSet::new))
-                                            )
-                                            .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
-                            );
+                                    .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME))
+                                    .addField(
+                                            new Field()
+                                                    .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
+                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType().asString()))
+                                                    .setArguments(
+                                                            methodDeclaration.getParameters().stream()
+                                                                    .map(parameter ->
+                                                                            new InputValue()
+                                                                                    .setName(parameter.getName().getIdentifier())
+                                                                                    .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
+                                                                    .collect(Collectors.toCollection(LinkedHashSet::new))
+                                                    )
+                                                    .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
+                                    );
                             manager.mergeDocument(objectType.toString());
                         }
+                );
+    }
+
+    protected void registerFields(ResolvedReferenceTypeDeclaration parentResolvedReferenceTypeDeclaration) {
+        List<ResolvedReferenceTypeDeclaration> objectTypeList = parentResolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                .filter(resolvedMethodDeclaration -> resolvedMethodDeclaration.getReturnType().isReferenceType())
+                .flatMap(resolvedMethodDeclaration -> resolve(resolvedMethodDeclaration.getReturnType().asReferenceType()).stream())
+                .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .collect(Collectors.toList());
+
+        List<ResolvedReferenceTypeDeclaration> interfaceTypeList = parentResolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                .filter(resolvedMethodDeclaration -> resolvedMethodDeclaration.getReturnType().isReferenceType())
+                .flatMap(resolvedMethodDeclaration -> resolve(resolvedMethodDeclaration.getReturnType().asReferenceType()).stream())
+                .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .collect(Collectors.toList());
+
+        List<ResolvedReferenceTypeDeclaration> enumTypeList = parentResolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                .filter(resolvedMethodDeclaration -> resolvedMethodDeclaration.getReturnType().isReferenceType())
+                .flatMap(resolvedMethodDeclaration -> resolve(resolvedMethodDeclaration.getReturnType().asReferenceType()).stream())
+                .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .collect(Collectors.toList());
+
+        objectTypeList.stream().map(this::buildObject).map(ObjectType::toString).forEach(manager::mergeDocument);
+        interfaceTypeList.stream().map(this::buildInterface).map(InterfaceType::toString).forEach(manager::mergeDocument);
+        enumTypeList.stream().map(this::buildEnum).map(EnumType::toString).forEach(manager::mergeDocument);
+
+        objectTypeList.forEach(this::registerFields);
+        interfaceTypeList.forEach(this::registerFields);
+    }
+
+    protected Optional<ResolvedReferenceTypeDeclaration> resolve(Type type) {
+        if (type.isArrayType()) {
+            return resolve(type.asArrayType().getElementType());
+        } else if (type.isReferenceType()) {
+            try {
+                ResolvedReferenceType resolvedReferenceType = type.resolve().asReferenceType();
+                return resolve(resolvedReferenceType);
+            } catch (UnsolvedSymbolException e) {
+                Logger.warn(e);
+            }
+        }
+        return Optional.empty();
+    }
+
+    protected Optional<ResolvedReferenceTypeDeclaration> resolve(ResolvedReferenceType resolvedReferenceType) {
+        String qualifiedName = resolvedReferenceType.getQualifiedName();
+        if (qualifiedName.equals(PublisherBuilder.class.getCanonicalName()) ||
+                qualifiedName.equals(Mono.class.getCanonicalName()) ||
+                qualifiedName.equals(Flux.class.getCanonicalName()) ||
+                qualifiedName.equals(Collection.class.getCanonicalName()) ||
+                qualifiedName.equals(List.class.getCanonicalName()) ||
+                qualifiedName.equals(Set.class.getCanonicalName())) {
+            return resolvedReferenceType.typeParametersValues().get(0).asReferenceType().getTypeDeclaration();
+        } else {
+            return resolvedReferenceType.getTypeDeclaration();
+        }
+    }
+
+    protected ObjectType buildObject(ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration) {
+        return new ObjectType()
+                .setName(resolvedReferenceTypeDeclaration.getName())
+                .setFields(
+                        resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                                .map(this::buildField)
+                                .collect(Collectors.toSet())
+                )
+                .addDirective(
+                        new Directive()
+                                .setName(CLASS_INFO_DIRECTIVE_NAME)
+                                .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                )
+                .addDirective(
+                        new Directive()
+                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                );
+    }
+
+    protected InterfaceType buildInterface(ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration) {
+        return new InterfaceType()
+                .setName(resolvedReferenceTypeDeclaration.getName())
+                .setFields(
+                        resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                                .map(this::buildField)
+                                .collect(Collectors.toSet())
+                )
+                .addDirective(
+                        new Directive()
+                                .setName(CLASS_INFO_DIRECTIVE_NAME)
+                                .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                )
+                .addDirective(
+                        new Directive()
+                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
+                );
+    }
+
+    protected EnumType buildEnum(ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration) {
+        return new EnumType()
+                .setName(resolvedReferenceTypeDeclaration.getName())
+                .setEnumValues(
+                        resolvedReferenceTypeDeclaration.asEnum().getEnumConstants().stream()
+                                .map(this::buildEnumValue)
+                                .collect(Collectors.toSet())
+                )
+                .addDirective(
+                        new Directive()
+                                .setName(CLASS_INFO_DIRECTIVE_NAME)
+                                .addArgument("className", resolvedReferenceTypeDeclaration.getQualifiedName())
+                )
+                .addDirective(
+                        new Directive()
+                                .setName(CONTAINER_TYPE_DIRECTIVE_NAME)
                 );
     }
 
@@ -404,6 +428,8 @@ public class BaseTask extends DefaultTask {
         String className = TYPE_NAME_UTIL.getClassName(typeName);
         if (typeName.endsWith("[]")) {
             return "[".concat(getInvokeFieldTypeName(typeName.replace("[]", ""))).concat("]");
+        } else if (className.equals(PublisherBuilder.class.getSimpleName()) || className.equals(Mono.class.getSimpleName())) {
+            return getInvokeFieldTypeName(TYPE_NAME_UTIL.getArgumentTypeName0(typeName));
         } else if (className.equals(Collection.class.getSimpleName()) ||
                 className.equals(List.class.getSimpleName()) ||
                 className.equals(Set.class.getSimpleName()) ||
