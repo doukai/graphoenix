@@ -209,7 +209,7 @@ public class BaseTask extends DefaultTask {
                             String objectName = methodDeclaration.getParameters().stream()
                                     .filter(parameter -> parameter.isAnnotationPresent(Source.class))
                                     .findFirst()
-                                    .orElseThrow(() -> new RuntimeException("@Source annotation not exist"))
+                                    .orElseThrow(() -> new RuntimeException("@Source annotation parameter not exist in " + methodDeclaration.getNameAsString()))
                                     .getType()
                                     .asString();
 
@@ -342,7 +342,7 @@ public class BaseTask extends DefaultTask {
                 qualifiedName.equals(Collection.class.getCanonicalName()) ||
                 qualifiedName.equals(List.class.getCanonicalName()) ||
                 qualifiedName.equals(Set.class.getCanonicalName())) {
-            return resolvedReferenceType.typeParametersValues().get(0).asReferenceType().getTypeDeclaration();
+            return resolve(resolvedReferenceType.typeParametersValues().get(0).asReferenceType());
         } else {
             return resolvedReferenceType.getTypeDeclaration();
         }
