@@ -473,7 +473,7 @@ public class GrpcServiceImplementer {
 
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
                 if (manager.isObject(fieldTypeName)) {
-                    invokeCodeBlock = CodeBlock.of(".map(operationType -> $T.from(Mono.justOrEmpty(operationType.$L())).flatMap($T::fromIterable).flatMap(invokeHandler.get()::$L))",
+                    invokeCodeBlock = CodeBlock.of(".map(operationType -> $T.from(Mono.justOrEmpty(operationType.$L())).flatMap($T::fromIterable).flatMap(item -> invokeHandler.get().$L(item, operationDefinitionContext.selectionSet().selection(0).field().selectionSet())))",
                             ClassName.get(Flux.class),
                             fieldGetterName,
                             ClassName.get(Flux.class),
@@ -502,9 +502,15 @@ public class GrpcServiceImplementer {
                                     CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, rpcHandlerMethodName),
                                     CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
                                     CodeBlock.of(".doOnSuccess(validator.get()::validateOperation)"),
-                                    CodeBlock.of(".flatMap(operationHandler.get()::$L)", operationMethodName),
-                                    CodeBlock.of(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))", operationClass),
-                                    invokeCodeBlock,
+                                    CodeBlock.builder()
+                                            .add(".flatMap(operationDefinitionContext -> \n")
+                                            .indent()
+                                            .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
+                                            .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
+                                            .add(invokeCodeBlock)
+                                            .unindent()
+                                            .add("\n)")
+                                            .build(),
                                     wrapperCodeBlock,
                                     CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
                                             ClassName.get(graphQLConfig.getGrpcPackageName(), rpcResponseClassName),
@@ -518,9 +524,15 @@ public class GrpcServiceImplementer {
                             List.of(
                                     CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, rpcHandlerMethodName),
                                     CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
-                                    CodeBlock.of(".flatMap(operationHandler.get()::$L)", operationMethodName),
-                                    CodeBlock.of(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))", operationClass),
-                                    invokeCodeBlock,
+                                    CodeBlock.builder()
+                                            .add(".flatMap(operationDefinitionContext -> \n")
+                                            .indent()
+                                            .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
+                                            .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
+                                            .add(invokeCodeBlock)
+                                            .unindent()
+                                            .add("\n)")
+                                            .build(),
                                     wrapperCodeBlock,
                                     CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
                                             ClassName.get(graphQLConfig.getGrpcPackageName(), rpcResponseClassName),
@@ -532,7 +544,7 @@ public class GrpcServiceImplementer {
                 }
             } else {
                 if (manager.isObject(fieldTypeName)) {
-                    invokeCodeBlock = CodeBlock.of(".flatMap(operationType -> invokeHandler.get().$L(operationType.$L()))",
+                    invokeCodeBlock = CodeBlock.of(".flatMap(operationType -> invokeHandler.get().$L(operationType.$L(), operationDefinitionContext.selectionSet().selection(0).field().selectionSet()))",
                             typeInvokeMethodName,
                             fieldGetterName
                     );
@@ -558,10 +570,16 @@ public class GrpcServiceImplementer {
                             List.of(
                                     CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, rpcHandlerMethodName),
                                     CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
-                                    CodeBlock.of(".doOnSuccess(validator.get()::validateOperation)"),
-                                    CodeBlock.of(".flatMap(operationHandler.get()::$L)", operationMethodName),
-                                    CodeBlock.of(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))", operationClass),
-                                    invokeCodeBlock,
+                                    CodeBlock.of(".doOnNext(validator.get()::validateOperation)"),
+                                    CodeBlock.builder()
+                                            .add(".flatMap(operationDefinitionContext -> \n")
+                                            .indent()
+                                            .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
+                                            .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
+                                            .add(invokeCodeBlock)
+                                            .unindent()
+                                            .add("\n)")
+                                            .build(),
                                     wrapperCodeBlock,
                                     CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
                                             ClassName.get(graphQLConfig.getGrpcPackageName(), rpcResponseClassName),
@@ -575,9 +593,15 @@ public class GrpcServiceImplementer {
                             List.of(
                                     CodeBlock.of("return $L.map(requestHandler.get()::$L)", requestParameterName, rpcHandlerMethodName),
                                     CodeBlock.of(".map($T.DOCUMENT_UTIL::graphqlToOperation)", ClassName.get(DocumentUtil.class)),
-                                    CodeBlock.of(".flatMap(operationHandler.get()::$L)", operationMethodName),
-                                    CodeBlock.of(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))", operationClass),
-                                    invokeCodeBlock,
+                                    CodeBlock.builder()
+                                            .add(".flatMap(operationDefinitionContext -> \n")
+                                            .indent()
+                                            .add("operationHandler.get().$L(operationDefinitionContext)\n", operationMethodName)
+                                            .add(".map(jsonString -> jsonb.get().fromJson(jsonString, $T.class))\n", operationClass)
+                                            .add(invokeCodeBlock)
+                                            .unindent()
+                                            .add("\n)")
+                                            .build(),
                                     wrapperCodeBlock,
                                     CodeBlock.of(".map(result -> $T.newBuilder().$L(result).build())",
                                             ClassName.get(graphQLConfig.getGrpcPackageName(), rpcResponseClassName),
