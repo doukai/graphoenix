@@ -1,20 +1,30 @@
 package io.graphoenix.gradle.task;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.expr.AnnotationExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.ResolvedEnumConstantDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserClassDeclaration;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserEnumDeclaration;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserInterfaceDeclaration;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ClassLoaderTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.utils.SourceRoot;
 import com.google.common.base.CaseFormat;
+import com.google.common.base.Strings;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
@@ -32,7 +42,10 @@ import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
-import org.eclipse.microprofile.graphql.*;
+import org.eclipse.microprofile.graphql.GraphQLApi;
+import org.eclipse.microprofile.graphql.Mutation;
+import org.eclipse.microprofile.graphql.Query;
+import org.eclipse.microprofile.graphql.Source;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.plugins.JavaPluginConvention;
@@ -63,8 +76,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.BYTE;
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.CHAR;
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.DOUBLE;
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.FLOAT;
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.INT;
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.LONG;
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.SHORT;
 import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
+import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
@@ -169,6 +190,7 @@ public class BaseTask extends DefaultTask {
                 .flatMap(methodDeclaration -> resolve(methodDeclaration.getType()).stream())
                 .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()))
                 .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> manager.getObject(findTypeName(resolvedReferenceTypeDeclaration)).isEmpty())
                 .collect(Collectors.toList());
 
         List<ResolvedReferenceTypeDeclaration> interfaceTypeList = compilations.stream()
@@ -177,6 +199,7 @@ public class BaseTask extends DefaultTask {
                 .flatMap(methodDeclaration -> resolve(methodDeclaration.getType()).stream())
                 .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName()))
                 .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> manager.getInterface(findTypeName(resolvedReferenceTypeDeclaration)).isEmpty())
                 .collect(Collectors.toList());
 
         List<ResolvedReferenceTypeDeclaration> enumTypeList = compilations.stream()
@@ -185,6 +208,7 @@ public class BaseTask extends DefaultTask {
                 .flatMap(methodDeclaration -> resolve(methodDeclaration.getType()).stream())
                 .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName()))
                 .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> manager.getEnum(findTypeName(resolvedReferenceTypeDeclaration)).isEmpty())
                 .collect(Collectors.toList());
 
         objectTypeList.stream().map(this::buildObject).map(ObjectType::toString).forEach(manager::mergeDocument);
@@ -218,7 +242,7 @@ public class BaseTask extends DefaultTask {
                                     .addField(
                                             new Field()
                                                     .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType().asString()))
+                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                     .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
                                     );
                             manager.mergeDocument(objectType.toString());
@@ -242,13 +266,13 @@ public class BaseTask extends DefaultTask {
                                     .addField(
                                             new Field()
                                                     .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType().asString()))
+                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                     .setArguments(
                                                             methodDeclaration.getParameters().stream()
                                                                     .map(parameter ->
                                                                             new InputValue()
                                                                                     .setName(parameter.getName().getIdentifier())
-                                                                                    .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
+                                                                                    .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
                                                                     .collect(Collectors.toCollection(LinkedHashSet::new))
                                                     )
                                                     .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
@@ -274,13 +298,13 @@ public class BaseTask extends DefaultTask {
                                     .addField(
                                             new Field()
                                                     .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
-                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType().asString()))
+                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                     .setArguments(
                                                             methodDeclaration.getParameters().stream()
                                                                     .map(parameter ->
                                                                             new InputValue()
                                                                                     .setName(parameter.getName().getIdentifier())
-                                                                                    .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType().asString())))
+                                                                                    .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
                                                                     .collect(Collectors.toCollection(LinkedHashSet::new))
                                                     )
                                                     .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
@@ -296,6 +320,7 @@ public class BaseTask extends DefaultTask {
                 .flatMap(resolvedMethodDeclaration -> resolve(resolvedMethodDeclaration.getReturnType().asReferenceType()).stream())
                 .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Type.class.getCanonicalName()))
                 .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> manager.getObject(findTypeName(resolvedReferenceTypeDeclaration)).isEmpty())
                 .collect(Collectors.toList());
 
         List<ResolvedReferenceTypeDeclaration> interfaceTypeList = parentResolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
@@ -303,6 +328,7 @@ public class BaseTask extends DefaultTask {
                 .flatMap(resolvedMethodDeclaration -> resolve(resolvedMethodDeclaration.getReturnType().asReferenceType()).stream())
                 .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Interface.class.getCanonicalName()))
                 .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> manager.getInterface(findTypeName(resolvedReferenceTypeDeclaration)).isEmpty())
                 .collect(Collectors.toList());
 
         List<ResolvedReferenceTypeDeclaration> enumTypeList = parentResolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
@@ -310,6 +336,7 @@ public class BaseTask extends DefaultTask {
                 .flatMap(resolvedMethodDeclaration -> resolve(resolvedMethodDeclaration.getReturnType().asReferenceType()).stream())
                 .filter(resolvedReferenceTypeDeclaration -> resolvedReferenceTypeDeclaration.hasAnnotation(org.eclipse.microprofile.graphql.Enum.class.getCanonicalName()))
                 .filter(resolvedReferenceTypeDeclaration -> !resolvedReferenceTypeDeclaration.hasAnnotation(Ignore.class.getCanonicalName()))
+                .filter(resolvedReferenceTypeDeclaration -> manager.getEnum(findTypeName(resolvedReferenceTypeDeclaration)).isEmpty())
                 .collect(Collectors.toList());
 
         objectTypeList.stream().map(this::buildObject).map(ObjectType::toString).forEach(manager::mergeDocument);
@@ -350,9 +377,10 @@ public class BaseTask extends DefaultTask {
 
     protected ObjectType buildObject(ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration) {
         return new ObjectType()
-                .setName(resolvedReferenceTypeDeclaration.getName())
+                .setName(findTypeName(resolvedReferenceTypeDeclaration))
                 .setFields(
                         resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                                .filter(resolvedMethodDeclaration -> !resolvedMethodDeclaration.getReturnType().isVoid())
                                 .map(this::buildField)
                                 .collect(Collectors.toSet())
                 )
@@ -369,9 +397,10 @@ public class BaseTask extends DefaultTask {
 
     protected InterfaceType buildInterface(ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration) {
         return new InterfaceType()
-                .setName(resolvedReferenceTypeDeclaration.getName())
+                .setName(findTypeName(resolvedReferenceTypeDeclaration))
                 .setFields(
                         resolvedReferenceTypeDeclaration.getDeclaredMethods().stream()
+                                .filter(resolvedMethodDeclaration -> !resolvedMethodDeclaration.getReturnType().isVoid())
                                 .map(this::buildField)
                                 .collect(Collectors.toSet())
                 )
@@ -388,7 +417,7 @@ public class BaseTask extends DefaultTask {
 
     protected EnumType buildEnum(ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration) {
         return new EnumType()
-                .setName(resolvedReferenceTypeDeclaration.getName())
+                .setName(findTypeName(resolvedReferenceTypeDeclaration))
                 .setEnumValues(
                         resolvedReferenceTypeDeclaration.asEnum().getEnumConstants().stream()
                                 .map(this::buildEnumValue)
@@ -405,9 +434,50 @@ public class BaseTask extends DefaultTask {
                 );
     }
 
+    protected String findTypeName(ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration) {
+        if (resolvedReferenceTypeDeclaration instanceof JavaParserClassDeclaration) {
+            return ((JavaParserClassDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Name.class)
+                    .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                    .filter(name -> !Strings.isNullOrEmpty(name))
+                    .orElseGet(() -> ((JavaParserClassDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Type.class)
+                            .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                            .filter(name -> !Strings.isNullOrEmpty(name))
+                            .orElse(resolvedReferenceTypeDeclaration.getName()));
+        } else if (resolvedReferenceTypeDeclaration instanceof JavaParserInterfaceDeclaration) {
+            return ((JavaParserInterfaceDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Name.class)
+                    .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                    .filter(name -> !Strings.isNullOrEmpty(name))
+                    .orElseGet(() -> ((JavaParserInterfaceDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Interface.class)
+                            .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                            .filter(name -> !Strings.isNullOrEmpty(name))
+                            .orElse(resolvedReferenceTypeDeclaration.getName()));
+        } else if (resolvedReferenceTypeDeclaration instanceof JavaParserEnumDeclaration) {
+            return ((JavaParserEnumDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Name.class)
+                    .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                    .filter(name -> !Strings.isNullOrEmpty(name))
+                    .orElseGet(() -> ((JavaParserEnumDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Enum.class)
+                            .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                            .filter(name -> !Strings.isNullOrEmpty(name))
+                            .orElse(resolvedReferenceTypeDeclaration.getName()));
+        }
+        return resolvedReferenceTypeDeclaration.getName();
+    }
+
+    protected Optional<Expression> findAnnotationValueException(AnnotationExpr annotationExpr) {
+        if (annotationExpr.isSingleMemberAnnotationExpr()) {
+            return Optional.of(annotationExpr.asSingleMemberAnnotationExpr().getMemberValue());
+        } else if (annotationExpr.isNormalAnnotationExpr()) {
+            return annotationExpr.asNormalAnnotationExpr().getPairs().stream()
+                    .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
+                    .findFirst()
+                    .map(MemberValuePair::getValue);
+        }
+        return Optional.empty();
+    }
+
     protected Field buildField(ResolvedMethodDeclaration resolvedMethodDeclaration) {
         return new Field(getInvokeFieldName(resolvedMethodDeclaration.getName()))
-                .setTypeName(getInvokeFieldTypeName(resolvedMethodDeclaration.getReturnType().toString()));
+                .setTypeName(getInvokeFieldTypeName(resolvedMethodDeclaration.getReturnType()));
     }
 
     protected EnumValue buildEnumValue(ResolvedEnumConstantDeclaration resolvedEnumConstantDeclaration) {
@@ -422,6 +492,34 @@ public class BaseTask extends DefaultTask {
         } else {
             return methodName;
         }
+    }
+
+    private String getInvokeFieldTypeName(Type type) {
+        if (type.isArrayType()) {
+            return "[".concat(getInvokeFieldTypeName(type.asArrayType().getComponentType())).concat("]");
+        } else if (type.isPrimitiveType()) {
+            if (type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.SHORT) ||
+                    type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.INT) ||
+                    type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.LONG)) {
+                return "Int";
+            } else if (type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.FLOAT) ||
+                    type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.DOUBLE)) {
+                return "Float";
+            } else if (type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.CHAR) ||
+                    type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.BYTE)) {
+                return "String";
+            } else if (type.asPrimitiveType().getType().equals(PrimitiveType.Primitive.DOUBLE)) {
+                return "Boolean";
+            }
+        } else if (type.isReferenceType()) {
+            try {
+                ResolvedReferenceType resolvedReferenceType = type.resolve().asReferenceType();
+                return getInvokeFieldTypeName(resolvedReferenceType);
+            } catch (UnsolvedSymbolException e) {
+                return getInvokeFieldTypeName(type.toString());
+            }
+        }
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(type.toString()));
     }
 
     private String getInvokeFieldTypeName(String typeName) {
@@ -469,11 +567,72 @@ public class BaseTask extends DefaultTask {
         }
     }
 
-    private String getInvokeFieldArgumentTypeName(String className) {
-        String invokeFieldTypeName = getInvokeFieldTypeName(className);
+    private String getInvokeFieldArgumentTypeName(Type type) {
+        String invokeFieldTypeName = getInvokeFieldTypeName(type);
         if (manager.isObject(invokeFieldTypeName)) {
             return invokeFieldTypeName.concat("Input");
         }
         return invokeFieldTypeName;
+    }
+
+    private String getInvokeFieldTypeName(ResolvedType resolvedType) {
+        if (resolvedType.isArray()) {
+            return "[".concat(getInvokeFieldTypeName(resolvedType.asArrayType().getComponentType())).concat("]");
+        } else if (resolvedType.isPrimitive()) {
+            return getInvokeFieldTypeName(resolvedType.asPrimitive());
+        } else if (resolvedType.isReferenceType()) {
+            return getInvokeFieldTypeName(resolvedType.asReferenceType());
+        }
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(resolvedType.toString()));
+    }
+
+    private String getInvokeFieldTypeName(ResolvedPrimitiveType resolvedPrimitiveType) {
+        if (resolvedPrimitiveType.in(SHORT, INT, LONG)) {
+            return "Int";
+        } else if (resolvedPrimitiveType.in(FLOAT, DOUBLE)) {
+            return "Float";
+        } else if (resolvedPrimitiveType.in(BYTE, CHAR)) {
+            return "String";
+        } else if (resolvedPrimitiveType.isBoolean()) {
+            return "Boolean";
+        }
+        throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(resolvedPrimitiveType.toString()));
+    }
+
+    private String getInvokeFieldTypeName(ResolvedReferenceType resolvedReferenceType) {
+        if (resolvedReferenceType.getQualifiedName().equals(PublisherBuilder.class.getCanonicalName()) ||
+                resolvedReferenceType.getQualifiedName().equals(Mono.class.getCanonicalName())) {
+            return getInvokeFieldTypeName(resolvedReferenceType.typeParametersValues().get(0).asReferenceType());
+        } else if (resolvedReferenceType.getQualifiedName().equals(Collection.class.getCanonicalName()) ||
+                resolvedReferenceType.getQualifiedName().equals(List.class.getCanonicalName()) ||
+                resolvedReferenceType.getQualifiedName().equals(Set.class.getCanonicalName()) ||
+                resolvedReferenceType.getQualifiedName().equals(Flux.class.getCanonicalName())) {
+            return "[".concat(getInvokeFieldTypeName(resolvedReferenceType.typeParametersValues().get(0).asReferenceType())).concat("]");
+        } else if (resolvedReferenceType.getQualifiedName().equals(Integer.class.getCanonicalName()) ||
+                resolvedReferenceType.getQualifiedName().equals(Short.class.getCanonicalName()) ||
+                resolvedReferenceType.getQualifiedName().equals(Byte.class.getCanonicalName())) {
+            return "Int";
+        } else if (resolvedReferenceType.getQualifiedName().equals(Float.class.getCanonicalName()) ||
+                resolvedReferenceType.getQualifiedName().equals(Double.class.getCanonicalName())) {
+            return "Float";
+        } else if (resolvedReferenceType.getQualifiedName().equals(String.class.getCanonicalName()) ||
+                resolvedReferenceType.getQualifiedName().equals(Character.class.getCanonicalName())) {
+            return "String";
+        } else if (resolvedReferenceType.getQualifiedName().equals(Boolean.class.getCanonicalName())) {
+            return "Boolean";
+        } else if (resolvedReferenceType.getQualifiedName().equals(BigInteger.class.getCanonicalName())) {
+            return "BigInteger";
+        } else if (resolvedReferenceType.getQualifiedName().equals(BigDecimal.class.getCanonicalName())) {
+            return "BigDecimal";
+        } else if (resolvedReferenceType.getQualifiedName().equals(LocalDate.class.getCanonicalName())) {
+            return "Date";
+        } else if (resolvedReferenceType.getQualifiedName().equals(LocalTime.class.getCanonicalName())) {
+            return "Time";
+        } else if (resolvedReferenceType.getQualifiedName().equals(LocalDateTime.class.getCanonicalName())) {
+            return "DateTime";
+        } else {
+            return resolvedReferenceType.getTypeDeclaration().map(this::findTypeName)
+                    .orElseGet(() -> resolvedReferenceType.getQualifiedName().substring(resolvedReferenceType.getQualifiedName().lastIndexOf(".") + 1));
+        }
     }
 }

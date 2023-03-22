@@ -2,7 +2,7 @@ package io.graphoenix.showcase.mysql.api;
 
 import org.eclipse.microprofile.graphql.Type;
 
-@Type
+@Type("ContainerType1")
 public class ContainerType {
 
     private String name;

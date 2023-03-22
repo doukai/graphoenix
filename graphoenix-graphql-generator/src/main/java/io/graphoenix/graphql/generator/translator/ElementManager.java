@@ -1,6 +1,7 @@
 package io.graphoenix.graphql.generator.translator;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.base.Strings;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrors;
@@ -11,10 +12,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.DefaultValue;
 import org.eclipse.microprofile.graphql.Description;
+import org.eclipse.microprofile.graphql.Enum;
 import org.eclipse.microprofile.graphql.Id;
+import org.eclipse.microprofile.graphql.Input;
+import org.eclipse.microprofile.graphql.Interface;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Source;
+import org.eclipse.microprofile.graphql.Type;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -89,9 +94,21 @@ public class ElementManager {
     }
 
     public String getNameFromElement(Element element) {
-        Name name = element.getAnnotation(Name.class);
-        if (name != null) {
-            return name.value();
+        Name nameAnnotation = element.getAnnotation(Name.class);
+        Type typeAnnotation = element.getAnnotation(Type.class);
+        Enum enumAnnotation = element.getAnnotation(Enum.class);
+        Interface interfaceAnnotation = element.getAnnotation(Interface.class);
+        Input inputAnnotation = element.getAnnotation(Input.class);
+        if (nameAnnotation != null && !Strings.isNullOrEmpty(nameAnnotation.value())) {
+            return nameAnnotation.value();
+        } else if (typeAnnotation != null && !Strings.isNullOrEmpty(typeAnnotation.value())) {
+            return typeAnnotation.value();
+        } else if (enumAnnotation != null && !Strings.isNullOrEmpty(enumAnnotation.value())) {
+            return enumAnnotation.value();
+        } else if (interfaceAnnotation != null && !Strings.isNullOrEmpty(interfaceAnnotation.value())) {
+            return interfaceAnnotation.value();
+        } else if (inputAnnotation != null && !Strings.isNullOrEmpty(inputAnnotation.value())) {
+            return inputAnnotation.value();
         } else {
             if (element.getSimpleName().toString().startsWith("get")) {
                 return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, element.getSimpleName().toString().replaceFirst("get", ""));
@@ -198,7 +215,7 @@ public class ElementManager {
                 typeMirrorName.equals(Set.class.getCanonicalName())) {
             typeName = "[".concat(elementToTypeName(element, ((DeclaredType) typeMirror).getTypeArguments().get(0), types)).concat("]");
         } else {
-            typeName = types.asElement(typeMirror).getSimpleName().toString();
+            typeName = getNameFromElement(types.asElement(typeMirror));
         }
 
         if (element.getAnnotation(NonNull.class) != null) {
@@ -253,7 +270,7 @@ public class ElementManager {
         } else if (typeMirrorName.equals(LocalDateTime.class.getCanonicalName())) {
             typeName = "DateTime";
         } else if (types.asElement(typeMirror).getKind().equals(ElementKind.ENUM)) {
-            typeName = types.asElement(typeMirror).getSimpleName().toString();
+            typeName = getNameFromElement(types.asElement(typeMirror));
         } else if (typeMirrorName.equals(Collection.class.getCanonicalName()) ||
                 typeMirrorName.equals(List.class.getCanonicalName()) ||
                 typeMirrorName.equals(Set.class.getCanonicalName())) {
@@ -267,9 +284,9 @@ public class ElementManager {
             }
         } else {
             if (typeMirrorName.endsWith(INPUT_SUFFIX)) {
-                typeName = types.asElement(typeMirror).getSimpleName().toString();
+                typeName = getNameFromElement(types.asElement(typeMirror));
             } else {
-                typeName = types.asElement(typeMirror).getSimpleName().toString().concat(INPUT_SUFFIX);
+                typeName = getNameFromElement(types.asElement(typeMirror)).concat(INPUT_SUFFIX);
             }
         }
 
