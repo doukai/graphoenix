@@ -261,15 +261,16 @@ public class MutationHandlerBuilder {
         MethodSpec.Builder builder = MethodSpec.methodBuilder("handle")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinition")
-                .addParameter(ClassName.get(MutationDataLoader.class), "loader")
-                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Operation.class)));
+                .addParameter(ClassName.get(MutationDataLoader.class), "loader");
 
         if (anchor) {
             builder.addStatement("$T operation = new $T(operationDefinition)", ClassName.get(Operation.class), ClassName.get(Operation.class))
-                    .addStatement("$T operationArguments = loader.buildOperationArguments(operation)", ClassName.get(JsonObject.class));
+                    .addStatement("$T operationArguments = loader.buildOperationArguments(operation)", ClassName.get(JsonObject.class))
+                    .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(Operation.class)));
         } else {
             builder.addParameter(ClassName.get(Operation.class), "operation")
-                    .addParameter(ClassName.get(JsonValue.class), "jsonValue");
+                    .addParameter(ClassName.get(JsonValue.class), "jsonValue")
+                    .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonObject.class)));
         }
         builder.beginControlFlow("for ($T selectionContext : operationDefinition.selectionSet().selection()) ", ClassName.get(GraphqlParser.SelectionContext.class))
                 .addStatement("$T selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText()", ClassName.get(String.class));
@@ -301,7 +302,7 @@ public class MutationHandlerBuilder {
         if (anchor) {
             builder.addStatement("return loader.backup().then(loader.load(operationArguments)).map(jsonValue -> loader.dispatchOperationArguments(jsonValue, operation))");
         } else {
-            builder.addStatement("return loader.load().thenReturn(operation)");
+            builder.addStatement("return loader.load().thenReturn(jsonValue.asJsonObject())");
         }
         return builder.build();
     }

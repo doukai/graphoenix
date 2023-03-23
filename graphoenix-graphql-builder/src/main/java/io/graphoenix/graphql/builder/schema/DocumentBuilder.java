@@ -72,14 +72,25 @@ public class DocumentBuilder {
         mapper.registerFieldMaps();
     }
 
-    public void build() throws IOException {
+    public void build() {
         manager.getObjects()
                 .filter(manager::isNotContainerType)
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
 
-        ObjectType queryType = new ObjectType().setName(QUERY_TYPE_NAME).addFields(buildQueryTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
-        ObjectType mutationType = new ObjectType().setName(MUTATION_TYPE_NAME).addFields(buildMutationTypeFields()).addInterface(META_INTERFACE_NAME).addFields(getMetaInterfaceFields());
+        ObjectType queryType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
+                .map(this::buildObject)
+                .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME))
+                .addFields(buildQueryTypeFields())
+                .addInterface(META_INTERFACE_NAME)
+                .addFields(getMetaInterfaceFields());
+
+        ObjectType mutationType = manager.getObject(manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME))
+                .map(this::buildObject)
+                .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME))
+                .addFields(buildMutationTypeFields())
+                .addInterface(META_INTERFACE_NAME)
+                .addFields(getMetaInterfaceFields());
 
         manager.registerGraphQL(queryType.toString());
         manager.registerGraphQL(mutationType.toString());
@@ -90,7 +101,7 @@ public class DocumentBuilder {
         mapper.registerFieldMaps();
     }
 
-    public Document buildDocument() throws IOException {
+    public Document buildDocument() {
         build();
         Document document = getDocument();
         Logger.info("document build success");

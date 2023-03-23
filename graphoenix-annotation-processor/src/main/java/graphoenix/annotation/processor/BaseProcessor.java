@@ -103,18 +103,18 @@ public abstract class BaseProcessor extends AbstractProcessor {
         roundEnv.getElementsAnnotatedWith(Enum.class).stream()
                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.ENUM))
-                .forEach(element -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) element).toString()));
+                .forEach(element -> manager.mergeDocument(javaElementToEnum.buildEnum((TypeElement) element).toString()));
 
         roundEnv.getElementsAnnotatedWith(Interface.class).stream()
                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
                 .forEach(element -> {
-                            manager.registerGraphQL(javaElementToInterface.buildInterface((TypeElement) element, typeUtils).toString());
+                            manager.mergeDocument(javaElementToInterface.buildInterface((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
                                     .filter(subElement -> subElement.getAnnotation(Ignore.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
-                                    .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
+                                    .forEach(subElement -> manager.mergeDocument(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
                         }
                 );
 
@@ -122,12 +122,12 @@ public abstract class BaseProcessor extends AbstractProcessor {
                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> {
-                            manager.registerGraphQL(javaElementToObject.buildObject((TypeElement) element, typeUtils).toString());
+                            manager.mergeDocument(javaElementToObject.buildObject((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
                                     .filter(subElement -> subElement.getAnnotation(Ignore.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
-                                    .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
+                                    .forEach(subElement -> manager.mergeDocument(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
                         }
                 );
 
@@ -135,12 +135,12 @@ public abstract class BaseProcessor extends AbstractProcessor {
                 .filter(element -> element.getAnnotation(Ignore.class) == null)
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(element -> {
-                            manager.registerGraphQL(javaElementToInputType.buildInputType((TypeElement) element, typeUtils).toString());
+                            manager.mergeDocument(javaElementToInputType.buildInputType((TypeElement) element, typeUtils).toString());
                             element.getEnclosedElements().stream()
                                     .filter(subElement -> subElement.getAnnotation(Ignore.class) == null)
                                     .filter(subElement -> subElement.getAnnotation(Enum.class) != null)
                                     .filter(subElement -> subElement.getKind().equals(ElementKind.ENUM))
-                                    .forEach(subElement -> manager.registerGraphQL(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
+                                    .forEach(subElement -> manager.mergeDocument(javaElementToEnum.buildEnum((TypeElement) subElement).toString()));
                         }
                 );
 
@@ -153,22 +153,22 @@ public abstract class BaseProcessor extends AbstractProcessor {
         element.getEnclosedElements()
                 .forEach(subElement -> {
                             if (subElement.getAnnotation(Query.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                                ObjectType objectType = manager.getQueryOperationTypeName().flatMap(name -> manager.getObject(name))
+                                ObjectType objectType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
                                         .map(objectTypeDefinitionContext -> documentBuilder.buildObject(objectTypeDefinitionContext))
                                         .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME));
                                 objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
-                                manager.registerGraphQL(objectType.toString());
+                                manager.mergeDocument(objectType.toString());
                             } else if (subElement.getAnnotation(Mutation.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
-                                ObjectType objectType = manager.getMutationOperationTypeName().flatMap(name -> manager.getObject(name))
+                                ObjectType objectType = manager.getObject(manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME))
                                         .map(objectTypeDefinitionContext -> documentBuilder.buildObject(objectTypeDefinitionContext))
                                         .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME));
                                 objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
-                                manager.registerGraphQL(objectType.toString());
+                                manager.mergeDocument(objectType.toString());
                             } else if (subElement.getKind().equals(ElementKind.METHOD) && ((ExecutableElement) subElement).getParameters().stream().anyMatch(variableElement -> variableElement.getAnnotation(Source.class) != null)) {
                                 Tuple2<String, Field> objectField = graphQLApiBuilder.variableElementToObjectField((ExecutableElement) subElement, typeUtils);
                                 GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectField._1()).orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.TYPE_NOT_EXIST.bind(objectField._1())));
                                 ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext).addField(objectField._2());
-                                manager.registerGraphQL(objectType.toString());
+                                manager.mergeDocument(objectType.toString());
                             }
                         }
                 );

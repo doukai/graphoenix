@@ -73,7 +73,7 @@ public class GrpcObjectHandlerBuilder {
 
     private MethodSpec buildTypeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         String objectParameterName = grpcNameUtil.getLowerCamelName(objectTypeDefinitionContext);
-        String rpcObjectName = grpcNameUtil.getGrpcTypeName(objectTypeDefinitionContext);
+        String grpcTypeName = grpcNameUtil.getGrpcTypeName(objectTypeDefinitionContext);
 
         ClassName className = manager.getClassName(objectTypeDefinitionContext)
                 .map(TYPE_NAME_UTIL::bestGuess)
@@ -81,11 +81,11 @@ public class GrpcObjectHandlerBuilder {
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), rpcObjectName))
+                .returns(ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), grpcTypeName))
                 .addParameter(className, objectParameterName)
                 .addStatement("$T builder = $T.newBuilder()",
-                        ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), rpcObjectName, "Builder"),
-                        ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), rpcObjectName)
+                        ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), grpcTypeName, "Builder"),
+                        ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), grpcTypeName)
                 );
 
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
@@ -98,25 +98,25 @@ public class GrpcObjectHandlerBuilder {
             String objectFieldMethodName = grpcNameUtil.getLowerCamelName(fieldDefinitionContext.type());
             CodeBlock codeBlock;
             if (manager.fieldTypeIsList(fieldDefinitionContext.type())) {
-                String rpcFieldAddAllName = grpcNameUtil.getGrpcAddAllMethodName(fieldDefinitionContext);
+                String grpcAddAllMethodName = grpcNameUtil.getGrpcAddAllMethodName(fieldDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
                     if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
                         codeBlock = CodeBlock.of("builder.$L($L.$L().stream().map(item -> $T.CODEC_UTIL.encode(item)).collect($T.toList()))",
-                                rpcFieldAddAllName,
+                                grpcAddAllMethodName,
                                 objectParameterName,
                                 fieldGetterName,
                                 ClassName.get(CodecUtil.class)
                         );
                     } else {
                         codeBlock = CodeBlock.of("builder.$L($L.$L())",
-                                rpcFieldAddAllName,
+                                grpcAddAllMethodName,
                                 objectParameterName,
                                 fieldGetterName
                         );
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
                     codeBlock = CodeBlock.of("builder.$L($L.$L().stream().map(item -> $T.forNumber(item.ordinal())).collect($T.toList()))",
-                            rpcFieldAddAllName,
+                            grpcAddAllMethodName,
                             objectParameterName,
                             fieldGetterName,
                             ClassName.get(graphQLConfig.getGrpcEnumTypePackageName(), fieldRpcObjectName),
@@ -124,7 +124,7 @@ public class GrpcObjectHandlerBuilder {
                     );
                 } else if (manager.isObject(fieldTypeName)) {
                     codeBlock = CodeBlock.of("builder.$L($L.$L().stream().map(this::$L).collect($T.toList()))",
-                            rpcFieldAddAllName,
+                            grpcAddAllMethodName,
                             objectParameterName,
                             fieldGetterName,
                             objectFieldMethodName,
@@ -133,33 +133,39 @@ public class GrpcObjectHandlerBuilder {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
+                if (fieldDefinitionContext.type().nonNullType() != null) {
+                    builder.addStatement("assert $L.$L() != null && $L.$L().size() > 0", objectParameterName, fieldGetterName, objectParameterName, fieldGetterName)
+                            .addStatement(codeBlock);
+                } else {
+                    builder.addStatement(codeBlock);
+                }
             } else {
-                String rpcFieldSetterName = grpcNameUtil.getGrpcSetMethodName(fieldDefinitionContext);
+                String grpcSetMethodName = grpcNameUtil.getGrpcSetMethodName(fieldDefinitionContext);
                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
                     if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
                         codeBlock = CodeBlock.of("builder.$L($T.CODEC_UTIL.encode($L.$L()))",
-                                rpcFieldSetterName,
+                                grpcSetMethodName,
                                 ClassName.get(CodecUtil.class),
                                 objectParameterName,
                                 fieldGetterName
                         );
                     } else {
                         codeBlock = CodeBlock.of("builder.$L($L.$L())",
-                                rpcFieldSetterName,
+                                grpcSetMethodName,
                                 objectParameterName,
                                 fieldGetterName
                         );
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
                     codeBlock = CodeBlock.of("builder.$L($T.forNumber($L.$L().ordinal()))",
-                            rpcFieldSetterName,
+                            grpcSetMethodName,
                             ClassName.get(graphQLConfig.getGrpcEnumTypePackageName(), fieldRpcObjectName),
                             objectParameterName,
                             fieldGetterName
                     );
                 } else if (manager.isObject(fieldTypeName)) {
                     codeBlock = CodeBlock.of("builder.$L($L($L.$L()))",
-                            rpcFieldSetterName,
+                            grpcSetMethodName,
                             objectFieldMethodName,
                             objectParameterName,
                             fieldGetterName
@@ -167,13 +173,12 @@ public class GrpcObjectHandlerBuilder {
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-            }
-            if (fieldDefinitionContext.type().nonNullType() != null) {
-                builder.beginControlFlow("if($L.$L() != null)", objectParameterName, fieldGetterName)
-                        .addStatement(codeBlock)
-                        .endControlFlow();
-            } else {
-                builder.addStatement(codeBlock);
+                if (fieldDefinitionContext.type().nonNullType() != null) {
+                    builder.addStatement("assert $L.$L() != null", objectParameterName, fieldGetterName)
+                            .addStatement(codeBlock);
+                } else {
+                    builder.addStatement(codeBlock);
+                }
             }
         }
         builder.addStatement("return builder.build()");

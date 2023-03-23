@@ -12,6 +12,24 @@ import "query_requests.proto";
 import "query_response.proto";
 
 service QueryTypeService {
+    rpc UserDetail (QueryUserDetailRequest) returns (QueryUserDetailResponse);
+    rpc UserDetail6 (QueryUserDetail6Request) returns (QueryUserDetail6Response);
+    rpc OrgLevel (QueryOrgLevelRequest) returns (QueryOrgLevelResponse);
+    rpc RoleDisable2 (QueryRoleDisable2Request) returns (QueryRoleDisable2Response);
+    rpc OrgLevel5 (QueryOrgLevel5Request) returns (QueryOrgLevel5Response);
+    rpc UserByOrg2 (QueryUserByOrg2Request) returns (QueryUserByOrg2Response);
+    rpc Parent2 (QueryParent2Request) returns (QueryParent2Response);
+    rpc FindRole2 (QueryFindRole2Request) returns (QueryFindRole2Response);
+    rpc FindContainerType (QueryFindContainerTypeRequest) returns (QueryFindContainerTypeResponse);
+    rpc IsDeprecated (QueryIsDeprecatedRequest) returns (QueryIsDeprecatedResponse);
+    rpc Version (QueryVersionRequest) returns (QueryVersionResponse);
+    rpc RealmId (QueryRealmIdRequest) returns (QueryRealmIdResponse);
+    rpc CreateUserId (QueryCreateUserIdRequest) returns (QueryCreateUserIdResponse);
+    rpc CreateTime (QueryCreateTimeRequest) returns (QueryCreateTimeResponse);
+    rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
+    rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
+    rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
+    rpc IntroTypename (QueryIntroTypenameRequest) returns (QueryIntroTypenameResponse);
     rpc User (QueryUserRequest) returns (QueryUserResponse);
     rpc UserList (QueryUserListRequest) returns (QueryUserListResponse);
     rpc UserConnection (QueryUserConnectionRequest) returns (QueryUserConnectionResponse);
@@ -66,12 +84,4 @@ service QueryTypeService {
     rpc IntroDirectiveLocations (QueryIntroDirectiveLocationsRequest) returns (QueryIntroDirectiveLocationsResponse);
     rpc IntroDirectiveLocationsList (QueryIntroDirectiveLocationsListRequest) returns (QueryIntroDirectiveLocationsListResponse);
     rpc IntroDirectiveLocationsConnection (QueryIntroDirectiveLocationsConnectionRequest) returns (QueryIntroDirectiveLocationsConnectionResponse);
-    rpc IsDeprecated (QueryIsDeprecatedRequest) returns (QueryIsDeprecatedResponse);
-    rpc Version (QueryVersionRequest) returns (QueryVersionResponse);
-    rpc RealmId (QueryRealmIdRequest) returns (QueryRealmIdResponse);
-    rpc CreateUserId (QueryCreateUserIdRequest) returns (QueryCreateUserIdResponse);
-    rpc CreateTime (QueryCreateTimeRequest) returns (QueryCreateTimeResponse);
-    rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
-    rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
-    rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
 }

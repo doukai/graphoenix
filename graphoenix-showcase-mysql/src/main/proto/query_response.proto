@@ -9,6 +9,60 @@ import "enums.proto";
 import "objects.proto";
 import "input_objects.proto";
 
+message QueryUserDetailResponse {
+    optional string user_detail = 1;
+}
+message QueryUserDetail6Response {
+    repeated string user_detail6 = 1;
+}
+message QueryOrgLevelResponse {
+    optional int32 org_level = 1;
+}
+message QueryRoleDisable2Response {
+    repeated bool role_disable2 = 1;
+}
+message QueryOrgLevel5Response {
+    repeated int32 org_level5 = 1;
+}
+message QueryUserByOrg2Response {
+    repeated User user_by_org2 = 1;
+}
+message QueryParent2Response {
+    optional Organization parent2 = 1;
+}
+message QueryFindRole2Response {
+    repeated Role find_role2 = 1;
+}
+message QueryFindContainerTypeResponse {
+    optional ContainerType1 find_container_type = 1;
+}
+message QueryIsDeprecatedResponse {
+    optional bool is_deprecated = 1;
+}
+message QueryVersionResponse {
+    optional int32 version = 1;
+}
+message QueryRealmIdResponse {
+    optional string realm_id = 1;
+}
+message QueryCreateUserIdResponse {
+    optional string create_user_id = 1;
+}
+message QueryCreateTimeResponse {
+    optional string create_time = 1;
+}
+message QueryUpdateUserIdResponse {
+    optional string update_user_id = 1;
+}
+message QueryUpdateTimeResponse {
+    optional string update_time = 1;
+}
+message QueryCreateGroupIdResponse {
+    optional string create_group_id = 1;
+}
+message QueryIntroTypenameResponse {
+    optional string intro_typename = 1;
+}
 message QueryUserResponse {
     optional User user = 1;
 }
@@ -170,28 +224,4 @@ message QueryIntroDirectiveLocationsListResponse {
 }
 message QueryIntroDirectiveLocationsConnectionResponse {
     optional IntroDirectiveLocationsConnection intro_directive_locations_connection = 1;
-}
-message QueryIsDeprecatedResponse {
-    optional bool is_deprecated = 1;
-}
-message QueryVersionResponse {
-    optional int32 version = 1;
-}
-message QueryRealmIdResponse {
-    optional string realm_id = 1;
-}
-message QueryCreateUserIdResponse {
-    optional string create_user_id = 1;
-}
-message QueryCreateTimeResponse {
-    optional string create_time = 1;
-}
-message QueryUpdateUserIdResponse {
-    optional string update_user_id = 1;
-}
-message QueryUpdateTimeResponse {
-    optional string update_time = 1;
-}
-message QueryCreateGroupIdResponse {
-    optional string create_group_id = 1;
 }

@@ -259,8 +259,7 @@ public class BaseTask extends DefaultTask {
                                 .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
                 )
                 .forEach(methodDeclaration -> {
-                            ObjectType objectType = manager.getQueryOperationTypeName()
-                                    .flatMap(manager::getObject)
+                            ObjectType objectType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
                                     .map(documentBuilder::buildObject)
                                     .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME))
                                     .addField(
@@ -291,8 +290,7 @@ public class BaseTask extends DefaultTask {
                                 .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Mutation.class))
                 )
                 .forEach(methodDeclaration -> {
-                            ObjectType objectType = manager.getMutationOperationTypeName()
-                                    .flatMap(manager::getObject)
+                            ObjectType objectType = manager.getObject(manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME))
                                     .map(documentBuilder::buildObject)
                                     .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME))
                                     .addField(

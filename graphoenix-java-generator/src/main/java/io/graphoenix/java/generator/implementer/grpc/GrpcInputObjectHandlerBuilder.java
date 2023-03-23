@@ -91,19 +91,20 @@ public class GrpcInputObjectHandlerBuilder {
             String fieldTypeName = manager.getFieldTypeName(inputValueDefinitionContext.type());
             String grpcEnumValueSuffixName = grpcNameUtil.getGrpcEnumValueSuffixName(inputValueDefinitionContext.type());
             String inputObjectFieldMethodName = grpcNameUtil.getLowerCamelName(inputValueDefinitionContext.type());
+            String grpcGetMethodName = grpcNameUtil.getGrpcGetMethodName(inputValueDefinitionContext);
             if (manager.fieldTypeIsList(inputValueDefinitionContext.type())) {
-                String rpcGetInputValueListName = grpcNameUtil.getGrpcGetListMethodName(inputValueDefinitionContext);
+                String grpcGetListMethodName = grpcNameUtil.getGrpcGetListMethodName(inputValueDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L())",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
-                            rpcGetInputValueListName
+                            grpcGetListMethodName
                     );
                 } else if (manager.isEnum(fieldTypeName)) {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L().stream().map(item -> item.getValueDescriptor().getName().replaceFirst($S, EMPTY)).collect($T.toList()))",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
-                            rpcGetInputValueListName,
+                            grpcGetListMethodName,
                             grpcEnumValueSuffixName,
                             ClassName.get(Collectors.class)
                     );
@@ -111,33 +112,31 @@ public class GrpcInputObjectHandlerBuilder {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L().stream().map(this::$L).collect($T.toList()))",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
-                            rpcGetInputValueListName,
+                            grpcGetListMethodName,
                             inputObjectFieldMethodName,
                             ClassName.get(Collectors.class)
                     );
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-                if (inputValueDefinitionContext.type().nonNullType() == null) {
-                    builder.beginControlFlow("if ($L.$L() > 0)", inputObjectParameterName, grpcNameUtil.getGrpcGetCountMethodName(inputValueDefinitionContext))
-                            .addStatement(codeBlock)
-                            .endControlFlow();
+                if (inputValueDefinitionContext.type().nonNullType() != null) {
+                    builder.addStatement("assert $L.$L() != null && $L.$L().size() > 0", inputObjectParameterName, grpcGetMethodName, inputObjectParameterName, grpcGetMethodName)
+                            .addStatement(codeBlock);
                 } else {
                     builder.addStatement(codeBlock);
                 }
             } else {
-                String rpcGetInputValueName = grpcNameUtil.getGrpcGetMethodName(inputValueDefinitionContext);
                 if (manager.isScalar(fieldTypeName)) {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L())",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
-                            rpcGetInputValueName
+                            grpcGetMethodName
                     );
                 } else if (manager.isEnum(fieldTypeName)) {
                     codeBlock = CodeBlock.of("objectValueWithVariable.put($S, $L.$L().getValueDescriptor().getName().replaceFirst($S, EMPTY))",
                             inputValueDefinitionContext.name().getText(),
                             inputObjectParameterName,
-                            rpcGetInputValueName,
+                            grpcGetMethodName,
                             grpcEnumValueSuffixName
                     );
                 } else if (manager.isInputObject(fieldTypeName)) {
@@ -145,15 +144,14 @@ public class GrpcInputObjectHandlerBuilder {
                             inputValueDefinitionContext.name().getText(),
                             inputObjectFieldMethodName,
                             inputObjectParameterName,
-                            rpcGetInputValueName
+                            grpcGetMethodName
                     );
                 } else {
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE);
                 }
-                if (inputValueDefinitionContext.type().nonNullType() == null) {
-                    builder.beginControlFlow("if ($L.$L())", inputObjectParameterName, grpcNameUtil.getGrpcHasMethodName(inputValueDefinitionContext))
-                            .addStatement(codeBlock)
-                            .endControlFlow();
+                if (inputValueDefinitionContext.type().nonNullType() != null) {
+                    builder.addStatement("assert $L.$L() != null", inputObjectParameterName, grpcGetMethodName)
+                            .addStatement(codeBlock);
                 } else {
                     builder.addStatement(codeBlock);
                 }
