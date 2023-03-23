@@ -274,10 +274,10 @@ message Organization {
     optional UserConnection users_connection = 33;
 }
 message ContainerType1 {
-    optional int32 age = 1;
+    optional bool sex = 1;
     optional float height = 2;
     optional string name = 3;
-    optional bool sex = 4;
+    optional int32 age = 4;
 }
 message QueryType {
     optional string user_detail = 1;
@@ -391,8 +391,8 @@ message IntroSchema {
     optional string subscription_type_name_max = 29;
     optional string subscription_type_name_min = 30;
     optional IntroType types_aggregate = 31;
-    optional IntroDirective directives_aggregate = 32;
-    optional IntroTypeConnection types_connection = 33;
+    optional IntroTypeConnection types_connection = 32;
+    optional IntroDirective directives_aggregate = 33;
     optional IntroDirectiveConnection directives_connection = 34;
 }
 message IntroType {
@@ -431,14 +431,14 @@ message IntroType {
     optional int32 schema_id_max = 33;
     optional int32 schema_id_min = 34;
     optional IntroField fields_aggregate = 35;
-    optional IntroType interfaces_aggregate = 36;
-    optional IntroType possible_types_aggregate = 37;
-    optional IntroEnumValue enum_values_aggregate = 38;
-    optional IntroInputValue input_fields_aggregate = 39;
-    optional IntroFieldConnection fields_connection = 40;
-    optional IntroTypeConnection interfaces_connection = 41;
-    optional IntroTypeConnection possible_types_connection = 42;
-    optional IntroEnumValueConnection enum_values_connection = 43;
+    optional IntroFieldConnection fields_connection = 36;
+    optional IntroType interfaces_aggregate = 37;
+    optional IntroTypeConnection interfaces_connection = 38;
+    optional IntroType possible_types_aggregate = 39;
+    optional IntroTypeConnection possible_types_connection = 40;
+    optional IntroEnumValue enum_values_aggregate = 41;
+    optional IntroEnumValueConnection enum_values_connection = 42;
+    optional IntroInputValue input_fields_aggregate = 43;
     optional IntroInputValueConnection input_fields_connection = 44;
 }
 message IntroTypeInterfaces {

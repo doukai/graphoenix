@@ -12,123 +12,49 @@ import "input_objects.proto";
 message QueryUserDetailRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
+    optional UserInput user = 3;
 }
 message QueryUserDetail6Request {
     optional string selection_set = 1;
     optional string arguments = 2;
-    optional Operator opr = 3;
-    optional string val = 4;
-    repeated string in = 5;
-    optional int32 first = 6;
-    optional int32 last = 7;
-    optional int32 offset = 8;
-    optional Sort sort = 9;
+    optional UserInput user = 3;
 }
 message QueryOrgLevelRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
+    optional OrganizationInput organization = 3;
 }
 message QueryRoleDisable2Request {
     optional string selection_set = 1;
     optional string arguments = 2;
-    optional Operator opr = 3;
-    optional bool val = 4;
-    repeated bool in = 5;
-    optional int32 first = 6;
-    optional int32 last = 7;
-    optional int32 offset = 8;
-    optional Sort sort = 9;
+    optional OrganizationInput organization = 3;
 }
 message QueryOrgLevel5Request {
     optional string selection_set = 1;
     optional string arguments = 2;
-    optional Operator opr = 3;
-    optional int32 val = 4;
-    repeated int32 in = 5;
-    optional int32 first = 6;
-    optional int32 last = 7;
-    optional int32 offset = 8;
-    optional Sort sort = 9;
+    optional OrganizationInput organization = 3;
 }
 message QueryUserByOrg2Request {
     optional string selection_set = 1;
     optional string arguments = 2;
-    optional StringExpression id = 3;
-    optional StringExpression login = 4;
-    optional StringExpression password = 5;
-    optional StringExpression name = 6;
-    optional IntExpression age = 7;
-    optional BooleanExpression disable = 8;
-    optional SexExpression sex = 9;
-    optional UserProfileExpression user_profile = 10;
-    optional IntExpression organization_id = 11;
-    optional OrganizationExpression organization = 12;
-    optional RoleExpression roles = 13;
-    optional StringExpression phones = 14;
-    optional IntExpression test1 = 15;
-    optional BooleanExpression test2 = 16;
-    optional bool include_deprecated = 17;
-    optional IntExpression version = 18;
-    optional StringExpression realm_id = 19;
-    optional StringExpression create_user_id = 20;
-    optional StringExpression create_time = 21;
-    optional StringExpression update_user_id = 22;
-    optional StringExpression update_time = 23;
-    optional StringExpression create_group_id = 24;
-    optional StringExpression intro_typename = 25;
-    optional int32 first = 26;
-    optional int32 last = 27;
-    optional int32 offset = 28;
-    optional UserOrderBy order_by = 29;
-    repeated string group_by = 30;
+    optional OrganizationInput organization = 3;
 }
 message QueryParent2Request {
     optional string selection_set = 1;
     optional string arguments = 2;
-    optional StringExpression id = 3;
-    optional IntExpression above_id = 4;
-    optional OrganizationExpression above = 5;
-    optional UserExpression users = 6;
-    optional StringExpression name = 7;
-    optional bool include_deprecated = 8;
-    optional IntExpression version = 9;
-    optional StringExpression realm_id = 10;
-    optional StringExpression create_user_id = 11;
-    optional StringExpression create_time = 12;
-    optional StringExpression update_user_id = 13;
-    optional StringExpression update_time = 14;
-    optional StringExpression create_group_id = 15;
-    optional StringExpression intro_typename = 16;
+    optional OrganizationInput organization = 3;
 }
 message QueryFindRole2Request {
     optional string selection_set = 1;
     optional string arguments = 2;
-    optional StringExpression id = 3;
-    optional StringExpression name = 4;
-    optional RoleTypeExpression type = 5;
-    optional UserExpression users = 6;
-    optional bool include_deprecated = 7;
-    optional IntExpression version = 8;
-    optional StringExpression realm_id = 9;
-    optional StringExpression create_user_id = 10;
-    optional StringExpression create_time = 11;
-    optional StringExpression update_user_id = 12;
-    optional StringExpression update_time = 13;
-    optional StringExpression create_group_id = 14;
-    optional StringExpression intro_typename = 15;
-    optional int32 first = 16;
-    optional int32 last = 17;
-    optional int32 offset = 18;
-    optional RoleOrderBy order_by = 19;
-    repeated string group_by = 20;
+    optional string name = 3;
+    optional int32 type = 4;
+    optional bool disable = 5;
 }
 message QueryFindContainerTypeRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
-    optional IntExpression age = 3;
-    optional FloatExpression height = 4;
-    optional StringExpression name = 5;
-    optional BooleanExpression sex = 6;
+    optional string name = 3;
 }
 message QueryIsDeprecatedRequest {
     optional string selection_set = 1;

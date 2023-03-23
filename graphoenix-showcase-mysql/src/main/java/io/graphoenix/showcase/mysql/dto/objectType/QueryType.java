@@ -5,10 +5,13 @@ import io.graphoenix.showcase.mysql.api.ContainerType;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
-import org.eclipse.microprofile.graphql.Type;
-
+import java.lang.Boolean;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
 import java.time.LocalDateTime;
 import java.util.Collection;
+import org.eclipse.microprofile.graphql.Type;
 
 @Type
 @CompiledJson

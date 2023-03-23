@@ -87,9 +87,9 @@ public class __Schema implements Meta {
 
   private __Type typesAggregate;
 
-  private __Directive directivesAggregate;
-
   private __TypeConnection typesConnection;
+
+  private __Directive directivesAggregate;
 
   private __DirectiveConnection directivesConnection;
 
@@ -357,20 +357,20 @@ public class __Schema implements Meta {
     this.typesAggregate = typesAggregate;
   }
 
-  public __Directive getDirectivesAggregate() {
-    return this.directivesAggregate;
-  }
-
-  public void setDirectivesAggregate(__Directive directivesAggregate) {
-    this.directivesAggregate = directivesAggregate;
-  }
-
   public __TypeConnection getTypesConnection() {
     return this.typesConnection;
   }
 
   public void setTypesConnection(__TypeConnection typesConnection) {
     this.typesConnection = typesConnection;
+  }
+
+  public __Directive getDirectivesAggregate() {
+    return this.directivesAggregate;
+  }
+
+  public void setDirectivesAggregate(__Directive directivesAggregate) {
+    this.directivesAggregate = directivesAggregate;
   }
 
   public __DirectiveConnection getDirectivesConnection() {

@@ -302,7 +302,8 @@ public class ElementManager {
             return executableElement.getParameters().stream()
                     .filter(variableElement -> variableElement.getAnnotation(Source.class) == null)
                     .map(variableElement ->
-                            new InputValue().setName(getNameFromElement(variableElement))
+                            new InputValue()
+                                    .setName(getNameFromElement(variableElement))
                                     .setDefaultValue(getDefaultValueFromElement(variableElement))
                                     .setTypeName(variableElementToTypeName(variableElement, typeUtils))
                                     .setDescription(getDescriptionFromElement(variableElement))

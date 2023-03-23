@@ -2,7 +2,6 @@ package io.graphoenix.graphql.generator.translator;
 
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.Field;
-import io.graphoenix.core.document.InputValue;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.vavr.Tuple;
@@ -16,7 +15,6 @@ import org.eclipse.microprofile.graphql.Source;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Types;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -39,17 +37,6 @@ public class GraphQLApiBuilder {
                 .setDescription(elementManager.getDescriptionFromElement(executableElement))
                 .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
                 .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))
-                .setArguments(
-                        executableElement.getParameters().stream()
-                                .map(variableElement ->
-                                        new InputValue()
-                                                .setName(elementManager.getNameFromElement(variableElement))
-                                                .setDescription(elementManager.getDescriptionFromElement(variableElement))
-                                                .setDefaultValue(elementManager.getDefaultValueFromElement(variableElement))
-                                                .setTypeName(elementManager.variableElementToInputTypeName(variableElement, typeUtils))
-                                )
-                                .collect(Collectors.toCollection(LinkedHashSet::new))
-                )
                 .addDirective(
                         new Directive()
                                 .setName(INVOKE_DIRECTIVE_NAME)

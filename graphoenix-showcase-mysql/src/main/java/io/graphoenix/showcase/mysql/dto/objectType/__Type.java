@@ -95,21 +95,21 @@ public class __Type implements Meta {
 
   private __Field fieldsAggregate;
 
-  private __Type interfacesAggregate;
-
-  private __Type possibleTypesAggregate;
-
-  private __EnumValue enumValuesAggregate;
-
-  private __InputValue inputFieldsAggregate;
-
   private __FieldConnection fieldsConnection;
+
+  private __Type interfacesAggregate;
 
   private __TypeConnection interfacesConnection;
 
+  private __Type possibleTypesAggregate;
+
   private __TypeConnection possibleTypesConnection;
 
+  private __EnumValue enumValuesAggregate;
+
   private __EnumValueConnection enumValuesConnection;
+
+  private __InputValue inputFieldsAggregate;
 
   private __InputValueConnection inputFieldsConnection;
 
@@ -409,44 +409,20 @@ public class __Type implements Meta {
     this.fieldsAggregate = fieldsAggregate;
   }
 
-  public __Type getInterfacesAggregate() {
-    return this.interfacesAggregate;
-  }
-
-  public void setInterfacesAggregate(__Type interfacesAggregate) {
-    this.interfacesAggregate = interfacesAggregate;
-  }
-
-  public __Type getPossibleTypesAggregate() {
-    return this.possibleTypesAggregate;
-  }
-
-  public void setPossibleTypesAggregate(__Type possibleTypesAggregate) {
-    this.possibleTypesAggregate = possibleTypesAggregate;
-  }
-
-  public __EnumValue getEnumValuesAggregate() {
-    return this.enumValuesAggregate;
-  }
-
-  public void setEnumValuesAggregate(__EnumValue enumValuesAggregate) {
-    this.enumValuesAggregate = enumValuesAggregate;
-  }
-
-  public __InputValue getInputFieldsAggregate() {
-    return this.inputFieldsAggregate;
-  }
-
-  public void setInputFieldsAggregate(__InputValue inputFieldsAggregate) {
-    this.inputFieldsAggregate = inputFieldsAggregate;
-  }
-
   public __FieldConnection getFieldsConnection() {
     return this.fieldsConnection;
   }
 
   public void setFieldsConnection(__FieldConnection fieldsConnection) {
     this.fieldsConnection = fieldsConnection;
+  }
+
+  public __Type getInterfacesAggregate() {
+    return this.interfacesAggregate;
+  }
+
+  public void setInterfacesAggregate(__Type interfacesAggregate) {
+    this.interfacesAggregate = interfacesAggregate;
   }
 
   public __TypeConnection getInterfacesConnection() {
@@ -457,6 +433,14 @@ public class __Type implements Meta {
     this.interfacesConnection = interfacesConnection;
   }
 
+  public __Type getPossibleTypesAggregate() {
+    return this.possibleTypesAggregate;
+  }
+
+  public void setPossibleTypesAggregate(__Type possibleTypesAggregate) {
+    this.possibleTypesAggregate = possibleTypesAggregate;
+  }
+
   public __TypeConnection getPossibleTypesConnection() {
     return this.possibleTypesConnection;
   }
@@ -465,12 +449,28 @@ public class __Type implements Meta {
     this.possibleTypesConnection = possibleTypesConnection;
   }
 
+  public __EnumValue getEnumValuesAggregate() {
+    return this.enumValuesAggregate;
+  }
+
+  public void setEnumValuesAggregate(__EnumValue enumValuesAggregate) {
+    this.enumValuesAggregate = enumValuesAggregate;
+  }
+
   public __EnumValueConnection getEnumValuesConnection() {
     return this.enumValuesConnection;
   }
 
   public void setEnumValuesConnection(__EnumValueConnection enumValuesConnection) {
     this.enumValuesConnection = enumValuesConnection;
+  }
+
+  public __InputValue getInputFieldsAggregate() {
+    return this.inputFieldsAggregate;
+  }
+
+  public void setInputFieldsAggregate(__InputValue inputFieldsAggregate) {
+    this.inputFieldsAggregate = inputFieldsAggregate;
   }
 
   public __InputValueConnection getInputFieldsConnection() {
