@@ -16,8 +16,10 @@ import org.eclipse.microprofile.graphql.Enum;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.Input;
 import org.eclipse.microprofile.graphql.Interface;
+import org.eclipse.microprofile.graphql.Mutation;
 import org.eclipse.microprofile.graphql.Name;
 import org.eclipse.microprofile.graphql.NonNull;
+import org.eclipse.microprofile.graphql.Query;
 import org.eclipse.microprofile.graphql.Source;
 import org.eclipse.microprofile.graphql.Type;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
@@ -40,6 +42,7 @@ import java.time.LocalTime;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -99,6 +102,8 @@ public class ElementManager {
         Enum enumAnnotation = element.getAnnotation(Enum.class);
         Interface interfaceAnnotation = element.getAnnotation(Interface.class);
         Input inputAnnotation = element.getAnnotation(Input.class);
+        Query queryAnnotation = element.getAnnotation(Query.class);
+        Mutation mutationAnnotation = element.getAnnotation(Mutation.class);
         if (nameAnnotation != null && !Strings.isNullOrEmpty(nameAnnotation.value())) {
             return nameAnnotation.value();
         } else if (typeAnnotation != null && !Strings.isNullOrEmpty(typeAnnotation.value())) {
@@ -109,6 +114,10 @@ public class ElementManager {
             return interfaceAnnotation.value();
         } else if (inputAnnotation != null && !Strings.isNullOrEmpty(inputAnnotation.value())) {
             return inputAnnotation.value();
+        } else if (queryAnnotation != null && !Strings.isNullOrEmpty(queryAnnotation.value())) {
+            return queryAnnotation.value();
+        } else if (mutationAnnotation != null && !Strings.isNullOrEmpty(mutationAnnotation.value())) {
+            return mutationAnnotation.value();
         } else {
             if (element.getSimpleName().toString().startsWith("get")) {
                 return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, element.getSimpleName().toString().replaceFirst("get", ""));
@@ -118,6 +127,14 @@ public class ElementManager {
                 return element.getSimpleName().toString();
             }
         }
+    }
+
+    public Optional<String> getSourceNameFromExecutableElement(ExecutableElement executableElement) {
+        return executableElement.getParameters().stream()
+                .flatMap(variableElement -> Stream.ofNullable(variableElement.getAnnotation(Source.class)))
+                .map(Source::name)
+                .filter(name -> !Strings.isNullOrEmpty(name))
+                .findFirst();
     }
 
     public String getDescriptionFromElement(Element element) {

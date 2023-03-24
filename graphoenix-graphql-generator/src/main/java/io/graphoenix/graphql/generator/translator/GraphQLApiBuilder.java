@@ -77,7 +77,7 @@ public class GraphQLApiBuilder {
                         typeUtils
                 ),
                 new Field()
-                        .setName(elementManager.getNameFromElement(executableElement))
+                        .setName(elementManager.getSourceNameFromExecutableElement(executableElement).orElseGet(() -> elementManager.getNameFromElement(executableElement)))
                         .setDescription(elementManager.getDescriptionFromElement(executableElement))
                         .setTypeName(elementManager.executableElementToTypeName(executableElement, typeUtils))
                         .setArguments(elementManager.executableElementParametersToInputValues(executableElement, typeUtils))

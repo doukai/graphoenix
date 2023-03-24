@@ -1,6 +1,7 @@
 package io.graphoenix.gradle.task;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
@@ -241,7 +242,7 @@ public class BaseTask extends DefaultTask {
                             ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
                                     .addField(
                                             new Field()
-                                                    .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
+                                                    .setName(getSourceNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
                                                     .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                     .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
                                     );
@@ -264,7 +265,7 @@ public class BaseTask extends DefaultTask {
                                     .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME))
                                     .addField(
                                             new Field()
-                                                    .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
+                                                    .setName(getQueryNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
                                                     .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                     .setArguments(
                                                             methodDeclaration.getParameters().stream()
@@ -295,7 +296,7 @@ public class BaseTask extends DefaultTask {
                                     .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME))
                                     .addField(
                                             new Field()
-                                                    .setName(getInvokeFieldName(methodDeclaration.getName().getIdentifier()))
+                                                    .setName(getMutationNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
                                                     .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
                                                     .setArguments(
                                                             methodDeclaration.getParameters().stream()
@@ -435,33 +436,33 @@ public class BaseTask extends DefaultTask {
     protected String findTypeName(ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration) {
         if (resolvedReferenceTypeDeclaration instanceof JavaParserClassDeclaration) {
             return ((JavaParserClassDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Name.class)
-                    .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                    .flatMap(annotationExpr -> findAnnotationValue(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
                     .filter(name -> !Strings.isNullOrEmpty(name))
                     .orElseGet(() -> ((JavaParserClassDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Type.class)
-                            .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                            .flatMap(annotationExpr -> findAnnotationValue(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
                             .filter(name -> !Strings.isNullOrEmpty(name))
                             .orElse(resolvedReferenceTypeDeclaration.getName()));
         } else if (resolvedReferenceTypeDeclaration instanceof JavaParserInterfaceDeclaration) {
             return ((JavaParserInterfaceDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Name.class)
-                    .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                    .flatMap(annotationExpr -> findAnnotationValue(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
                     .filter(name -> !Strings.isNullOrEmpty(name))
                     .orElseGet(() -> ((JavaParserInterfaceDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Interface.class)
-                            .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                            .flatMap(annotationExpr -> findAnnotationValue(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
                             .filter(name -> !Strings.isNullOrEmpty(name))
                             .orElse(resolvedReferenceTypeDeclaration.getName()));
         } else if (resolvedReferenceTypeDeclaration instanceof JavaParserEnumDeclaration) {
             return ((JavaParserEnumDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Name.class)
-                    .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                    .flatMap(annotationExpr -> findAnnotationValue(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
                     .filter(name -> !Strings.isNullOrEmpty(name))
                     .orElseGet(() -> ((JavaParserEnumDeclaration) resolvedReferenceTypeDeclaration).getWrappedNode().getAnnotationByClass(org.eclipse.microprofile.graphql.Enum.class)
-                            .flatMap(annotationExpr -> findAnnotationValueException(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
+                            .flatMap(annotationExpr -> findAnnotationValue(annotationExpr).map(expression -> expression.asStringLiteralExpr().getValue()))
                             .filter(name -> !Strings.isNullOrEmpty(name))
                             .orElse(resolvedReferenceTypeDeclaration.getName()));
         }
         return resolvedReferenceTypeDeclaration.getName();
     }
 
-    protected Optional<Expression> findAnnotationValueException(AnnotationExpr annotationExpr) {
+    protected Optional<Expression> findAnnotationValue(AnnotationExpr annotationExpr) {
         if (annotationExpr.isSingleMemberAnnotationExpr()) {
             return Optional.of(annotationExpr.asSingleMemberAnnotationExpr().getMemberValue());
         } else if (annotationExpr.isNormalAnnotationExpr()) {
@@ -480,6 +481,33 @@ public class BaseTask extends DefaultTask {
 
     protected EnumValue buildEnumValue(ResolvedEnumConstantDeclaration resolvedEnumConstantDeclaration) {
         return new EnumValue(getInvokeFieldName(resolvedEnumConstantDeclaration.getName()));
+    }
+
+    private Optional<String> getSourceNameFromMethodDeclaration(MethodDeclaration methodDeclaration) {
+        return methodDeclaration.getParameters().stream()
+                .filter(parameter -> parameter.isAnnotationPresent(Source.class))
+                .flatMap(parameter -> parameter.getAnnotationByClass(Source.class).stream())
+                .findFirst()
+                .flatMap(annotationExpr ->
+                        annotationExpr.asNormalAnnotationExpr().getPairs().stream()
+                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
+                                .findFirst()
+                )
+                .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr().getValue());
+    }
+
+    private Optional<String> getQueryNameFromMethodDeclaration(MethodDeclaration methodDeclaration) {
+        return methodDeclaration.getAnnotationByClass(Query.class).stream()
+                .findFirst()
+                .flatMap(this::findAnnotationValue)
+                .map(expression -> expression.asStringLiteralExpr().getValue());
+    }
+
+    private Optional<String> getMutationNameFromMethodDeclaration(MethodDeclaration methodDeclaration) {
+        return methodDeclaration.getAnnotationByClass(Mutation.class).stream()
+                .findFirst()
+                .flatMap(this::findAnnotationValue)
+                .map(expression -> expression.asStringLiteralExpr().getValue());
     }
 
     private String getInvokeFieldName(String methodName) {
