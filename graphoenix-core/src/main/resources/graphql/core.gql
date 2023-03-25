@@ -179,7 +179,7 @@ directive @invoke(
     methodName: String
     parameters: [InvokeParameter]
     returnClassName: String
-) on FIELD_DEFINITION
+) on FIELD_DEFINITION | QUERY | MUTATION | SUBSCRIPTION
 
 directive @skipNullArguments(if: Boolean!) on FIELD
 

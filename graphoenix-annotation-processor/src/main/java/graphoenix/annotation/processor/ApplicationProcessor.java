@@ -7,14 +7,7 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.java.generator.implementer.ConnectionHandlerBuilder;
-import io.graphoenix.java.generator.implementer.InvokeHandlerBuilder;
-import io.graphoenix.java.generator.implementer.MutationDataLoaderBuilder;
-import io.graphoenix.java.generator.implementer.MutationHandlerBuilder;
-import io.graphoenix.java.generator.implementer.OperationHandlerImplementer;
-import io.graphoenix.java.generator.implementer.QueryDataLoaderBuilder;
-import io.graphoenix.java.generator.implementer.QueryHandlerBuilder;
-import io.graphoenix.java.generator.implementer.SelectionFilterBuilder;
+import io.graphoenix.java.generator.implementer.*;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.tinylog.Logger;
 
@@ -31,8 +24,7 @@ import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static javax.lang.model.SourceVersion.RELEASE_11;
@@ -67,6 +59,7 @@ public class ApplicationProcessor extends BaseProcessor {
         MutationDataLoaderBuilder mutationDataLoaderBuilder = BeanContext.get(MutationDataLoaderBuilder.class);
         QueryHandlerBuilder queryHandlerBuilder = BeanContext.get(QueryHandlerBuilder.class);
         MutationHandlerBuilder mutationHandlerBuilder = BeanContext.get(MutationHandlerBuilder.class);
+        OperationInterfaceImplementer operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
         registerElements(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
@@ -109,6 +102,8 @@ public class ApplicationProcessor extends BaseProcessor {
             mutationDataLoaderBuilder.writeToFiler(filer);
             queryHandlerBuilder.writeToFiler(filer);
             mutationHandlerBuilder.writeToFiler(filer);
+            operationInterfaceImplementer.writeToFiler(filer);
+
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());

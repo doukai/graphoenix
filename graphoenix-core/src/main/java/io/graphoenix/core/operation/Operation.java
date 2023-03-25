@@ -87,6 +87,14 @@ public class Operation {
         return this;
     }
 
+    public Operation addDirective(Directive directive) {
+        if (this.directives == null) {
+            this.directives = new LinkedHashSet<>();
+        }
+        this.directives.add(directive.toString());
+        return this;
+    }
+
     public Set<Field> getFields() {
         return fields;
     }

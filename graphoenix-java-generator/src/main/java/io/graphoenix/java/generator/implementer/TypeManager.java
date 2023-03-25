@@ -173,7 +173,19 @@ public class TypeManager {
     }
 
     public String getClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives().directive().stream()
+        return Optional.ofNullable(fieldDefinitionContext.directives())
+                .map(this::getClassName)
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("className")));
+    }
+
+    public String getClassName(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return Optional.ofNullable(operationDefinitionContext.directives())
+                .map(this::getClassName)
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("className")));
+    }
+
+    public String getClassName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()
@@ -186,7 +198,19 @@ public class TypeManager {
     }
 
     public String getMethodName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives().directive().stream()
+        return Optional.ofNullable(fieldDefinitionContext.directives())
+                .map(this::getMethodName)
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("methodName")));
+    }
+
+    public String getMethodName(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return Optional.ofNullable(operationDefinitionContext.directives())
+                .map(this::getMethodName)
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("methodName")));
+    }
+
+    public String getMethodName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()
@@ -199,7 +223,19 @@ public class TypeManager {
     }
 
     public List<AbstractMap.SimpleEntry<String, String>> getParameters(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return fieldDefinitionContext.directives().directive().stream()
+        return Stream.ofNullable(fieldDefinitionContext.directives())
+                .flatMap(this::getParameters)
+                .collect(Collectors.toList());
+    }
+
+    public List<AbstractMap.SimpleEntry<String, String>> getParameters(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return Stream.ofNullable(operationDefinitionContext.directives())
+                .flatMap(this::getParameters)
+                .collect(Collectors.toList());
+    }
+
+    public Stream<AbstractMap.SimpleEntry<String, String>> getParameters(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()
@@ -222,13 +258,23 @@ public class TypeManager {
                                         .map(objectFieldWithVariableContext -> DOCUMENT_UTIL.getStringValue(objectFieldWithVariableContext.valueWithVariable().StringValue()))
                                         .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("className")))
                         )
-                )
-                .collect(Collectors.toList());
+                );
     }
 
     public String getReturnClassName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
-        return Stream.ofNullable(fieldDefinitionContext.directives())
-                .flatMap(directivesContext -> directivesContext.directive().stream())
+        return Optional.ofNullable(fieldDefinitionContext.directives())
+                .map(this::getReturnClassName)
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("returnClassName")));
+    }
+
+    public String getReturnClassName(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return Optional.ofNullable(operationDefinitionContext.directives())
+                .map(this::getReturnClassName)
+                .orElseThrow(() -> new GraphQLErrors(ARGUMENT_NOT_EXIST.bind("returnClassName")));
+    }
+
+    public String getReturnClassName(GraphqlParser.DirectivesContext directivesContext) {
+        return directivesContext.directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals(INVOKE_DIRECTIVE_NAME))
                 .flatMap(directiveContext ->
                         directiveContext.arguments().argument().stream()

@@ -140,7 +140,11 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.InputObjectTypeDefinitionContext> getInputObjects();
 
-    Optional<GraphqlParser.OperationTypeDefinitionContext> getOperation(String name);
+    Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String name);
+
+    Optional<GraphqlParser.OperationDefinitionContext> getOperationDefinition(String name);
+
+    Stream<GraphqlParser.OperationDefinitionContext> getOperationDefinitions();
 
     Optional<GraphqlParser.OperationTypeDefinitionContext> getQueryOperationTypeDefinition();
 

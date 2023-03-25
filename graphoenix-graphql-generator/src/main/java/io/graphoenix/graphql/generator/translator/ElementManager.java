@@ -4,10 +4,14 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.ElementProcessException;
+import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.document.InputValue;
 import io.graphoenix.core.operation.Field;
+import io.graphoenix.spi.annotation.MutationOperation;
+import io.graphoenix.spi.annotation.QueryOperation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.dto.type.OperationType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.graphql.DefaultValue;
@@ -52,6 +56,8 @@ import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
 import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
+import static io.graphoenix.spi.dto.type.OperationType.MUTATION;
+import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 
 @ApplicationScoped
 public class ElementManager {
@@ -127,6 +133,63 @@ public class ElementManager {
                 return element.getSimpleName().toString();
             }
         }
+    }
+
+    public OperationType getOperationTypeFromExecutableElement(ExecutableElement executableElement) {
+        QueryOperation queryOperation = executableElement.getAnnotation(QueryOperation.class);
+        if (queryOperation != null) {
+            return QUERY;
+        }
+        MutationOperation mutationOperation = executableElement.getAnnotation(MutationOperation.class);
+        if (mutationOperation != null) {
+            return MUTATION;
+        }
+        throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+    }
+
+    public String getSelectionSetFromExecutableElement(ExecutableElement executableElement) {
+        QueryOperation queryOperation = executableElement.getAnnotation(QueryOperation.class);
+        if (queryOperation != null) {
+            return queryOperation.selectionSet();
+        }
+        MutationOperation mutationOperation = executableElement.getAnnotation(MutationOperation.class);
+        if (mutationOperation != null) {
+            return mutationOperation.selectionSet();
+        }
+        throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+    }
+
+    public int getLayersFromExecutableElement(ExecutableElement executableElement) {
+        QueryOperation queryOperation = executableElement.getAnnotation(QueryOperation.class);
+        if (queryOperation != null) {
+            return queryOperation.layers();
+        }
+        MutationOperation mutationOperation = executableElement.getAnnotation(MutationOperation.class);
+        if (mutationOperation != null) {
+            return mutationOperation.layers();
+        }
+        throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+    }
+
+    public String getOperationFieldNameFromExecutableElement(ExecutableElement executableElement) {
+        QueryOperation queryOperationAnnotation = executableElement.getAnnotation(QueryOperation.class);
+        if (queryOperationAnnotation != null && !Strings.isNullOrEmpty(queryOperationAnnotation.value())) {
+            return queryOperationAnnotation.value();
+        }
+        MutationOperation mutationOperationAnnotation = executableElement.getAnnotation(MutationOperation.class);
+        if (mutationOperationAnnotation != null && !Strings.isNullOrEmpty(mutationOperationAnnotation.value())) {
+            return mutationOperationAnnotation.value();
+        }
+        return executableElement.getSimpleName().toString();
+    }
+
+    public String getOperationNameFromExecutableElement(ExecutableElement executableElement, int index) {
+        TypeElement typeElement = (TypeElement) executableElement.getEnclosingElement();
+        return typeElement.getQualifiedName().toString().replaceAll("\\.", "_")
+                .concat("_")
+                .concat(executableElement.getSimpleName().toString())
+                .concat("_")
+                .concat(String.valueOf(index));
     }
 
     public Optional<String> getSourceNameFromExecutableElement(ExecutableElement executableElement) {

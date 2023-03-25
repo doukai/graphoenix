@@ -8,13 +8,11 @@ import java.util.stream.Stream;
 
 public interface IGraphQLOperationManager {
 
-    Map<String, GraphqlParser.OperationTypeDefinitionContext> register(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext);
+    Map<String, GraphqlParser.OperationDefinitionContext> register(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
 
-    boolean isOperation(String operationTypeName);
+    Optional<GraphqlParser.OperationDefinitionContext> getOperationDefinition(String operationTypeName);
 
-    Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String operationTypeName);
-
-    Stream<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinitions();
+    Stream<GraphqlParser.OperationDefinitionContext> getOperationDefinitions();
 
     void clear();
 }

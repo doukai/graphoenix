@@ -1,10 +1,11 @@
 package io.graphoenix.core.utils;
 
 import com.squareup.javapoet.ClassName;
+import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public enum TypeNameUtil {
     TYPE_NAME_UTIL;
@@ -53,6 +54,21 @@ public enum TypeNameUtil {
             throw new RuntimeException("argument type not exist in " + typeName);
         }
         return argumentTypeNames[0];
+    }
+
+    public boolean isReactiveType(String typeName) {
+        String className = getClassName(typeName);
+        return className.equals(PublisherBuilder.class.getCanonicalName()) ||
+                className.equals(Mono.class.getCanonicalName()) ||
+                className.equals(Flux.class.getCanonicalName());
+    }
+
+    public boolean isListType(String typeName) {
+        String className = getClassName(typeName);
+        return className.equals(Collection.class.getCanonicalName()) ||
+                className.equals(List.class.getCanonicalName()) ||
+                className.equals(Set.class.getCanonicalName()) ||
+                className.equals(Flux.class.getCanonicalName());
     }
 
     public ClassName bestGuess(String classNameString) {

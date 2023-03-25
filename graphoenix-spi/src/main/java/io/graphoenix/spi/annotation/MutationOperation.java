@@ -6,7 +6,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.SOURCE)
 @Documented
 public @interface MutationOperation {
-    String value();
+
+    String value() default "";
 
     String selectionSet() default "";
 

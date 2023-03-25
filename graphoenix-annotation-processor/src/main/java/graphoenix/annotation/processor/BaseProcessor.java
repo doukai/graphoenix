@@ -9,11 +9,8 @@ import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
-import io.graphoenix.graphql.generator.translator.GraphQLApiBuilder;
-import io.graphoenix.graphql.generator.translator.JavaElementToEnum;
-import io.graphoenix.graphql.generator.translator.JavaElementToInputType;
-import io.graphoenix.graphql.generator.translator.JavaElementToInterface;
-import io.graphoenix.graphql.generator.translator.JavaElementToObject;
+import io.graphoenix.graphql.generator.translator.*;
+import io.graphoenix.spi.annotation.GraphQLOperation;
 import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -58,6 +55,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
     private JavaElementToObject javaElementToObject;
     private JavaElementToInterface javaElementToInterface;
     private JavaElementToInputType javaElementToInputType;
+    private JavaElementToOperation javaElementToOperation;
     private Types typeUtils;
 
     @Override
@@ -75,6 +73,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
         javaElementToObject = BeanContext.get(JavaElementToObject.class);
         javaElementToInterface = BeanContext.get(JavaElementToInterface.class);
         javaElementToInputType = BeanContext.get(JavaElementToInputType.class);
+        javaElementToOperation = BeanContext.get(JavaElementToOperation.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         IGraphQLFieldMapManager mapper = BeanContext.get(IGraphQLFieldMapManager.class);
 
@@ -147,6 +146,10 @@ public abstract class BaseProcessor extends AbstractProcessor {
         roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(this::registerGraphQLApiElement);
+
+        roundEnv.getElementsAnnotatedWith(GraphQLOperation.class).stream()
+                .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
+                .forEach(this::registerGraphQLOperationElement);
     }
 
     private void registerGraphQLApiElement(Element element) {
@@ -172,5 +175,10 @@ public abstract class BaseProcessor extends AbstractProcessor {
                             }
                         }
                 );
+    }
+
+    private void registerGraphQLOperationElement(Element element) {
+        javaElementToOperation.buildOperations((TypeElement) element, typeUtils)
+                .forEach(operation -> manager.registerGraphQL(operation));
     }
 }

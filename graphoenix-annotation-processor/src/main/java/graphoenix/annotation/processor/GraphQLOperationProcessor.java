@@ -96,7 +96,7 @@ public class GraphQLOperationProcessor extends BaseProcessor {
                                 .orElseThrow(() -> new ElementProcessException(ElementProcessErrorType.OPERATION_DAO_VALUE_NOT_EXIST));
 
                         Logger.info("start build operation resource for interface {}", typeElement.getQualifiedName().toString());
-                        Map<String, String> operationResourcesContent = javaElementToOperation.buildOperationResources(typeElement, typeUtils)
+                        Map<String, String> operationResourcesContent = javaElementToOperation.buildOperations(typeElement, typeUtils)
                                 .entrySet().stream()
                                 .collect(
                                         Collectors.toMap(

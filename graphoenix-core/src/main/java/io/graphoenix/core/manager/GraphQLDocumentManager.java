@@ -7,19 +7,7 @@ import io.graphoenix.core.document.InputObjectType;
 import io.graphoenix.core.document.InterfaceType;
 import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.spi.antlr.IGraphQLDirectiveManager;
-import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
-import io.graphoenix.spi.antlr.IGraphQLEnumManager;
-import io.graphoenix.spi.antlr.IGraphQLFieldManager;
-import io.graphoenix.spi.antlr.IGraphQLFragmentManager;
-import io.graphoenix.spi.antlr.IGraphQLInputObjectManager;
-import io.graphoenix.spi.antlr.IGraphQLInputValueManager;
-import io.graphoenix.spi.antlr.IGraphQLInterfaceManager;
-import io.graphoenix.spi.antlr.IGraphQLObjectManager;
-import io.graphoenix.spi.antlr.IGraphQLOperationManager;
-import io.graphoenix.spi.antlr.IGraphQLScalarManager;
-import io.graphoenix.spi.antlr.IGraphQLSchemaManager;
-import io.graphoenix.spi.antlr.IGraphQLUnionManager;
+import io.graphoenix.spi.antlr.*;
 import io.graphoenix.spi.constant.Hammurabi;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -65,6 +53,8 @@ import static io.graphoenix.spi.constant.Hammurabi.UPDATE_DIRECTIVE_NAME;
 @ApplicationScoped
 public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
+    private final IGraphQLOperationTypeManager graphQLOperationTypeManager;
+
     private final IGraphQLOperationManager graphQLOperationManager;
 
     private final IGraphQLSchemaManager graphQLSchemaManager;
@@ -90,7 +80,8 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     private final IGraphQLFragmentManager graphQLFragmentManager;
 
     @Inject
-    public GraphQLDocumentManager(IGraphQLOperationManager graphQLOperationManager,
+    public GraphQLDocumentManager(IGraphQLOperationTypeManager graphQLOperationTypeManager,
+                                  IGraphQLOperationManager graphQLOperationManager,
                                   IGraphQLSchemaManager graphQLSchemaManager,
                                   IGraphQLDirectiveManager graphQLDirectiveManager,
                                   IGraphQLObjectManager graphQLObjectManager,
@@ -102,6 +93,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                                   IGraphQLEnumManager graphQLEnumManager,
                                   IGraphQLScalarManager graphQLScalarManager,
                                   IGraphQLFragmentManager graphQLFragmentManager) {
+        this.graphQLOperationTypeManager = graphQLOperationTypeManager;
         this.graphQLOperationManager = graphQLOperationManager;
         this.graphQLSchemaManager = graphQLSchemaManager;
         this.graphQLDirectiveManager = graphQLDirectiveManager;
@@ -321,6 +313,8 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             registerSystemDefinition(definitionContext.typeSystemDefinition());
         } else if (definitionContext.fragmentDefinition() != null) {
             graphQLFragmentManager.register(definitionContext.fragmentDefinition());
+        } else if (definitionContext.operationDefinition() != null) {
+            graphQLOperationManager.register(definitionContext.operationDefinition());
         }
     }
 
@@ -355,7 +349,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     protected void registerOperationType(GraphqlParser.OperationTypeDefinitionContext operationTypeDefinitionContext) {
-        graphQLOperationManager.register(operationTypeDefinitionContext);
+        graphQLOperationTypeManager.register(operationTypeDefinitionContext);
+    }
+
+    protected void registerOperation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        graphQLOperationManager.register(operationDefinitionContext);
     }
 
     protected void registerTypeDefinition(GraphqlParser.TypeDefinitionContext typeDefinitionContext) {
@@ -460,7 +458,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public boolean isOperation(String name) {
-        return graphQLOperationManager.isOperation(name);
+        return graphQLOperationTypeManager.isOperation(name);
     }
 
     @Override
@@ -634,25 +632,35 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
-    public Optional<GraphqlParser.OperationTypeDefinitionContext> getOperation(String name) {
-        return graphQLOperationManager.getOperationTypeDefinition(name);
+    public Optional<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition(String name) {
+        return graphQLOperationTypeManager.getOperationTypeDefinition(name);
+    }
+
+    @Override
+    public Optional<GraphqlParser.OperationDefinitionContext> getOperationDefinition(String name) {
+        return graphQLOperationManager.getOperationDefinition(name);
+    }
+
+    @Override
+    public Stream<GraphqlParser.OperationDefinitionContext> getOperationDefinitions() {
+        return graphQLOperationManager.getOperationDefinitions();
     }
 
     @Override
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getQueryOperationTypeDefinition() {
-        return graphQLOperationManager.getOperationTypeDefinitions()
+        return graphQLOperationTypeManager.getOperationTypeDefinitions()
                 .filter(operationTypeDefinition -> operationTypeDefinition.operationType().QUERY() != null).findFirst();
     }
 
     @Override
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getMutationOperationTypeDefinition() {
-        return graphQLOperationManager.getOperationTypeDefinitions()
+        return graphQLOperationTypeManager.getOperationTypeDefinitions()
                 .filter(operationTypeDefinition -> operationTypeDefinition.operationType().MUTATION() != null).findFirst();
     }
 
     @Override
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getSubscriptionOperationTypeDefinition() {
-        return graphQLOperationManager.getOperationTypeDefinitions()
+        return graphQLOperationTypeManager.getOperationTypeDefinitions()
                 .filter(operationTypeDefinition -> operationTypeDefinition.operationType().SUBSCRIPTION() != null).findFirst();
     }
 
@@ -1110,6 +1118,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public void clearAll() {
+        graphQLOperationTypeManager.clear();
         graphQLOperationManager.clear();
         graphQLSchemaManager.clear();
         graphQLDirectiveManager.clear();
