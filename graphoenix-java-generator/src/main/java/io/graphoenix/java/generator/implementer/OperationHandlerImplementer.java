@@ -266,7 +266,7 @@ public class OperationHandlerImplementer {
                 .distinct()
                 .collect(Collectors.toList()).stream()
                 .map(className ->
-                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()))
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.toClassName(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -281,7 +281,7 @@ public class OperationHandlerImplementer {
                 .distinct()
                 .collect(Collectors.toList()).stream()
                 .map(className ->
-                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()))
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.toClassName(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -380,7 +380,7 @@ public class OperationHandlerImplementer {
             builder.addStatement("$T $L = $L.get().$L($L)",
                     TYPE_UTIL.getTypeName(returnClassName),
                     fieldDefinitionContext.name().getText(),
-                    typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
+                    typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
                     methodName,
                     CodeBlock.join(parameters.stream()
                             .map(parameter ->
@@ -511,11 +511,11 @@ public class OperationHandlerImplementer {
                         .collect(Collectors.toList())
                         .forEach(className ->
                                 builder.addParameter(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)),
-                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName())
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.toClassName(className)),
+                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName())
                                 ).addStatement("this.$L = $L",
-                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
-                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName())
+                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
+                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName())
                                 )
                         );
                 manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
@@ -542,11 +542,11 @@ public class OperationHandlerImplementer {
                         .collect(Collectors.toList())
                         .forEach(className ->
                                 builder.addParameter(
-                                        ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)),
-                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName())
+                                        ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.toClassName(className)),
+                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName())
                                 ).addStatement("this.$L = $L",
-                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
-                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName())
+                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
+                                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName())
                                 )
                         );
                 manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))

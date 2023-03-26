@@ -76,7 +76,7 @@ public class GrpcObjectHandlerBuilder {
         String grpcTypeName = grpcNameUtil.getGrpcTypeName(objectTypeDefinitionContext);
 
         ClassName className = manager.getClassName(objectTypeDefinitionContext)
-                .map(TYPE_NAME_UTIL::bestGuess)
+                .map(TYPE_NAME_UTIL::toClassName)
                 .orElseGet(() -> ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()));
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)

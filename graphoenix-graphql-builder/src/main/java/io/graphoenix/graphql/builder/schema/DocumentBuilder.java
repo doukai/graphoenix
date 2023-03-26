@@ -77,7 +77,13 @@ public class DocumentBuilder {
                 .filter(manager::isNotContainerType)
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+        buildOperationType();
+        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
+        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+        mapper.registerFieldMaps();
+    }
 
+    public void buildOperationType() {
         ObjectType queryType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
                 .map(this::buildObject)
                 .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME))
@@ -95,10 +101,6 @@ public class DocumentBuilder {
         manager.registerGraphQL(queryType.toString());
         manager.registerGraphQL(mutationType.toString());
         manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
-
-        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
-        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
-        mapper.registerFieldMaps();
     }
 
     public Document buildDocument() {

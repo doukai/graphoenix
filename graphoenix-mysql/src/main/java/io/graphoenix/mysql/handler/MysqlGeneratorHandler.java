@@ -1,5 +1,6 @@
 package io.graphoenix.mysql.handler;
 
+import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.mysql.translator.handler.OperationToSQLConvertHandler;
 import io.graphoenix.mysql.translator.handler.SQLFormatHandler;
 import io.graphoenix.spi.handler.GeneratorHandler;
@@ -18,6 +19,18 @@ public class MysqlGeneratorHandler implements GeneratorHandler {
     public MysqlGeneratorHandler(OperationToSQLConvertHandler operationToSQLConvertHandler, SQLFormatHandler sqlFormatHandler) {
         this.operationToSQLConvertHandler = operationToSQLConvertHandler;
         this.sqlFormatHandler = sqlFormatHandler;
+    }
+
+    @Override
+    public String query(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        String select = operationToSQLConvertHandler.queryToSelect(operationDefinitionContext);
+        return sqlFormatHandler.query(select);
+    }
+
+    @Override
+    public String mutation(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        Stream<String> statements = operationToSQLConvertHandler.mutationToStatements(operationDefinitionContext);
+        return sqlFormatHandler.mutation(statements);
     }
 
     @Override

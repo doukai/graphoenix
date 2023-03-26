@@ -112,7 +112,7 @@ public class InvokeHandlerBuilder {
                 .flatMap(classMap ->
                         classMap.keySet().stream()
                                 .map(className ->
-                                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()))
+                                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.toClassName(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()))
                                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                                 .build()
                                 )
@@ -133,8 +133,8 @@ public class InvokeHandlerBuilder {
                         classNameSet.stream()
                                 .map(className ->
                                         ParameterSpec.builder(
-                                                ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)),
-                                                typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName())
+                                                ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.toClassName(className)),
+                                                typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName())
                                         ).build()
                                 )
                                 .collect(Collectors.toList())
@@ -143,8 +143,8 @@ public class InvokeHandlerBuilder {
 
         classNameSet.forEach(className ->
                 builder.addStatement("this.$L = $L",
-                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
-                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName())
+                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
+                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName())
                 )
         );
 
@@ -162,7 +162,7 @@ public class InvokeHandlerBuilder {
 
     private MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         ClassName typeClassName = manager.getClassName(objectTypeDefinitionContext)
-                .map(TYPE_NAME_UTIL::bestGuess)
+                .map(TYPE_NAME_UTIL::toClassName)
                 .orElseGet(() -> ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()));
         String typeParameterName = getParameterName(objectTypeDefinitionContext);
 
@@ -195,7 +195,7 @@ public class InvokeHandlerBuilder {
                                                                                         .flatMap(entry ->
                                                                                                 entry.getValue().stream()
                                                                                                         .map(methodEntry -> {
-                                                                                                                    String apiVariableName = typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(entry.getKey()).simpleName());
+                                                                                                                    String apiVariableName = typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(entry.getKey()).simpleName());
                                                                                                                     String invokeFieldName = typeManager.getInvokeFieldName(methodEntry.getKey());
                                                                                                                     String fieldSetterMethodName = typeManager.getFieldSetterMethodName(invokeFieldName);
                                                                                                                     CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", invokeFieldName);

@@ -147,6 +147,7 @@ public abstract class BaseProcessor extends AbstractProcessor {
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(this::registerGraphQLApiElement);
 
+        documentBuilder.buildOperationType();
         roundEnv.getElementsAnnotatedWith(GraphQLOperation.class).stream()
                 .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
                 .forEach(this::registerGraphQLOperationElement);

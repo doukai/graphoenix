@@ -114,7 +114,7 @@ public class SelectionFilterBuilder {
         ClassName typeClassName;
         Optional<String> className = manager.getClassName(objectTypeDefinitionContext);
         if (className.isPresent()) {
-            typeClassName = TYPE_NAME_UTIL.bestGuess(className.get());
+            typeClassName = TYPE_NAME_UTIL.toClassName(className.get());
         } else {
             typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
         }
@@ -244,7 +244,7 @@ public class SelectionFilterBuilder {
         ClassName typeClassName;
         Optional<String> className = manager.getClassName(objectTypeDefinitionContext);
         if (className.isPresent()) {
-            typeClassName = TYPE_NAME_UTIL.bestGuess(className.get());
+            typeClassName = TYPE_NAME_UTIL.toClassName(className.get());
         } else {
             typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
         }

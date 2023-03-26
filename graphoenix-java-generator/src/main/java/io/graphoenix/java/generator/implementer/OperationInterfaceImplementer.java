@@ -6,16 +6,15 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.ElementProcessException;
+import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.spi.annotation.MutationOperation;
-import io.graphoenix.spi.annotation.QueryOperation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.graphoenix.spi.handler.GeneratorHandler;
 import io.vavr.collection.HashMap;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -25,7 +24,10 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,12 +42,14 @@ public class OperationInterfaceImplementer {
     private final IGraphQLDocumentManager manager;
     private final TypeManager typeManager;
     private final GraphQLConfig graphQLConfig;
+    private final GeneratorHandler generatorHandler;
 
     @Inject
-    public OperationInterfaceImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
+    public OperationInterfaceImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig, GeneratorHandler generatorHandler) {
         this.manager = manager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
+        this.generatorHandler = generatorHandler;
     }
 
     public void writeToFiler(Filer filer) throws IOException {
@@ -81,8 +85,32 @@ public class OperationInterfaceImplementer {
                 .forEach((packageName, interfaceMap) ->
                         interfaceMap.forEach((interfaceName, operationList) -> {
                                     try {
-                                        this.buildImplementClass(packageName, interfaceName, operationList, "").writeTo(filer);
+                                        this.buildImplementClass(packageName, interfaceName, operationList, generatorHandler.extension()).writeTo(filer);
                                         Logger.info("{} build success", packageName.concat(".").concat(interfaceName) + "Impl");
+
+                                        for (GraphqlParser.OperationDefinitionContext operationDefinitionContext : operationList) {
+                                            String methodName = typeManager.getMethodName(operationDefinitionContext);
+                                            int index = getIndex(operationDefinitionContext);
+                                            String resourceName = interfaceName.concat("_").concat(methodName).concat("_").concat(String.valueOf(index)).concat(".").concat(generatorHandler.extension());
+                                            String content;
+                                            if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+                                                content = generatorHandler.query(operationDefinitionContext);
+                                            } else if (operationDefinitionContext.operationType().MUTATION() != null) {
+                                                content = generatorHandler.mutation(operationDefinitionContext);
+                                            } else {
+                                                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+                                            }
+                                            FileObject fileObject = filer.createResource(
+                                                    StandardLocation.CLASS_OUTPUT,
+                                                    packageName,
+                                                    resourceName
+                                            );
+                                            Writer writer = fileObject.openWriter();
+                                            writer.write(content);
+                                            writer.close();
+                                            Logger.info("{} build success", resourceName);
+                                            Logger.debug("resource content:\r\n{}", content);
+                                        }
                                     } catch (IOException e) {
                                         Logger.error(e);
                                     }
@@ -115,18 +143,8 @@ public class OperationInterfaceImplementer {
                 .collect(Collectors.toList());
     }
 
-    private int getIndex(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        String[] nameArray = operationDefinitionContext.name().getText().split("_");
-        return Integer.parseInt(nameArray[nameArray.length - 1]);
-    }
-
-    private String getMethodName(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        String[] nameArray = operationDefinitionContext.name().getText().split("_");
-        return String.valueOf(nameArray[nameArray.length - 2]);
-    }
-
     private FieldSpec buildFileContentField(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        String methodName = getMethodName(operationDefinitionContext);
+        String methodName = typeManager.getMethodName(operationDefinitionContext);
         int index = getIndex(operationDefinitionContext);
         return FieldSpec.builder(
                 TypeName.get(String.class),
@@ -145,13 +163,13 @@ public class OperationInterfaceImplementer {
                 .forEach(operationDefinitionContext ->
                         builder.addStatement(
                                 "$L = fileToString($T.class, $S)",
-                                getMethodName(operationDefinitionContext)
+                                typeManager.getMethodName(operationDefinitionContext)
                                         .concat("_")
                                         .concat(String.valueOf(getIndex(operationDefinitionContext))),
                                 typeClassName,
                                 interfaceName
                                         .concat("_")
-                                        .concat(getMethodName(operationDefinitionContext))
+                                        .concat(typeManager.getMethodName(operationDefinitionContext))
                                         .concat("_")
                                         .concat(String.valueOf(getIndex(operationDefinitionContext)))
                                         .concat(".")
@@ -162,33 +180,30 @@ public class OperationInterfaceImplementer {
     }
 
     private MethodSpec executableElementToMethodSpec(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        TypeName typeName = TYPE_NAME_UTIL.bestGuess(typeManager.getReturnClassName(operationDefinitionContext));
+        TypeName typeName = TYPE_NAME_UTIL.toClassName(typeManager.getReturnClassName(operationDefinitionContext));
         List<AbstractMap.SimpleEntry<String, String>> parameters = typeManager.getParameters(operationDefinitionContext);
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeManager.getMethodName(operationDefinitionContext))
                 .addModifiers(Modifier.PUBLIC)
                 .addParameters(
                         parameters.stream()
-                                .map(entry -> ParameterSpec.builder(TYPE_NAME_UTIL.bestGuess(entry.getValue()), entry.getKey()).build())
+                                .map(entry -> ParameterSpec.builder(TYPE_NAME_UTIL.toTypeName(entry.getValue()), entry.getKey()).build())
                                 .collect(Collectors.toList())
                 )
                 .returns(typeName)
                 .addException(ClassName.get(Exception.class));
 
         if (parameters.size() == 0) {
-            builder.addStatement(getCodeBlock(operationDefinitionContext));
+            builder.addStatement(getCodeBlock(operationDefinitionContext, CodeBlock.of("$T.empty().toJavaMap()", ClassName.get(HashMap.class))));
         } else {
-            CodeBlock mapOf = CodeBlock.join(
-                    parameters.stream()
-                            .map(entry ->
-                                    CodeBlock.of(
-                                            "$S, (Object)$L",
-                                            entry.getKey(),
-                                            entry.getKey()
-                                    )
-                            )
-                            .collect(Collectors.toList()),
-                    ", ");
+            CodeBlock mapOf = CodeBlock.of(
+                    "$T.of($L).toJavaMap()",
+                    ClassName.get(HashMap.class),
+                    CodeBlock.join(
+                            parameters.stream().map(entry -> CodeBlock.of("$S, (Object)$L", entry.getKey(), entry.getKey())).collect(Collectors.toList()),
+                            ", "
+                    )
+            );
             builder.addStatement(getCodeBlock(operationDefinitionContext, mapOf));
         }
         return builder.build();
@@ -198,25 +213,24 @@ public class OperationInterfaceImplementer {
         String fieldName = operationDefinitionContext.selectionSet().selection(0).field().name().getText();
         String methodName = typeManager.getMethodName(operationDefinitionContext);
         int index = getIndex(operationDefinitionContext);
-        String returnTypeName = typeManager.getReturnClassName(operationDefinitionContext);
-        String className = TYPE_NAME_UTIL.getClassName(returnTypeName);
-        String[] argumentTypeNames = TYPE_NAME_UTIL.getArgumentTypeNames(returnTypeName);
+        String typeName = typeManager.getReturnClassName(operationDefinitionContext);
+        String className = TYPE_NAME_UTIL.getClassName(typeName);
+        String[] argumentTypeNames = TYPE_NAME_UTIL.getArgumentTypeNames(typeName);
         String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
         String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
 
         if (argumentTypeNames.length > 0) {
             if (className.equals(Mono.class.getCanonicalName())) {
-                returnTypeName = TYPE_NAME_UTIL.getArgumentTypeName0(className);
-                className = TYPE_NAME_UTIL.getClassName(returnTypeName);
-                argumentTypeNames = TYPE_NAME_UTIL.getArgumentTypeNames(returnTypeName);
+                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
+                className = TYPE_NAME_UTIL.getClassName(typeName);
+                argumentTypeNames = TYPE_NAME_UTIL.getArgumentTypeNames(typeName);
                 if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                     if (argumentTypeNames.length > 0) {
                         Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(className);
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
-                                    "return findAsync($L, $T.of($L).toJavaMap(), $T.class).map($T::$L).map($T::new)",
+                                    "return findAsync($L, $L, $T.class).map($T::$L).map($T::new)",
                                     methodName.concat("_").concat(String.valueOf(index)),
-                                    ClassName.get(HashMap.class),
                                     mapOf,
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
@@ -226,9 +240,8 @@ public class OperationInterfaceImplementer {
                         }
                     }
                     return CodeBlock.of(
-                            "return findAsync($L, $T.of($L).toJavaMap(), $T.class).map($T::$L)",
+                            "return findAsync($L, $L, $T.class).map($T::$L)",
                             methodName.concat("_").concat(String.valueOf(index)),
-                            ClassName.get(HashMap.class),
                             mapOf,
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
@@ -239,9 +252,8 @@ public class OperationInterfaceImplementer {
                         Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(className);
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
-                                    "return saveAsync($L, $T.of($L).toJavaMap(), $T.class).map($T::$L).map($T::new)",
+                                    "return saveAsync($L, $L, $T.class).map($T::$L).map($T::new)",
                                     methodName.concat("_").concat(String.valueOf(index)),
-                                    ClassName.get(HashMap.class),
                                     mapOf,
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
@@ -251,9 +263,8 @@ public class OperationInterfaceImplementer {
                         }
                     }
                     return CodeBlock.of(
-                            "return saveAsync($L, $T.of($L).toJavaMap(), $T.class).map($T::$L)",
+                            "return saveAsync($L, $L, $T.class).map($T::$L)",
                             methodName.concat("_").concat(String.valueOf(index)),
-                            ClassName.get(HashMap.class),
                             mapOf,
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
@@ -261,17 +272,16 @@ public class OperationInterfaceImplementer {
                     );
                 }
             } else if (className.equals(PublisherBuilder.class.getCanonicalName())) {
-                returnTypeName = TYPE_NAME_UTIL.getArgumentTypeName0(className);
-                className = TYPE_NAME_UTIL.getClassName(returnTypeName);
-                argumentTypeNames = TYPE_NAME_UTIL.getArgumentTypeNames(returnTypeName);
+                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
+                className = TYPE_NAME_UTIL.getClassName(typeName);
+                argumentTypeNames = TYPE_NAME_UTIL.getArgumentTypeNames(typeName);
                 if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                     if (argumentTypeNames.length > 0) {
                         Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(className);
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
-                                    "return findAsyncBuilder($L, $T.of($L).toJavaMap(), $T.class).map($T::$L).map($T::new)",
+                                    "return findAsyncBuilder($L, $L, $T.class).map($T::$L).map($T::new)",
                                     methodName.concat("_").concat(String.valueOf(index)),
-                                    ClassName.get(HashMap.class),
                                     mapOf,
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
@@ -281,9 +291,8 @@ public class OperationInterfaceImplementer {
                         }
                     }
                     return CodeBlock.of(
-                            "return findAsyncBuilder($L, $T.of($L).toJavaMap(), $T.class).map($T::$L)",
+                            "return findAsyncBuilder($L, $L, $T.class).map($T::$L)",
                             methodName.concat("_").concat(String.valueOf(index)),
-                            ClassName.get(HashMap.class),
                             mapOf,
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
@@ -294,9 +303,8 @@ public class OperationInterfaceImplementer {
                         Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(className);
                         if (collectionImplementationClassName.isPresent()) {
                             return CodeBlock.of(
-                                    "return saveAsyncBuilder($L, $T.of($L).toJavaMap(), $T.class).map($T::$L).map($T::new)",
+                                    "return saveAsyncBuilder($L, $L, $T.class).map($T::$L).map($T::new)",
                                     methodName.concat("_").concat(String.valueOf(index)),
-                                    ClassName.get(HashMap.class),
                                     mapOf,
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
                                     ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
@@ -306,9 +314,8 @@ public class OperationInterfaceImplementer {
                         }
                     }
                     return CodeBlock.of(
-                            "return saveAsyncBuilder($L, $T.of($L).toJavaMap(), $T.class).map($T::$L)",
+                            "return saveAsyncBuilder($L, $L, $T.class).map($T::$L)",
                             methodName.concat("_").concat(String.valueOf(index)),
-                            ClassName.get(HashMap.class),
                             mapOf,
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
                             ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
@@ -316,26 +323,24 @@ public class OperationInterfaceImplementer {
                     );
                 }
             } else {
-                returnTypeName = TYPE_NAME_UTIL.getArgumentTypeName0(className);
-                className = TYPE_NAME_UTIL.getClassName(returnTypeName);
+                typeName = TYPE_NAME_UTIL.getArgumentTypeName0(typeName);
+                className = TYPE_NAME_UTIL.getClassName(typeName);
                 if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                     Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(className);
                     return collectionImplementationClassName
                             .map(collectionClassName ->
                                     CodeBlock.of(
-                                            "return new $T(find($L, $T.of($L).toJavaMap(), $T.class).$L())",
+                                            "return new $T(find($L, $L, $T.class).$L())",
                                             collectionClassName,
                                             methodName.concat("_").concat(String.valueOf(index)),
-                                            ClassName.get(HashMap.class),
                                             mapOf,
                                             ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
                                             typeManager.getFieldGetterMethodName(fieldName)
                                     )
                             ).orElseGet(() ->
                                     CodeBlock.of(
-                                            "return find($L, $T.of($L).toJavaMap(), $T.class).$L()",
+                                            "return find($L, $L, $T.class).$L()",
                                             methodName.concat("_").concat(String.valueOf(index)),
-                                            ClassName.get(HashMap.class),
                                             mapOf,
                                             ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
                                             typeManager.getFieldGetterMethodName(fieldName)
@@ -346,19 +351,17 @@ public class OperationInterfaceImplementer {
                     return collectionImplementationClassName
                             .map(collectionClassName ->
                                     CodeBlock.of(
-                                            "return new $T(save($L, $T.of($L).toJavaMap(), $T.class).$L())",
+                                            "return new $T(save($L, $L, $T.class).$L())",
                                             collectionClassName,
                                             methodName.concat("_").concat(String.valueOf(index)),
-                                            ClassName.get(HashMap.class),
                                             mapOf,
                                             ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
                                             typeManager.getFieldGetterMethodName(fieldName)
                                     )
                             ).orElseGet(() ->
                                     CodeBlock.of(
-                                            "return save($L, $T.of($L).toJavaMap(), $T.class).$L()",
+                                            "return save($L, $L, $T.class).$L()",
                                             methodName.concat("_").concat(String.valueOf(index)),
-                                            ClassName.get(HashMap.class),
                                             mapOf,
                                             ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
                                             typeManager.getFieldGetterMethodName(fieldName)
@@ -369,226 +372,23 @@ public class OperationInterfaceImplementer {
         } else {
             if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
                 return CodeBlock.of(
-                        "return find($L, $T.of($L).toJavaMap(), $T.class).$L()",
+                        "return find($L, $L, $T.class).$L()",
                         methodName.concat("_").concat(String.valueOf(index)),
-                        ClassName.get(HashMap.class),
                         mapOf,
                         ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
                         typeManager.getFieldGetterMethodName(fieldName)
                 );
             } else if (operationDefinitionContext.operationType().MUTATION() != null) {
                 return CodeBlock.of(
-                        "return save($L, $T.of($L).toJavaMap(), $T.class).$L()",
+                        "return save($L, $L, $T.class).$L()",
                         methodName.concat("_").concat(String.valueOf(index)),
-                        ClassName.get(HashMap.class),
                         mapOf,
                         ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
                         typeManager.getFieldGetterMethodName(fieldName)
                 );
             }
         }
-        throw new ElementProcessException(UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE.bind(returnTypeName));
-    }
-
-    private CodeBlock getCodeBlock(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        String methodName = getMethodName(operationDefinitionContext);
-        int index = getIndex(operationDefinitionContext);
-        TypeName typeName = ClassName.get(executableElement.getReturnType());
-        if (typeName instanceof ParameterizedTypeName) {
-            ClassName rawType = ((ParameterizedTypeName) typeName).rawType;
-            if (rawType.canonicalName().equals(Mono.class.getCanonicalName())) {
-                TypeName argumentType = ((ParameterizedTypeName) typeName).typeArguments.get(0);
-                if (executableElement.getAnnotation(QueryOperation.class) != null) {
-                    String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-                    String value = executableElement.getAnnotation(QueryOperation.class).value();
-                    if (argumentType instanceof ParameterizedTypeName) {
-                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(((ParameterizedTypeName) argumentType).rawType);
-                        if (collectionImplementationClassName.isPresent()) {
-                            return CodeBlock.of(
-                                    "return findAsync($L, new $T<>(), $T.class).map($T::$L).map($T::new)",
-                                    executableElement.getSimpleName().toString()
-                                            .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                                    ClassName.get(java.util.HashMap.class),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                                    typeManager.getFieldGetterMethodName(value),
-                                    collectionImplementationClassName.get()
-                            );
-                        }
-                    }
-                    return CodeBlock.of(
-                            "return findAsync($L, new $T<>(), $T.class).map($T::$L)",
-                            executableElement.getSimpleName().toString()
-                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                            ClassName.get(java.util.HashMap.class),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                            typeManager.getFieldGetterMethodName(value)
-                    );
-                } else if (executableElement.getAnnotation(MutationOperation.class) != null) {
-                    String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-                    String value = executableElement.getAnnotation(MutationOperation.class).value();
-                    if (argumentType instanceof ParameterizedTypeName) {
-                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(((ParameterizedTypeName) argumentType).rawType);
-                        if (collectionImplementationClassName.isPresent()) {
-                            return CodeBlock.of(
-                                    "return saveAsync($L, $new $T<>(), $T.class).map($T::$L).map($T::new)",
-                                    executableElement.getSimpleName().toString()
-                                            .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                                    ClassName.get(java.util.HashMap.class),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                                    typeManager.getFieldGetterMethodName(value),
-                                    collectionImplementationClassName.get()
-                            );
-                        }
-                    }
-                    return CodeBlock.of(
-                            "return saveAsync($L, $new $T<>(), $T.class).map($T::$L)",
-                            executableElement.getSimpleName().toString()
-                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                            ClassName.get(java.util.HashMap.class),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                            typeManager.getFieldGetterMethodName(value)
-                    );
-                }
-            } else if (rawType.canonicalName().equals(PublisherBuilder.class.getCanonicalName())) {
-                TypeName argumentType = ((ParameterizedTypeName) typeName).typeArguments.get(0);
-                if (executableElement.getAnnotation(QueryOperation.class) != null) {
-                    String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-                    String value = executableElement.getAnnotation(QueryOperation.class).value();
-                    if (argumentType instanceof ParameterizedTypeName) {
-                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(((ParameterizedTypeName) argumentType).rawType);
-                        if (collectionImplementationClassName.isPresent()) {
-                            return CodeBlock.of(
-                                    "return findAsyncBuilder($L, new $T<>(), $T.class).map($T::$L).map($T::new)",
-                                    executableElement.getSimpleName().toString()
-                                            .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                                    ClassName.get(java.util.HashMap.class),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                                    typeManager.getFieldGetterMethodName(value),
-                                    collectionImplementationClassName.get()
-                            );
-                        }
-                    }
-                    return CodeBlock.of(
-                            "return findAsyncBuilder($L, new $T<>(), $T.class).map($T::$L)",
-                            executableElement.getSimpleName().toString()
-                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                            ClassName.get(java.util.HashMap.class),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                            typeManager.getFieldGetterMethodName(value)
-                    );
-                } else if (executableElement.getAnnotation(MutationOperation.class) != null) {
-                    String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-                    String value = executableElement.getAnnotation(MutationOperation.class).value();
-                    if (argumentType instanceof ParameterizedTypeName) {
-                        Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(((ParameterizedTypeName) argumentType).rawType);
-                        if (collectionImplementationClassName.isPresent()) {
-                            return CodeBlock.of(
-                                    "return saveAsyncBuilder($L, new $T<>(), $T.class).map($T::$L).map($T::new)",
-                                    executableElement.getSimpleName().toString()
-                                            .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                                    ClassName.get(java.util.HashMap.class),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                                    ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                                    typeManager.getFieldGetterMethodName(value),
-                                    collectionImplementationClassName.get()
-                            );
-                        }
-                    }
-                    return CodeBlock.of(
-                            "return saveAsyncBuilder($L, new $T<>(), $T.class).map($T::$L)",
-                            executableElement.getSimpleName().toString()
-                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                            ClassName.get(java.util.HashMap.class),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                            typeManager.getFieldGetterMethodName(value)
-                    );
-                }
-            } else {
-                if (executableElement.getAnnotation(QueryOperation.class) != null) {
-                    String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-                    String value = executableElement.getAnnotation(QueryOperation.class).value();
-                    Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(rawType);
-                    return collectionImplementationClassName
-                            .map(className ->
-                                    CodeBlock.of(
-                                            "return new $T(find($L, new $T<>(), $T.class).$L())",
-                                            className,
-                                            executableElement.getSimpleName().toString()
-                                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                                            ClassName.get(java.util.HashMap.class),
-                                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                                            typeManager.getFieldGetterMethodName(value)
-                                    )
-                            ).orElseGet(() ->
-                                    CodeBlock.of(
-                                            "return find($L, new $T<>(), $T.class).$L()",
-                                            executableElement.getSimpleName().toString()
-                                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                                            ClassName.get(java.util.HashMap.class),
-                                            ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                                            typeManager.getFieldGetterMethodName(value)
-                                    )
-                            );
-                } else if (executableElement.getAnnotation(MutationOperation.class) != null) {
-                    String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-                    String value = executableElement.getAnnotation(MutationOperation.class).value();
-                    Optional<ClassName> collectionImplementationClassName = getCollectionImplementationClassName(rawType);
-                    return collectionImplementationClassName
-                            .map(className ->
-                                    CodeBlock.of(
-                                            "return new $T(save($L, new $T<>(), $T.class).$L())",
-                                            className,
-                                            executableElement.getSimpleName().toString()
-                                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                                            ClassName.get(java.util.HashMap.class),
-                                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                                            typeManager.getFieldGetterMethodName(value)
-                                    )
-                            ).orElseGet(() ->
-                                    CodeBlock.of(
-                                            "return save($L, new $T<>(), $T.class).$L()",
-                                            executableElement.getSimpleName().toString()
-                                                    .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                                            ClassName.get(java.util.HashMap.class),
-                                            ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                                            typeManager.getFieldGetterMethodName(value)
-                                    )
-                            );
-                }
-            }
-        } else {
-            if (executableElement.getAnnotation(QueryOperation.class) != null) {
-                String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST));
-                String value = executableElement.getAnnotation(QueryOperation.class).value();
-                return CodeBlock.of(
-                        "return find($L, new $T<>(), $T.class).$L()",
-                        executableElement.getSimpleName().toString()
-                                .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                        ClassName.get(java.util.HashMap.class),
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), queryTypeName),
-                        typeManager.getFieldGetterMethodName(value)
-                );
-            } else if (executableElement.getAnnotation(MutationOperation.class) != null) {
-                String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST));
-                String value = executableElement.getAnnotation(MutationOperation.class).value();
-                return CodeBlock.of(
-                        "return save($L, new $T<>(), $T.class).$L()",
-                        executableElement.getSimpleName().toString()
-                                .concat("_" + typeElement.getEnclosedElements().indexOf(executableElement)),
-                        ClassName.get(java.util.HashMap.class),
-                        ClassName.get(graphQLConfig.getObjectTypePackageName(), mutationTypeName),
-                        typeManager.getFieldGetterMethodName(value)
-                );
-            }
-        }
-        throw new ElementProcessException(UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE.bind(executableElement.getReturnType().toString()));
+        throw new ElementProcessException(UNSUPPORTED_OPERATION_METHOD_RETURN_TYPE.bind(typeName));
     }
 
     private Optional<ClassName> getCollectionImplementationClassName(String className) {
@@ -600,8 +400,13 @@ public class OperationInterfaceImplementer {
             } else if (className.equals(Set.class.getCanonicalName())) {
                 return Optional.of(ClassName.get(LinkedHashSet.class));
             } else {
-                return Optional.of(TYPE_NAME_UTIL.bestGuess(className));
+                return Optional.of(TYPE_NAME_UTIL.toClassName(className));
             }
         }
+    }
+
+    private int getIndex(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        String[] nameArray = operationDefinitionContext.name().getText().split("_");
+        return Integer.parseInt(nameArray[nameArray.length - 1]);
     }
 }

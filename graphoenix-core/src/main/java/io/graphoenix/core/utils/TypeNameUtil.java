@@ -1,6 +1,7 @@
 package io.graphoenix.core.utils;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -71,9 +72,41 @@ public enum TypeNameUtil {
                 className.equals(Flux.class.getCanonicalName());
     }
 
-    public ClassName bestGuess(String classNameString) {
-        int i = classNameString.lastIndexOf(".");
-        return ClassName.get(classNameString.substring(0, i), classNameString.substring(i + 1));
+    public ClassName toClassName(String className) {
+        int i = className.lastIndexOf(".");
+        if (i == -1) {
+            ClassName.bestGuess(className);
+        }
+        return ClassName.get(className.substring(0, i), className.substring(i + 1));
+    }
+
+    public TypeName toTypeName(String typeName) {
+        int i = typeName.lastIndexOf(".");
+        if (i == -1) {
+            switch (typeName) {
+                case "void":
+                    return TypeName.VOID;
+                case "boolean":
+                    return TypeName.BOOLEAN;
+                case "byte":
+                    return TypeName.BYTE;
+                case "short":
+                    return TypeName.SHORT;
+                case "int":
+                    return TypeName.INT;
+                case "long":
+                    return TypeName.LONG;
+                case "char":
+                    return TypeName.CHAR;
+                case "float":
+                    return TypeName.FLOAT;
+                case "double":
+                    return TypeName.DOUBLE;
+                default:
+                    return ClassName.bestGuess(typeName);
+            }
+        }
+        return ClassName.get(typeName.substring(0, i), typeName.substring(i + 1));
     }
 
     public String packageNameToUnderline(String packageName) {

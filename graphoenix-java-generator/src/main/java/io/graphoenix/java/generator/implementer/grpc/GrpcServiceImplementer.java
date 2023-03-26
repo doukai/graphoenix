@@ -280,10 +280,10 @@ public class GrpcServiceImplementer {
 
         switch (operationType) {
             case QUERY:
-                queryInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.bestGuess(className)));
+                queryInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.toClassName(className)));
                 break;
             case MUTATION:
-                mutationInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.bestGuess(className)));
+                mutationInvokeClassNames.forEach(className -> builder.addStatement("this.$L = $T.getProvider($T.class)", typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()), ClassName.get(BeanContext.class), TYPE_NAME_UTIL.toClassName(className)));
                 builder.addStatement("this.validator = $T.getProvider($T.class)", ClassName.get(BeanContext.class), ClassName.get(JsonSchemaValidator.class));
                 break;
             default:
@@ -295,7 +295,7 @@ public class GrpcServiceImplementer {
     private Set<FieldSpec> buildQueryFields() {
         return queryInvokeClassNames.stream()
                 .map(className ->
-                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()))
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.toClassName(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -305,7 +305,7 @@ public class GrpcServiceImplementer {
     private Set<FieldSpec> buildMutationFields() {
         return mutationInvokeClassNames.stream()
                 .map(className ->
-                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.bestGuess(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()))
+                        FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Provider.class), TYPE_NAME_UTIL.toClassName(className)), typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()))
                                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL)
                                 .build()
                 )
@@ -369,28 +369,28 @@ public class GrpcServiceImplementer {
             if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
                 resultMapBlock = Optional.of(CodeBlock.of(".flatMap($L -> $T.from($L.buildRs()))", fieldDefinitionContext.name().getText(), ClassName.get(Mono.class), fieldDefinitionContext.name().getText()));
                 invokeCodeBlock = CodeBlock.of(".map(selectionContext -> $L.get().$L($L))",
-                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
+                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
                         invokeMethodName,
                         parametersCodeBlock
                 );
             } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
                 resultMapBlock = Optional.empty();
                 invokeCodeBlock = CodeBlock.of(".flatMap(selectionContext -> $L.get().$L($L))",
-                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
+                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
                         invokeMethodName,
                         parametersCodeBlock
                 );
             } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
                 resultMapBlock = Optional.of(CodeBlock.of(".flatMap($L -> $L.collectList())", fieldDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()));
                 invokeCodeBlock = CodeBlock.of(".map(selectionContext -> $L.get().$L($L))",
-                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
+                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
                         invokeMethodName,
                         parametersCodeBlock
                 );
             } else {
                 resultMapBlock = Optional.empty();
                 invokeCodeBlock = CodeBlock.of(".map(selectionContext -> $L.get().$L($L))",
-                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.bestGuess(className).simpleName()),
+                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
                         invokeMethodName,
                         parametersCodeBlock
                 );

@@ -15,15 +15,15 @@ public enum TypeUtil {
         String className = TYPE_NAME_UTIL.getClassName(typeName);
         String[] argumentTypeNames = TYPE_NAME_UTIL.getArgumentTypeNames(typeName);
         if (argumentTypeNames.length == 1) {
-            return ParameterizedTypeName.get(TYPE_NAME_UTIL.bestGuess(className), getTypeName(argumentTypeNames[0]));
+            return ParameterizedTypeName.get(TYPE_NAME_UTIL.toClassName(className), getTypeName(argumentTypeNames[0]));
         } else if (argumentTypeNames.length > 1) {
-            return ParameterizedTypeName.get(TYPE_NAME_UTIL.bestGuess(className), Arrays.stream(argumentTypeNames).map(this::getTypeName).toArray(TypeName[]::new));
+            return ParameterizedTypeName.get(TYPE_NAME_UTIL.toClassName(className), Arrays.stream(argumentTypeNames).map(this::getTypeName).toArray(TypeName[]::new));
         } else {
-            return TYPE_NAME_UTIL.bestGuess(className);
+            return TYPE_NAME_UTIL.toClassName(className);
         }
     }
 
     public ClassName getClassName(String typeName) {
-        return TYPE_NAME_UTIL.bestGuess(TYPE_NAME_UTIL.getClassName(typeName));
+        return TYPE_NAME_UTIL.toClassName(TYPE_NAME_UTIL.getClassName(typeName));
     }
 }

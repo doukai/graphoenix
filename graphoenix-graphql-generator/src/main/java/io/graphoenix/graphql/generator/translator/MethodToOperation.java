@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
+import com.google.common.base.CaseFormat;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.*;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 import static io.graphoenix.core.error.GraphQLErrorType.MUTATION_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE;
-import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class MethodToOperation {

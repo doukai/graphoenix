@@ -481,7 +481,7 @@ public class TypeSpecBuilder {
                     return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + layer);
                 } else {
                     return manager.getClassName(object.get())
-                            .map(TYPE_NAME_UTIL::bestGuess)
+                            .map(TYPE_NAME_UTIL::toClassName)
                             .orElseGet(() -> ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText()));
                 }
             }
@@ -489,14 +489,14 @@ public class TypeSpecBuilder {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
             if (enumType.isPresent()) {
                 return manager.getClassName(enumType.get())
-                        .map(TYPE_NAME_UTIL::bestGuess)
+                        .map(TYPE_NAME_UTIL::toClassName)
                         .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()));
             }
         } else if (manager.isInterface(nameContext.getText())) {
             Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(nameContext.getText());
             if (interfaceType.isPresent()) {
                 return manager.getClassName(interfaceType.get())
-                        .map(TYPE_NAME_UTIL::bestGuess)
+                        .map(TYPE_NAME_UTIL::toClassName)
                         .orElseGet(() -> ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText()));
             }
         } else if (manager.isInputObject(nameContext.getText())) {
@@ -506,7 +506,7 @@ public class TypeSpecBuilder {
                     return ClassName.get(graphQLConfig.getDirectivePackageName(), inputObject.get().name().getText());
                 } else {
                     return manager.getClassName(inputObject.get())
-                            .map(TYPE_NAME_UTIL::bestGuess)
+                            .map(TYPE_NAME_UTIL::toClassName)
                             .orElseGet(() -> ClassName.get(graphQLConfig.getInputObjectTypePackageName(), inputObject.get().name().getText()));
                 }
             }
