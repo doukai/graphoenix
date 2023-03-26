@@ -2,7 +2,6 @@ package io.graphoenix.graphql.generator.translator;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
-import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
@@ -69,13 +68,26 @@ public class ElementManager {
     }
 
     public Set<Field> buildFields(String typeName, int level, int layers) {
-        return getFields(typeName, level, layers)
-                .map(fieldDefinitionContext -> {
-                            Field field = new Field().setName(fieldDefinitionContext.name().getText());
-                            if (level <= layers) {
-                                field.setFields(buildFields(manager.getFieldTypeName(fieldDefinitionContext.type()), level + 1, layers));
+        return manager.getFields(typeName)
+                .filter(manager::isNotInvokeField)
+                .filter(manager::isNotFetchField)
+                .filter(manager::isNotFunctionField)
+                .filter(manager::isNotConnectionField)
+                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                .flatMap(fieldDefinitionContext -> {
+                            String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
+                            if (manager.isObject(fieldTypeName)) {
+                                if (level <= layers) {
+                                    return Stream.of(
+                                            new Field(fieldDefinitionContext.name().getText())
+                                                    .setFields(buildFields(fieldTypeName, level + 1, layers))
+                                    );
+                                } else {
+                                    return Stream.empty();
+                                }
+                            } else {
+                                return Stream.of(new Field(fieldDefinitionContext.name().getText()));
                             }
-                            return field;
                         }
                 )
                 .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -83,16 +95,6 @@ public class ElementManager {
 
     public Set<Field> buildFields(String selectionSet) {
         return DOCUMENT_UTIL.graphqlToSelectionSet(selectionSet).selection().stream().map(Field::new).collect(Collectors.toSet());
-    }
-
-    public Stream<GraphqlParser.FieldDefinitionContext> getFields(String typeName, int level, int layers) {
-        return manager.getFields(typeName)
-                .filter(fieldDefinitionContext -> manager.isNotFunctionField(typeName, fieldDefinitionContext.name().getText()))
-                .filter(fieldDefinitionContext -> manager.isNotConnectionField(typeName, fieldDefinitionContext.name().getText()))
-                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                .filter(fieldDefinitionContext -> level < layers ||
-                        level == layers && (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type())) || manager.isEnum(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                );
     }
 
     public VariableElement getParameterFromExecutableElement(ExecutableElement executableElement, String name) {

@@ -18,6 +18,7 @@ import io.graphoenix.core.document.InterfaceType;
 import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.document.ScalarType;
 import io.graphoenix.core.document.Schema;
+import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -121,7 +122,8 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getObjects().map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInputObjects().map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 //TODO union type
-                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
+                .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(manager.getOperationDefinitions().map(Operation::new).map(Operation::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     public Optional<Schema> buildSchema() {

@@ -67,6 +67,7 @@ public class ApplicationProcessor extends BaseProcessor {
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
+            registerOperations(roundEnv);
             FileObject mainGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/main.gql");
             Writer writer = mainGraphQL.openWriter();
             writer.write(documentBuilder.getDocument().toString());

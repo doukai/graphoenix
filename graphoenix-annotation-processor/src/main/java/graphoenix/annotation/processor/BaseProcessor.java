@@ -146,11 +146,6 @@ public abstract class BaseProcessor extends AbstractProcessor {
         roundEnv.getElementsAnnotatedWith(GraphQLApi.class).stream()
                 .filter(element -> element.getKind().equals(ElementKind.CLASS))
                 .forEach(this::registerGraphQLApiElement);
-
-        documentBuilder.buildOperationType();
-        roundEnv.getElementsAnnotatedWith(GraphQLOperation.class).stream()
-                .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
-                .forEach(this::registerGraphQLOperationElement);
     }
 
     private void registerGraphQLApiElement(Element element) {
@@ -176,6 +171,12 @@ public abstract class BaseProcessor extends AbstractProcessor {
                             }
                         }
                 );
+    }
+
+    public void registerOperations(RoundEnvironment roundEnv) {
+        roundEnv.getElementsAnnotatedWith(GraphQLOperation.class).stream()
+                .filter(element -> element.getKind().equals(ElementKind.INTERFACE))
+                .forEach(this::registerGraphQLOperationElement);
     }
 
     private void registerGraphQLOperationElement(Element element) {

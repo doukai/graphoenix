@@ -1,8 +1,10 @@
 package graphoenix.annotation.processor;
 
 import com.google.auto.service.AutoService;
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.tinylog.Logger;
 
 import javax.annotation.processing.Filer;
@@ -39,8 +41,14 @@ public class PackageProcessor extends BaseProcessor {
         if (annotations.isEmpty()) {
             return false;
         }
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         registerElements(roundEnv);
+        if (graphQLConfig.getBuild()) {
+            manager.registerGraphQL(documentBuilder.buildDocument().toString());
+        }
+        registerOperations(roundEnv);
         try {
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/package.gql");
             Writer writer = packageGraphQL.openWriter();
