@@ -55,67 +55,57 @@ public class OperationInterfaceImplementer {
     public void writeToFiler(Filer filer) throws IOException {
         manager.getOperationDefinitions()
                 .map(operationDefinitionContext -> {
-                            String[] operationNameArray = operationDefinitionContext.name().getText().split("_");
-                            String packageName = String.join(".", Arrays.copyOfRange(operationNameArray, 0, operationNameArray.length - 4));
-                            String interfaceName = operationNameArray[operationNameArray.length - 3];
+                            String interfaceName = typeManager.getClassName(operationDefinitionContext);
                             return new AbstractMap.SimpleEntry<>(
-                                    packageName,
-                                    new AbstractMap.SimpleEntry<>(
-                                            interfaceName,
-                                            operationDefinitionContext
-                                    )
+                                    interfaceName,
+                                    operationDefinitionContext
                             );
                         }
                 )
                 .collect(
                         Collectors.groupingBy(
-                                Map.Entry<String, AbstractMap.SimpleEntry<String, GraphqlParser.OperationDefinitionContext>>::getKey,
+                                Map.Entry<String, GraphqlParser.OperationDefinitionContext>::getKey,
                                 Collectors.mapping(
-                                        Map.Entry<String, AbstractMap.SimpleEntry<String, GraphqlParser.OperationDefinitionContext>>::getValue,
-                                        Collectors.groupingBy(
-                                                Map.Entry<String, GraphqlParser.OperationDefinitionContext>::getKey,
-                                                Collectors.mapping(
-                                                        Map.Entry<String, GraphqlParser.OperationDefinitionContext>::getValue,
-                                                        Collectors.toList()
-                                                )
-                                        )
+                                        Map.Entry<String, GraphqlParser.OperationDefinitionContext>::getValue,
+                                        Collectors.toList()
                                 )
                         )
                 )
-                .forEach((packageName, interfaceMap) ->
-                        interfaceMap.forEach((interfaceName, operationList) -> {
-                                    try {
-                                        this.buildImplementClass(packageName, interfaceName, operationList, generatorHandler.extension()).writeTo(filer);
-                                        Logger.info("{} build success", packageName.concat(".").concat(interfaceName) + "Impl");
+                .forEach((interfaceName, operationList) -> {
+                            try {
+                                int i = interfaceName.lastIndexOf(".");
+                                String packageName = interfaceName.substring(0, i);
+                                String name = interfaceName.substring(i + 1);
+                                this.buildImplementClass(packageName, name, operationList, generatorHandler.extension()).writeTo(filer);
+                                Logger.info("{} build success", interfaceName.concat("Impl"));
 
-                                        for (GraphqlParser.OperationDefinitionContext operationDefinitionContext : operationList) {
-                                            String methodName = typeManager.getMethodName(operationDefinitionContext);
-                                            int index = getIndex(operationDefinitionContext);
-                                            String resourceName = interfaceName.concat("_").concat(methodName).concat("_").concat(String.valueOf(index)).concat(".").concat(generatorHandler.extension());
-                                            String content;
-                                            if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
-                                                content = generatorHandler.query(operationDefinitionContext);
-                                            } else if (operationDefinitionContext.operationType().MUTATION() != null) {
-                                                content = generatorHandler.mutation(operationDefinitionContext);
-                                            } else {
-                                                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
-                                            }
-                                            FileObject fileObject = filer.createResource(
-                                                    StandardLocation.CLASS_OUTPUT,
-                                                    packageName,
-                                                    resourceName
-                                            );
-                                            Writer writer = fileObject.openWriter();
-                                            writer.write(content);
-                                            writer.close();
-                                            Logger.info("{} build success", resourceName);
-                                            Logger.debug("resource content:\r\n{}", content);
-                                        }
-                                    } catch (IOException e) {
-                                        Logger.error(e);
+                                for (GraphqlParser.OperationDefinitionContext operationDefinitionContext : operationList) {
+                                    String methodName = typeManager.getMethodName(operationDefinitionContext);
+                                    int index = getIndex(operationDefinitionContext);
+                                    String resourceName = name.concat("_").concat(methodName).concat("_").concat(String.valueOf(index)).concat(".").concat(generatorHandler.extension());
+                                    String content;
+                                    if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
+                                        content = generatorHandler.query(operationDefinitionContext);
+                                    } else if (operationDefinitionContext.operationType().MUTATION() != null) {
+                                        content = generatorHandler.mutation(operationDefinitionContext);
+                                    } else {
+                                        throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
                                     }
+                                    FileObject fileObject = filer.createResource(
+                                            StandardLocation.CLASS_OUTPUT,
+                                            packageName,
+                                            resourceName
+                                    );
+                                    Writer writer = fileObject.openWriter();
+                                    writer.write(content);
+                                    writer.close();
+                                    Logger.info("{} build success", resourceName);
+                                    Logger.debug("resource content:\r\n{}", content);
                                 }
-                        )
+                            } catch (IOException e) {
+                                Logger.error(e);
+                            }
+                        }
                 );
     }
 
@@ -180,7 +170,7 @@ public class OperationInterfaceImplementer {
     }
 
     private MethodSpec executableElementToMethodSpec(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
-        TypeName typeName = TYPE_NAME_UTIL.toClassName(typeManager.getReturnClassName(operationDefinitionContext));
+        TypeName typeName = TYPE_NAME_UTIL.toTypeName(typeManager.getReturnClassName(operationDefinitionContext));
         List<AbstractMap.SimpleEntry<String, String>> parameters = typeManager.getParameters(operationDefinitionContext);
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeManager.getMethodName(operationDefinitionContext))
