@@ -78,10 +78,8 @@ public class MutationHandlerBuilder {
 
     private List<MethodSpec> buildTypeMethods(boolean anchor) {
         return manager.getObjects()
+                .filter(manager::isNotOperationType)
                 .filter(objectTypeDefinitionContext -> !manager.hasClassName(objectTypeDefinitionContext))
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(PAGE_INFO_NAME))
                 .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                 .flatMap(objectTypeDefinitionContext ->

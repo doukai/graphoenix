@@ -228,10 +228,45 @@ input Property @packageInfo(packageName: "io.graphoenix.core") {
   validation: ValidationInput
   required: [String]
 }
+input OperatorExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Operator
+  in: [Operator]
+}
+input ConditionalExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Conditional
+  in: [Conditional]
+}
+input SortExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Sort
+  in: [Sort]
+}
+input FunctionExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Function
+  in: [Function]
+}
+input ProtocolExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Protocol
+  in: [Protocol]
+}
+input __TypeKindExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: __TypeKind
+  in: [__TypeKind]
+}
+input __DirectiveLocationExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: __DirectiveLocation
+  in: [__DirectiveLocation]
+}
 directive @dataType(type: String length: Int decimals: Int default: String) on FIELD_DEFINITION
 directive @map(from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
 directive @fetch(protocol: Protocol from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
-directive @invoke(className: String methodName: String parameters: [InvokeParameter] returnClassName: String) on FIELD_DEFINITION
+directive @invoke(className: String methodName: String parameters: [InvokeParameter] returnClassName: String) on SUBSCRIPTION
 directive @skipNullArguments(if: Boolean!) on FIELD
 directive @cursor on FIELD_DEFINITION
 directive @func(name: Function field: String) on FIELD_DEFINITION

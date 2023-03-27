@@ -154,13 +154,13 @@ public abstract class BaseProcessor extends AbstractProcessor {
                             if (subElement.getAnnotation(Query.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
                                 ObjectType objectType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
                                         .map(objectTypeDefinitionContext -> documentBuilder.buildObject(objectTypeDefinitionContext))
-                                        .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME));
+                                        .orElseGet(() -> new ObjectType(QUERY_TYPE_NAME));
                                 objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.mergeDocument(objectType.toString());
                             } else if (subElement.getAnnotation(Mutation.class) != null && subElement.getKind().equals(ElementKind.METHOD)) {
                                 ObjectType objectType = manager.getObject(manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME))
                                         .map(objectTypeDefinitionContext -> documentBuilder.buildObject(objectTypeDefinitionContext))
-                                        .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME));
+                                        .orElseGet(() -> new ObjectType(MUTATION_TYPE_NAME));
                                 objectType.addField(graphQLApiBuilder.variableElementToField((ExecutableElement) subElement, typeUtils));
                                 manager.mergeDocument(objectType.toString());
                             } else if (subElement.getKind().equals(ElementKind.METHOD) && ((ExecutableElement) subElement).getParameters().stream().anyMatch(variableElement -> variableElement.getAnnotation(Source.class) != null)) {

@@ -102,9 +102,7 @@ public class SelectionFilterBuilder {
 
     private List<MethodSpec> buildTypeMethods() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotOperationType)
                 .map(this::buildTypeMethod)
                 .collect(Collectors.toList());
     }
@@ -231,9 +229,7 @@ public class SelectionFilterBuilder {
 
     private List<MethodSpec> buildListTypeMethods() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotOperationType)
                 .map(this::buildListTypeMethod)
                 .collect(Collectors.toList());
     }

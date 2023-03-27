@@ -40,10 +40,8 @@ public class GraphQLTypeToTable {
     public Stream<String> createTablesSQL() {
         return manager.getObjects()
                 .filter(packageManager::isLocalPackage)
+                .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
                 .map(this::createTable)
                 .map(CreateTable::toString);
     }

@@ -18,7 +18,7 @@ public class GraphoenixPlugin implements Plugin<Project> {
         project.getExtensions().create(GraphQLConfig.class.getAnnotation(ConfigProperties.class).prefix(), GraphQLConfig.class);
         project.getExtensions().create(BannerConfig.class.getAnnotation(ConfigProperties.class).prefix(), BannerConfig.class);
         project.getTasks().create("generateGraphQLSource", GenerateGraphQLSourceTask.class).setGroup(GROUP_NAME);
-        project.getTasks().create("generatePackageGraphQLTask", GeneratePackageGraphQLTask.class).setGroup(GROUP_NAME);
+        project.getTasks().create("generatePackageGraphQL", GeneratePackageGraphQLTask.class).setGroup(GROUP_NAME);
         project.getTasks().create("generateProtobufV3", GenerateProtobufV3Task.class).setGroup(GROUP_NAME);
         project.getTasks().create("generateBanner", GenerateBannerTask.class).setGroup(GROUP_NAME);
     }

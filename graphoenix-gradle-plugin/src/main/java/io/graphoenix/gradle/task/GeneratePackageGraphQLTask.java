@@ -1,7 +1,9 @@
 package io.graphoenix.gradle.task;
 
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
+import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.gradle.api.plugins.JavaPluginConvention;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.TaskAction;
@@ -17,11 +19,16 @@ public class GeneratePackageGraphQLTask extends BaseTask {
     @TaskAction
     public void generatePackageGraphQLTask() {
         init();
+        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
         String resourcePath = sourceSet.getResources().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_RESOURCES_PATH)).getAsPath();
         try {
             registerInvoke();
+            if (graphQLConfig.getBuild()) {
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            }
             Path filePath = Path.of(resourcePath).resolve("META-INF").resolve("graphql");
             if (Files.notExists(filePath)) {
                 Files.createDirectories(filePath);

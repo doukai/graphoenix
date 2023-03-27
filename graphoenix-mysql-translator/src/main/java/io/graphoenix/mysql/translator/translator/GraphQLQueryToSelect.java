@@ -67,6 +67,7 @@ import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.CURSOR_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FUNC_DIRECTIVE_NAME;
@@ -350,7 +351,7 @@ public class GraphQLQueryToSelect {
                                             .findFirst()
                                             .map(cursor ->
                                                     new Field(
-                                                            manager.getFieldByDirective(fieldTypeName, "cursor")
+                                                            manager.getFieldByDirective(fieldTypeName, CURSOR_DIRECTIVE_NAME)
                                                                     .findFirst()
                                                                     .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
                                                                     .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)))
@@ -600,7 +601,7 @@ public class GraphQLQueryToSelect {
         Optional<GraphqlParser.ArgumentContext> after = afterInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
         Optional<GraphqlParser.ArgumentContext> before = beforeInput.flatMap(inputValueDefinitionContext -> manager.getArgumentFromInputValueDefinition(selectionContext.field().arguments(), inputValueDefinitionContext));
 
-        GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(typeName, "cursor").findFirst()
+        GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(typeName, CURSOR_DIRECTIVE_NAME).findFirst()
                 .or(() -> manager.getObjectTypeIDFieldDefinition(typeName))
                 .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(typeName)));
 
@@ -673,7 +674,7 @@ public class GraphQLQueryToSelect {
                             .findFirst();
                     OrderByElement orderByElement = new OrderByElement();
                     orderByElement.setAsc(lastArgument.isEmpty());
-                    GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(fieldTypeName, "cursor").findFirst()
+                    GraphqlParser.FieldDefinitionContext cursorFieldDefinitionContext = manager.getFieldByDirective(fieldTypeName, CURSOR_DIRECTIVE_NAME).findFirst()
                             .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
                             .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)));
                     orderByElement.setExpression(fieldToColumn(table, cursorFieldDefinitionContext));

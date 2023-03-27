@@ -25,6 +25,7 @@ import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.CURSOR_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
 import static jakarta.json.JsonValue.EMPTY_JSON_OBJECT;
@@ -75,7 +76,7 @@ public class ConnectionBuilder {
                     GraphqlParser.FieldDefinitionContext fieldDefinitionContext = manager.getField(typeName, fieldName)
                             .orElseThrow(() -> new GraphQLErrors(GraphQLErrorType.FIELD_NOT_EXIST.bind(typeName, fieldName)));
                     String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
-                    String cursorFieldName = manager.getFieldByDirective(fieldTypeName, "cursor")
+                    String cursorFieldName = manager.getFieldByDirective(fieldTypeName, CURSOR_DIRECTIVE_NAME)
                             .findFirst()
                             .or(() -> manager.getObjectTypeIDFieldDefinition(fieldTypeName))
                             .orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST.bind(fieldTypeName)))

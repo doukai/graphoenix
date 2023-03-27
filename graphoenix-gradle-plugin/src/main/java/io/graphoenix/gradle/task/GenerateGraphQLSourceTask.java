@@ -20,7 +20,6 @@ public class GenerateGraphQLSourceTask extends BaseTask {
 
     @TaskAction
     public void generateGraphQLSourceTask() {
-
         init();
         IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
         GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);

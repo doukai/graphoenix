@@ -1,9 +1,14 @@
 package io.graphoenix.core.document;
 
+import graphql.parser.antlr.GraphqlParser;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 
 public class DirectiveDefinition {
 
@@ -11,6 +16,30 @@ public class DirectiveDefinition {
     private Set<InputValue> arguments;
     private Set<String> directiveLocations;
     private String description;
+
+    public DirectiveDefinition() {
+    }
+
+    public DirectiveDefinition(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
+        this.name = directiveDefinitionContext.name().getText();
+        if (directiveDefinitionContext.argumentsDefinition() != null) {
+            this.arguments = directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream().map(InputValue::new).collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+        this.directiveLocations = directiveLocationList(directiveDefinitionContext.directiveLocations());
+        if (directiveDefinitionContext.description() != null) {
+            this.description = DOCUMENT_UTIL.getStringValue(directiveDefinitionContext.description().StringValue());
+        }
+    }
+
+    public Set<String> directiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext) {
+        Set<String> directiveLocationList = new LinkedHashSet<>();
+        if (directiveLocationsContext.directiveLocation() != null) {
+            directiveLocationList.add(directiveLocationsContext.directiveLocation().name().getText());
+        } else if (directiveLocationsContext.directiveLocations() != null) {
+            directiveLocationList.addAll(directiveLocationList(directiveLocationsContext.directiveLocations()));
+        }
+        return directiveLocationList;
+    }
 
     public String getName() {
         return name;

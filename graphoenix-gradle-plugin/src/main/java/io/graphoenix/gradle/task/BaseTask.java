@@ -262,7 +262,7 @@ public class BaseTask extends DefaultTask {
                 .forEach(methodDeclaration -> {
                             ObjectType objectType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
                                     .map(documentBuilder::buildObject)
-                                    .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME))
+                                    .orElseGet(() -> new ObjectType(QUERY_TYPE_NAME))
                                     .addField(
                                             new Field()
                                                     .setName(getQueryNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
@@ -293,7 +293,7 @@ public class BaseTask extends DefaultTask {
                 .forEach(methodDeclaration -> {
                             ObjectType objectType = manager.getObject(manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME))
                                     .map(documentBuilder::buildObject)
-                                    .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME))
+                                    .orElseGet(() -> new ObjectType(MUTATION_TYPE_NAME))
                                     .addField(
                                             new Field()
                                                     .setName(getMutationNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))

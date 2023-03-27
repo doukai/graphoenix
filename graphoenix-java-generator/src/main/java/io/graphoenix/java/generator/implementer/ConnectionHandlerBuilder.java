@@ -110,9 +110,7 @@ public class ConnectionHandlerBuilder {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(fieldName)
                 .addModifiers(Modifier.PUBLIC);
 
-        if (manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) ||
-                manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) ||
-                manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())) {
+        if (manager.isOperationType(objectTypeDefinitionContext)) {
             builder.returns(ClassName.get(JsonValue.class))
                     .addParameter(ClassName.get(JsonValue.class), "jsonValue")
                     .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinitionContext")
@@ -148,9 +146,7 @@ public class ConnectionHandlerBuilder {
                     .endControlFlow()
                     .endControlFlow();
         } else {
-            if (manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) ||
-                    manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) ||
-                    manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())) {
+            if (manager.isOperationType(objectTypeDefinitionContext)) {
                 builder.beginControlFlow("if (operationDefinitionContext.selectionSet() != null && operationDefinitionContext.selectionSet().selection().size() > 0)")
                         .beginControlFlow("for ($T selectionContext : operationDefinitionContext.selectionSet().selection().stream().flatMap(selectionContext -> manager.fragmentUnzip($S, selectionContext)).collect($T.toList()))",
                                 ClassName.get(GraphqlParser.SelectionContext.class),
@@ -205,9 +201,7 @@ public class ConnectionHandlerBuilder {
             builder.endControlFlow()
                     .endControlFlow();
         }
-        if (manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()) ||
-                manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()) ||
-                manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText())) {
+        if (manager.isOperationType(objectTypeDefinitionContext)) {
             builder.addStatement("return jsonPatchBuilder.build().apply(jsonValue.asJsonObject())");
         }
         return builder.build();

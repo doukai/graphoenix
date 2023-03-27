@@ -51,9 +51,7 @@ public class InvokeHandlerBuilder {
 
     public void writeToFiler(Filer filer) throws IOException {
         this.invokeMethods = manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotOperationType)
                 .collect(
                         Collectors.toMap(
                                 objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText(),
@@ -153,9 +151,7 @@ public class InvokeHandlerBuilder {
 
     private List<MethodSpec> buildTypeInvokeMethods() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
-                .filter(objectTypeDefinitionContext -> !manager.isSubscriptionOperationType(objectTypeDefinitionContext.name().getText()))
+                .filter(manager::isNotOperationType)
                 .map(this::buildTypeInvokeMethod)
                 .collect(Collectors.toList());
     }
