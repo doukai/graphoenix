@@ -24,6 +24,10 @@ public class ObjectType {
     public ObjectType() {
     }
 
+    public ObjectType(String name) {
+        this.name = name;
+    }
+
     public ObjectType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         this.name = objectTypeDefinitionContext.name().getText();
         if (objectTypeDefinitionContext.description() != null) {

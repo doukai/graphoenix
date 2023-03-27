@@ -1,5 +1,6 @@
 package io.graphoenix.core.document;
 
+import graphql.parser.antlr.GraphqlParser;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -7,6 +8,23 @@ public class Schema {
 
     private String query;
     private String mutation;
+
+    public Schema() {
+    }
+
+    public Schema(GraphqlParser.SchemaDefinitionContext schemaDefinitionContext) {
+        this.query = schemaDefinitionContext.operationTypeDefinition().stream()
+                .filter(operationTypeDefinitionContext -> operationTypeDefinitionContext.operationType().QUERY() != null)
+                .findFirst()
+                .map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText())
+                .orElse(null);
+
+        this.mutation = schemaDefinitionContext.operationTypeDefinition().stream()
+                .filter(operationTypeDefinitionContext -> operationTypeDefinitionContext.operationType().MUTATION() != null)
+                .findFirst()
+                .map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText())
+                .orElse(null);
+    }
 
     public String getQuery() {
         return query;

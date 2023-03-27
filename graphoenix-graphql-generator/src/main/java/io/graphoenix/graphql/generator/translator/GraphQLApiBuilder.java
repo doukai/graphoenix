@@ -19,7 +19,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.ElementProcessErrorType.SOURCE_ANNOTATION_NOT_EXIST;
+import static io.graphoenix.spi.constant.Hammurabi.DENY_ALL;
 import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.PERMIT_ALL;
+import static io.graphoenix.spi.constant.Hammurabi.ROLES_ALLOWED;
 
 @ApplicationScoped
 public class GraphQLApiBuilder {
@@ -53,14 +56,14 @@ public class GraphQLApiBuilder {
                                 .addArgument("returnClassName", executableElement.getReturnType().toString())
                 );
         if (executableElement.getAnnotation(PermitAll.class) != null) {
-            field.addDirective(new Directive("permitAll"));
+            field.addDirective(new Directive(PERMIT_ALL));
         }
         if (executableElement.getAnnotation(DenyAll.class) != null) {
-            field.addDirective(new Directive("denyAll"));
+            field.addDirective(new Directive(DENY_ALL));
         }
         if (executableElement.getAnnotation(RolesAllowed.class) != null) {
             Directive directive = new Directive()
-                    .setName("rolesAllowed")
+                    .setName(ROLES_ALLOWED)
                     .addArgument("roles", executableElement.getAnnotation(RolesAllowed.class).value());
             field.addDirective(directive);
         }

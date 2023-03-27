@@ -44,10 +44,13 @@ import static io.graphoenix.spi.constant.Hammurabi.DELETE_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.FETCH_DIRECTIVE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MERGE_TO_LIST_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.DELETE;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.MERGE;
 import static io.graphoenix.spi.constant.Hammurabi.MutationType.UPDATE;
 import static io.graphoenix.spi.constant.Hammurabi.PACKAGE_INFO_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.SUBSCRIPTION_TYPE_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.UPDATE_DIRECTIVE_NAME;
 
 @ApplicationScoped
@@ -690,38 +693,58 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
 
     @Override
     public Optional<String> getQueryOperationTypeName() {
-        Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = getQueryOperationTypeDefinition();
-        return queryOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
+        return getQueryOperationTypeDefinition().map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
     }
 
     @Override
     public boolean isQueryOperationType(String typeName) {
-        Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = getQueryOperationTypeDefinition();
-        return queryOperationTypeDefinition.isPresent() && queryOperationTypeDefinition.get().typeName().name().getText().equals(typeName);
+        return getQueryOperationTypeDefinition()
+                .map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText().equals(typeName))
+                .orElseGet(() -> typeName.equals(QUERY_TYPE_NAME));
     }
 
     @Override
     public Optional<String> getMutationOperationTypeName() {
-        Optional<GraphqlParser.OperationTypeDefinitionContext> mutationOperationTypeDefinition = getMutationOperationTypeDefinition();
-        return mutationOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
+        return getMutationOperationTypeDefinition().map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
     }
 
     @Override
     public boolean isMutationOperationType(String typeName) {
-        Optional<GraphqlParser.OperationTypeDefinitionContext> mutationOperationTypeDefinition = getMutationOperationTypeDefinition();
-        return mutationOperationTypeDefinition.isPresent() && mutationOperationTypeDefinition.get().typeName().name().getText().equals(typeName);
+        return getMutationOperationTypeDefinition()
+                .map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText().equals(typeName))
+                .orElseGet(() -> typeName.equals(MUTATION_TYPE_NAME));
     }
 
     @Override
     public Optional<String> getSubscriptionOperationTypeName() {
-        Optional<GraphqlParser.OperationTypeDefinitionContext> subscriptionOperationTypeDefinition = getSubscriptionOperationTypeDefinition();
-        return subscriptionOperationTypeDefinition.map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
+        return getSubscriptionOperationTypeDefinition().map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText());
     }
 
     @Override
     public boolean isSubscriptionOperationType(String typeName) {
-        Optional<GraphqlParser.OperationTypeDefinitionContext> subscriptionOperationTypeDefinition = getSubscriptionOperationTypeDefinition();
-        return subscriptionOperationTypeDefinition.isPresent() && subscriptionOperationTypeDefinition.get().typeName().name().getText().equals(typeName);
+        return getSubscriptionOperationTypeDefinition()
+                .map(operationTypeDefinitionContext -> operationTypeDefinitionContext.typeName().name().getText().equals(typeName))
+                .orElseGet(() -> typeName.equals(SUBSCRIPTION_TYPE_NAME));
+    }
+
+    @Override
+    public boolean isOperationType(String typeName) {
+        return isQueryOperationType(typeName) || isMutationOperationType(typeName) || isSubscriptionOperationType(typeName);
+    }
+
+    @Override
+    public boolean isOperationType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return isOperationType(objectTypeDefinitionContext.name().getText());
+    }
+
+    @Override
+    public boolean isNotOperationType(String typeName) {
+        return !isOperationType(typeName);
+    }
+
+    @Override
+    public boolean isNotOperationType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        return isNotOperationType(objectTypeDefinitionContext.name().getText());
     }
 
     @Override

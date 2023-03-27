@@ -47,6 +47,8 @@ public class Hammurabi {
     public static final String CURRENT_USER = "currentUser";
     public static final String OPERATION_DEFINITION = "operationDefinition";
     public static final String PERMIT_ALL = "permitAll";
+    public static final String DENY_ALL = "denyAll";
+    public static final String ROLES_ALLOWED = "rolesAllowed";
 
     public enum TransactionType {
         NO_TRANSACTION, IN_TRANSACTION

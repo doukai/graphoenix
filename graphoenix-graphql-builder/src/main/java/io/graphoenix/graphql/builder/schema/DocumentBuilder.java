@@ -4,9 +4,6 @@ import com.google.common.base.CaseFormat;
 import com.google.common.collect.Streams;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
-import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.handler.GraphQLConfigRegister;
-import io.graphoenix.core.operation.EnumValue;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.DirectiveDefinition;
 import io.graphoenix.core.document.Document;
@@ -18,6 +15,10 @@ import io.graphoenix.core.document.InterfaceType;
 import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.document.ScalarType;
 import io.graphoenix.core.document.Schema;
+import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
+import io.graphoenix.core.handler.PackageManager;
+import io.graphoenix.core.operation.EnumValue;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.antlr.IGraphQLFieldMapManager;
@@ -35,7 +36,35 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
-import static io.graphoenix.spi.constant.Hammurabi.*;
+import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.AGGREGATE_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.CONNECTION_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.DENY_ALL;
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_FIELD_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.DEPRECATED_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.EDGE_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.EXPRESSION_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.FIRST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.FUNC_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.GROUP_BY_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.INPUT_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
+import static io.graphoenix.spi.constant.Hammurabi.LAST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.META_INTERFACE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.OFFSET_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.ORDER_BY_SUFFIX;
+import static io.graphoenix.spi.constant.Hammurabi.PACKAGE_INFO_DIRECTIVE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.PERMIT_ALL;
+import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.ROLES_ALLOWED;
+import static io.graphoenix.spi.constant.Hammurabi.SORT_INPUT_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.WHERE_INPUT_NAME;
 
 @ApplicationScoped
 public class DocumentBuilder {
@@ -48,15 +77,19 @@ public class DocumentBuilder {
 
     private final GraphQLConfigRegister graphQLConfigRegister;
 
+    private final PackageManager packageManager;
+
     @Inject
     public DocumentBuilder(GraphQLConfig graphQLConfig,
                            IGraphQLDocumentManager manager,
                            IGraphQLFieldMapManager mapper,
-                           GraphQLConfigRegister graphQLConfigRegister) {
+                           GraphQLConfigRegister graphQLConfigRegister,
+                           PackageManager packageManager) {
         this.graphQLConfig = graphQLConfig;
         this.manager = manager;
         this.mapper = mapper;
         this.graphQLConfigRegister = graphQLConfigRegister;
+        this.packageManager = packageManager;
     }
 
     public void startupManager() throws IOException, URISyntaxException {
@@ -73,28 +106,24 @@ public class DocumentBuilder {
         mapper.registerFieldMaps();
     }
 
-    public void build() {
+    public Document buildDocument() {
         manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
                 .map(objectTypeDefinitionContext -> buildObject(objectTypeDefinitionContext, true, true, true))
                 .forEach(objectType -> manager.registerGraphQL(objectType.toString()));
-        buildOperationType();
-        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
-        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
-        mapper.registerFieldMaps();
-    }
 
-    public void buildOperationType() {
         ObjectType queryType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
                 .map(this::buildObject)
-                .orElseGet(() -> new ObjectType().setName(QUERY_TYPE_NAME))
+                .orElseGet(() -> new ObjectType(QUERY_TYPE_NAME))
                 .addFields(buildQueryTypeFields())
                 .addInterface(META_INTERFACE_NAME)
                 .addFields(getMetaInterfaceFields());
 
         ObjectType mutationType = manager.getObject(manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME))
                 .map(this::buildObject)
-                .orElseGet(() -> new ObjectType().setName(MUTATION_TYPE_NAME))
+                .orElseGet(() -> new ObjectType(MUTATION_TYPE_NAME))
                 .addFields(buildMutationTypeFields())
                 .addInterface(META_INTERFACE_NAME)
                 .addFields(getMetaInterfaceFields());
@@ -102,10 +131,11 @@ public class DocumentBuilder {
         manager.registerGraphQL(queryType.toString());
         manager.registerGraphQL(mutationType.toString());
         manager.registerGraphQL(new Schema().setQuery(queryType.getName()).setMutation(mutationType.getName()).toString());
-    }
 
-    public Document buildDocument() {
-        build();
+        buildArgumentInputObjects().forEach(inputObjectType -> manager.registerGraphQL(inputObjectType.toString()));
+        buildContainerTypeObjects().forEach(objectType -> manager.registerGraphQL(objectType.toString()));
+        mapper.registerFieldMaps();
+
         Document document = getDocument();
         Logger.info("document build success");
         Logger.debug("\r\n{}", document.toString());
@@ -113,9 +143,8 @@ public class DocumentBuilder {
     }
 
     public Document getDocument() {
-        Document document = new Document();
-        buildSchema().ifPresent(schema -> document.addDefinition(schema.toString()));
-        return document
+        return new Document()
+                .addDefinition(new Schema(manager.getSchema()).toString())
                 .addDefinitions(manager.getScalars().map(this::buildScalarType).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getEnums().map(this::buildEnum).map(EnumType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInterfaces().map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
@@ -124,29 +153,6 @@ public class DocumentBuilder {
                 //TODO union type
                 .addDefinitions(manager.getDirectives().map(this::buildDirectiveDefinition).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getOperationDefinitions().map(Operation::new).map(Operation::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
-    }
-
-    public Optional<Schema> buildSchema() {
-        Optional<String> queryOperationTypeName = manager.getQueryOperationTypeName();
-        Optional<String> mutationOperationTypeName = manager.getMutationOperationTypeName();
-        if (queryOperationTypeName.isPresent() && mutationOperationTypeName.isPresent()) {
-            return Optional.of(
-                    new Schema()
-                            .setQuery(queryOperationTypeName.get())
-                            .setMutation(mutationOperationTypeName.get())
-            );
-        } else if (queryOperationTypeName.isPresent()) {
-            return Optional.of(
-                    new Schema()
-                            .setQuery(queryOperationTypeName.get())
-            );
-        } else if (mutationOperationTypeName.isPresent()) {
-            return Optional.of(
-                    new Schema()
-                            .setMutation(mutationOperationTypeName.get())
-            );
-        }
-        return Optional.empty();
     }
 
     public ScalarType buildScalarType(GraphqlParser.ScalarTypeDefinitionContext scalarTypeDefinitionContext) {
@@ -409,9 +415,8 @@ public class DocumentBuilder {
 
     public List<Field> buildQueryTypeFields() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(QUERY_TYPE_NAME))
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(MUTATION_TYPE_NAME))
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(SUBSCRIPTION_TYPE_NAME))
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -425,9 +430,8 @@ public class DocumentBuilder {
 
     public List<Field> buildMutationTypeFields() {
         return manager.getObjects()
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(QUERY_TYPE_NAME))
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(MUTATION_TYPE_NAME))
-                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().equals(SUBSCRIPTION_TYPE_NAME))
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
                 .flatMap(objectTypeDefinitionContext ->
                         Stream.of(
@@ -514,9 +518,9 @@ public class DocumentBuilder {
         if (objectTypeDefinitionContext.directives() != null) {
             objectTypeDefinitionContext.directives().directive().stream()
                     .filter(directiveContext ->
-                            directiveContext.name().getText().equals("permitAll") ||
-                                    directiveContext.name().getText().equals("denyAll") ||
-                                    directiveContext.name().getText().equals("rolesAllowed")
+                            directiveContext.name().getText().equals(PERMIT_ALL) ||
+                                    directiveContext.name().getText().equals(DENY_ALL) ||
+                                    directiveContext.name().getText().equals(ROLES_ALLOWED)
                     )
                     .findAny()
                     .ifPresent(directiveContext -> field.addDirective(buildDirective(directiveContext)));
@@ -601,6 +605,8 @@ public class DocumentBuilder {
 
     public List<InputObjectType> buildArgumentInputObjects() {
         List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))
@@ -617,6 +623,8 @@ public class DocumentBuilder {
 
     public List<ObjectType> buildContainerTypeObjects() {
         List<GraphqlParser.ObjectTypeDefinitionContext> objectTypeDefinitionContextList = manager.getObjects()
+                .filter(packageManager::isOwnPackage)
+                .filter(manager::isNotOperationType)
                 .filter(manager::isNotContainerType)
                 .filter(objectTypeDefinitionContext -> !manager.isQueryOperationType(objectTypeDefinitionContext.name().getText()))
                 .filter(objectTypeDefinitionContext -> !manager.isMutationOperationType(objectTypeDefinitionContext.name().getText()))

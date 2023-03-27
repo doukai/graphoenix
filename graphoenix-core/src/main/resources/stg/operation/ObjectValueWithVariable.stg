@@ -1,5 +1,3 @@
 objectValueWithVariableDefinition(objectValueWithVariable) ::= <<
-{
-<objectValueWithVariable.keys:{key|<key>: <objectValueWithVariable.(key)>};separator=", ">
-}
+{<objectValueWithVariable.keys:{key|<key>: <objectValueWithVariable.(key)>};separator=", ">}
 >>

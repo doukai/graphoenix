@@ -170,6 +170,14 @@ public interface IGraphQLDocumentManager {
 
     boolean isSubscriptionOperationType(String typeName);
 
+    boolean isOperationType(String typeName);
+
+    boolean isOperationType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
+    boolean isNotOperationType(String typeName);
+
+    boolean isNotOperationType(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext);
+
     Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIDFieldDefinition(String objectTypeName);
 
     Optional<GraphqlParser.FieldDefinitionContext> getObjectTypeIsDeprecatedFieldDefinition(String objectTypeName);
