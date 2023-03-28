@@ -72,6 +72,9 @@ public class GraphQLConfig {
     private String handlerPackageName;
 
     @Optional
+    private String operationPackageName;
+
+    @Optional
     private String grpcObjectTypePackageName;
 
     @Optional
@@ -271,6 +274,14 @@ public class GraphQLConfig {
 
     public void setHandlerPackageName(String handlerPackageName) {
         this.handlerPackageName = handlerPackageName;
+    }
+
+    public String getOperationPackageName() {
+        return operationPackageName != null ? operationPackageName : packageName + ".operation";
+    }
+
+    public void setOperationPackageName(String operationPackageName) {
+        this.operationPackageName = operationPackageName;
     }
 
     public String getGrpcObjectTypePackageName() {

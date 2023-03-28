@@ -12,5 +12,7 @@ public interface GeneratorHandler {
 
     String mutation(String graphQL);
 
+    String operationDAOName();
+
     String extension();
 }

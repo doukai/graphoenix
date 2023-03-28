@@ -6,10 +6,12 @@ import io.graphoenix.mysql.translator.handler.SQLFormatHandler;
 import io.graphoenix.spi.handler.GeneratorHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.graphql.Name;
 
 import java.util.stream.Stream;
 
 @ApplicationScoped
+@Name("mysql")
 public class MysqlGeneratorHandler implements GeneratorHandler {
 
     private final OperationToSQLConvertHandler operationToSQLConvertHandler;
@@ -43,6 +45,11 @@ public class MysqlGeneratorHandler implements GeneratorHandler {
     public String mutation(String graphQL) {
         Stream<String> statements = operationToSQLConvertHandler.mutationToStatements(graphQL);
         return sqlFormatHandler.mutation(statements);
+    }
+
+    @Override
+    public String operationDAOName() {
+        return "r2dbc";
     }
 
     @Override

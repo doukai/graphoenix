@@ -8,11 +8,14 @@ import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsFa
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BeanContext {
 
@@ -28,6 +31,7 @@ public class BeanContext {
     }
 
     public static void load(ClassLoader classLoader) {
+        Thread.currentThread().setContextClassLoader(classLoader);
         Logger.info("load ModuleContext from {}", classLoader.getName());
         moduleContexts = ServiceLoader.load(ModuleContext.class, classLoader).stream()
                 .map(ServiceLoader.Provider::get)
@@ -181,7 +185,7 @@ public class BeanContext {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
-                .map(supplier -> (Supplier<T>) CONTEXT_CACHE.get(beanClass).putIfAbsent(name, supplier));
+                .map(supplier -> (Supplier<T>) CONTEXT_CACHE.get(beanClass).computeIfAbsent(name, k -> supplier));
     }
 
     @SuppressWarnings("unchecked")
@@ -192,12 +196,88 @@ public class BeanContext {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst()
-                .map(supplier -> (Supplier<Mono<T>>) CONTEXT_CACHE.get(beanClass).putIfAbsent(name, supplier));
+                .map(supplier -> (Supplier<Mono<T>>) CONTEXT_CACHE.get(beanClass).computeIfAbsent(name, k -> supplier));
     }
 
     private static <T> Optional<Supplier<PublisherBuilder<T>>> getAndCachePublisherBuilderSupplier(Class<T> beanClass, String name) {
         Logger.debug("search bean instance for class {} name {}", beanClass.getName(), name);
         return getAndCacheMonoSupplier(beanClass, name)
                 .map(monoSupplier -> () -> ReactiveStreamsFactoryResolver.instance().fromPublisher(monoSupplier.get()));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Map<String, T> getMap(Class<T> beanClass) {
+        Logger.debug("search bean map for class {}", beanClass.getName());
+        return moduleContexts.stream()
+                .flatMap(moduleContext ->
+                        Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
+                                .flatMap(map -> map.entrySet().stream())
+                                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (T) entry.getValue().get()))
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Map<String, Mono<T>> getMonoMap(Class<T> beanClass) {
+        Logger.debug("search bean map for class {}", beanClass.getName());
+        return moduleContexts.stream()
+                .flatMap(moduleContext ->
+                        Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
+                                .flatMap(map -> map.entrySet().stream())
+                                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (Mono<T>) entry.getValue().get()))
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Map<String, PublisherBuilder<T>> getPublisherBuilderMap(Class<T> beanClass) {
+        Logger.debug("search bean map for class {}", beanClass.getName());
+        return moduleContexts.stream()
+                .flatMap(moduleContext ->
+                        Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
+                                .flatMap(map -> map.entrySet().stream())
+                                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), ReactiveStreamsFactoryResolver.instance().fromPublisher((Mono<T>) entry.getValue().get())))
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Map<String, Supplier<T>> getSupplierMap(Class<T> beanClass) {
+        Logger.debug("search bean map for class {}", beanClass.getName());
+        return moduleContexts.stream()
+                .flatMap(moduleContext ->
+                        Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
+                                .flatMap(map -> map.entrySet().stream())
+                                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (Supplier<T>) entry.getValue()))
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Map<String, Supplier<Mono<T>>> getMonoSupplierMap(Class<T> beanClass) {
+        Logger.debug("search bean map for class {}", beanClass.getName());
+        return moduleContexts.stream()
+                .flatMap(moduleContext ->
+                        Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
+                                .flatMap(map -> map.entrySet().stream())
+                                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (Supplier<Mono<T>>) entry.getValue()))
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Map<String, Supplier<PublisherBuilder<T>>> getPublisherBuilderSupplierMap(Class<T> beanClass) {
+        Logger.debug("search bean map for class {}", beanClass.getName());
+        return moduleContexts.stream()
+                .flatMap(moduleContext ->
+                        Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
+                                .flatMap(map -> map.entrySet().stream())
+                                .map(entry -> {
+                                            Supplier<PublisherBuilder<T>> publisherBuilderSupplier = () -> ReactiveStreamsFactoryResolver.instance().fromPublisher((Mono<T>) entry.getValue().get());
+                                            return new AbstractMap.SimpleEntry<>(entry.getKey(), publisherBuilderSupplier);
+                                        }
+                                )
+                )
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

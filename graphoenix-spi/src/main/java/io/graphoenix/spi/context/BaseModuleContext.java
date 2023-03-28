@@ -1,8 +1,10 @@
 package io.graphoenix.spi.context;
 
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public abstract class BaseModuleContext implements ModuleContext {
 
@@ -38,5 +40,22 @@ public abstract class BaseModuleContext implements ModuleContext {
             return Optional.of((Supplier<T>) CONTEXT.get(beanClass).get(name));
         }
         return Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> Map<String, T> getMap(Class<T> beanClass) {
+        return Optional.ofNullable(getSupplierMap(beanClass))
+                .map(map ->
+                        map.entrySet().stream()
+                                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (T) entry.getValue().get()))
+                                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                )
+                .orElseGet(Map::of);
+    }
+
+    @Override
+    public <T> Map<String, Supplier<?>> getSupplierMap(Class<T> beanClass) {
+        return CONTEXT.get(beanClass);
     }
 }

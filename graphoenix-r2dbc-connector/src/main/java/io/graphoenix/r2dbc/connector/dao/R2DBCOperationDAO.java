@@ -1,18 +1,23 @@
 package io.graphoenix.r2dbc.connector.dao;
 
-import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.core.dao.BaseOperationDAO;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.r2dbc.connector.executor.QueryExecutor;
 import io.graphoenix.r2dbc.connector.parameter.R2dbcParameterProcessor;
+import io.graphoenix.spi.dao.OperationDAO;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import jakarta.json.bind.Jsonb;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
+import org.eclipse.microprofile.reactive.streams.operators.ReactiveStreamsFactory;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 
-public class R2DBCOperationDAO extends BaseOperationDAO {
+@ApplicationScoped
+@Named("r2dbc")
+public class R2DBCOperationDAO implements OperationDAO {
 
     private final QueryExecutor queryExecutor;
 
@@ -22,11 +27,15 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     private final Jsonb jsonb;
 
-    public R2DBCOperationDAO() {
-        this.queryExecutor = BeanContext.get(QueryExecutor.class);
-        this.mutationExecutor = BeanContext.get(MutationExecutor.class);
-        this.r2dbcParameterProcessor = BeanContext.get(R2dbcParameterProcessor.class);
-        this.jsonb = BeanContext.get(Jsonb.class);
+    private final ReactiveStreamsFactory reactiveStreamsFactory;
+
+    @Inject
+    public R2DBCOperationDAO(QueryExecutor queryExecutor, MutationExecutor mutationExecutor, R2dbcParameterProcessor r2dbcParameterProcessor, Jsonb jsonb, ReactiveStreamsFactory reactiveStreamsFactory) {
+        this.queryExecutor = queryExecutor;
+        this.mutationExecutor = mutationExecutor;
+        this.r2dbcParameterProcessor = r2dbcParameterProcessor;
+        this.jsonb = jsonb;
+        this.reactiveStreamsFactory = reactiveStreamsFactory;
     }
 
     @Override
@@ -77,21 +86,21 @@ public class R2DBCOperationDAO extends BaseOperationDAO {
 
     @Override
     public <T> PublisherBuilder<T> findAsyncBuilder(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        return toBuilder(findAsync(sql, parameters, beanClass));
+        return reactiveStreamsFactory.fromPublisher(findAsync(sql, parameters, beanClass));
     }
 
     @Override
     public <T> PublisherBuilder<T> findAsyncBuilder(String sql, Map<String, Object> parameters, Type type) {
-        return toBuilder(findAsync(sql, parameters, type));
+        return reactiveStreamsFactory.fromPublisher(findAsync(sql, parameters, type));
     }
 
     @Override
     public <T> PublisherBuilder<T> saveAsyncBuilder(String sql, Map<String, Object> parameters, Class<T> beanClass) {
-        return toBuilder(saveAsync(sql, parameters, beanClass));
+        return reactiveStreamsFactory.fromPublisher(saveAsync(sql, parameters, beanClass));
     }
 
     @Override
     public <T> PublisherBuilder<T> saveAsyncBuilder(String sql, Map<String, Object> parameters, Type type) {
-        return toBuilder(saveAsync(sql, parameters, type));
+        return reactiveStreamsFactory.fromPublisher(saveAsync(sql, parameters, type));
     }
 }
