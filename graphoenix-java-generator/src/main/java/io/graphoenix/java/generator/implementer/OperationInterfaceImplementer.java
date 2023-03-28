@@ -60,7 +60,6 @@ public class OperationInterfaceImplementer {
         this.manager = manager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
-        BeanContext.load(OperationInterfaceImplementer.class.getClassLoader());
         this.generatorHandlerMap = BeanContext.getMap(GeneratorHandler.class);
     }
 

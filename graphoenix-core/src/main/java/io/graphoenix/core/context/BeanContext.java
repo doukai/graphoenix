@@ -8,14 +8,12 @@ import org.eclipse.microprofile.reactive.streams.operators.spi.ReactiveStreamsFa
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ServiceLoader;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.graphoenix.core.utils.StreamUtil.STREAM_UTIL;
 
 public class BeanContext {
 
@@ -212,6 +210,7 @@ public class BeanContext {
                 .flatMap(moduleContext ->
                         Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
                                 .flatMap(map -> map.entrySet().stream())
+                                .filter(STREAM_UTIL.distinctByKey(Map.Entry::getKey))
                                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (T) entry.getValue().get()))
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -224,6 +223,7 @@ public class BeanContext {
                 .flatMap(moduleContext ->
                         Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
                                 .flatMap(map -> map.entrySet().stream())
+                                .filter(STREAM_UTIL.distinctByKey(Map.Entry::getKey))
                                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (Mono<T>) entry.getValue().get()))
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -236,6 +236,7 @@ public class BeanContext {
                 .flatMap(moduleContext ->
                         Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
                                 .flatMap(map -> map.entrySet().stream())
+                                .filter(STREAM_UTIL.distinctByKey(Map.Entry::getKey))
                                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), ReactiveStreamsFactoryResolver.instance().fromPublisher((Mono<T>) entry.getValue().get())))
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -248,6 +249,7 @@ public class BeanContext {
                 .flatMap(moduleContext ->
                         Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
                                 .flatMap(map -> map.entrySet().stream())
+                                .filter(STREAM_UTIL.distinctByKey(Map.Entry::getKey))
                                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (Supplier<T>) entry.getValue()))
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -260,6 +262,7 @@ public class BeanContext {
                 .flatMap(moduleContext ->
                         Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
                                 .flatMap(map -> map.entrySet().stream())
+                                .filter(STREAM_UTIL.distinctByKey(Map.Entry::getKey))
                                 .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey(), (Supplier<Mono<T>>) entry.getValue()))
                 )
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -272,6 +275,7 @@ public class BeanContext {
                 .flatMap(moduleContext ->
                         Stream.ofNullable(moduleContext.getSupplierMap(beanClass))
                                 .flatMap(map -> map.entrySet().stream())
+                                .filter(STREAM_UTIL.distinctByKey(Map.Entry::getKey))
                                 .map(entry -> {
                                             Supplier<PublisherBuilder<T>> publisherBuilderSupplier = () -> ReactiveStreamsFactoryResolver.instance().fromPublisher((Mono<T>) entry.getValue().get());
                                             return new AbstractMap.SimpleEntry<>(entry.getKey(), publisherBuilderSupplier);
