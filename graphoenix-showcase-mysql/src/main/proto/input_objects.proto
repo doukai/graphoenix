@@ -124,9 +124,17 @@ message IntroSchemaExpression {
     optional IntroTypeExpression mutation_type = 7;
     optional IntroTypeExpression subscription_type = 8;
     optional IntroDirectiveExpression directives = 9;
-    optional StringExpression intro_typename = 10;
-    optional Conditional cond = 11;
-    repeated IntroSchemaExpression exs = 12;
+    optional bool include_deprecated = 10;
+    optional IntExpression version = 11;
+    optional StringExpression realm_id = 12;
+    optional StringExpression create_user_id = 13;
+    optional StringExpression create_time = 14;
+    optional StringExpression update_user_id = 15;
+    optional StringExpression update_time = 16;
+    optional StringExpression create_group_id = 17;
+    optional StringExpression intro_typename = 18;
+    optional Conditional cond = 19;
+    repeated IntroSchemaExpression exs = 20;
 }
 message IntroSchemaInput {
     optional string id = 1;
@@ -138,7 +146,15 @@ message IntroSchemaInput {
     optional IntroTypeInput mutation_type = 7;
     optional IntroTypeInput subscription_type = 8;
     repeated IntroDirectiveInput directives = 9;
-    optional string intro_typename = 10;
+    optional bool is_deprecated = 10;
+    optional int32 version = 11;
+    optional string realm_id = 12;
+    optional string create_user_id = 13;
+    optional string create_time = 14;
+    optional string update_user_id = 15;
+    optional string update_time = 16;
+    optional string create_group_id = 17;
+    optional string intro_typename = 18;
 }
 message IntroSchemaOrderBy {
 }
@@ -154,9 +170,17 @@ message IntroTypeExpression {
     optional IntroInputValueExpression input_fields = 9;
     optional StringExpression of_type_name = 10;
     optional IntroTypeExpression of_type = 11;
-    optional StringExpression intro_typename = 12;
-    optional Conditional cond = 13;
-    repeated IntroTypeExpression exs = 14;
+    optional bool include_deprecated = 12;
+    optional IntExpression version = 13;
+    optional StringExpression realm_id = 14;
+    optional StringExpression create_user_id = 15;
+    optional StringExpression create_time = 16;
+    optional StringExpression update_user_id = 17;
+    optional StringExpression update_time = 18;
+    optional StringExpression create_group_id = 19;
+    optional StringExpression intro_typename = 20;
+    optional Conditional cond = 21;
+    repeated IntroTypeExpression exs = 22;
 }
 message IntroTypeInput {
     optional string name = 1;
@@ -170,7 +194,15 @@ message IntroTypeInput {
     repeated IntroInputValueInput input_fields = 9;
     optional string of_type_name = 10;
     optional IntroTypeInput of_type = 11;
-    optional string intro_typename = 12;
+    optional bool is_deprecated = 12;
+    optional int32 version = 13;
+    optional string realm_id = 14;
+    optional string create_user_id = 15;
+    optional string create_time = 16;
+    optional string update_user_id = 17;
+    optional string update_time = 18;
+    optional string create_group_id = 19;
+    optional string intro_typename = 20;
 }
 message IntroTypeOrderBy {
 }
@@ -178,15 +210,31 @@ message IntroTypeInterfacesExpression {
     optional StringExpression id = 1;
     optional StringExpression type_name = 2;
     optional StringExpression interface_name = 3;
-    optional StringExpression intro_typename = 4;
-    optional Conditional cond = 5;
-    repeated IntroTypeInterfacesExpression exs = 6;
+    optional bool include_deprecated = 4;
+    optional IntExpression version = 5;
+    optional StringExpression realm_id = 6;
+    optional StringExpression create_user_id = 7;
+    optional StringExpression create_time = 8;
+    optional StringExpression update_user_id = 9;
+    optional StringExpression update_time = 10;
+    optional StringExpression create_group_id = 11;
+    optional StringExpression intro_typename = 12;
+    optional Conditional cond = 13;
+    repeated IntroTypeInterfacesExpression exs = 14;
 }
 message IntroTypeInterfacesInput {
     optional string id = 1;
     optional string type_name = 2;
     optional string interface_name = 3;
-    optional string intro_typename = 4;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message IntroTypeInterfacesOrderBy {
 }
@@ -194,15 +242,31 @@ message IntroTypePossibleTypesExpression {
     optional StringExpression id = 1;
     optional StringExpression type_name = 2;
     optional StringExpression possible_type_name = 3;
-    optional StringExpression intro_typename = 4;
-    optional Conditional cond = 5;
-    repeated IntroTypePossibleTypesExpression exs = 6;
+    optional bool include_deprecated = 4;
+    optional IntExpression version = 5;
+    optional StringExpression realm_id = 6;
+    optional StringExpression create_user_id = 7;
+    optional StringExpression create_time = 8;
+    optional StringExpression update_user_id = 9;
+    optional StringExpression update_time = 10;
+    optional StringExpression create_group_id = 11;
+    optional StringExpression intro_typename = 12;
+    optional Conditional cond = 13;
+    repeated IntroTypePossibleTypesExpression exs = 14;
 }
 message IntroTypePossibleTypesInput {
     optional string id = 1;
     optional string type_name = 2;
     optional string possible_type_name = 3;
-    optional string intro_typename = 4;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message IntroTypePossibleTypesOrderBy {
 }
@@ -216,9 +280,17 @@ message IntroFieldExpression {
     optional IntroInputValueExpression args = 7;
     optional IntroTypeExpression type = 8;
     optional StringExpression deprecation_reason = 9;
-    optional StringExpression intro_typename = 10;
-    optional Conditional cond = 11;
-    repeated IntroFieldExpression exs = 12;
+    optional bool include_deprecated = 10;
+    optional IntExpression version = 11;
+    optional StringExpression realm_id = 12;
+    optional StringExpression create_user_id = 13;
+    optional StringExpression create_time = 14;
+    optional StringExpression update_user_id = 15;
+    optional StringExpression update_time = 16;
+    optional StringExpression create_group_id = 17;
+    optional StringExpression intro_typename = 18;
+    optional Conditional cond = 19;
+    repeated IntroFieldExpression exs = 20;
 }
 message IntroFieldInput {
     optional string id = 1;
@@ -230,7 +302,15 @@ message IntroFieldInput {
     repeated IntroInputValueInput args = 7;
     optional IntroTypeInput type = 8;
     optional string deprecation_reason = 9;
-    optional string intro_typename = 10;
+    optional bool is_deprecated = 10;
+    optional int32 version = 11;
+    optional string realm_id = 12;
+    optional string create_user_id = 13;
+    optional string create_time = 14;
+    optional string update_user_id = 15;
+    optional string update_time = 16;
+    optional string create_group_id = 17;
+    optional string intro_typename = 18;
 }
 message IntroFieldOrderBy {
 }
@@ -245,9 +325,17 @@ message IntroInputValueExpression {
     optional StringExpression description = 8;
     optional IntroTypeExpression type = 9;
     optional StringExpression default_value = 10;
-    optional StringExpression intro_typename = 11;
-    optional Conditional cond = 12;
-    repeated IntroInputValueExpression exs = 13;
+    optional bool include_deprecated = 11;
+    optional IntExpression version = 12;
+    optional StringExpression realm_id = 13;
+    optional StringExpression create_user_id = 14;
+    optional StringExpression create_time = 15;
+    optional StringExpression update_user_id = 16;
+    optional StringExpression update_time = 17;
+    optional StringExpression create_group_id = 18;
+    optional StringExpression intro_typename = 19;
+    optional Conditional cond = 20;
+    repeated IntroInputValueExpression exs = 21;
 }
 message IntroInputValueInput {
     optional string id = 1;
@@ -260,7 +348,15 @@ message IntroInputValueInput {
     optional string description = 8;
     optional IntroTypeInput type = 9;
     optional string default_value = 10;
-    optional string intro_typename = 11;
+    optional bool is_deprecated = 11;
+    optional int32 version = 12;
+    optional string realm_id = 13;
+    optional string create_user_id = 14;
+    optional string create_time = 15;
+    optional string update_user_id = 16;
+    optional string update_time = 17;
+    optional string create_group_id = 18;
+    optional string intro_typename = 19;
 }
 message IntroInputValueOrderBy {
 }
@@ -271,9 +367,17 @@ message IntroEnumValueExpression {
     optional IntroTypeExpression of_type = 4;
     optional StringExpression description = 5;
     optional StringExpression deprecation_reason = 6;
-    optional StringExpression intro_typename = 7;
-    optional Conditional cond = 8;
-    repeated IntroEnumValueExpression exs = 9;
+    optional bool include_deprecated = 7;
+    optional IntExpression version = 8;
+    optional StringExpression realm_id = 9;
+    optional StringExpression create_user_id = 10;
+    optional StringExpression create_time = 11;
+    optional StringExpression update_user_id = 12;
+    optional StringExpression update_time = 13;
+    optional StringExpression create_group_id = 14;
+    optional StringExpression intro_typename = 15;
+    optional Conditional cond = 16;
+    repeated IntroEnumValueExpression exs = 17;
 }
 message IntroEnumValueInput {
     optional string id = 1;
@@ -282,7 +386,15 @@ message IntroEnumValueInput {
     optional IntroTypeInput of_type = 4;
     optional string description = 5;
     optional string deprecation_reason = 6;
-    optional string intro_typename = 7;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional string create_time = 11;
+    optional string update_user_id = 12;
+    optional string update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
 }
 message IntroEnumValueOrderBy {
 }
@@ -295,9 +407,17 @@ message IntroDirectiveExpression {
     optional BooleanExpression on_operation = 6;
     optional BooleanExpression on_fragment = 7;
     optional BooleanExpression on_field = 8;
-    optional StringExpression intro_typename = 9;
-    optional Conditional cond = 10;
-    repeated IntroDirectiveExpression exs = 11;
+    optional bool include_deprecated = 9;
+    optional IntExpression version = 10;
+    optional StringExpression realm_id = 11;
+    optional StringExpression create_user_id = 12;
+    optional StringExpression create_time = 13;
+    optional StringExpression update_user_id = 14;
+    optional StringExpression update_time = 15;
+    optional StringExpression create_group_id = 16;
+    optional StringExpression intro_typename = 17;
+    optional Conditional cond = 18;
+    repeated IntroDirectiveExpression exs = 19;
 }
 message IntroDirectiveInput {
     optional string name = 1;
@@ -308,7 +428,15 @@ message IntroDirectiveInput {
     optional bool on_operation = 6;
     optional bool on_fragment = 7;
     optional bool on_field = 8;
-    optional string intro_typename = 9;
+    optional bool is_deprecated = 9;
+    optional int32 version = 10;
+    optional string realm_id = 11;
+    optional string create_user_id = 12;
+    optional string create_time = 13;
+    optional string update_user_id = 14;
+    optional string update_time = 15;
+    optional string create_group_id = 16;
+    optional string intro_typename = 17;
 }
 message IntroDirectiveOrderBy {
 }
@@ -316,15 +444,31 @@ message IntroDirectiveLocationsExpression {
     optional StringExpression id = 1;
     optional StringExpression directive_name = 2;
     optional IntroDirectiveLocationExpression directive_location = 3;
-    optional StringExpression intro_typename = 4;
-    optional Conditional cond = 5;
-    repeated IntroDirectiveLocationsExpression exs = 6;
+    optional bool include_deprecated = 4;
+    optional IntExpression version = 5;
+    optional StringExpression realm_id = 6;
+    optional StringExpression create_user_id = 7;
+    optional StringExpression create_time = 8;
+    optional StringExpression update_user_id = 9;
+    optional StringExpression update_time = 10;
+    optional StringExpression create_group_id = 11;
+    optional StringExpression intro_typename = 12;
+    optional Conditional cond = 13;
+    repeated IntroDirectiveLocationsExpression exs = 14;
 }
 message IntroDirectiveLocationsInput {
     optional string id = 1;
     optional string directive_name = 2;
     optional IntroDirectiveLocation directive_location = 3;
-    optional string intro_typename = 4;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
 }
 message IntroDirectiveLocationsOrderBy {
 }

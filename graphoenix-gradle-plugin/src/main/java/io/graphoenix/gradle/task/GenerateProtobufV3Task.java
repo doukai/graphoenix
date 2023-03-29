@@ -33,7 +33,7 @@ public class GenerateProtobufV3Task extends BaseTask {
         Path protoPath = Path.of(sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath()).getParent().resolve("proto");
         try {
             registerInvoke();
-            configRegister.registerPreset(createClassLoader());
+            configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }

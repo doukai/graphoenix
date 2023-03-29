@@ -99,7 +99,7 @@ public class DocumentBuilder {
     }
 
     public void buildManager() throws IOException, URISyntaxException {
-        graphQLConfigRegister.registerPreset();
+        graphQLConfigRegister.registerPackage();
         graphQLConfigRegister.registerConfig();
         if (graphQLConfig.getBuild()) {
             manager.registerGraphQL(buildDocument().toString());

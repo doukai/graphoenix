@@ -30,6 +30,14 @@ service MutationTypeService {
     rpc IntroDirectiveList (MutationIntroDirectiveListRequest) returns (MutationIntroDirectiveListResponse);
     rpc IntroDirectiveLocations (MutationIntroDirectiveLocationsRequest) returns (MutationIntroDirectiveLocationsResponse);
     rpc IntroDirectiveLocationsList (MutationIntroDirectiveLocationsListRequest) returns (MutationIntroDirectiveLocationsListResponse);
+    rpc IsDeprecated (MutationIsDeprecatedRequest) returns (MutationIsDeprecatedResponse);
+    rpc Version (MutationVersionRequest) returns (MutationVersionResponse);
+    rpc RealmId (MutationRealmIdRequest) returns (MutationRealmIdResponse);
+    rpc CreateUserId (MutationCreateUserIdRequest) returns (MutationCreateUserIdResponse);
+    rpc CreateTime (MutationCreateTimeRequest) returns (MutationCreateTimeResponse);
+    rpc UpdateUserId (MutationUpdateUserIdRequest) returns (MutationUpdateUserIdResponse);
+    rpc UpdateTime (MutationUpdateTimeRequest) returns (MutationUpdateTimeResponse);
+    rpc CreateGroupId (MutationCreateGroupIdRequest) returns (MutationCreateGroupIdResponse);
     rpc User (MutationUserRequest) returns (MutationUserResponse);
     rpc UserList (MutationUserListRequest) returns (MutationUserListResponse);
     rpc UserProfile (MutationUserProfileRequest) returns (MutationUserProfileResponse);
@@ -48,12 +56,4 @@ service MutationTypeService {
     rpc RoleRoleTypeList (MutationRoleRoleTypeListRequest) returns (MutationRoleRoleTypeListResponse);
     rpc Organization (MutationOrganizationRequest) returns (MutationOrganizationResponse);
     rpc OrganizationList (MutationOrganizationListRequest) returns (MutationOrganizationListResponse);
-    rpc IsDeprecated (MutationIsDeprecatedRequest) returns (MutationIsDeprecatedResponse);
-    rpc Version (MutationVersionRequest) returns (MutationVersionResponse);
-    rpc RealmId (MutationRealmIdRequest) returns (MutationRealmIdResponse);
-    rpc CreateUserId (MutationCreateUserIdRequest) returns (MutationCreateUserIdResponse);
-    rpc CreateTime (MutationCreateTimeRequest) returns (MutationCreateTimeResponse);
-    rpc UpdateUserId (MutationUpdateUserIdRequest) returns (MutationUpdateUserIdResponse);
-    rpc UpdateTime (MutationUpdateTimeRequest) returns (MutationUpdateTimeResponse);
-    rpc CreateGroupId (MutationCreateGroupIdRequest) returns (MutationCreateGroupIdResponse);
 }

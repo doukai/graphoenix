@@ -17,6 +17,22 @@ public @interface __SchemaOrderBy0 {
 
   Sort subscriptionTypeName() default Sort.ASC;
 
+  Sort isDeprecated() default Sort.ASC;
+
+  Sort version() default Sort.ASC;
+
+  Sort realmId() default Sort.ASC;
+
+  Sort createUserId() default Sort.ASC;
+
+  Sort createTime() default Sort.ASC;
+
+  Sort updateUserId() default Sort.ASC;
+
+  Sort updateTime() default Sort.ASC;
+
+  Sort createGroupId() default Sort.ASC;
+
   Sort __typename() default Sort.ASC;
 
   __TypeOrderBy1 types() default @__TypeOrderBy1;

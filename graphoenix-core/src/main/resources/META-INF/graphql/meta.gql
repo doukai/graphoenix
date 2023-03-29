@@ -1,0 +1,10 @@
+interface Meta {
+    isDeprecated: Boolean
+    version: Int
+    realmId: String
+    createUserId: String
+    createTime: Timestamp
+    updateUserId: String
+    updateTime: Timestamp
+    createGroupId: String
+}

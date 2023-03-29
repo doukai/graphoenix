@@ -24,6 +24,22 @@ public @interface __DirectiveInput2 {
 
   boolean onField() default false;
 
+  boolean isDeprecated() default false;
+
+  int version() default 0;
+
+  String realmId() default "";
+
+  String createUserId() default "";
+
+  String createTime() default "";
+
+  String updateUserId() default "";
+
+  String updateTime() default "";
+
+  String createGroupId() default "";
+
   String __typename() default "";
 
   String $name() default "";
@@ -41,6 +57,22 @@ public @interface __DirectiveInput2 {
   String $onFragment() default "";
 
   String $onField() default "";
+
+  String $isDeprecated() default "";
+
+  String $version() default "";
+
+  String $realmId() default "";
+
+  String $createUserId() default "";
+
+  String $createTime() default "";
+
+  String $updateUserId() default "";
+
+  String $updateTime() default "";
+
+  String $createGroupId() default "";
 
   String $__typename() default "";
 

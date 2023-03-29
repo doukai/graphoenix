@@ -117,6 +117,30 @@ message QueryIntroDirectiveLocationsListResponse {
 message QueryIntroDirectiveLocationsConnectionResponse {
     optional IntroDirectiveLocationsConnection intro_directive_locations_connection = 1;
 }
+message QueryIsDeprecatedResponse {
+    optional bool is_deprecated = 1;
+}
+message QueryVersionResponse {
+    optional int32 version = 1;
+}
+message QueryRealmIdResponse {
+    optional string realm_id = 1;
+}
+message QueryCreateUserIdResponse {
+    optional string create_user_id = 1;
+}
+message QueryCreateTimeResponse {
+    optional string create_time = 1;
+}
+message QueryUpdateUserIdResponse {
+    optional string update_user_id = 1;
+}
+message QueryUpdateTimeResponse {
+    optional string update_time = 1;
+}
+message QueryCreateGroupIdResponse {
+    optional string create_group_id = 1;
+}
 message QueryUserResponse {
     optional User user = 1;
 }
@@ -197,28 +221,4 @@ message QueryOrganizationListResponse {
 }
 message QueryOrganizationConnectionResponse {
     optional OrganizationConnection organization_connection = 1;
-}
-message QueryIsDeprecatedResponse {
-    optional bool is_deprecated = 1;
-}
-message QueryVersionResponse {
-    optional int32 version = 1;
-}
-message QueryRealmIdResponse {
-    optional string realm_id = 1;
-}
-message QueryCreateUserIdResponse {
-    optional string create_user_id = 1;
-}
-message QueryCreateTimeResponse {
-    optional string create_time = 1;
-}
-message QueryUpdateUserIdResponse {
-    optional string update_user_id = 1;
-}
-message QueryUpdateTimeResponse {
-    optional string update_time = 1;
-}
-message QueryCreateGroupIdResponse {
-    optional string create_group_id = 1;
 }

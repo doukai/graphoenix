@@ -20,6 +20,22 @@ public @interface __SchemaExpression2 {
 
   StringExpression subscriptionTypeName() default @StringExpression;
 
+  BooleanExpression isDeprecated() default @BooleanExpression;
+
+  IntExpression version() default @IntExpression;
+
+  StringExpression realmId() default @StringExpression;
+
+  StringExpression createUserId() default @StringExpression;
+
+  StringExpression createTime() default @StringExpression;
+
+  StringExpression updateUserId() default @StringExpression;
+
+  StringExpression updateTime() default @StringExpression;
+
+  StringExpression createGroupId() default @StringExpression;
+
   StringExpression __typename() default @StringExpression;
 
   String[] groupBy() default {};

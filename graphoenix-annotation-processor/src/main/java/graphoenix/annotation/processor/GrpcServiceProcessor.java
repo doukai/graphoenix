@@ -56,7 +56,7 @@ public class GrpcServiceProcessor extends BaseProcessor {
         registerElements(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-            configRegister.registerPreset(GrpcServiceProcessor.class.getClassLoader());
+            configRegister.registerPackage(GrpcServiceProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }

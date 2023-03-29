@@ -93,7 +93,15 @@ public class GraphQLConfigRegister {
         }
     }
 
-    public void registerPreset(ClassLoader classLoader) throws IOException, URISyntaxException {
+    public void registerPackage(ClassLoader classLoader) throws IOException, URISyntaxException {
+        registerPreset(classLoader, "package.gql");
+    }
+
+    public void registerMeta(ClassLoader classLoader) throws IOException, URISyntaxException {
+        registerPreset(classLoader, "meta.gql");
+    }
+
+    public void registerPreset(ClassLoader classLoader, String fileName) throws IOException, URISyntaxException {
         Iterator<URL> urlIterator = Objects.requireNonNull(classLoader.getResources("META-INF/graphql")).asIterator();
         while (urlIterator.hasNext()) {
             URI uri = urlIterator.next().toURI();
@@ -106,7 +114,7 @@ public class GraphQLConfigRegister {
                 pathList = Files.list(fileSystem.getPath("META-INF/graphql")).collect(Collectors.toList());
             }
             try {
-                Optional<Path> exportGraphQLFile = pathList.stream().filter(path -> path.getFileName().getFileName().toString().equals("package.gql")).findFirst();
+                Optional<Path> exportGraphQLFile = pathList.stream().filter(path -> path.getFileName().getFileName().toString().equals(fileName)).findFirst();
                 if (exportGraphQLFile.isPresent()) {
                     manager.mergePath(exportGraphQLFile.get());
                 } else {
@@ -122,7 +130,7 @@ public class GraphQLConfigRegister {
         }
     }
 
-    public void registerPreset() throws IOException, URISyntaxException {
-        registerPreset(getClass().getClassLoader());
+    public void registerPackage() throws IOException, URISyntaxException {
+        registerPackage(getClass().getClassLoader());
     }
 }

@@ -3,6 +3,7 @@ package graphoenix.annotation.processor;
 import com.google.auto.service.AutoService;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.tinylog.Logger;
@@ -19,6 +20,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.util.Set;
 
 import static javax.lang.model.SourceVersion.RELEASE_11;
@@ -45,17 +47,19 @@ public class PackageProcessor extends BaseProcessor {
         IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         registerElements(roundEnv);
-        if (graphQLConfig.getBuild()) {
-            manager.registerGraphQL(documentBuilder.buildDocument().toString());
-        }
-        registerOperations(roundEnv);
         try {
+            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+            configRegister.registerMeta(PackageProcessor.class.getClassLoader());
+            if (graphQLConfig.getBuild()) {
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+            }
+            registerOperations(roundEnv);
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/package.gql");
             Writer writer = packageGraphQL.openWriter();
             writer.write(documentBuilder.getDocument().toString());
             writer.close();
 
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
         }

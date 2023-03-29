@@ -19,6 +19,22 @@ public @interface __TypeOrderBy0 {
 
   Sort ofTypeName() default Sort.ASC;
 
+  Sort isDeprecated() default Sort.ASC;
+
+  Sort version() default Sort.ASC;
+
+  Sort realmId() default Sort.ASC;
+
+  Sort createUserId() default Sort.ASC;
+
+  Sort createTime() default Sort.ASC;
+
+  Sort updateUserId() default Sort.ASC;
+
+  Sort updateTime() default Sort.ASC;
+
+  Sort createGroupId() default Sort.ASC;
+
   Sort __typename() default Sort.ASC;
 
   __FieldOrderBy1 fields() default @__FieldOrderBy1;

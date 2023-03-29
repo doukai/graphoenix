@@ -30,7 +30,7 @@ public class GenerateGraphQLSourceTask extends BaseTask {
         String javaPath = sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath();
         try {
             registerInvoke();
-            configRegister.registerPreset(createClassLoader());
+            configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }

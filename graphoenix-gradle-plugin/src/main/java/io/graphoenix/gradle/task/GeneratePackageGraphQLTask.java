@@ -2,6 +2,7 @@ package io.graphoenix.gradle.task;
 
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
+import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.gradle.api.plugins.JavaPluginConvention;
@@ -11,6 +12,7 @@ import org.gradle.api.tasks.TaskExecutionException;
 import org.tinylog.Logger;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -26,6 +28,8 @@ public class GeneratePackageGraphQLTask extends BaseTask {
         String resourcePath = sourceSet.getResources().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_RESOURCES_PATH)).getAsPath();
         try {
             registerInvoke();
+            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+            configRegister.registerMeta(createClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
@@ -37,7 +41,7 @@ public class GeneratePackageGraphQLTask extends BaseTask {
                     filePath.resolve("package.gql"),
                     documentBuilder.getDocument().toString()
             );
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             Logger.error(e);
             throw new TaskExecutionException(this, e);
         }

@@ -63,6 +63,30 @@ message MutationIntroDirectiveLocationsResponse {
 message MutationIntroDirectiveLocationsListResponse {
     repeated IntroDirectiveLocations intro_directive_locations_list = 1;
 }
+message MutationIsDeprecatedResponse {
+    optional bool is_deprecated = 1;
+}
+message MutationVersionResponse {
+    optional int32 version = 1;
+}
+message MutationRealmIdResponse {
+    optional string realm_id = 1;
+}
+message MutationCreateUserIdResponse {
+    optional string create_user_id = 1;
+}
+message MutationCreateTimeResponse {
+    optional string create_time = 1;
+}
+message MutationUpdateUserIdResponse {
+    optional string update_user_id = 1;
+}
+message MutationUpdateTimeResponse {
+    optional string update_time = 1;
+}
+message MutationCreateGroupIdResponse {
+    optional string create_group_id = 1;
+}
 message MutationUserResponse {
     optional User user = 1;
 }
@@ -116,28 +140,4 @@ message MutationOrganizationResponse {
 }
 message MutationOrganizationListResponse {
     repeated Organization organization_list = 1;
-}
-message MutationIsDeprecatedResponse {
-    optional bool is_deprecated = 1;
-}
-message MutationVersionResponse {
-    optional int32 version = 1;
-}
-message MutationRealmIdResponse {
-    optional string realm_id = 1;
-}
-message MutationCreateUserIdResponse {
-    optional string create_user_id = 1;
-}
-message MutationCreateTimeResponse {
-    optional string create_time = 1;
-}
-message MutationUpdateUserIdResponse {
-    optional string update_user_id = 1;
-}
-message MutationUpdateTimeResponse {
-    optional string update_time = 1;
-}
-message MutationCreateGroupIdResponse {
-    optional string create_group_id = 1;
 }

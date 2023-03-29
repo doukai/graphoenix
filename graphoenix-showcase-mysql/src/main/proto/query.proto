@@ -48,6 +48,14 @@ service QueryTypeService {
     rpc IntroDirectiveLocations (QueryIntroDirectiveLocationsRequest) returns (QueryIntroDirectiveLocationsResponse);
     rpc IntroDirectiveLocationsList (QueryIntroDirectiveLocationsListRequest) returns (QueryIntroDirectiveLocationsListResponse);
     rpc IntroDirectiveLocationsConnection (QueryIntroDirectiveLocationsConnectionRequest) returns (QueryIntroDirectiveLocationsConnectionResponse);
+    rpc IsDeprecated (QueryIsDeprecatedRequest) returns (QueryIsDeprecatedResponse);
+    rpc Version (QueryVersionRequest) returns (QueryVersionResponse);
+    rpc RealmId (QueryRealmIdRequest) returns (QueryRealmIdResponse);
+    rpc CreateUserId (QueryCreateUserIdRequest) returns (QueryCreateUserIdResponse);
+    rpc CreateTime (QueryCreateTimeRequest) returns (QueryCreateTimeResponse);
+    rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
+    rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
+    rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
     rpc User (QueryUserRequest) returns (QueryUserResponse);
     rpc UserList (QueryUserListRequest) returns (QueryUserListResponse);
     rpc UserConnection (QueryUserConnectionRequest) returns (QueryUserConnectionResponse);
@@ -75,12 +83,4 @@ service QueryTypeService {
     rpc Organization (QueryOrganizationRequest) returns (QueryOrganizationResponse);
     rpc OrganizationList (QueryOrganizationListRequest) returns (QueryOrganizationListResponse);
     rpc OrganizationConnection (QueryOrganizationConnectionRequest) returns (QueryOrganizationConnectionResponse);
-    rpc IsDeprecated (QueryIsDeprecatedRequest) returns (QueryIsDeprecatedResponse);
-    rpc Version (QueryVersionRequest) returns (QueryVersionResponse);
-    rpc RealmId (QueryRealmIdRequest) returns (QueryRealmIdResponse);
-    rpc CreateUserId (QueryCreateUserIdRequest) returns (QueryCreateUserIdResponse);
-    rpc CreateTime (QueryCreateTimeRequest) returns (QueryCreateTimeResponse);
-    rpc UpdateUserId (QueryUpdateUserIdRequest) returns (QueryUpdateUserIdResponse);
-    rpc UpdateTime (QueryUpdateTimeRequest) returns (QueryUpdateTimeResponse);
-    rpc CreateGroupId (QueryCreateGroupIdRequest) returns (QueryCreateGroupIdResponse);
 }
