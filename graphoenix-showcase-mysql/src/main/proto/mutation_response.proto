@@ -9,60 +9,6 @@ import "enums.proto";
 import "objects.proto";
 import "input_objects.proto";
 
-message MutationUserResponse {
-    optional User user = 1;
-}
-message MutationUserListResponse {
-    repeated User user_list = 1;
-}
-message MutationUserProfileResponse {
-    optional UserProfile user_profile = 1;
-}
-message MutationUserProfileListResponse {
-    repeated UserProfile user_profile_list = 1;
-}
-message MutationUserPhonesResponse {
-    optional UserPhones user_phones = 1;
-}
-message MutationUserPhonesListResponse {
-    repeated UserPhones user_phones_list = 1;
-}
-message MutationUserTest1Response {
-    optional UserTest1 user_test1 = 1;
-}
-message MutationUserTest1ListResponse {
-    repeated UserTest1 user_test1_list = 1;
-}
-message MutationUserTest2Response {
-    optional UserTest2 user_test2 = 1;
-}
-message MutationUserTest2ListResponse {
-    repeated UserTest2 user_test2_list = 1;
-}
-message MutationUserRoleResponse {
-    optional UserRole user_role = 1;
-}
-message MutationUserRoleListResponse {
-    repeated UserRole user_role_list = 1;
-}
-message MutationRoleResponse {
-    optional Role role = 1;
-}
-message MutationRoleListResponse {
-    repeated Role role_list = 1;
-}
-message MutationRoleRoleTypeResponse {
-    optional RoleRoleType role_role_type = 1;
-}
-message MutationRoleRoleTypeListResponse {
-    repeated RoleRoleType role_role_type_list = 1;
-}
-message MutationOrganizationResponse {
-    optional Organization organization = 1;
-}
-message MutationOrganizationListResponse {
-    repeated Organization organization_list = 1;
-}
 message MutationIntroSchemaResponse {
     optional IntroSchema intro_schema = 1;
 }
@@ -116,6 +62,60 @@ message MutationIntroDirectiveLocationsResponse {
 }
 message MutationIntroDirectiveLocationsListResponse {
     repeated IntroDirectiveLocations intro_directive_locations_list = 1;
+}
+message MutationUserResponse {
+    optional User user = 1;
+}
+message MutationUserListResponse {
+    repeated User user_list = 1;
+}
+message MutationUserProfileResponse {
+    optional UserProfile user_profile = 1;
+}
+message MutationUserProfileListResponse {
+    repeated UserProfile user_profile_list = 1;
+}
+message MutationUserPhonesResponse {
+    optional UserPhones user_phones = 1;
+}
+message MutationUserPhonesListResponse {
+    repeated UserPhones user_phones_list = 1;
+}
+message MutationUserTest1Response {
+    optional UserTest1 user_test1 = 1;
+}
+message MutationUserTest1ListResponse {
+    repeated UserTest1 user_test1_list = 1;
+}
+message MutationUserTest2Response {
+    optional UserTest2 user_test2 = 1;
+}
+message MutationUserTest2ListResponse {
+    repeated UserTest2 user_test2_list = 1;
+}
+message MutationUserRoleResponse {
+    optional UserRole user_role = 1;
+}
+message MutationUserRoleListResponse {
+    repeated UserRole user_role_list = 1;
+}
+message MutationRoleResponse {
+    optional Role role = 1;
+}
+message MutationRoleListResponse {
+    repeated Role role_list = 1;
+}
+message MutationRoleRoleTypeResponse {
+    optional RoleRoleType role_role_type = 1;
+}
+message MutationRoleRoleTypeListResponse {
+    repeated RoleRoleType role_role_type_list = 1;
+}
+message MutationOrganizationResponse {
+    optional Organization organization = 1;
+}
+message MutationOrganizationListResponse {
+    repeated Organization organization_list = 1;
 }
 message MutationIsDeprecatedResponse {
     optional bool is_deprecated = 1;

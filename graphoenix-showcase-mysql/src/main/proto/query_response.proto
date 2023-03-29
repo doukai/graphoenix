@@ -36,32 +36,86 @@ message QueryFindRole2Response {
 message QueryFindContainerTypeResponse {
     optional ContainerType1 find_container_type = 1;
 }
-message QueryIsDeprecatedResponse {
-    optional bool is_deprecated = 1;
+message QueryIntroSchemaResponse {
+    optional IntroSchema intro_schema = 1;
 }
-message QueryVersionResponse {
-    optional int32 version = 1;
+message QueryIntroSchemaListResponse {
+    repeated IntroSchema intro_schema_list = 1;
 }
-message QueryRealmIdResponse {
-    optional string realm_id = 1;
+message QueryIntroSchemaConnectionResponse {
+    optional IntroSchemaConnection intro_schema_connection = 1;
 }
-message QueryCreateUserIdResponse {
-    optional string create_user_id = 1;
+message QueryIntroTypeResponse {
+    optional IntroType intro_type = 1;
 }
-message QueryCreateTimeResponse {
-    optional string create_time = 1;
+message QueryIntroTypeListResponse {
+    repeated IntroType intro_type_list = 1;
 }
-message QueryUpdateUserIdResponse {
-    optional string update_user_id = 1;
+message QueryIntroTypeConnectionResponse {
+    optional IntroTypeConnection intro_type_connection = 1;
 }
-message QueryUpdateTimeResponse {
-    optional string update_time = 1;
+message QueryIntroTypeInterfacesResponse {
+    optional IntroTypeInterfaces intro_type_interfaces = 1;
 }
-message QueryCreateGroupIdResponse {
-    optional string create_group_id = 1;
+message QueryIntroTypeInterfacesListResponse {
+    repeated IntroTypeInterfaces intro_type_interfaces_list = 1;
 }
-message QueryIntroTypenameResponse {
-    optional string intro_typename = 1;
+message QueryIntroTypeInterfacesConnectionResponse {
+    optional IntroTypeInterfacesConnection intro_type_interfaces_connection = 1;
+}
+message QueryIntroTypePossibleTypesResponse {
+    optional IntroTypePossibleTypes intro_type_possible_types = 1;
+}
+message QueryIntroTypePossibleTypesListResponse {
+    repeated IntroTypePossibleTypes intro_type_possible_types_list = 1;
+}
+message QueryIntroTypePossibleTypesConnectionResponse {
+    optional IntroTypePossibleTypesConnection intro_type_possible_types_connection = 1;
+}
+message QueryIntroFieldResponse {
+    optional IntroField intro_field = 1;
+}
+message QueryIntroFieldListResponse {
+    repeated IntroField intro_field_list = 1;
+}
+message QueryIntroFieldConnectionResponse {
+    optional IntroFieldConnection intro_field_connection = 1;
+}
+message QueryIntroInputValueResponse {
+    optional IntroInputValue intro_input_value = 1;
+}
+message QueryIntroInputValueListResponse {
+    repeated IntroInputValue intro_input_value_list = 1;
+}
+message QueryIntroInputValueConnectionResponse {
+    optional IntroInputValueConnection intro_input_value_connection = 1;
+}
+message QueryIntroEnumValueResponse {
+    optional IntroEnumValue intro_enum_value = 1;
+}
+message QueryIntroEnumValueListResponse {
+    repeated IntroEnumValue intro_enum_value_list = 1;
+}
+message QueryIntroEnumValueConnectionResponse {
+    optional IntroEnumValueConnection intro_enum_value_connection = 1;
+}
+message QueryIntroDirectiveResponse {
+    optional IntroDirective intro_directive = 1;
+}
+message QueryIntroDirectiveListResponse {
+    repeated IntroDirective intro_directive_list = 1;
+}
+message QueryIntroDirectiveConnectionResponse {
+    optional IntroDirectiveConnection intro_directive_connection = 1;
+}
+message QueryIntroDirectiveLocationsResponse {
+    optional IntroDirectiveLocations intro_directive_locations = 1;
+}
+message QueryIntroDirectiveLocationsListResponse {
+    repeated IntroDirectiveLocations intro_directive_locations_list = 1;
+}
+message QueryIntroDirectiveLocationsConnectionResponse {
+    optional IntroDirectiveLocationsConnection intro_directive_locations_connection = 1;
 }
 message QueryUserResponse {
     optional User user = 1;
@@ -144,84 +198,27 @@ message QueryOrganizationListResponse {
 message QueryOrganizationConnectionResponse {
     optional OrganizationConnection organization_connection = 1;
 }
-message QueryIntroSchemaResponse {
-    optional IntroSchema intro_schema = 1;
+message QueryIsDeprecatedResponse {
+    optional bool is_deprecated = 1;
 }
-message QueryIntroSchemaListResponse {
-    repeated IntroSchema intro_schema_list = 1;
+message QueryVersionResponse {
+    optional int32 version = 1;
 }
-message QueryIntroSchemaConnectionResponse {
-    optional IntroSchemaConnection intro_schema_connection = 1;
+message QueryRealmIdResponse {
+    optional string realm_id = 1;
 }
-message QueryIntroTypeResponse {
-    optional IntroType intro_type = 1;
+message QueryCreateUserIdResponse {
+    optional string create_user_id = 1;
 }
-message QueryIntroTypeListResponse {
-    repeated IntroType intro_type_list = 1;
+message QueryCreateTimeResponse {
+    optional string create_time = 1;
 }
-message QueryIntroTypeConnectionResponse {
-    optional IntroTypeConnection intro_type_connection = 1;
+message QueryUpdateUserIdResponse {
+    optional string update_user_id = 1;
 }
-message QueryIntroTypeInterfacesResponse {
-    optional IntroTypeInterfaces intro_type_interfaces = 1;
+message QueryUpdateTimeResponse {
+    optional string update_time = 1;
 }
-message QueryIntroTypeInterfacesListResponse {
-    repeated IntroTypeInterfaces intro_type_interfaces_list = 1;
-}
-message QueryIntroTypeInterfacesConnectionResponse {
-    optional IntroTypeInterfacesConnection intro_type_interfaces_connection = 1;
-}
-message QueryIntroTypePossibleTypesResponse {
-    optional IntroTypePossibleTypes intro_type_possible_types = 1;
-}
-message QueryIntroTypePossibleTypesListResponse {
-    repeated IntroTypePossibleTypes intro_type_possible_types_list = 1;
-}
-message QueryIntroTypePossibleTypesConnectionResponse {
-    optional IntroTypePossibleTypesConnection intro_type_possible_types_connection = 1;
-}
-message QueryIntroFieldResponse {
-    optional IntroField intro_field = 1;
-}
-message QueryIntroFieldListResponse {
-    repeated IntroField intro_field_list = 1;
-}
-message QueryIntroFieldConnectionResponse {
-    optional IntroFieldConnection intro_field_connection = 1;
-}
-message QueryIntroInputValueResponse {
-    optional IntroInputValue intro_input_value = 1;
-}
-message QueryIntroInputValueListResponse {
-    repeated IntroInputValue intro_input_value_list = 1;
-}
-message QueryIntroInputValueConnectionResponse {
-    optional IntroInputValueConnection intro_input_value_connection = 1;
-}
-message QueryIntroEnumValueResponse {
-    optional IntroEnumValue intro_enum_value = 1;
-}
-message QueryIntroEnumValueListResponse {
-    repeated IntroEnumValue intro_enum_value_list = 1;
-}
-message QueryIntroEnumValueConnectionResponse {
-    optional IntroEnumValueConnection intro_enum_value_connection = 1;
-}
-message QueryIntroDirectiveResponse {
-    optional IntroDirective intro_directive = 1;
-}
-message QueryIntroDirectiveListResponse {
-    repeated IntroDirective intro_directive_list = 1;
-}
-message QueryIntroDirectiveConnectionResponse {
-    optional IntroDirectiveConnection intro_directive_connection = 1;
-}
-message QueryIntroDirectiveLocationsResponse {
-    optional IntroDirectiveLocations intro_directive_locations = 1;
-}
-message QueryIntroDirectiveLocationsListResponse {
-    repeated IntroDirectiveLocations intro_directive_locations_list = 1;
-}
-message QueryIntroDirectiveLocationsConnectionResponse {
-    optional IntroDirectiveLocationsConnection intro_directive_locations_connection = 1;
+message QueryCreateGroupIdResponse {
+    optional string create_group_id = 1;
 }

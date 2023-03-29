@@ -488,10 +488,15 @@ public class BaseTask extends DefaultTask {
                 .filter(parameter -> parameter.isAnnotationPresent(Source.class))
                 .flatMap(parameter -> parameter.getAnnotationByClass(Source.class).stream())
                 .findFirst()
-                .flatMap(annotationExpr ->
-                        annotationExpr.asNormalAnnotationExpr().getPairs().stream()
-                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
-                                .findFirst()
+                .flatMap(annotationExpr -> {
+                            if (annotationExpr.isNormalAnnotationExpr()) {
+                                return annotationExpr.asNormalAnnotationExpr().getPairs().stream()
+                                        .filter(memberValuePair -> memberValuePair.getNameAsString().equals("name"))
+                                        .filter(memberValuePair -> Strings.isNullOrEmpty(memberValuePair.getValue().asStringLiteralExpr().getValue()))
+                                        .findFirst();
+                            }
+                            return Optional.empty();
+                        }
                 )
                 .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr().getValue());
     }

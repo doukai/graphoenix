@@ -57,22 +57,22 @@ public class IntrospectionMutationBuilder {
 
         arguments.put("types",
                 Stream.concat(
-                        manager.getObjects()
-                                .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
-                                .map(this::objectTypeDefinitionContextToType),
-                        Stream.concat(
-                                manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
+                                manager.getObjects()
+                                        .filter(objectTypeDefinitionContext -> !objectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                                        .map(this::objectTypeDefinitionContextToType),
                                 Stream.concat(
-                                        manager.getInputObjects()
-                                                .filter(inputObjectTypeDefinitionContext -> !inputObjectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
-                                                .map(this::inputObjectTypeDefinitionContextToType),
+                                        manager.getInterfaces().map(this::interfaceTypeDefinitionContextToType),
                                         Stream.concat(
-                                                manager.getEnums().map(this::enumTypeDefinitionContextToType),
-                                                manager.getScalars().map(this::scalarTypeDefinitionContextToType)
+                                                manager.getInputObjects()
+                                                        .filter(inputObjectTypeDefinitionContext -> !inputObjectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                                                        .map(this::inputObjectTypeDefinitionContextToType),
+                                                Stream.concat(
+                                                        manager.getEnums().map(this::enumTypeDefinitionContextToType),
+                                                        manager.getScalars().map(this::scalarTypeDefinitionContextToType)
+                                                )
                                         )
                                 )
-                        )
-                ).map(__Type::toValue)
+                        ).map(__Type::toValue)
                         .collect(Collectors.toList())
         );
 
@@ -157,7 +157,7 @@ public class IntrospectionMutationBuilder {
                     objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                             .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(objectTypeDefinitionContext.name().getText()))
                             .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
-                            .map(fieldDefinitionContext -> fieldDefinitionContextToField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
+                            .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1))
                             .collect(Collectors.toCollection(LinkedHashSet::new))
             );
         }
@@ -192,14 +192,14 @@ public class IntrospectionMutationBuilder {
                     interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
                             .filter(fieldDefinitionContext -> !manager.getFieldTypeName(fieldDefinitionContext.type()).equals(interfaceTypeDefinitionContext.name().getText()))
                             .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
-                            .map(fieldDefinitionContext -> fieldDefinitionContextToField(interfaceTypeDefinitionContext.name().getText(), fieldDefinitionContext, level + 1))
+                            .map(fieldDefinitionContext -> fieldDefinitionContextToField(fieldDefinitionContext, level + 1))
                             .collect(Collectors.toCollection(LinkedHashSet::new))
             );
         }
         return type;
     }
 
-    private __Field fieldDefinitionContextToField(String typeName, GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
+    private __Field fieldDefinitionContextToField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
         __Field field = new __Field();
         field.setName(fieldDefinitionContext.name().getText());
 
@@ -216,17 +216,6 @@ public class IntrospectionMutationBuilder {
             field.setArgs(new LinkedHashSet<>());
         }
         field.setType(typeContextToType(fieldDefinitionContext.type(), level));
-
-        mapper.getFromFieldDefinition(typeName, fieldDefinitionContext.name().getText())
-                .ifPresent(formFieldDefinitionContext -> field.setFrom(formFieldDefinitionContext.name().getText()));
-        mapper.getToFieldDefinition(typeName, fieldDefinitionContext.name().getText())
-                .ifPresent(toFieldDefinitionContext -> field.setTo(toFieldDefinitionContext.name().getText()));
-        mapper.getWithObjectTypeDefinition(typeName, fieldDefinitionContext.name().getText())
-                .ifPresent(objectTypeDefinitionContext -> field.setWithType(objectTypeDefinitionContext.name().getText()));
-        mapper.getWithFromFieldDefinition(typeName, fieldDefinitionContext.name().getText())
-                .ifPresent(withFormFieldDefinitionContext -> field.setWithFrom(withFormFieldDefinitionContext.name().getText()));
-        mapper.getWithToFieldDefinition(typeName, fieldDefinitionContext.name().getText())
-                .ifPresent(withToFieldDefinitionContext -> field.setWithTo(withToFieldDefinitionContext.name().getText()));
         return field;
     }
 

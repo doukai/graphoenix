@@ -1,11 +1,9 @@
 package io.graphoenix.core.introspection;
 
-import io.graphoenix.core.document.InputValue;
 import io.graphoenix.core.operation.ObjectValueWithVariable;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 

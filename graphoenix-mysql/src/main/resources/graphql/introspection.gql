@@ -58,11 +58,6 @@ type __Field {
     args: [__InputValue!]! @map(from: "id" to: "fieldId")
     type: __Type! @map(from: "typeName" to: "name" anchor: true)
     deprecationReason: String
-    from: String
-    to: String
-    withType: String
-    withFrom: String
-    withTo: String
 }
 
 type __InputValue {

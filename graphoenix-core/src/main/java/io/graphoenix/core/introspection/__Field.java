@@ -21,16 +21,6 @@ public class __Field {
 
     private String deprecationReason;
 
-    private String from;
-
-    private String to;
-
-    private String withType;
-
-    private String withFrom;
-
-    private String withTo;
-
     public String getName() {
         return name;
     }
@@ -79,46 +69,6 @@ public class __Field {
         this.deprecationReason = deprecationReason;
     }
 
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    public String getTo() {
-        return to;
-    }
-
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public String getWithType() {
-        return withType;
-    }
-
-    public void setWithType(String withType) {
-        this.withType = withType;
-    }
-
-    public String getWithFrom() {
-        return withFrom;
-    }
-
-    public void setWithFrom(String withFrom) {
-        this.withFrom = withFrom;
-    }
-
-    public String getWithTo() {
-        return withTo;
-    }
-
-    public void setWithTo(String withTo) {
-        this.withTo = withTo;
-    }
-
     public ObjectValueWithVariable toValue() {
         ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
         if (this.getName() != null) {
@@ -138,21 +88,6 @@ public class __Field {
         }
         if (this.getDeprecationReason() != null) {
             objectValueWithVariable.put("deprecationReason", this.getDeprecationReason());
-        }
-        if (this.getFrom() != null) {
-            objectValueWithVariable.put("from", this.getFrom());
-        }
-        if (this.getTo() != null) {
-            objectValueWithVariable.put("to", this.getTo());
-        }
-        if (this.getWithType() != null) {
-            objectValueWithVariable.put("withType", this.getWithType());
-        }
-        if (this.getWithFrom() != null) {
-            objectValueWithVariable.put("withFrom", this.getWithFrom());
-        }
-        if (this.getWithTo() != null) {
-            objectValueWithVariable.put("withTo", this.getWithTo());
         }
         return objectValueWithVariable;
     }

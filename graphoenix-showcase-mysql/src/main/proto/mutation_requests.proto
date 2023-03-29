@@ -9,6 +9,247 @@ import "enums.proto";
 import "objects.proto";
 import "input_objects.proto";
 
+message MutationIntroSchemaRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string query_type_name = 4;
+    optional string mutation_type_name = 5;
+    optional string subscription_type_name = 6;
+    repeated IntroTypeInput types = 7;
+    optional IntroTypeInput query_type = 8;
+    optional IntroTypeInput mutation_type = 9;
+    optional IntroTypeInput subscription_type = 10;
+    repeated IntroDirectiveInput directives = 11;
+    optional string intro_typename = 12;
+    optional IntroSchemaExpression where = 13;
+}
+message MutationIntroSchemaListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string query_type_name = 4;
+    optional string mutation_type_name = 5;
+    optional string subscription_type_name = 6;
+    repeated IntroTypeInput types = 7;
+    optional IntroTypeInput query_type = 8;
+    optional IntroTypeInput mutation_type = 9;
+    optional IntroTypeInput subscription_type = 10;
+    repeated IntroDirectiveInput directives = 11;
+    optional string intro_typename = 12;
+    repeated IntroSchemaInput list = 13;
+    optional IntroSchemaExpression where = 14;
+}
+message MutationIntroTypeRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string name = 3;
+    optional int32 schema_id = 4;
+    optional IntroTypeKind kind = 5;
+    optional string description = 6;
+    repeated IntroFieldInput fields = 7;
+    repeated IntroTypeInput interfaces = 8;
+    repeated IntroTypeInput possible_types = 9;
+    repeated IntroEnumValueInput enum_values = 10;
+    repeated IntroInputValueInput input_fields = 11;
+    optional string of_type_name = 12;
+    optional IntroTypeInput of_type = 13;
+    optional string intro_typename = 14;
+    optional IntroTypeExpression where = 15;
+}
+message MutationIntroTypeListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string name = 3;
+    optional int32 schema_id = 4;
+    optional IntroTypeKind kind = 5;
+    optional string description = 6;
+    repeated IntroFieldInput fields = 7;
+    repeated IntroTypeInput interfaces = 8;
+    repeated IntroTypeInput possible_types = 9;
+    repeated IntroEnumValueInput enum_values = 10;
+    repeated IntroInputValueInput input_fields = 11;
+    optional string of_type_name = 12;
+    optional IntroTypeInput of_type = 13;
+    optional string intro_typename = 14;
+    repeated IntroTypeInput list = 15;
+    optional IntroTypeExpression where = 16;
+}
+message MutationIntroTypeInterfacesRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string type_name = 4;
+    optional string interface_name = 5;
+    optional string intro_typename = 6;
+    optional IntroTypeInterfacesExpression where = 7;
+}
+message MutationIntroTypeInterfacesListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string type_name = 4;
+    optional string interface_name = 5;
+    optional string intro_typename = 6;
+    repeated IntroTypeInterfacesInput list = 7;
+    optional IntroTypeInterfacesExpression where = 8;
+}
+message MutationIntroTypePossibleTypesRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string type_name = 4;
+    optional string possible_type_name = 5;
+    optional string intro_typename = 6;
+    optional IntroTypePossibleTypesExpression where = 7;
+}
+message MutationIntroTypePossibleTypesListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string type_name = 4;
+    optional string possible_type_name = 5;
+    optional string intro_typename = 6;
+    repeated IntroTypePossibleTypesInput list = 7;
+    optional IntroTypePossibleTypesExpression where = 8;
+}
+message MutationIntroFieldRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    optional string type_name = 5;
+    optional string of_type_name = 6;
+    optional IntroTypeInput of_type = 7;
+    optional string description = 8;
+    repeated IntroInputValueInput args = 9;
+    optional IntroTypeInput type = 10;
+    optional string deprecation_reason = 11;
+    optional string intro_typename = 12;
+    optional IntroFieldExpression where = 13;
+}
+message MutationIntroFieldListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    optional string type_name = 5;
+    optional string of_type_name = 6;
+    optional IntroTypeInput of_type = 7;
+    optional string description = 8;
+    repeated IntroInputValueInput args = 9;
+    optional IntroTypeInput type = 10;
+    optional string deprecation_reason = 11;
+    optional string intro_typename = 12;
+    repeated IntroFieldInput list = 13;
+    optional IntroFieldExpression where = 14;
+}
+message MutationIntroInputValueRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    optional string type_name = 5;
+    optional string of_type_name = 6;
+    optional IntroTypeInput of_type = 7;
+    optional int32 field_id = 8;
+    optional string directive_name = 9;
+    optional string description = 10;
+    optional IntroTypeInput type = 11;
+    optional string default_value = 12;
+    optional string intro_typename = 13;
+    optional IntroInputValueExpression where = 14;
+}
+message MutationIntroInputValueListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    optional string type_name = 5;
+    optional string of_type_name = 6;
+    optional IntroTypeInput of_type = 7;
+    optional int32 field_id = 8;
+    optional string directive_name = 9;
+    optional string description = 10;
+    optional IntroTypeInput type = 11;
+    optional string default_value = 12;
+    optional string intro_typename = 13;
+    repeated IntroInputValueInput list = 14;
+    optional IntroInputValueExpression where = 15;
+}
+message MutationIntroEnumValueRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    optional string of_type_name = 5;
+    optional IntroTypeInput of_type = 6;
+    optional string description = 7;
+    optional string deprecation_reason = 8;
+    optional string intro_typename = 9;
+    optional IntroEnumValueExpression where = 10;
+}
+message MutationIntroEnumValueListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    optional string of_type_name = 5;
+    optional IntroTypeInput of_type = 6;
+    optional string description = 7;
+    optional string deprecation_reason = 8;
+    optional string intro_typename = 9;
+    repeated IntroEnumValueInput list = 10;
+    optional IntroEnumValueExpression where = 11;
+}
+message MutationIntroDirectiveRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string name = 3;
+    optional int32 schema_id = 4;
+    optional string description = 5;
+    repeated IntroDirectiveLocation locations = 6;
+    repeated IntroInputValueInput args = 7;
+    optional bool on_operation = 8;
+    optional bool on_fragment = 9;
+    optional bool on_field = 10;
+    optional string intro_typename = 11;
+    optional IntroDirectiveExpression where = 12;
+}
+message MutationIntroDirectiveListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string name = 3;
+    optional int32 schema_id = 4;
+    optional string description = 5;
+    repeated IntroDirectiveLocation locations = 6;
+    repeated IntroInputValueInput args = 7;
+    optional bool on_operation = 8;
+    optional bool on_fragment = 9;
+    optional bool on_field = 10;
+    optional string intro_typename = 11;
+    repeated IntroDirectiveInput list = 12;
+    optional IntroDirectiveExpression where = 13;
+}
+message MutationIntroDirectiveLocationsRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string directive_name = 4;
+    optional IntroDirectiveLocation directive_location = 5;
+    optional string intro_typename = 6;
+    optional IntroDirectiveLocationsExpression where = 7;
+}
+message MutationIntroDirectiveLocationsListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string directive_name = 4;
+    optional IntroDirectiveLocation directive_location = 5;
+    optional string intro_typename = 6;
+    repeated IntroDirectiveLocationsInput list = 7;
+    optional IntroDirectiveLocationsExpression where = 8;
+}
 message MutationUserRequest {
     optional string selection_set = 1;
     optional string arguments = 2;
@@ -357,401 +598,6 @@ message MutationOrganizationListRequest {
     optional string intro_typename = 16;
     repeated OrganizationInput list = 17;
     optional OrganizationExpression where = 18;
-}
-message MutationIntroSchemaRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string query_type_name = 4;
-    optional string mutation_type_name = 5;
-    optional string subscription_type_name = 6;
-    repeated IntroTypeInput types = 7;
-    optional IntroTypeInput query_type = 8;
-    optional IntroTypeInput mutation_type = 9;
-    optional IntroTypeInput subscription_type = 10;
-    repeated IntroDirectiveInput directives = 11;
-    optional bool is_deprecated = 12;
-    optional int32 version = 13;
-    optional string realm_id = 14;
-    optional string create_user_id = 15;
-    optional string create_time = 16;
-    optional string update_user_id = 17;
-    optional string update_time = 18;
-    optional string create_group_id = 19;
-    optional string intro_typename = 20;
-    optional IntroSchemaExpression where = 21;
-}
-message MutationIntroSchemaListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string query_type_name = 4;
-    optional string mutation_type_name = 5;
-    optional string subscription_type_name = 6;
-    repeated IntroTypeInput types = 7;
-    optional IntroTypeInput query_type = 8;
-    optional IntroTypeInput mutation_type = 9;
-    optional IntroTypeInput subscription_type = 10;
-    repeated IntroDirectiveInput directives = 11;
-    optional bool is_deprecated = 12;
-    optional int32 version = 13;
-    optional string realm_id = 14;
-    optional string create_user_id = 15;
-    optional string create_time = 16;
-    optional string update_user_id = 17;
-    optional string update_time = 18;
-    optional string create_group_id = 19;
-    optional string intro_typename = 20;
-    repeated IntroSchemaInput list = 21;
-    optional IntroSchemaExpression where = 22;
-}
-message MutationIntroTypeRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string name = 3;
-    optional int32 schema_id = 4;
-    optional IntroTypeKind kind = 5;
-    optional string description = 6;
-    repeated IntroFieldInput fields = 7;
-    repeated IntroTypeInput interfaces = 8;
-    repeated IntroTypeInput possible_types = 9;
-    repeated IntroEnumValueInput enum_values = 10;
-    repeated IntroInputValueInput input_fields = 11;
-    optional string of_type_name = 12;
-    optional IntroTypeInput of_type = 13;
-    optional bool is_deprecated = 14;
-    optional int32 version = 15;
-    optional string realm_id = 16;
-    optional string create_user_id = 17;
-    optional string create_time = 18;
-    optional string update_user_id = 19;
-    optional string update_time = 20;
-    optional string create_group_id = 21;
-    optional string intro_typename = 22;
-    optional IntroTypeExpression where = 23;
-}
-message MutationIntroTypeListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string name = 3;
-    optional int32 schema_id = 4;
-    optional IntroTypeKind kind = 5;
-    optional string description = 6;
-    repeated IntroFieldInput fields = 7;
-    repeated IntroTypeInput interfaces = 8;
-    repeated IntroTypeInput possible_types = 9;
-    repeated IntroEnumValueInput enum_values = 10;
-    repeated IntroInputValueInput input_fields = 11;
-    optional string of_type_name = 12;
-    optional IntroTypeInput of_type = 13;
-    optional bool is_deprecated = 14;
-    optional int32 version = 15;
-    optional string realm_id = 16;
-    optional string create_user_id = 17;
-    optional string create_time = 18;
-    optional string update_user_id = 19;
-    optional string update_time = 20;
-    optional string create_group_id = 21;
-    optional string intro_typename = 22;
-    repeated IntroTypeInput list = 23;
-    optional IntroTypeExpression where = 24;
-}
-message MutationIntroTypeInterfacesRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string type_name = 4;
-    optional string interface_name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional string create_time = 10;
-    optional string update_user_id = 11;
-    optional string update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    optional IntroTypeInterfacesExpression where = 15;
-}
-message MutationIntroTypeInterfacesListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string type_name = 4;
-    optional string interface_name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional string create_time = 10;
-    optional string update_user_id = 11;
-    optional string update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    repeated IntroTypeInterfacesInput list = 15;
-    optional IntroTypeInterfacesExpression where = 16;
-}
-message MutationIntroTypePossibleTypesRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string type_name = 4;
-    optional string possible_type_name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional string create_time = 10;
-    optional string update_user_id = 11;
-    optional string update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    optional IntroTypePossibleTypesExpression where = 15;
-}
-message MutationIntroTypePossibleTypesListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string type_name = 4;
-    optional string possible_type_name = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional string create_time = 10;
-    optional string update_user_id = 11;
-    optional string update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    repeated IntroTypePossibleTypesInput list = 15;
-    optional IntroTypePossibleTypesExpression where = 16;
-}
-message MutationIntroFieldRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string name = 4;
-    optional string type_name = 5;
-    optional string of_type_name = 6;
-    optional IntroTypeInput of_type = 7;
-    optional string description = 8;
-    repeated IntroInputValueInput args = 9;
-    optional IntroTypeInput type = 10;
-    optional string deprecation_reason = 11;
-    optional string from = 12;
-    optional string to = 13;
-    optional string with_type = 14;
-    optional string with_from = 15;
-    optional string with_to = 16;
-    optional bool is_deprecated = 17;
-    optional int32 version = 18;
-    optional string realm_id = 19;
-    optional string create_user_id = 20;
-    optional string create_time = 21;
-    optional string update_user_id = 22;
-    optional string update_time = 23;
-    optional string create_group_id = 24;
-    optional string intro_typename = 25;
-    optional IntroFieldExpression where = 26;
-}
-message MutationIntroFieldListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string name = 4;
-    optional string type_name = 5;
-    optional string of_type_name = 6;
-    optional IntroTypeInput of_type = 7;
-    optional string description = 8;
-    repeated IntroInputValueInput args = 9;
-    optional IntroTypeInput type = 10;
-    optional string deprecation_reason = 11;
-    optional string from = 12;
-    optional string to = 13;
-    optional string with_type = 14;
-    optional string with_from = 15;
-    optional string with_to = 16;
-    optional bool is_deprecated = 17;
-    optional int32 version = 18;
-    optional string realm_id = 19;
-    optional string create_user_id = 20;
-    optional string create_time = 21;
-    optional string update_user_id = 22;
-    optional string update_time = 23;
-    optional string create_group_id = 24;
-    optional string intro_typename = 25;
-    repeated IntroFieldInput list = 26;
-    optional IntroFieldExpression where = 27;
-}
-message MutationIntroInputValueRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string name = 4;
-    optional string type_name = 5;
-    optional string of_type_name = 6;
-    optional IntroTypeInput of_type = 7;
-    optional int32 field_id = 8;
-    optional string directive_name = 9;
-    optional string description = 10;
-    optional IntroTypeInput type = 11;
-    optional string default_value = 12;
-    optional bool is_deprecated = 13;
-    optional int32 version = 14;
-    optional string realm_id = 15;
-    optional string create_user_id = 16;
-    optional string create_time = 17;
-    optional string update_user_id = 18;
-    optional string update_time = 19;
-    optional string create_group_id = 20;
-    optional string intro_typename = 21;
-    optional IntroInputValueExpression where = 22;
-}
-message MutationIntroInputValueListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string name = 4;
-    optional string type_name = 5;
-    optional string of_type_name = 6;
-    optional IntroTypeInput of_type = 7;
-    optional int32 field_id = 8;
-    optional string directive_name = 9;
-    optional string description = 10;
-    optional IntroTypeInput type = 11;
-    optional string default_value = 12;
-    optional bool is_deprecated = 13;
-    optional int32 version = 14;
-    optional string realm_id = 15;
-    optional string create_user_id = 16;
-    optional string create_time = 17;
-    optional string update_user_id = 18;
-    optional string update_time = 19;
-    optional string create_group_id = 20;
-    optional string intro_typename = 21;
-    repeated IntroInputValueInput list = 22;
-    optional IntroInputValueExpression where = 23;
-}
-message MutationIntroEnumValueRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string name = 4;
-    optional string of_type_name = 5;
-    optional IntroTypeInput of_type = 6;
-    optional string description = 7;
-    optional string deprecation_reason = 8;
-    optional bool is_deprecated = 9;
-    optional int32 version = 10;
-    optional string realm_id = 11;
-    optional string create_user_id = 12;
-    optional string create_time = 13;
-    optional string update_user_id = 14;
-    optional string update_time = 15;
-    optional string create_group_id = 16;
-    optional string intro_typename = 17;
-    optional IntroEnumValueExpression where = 18;
-}
-message MutationIntroEnumValueListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string name = 4;
-    optional string of_type_name = 5;
-    optional IntroTypeInput of_type = 6;
-    optional string description = 7;
-    optional string deprecation_reason = 8;
-    optional bool is_deprecated = 9;
-    optional int32 version = 10;
-    optional string realm_id = 11;
-    optional string create_user_id = 12;
-    optional string create_time = 13;
-    optional string update_user_id = 14;
-    optional string update_time = 15;
-    optional string create_group_id = 16;
-    optional string intro_typename = 17;
-    repeated IntroEnumValueInput list = 18;
-    optional IntroEnumValueExpression where = 19;
-}
-message MutationIntroDirectiveRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string name = 3;
-    optional int32 schema_id = 4;
-    optional string description = 5;
-    repeated IntroDirectiveLocation locations = 6;
-    repeated IntroInputValueInput args = 7;
-    optional bool on_operation = 8;
-    optional bool on_fragment = 9;
-    optional bool on_field = 10;
-    optional bool is_deprecated = 11;
-    optional int32 version = 12;
-    optional string realm_id = 13;
-    optional string create_user_id = 14;
-    optional string create_time = 15;
-    optional string update_user_id = 16;
-    optional string update_time = 17;
-    optional string create_group_id = 18;
-    optional string intro_typename = 19;
-    optional IntroDirectiveExpression where = 20;
-}
-message MutationIntroDirectiveListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string name = 3;
-    optional int32 schema_id = 4;
-    optional string description = 5;
-    repeated IntroDirectiveLocation locations = 6;
-    repeated IntroInputValueInput args = 7;
-    optional bool on_operation = 8;
-    optional bool on_fragment = 9;
-    optional bool on_field = 10;
-    optional bool is_deprecated = 11;
-    optional int32 version = 12;
-    optional string realm_id = 13;
-    optional string create_user_id = 14;
-    optional string create_time = 15;
-    optional string update_user_id = 16;
-    optional string update_time = 17;
-    optional string create_group_id = 18;
-    optional string intro_typename = 19;
-    repeated IntroDirectiveInput list = 20;
-    optional IntroDirectiveExpression where = 21;
-}
-message MutationIntroDirectiveLocationsRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string directive_name = 4;
-    optional IntroDirectiveLocation directive_location = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional string create_time = 10;
-    optional string update_user_id = 11;
-    optional string update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    optional IntroDirectiveLocationsExpression where = 15;
-}
-message MutationIntroDirectiveLocationsListRequest {
-    optional string selection_set = 1;
-    optional string arguments = 2;
-    optional string id = 3;
-    optional string directive_name = 4;
-    optional IntroDirectiveLocation directive_location = 5;
-    optional bool is_deprecated = 6;
-    optional int32 version = 7;
-    optional string realm_id = 8;
-    optional string create_user_id = 9;
-    optional string create_time = 10;
-    optional string update_user_id = 11;
-    optional string update_time = 12;
-    optional string create_group_id = 13;
-    optional string intro_typename = 14;
-    repeated IntroDirectiveLocationsInput list = 15;
-    optional IntroDirectiveLocationsExpression where = 16;
 }
 message MutationIsDeprecatedRequest {
     optional string selection_set = 1;
