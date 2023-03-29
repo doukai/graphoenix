@@ -6,11 +6,13 @@ import io.graphoenix.r2dbc.connector.handler.OperationSQLExecuteHandler;
 import io.graphoenix.spi.handler.OperationHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import reactor.core.publisher.Mono;
 
 import java.util.stream.Stream;
 
 @ApplicationScoped
+@Named("mysql")
 public class MysqlR2dbcHandler implements OperationHandler {
 
     private final OperationToSQLConvertHandler operationToSQLConvertHandler;

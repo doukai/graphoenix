@@ -1226,7 +1226,8 @@ public class InjectProcessor extends AbstractProcessor {
                     );
                     Optional<StringLiteralExpr> nameStringExpr = componentProxyComponentClassDeclaration.getAnnotationByClass(Named.class)
                             .flatMap(processorManager::findAnnotationValue)
-                            .map(Expression::asStringLiteralExpr);;
+                            .map(Expression::asStringLiteralExpr);
+                    ;
 
                     addPutTypeStatement(blockStmt, componentType, nameStringExpr.orElse(null), daggerVariableName, isPublisherBuilder);
 
@@ -1287,19 +1288,18 @@ public class InjectProcessor extends AbstractProcessor {
         } else {
             supplierExpression = new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName));
         }
+        blockStmt.addStatement(
+                new MethodCallExpr()
+                        .setName("put")
+                        .addArgument(new ClassExpr().setType(classOrInterfaceType.getNameAsString()))
+                        .addArgument(supplierExpression)
+        );
         if (nameStringExpr != null) {
             blockStmt.addStatement(
                     new MethodCallExpr()
                             .setName("put")
                             .addArgument(new ClassExpr().setType(classOrInterfaceType.getNameAsString()))
                             .addArgument(nameStringExpr)
-                            .addArgument(supplierExpression)
-            );
-        } else {
-            blockStmt.addStatement(
-                    new MethodCallExpr()
-                            .setName("put")
-                            .addArgument(new ClassExpr().setType(classOrInterfaceType.getNameAsString()))
                             .addArgument(supplierExpression)
             );
         }

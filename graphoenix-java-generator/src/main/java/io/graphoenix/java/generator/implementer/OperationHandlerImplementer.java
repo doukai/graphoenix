@@ -12,6 +12,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.ArgumentBuilder;
@@ -47,6 +48,7 @@ import java.util.AbstractMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -111,6 +113,14 @@ public class OperationHandlerImplementer {
                 .addSuperinterface(superinterface)
                 .addField(
                         FieldSpec.builder(
+                                ClassName.get(GraphQLConfig.class),
+                                "graphQLConfig",
+                                Modifier.PRIVATE,
+                                Modifier.FINAL
+                        ).build()
+                )
+                .addField(
+                        FieldSpec.builder(
                                 ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)),
                                 "manager",
                                 Modifier.PRIVATE,
@@ -127,8 +137,8 @@ public class OperationHandlerImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)),
-                                "operationHandler",
+                                ParameterizedTypeName.get(ClassName.get(Map.class), ClassName.get(String.class), ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class))),
+                                "operationHandlerMap",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
@@ -197,6 +207,7 @@ public class OperationHandlerImplementer {
                                 Modifier.FINAL
                         ).build()
                 )
+                .addMethod(buildDefaultOperationMethod(type))
                 .addMethod(buildOperationMethod(type))
                 .addMethod(buildConstructor(type))
                 .addMethods(buildMethods(type));
@@ -288,6 +299,32 @@ public class OperationHandlerImplementer {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+    private MethodSpec buildDefaultOperationMethod(OperationType type) {
+        String operationName;
+        switch (type) {
+            case QUERY:
+                operationName = "query";
+                break;
+            case MUTATION:
+                operationName = "mutation";
+                break;
+            default:
+                throw new GraphQLErrors(GraphQLErrorType.UNSUPPORTED_OPERATION_TYPE);
+        }
+
+        return MethodSpec.methodBuilder(operationName)
+                .addModifiers(Modifier.PUBLIC)
+                .addAnnotation(Override.class)
+                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
+                .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonValue.class), "variables").build())
+                .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)))
+                .addStatement("return $L($T.ofNullable(graphQLConfig.getDefaultOperationHandlerName()).orElseGet(() -> operationHandlerMap.keySet().iterator().next()), graphQL, variables)",
+                        operationName,
+                        ClassName.get(Optional.class)
+                )
+                .build();
+    }
+
     private MethodSpec buildOperationMethod(OperationType type) {
         String operationName;
         String operationTypeName;
@@ -307,6 +344,7 @@ public class OperationHandlerImplementer {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(operationName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
+                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "handlerName").build())
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
                 .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonValue.class), "variables").build())
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)))
@@ -324,7 +362,7 @@ public class OperationHandlerImplementer {
                                             CodeBlock.builder()
                                                     .add(".flatMap(operation ->\n")
                                                     .indent()
-                                                    .add("operationHandler.get().$L($T.DOCUMENT_UTIL.graphqlToOperation(operation.toString()))\n", operationName, ClassName.get(DocumentUtil.class))
+                                                    .add("operationHandlerMap.get(handlerName).get().$L($T.DOCUMENT_UTIL.graphqlToOperation(operation.toString()))\n", operationName, ClassName.get(DocumentUtil.class))
                                                     .add(".map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n", ClassName.get(StringReader.class))
                                                     .add(".flatMap(jsonObject -> mutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), operation, jsonObject))\n")
                                                     .unindent()
@@ -343,7 +381,7 @@ public class OperationHandlerImplementer {
                     .addStatement(
                             CodeBlock.join(
                                     List.of(
-                                            CodeBlock.of("return operationHandler.get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
+                                            CodeBlock.of("return operationHandlerMap.get(handlerName).get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
                                                     operationName,
                                                     ClassName.get(StringReader.class)
                                             ),
@@ -479,9 +517,9 @@ public class OperationHandlerImplementer {
         MethodSpec.Builder builder = MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
+                .addParameter(ClassName.get(GraphQLConfig.class), "graphQLConfig")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(IGraphQLDocumentManager.class)), "manager")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(GraphQLVariablesProcessor.class)), "variablesProcessor")
-                .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)), "operationHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "InvokeHandler")), "invokeHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "ConnectionHandler")), "connectionHandler")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "SelectionFilter")), "selectionFilter")
@@ -490,9 +528,10 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(ArgumentBuilder.class)), "argumentBuilder")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(QueryDataLoader.class)), "queryDataLoader")
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "QueryAfterHandler")), "queryHandler")
+                .addStatement("this.graphQLConfig = graphQLConfig")
                 .addStatement("this.manager = manager")
                 .addStatement("this.variablesProcessor = variablesProcessor")
-                .addStatement("this.operationHandler = operationHandler")
+                .addStatement("this.operationHandlerMap = $T.getProviderMap($T.class)", ClassName.get(BeanContext.class), ClassName.get(OperationHandler.class))
                 .addStatement("this.invokeHandler = invokeHandler")
                 .addStatement("this.connectionHandler = connectionHandler")
                 .addStatement("this.selectionFilter = selectionFilter")

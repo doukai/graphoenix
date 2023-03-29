@@ -8,4 +8,6 @@ import java.util.Map;
 public interface MutationHandler {
 
     Mono<JsonValue> mutation(String graphQL, Map<String, JsonValue> variables);
+
+    Mono<JsonValue> mutation(String handlerName, String graphQL, Map<String, JsonValue> variables);
 }

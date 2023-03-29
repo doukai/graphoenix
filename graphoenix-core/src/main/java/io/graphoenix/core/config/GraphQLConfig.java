@@ -18,6 +18,9 @@ public class GraphQLConfig {
     private String graphQLPath = "graphql";
 
     @Optional
+    private String defaultOperationHandlerName;
+
+    @Optional
     private Boolean build = true;
 
     @Optional
@@ -129,6 +132,14 @@ public class GraphQLConfig {
 
     public void setGraphQLPath(String graphQLPath) {
         this.graphQLPath = graphQLPath;
+    }
+
+    public String getDefaultOperationHandlerName() {
+        return defaultOperationHandlerName;
+    }
+
+    public void setDefaultOperationHandlerName(String defaultOperationHandlerName) {
+        this.defaultOperationHandlerName = defaultOperationHandlerName;
     }
 
     public Boolean getBuild() {
