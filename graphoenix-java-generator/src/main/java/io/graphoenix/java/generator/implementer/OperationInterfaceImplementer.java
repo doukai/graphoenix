@@ -1,5 +1,6 @@
 package io.graphoenix.java.generator.implementer;
 
+import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -21,6 +22,7 @@ import io.graphoenix.spi.handler.GeneratorHandler;
 import io.vavr.collection.HashMap;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
@@ -92,7 +94,7 @@ public class OperationInterfaceImplementer {
                                                 try {
                                                     String generatorName = entry.getKey();
                                                     GeneratorHandler generatorHandler = entry.getValue();
-                                                    this.buildImplementClass(generatorName, packageName, name, operationList, generatorHandler.extension()).writeTo(filer);
+                                                    this.buildImplementClass(generatorName, generatorHandler.operationDAOName(), packageName, name, operationList, generatorHandler.extension()).writeTo(filer);
                                                     Logger.info("{} build success", interfaceName.concat("Impl"));
                                                     for (GraphqlParser.OperationDefinitionContext operationDefinitionContext : operationList) {
                                                         String methodName = typeManager.getMethodName(operationDefinitionContext);
@@ -126,8 +128,8 @@ public class OperationInterfaceImplementer {
                 );
     }
 
-    public JavaFile buildImplementClass(String generatorName, String packageName, String interfaceName, List<GraphqlParser.OperationDefinitionContext> operationDefinitionContextList, String suffix) {
-        TypeSpec.Builder builder = TypeSpec.classBuilder(ClassName.get(graphQLConfig.getOperationPackageName().concat(".").concat(generatorName), interfaceName.concat("Impl")))
+    public JavaFile buildImplementClass(String generatorName, String operationDAOName, String packageName, String interfaceName, List<GraphqlParser.OperationDefinitionContext> operationDefinitionContextList, String suffix) {
+        TypeSpec.Builder builder = TypeSpec.classBuilder(interfaceName.concat("Impl"))
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(ApplicationScoped.class)
                 .addSuperinterface(ClassName.get(packageName, interfaceName))
@@ -140,8 +142,8 @@ public class OperationInterfaceImplementer {
                         ).build()
                 )
                 .addFields(buildFileContentFields(operationDefinitionContextList))
-                .addStaticBlock(buildContentFieldInitializeCodeBlock(packageName, interfaceName, operationDefinitionContextList, suffix))
-                .addMethod(buildConstructor())
+                .addStaticBlock(buildContentFieldInitializeCodeBlock(generatorName, interfaceName, operationDefinitionContextList, suffix))
+                .addMethod(buildConstructor(operationDAOName))
                 .addMethods(
                         operationDefinitionContextList.stream()
                                 .sorted(Comparator.comparingInt(this::getIndex))
@@ -149,14 +151,17 @@ public class OperationInterfaceImplementer {
                                 .collect(Collectors.toList())
                 );
 
-        return JavaFile.builder(packageName, builder.build()).build();
+        return JavaFile.builder(graphQLConfig.getOperationPackageName().concat(".").concat(generatorName), builder.build()).build();
     }
 
-    private MethodSpec buildConstructor() {
+    private MethodSpec buildConstructor(String operationDAOName) {
         return MethodSpec.constructorBuilder()
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Inject.class)
-                .addParameter(ClassName.get(OperationDAO.class), "operationDAO")
+                .addParameter(
+                        ParameterSpec.builder(ClassName.get(OperationDAO.class), "operationDAO")
+                                .addAnnotation(AnnotationSpec.builder(Named.class).addMember("value", "$S", operationDAOName).build())
+                                .build())
                 .addStatement("this.operationDAO = operationDAO")
                 .build();
     }
@@ -180,8 +185,8 @@ public class OperationInterfaceImplementer {
         ).build();
     }
 
-    private CodeBlock buildContentFieldInitializeCodeBlock(String packageName, String interfaceName, List<GraphqlParser.OperationDefinitionContext> operationDefinitionContextList, String suffix) {
-        ClassName typeClassName = ClassName.get(packageName, interfaceName.concat("Impl"));
+    private CodeBlock buildContentFieldInitializeCodeBlock(String generatorName, String interfaceName, List<GraphqlParser.OperationDefinitionContext> operationDefinitionContextList, String suffix) {
+        ClassName typeClassName = ClassName.get(graphQLConfig.getOperationPackageName().concat(".").concat(generatorName), interfaceName.concat("Impl"));
         CodeBlock.Builder builder = CodeBlock.builder();
         operationDefinitionContextList.stream()
                 .sorted(Comparator.comparingInt(this::getIndex))

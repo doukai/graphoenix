@@ -745,13 +745,9 @@ public class InjectProcessor extends AbstractProcessor {
 
     private MethodCallExpr getBeanGetMethodCallExpr(NodeWithAnnotations<?> nodeWithAnnotations, CompilationUnit belongCompilationUnit, ClassOrInterfaceType classOrInterfaceType) {
         Optional<StringLiteralExpr> nameStringExpr = nodeWithAnnotations.getAnnotationByClass(Named.class)
-                .map(Expression::asNormalAnnotationExpr)
-                .flatMap(normalAnnotationExpr ->
-                        normalAnnotationExpr.getPairs().stream()
-                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
-                                .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr())
-                                .findFirst()
-                );
+                .flatMap(processorManager::findAnnotationValue)
+                .map(Expression::asStringLiteralExpr);
+
         MethodCallExpr methodCallExpr;
         if (processorManager.getQualifiedNameByType(classOrInterfaceType).equals(Provider.class.getName())) {
             Type type = classOrInterfaceType.getTypeArguments().orElseThrow(() -> new InjectionProcessException(PROVIDER_TYPE_NOT_EXIST)).get(0);
@@ -1229,12 +1225,8 @@ public class InjectProcessor extends AbstractProcessor {
                             )
                     );
                     Optional<StringLiteralExpr> nameStringExpr = componentProxyComponentClassDeclaration.getAnnotationByClass(Named.class)
-                            .flatMap(annotationExpr ->
-                                    annotationExpr.asNormalAnnotationExpr().getPairs().stream()
-                                            .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
-                                            .map(memberValuePair -> memberValuePair.getValue().asStringLiteralExpr())
-                                            .findFirst()
-                            );
+                            .flatMap(processorManager::findAnnotationValue)
+                            .map(Expression::asStringLiteralExpr);;
 
                     addPutTypeStatement(blockStmt, componentType, nameStringExpr.orElse(null), daggerVariableName, isPublisherBuilder);
 

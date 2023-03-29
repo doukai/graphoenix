@@ -6,12 +6,12 @@ import io.graphoenix.mysql.translator.handler.SQLFormatHandler;
 import io.graphoenix.spi.handler.GeneratorHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.eclipse.microprofile.graphql.Name;
+import jakarta.inject.Named;
 
 import java.util.stream.Stream;
 
 @ApplicationScoped
-@Name("mysql")
+@Named("mysql")
 public class MysqlGeneratorHandler implements GeneratorHandler {
 
     private final OperationToSQLConvertHandler operationToSQLConvertHandler;

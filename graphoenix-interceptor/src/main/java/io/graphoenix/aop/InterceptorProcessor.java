@@ -652,12 +652,8 @@ public class InterceptorProcessor implements ComponentProxyProcessor {
 
     private int getPriorityFromInterceptor(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
         return classOrInterfaceDeclaration.getAnnotationByClass(Priority.class)
-                .flatMap(annotationExpr ->
-                        annotationExpr.asNormalAnnotationExpr().getPairs().stream()
-                                .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
-                                .map(memberValuePair -> memberValuePair.getValue().asIntegerLiteralExpr().asNumber().intValue())
-                                .findFirst()
-                )
+                .flatMap(processorManager::findAnnotationValue)
+                .map(expression -> expression.asIntegerLiteralExpr().asNumber().intValue())
                 .orElse(Integer.MAX_VALUE);
     }
 }

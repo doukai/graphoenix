@@ -8,6 +8,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MemberValuePair;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.Type;
@@ -435,5 +436,17 @@ public class ProcessorManager {
                 .filter(BodyDeclaration::isAnnotationDeclaration)
                 .map(BodyDeclaration::asAnnotationDeclaration)
                 .findFirst();
+    }
+
+    public Optional<Expression> findAnnotationValue(AnnotationExpr annotationExpr) {
+        if (annotationExpr.isSingleMemberAnnotationExpr()) {
+            return Optional.of(annotationExpr.asSingleMemberAnnotationExpr().getMemberValue());
+        } else if (annotationExpr.isNormalAnnotationExpr()) {
+            return annotationExpr.asNormalAnnotationExpr().getPairs().stream()
+                    .filter(memberValuePair -> memberValuePair.getNameAsString().equals("value"))
+                    .findFirst()
+                    .map(MemberValuePair::getValue);
+        }
+        return Optional.empty();
     }
 }
