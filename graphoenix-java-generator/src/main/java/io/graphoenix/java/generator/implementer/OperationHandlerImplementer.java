@@ -137,8 +137,8 @@ public class OperationHandlerImplementer {
                 )
                 .addField(
                         FieldSpec.builder(
-                                ParameterizedTypeName.get(ClassName.get(Map.class), ClassName.get(String.class), ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class))),
-                                "operationHandlerMap",
+                                ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(OperationHandler.class)),
+                                "defaultOperationHandler",
                                 Modifier.PRIVATE,
                                 Modifier.FINAL
                         ).build()
@@ -318,10 +318,7 @@ public class OperationHandlerImplementer {
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
                 .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonValue.class), "variables").build())
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)))
-                .addStatement("return $L($T.ofNullable(graphQLConfig.getDefaultOperationHandlerName()).orElseGet(() -> operationHandlerMap.keySet().iterator().next()), graphQL, variables)",
-                        operationName,
-                        ClassName.get(Optional.class)
-                )
+                .addStatement("return $L(defaultOperationHandler.get(), graphQL, variables)", operationName)
                 .build();
     }
 
@@ -344,7 +341,7 @@ public class OperationHandlerImplementer {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(operationName)
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
-                .addParameter(ParameterSpec.builder(ClassName.get(String.class), "handlerName").build())
+                .addParameter(ParameterSpec.builder(ClassName.get(OperationHandler.class), "operationHandler").build())
                 .addParameter(ParameterSpec.builder(ClassName.get(String.class), "graphQL").build())
                 .addParameter(ParameterSpec.builder(ParameterizedTypeName.get(Map.class, String.class, JsonValue.class), "variables").build())
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)))
@@ -362,7 +359,7 @@ public class OperationHandlerImplementer {
                                             CodeBlock.builder()
                                                     .add(".flatMap(operation ->\n")
                                                     .indent()
-                                                    .add("operationHandlerMap.get(handlerName).get().$L($T.DOCUMENT_UTIL.graphqlToOperation(operation.toString()))\n", operationName, ClassName.get(DocumentUtil.class))
+                                                    .add("operationHandler.$L($T.DOCUMENT_UTIL.graphqlToOperation(operation.toString()))\n", operationName, ClassName.get(DocumentUtil.class))
                                                     .add(".map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())\n", ClassName.get(StringReader.class))
                                                     .add(".flatMap(jsonObject -> mutationAfterHandler.get().handle(operationDefinitionContext, mutationLoader.then(), operation, jsonObject))\n")
                                                     .unindent()
@@ -381,7 +378,7 @@ public class OperationHandlerImplementer {
                     .addStatement(
                             CodeBlock.join(
                                     List.of(
-                                            CodeBlock.of("return operationHandlerMap.get(handlerName).get().$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
+                                            CodeBlock.of("return operationHandler.$L(operationDefinitionContext).map(jsonString -> jsonProvider.get().createReader(new $T(jsonString)).readObject())",
                                                     operationName,
                                                     ClassName.get(StringReader.class)
                                             ),
@@ -531,7 +528,13 @@ public class OperationHandlerImplementer {
                 .addStatement("this.graphQLConfig = graphQLConfig")
                 .addStatement("this.manager = manager")
                 .addStatement("this.variablesProcessor = variablesProcessor")
-                .addStatement("this.operationHandlerMap = $T.getProviderMap($T.class)", ClassName.get(BeanContext.class), ClassName.get(OperationHandler.class))
+                .addStatement("this.defaultOperationHandler = $T.ofNullable(graphQLConfig.getDefaultOperationHandlerName()).map(name -> $T.getProvider($T.class, name)).orElseGet(() -> $T.getProvider($T.class))",
+                        ClassName.get(Optional.class),
+                        ClassName.get(BeanContext.class),
+                        ClassName.get(OperationHandler.class),
+                        ClassName.get(BeanContext.class),
+                        ClassName.get(OperationHandler.class)
+                )
                 .addStatement("this.invokeHandler = invokeHandler")
                 .addStatement("this.connectionHandler = connectionHandler")
                 .addStatement("this.selectionFilter = selectionFilter")
