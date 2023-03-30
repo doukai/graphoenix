@@ -97,10 +97,6 @@ public class GraphQLConfigRegister {
         registerPreset(classLoader, "package.gql");
     }
 
-    public void registerMeta(ClassLoader classLoader) throws IOException, URISyntaxException {
-        registerPreset(classLoader, "meta.gql");
-    }
-
     public void registerPreset(ClassLoader classLoader, String fileName) throws IOException, URISyntaxException {
         Iterator<URL> urlIterator = Objects.requireNonNull(classLoader.getResources("META-INF/graphql")).asIterator();
         while (urlIterator.hasNext()) {

@@ -322,19 +322,17 @@ message MutationIntroDirectiveRequest {
     optional string description = 5;
     repeated IntroDirectiveLocation locations = 6;
     repeated IntroInputValueInput args = 7;
-    optional bool on_operation = 8;
-    optional bool on_fragment = 9;
-    optional bool on_field = 10;
-    optional bool is_deprecated = 11;
-    optional int32 version = 12;
-    optional string realm_id = 13;
-    optional string create_user_id = 14;
-    optional string create_time = 15;
-    optional string update_user_id = 16;
-    optional string update_time = 17;
-    optional string create_group_id = 18;
-    optional string intro_typename = 19;
-    optional IntroDirectiveExpression where = 20;
+    optional bool is_repeatable = 8;
+    optional bool is_deprecated = 9;
+    optional int32 version = 10;
+    optional string realm_id = 11;
+    optional string create_user_id = 12;
+    optional string create_time = 13;
+    optional string update_user_id = 14;
+    optional string update_time = 15;
+    optional string create_group_id = 16;
+    optional string intro_typename = 17;
+    optional IntroDirectiveExpression where = 18;
 }
 message MutationIntroDirectiveListRequest {
     optional string selection_set = 1;
@@ -344,20 +342,18 @@ message MutationIntroDirectiveListRequest {
     optional string description = 5;
     repeated IntroDirectiveLocation locations = 6;
     repeated IntroInputValueInput args = 7;
-    optional bool on_operation = 8;
-    optional bool on_fragment = 9;
-    optional bool on_field = 10;
-    optional bool is_deprecated = 11;
-    optional int32 version = 12;
-    optional string realm_id = 13;
-    optional string create_user_id = 14;
-    optional string create_time = 15;
-    optional string update_user_id = 16;
-    optional string update_time = 17;
-    optional string create_group_id = 18;
-    optional string intro_typename = 19;
-    repeated IntroDirectiveInput list = 20;
-    optional IntroDirectiveExpression where = 21;
+    optional bool is_repeatable = 8;
+    optional bool is_deprecated = 9;
+    optional int32 version = 10;
+    optional string realm_id = 11;
+    optional string create_user_id = 12;
+    optional string create_time = 13;
+    optional string update_user_id = 14;
+    optional string update_time = 15;
+    optional string create_group_id = 16;
+    optional string intro_typename = 17;
+    repeated IntroDirectiveInput list = 18;
+    optional IntroDirectiveExpression where = 19;
 }
 message MutationIntroDirectiveLocationsRequest {
     optional string selection_set = 1;

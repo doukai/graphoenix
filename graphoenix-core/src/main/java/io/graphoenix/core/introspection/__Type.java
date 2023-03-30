@@ -1,11 +1,11 @@
 package io.graphoenix.core.introspection;
 
 import io.graphoenix.core.operation.ObjectValueWithVariable;
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroupFile;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class __Type {
 
@@ -99,7 +99,7 @@ public class __Type {
         this.ofType = ofType;
     }
 
-    public ObjectValueWithVariable toValue() {
+    public ObjectValueWithVariable toObjectValue() {
         ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
         if (this.getKind() != null) {
             objectValueWithVariable.put("kind", this.getKind());
@@ -111,33 +111,41 @@ public class __Type {
             objectValueWithVariable.put("description", this.getDescription());
         }
         if (this.getFields() != null) {
-            objectValueWithVariable.put("fields", this.getFields().stream().map(__Field::toValue).collect(Collectors.toList()));
-        }
-        if (this.getInterfaces() != null) {
-            objectValueWithVariable.put("interfaces", this.getInterfaces().stream().map(__Type::toValue).collect(Collectors.toList()));
-        }
-        if (this.getPossibleTypes() != null) {
-            objectValueWithVariable.put("possibleTypes", this.getPossibleTypes().stream().map(__Type::toValue).collect(Collectors.toList()));
+            objectValueWithVariable.put("fields", this.getFields().stream().map(__Field::toObjectValue).collect(Collectors.toList()));
         }
         if (this.getEnumValues() != null) {
-            objectValueWithVariable.put("enumValues", this.getEnumValues().stream().map(__EnumValue::toValue).collect(Collectors.toList()));
+            objectValueWithVariable.put("enumValues", this.getEnumValues().stream().map(__EnumValue::toObjectValue).collect(Collectors.toList()));
         }
         if (this.getInputFields() != null) {
-            objectValueWithVariable.put("inputFields", this.getInputFields().stream().map(__InputValue::toValue).collect(Collectors.toList()));
+            objectValueWithVariable.put("inputFields", this.getInputFields().stream().map(__InputValue::toObjectValue).collect(Collectors.toList()));
         }
         if (this.getOfType() != null) {
-            objectValueWithVariable.put("ofType", this.getOfType().toValue());
+            objectValueWithVariable.put("ofTypeName", this.getOfType().getName());
         }
         return objectValueWithVariable;
     }
 
-    @Override
-    public String toString() {
-        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__Type.stg");
-        ST st = stGroupFile.getInstanceOf("__typeDefinition");
-        st.add("__type", this);
-        String render = st.render();
-        stGroupFile.unload();
-        return render;
+    public Stream<ObjectValueWithVariable> getInterfacesObjectValues() {
+        return Stream.ofNullable(this.getInterfaces())
+                .flatMap(Collection::stream)
+                .map(interfaceType -> {
+                            ObjectValueWithVariable __typeInterfaces = new ObjectValueWithVariable();
+                            __typeInterfaces.put("typeName", this.getName());
+                            __typeInterfaces.put("interfaceName", interfaceType.getName());
+                            return __typeInterfaces;
+                        }
+                );
+    }
+
+    public Stream<ObjectValueWithVariable> getPossibleTypesObjectValues() {
+        return Stream.ofNullable(this.getPossibleTypes())
+                .flatMap(Collection::stream)
+                .map(possibleType -> {
+                            ObjectValueWithVariable __typePossibleTypes = new ObjectValueWithVariable();
+                            __typePossibleTypes.put("typeName", this.getName());
+                            __typePossibleTypes.put("possibleTypeName", possibleType.getName());
+                            return __typePossibleTypes;
+                        }
+                );
     }
 }

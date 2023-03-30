@@ -168,6 +168,28 @@ public class DocumentBuilder {
         return document;
     }
 
+    public Document getPackageDocument() {
+        Document document = new Document()
+                .addDefinitions(manager.getEnums().filter(packageManager::isOwnPackage).map(this::buildEnum).map(EnumType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(manager.getInterfaces().filter(packageManager::isOwnPackage).map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(manager.getObjects().filter(packageManager::isOwnPackage).map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(manager.getInputObjects().filter(packageManager::isOwnPackage).map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                //TODO union type
+                .addDefinitions(manager.getDirectives().map(DirectiveDefinition::new).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(manager.getOperationDefinitions().map(Operation::new).map(Operation::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
+
+        Optional.ofNullable(manager.getSchema())
+                .map(Schema::new)
+                .or(() ->
+                        manager.getQueryOperationTypeName()
+                                .map(queryTypeName -> new Schema().setQuery(queryTypeName).setMutation(manager.getMutationOperationTypeName().orElse(null)))
+                )
+                .map(Schema::toString)
+                .ifPresent(document::addDefinition);
+
+        return document;
+    }
+
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return buildObject(objectTypeDefinitionContext, false, false, false);
     }

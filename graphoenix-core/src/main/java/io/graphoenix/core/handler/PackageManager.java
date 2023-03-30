@@ -1,12 +1,18 @@
 package io.graphoenix.core.handler;
 
+import com.google.common.reflect.ClassPath;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.spi.annotation.Package;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
+import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
@@ -20,6 +26,22 @@ public class PackageManager {
     public PackageManager(GraphQLConfig graphQLConfig, IGraphQLDocumentManager manager) {
         this.graphQLConfig = graphQLConfig;
         this.manager = manager;
+    }
+
+    public String getDefaultPackageName() {
+        try {
+            ClassPath classPath = ClassPath.from(Thread.currentThread().getContextClassLoader());
+            return classPath.getTopLevelClasses()
+                    .stream()
+                    .filter(classInfo -> classInfo.getSimpleName().equals("package-info"))
+                    .filter(classInfo -> classInfo.load().getPackage().isAnnotationPresent(Package.class))
+                    .findFirst()
+                    .map(ClassPath.ClassInfo::getPackageName)
+                    .orElseThrow(() -> new RuntimeException("package name not exist"));
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+        throw new RuntimeException("package name not exist");
     }
 
     public boolean isOwnPackage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -55,7 +77,7 @@ public class PackageManager {
     }
 
     public boolean isOwnPackage(String packageName) {
-        return graphQLConfig.getPackageName().equals(packageName);
+        return Optional.ofNullable(graphQLConfig.getPackageName()).orElseGet(this::getDefaultPackageName).equals(packageName);
     }
 
     public boolean isLocalPackage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
@@ -92,8 +114,8 @@ public class PackageManager {
 
     public boolean isLocalPackage(String packageName) {
         return Stream.concat(
-                Stream.ofNullable(graphQLConfig.getPackageName()),
-                graphQLConfig.getLocalPackageNames().stream()
+                Stream.of(Optional.ofNullable(graphQLConfig.getPackageName()).orElseGet(this::getDefaultPackageName)),
+                Stream.ofNullable(graphQLConfig.getLocalPackageNames()).flatMap(Collection::stream)
         ).anyMatch(localPackageName -> localPackageName.equals(packageName));
     }
 

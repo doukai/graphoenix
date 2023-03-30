@@ -18,11 +18,7 @@ public @interface __DirectiveInput2 {
 
   __DirectiveLocation[] locations() default {};
 
-  boolean onOperation() default false;
-
-  boolean onFragment() default false;
-
-  boolean onField() default false;
+  boolean isRepeatable() default false;
 
   boolean isDeprecated() default false;
 
@@ -52,11 +48,7 @@ public @interface __DirectiveInput2 {
 
   String $args() default "";
 
-  String $onOperation() default "";
-
-  String $onFragment() default "";
-
-  String $onField() default "";
+  String $isRepeatable() default "";
 
   String $isDeprecated() default "";
 

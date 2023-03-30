@@ -275,9 +275,9 @@ message Organization {
 }
 message ContainerType1 {
     optional int32 age = 1;
-    optional string name = 2;
-    optional bool sex = 3;
-    optional float height = 4;
+    optional float height = 2;
+    optional string name = 3;
+    optional bool sex = 4;
 }
 message QueryType {
     optional string user_detail = 1;
@@ -611,31 +611,29 @@ message IntroDirective {
     optional string description = 3;
     repeated IntroDirectiveLocation locations = 4;
     repeated IntroInputValue args = 5;
-    optional bool on_operation = 6;
-    optional bool on_fragment = 7;
-    optional bool on_field = 8;
-    optional bool is_deprecated = 9;
-    optional int32 version = 10;
-    optional string realm_id = 11;
-    optional string create_user_id = 12;
-    optional string create_time = 13;
-    optional string update_user_id = 14;
-    optional string update_time = 15;
-    optional string create_group_id = 16;
-    optional string intro_typename = 17;
-    optional int32 name_count = 18;
-    optional string name_max = 19;
-    optional string name_min = 20;
-    optional int32 description_count = 21;
-    optional string description_max = 22;
-    optional string description_min = 23;
-    optional int32 schema_id_count = 24;
-    optional int32 schema_id_sum = 25;
-    optional int32 schema_id_avg = 26;
-    optional int32 schema_id_max = 27;
-    optional int32 schema_id_min = 28;
-    optional IntroInputValue args_aggregate = 29;
-    optional IntroInputValueConnection args_connection = 30;
+    bool is_repeatable = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional string create_time = 11;
+    optional string update_user_id = 12;
+    optional string update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    optional int32 name_count = 16;
+    optional string name_max = 17;
+    optional string name_min = 18;
+    optional int32 description_count = 19;
+    optional string description_max = 20;
+    optional string description_min = 21;
+    optional int32 schema_id_count = 22;
+    optional int32 schema_id_sum = 23;
+    optional int32 schema_id_avg = 24;
+    optional int32 schema_id_max = 25;
+    optional int32 schema_id_min = 26;
+    optional IntroInputValue args_aggregate = 27;
+    optional IntroInputValueConnection args_connection = 28;
 }
 message IntroDirectiveLocations {
     optional string id = 1;

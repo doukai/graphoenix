@@ -20,11 +20,7 @@ public @interface __DirectiveExpression1 {
 
   __DirectiveLocationExpression locations() default @__DirectiveLocationExpression;
 
-  BooleanExpression onOperation() default @BooleanExpression;
-
-  BooleanExpression onFragment() default @BooleanExpression;
-
-  BooleanExpression onField() default @BooleanExpression;
+  BooleanExpression isRepeatable() default @BooleanExpression;
 
   BooleanExpression isDeprecated() default @BooleanExpression;
 

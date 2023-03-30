@@ -5,15 +5,12 @@ import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
-import java.lang.Boolean;
-import java.lang.Integer;
-import java.lang.Override;
-import java.lang.String;
-import java.time.LocalDateTime;
-import java.util.Collection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
 
 @Type
 @CompiledJson
@@ -33,11 +30,8 @@ public class __Directive implements Meta {
   @NonNull
   private Collection<__InputValue> args;
 
-  private Boolean onOperation;
-
-  private Boolean onFragment;
-
-  private Boolean onField;
+  @NonNull
+  private Boolean isRepeatable;
 
   private Boolean isDeprecated;
 
@@ -125,28 +119,12 @@ public class __Directive implements Meta {
     this.args = args;
   }
 
-  public Boolean getOnOperation() {
-    return this.onOperation;
+  public Boolean getIsRepeatable() {
+    return this.isRepeatable;
   }
 
-  public void setOnOperation(Boolean onOperation) {
-    this.onOperation = onOperation;
-  }
-
-  public Boolean getOnFragment() {
-    return this.onFragment;
-  }
-
-  public void setOnFragment(Boolean onFragment) {
-    this.onFragment = onFragment;
-  }
-
-  public Boolean getOnField() {
-    return this.onField;
-  }
-
-  public void setOnField(Boolean onField) {
-    this.onField = onField;
+  public void setIsRepeatable(Boolean isRepeatable) {
+    this.isRepeatable = isRepeatable;
   }
 
   @Override

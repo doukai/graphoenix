@@ -88,6 +88,17 @@ enum __DirectiveLocation {
     INPUT_FIELD_DEFINITION
 }
 
+interface Meta {
+    isDeprecated: Boolean
+    version: Int
+    realmId: String
+    createUserId: String
+    createTime: Timestamp
+    updateUserId: String
+    updateTime: Timestamp
+    createGroupId: String
+}
+
 type PageInfo @containerType {
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!

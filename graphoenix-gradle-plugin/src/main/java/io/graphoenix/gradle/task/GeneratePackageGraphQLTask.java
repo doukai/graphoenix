@@ -29,9 +29,9 @@ public class GeneratePackageGraphQLTask extends BaseTask {
         try {
             registerInvoke();
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-            configRegister.registerMeta(createClassLoader());
+            configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+                manager.registerGraphQL(documentBuilder.getPackageDocument().toString());
             }
             Path filePath = Path.of(resourcePath).resolve("META-INF").resolve("graphql");
             if (Files.notExists(filePath)) {

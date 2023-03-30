@@ -17,11 +17,7 @@ public @interface __DirectiveOrderBy2 {
 
   Sort locations() default Sort.ASC;
 
-  Sort onOperation() default Sort.ASC;
-
-  Sort onFragment() default Sort.ASC;
-
-  Sort onField() default Sort.ASC;
+  Sort isRepeatable() default Sort.ASC;
 
   Sort isDeprecated() default Sort.ASC;
 

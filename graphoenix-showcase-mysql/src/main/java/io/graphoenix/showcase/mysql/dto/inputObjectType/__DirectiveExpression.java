@@ -24,11 +24,7 @@ public class __DirectiveExpression {
 
   private __InputValueExpression args;
 
-  private BooleanExpression onOperation;
-
-  private BooleanExpression onFragment;
-
-  private BooleanExpression onField;
+  private BooleanExpression isRepeatable;
 
   @DefaultValue("false")
   private Boolean includeDeprecated;
@@ -94,28 +90,12 @@ public class __DirectiveExpression {
     this.args = args;
   }
 
-  public BooleanExpression getOnOperation() {
-    return this.onOperation;
+  public BooleanExpression getIsRepeatable() {
+    return this.isRepeatable;
   }
 
-  public void setOnOperation(BooleanExpression onOperation) {
-    this.onOperation = onOperation;
-  }
-
-  public BooleanExpression getOnFragment() {
-    return this.onFragment;
-  }
-
-  public void setOnFragment(BooleanExpression onFragment) {
-    this.onFragment = onFragment;
-  }
-
-  public BooleanExpression getOnField() {
-    return this.onField;
-  }
-
-  public void setOnField(BooleanExpression onField) {
-    this.onField = onField;
+  public void setIsRepeatable(BooleanExpression isRepeatable) {
+    this.isRepeatable = isRepeatable;
   }
 
   public Boolean getIncludeDeprecated() {

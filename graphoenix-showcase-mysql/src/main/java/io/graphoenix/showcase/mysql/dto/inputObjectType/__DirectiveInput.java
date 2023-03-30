@@ -27,11 +27,7 @@ public class __DirectiveInput {
 
   private Collection<__InputValueInput> args;
 
-  private Boolean onOperation;
-
-  private Boolean onFragment;
-
-  private Boolean onField;
+  private Boolean isRepeatable;
 
   private Boolean isDeprecated;
 
@@ -92,28 +88,12 @@ public class __DirectiveInput {
     this.args = args;
   }
 
-  public Boolean getOnOperation() {
-    return this.onOperation;
+  public Boolean getIsRepeatable() {
+    return this.isRepeatable;
   }
 
-  public void setOnOperation(Boolean onOperation) {
-    this.onOperation = onOperation;
-  }
-
-  public Boolean getOnFragment() {
-    return this.onFragment;
-  }
-
-  public void setOnFragment(Boolean onFragment) {
-    this.onFragment = onFragment;
-  }
-
-  public Boolean getOnField() {
-    return this.onField;
-  }
-
-  public void setOnField(Boolean onField) {
-    this.onField = onField;
+  public void setIsRepeatable(Boolean isRepeatable) {
+    this.isRepeatable = isRepeatable;
   }
 
   public Boolean getIsDeprecated() {

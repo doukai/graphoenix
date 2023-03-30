@@ -1,8 +1,6 @@
 package io.graphoenix.core.introspection;
 
 import io.graphoenix.core.operation.ObjectValueWithVariable;
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,11 +15,7 @@ public class __Directive {
 
     private Set<__InputValue> args;
 
-    private Boolean onOperation;
-
-    private Boolean onFragment;
-
-    private Boolean onField;
+    private Boolean isRepeatable;
 
     public String getName() {
         return name;
@@ -55,31 +49,15 @@ public class __Directive {
         this.args = args;
     }
 
-    public Boolean getOnOperation() {
-        return onOperation;
+    public Boolean getRepeatable() {
+        return isRepeatable;
     }
 
-    public void setOnOperation(Boolean onOperation) {
-        this.onOperation = onOperation;
+    public void setRepeatable(Boolean repeatable) {
+        isRepeatable = repeatable;
     }
 
-    public Boolean getOnFragment() {
-        return onFragment;
-    }
-
-    public void setOnFragment(Boolean onFragment) {
-        this.onFragment = onFragment;
-    }
-
-    public Boolean getOnField() {
-        return onField;
-    }
-
-    public void setOnField(Boolean onField) {
-        this.onField = onField;
-    }
-
-    public ObjectValueWithVariable toValue() {
+    public ObjectValueWithVariable toObjectValue() {
         ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
         if (this.getName() != null) {
             objectValueWithVariable.put("name", this.getName());
@@ -91,27 +69,11 @@ public class __Directive {
             objectValueWithVariable.put("locations", this.getLocations());
         }
         if (this.getArgs() != null) {
-            objectValueWithVariable.put("args", this.getArgs().stream().map(__InputValue::toValue).collect(Collectors.toList()));
+            objectValueWithVariable.put("args", this.getArgs().stream().map(__InputValue::toObjectValue).collect(Collectors.toList()));
         }
-        if (this.getOnOperation() != null) {
-            objectValueWithVariable.put("onOperation", this.getOnOperation());
-        }
-        if (this.getOnFragment() != null) {
-            objectValueWithVariable.put("onFragment", this.getOnFragment());
-        }
-        if (this.getOnField() != null) {
-            objectValueWithVariable.put("onField", this.getOnField());
+        if (this.getRepeatable() != null) {
+            objectValueWithVariable.put("isRepeatable", this.getRepeatable());
         }
         return objectValueWithVariable;
-    }
-
-    @Override
-    public String toString() {
-        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__Directive.stg");
-        ST st = stGroupFile.getInstanceOf("__directiveDefinition");
-        st.add("__directive", this);
-        String render = st.render();
-        stGroupFile.unload();
-        return render;
     }
 }

@@ -49,14 +49,14 @@ public class PackageProcessor extends BaseProcessor {
         registerElements(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-            configRegister.registerMeta(PackageProcessor.class.getClassLoader());
+            configRegister.registerPackage(PackageProcessor.class.getClassLoader());
             if (graphQLConfig.getBuild()) {
                 manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
             registerOperations(roundEnv);
             FileObject packageGraphQL = filer.createResource(StandardLocation.CLASS_OUTPUT, "", "META-INF/graphql/package.gql");
             Writer writer = packageGraphQL.openWriter();
-            writer.write(documentBuilder.getDocument().toString());
+            writer.write(documentBuilder.getPackageDocument().toString());
             writer.close();
 
         } catch (IOException | URISyntaxException e) {

@@ -1,8 +1,6 @@
 package io.graphoenix.core.introspection;
 
 import io.graphoenix.core.operation.ObjectValueWithVariable;
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroupFile;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,7 +67,7 @@ public class __Field {
         this.deprecationReason = deprecationReason;
     }
 
-    public ObjectValueWithVariable toValue() {
+    public ObjectValueWithVariable toObjectValue() {
         ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
         if (this.getName() != null) {
             objectValueWithVariable.put("name", this.getName());
@@ -78,10 +76,10 @@ public class __Field {
             objectValueWithVariable.put("description", this.getDescription());
         }
         if (this.getArgs() != null) {
-            objectValueWithVariable.put("args", this.getArgs().stream().map(__InputValue::toValue).collect(Collectors.toList()));
+            objectValueWithVariable.put("args", this.getArgs().stream().map(__InputValue::toObjectValue).collect(Collectors.toList()));
         }
         if (this.getType() != null) {
-            objectValueWithVariable.put("type", this.getType().toValue());
+            objectValueWithVariable.put("typeName", this.getType().getName());
         }
         if (this.getIsDeprecated() != null) {
             objectValueWithVariable.put("isDeprecated", this.getIsDeprecated());
@@ -90,15 +88,5 @@ public class __Field {
             objectValueWithVariable.put("deprecationReason", this.getDeprecationReason());
         }
         return objectValueWithVariable;
-    }
-
-    @Override
-    public String toString() {
-        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__Field.stg");
-        ST st = stGroupFile.getInstanceOf("__fieldDefinition");
-        st.add("__field", this);
-        String render = st.render();
-        stGroupFile.unload();
-        return render;
     }
 }

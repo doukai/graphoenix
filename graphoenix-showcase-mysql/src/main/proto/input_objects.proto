@@ -157,6 +157,19 @@ message IntroSchemaInput {
     optional string intro_typename = 18;
 }
 message IntroSchemaOrderBy {
+    optional Sort id = 1;
+    optional Sort query_type_name = 2;
+    optional Sort mutation_type_name = 3;
+    optional Sort subscription_type_name = 4;
+    optional Sort is_deprecated = 5;
+    optional Sort version = 6;
+    optional Sort realm_id = 7;
+    optional Sort create_user_id = 8;
+    optional Sort create_time = 9;
+    optional Sort update_user_id = 10;
+    optional Sort update_time = 11;
+    optional Sort create_group_id = 12;
+    optional Sort intro_typename = 13;
 }
 message IntroTypeExpression {
     optional StringExpression name = 1;
@@ -205,6 +218,20 @@ message IntroTypeInput {
     optional string intro_typename = 20;
 }
 message IntroTypeOrderBy {
+    optional Sort name = 1;
+    optional Sort schema_id = 2;
+    optional Sort kind = 3;
+    optional Sort description = 4;
+    optional Sort of_type_name = 5;
+    optional Sort is_deprecated = 6;
+    optional Sort version = 7;
+    optional Sort realm_id = 8;
+    optional Sort create_user_id = 9;
+    optional Sort create_time = 10;
+    optional Sort update_user_id = 11;
+    optional Sort update_time = 12;
+    optional Sort create_group_id = 13;
+    optional Sort intro_typename = 14;
 }
 message IntroTypeInterfacesExpression {
     optional StringExpression id = 1;
@@ -237,6 +264,18 @@ message IntroTypeInterfacesInput {
     optional string intro_typename = 12;
 }
 message IntroTypeInterfacesOrderBy {
+    optional Sort id = 1;
+    optional Sort type_name = 2;
+    optional Sort interface_name = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
 message IntroTypePossibleTypesExpression {
     optional StringExpression id = 1;
@@ -269,6 +308,18 @@ message IntroTypePossibleTypesInput {
     optional string intro_typename = 12;
 }
 message IntroTypePossibleTypesOrderBy {
+    optional Sort id = 1;
+    optional Sort type_name = 2;
+    optional Sort possible_type_name = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
 message IntroFieldExpression {
     optional StringExpression id = 1;
@@ -313,6 +364,21 @@ message IntroFieldInput {
     optional string intro_typename = 18;
 }
 message IntroFieldOrderBy {
+    optional Sort id = 1;
+    optional Sort name = 2;
+    optional Sort type_name = 3;
+    optional Sort of_type_name = 4;
+    optional Sort description = 5;
+    optional Sort deprecation_reason = 6;
+    optional Sort is_deprecated = 7;
+    optional Sort version = 8;
+    optional Sort realm_id = 9;
+    optional Sort create_user_id = 10;
+    optional Sort create_time = 11;
+    optional Sort update_user_id = 12;
+    optional Sort update_time = 13;
+    optional Sort create_group_id = 14;
+    optional Sort intro_typename = 15;
 }
 message IntroInputValueExpression {
     optional StringExpression id = 1;
@@ -359,6 +425,23 @@ message IntroInputValueInput {
     optional string intro_typename = 19;
 }
 message IntroInputValueOrderBy {
+    optional Sort id = 1;
+    optional Sort name = 2;
+    optional Sort type_name = 3;
+    optional Sort of_type_name = 4;
+    optional Sort field_id = 5;
+    optional Sort directive_name = 6;
+    optional Sort description = 7;
+    optional Sort default_value = 8;
+    optional Sort is_deprecated = 9;
+    optional Sort version = 10;
+    optional Sort realm_id = 11;
+    optional Sort create_user_id = 12;
+    optional Sort create_time = 13;
+    optional Sort update_user_id = 14;
+    optional Sort update_time = 15;
+    optional Sort create_group_id = 16;
+    optional Sort intro_typename = 17;
 }
 message IntroEnumValueExpression {
     optional StringExpression id = 1;
@@ -397,6 +480,20 @@ message IntroEnumValueInput {
     optional string intro_typename = 15;
 }
 message IntroEnumValueOrderBy {
+    optional Sort id = 1;
+    optional Sort name = 2;
+    optional Sort of_type_name = 3;
+    optional Sort description = 4;
+    optional Sort deprecation_reason = 5;
+    optional Sort is_deprecated = 6;
+    optional Sort version = 7;
+    optional Sort realm_id = 8;
+    optional Sort create_user_id = 9;
+    optional Sort create_time = 10;
+    optional Sort update_user_id = 11;
+    optional Sort update_time = 12;
+    optional Sort create_group_id = 13;
+    optional Sort intro_typename = 14;
 }
 message IntroDirectiveExpression {
     optional StringExpression name = 1;
@@ -404,20 +501,18 @@ message IntroDirectiveExpression {
     optional StringExpression description = 3;
     optional IntroDirectiveLocationExpression locations = 4;
     optional IntroInputValueExpression args = 5;
-    optional BooleanExpression on_operation = 6;
-    optional BooleanExpression on_fragment = 7;
-    optional BooleanExpression on_field = 8;
-    optional bool include_deprecated = 9;
-    optional IntExpression version = 10;
-    optional StringExpression realm_id = 11;
-    optional StringExpression create_user_id = 12;
-    optional StringExpression create_time = 13;
-    optional StringExpression update_user_id = 14;
-    optional StringExpression update_time = 15;
-    optional StringExpression create_group_id = 16;
-    optional StringExpression intro_typename = 17;
-    optional Conditional cond = 18;
-    repeated IntroDirectiveExpression exs = 19;
+    optional BooleanExpression is_repeatable = 6;
+    optional bool include_deprecated = 7;
+    optional IntExpression version = 8;
+    optional StringExpression realm_id = 9;
+    optional StringExpression create_user_id = 10;
+    optional StringExpression create_time = 11;
+    optional StringExpression update_user_id = 12;
+    optional StringExpression update_time = 13;
+    optional StringExpression create_group_id = 14;
+    optional StringExpression intro_typename = 15;
+    optional Conditional cond = 16;
+    repeated IntroDirectiveExpression exs = 17;
 }
 message IntroDirectiveInput {
     optional string name = 1;
@@ -425,20 +520,31 @@ message IntroDirectiveInput {
     optional string description = 3;
     repeated IntroDirectiveLocation locations = 4;
     repeated IntroInputValueInput args = 5;
-    optional bool on_operation = 6;
-    optional bool on_fragment = 7;
-    optional bool on_field = 8;
-    optional bool is_deprecated = 9;
-    optional int32 version = 10;
-    optional string realm_id = 11;
-    optional string create_user_id = 12;
-    optional string create_time = 13;
-    optional string update_user_id = 14;
-    optional string update_time = 15;
-    optional string create_group_id = 16;
-    optional string intro_typename = 17;
+    optional bool is_repeatable = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional string create_time = 11;
+    optional string update_user_id = 12;
+    optional string update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
 }
 message IntroDirectiveOrderBy {
+    optional Sort name = 1;
+    optional Sort schema_id = 2;
+    optional Sort description = 3;
+    optional Sort is_repeatable = 4;
+    optional Sort is_deprecated = 5;
+    optional Sort version = 6;
+    optional Sort realm_id = 7;
+    optional Sort create_user_id = 8;
+    optional Sort create_time = 9;
+    optional Sort update_user_id = 10;
+    optional Sort update_time = 11;
+    optional Sort create_group_id = 12;
+    optional Sort intro_typename = 13;
 }
 message IntroDirectiveLocationsExpression {
     optional StringExpression id = 1;
@@ -471,6 +577,18 @@ message IntroDirectiveLocationsInput {
     optional string intro_typename = 12;
 }
 message IntroDirectiveLocationsOrderBy {
+    optional Sort id = 1;
+    optional Sort directive_name = 2;
+    optional Sort directive_location = 3;
+    optional Sort is_deprecated = 4;
+    optional Sort version = 5;
+    optional Sort realm_id = 6;
+    optional Sort create_user_id = 7;
+    optional Sort create_time = 8;
+    optional Sort update_user_id = 9;
+    optional Sort update_time = 10;
+    optional Sort create_group_id = 11;
+    optional Sort intro_typename = 12;
 }
 message UserExpression {
     optional StringExpression id = 1;

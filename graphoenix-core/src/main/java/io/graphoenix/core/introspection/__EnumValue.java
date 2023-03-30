@@ -1,8 +1,6 @@
 package io.graphoenix.core.introspection;
 
 import io.graphoenix.core.operation.ObjectValueWithVariable;
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroupFile;
 
 public class __EnumValue {
 
@@ -46,7 +44,7 @@ public class __EnumValue {
         this.deprecationReason = deprecationReason;
     }
 
-    public ObjectValueWithVariable toValue() {
+    public ObjectValueWithVariable toObjectValue() {
         ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
         if (this.getName() != null) {
             objectValueWithVariable.put("name", this.getName());
@@ -61,15 +59,5 @@ public class __EnumValue {
             objectValueWithVariable.put("deprecationReason", this.getDeprecationReason());
         }
         return objectValueWithVariable;
-    }
-
-    @Override
-    public String toString() {
-        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__EnumValue.stg");
-        ST st = stGroupFile.getInstanceOf("__enumValueDefinition");
-        st.add("__enumValue", this);
-        String render = st.render();
-        stGroupFile.unload();
-        return render;
     }
 }

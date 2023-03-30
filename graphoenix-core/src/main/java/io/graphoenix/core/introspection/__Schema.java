@@ -1,8 +1,6 @@
 package io.graphoenix.core.introspection;
 
-import io.graphoenix.core.operation.ObjectValueWithVariable;
-import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroupFile;
+import io.graphoenix.core.operation.Arguments;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -69,36 +67,26 @@ public class __Schema {
         this.description = description;
     }
 
-    public ObjectValueWithVariable toValue() {
-        ObjectValueWithVariable objectValueWithVariable = new ObjectValueWithVariable();
+    public Arguments toArguments() {
+        Arguments arguments = new Arguments();
         if (this.getTypes() != null) {
-            objectValueWithVariable.put("types", this.getTypes().stream().map(__Type::toValue).collect(Collectors.toList()));
+            arguments.put("types", this.getTypes().stream().map(__Type::toObjectValue).collect(Collectors.toList()));
         }
         if (this.getQueryType() != null) {
-            objectValueWithVariable.put("queryType", this.getQueryType().toValue());
+            arguments.put("queryTypeName", this.getQueryType().getName());
         }
         if (this.getMutationType() != null) {
-            objectValueWithVariable.put("mutationType", this.getMutationType().toValue());
+            arguments.put("mutationTypeName", this.getMutationType().getName());
         }
         if (this.getSubscriptionType() != null) {
-            objectValueWithVariable.put("subscriptionType", this.getSubscriptionType().toValue());
+            arguments.put("subscriptionTypeName", this.getSubscriptionType().getName());
         }
         if (this.getDirectives() != null) {
-            objectValueWithVariable.put("directives", this.getDirectives().stream().map(__Directive::toValue).collect(Collectors.toList()));
+            arguments.put("directives", this.getDirectives().stream().map(__Directive::toObjectValue).collect(Collectors.toList()));
         }
         if (this.getDescription() != null) {
-            objectValueWithVariable.put("description", this.getDescription());
+            arguments.put("description", this.getDescription());
         }
-        return objectValueWithVariable;
-    }
-
-    @Override
-    public String toString() {
-        STGroupFile stGroupFile = new STGroupFile("stg/introspection/__Schema.stg");
-        ST st = stGroupFile.getInstanceOf("__schemaDefinition");
-        st.add("__schema", this);
-        String render = st.render();
-        stGroupFile.unload();
-        return render;
+        return arguments;
     }
 }
