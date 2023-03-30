@@ -35,7 +35,8 @@ public class DirectiveDefinition {
         Set<String> directiveLocationList = new LinkedHashSet<>();
         if (directiveLocationsContext.directiveLocation() != null) {
             directiveLocationList.add(directiveLocationsContext.directiveLocation().name().getText());
-        } else if (directiveLocationsContext.directiveLocations() != null) {
+        }
+        if (directiveLocationsContext.directiveLocations() != null) {
             directiveLocationList.addAll(directiveLocationList(directiveLocationsContext.directiveLocations()));
         }
         return directiveLocationList;

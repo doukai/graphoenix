@@ -2,6 +2,7 @@ package io.graphoenix.core.introspection;
 
 import io.graphoenix.core.operation.Arguments;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,13 @@ public class __Schema {
 
     public void setTypes(Set<__Type> types) {
         this.types = types;
+    }
+
+    public void addTypes(Set<__Type> types) {
+        if (this.types == null) {
+            this.types = new LinkedHashSet<>();
+        }
+        this.types.addAll(types);
     }
 
     public __Type getQueryType() {

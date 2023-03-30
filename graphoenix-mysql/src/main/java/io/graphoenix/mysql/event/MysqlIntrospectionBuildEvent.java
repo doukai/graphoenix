@@ -15,6 +15,7 @@ import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Initialized(ApplicationScoped.class)
@@ -41,10 +42,7 @@ public class MysqlIntrospectionBuildEvent implements ScopeEvent {
             Logger.info("introspection data SQL insert started");
             Operation operation = introspectionMutationBuilder.buildIntrospectionSchemaMutation();
             Stream<String> introspectionMutationSQLStream = mutationToStatements.createStatementsSQL(operation.toString());
-            return mutationExecutor.executeMutationsInBatchByGroup(introspectionMutationSQLStream, sqlCount)
-                    .doOnNext(count -> Logger.info(count + " introspection data SQL insert success"))
-                    .doOnComplete(() -> Logger.info("all introspection data SQL insert success"))
-                    .then();
+            return mutationExecutor.executeMutations(introspectionMutationSQLStream.collect(Collectors.joining(";"))).then();
         }
         return Mono.empty();
     }

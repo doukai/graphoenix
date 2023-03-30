@@ -104,6 +104,14 @@ public class Operation {
         return this;
     }
 
+    public Operation addFields(Set<Field> fields) {
+        if (this.fields == null) {
+            this.fields = new LinkedHashSet<>();
+        }
+        this.fields.addAll(fields);
+        return this;
+    }
+
     public Field getField(String name) {
         return this.fields.stream().filter(field -> field.getAlias() != null && field.getAlias().equals(name) || field.getName().equals(name)).findFirst().orElse(null);
     }

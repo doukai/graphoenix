@@ -12,15 +12,14 @@ import io.graphoenix.core.introspection.__Schema;
 import io.graphoenix.core.introspection.__Type;
 import io.graphoenix.core.introspection.__TypeKind;
 import io.graphoenix.core.operation.Field;
+import io.graphoenix.core.operation.ObjectValueWithVariable;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.tinylog.Logger;
 
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,29 +44,38 @@ public class IntrospectionMutationBuilder {
         Operation operation = new Operation()
                 .setOperationType("mutation")
                 .setName("introspection")
-                .setFields(
-                        Stream.of(new Field("__schema")
-                                                .setArguments(buildIntrospectionSchema().toArguments())
-                                                .addField(new Field("id")),
-                                        new Field("__typeInterfacesList")
-                                                .addArgument(LIST_INPUT_NAME,
-                                                        manager.getObjects()
-                                                                .map(this::buildType)
-                                                                .flatMap(__Type::getInterfacesObjectValues)
-                                                                .collect(Collectors.toList())
-                                                )
-                                                .addField(new Field("id")),
-                                        new Field("__typePossibleTypesList")
-                                                .addArgument(LIST_INPUT_NAME,
-                                                        manager.getInterfaces()
-                                                                .map(this::buildType)
-                                                                .flatMap(__Type::getPossibleTypesObjectValues)
-                                                                .collect(Collectors.toList())
-                                                )
-                                                .addField(new Field("id"))
-                                )
-                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                .addField(
+                        new Field("__schema")
+                                .setArguments(buildIntrospectionSchema().toArguments())
+                                .addField(new Field("id"))
                 );
+
+        List<ObjectValueWithVariable> interfacesObjectValues = manager.getObjects()
+                .map(this::buildType)
+                .flatMap(__Type::getInterfacesObjectValues)
+                .collect(Collectors.toList());
+
+        if (interfacesObjectValues.size() > 0) {
+            operation.addField(
+                    new Field("__typeInterfacesList")
+                            .addArgument(LIST_INPUT_NAME, interfacesObjectValues)
+                            .addField(new Field("id"))
+            );
+        }
+
+        List<ObjectValueWithVariable> possibleTypesObjectValues = manager.getInterfaces()
+                .map(this::buildType)
+                .flatMap(__Type::getPossibleTypesObjectValues)
+                .collect(Collectors.toList());
+
+        if (possibleTypesObjectValues.size() > 0) {
+            operation.addField(
+                    new Field("__typePossibleTypesList")
+                            .addArgument(LIST_INPUT_NAME, possibleTypesObjectValues)
+                            .addField(new Field("id"))
+            );
+        }
+
         Logger.info("introspection schema mutation build success");
         Logger.debug("\r\n{}", operation.toString());
         return operation;
@@ -90,20 +98,34 @@ public class IntrospectionMutationBuilder {
                                 .filter(enumTypeDefinitionContext -> !enumTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
                                 .map(this::buildType),
                         manager.getScalars()
-                                .map(this::buildType),
-                        manager.getObjects()
-                                .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                                .map(GraphqlParser.FieldDefinitionContext::type)
-                                .map(this::buildType),
-                        manager.getInterfaces()
-                                .flatMap(interfaceTypeDefinitionContext -> interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
-                                .map(GraphqlParser.FieldDefinitionContext::type)
-                                .map(this::buildType),
-                        manager.getInputObjects()
-                                .flatMap(inputObjectTypeDefinitionContext -> inputObjectTypeDefinitionContext.inputObjectValueDefinitions().inputValueDefinition().stream())
-                                .map(GraphqlParser.InputValueDefinitionContext::type)
                                 .map(this::buildType)
                 ).collect(Collectors.toCollection(LinkedHashSet::new))
+        );
+
+        schema.addTypes(
+                Stream.ofNullable(schema.getTypes())
+                        .flatMap(Collection::stream)
+                        .flatMap(type -> {
+                                    switch (type.getKind()) {
+                                        case SCALAR:
+                                        case OBJECT:
+                                        case INTERFACE:
+                                        case UNION:
+                                        case ENUM:
+                                        case INPUT_OBJECT:
+                                            return Stream.of(
+                                                    buildNonNullType(type),
+                                                    buildListType(type),
+                                                    buildNonNullListType(type),
+                                                    buildListNonNullType(type),
+                                                    buildNonNullListNonNullType(type)
+                                            );
+                                        default:
+                                            return Stream.empty();
+                                    }
+                                }
+                        )
+                        .collect(Collectors.toSet())
         );
 
         manager.getQueryOperationTypeName()
@@ -147,7 +169,7 @@ public class IntrospectionMutationBuilder {
 
         if (level == 0) {
             if (objectTypeDefinitionContext.implementsInterfaces() != null) {
-                type.setInterfaces(getInterfaces(objectTypeDefinitionContext.implementsInterfaces(), level + 1));
+                type.setInterfaces(getInterfaces(objectTypeDefinitionContext.implementsInterfaces(), level + 1).collect(Collectors.toCollection(LinkedHashSet::new)));
             } else {
                 type.setInterfaces(new LinkedHashSet<>());
             }
@@ -173,7 +195,7 @@ public class IntrospectionMutationBuilder {
 
         if (level == 0) {
             if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
-                type.setInterfaces(getInterfaces(interfaceTypeDefinitionContext.implementsInterfaces(), level + 1));
+                type.setInterfaces(getInterfaces(interfaceTypeDefinitionContext.implementsInterfaces(), level + 1).collect(Collectors.toCollection(LinkedHashSet::new)));
             } else {
                 type.setInterfaces(new LinkedHashSet<>());
             }
@@ -192,13 +214,15 @@ public class IntrospectionMutationBuilder {
         return type;
     }
 
-    private Set<__Type> getInterfaces(GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext, int level) {
-        return implementsInterfacesContext.typeName().stream()
-                .map(typeNameContext -> manager.getInterface(typeNameContext.name().getText()))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(interfaceTypeDefinitionContext -> buildType(interfaceTypeDefinitionContext, level))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+    private Stream<__Type> getInterfaces(GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext, int level) {
+        return Stream.concat(
+                Stream.ofNullable(implementsInterfacesContext.typeName())
+                        .flatMap(Collection::stream)
+                        .flatMap(typeNameContext -> manager.getInterface(typeNameContext.name().getText()).stream())
+                        .map(interfaceTypeDefinitionContext -> buildType(interfaceTypeDefinitionContext, level)),
+                Stream.ofNullable(implementsInterfacesContext.implementsInterfaces())
+                        .flatMap(subImplementsInterfacesContext -> getInterfaces(subImplementsInterfacesContext, level))
+        );
     }
 
     private __Field buildField(GraphqlParser.FieldDefinitionContext fieldDefinitionContext, int level) {
@@ -368,6 +392,34 @@ public class IntrospectionMutationBuilder {
         return type;
     }
 
+    private __Type buildNonNullType(__Type __type) {
+        __Type nonNullType = new __Type();
+        nonNullType.setName(__type.getName().concat("!"));
+        nonNullType.setOfType(__type);
+        nonNullType.setKind(__TypeKind.NON_NULL);
+        return nonNullType;
+    }
+
+    private __Type buildListType(__Type __type) {
+        __Type listType = new __Type();
+        listType.setName("[".concat(__type.getName()).concat("]"));
+        listType.setOfType(__type);
+        listType.setKind(__TypeKind.LIST);
+        return listType;
+    }
+
+    private __Type buildNonNullListType(__Type __type) {
+        return buildNonNullType(buildListType(__type));
+    }
+
+    private __Type buildListNonNullType(__Type __type) {
+        return buildListType(buildNonNullType(__type));
+    }
+
+    private __Type buildNonNullListNonNullType(__Type __type) {
+        return buildNonNullType(buildListNonNullType(__type));
+    }
+
     private __Directive buildDirective(GraphqlParser.DirectiveDefinitionContext directiveDefinitionContext) {
         __Directive directive = new __Directive();
         directive.setName(directiveDefinitionContext.name().getText());
@@ -386,18 +438,18 @@ public class IntrospectionMutationBuilder {
             directive.setArgs(new LinkedHashSet<>());
         }
 
-        Set<__DirectiveLocation> directiveLocationList = new LinkedHashSet<>();
-        buildDirectiveLocationList(directiveDefinitionContext.directiveLocations(), directiveLocationList);
-        directive.setLocations(directiveLocationList);
+        directive.setLocations(buildDirectiveLocationList(directiveDefinitionContext.directiveLocations()));
         return directive;
     }
 
-    private void buildDirectiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext, Set<__DirectiveLocation> directiveLocationList) {
+    public Set<__DirectiveLocation> buildDirectiveLocationList(GraphqlParser.DirectiveLocationsContext directiveLocationsContext) {
+        Set<__DirectiveLocation> directiveLocationList = new LinkedHashSet<>();
         if (directiveLocationsContext.directiveLocation() != null) {
             directiveLocationList.add(__DirectiveLocation.valueOf(directiveLocationsContext.directiveLocation().name().getText()));
         }
         if (directiveLocationsContext.directiveLocations() != null) {
-            buildDirectiveLocationList(directiveLocationsContext.directiveLocations(), directiveLocationList);
+            directiveLocationList.addAll(buildDirectiveLocationList(directiveLocationsContext.directiveLocations()));
         }
+        return directiveLocationList;
     }
 }

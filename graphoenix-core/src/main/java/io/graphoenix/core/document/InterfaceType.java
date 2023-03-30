@@ -29,7 +29,7 @@ public class InterfaceType {
             this.description = DOCUMENT_UTIL.getStringValue(interfaceTypeDefinitionContext.description().StringValue());
         }
         if (interfaceTypeDefinitionContext.implementsInterfaces() != null) {
-            this.interfaces = interfaceTypeDefinitionContext.implementsInterfaces().typeName().stream().map(typeNameContext -> typeNameContext.name().getText()).collect(Collectors.toCollection(LinkedHashSet::new));
+            this.interfaces = getInterfaces(interfaceTypeDefinitionContext.implementsInterfaces()).collect(Collectors.toCollection(LinkedHashSet::new));
         }
         if (interfaceTypeDefinitionContext.directives() != null) {
             this.directives = interfaceTypeDefinitionContext.directives().directive().stream().map(Directive::new).map(Directive::toString).collect(Collectors.toCollection(LinkedHashSet::new));
@@ -37,6 +37,16 @@ public class InterfaceType {
         if (interfaceTypeDefinitionContext.fieldsDefinition() != null) {
             this.fields = interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream().map(Field::new).collect(Collectors.toCollection(LinkedHashSet::new));
         }
+    }
+
+    private Stream<String> getInterfaces(GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
+        return Stream.concat(
+                Stream.ofNullable(implementsInterfacesContext.typeName())
+                        .flatMap(Collection::stream)
+                        .map(typeNameContext -> typeNameContext.name().getText()),
+                Stream.ofNullable(implementsInterfacesContext.implementsInterfaces())
+                        .flatMap(this::getInterfaces)
+        );
     }
 
     public static InterfaceType merge(GraphqlParser.InterfaceTypeDefinitionContext... interfaceTypeDefinitionContexts) {

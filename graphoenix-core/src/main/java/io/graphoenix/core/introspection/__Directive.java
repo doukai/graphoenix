@@ -15,7 +15,7 @@ public class __Directive {
 
     private Set<__InputValue> args;
 
-    private Boolean isRepeatable;
+    private Boolean isRepeatable = true;
 
     public String getName() {
         return name;
