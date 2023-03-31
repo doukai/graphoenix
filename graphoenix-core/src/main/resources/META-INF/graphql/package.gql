@@ -1,0 +1,284 @@
+scalar ID
+scalar Int
+scalar Float
+scalar String
+scalar Boolean
+scalar BigInteger
+scalar BigDecimal
+scalar Date
+scalar Time
+scalar DateTime
+scalar Timestamp
+enum Operator @packageInfo(packageName: "io.graphoenix.core") {
+  EQ
+
+  NEQ
+
+  LK
+
+  NLK
+
+  GT
+
+  NLTE
+
+  GTE
+
+  NLT
+
+  LT
+
+  NGTE
+
+  LTE
+
+  NGT
+
+  NIL
+
+  NNIL
+
+  IN
+
+  NIN
+
+  BT
+
+  NBT
+}
+enum Conditional @packageInfo(packageName: "io.graphoenix.core") {
+  AND
+
+  OR
+}
+enum Sort @packageInfo(packageName: "io.graphoenix.core") {
+  ASC
+
+  DESC
+}
+enum Function @packageInfo(packageName: "io.graphoenix.core") {
+  COUNT
+
+  MAX
+
+  MIN
+
+  SUM
+
+  AVG
+}
+enum Protocol @packageInfo(packageName: "io.graphoenix.core") {
+  LOCAL
+
+  GRPC
+
+  HTTP
+
+  RSOCKET
+}
+enum __TypeKind @packageInfo(packageName: "io.graphoenix.core") {
+  SCALAR
+
+  OBJECT
+
+  INTERFACE
+
+  UNION
+
+  ENUM
+
+  INPUT_OBJECT
+
+  LIST
+
+  NON_NULL
+}
+enum __DirectiveLocation @packageInfo(packageName: "io.graphoenix.core") {
+  QUERY
+
+  MUTATION
+
+  SUBSCRIPTION
+
+  FIELD
+
+  FRAGMENT_DEFINITION
+
+  FRAGMENT_SPREAD
+
+  INLINE_FRAGMENT
+
+  SCHEMA
+
+  SCALAR
+
+  OBJECT
+
+  FIELD_DEFINITION
+
+  ARGUMENT_DEFINITION
+
+  INTERFACE
+
+  UNION
+
+  ENUM
+
+  ENUM_VALUE
+
+  INPUT_OBJECT
+
+  INPUT_FIELD_DEFINITION
+}
+interface Meta @packageInfo(packageName: "io.graphoenix.core") {
+  isDeprecated: Boolean
+
+  version: Int
+
+  realmId: String
+
+  createUserId: String
+
+  createTime: Timestamp
+
+  updateUserId: String
+
+  updateTime: Timestamp
+
+  createGroupId: String
+}
+type PageInfo @containerType @packageInfo(packageName: "io.graphoenix.core") {
+  hasNextPage: Boolean!
+
+  hasPreviousPage: Boolean!
+
+  startCursor: String!
+
+  endCursor: String!
+}
+input IDExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: ID
+  in: [ID]
+  skipNull: Boolean = false
+}
+input StringExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: String
+  in: [String]
+  skipNull: Boolean = false
+}
+input BooleanExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Boolean
+  in: [Boolean]
+  skipNull: Boolean = false
+}
+input IntExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Int
+  in: [Int]
+  skipNull: Boolean = false
+}
+input FloatExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Float
+  in: [Float]
+  skipNull: Boolean = false
+}
+input MapWith @packageInfo(packageName: "io.graphoenix.core") {
+  type: String
+  from: String
+  to: String
+}
+input InvokeParameter @packageInfo(packageName: "io.graphoenix.core") {
+  name: String
+  className: String
+}
+input ValidationInput @packageInfo(packageName: "io.graphoenix.core") {
+  minLength: Int
+  maxLength: Int
+  pattern: String
+  format: String
+  contentMediaType: String
+  contentEncoding: String
+  minimum: Float
+  exclusiveMinimum: Float
+  maximum: Float
+  exclusiveMaximum: Float
+  multipleOf: Float
+  const: String
+  enum: [String]
+  items: ValidationInput
+  minItems: Int
+  maxItems: Int
+  uniqueItems: Boolean
+  allOf: [ValidationInput]
+  anyOf: [ValidationInput]
+  oneOf: [ValidationInput]
+  not: ValidationInput
+  properties: [Property]
+  if: ValidationInput
+  then: ValidationInput
+  else: ValidationInput
+  dependentRequired: [Property]
+}
+input Property @packageInfo(packageName: "io.graphoenix.core") {
+  name: String!
+  validation: ValidationInput
+  required: [String]
+}
+input OperatorExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Operator
+  in: [Operator]
+}
+input ConditionalExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Conditional
+  in: [Conditional]
+}
+input SortExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Sort
+  in: [Sort]
+}
+input FunctionExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Function
+  in: [Function]
+}
+input ProtocolExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: Protocol
+  in: [Protocol]
+}
+input __TypeKindExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: __TypeKind
+  in: [__TypeKind]
+}
+input __DirectiveLocationExpression @packageInfo(packageName: "io.graphoenix.core") {
+  opr: Operator = EQ
+  val: __DirectiveLocation
+  in: [__DirectiveLocation]
+}
+directive @dataType(type: String length: Int decimals: Int default: String) on FIELD_DEFINITION
+directive @map(from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
+directive @fetch(protocol: Protocol from: String! with: MapWith to: String anchor: Boolean) on FIELD_DEFINITION
+directive @invoke(className: String methodName: String parameters: [InvokeParameter] returnClassName: String) on FIELD_DEFINITION | QUERY | MUTATION | SUBSCRIPTION
+directive @skipNullArguments(if: Boolean!) on FIELD
+directive @cursor on FIELD_DEFINITION
+directive @func(name: Function field: String) on FIELD_DEFINITION
+directive @containerType on OBJECT
+directive @classInfo(className: String!) on OBJECT
+directive @packageInfo(packageName: String!) on OBJECT
+directive @connection(field: String agg: String) on FIELD_DEFINITION
+directive @update(if: Boolean!) on FIELD
+directive @delete(if: Boolean!) on FIELD
+directive @mergeToList(arguments: [String]) on FIELD
+directive @format(value: String locale: String) on FIELD | FIELD_DEFINITION
+directive @permitAll on FIELD | OBJECT
+directive @denyAll on FIELD | OBJECT
+directive @rolesAllowed(roles: [String]) on FIELD | OBJECT
+directive @validation(minLength: Int maxLength: Int pattern: String format: String contentMediaType: String contentEncoding: String minimum: Float exclusiveMinimum: Float maximum: Float exclusiveMaximum: Float multipleOf: Float const: String enum: [String] items: ValidationInput minItems: Int maxItems: Int uniqueItems: Boolean allOf: [ValidationInput] anyOf: [ValidationInput] oneOf: [ValidationInput] not: ValidationInput properties: [Property] if: ValidationInput then: ValidationInput else: ValidationInput dependentRequired: [Property]) on OBJECT | FIELD_DEFINITION

@@ -31,7 +31,7 @@ public class GeneratePackageGraphQLTask extends BaseTask {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
             configRegister.registerPackage(createClassLoader());
             if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.getPackageDocument().toString());
+                manager.registerGraphQL(documentBuilder.buildDocument().toString());
             }
             Path filePath = Path.of(resourcePath).resolve("META-INF").resolve("graphql");
             if (Files.notExists(filePath)) {
@@ -39,7 +39,7 @@ public class GeneratePackageGraphQLTask extends BaseTask {
             }
             Files.writeString(
                     filePath.resolve("package.gql"),
-                    documentBuilder.getDocument().toString()
+                    documentBuilder.getPackageDocument().toString()
             );
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);

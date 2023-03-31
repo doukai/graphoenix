@@ -401,8 +401,7 @@ public class ProcessorManager {
     public Stream<ResolvedType> getMethodReturnType(MethodDeclaration methodDeclaration) {
         return methodDeclaration.findAll(ReturnStmt.class).stream()
                 .map(ReturnStmt::getExpression)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .map(javaSymbolSolver::calculateType);
     }
 

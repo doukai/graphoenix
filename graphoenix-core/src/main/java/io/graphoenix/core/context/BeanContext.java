@@ -183,8 +183,7 @@ public class BeanContext {
         Logger.debug("search bean instance for class {} name {}", beanClass.getName(), name);
         return moduleContexts.stream()
                 .map(moduleContext -> moduleContext.getOptional(beanClass, name))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .findFirst()
                 .map(supplier -> (Supplier<T>) CONTEXT_CACHE.get(beanClass).computeIfAbsent(name, k -> supplier));
     }
@@ -194,8 +193,7 @@ public class BeanContext {
         Logger.debug("search bean instance for class {} name {}", beanClass.getName(), name);
         return moduleContexts.stream()
                 .map(moduleContext -> moduleContext.getOptional(beanClass, name))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .findFirst()
                 .map(supplier -> (Supplier<Mono<T>>) CONTEXT_CACHE.get(beanClass).computeIfAbsent(name, k -> supplier));
     }

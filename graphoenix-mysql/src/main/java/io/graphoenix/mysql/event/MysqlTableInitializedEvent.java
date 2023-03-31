@@ -2,8 +2,8 @@ package io.graphoenix.mysql.event;
 
 import com.google.auto.service.AutoService;
 import io.graphoenix.core.context.BeanContext;
-import io.graphoenix.mysql.translator.translator.GraphQLTypeToTable;
 import io.graphoenix.mysql.config.MysqlConfig;
+import io.graphoenix.mysql.translator.translator.GraphQLTypeToTable;
 import io.graphoenix.r2dbc.connector.executor.TableCreator;
 import io.graphoenix.spi.handler.ScopeEvent;
 import jakarta.annotation.Priority;
@@ -13,7 +13,7 @@ import org.tinylog.Logger;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 @Initialized(ApplicationScoped.class)
 @Priority(1)
@@ -34,8 +34,10 @@ public class MysqlTableInitializedEvent implements ScopeEvent {
     public Mono<Void> fireAsync(Map<String, Object> context) {
         if (mysqlConfig.getCrateTable()) {
             Logger.info("start create type table");
-            Stream<String> createTablesSQLStream = graphqlTypeToTable.createTablesSQL();
-            return tableCreator.createTables(createTablesSQLStream).doOnSuccess((v) -> Logger.info("create type table success"));
+            return tableCreator.selectColumns(graphqlTypeToTable.selectColumnsSQL())
+                    .doOnSuccess(existsColumnNameList -> tableCreator.mergeTable(graphqlTypeToTable.mergeTablesSQL(existsColumnNameList).collect(Collectors.joining(";"))))
+                    .doOnSuccess((v) -> Logger.info("merge type table success"))
+                    .then();
         }
         return Mono.empty();
     }

@@ -41,8 +41,7 @@ public class JavaFileBuilder {
                                 directiveDefinitionContext.argumentsDefinition().inputValueDefinition().stream()
                                         .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                                         .map(inputValueDefinitionContext -> manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
-                                        .filter(Optional::isPresent)
-                                        .map(Optional::get)
+                                        .flatMap(Optional::stream)
                         )
                         .map(typeSpecBuilder::buildAnnotation)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getDirectivePackageName(), typeSpec).build()),

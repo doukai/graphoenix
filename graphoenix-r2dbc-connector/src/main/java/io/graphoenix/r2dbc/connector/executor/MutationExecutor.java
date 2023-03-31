@@ -28,9 +28,9 @@ public class MutationExecutor {
         this.connectionMonoProvider = connectionMonoProvider;
     }
 
-    @Transactional
     public Mono<String> executeMutationsInBatch(Stream<String> sqlStream) {
         return this.connectionMonoProvider.get()
+                .flatMap(connection -> Mono.from(connection.setAutoCommit(true)).thenReturn(connection))
                 .flatMapMany(connection -> {
                             Batch batch = connection.createBatch();
                             sqlStream.forEach(sql -> {
@@ -45,10 +45,10 @@ public class MutationExecutor {
                 .flatMap(this::getJsonStringFromResult);
     }
 
-    @Transactional
     public Flux<Integer> executeMutationsInBatchByGroup(Stream<String> sqlStream, int itemCount) {
         List<List<String>> sqlListGroup = Lists.partition(sqlStream.collect(Collectors.toList()), itemCount);
         return this.connectionMonoProvider.get()
+                .flatMap(connection -> Mono.from(connection.setAutoCommit(true)).thenReturn(connection))
                 .flatMapMany(connection ->
                         Flux.fromIterable(sqlListGroup)
                                 .flatMap(sqlList -> {

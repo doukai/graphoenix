@@ -5,12 +5,15 @@ import io.graphoenix.showcase.mysql.dto.enumType.__DirectiveLocation;
 import io.graphoenix.showcase.mysql.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
+import java.lang.Boolean;
+import java.lang.Integer;
+import java.lang.Override;
+import java.lang.String;
+import java.time.LocalDateTime;
+import java.util.Collection;
 import org.eclipse.microprofile.graphql.Id;
 import org.eclipse.microprofile.graphql.NonNull;
 import org.eclipse.microprofile.graphql.Type;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
 
 @Type
 @CompiledJson

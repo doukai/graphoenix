@@ -1861,8 +1861,7 @@ public class GraphQLMutationToStatements {
                                                 .orElseGet(() -> defaultToColumn(table, typeContext, inputValueDefinitionContext))
                                 )
                 )
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toList());
 
         ExpressionList expressionList = new ExpressionList(
@@ -1875,8 +1874,7 @@ public class GraphQLMutationToStatements {
                                                         .orElseGet(() -> defaultValueToDBValue(inputValueDefinitionContext))
                                         )
                         )
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(Optional::stream)
                         .collect(Collectors.toList())
         );
         return insertExpression(table, columnList, expressionList, true);
@@ -1996,8 +1994,7 @@ public class GraphQLMutationToStatements {
                                                 .orElseGet(() -> defaultToColumn(table, typeContext, inputValueDefinitionContext))
                                 )
                 )
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toList());
 
         ExpressionList expressionList = new ExpressionList(
@@ -2010,8 +2007,7 @@ public class GraphQLMutationToStatements {
                                                         .orElseGet(() -> defaultValueToDBValue(inputValueDefinitionContext))
                                         )
                         )
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(Optional::stream)
                         .collect(Collectors.toList())
         );
         return insertExpression(table, columnList, expressionList, true);
@@ -2173,8 +2169,7 @@ public class GraphQLMutationToStatements {
                                                 .orElseGet(() -> defaultToColumn(table, typeContext, inputValueDefinitionContext))
                                 )
                 )
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .collect(Collectors.toList());
 
         ExpressionList expressionList = new ExpressionList(
@@ -2187,8 +2182,7 @@ public class GraphQLMutationToStatements {
                                                         .orElseGet(() -> defaultValueToDBValue(inputValueDefinitionContext))
                                         )
                         )
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(Optional::stream)
                         .collect(Collectors.toList())
         );
         return insertExpression(table, columnList, expressionList, true);

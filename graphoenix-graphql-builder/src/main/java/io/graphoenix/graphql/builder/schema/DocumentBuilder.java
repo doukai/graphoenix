@@ -170,6 +170,7 @@ public class DocumentBuilder {
 
     public Document getPackageDocument() {
         Document document = new Document()
+                .addDefinitions(manager.getScalars().map(ScalarType::new).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getEnums().filter(packageManager::isOwnPackage).map(this::buildEnum).map(EnumType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInterfaces().filter(packageManager::isOwnPackage).map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getObjects().filter(packageManager::isOwnPackage).map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))

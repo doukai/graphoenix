@@ -276,8 +276,8 @@ message Organization {
 message ContainerType1 {
     optional int32 age = 1;
     optional float height = 2;
-    optional string name = 3;
-    optional bool sex = 4;
+    optional bool sex = 3;
+    optional string name = 4;
 }
 message QueryType {
     optional string user_detail = 1;

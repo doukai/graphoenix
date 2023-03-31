@@ -5,12 +5,23 @@ import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.mysql.translator.utils.DBNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
+import io.vavr.Tuple2;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.alter.Alter;
+import net.sf.jsqlparser.statement.alter.AlterExpression;
+import net.sf.jsqlparser.statement.alter.AlterOperation;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.truncate.Truncate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +33,7 @@ import java.util.stream.Stream;
 import static io.graphoenix.core.error.GraphQLErrorType.DEFINITION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_DEFINITION_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 
 @ApplicationScoped
 public class GraphQLTypeToTable {
@@ -37,6 +49,59 @@ public class GraphQLTypeToTable {
         this.dbNameUtil = dbNameUtil;
     }
 
+    public String selectColumnsSQL() {
+        return selectColumns().toString();
+    }
+
+    public Select selectColumns() {
+        return new Select()
+                .withSelectBody(
+                        new PlainSelect()
+                                .withSelectItems(
+                                        List.of(
+                                                new SelectExpressionItem(new Column("table_name")),
+                                                new SelectExpressionItem(new Column("column_name"))
+                                        )
+                                )
+                                .withFromItem(new Table("COLUMNS").withSchemaName("information_schema"))
+                                .withWhere(
+                                        new EqualsTo()
+                                                .withLeftExpression(new Column("table_schema"))
+                                                .withRightExpression(new Function().withName("DATABASE"))
+                                )
+                );
+    }
+
+    public Stream<String> truncateIntrospectionObjectTablesSQL() {
+        return truncateIntrospectionObjectTables().map(Truncate::toString);
+    }
+
+    public Stream<Truncate> truncateIntrospectionObjectTables() {
+        return manager.getObjects()
+                .filter(packageManager::isLocalPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
+                .filter(objectTypeDefinitionContext -> objectTypeDefinitionContext.name().getText().startsWith(INTROSPECTION_PREFIX))
+                .map(this::truncateObjectTable);
+    }
+
+    public Truncate truncateObjectTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
+        Table table = dbNameUtil.typeToTable(objectTypeDefinitionContext.name().getText());
+        return new Truncate().withTable(table);
+    }
+
+    public Stream<String> mergeTablesSQL(List<Tuple2<String, String>> existsColumnNameList) {
+        return manager.getObjects()
+                .filter(packageManager::isLocalPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
+                .map(objectTypeDefinitionContext ->
+                        alterTable(objectTypeDefinitionContext, existsColumnNameList)
+                                .map(Alter::toString)
+                                .orElseGet(() -> createTable(objectTypeDefinitionContext).toString())
+                );
+    }
+
     public Stream<String> createTablesSQL() {
         return manager.getObjects()
                 .filter(packageManager::isLocalPackage)
@@ -47,7 +112,7 @@ public class GraphQLTypeToTable {
     }
 
     public Stream<CreateTable> createTables(GraphqlParser.DocumentContext documentContext) {
-        return documentContext.definition().stream().map(this::createTable).filter(Optional::isPresent).map(Optional::get);
+        return documentContext.definition().stream().map(this::createTable).flatMap(Optional::stream);
     }
 
     protected Optional<CreateTable> createTable(GraphqlParser.DefinitionContext definitionContext) {
@@ -85,13 +150,93 @@ public class GraphQLTypeToTable {
                         .filter(manager::isNotFunctionField)
                         .filter(manager::isNotConnectionField)
                         .map(this::createColumn)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(Optional::stream)
                         .collect(Collectors.toList())
         );
         createTable.setIfNotExists(true);
         createTable.setTableOptionsStrings(createTableOption(objectTypeDefinitionContext));
         return createTable;
+    }
+
+    public Stream<String> alterTablesSQL(List<Tuple2<String, String>> existsColumnNameList) {
+        return manager.getObjects()
+                .filter(packageManager::isLocalPackage)
+                .filter(manager::isNotOperationType)
+                .filter(manager::isNotContainerType)
+                .map(objectTypeDefinitionContext -> alterTable(objectTypeDefinitionContext, existsColumnNameList))
+                .flatMap(Optional::stream)
+                .map(Alter::toString);
+    }
+
+    public Stream<Alter> alterTable(GraphqlParser.DocumentContext documentContext, List<Tuple2<String, String>> existsColumnNameList) {
+        return documentContext.definition().stream().map(definitionContext -> alterTable(definitionContext, existsColumnNameList)).flatMap(Optional::stream);
+    }
+
+    protected Optional<Alter> alterTable(GraphqlParser.DefinitionContext definitionContext, List<Tuple2<String, String>> existsColumnNameList) {
+        if (definitionContext.typeSystemDefinition() == null) {
+            throw new GraphQLErrors(DEFINITION_NOT_EXIST);
+        }
+        return alterTable(definitionContext.typeSystemDefinition(), existsColumnNameList);
+    }
+
+    protected Optional<Alter> alterTable(GraphqlParser.TypeSystemDefinitionContext typeSystemDefinitionContext, List<Tuple2<String, String>> existsColumnNameList) {
+        if (typeSystemDefinitionContext.typeDefinition() == null) {
+            throw new GraphQLErrors(TYPE_DEFINITION_NOT_EXIST);
+        }
+        return alterTable(typeSystemDefinitionContext.typeDefinition(), existsColumnNameList);
+    }
+
+    protected Optional<Alter> alterTable(GraphqlParser.TypeDefinitionContext typeDefinitionContext, List<Tuple2<String, String>> existsColumnNameList) {
+        if (typeDefinitionContext.objectTypeDefinition() == null) {
+            return Optional.empty();
+        }
+        if (manager.isOperation(typeDefinitionContext.objectTypeDefinition().name().getText())) {
+            return Optional.empty();
+        }
+        return alterTable(typeDefinitionContext.objectTypeDefinition(), existsColumnNameList);
+    }
+
+    protected Optional<Alter> alterTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, List<Tuple2<String, String>> existsColumnNameList) {
+        Table table = dbNameUtil.typeToTable(objectTypeDefinitionContext.name().getText());
+        if (existsColumnNameList.stream().noneMatch(tuple2 -> dbNameUtil.nameToDBEscape(tuple2._1()).equals(table.getName()))) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new Alter()
+                        .withTable(table)
+                        .withAlterExpressions(
+                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                        .filter(manager::isNotInvokeField)
+                                        .filter(manager::isNotFetchField)
+                                        .filter(manager::isNotFunctionField)
+                                        .filter(manager::isNotConnectionField)
+                                        .map(this::createColumn)
+                                        .flatMap(Optional::stream)
+                                        .map(columnDefinition ->
+                                                alterColumn(
+                                                        columnDefinition,
+                                                        existsColumnNameList.stream()
+                                                                .anyMatch(tuple2 ->
+                                                                        dbNameUtil.nameToDBEscape(tuple2._1()).equals(table.getName()) &&
+                                                                                dbNameUtil.nameToDBEscape(tuple2._2()).equals(columnDefinition.getColumnName())
+                                                                )
+                                                )
+                                        )
+                                        .collect(Collectors.toList())
+                        )
+        );
+    }
+
+    protected AlterExpression alterColumn(ColumnDefinition columnDefinition, boolean exists) {
+        AlterExpression alterExpression = new AlterExpression()
+                .withOperation(exists ? AlterOperation.MODIFY : AlterOperation.ADD);
+        alterExpression.addColDataType(
+                new AlterExpression.ColumnDataType(false)
+                        .withColumnName(columnDefinition.getColumnName())
+                        .withColDataType(columnDefinition.getColDataType())
+                        .withColumnSpecs(columnDefinition.getColumnSpecs())
+        );
+        return alterExpression;
     }
 
     protected Optional<ColumnDefinition> createColumn(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {

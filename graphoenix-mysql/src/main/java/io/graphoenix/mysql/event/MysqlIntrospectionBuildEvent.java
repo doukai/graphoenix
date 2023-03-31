@@ -4,8 +4,9 @@ import com.google.auto.service.AutoService;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.operation.Operation;
 import io.graphoenix.graphql.builder.introspection.IntrospectionMutationBuilder;
-import io.graphoenix.mysql.translator.translator.GraphQLMutationToStatements;
 import io.graphoenix.mysql.config.MysqlConfig;
+import io.graphoenix.mysql.translator.translator.GraphQLMutationToStatements;
+import io.graphoenix.mysql.translator.translator.GraphQLTypeToTable;
 import io.graphoenix.r2dbc.connector.executor.MutationExecutor;
 import io.graphoenix.spi.handler.ScopeEvent;
 import jakarta.annotation.Priority;
@@ -16,23 +17,23 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Initialized(ApplicationScoped.class)
 @Priority(2)
 @AutoService(ScopeEvent.class)
 public class MysqlIntrospectionBuildEvent implements ScopeEvent {
 
-    private static final int sqlCount = 300;
     private final MysqlConfig mysqlConfig;
     private final IntrospectionMutationBuilder introspectionMutationBuilder;
     private final GraphQLMutationToStatements mutationToStatements;
+    private final GraphQLTypeToTable graphQLTypeToTable;
     private final MutationExecutor mutationExecutor;
 
     public MysqlIntrospectionBuildEvent() {
         this.mysqlConfig = BeanContext.get(MysqlConfig.class);
         this.introspectionMutationBuilder = BeanContext.get(IntrospectionMutationBuilder.class);
         this.mutationToStatements = BeanContext.get(GraphQLMutationToStatements.class);
+        this.graphQLTypeToTable = BeanContext.get(GraphQLTypeToTable.class);
         this.mutationExecutor = BeanContext.get(MutationExecutor.class);
     }
 
@@ -41,8 +42,10 @@ public class MysqlIntrospectionBuildEvent implements ScopeEvent {
         if (mysqlConfig.getCrateIntrospection()) {
             Logger.info("introspection data SQL insert started");
             Operation operation = introspectionMutationBuilder.buildIntrospectionSchemaMutation();
-            Stream<String> introspectionMutationSQLStream = mutationToStatements.createStatementsSQL(operation.toString());
-            return mutationExecutor.executeMutations(introspectionMutationSQLStream.collect(Collectors.joining(";"))).then();
+            return mutationExecutor.executeMutations(graphQLTypeToTable.truncateIntrospectionObjectTablesSQL().collect(Collectors.joining(";")))
+                    .then(mutationExecutor.executeMutations(mutationToStatements.createStatementsSQL(operation.toString()).collect(Collectors.joining(";"))))
+                    .then();
+
         }
         return Mono.empty();
     }

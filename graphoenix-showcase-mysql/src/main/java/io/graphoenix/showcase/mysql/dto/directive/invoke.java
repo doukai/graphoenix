@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.METHOD})
+@Target({ElementType.FIELD})
 public @interface invoke {
   String className();
 

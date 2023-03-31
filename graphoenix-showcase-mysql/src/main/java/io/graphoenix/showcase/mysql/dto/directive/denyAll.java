@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
 @Ignore
 @Documented
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.TYPE})
+@Target({ElementType.FIELD})
 public @interface denyAll {
 }

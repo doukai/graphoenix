@@ -175,8 +175,7 @@ public class GraphQLArgumentsToWhere {
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
                 .filter(inputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText())))
                 .map(inputValueDefinitionContext -> argumentsToExpression(typeContext, inputValueDefinitionContext, argumentsContext, level))
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(Optional::stream);
         Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfArgumentsToExpressionList(typeContext, argumentsDefinitionContext, argumentsContext, level);
         return Stream.concat(expressionStream, conditionalExpressionStream);
     }
@@ -190,8 +189,7 @@ public class GraphQLArgumentsToWhere {
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
                 .filter(inputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText())))
                 .map(inputValueDefinitionContext -> objectValueWithVariableToExpression(typeContext, inputValueDefinitionContext, objectValueWithVariableContext, level))
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(Optional::stream);
         Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfObjectValueWithVariableToExpressionList(typeContext, inputObjectValueDefinitionsContext, objectValueWithVariableContext, level);
         return Stream.concat(expressionStream, conditionalExpressionStream);
     }
@@ -205,8 +203,7 @@ public class GraphQLArgumentsToWhere {
                 .filter(inputValueDefinitionContext -> !inputValueDefinitionContext.name().getText().equals(DEPRECATED_FIELD_NAME))
                 .filter(inputValueDefinitionContext -> Arrays.stream(EXCLUDE_INPUT).noneMatch(inputName -> inputName.equals(inputValueDefinitionContext.name().getText())))
                 .map(inputValueDefinitionContext -> objectValueToExpression(typeContext, inputValueDefinitionContext, objectValueContext, level))
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(Optional::stream);
         Stream<Expression> conditionalExpressionStream = listTypeConditionalFieldOfObjectValueToExpression(typeContext, inputObjectValueDefinitionsContext, objectValueContext, level);
         return Stream.concat(expressionStream, conditionalExpressionStream);
     }
@@ -656,8 +653,7 @@ public class GraphQLArgumentsToWhere {
                             Optional.of(
                                     context.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
                                             .map(valueWithVariableContext -> objectValueWithVariableToMultipleExpression(typeContext, conditionalInputValueDefinitionContext.get(), valueWithVariableContext.objectValueWithVariable(), level))
-                                            .filter(Optional::isPresent)
-                                            .map(Optional::get)
+                                            .flatMap(Optional::stream)
                             )
                     )
                     .orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(typeContext, conditionalInputValueDefinitionContext.get(), level));
@@ -679,8 +675,7 @@ public class GraphQLArgumentsToWhere {
                             Optional.of(
                                     fieldWithVariableContext.valueWithVariable().arrayValueWithVariable().valueWithVariable().stream()
                                             .map(valueWithVariableContext -> objectValueWithVariableToMultipleExpression(typeContext, conditionalInputValueDefinitionContext.get(), valueWithVariableContext.objectValueWithVariable(), level))
-                                            .filter(Optional::isPresent)
-                                            .map(Optional::get)
+                                            .flatMap(Optional::stream)
                             )
                     )
                     .orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(typeContext, conditionalInputValueDefinitionContext.get(), level));
@@ -702,8 +697,7 @@ public class GraphQLArgumentsToWhere {
                             Optional.of(
                                     fieldContext.value().arrayValue().value().stream()
                                             .map(valueContext -> objectValueToMultipleExpression(typeContext, conditionalInputValueDefinitionContext.get(), valueContext.objectValue(), level))
-                                            .filter(Optional::isPresent)
-                                            .map(Optional::get)
+                                            .flatMap(Optional::stream)
                             )
                     )
                     .orElseGet(() -> listTypeConditionalFieldOfInputValueToExpression(typeContext, conditionalInputValueDefinitionContext.get(), level));
@@ -718,8 +712,7 @@ public class GraphQLArgumentsToWhere {
             if (inputValueDefinitionContext.defaultValue() != null) {
                 return inputValueDefinitionContext.defaultValue().value().arrayValue().value().stream()
                         .map(valueContext -> objectValueToMultipleExpression(typeContext, inputValueDefinitionContext, valueContext.objectValue(), level))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get);
+                        .flatMap(Optional::stream);
             } else {
                 throw new GraphQLErrors(NON_NULL_VALUE_NOT_EXIST.bind(inputValueDefinitionContext.getText()));
             }
