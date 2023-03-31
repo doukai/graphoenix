@@ -45,7 +45,6 @@ public class MysqlIntrospectionBuildEvent implements ScopeEvent {
             return mutationExecutor.executeMutations(graphQLTypeToTable.truncateIntrospectionObjectTablesSQL().collect(Collectors.joining(";")))
                     .then(mutationExecutor.executeMutations(mutationToStatements.createStatementsSQL(operation.toString()).collect(Collectors.joining(";"))))
                     .then();
-
         }
         return Mono.empty();
     }
