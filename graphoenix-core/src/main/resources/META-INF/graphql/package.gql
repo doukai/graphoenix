@@ -272,7 +272,7 @@ directive @cursor on FIELD_DEFINITION
 directive @func(name: Function field: String) on FIELD_DEFINITION
 directive @containerType on OBJECT
 directive @classInfo(className: String!) on OBJECT
-directive @packageInfo(packageName: String!) on OBJECT
+directive @packageInfo(packageName: String!) on OBJECT | QUERY | MUTATION | SUBSCRIPTION
 directive @connection(field: String agg: String) on FIELD_DEFINITION
 directive @update(if: Boolean!) on FIELD
 directive @delete(if: Boolean!) on FIELD

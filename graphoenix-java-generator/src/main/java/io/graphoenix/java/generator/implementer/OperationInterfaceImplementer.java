@@ -15,6 +15,7 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.ElementProcessException;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.utils.FileUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.graphoenix.spi.dao.OperationDAO;
@@ -53,13 +54,15 @@ import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
 public class OperationInterfaceImplementer {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final TypeManager typeManager;
     private final GraphQLConfig graphQLConfig;
     private final Map<String, GeneratorHandler> generatorHandlerMap;
 
     @Inject
-    public OperationInterfaceImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
+    public OperationInterfaceImplementer(IGraphQLDocumentManager manager, PackageManager packageManager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
         this.generatorHandlerMap = BeanContext.getMap(GeneratorHandler.class);
@@ -67,6 +70,7 @@ public class OperationInterfaceImplementer {
 
     public void writeToFiler(Filer filer) throws IOException {
         manager.getOperationDefinitions()
+                .filter(packageManager::isLocalPackage)
                 .map(operationDefinitionContext -> {
                             String interfaceName = typeManager.getClassName(operationDefinitionContext);
                             return new AbstractMap.SimpleEntry<>(

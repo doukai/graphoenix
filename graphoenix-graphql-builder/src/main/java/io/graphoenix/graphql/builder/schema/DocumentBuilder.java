@@ -177,7 +177,7 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getInputObjects().filter(packageManager::isOwnPackage).map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 //TODO union type
                 .addDefinitions(manager.getDirectives().map(DirectiveDefinition::new).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .addDefinitions(manager.getOperationDefinitions().map(Operation::new).map(Operation::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
+                .addDefinitions(manager.getOperationDefinitions().filter(packageManager::isOwnPackage).map(Operation::new).map(Operation::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
 
         Optional.ofNullable(manager.getSchema())
                 .map(Schema::new)

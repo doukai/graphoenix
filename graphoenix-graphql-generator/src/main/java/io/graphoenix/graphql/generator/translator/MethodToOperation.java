@@ -1,6 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
-import com.google.common.base.CaseFormat;
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.operation.*;
@@ -32,11 +32,13 @@ public class MethodToOperation {
 
     private final IGraphQLDocumentManager manager;
     private final ElementManager elementManager;
+    private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public MethodToOperation(IGraphQLDocumentManager manager, ElementManager elementManager) {
+    public MethodToOperation(IGraphQLDocumentManager manager, ElementManager elementManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
         this.elementManager = elementManager;
+        this.graphQLConfig = graphQLConfig;
     }
 
     public String executableElementToOperation(ExecutableElement executableElement, int index, Types typeUtils) {
@@ -79,6 +81,10 @@ public class MethodToOperation {
                                         )
                                 )
                                 .addArgument("returnClassName", executableElement.getReturnType().toString())
+                )
+                .addDirective(
+                        new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
                 );
         Field field = new Field().setName(fieldName);
 

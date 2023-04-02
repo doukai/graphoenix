@@ -60,6 +60,10 @@ public class PackageManager {
         return manager.getPackageName(inputObjectTypeDefinitionContext).map(this::isOwnPackage).orElse(true);
     }
 
+    public boolean isOwnPackage(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return manager.getPackageName(operationDefinitionContext).map(this::isOwnPackage).orElse(true);
+    }
+
     public boolean isNotOwnPackage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return !isOwnPackage(objectTypeDefinitionContext);
     }
@@ -96,6 +100,10 @@ public class PackageManager {
         return manager.getPackageName(inputObjectTypeDefinitionContext).map(this::isLocalPackage).orElse(true);
     }
 
+    public boolean isLocalPackage(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return manager.getPackageName(operationDefinitionContext).map(this::isLocalPackage).orElse(true);
+    }
+
     public boolean isNotLocalPackage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return !isLocalPackage(objectTypeDefinitionContext);
     }
@@ -110,6 +118,10 @@ public class PackageManager {
 
     public boolean isNotLocalPackage(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         return !isLocalPackage(inputObjectTypeDefinitionContext);
+    }
+
+    public boolean isNotLocalPackage(GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
+        return !isLocalPackage(operationDefinitionContext);
     }
 
     public boolean isLocalPackage(String packageName) {

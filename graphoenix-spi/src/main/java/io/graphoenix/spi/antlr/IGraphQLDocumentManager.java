@@ -222,6 +222,8 @@ public interface IGraphQLDocumentManager {
 
     Optional<String> getPackageName(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext);
 
+    Optional<String> getPackageName(GraphqlParser.OperationDefinitionContext operationDefinitionContext);
+
     String getPackageName(String typeName);
 
     String getProtocol(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
