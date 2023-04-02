@@ -46,6 +46,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.inject.Default;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -194,18 +195,19 @@ public class InjectProcessor extends AbstractProcessor {
     }
 
     private CompilationUnit buildComponentProxy(CompilationUnit componentCompilationUnit) {
-        return buildComponentProxy(componentCompilationUnit, null);
+        return buildComponentProxy(componentCompilationUnit, null, null);
     }
 
-    private CompilationUnit buildComponentProxy(CompilationUnit componentCompilationUnit, AnnotationExpr named) {
+    private CompilationUnit buildComponentProxy(CompilationUnit componentCompilationUnit, AnnotationExpr named, AnnotationExpr defaultAnnotation) {
         return buildComponentProxy(
                 componentCompilationUnit,
                 processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit),
-                named
+                named,
+                defaultAnnotation
         );
     }
 
-    private CompilationUnit buildComponentProxy(CompilationUnit componentCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, AnnotationExpr named) {
+    private CompilationUnit buildComponentProxy(CompilationUnit componentCompilationUnit, ClassOrInterfaceDeclaration componentClassDeclaration, AnnotationExpr named, AnnotationExpr defaultAnnotation) {
         ClassOrInterfaceDeclaration componentProxyClassDeclaration = new ClassOrInterfaceDeclaration()
                 .addModifier(Modifier.Keyword.PUBLIC)
                 .addExtendedType(componentClassDeclaration.getNameAsString())
@@ -246,10 +248,24 @@ public class InjectProcessor extends AbstractProcessor {
                         }
                 );
 
+        componentClassDeclaration.getAnnotationByClass(Default.class)
+                .ifPresent(annotationExpr -> {
+                            AnnotationExpr annotationExprClone = annotationExpr.clone();
+                            annotationExprClone.setParentNode(componentProxyClassDeclaration);
+                            componentProxyClassDeclaration.addAnnotation(annotationExprClone);
+                            componentProxyCompilationUnit.addImport(Default.class);
+                        }
+                );
+
         if (named != null) {
             AnnotationExpr annotationExprClone = named.clone();
             componentProxyClassDeclaration.addAnnotation(annotationExprClone);
             componentProxyCompilationUnit.addImport(Named.class);
+        }
+        if (defaultAnnotation != null) {
+            AnnotationExpr annotationExprClone = defaultAnnotation.clone();
+            componentProxyClassDeclaration.addAnnotation(annotationExprClone);
+            componentProxyCompilationUnit.addImport(Default.class);
         }
         componentCompilationUnit.getPackageDeclaration()
                 .ifPresent(packageDeclaration -> componentProxyCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
@@ -284,12 +300,24 @@ public class InjectProcessor extends AbstractProcessor {
                                 return processorManager.getMethodReturnReferenceType(methodDeclaration)
                                         .map(resolvedReferenceType -> resolvedReferenceType.getTypeParametersMap().get(0).b.asReferenceType())
                                         .map(resolvedReferenceType -> processorManager.getCompilationUnitByResolvedReferenceType(resolvedReferenceType))
-                                        .map(compilationUnit -> buildComponentProxy(compilationUnit, methodDeclaration.getAnnotationByClass(Named.class).orElse(null)));
+                                        .map(compilationUnit ->
+                                                buildComponentProxy(
+                                                        compilationUnit,
+                                                        methodDeclaration.getAnnotationByClass(Named.class).orElse(null),
+                                                        methodDeclaration.getAnnotationByClass(Default.class).orElse(null)
+                                                )
+                                        );
 
                             } else {
                                 return processorManager.getMethodReturnReferenceType(methodDeclaration)
                                         .map(resolvedReferenceType -> processorManager.getCompilationUnitByResolvedReferenceType(resolvedReferenceType))
-                                        .map(compilationUnit -> buildComponentProxy(compilationUnit, methodDeclaration.getAnnotationByClass(Named.class).orElse(null)));
+                                        .map(compilationUnit ->
+                                                buildComponentProxy(
+                                                        compilationUnit,
+                                                        methodDeclaration.getAnnotationByClass(Named.class).orElse(null),
+                                                        methodDeclaration.getAnnotationByClass(Default.class).orElse(null)
+                                                )
+                                        );
                             }
                         }
                 );
@@ -744,9 +772,13 @@ public class InjectProcessor extends AbstractProcessor {
     }
 
     private MethodCallExpr getBeanGetMethodCallExpr(NodeWithAnnotations<?> nodeWithAnnotations, CompilationUnit belongCompilationUnit, ClassOrInterfaceType classOrInterfaceType) {
-        Optional<StringLiteralExpr> nameStringExpr = nodeWithAnnotations.getAnnotationByClass(Named.class)
-                .flatMap(processorManager::findAnnotationValue)
-                .map(Expression::asStringLiteralExpr);
+        Optional<StringLiteralExpr> nameStringExpr = nodeWithAnnotations.getAnnotationByClass(Default.class)
+                .map(annotationExpr -> new StringLiteralExpr("default"))
+                .or(() ->
+                        nodeWithAnnotations.getAnnotationByClass(Named.class)
+                                .flatMap(processorManager::findAnnotationValue)
+                                .map(Expression::asStringLiteralExpr)
+                );
 
         MethodCallExpr methodCallExpr;
         if (processorManager.getQualifiedNameByType(classOrInterfaceType).equals(Provider.class.getName())) {
@@ -1006,6 +1038,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                 producesMethodDeclaration.getAnnotationByClass(Singleton.class).ifPresent(Node::remove);
                                                 producesMethodDeclaration.getAnnotationByClass(Dependent.class).ifPresent(Node::remove);
                                                 producesMethodDeclaration.getAnnotationByClass(Named.class).ifPresent(Node::remove);
+                                                producesMethodDeclaration.getAnnotationByClass(Default.class).ifPresent(Node::remove);
                                             }
                                     );
                             processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, classOrInterfaceDeclaration);
@@ -1083,6 +1116,15 @@ public class InjectProcessor extends AbstractProcessor {
                         }
                 );
 
+        componentProxyClassDeclaration.getAnnotationByClass(Default.class)
+                .ifPresent(annotationExpr -> {
+                            AnnotationExpr AnnotationExprClone = annotationExpr.clone();
+                            AnnotationExprClone.setParentNode(componentProxyClassDeclaration);
+                            componentProxyComponentInterfaceDeclaration.addAnnotation(AnnotationExprClone);
+                            componentProxyComponentCompilationUnit.addImport(Default.class);
+                        }
+                );
+
         componentProxyCompilationUnit.getPackageDeclaration()
                 .ifPresent(packageDeclaration -> componentProxyComponentCompilationUnit.setPackageDeclaration(packageDeclaration.getNameAsString()));
 
@@ -1141,6 +1183,16 @@ public class InjectProcessor extends AbstractProcessor {
                                                 AnnotationExprClone.setParentNode(producesComponentInterfaceDeclaration);
                                                 producesComponentInterfaceDeclaration.addAnnotation(AnnotationExprClone);
                                                 producesComponentCompilationUnit.addImport(Named.class);
+                                            }
+                                    );
+
+
+                            providesMethodDeclaration.getAnnotationByClass(Default.class)
+                                    .ifPresent(annotationExpr -> {
+                                                AnnotationExpr AnnotationExprClone = annotationExpr.clone();
+                                                AnnotationExprClone.setParentNode(producesComponentInterfaceDeclaration);
+                                                producesComponentInterfaceDeclaration.addAnnotation(AnnotationExprClone);
+                                                producesComponentCompilationUnit.addImport(Default.class);
                                             }
                                     );
 
@@ -1224,12 +1276,23 @@ public class InjectProcessor extends AbstractProcessor {
                                             )
                             )
                     );
+
+                    addPutTypeStatement(blockStmt, componentType, null, daggerVariableName, isPublisherBuilder);
+
                     Optional<StringLiteralExpr> nameStringExpr = componentProxyComponentClassDeclaration.getAnnotationByClass(Named.class)
                             .flatMap(processorManager::findAnnotationValue)
                             .map(Expression::asStringLiteralExpr);
-                    ;
 
-                    addPutTypeStatement(blockStmt, componentType, nameStringExpr.orElse(null), daggerVariableName, isPublisherBuilder);
+                    if (nameStringExpr.isPresent()) {
+                        addPutTypeStatement(blockStmt, componentType, nameStringExpr.get(), daggerVariableName, isPublisherBuilder);
+                    }
+
+                    Optional<StringLiteralExpr> defaultStringExpr = componentProxyComponentClassDeclaration.getAnnotationByClass(Default.class)
+                            .map(annotationExpr -> new StringLiteralExpr("default"));
+
+                    if (defaultStringExpr.isPresent()) {
+                        addPutTypeStatement(blockStmt, componentType, defaultStringExpr.get(), daggerVariableName, isPublisherBuilder);
+                    }
 
                     componentProxyComponentCompilationUnit.getPackageDeclaration()
                             .ifPresent(packageDeclaration -> {
@@ -1242,13 +1305,17 @@ public class InjectProcessor extends AbstractProcessor {
                     ClassOrInterfaceDeclaration componentDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
                     componentDeclaration.getExtendedTypes()
                             .forEach(extendedType -> {
-                                        addPutTypeStatement(blockStmt, extendedType, nameStringExpr.orElse(null), daggerVariableName, isPublisherBuilder);
+                                        addPutTypeStatement(blockStmt, extendedType, null, daggerVariableName, isPublisherBuilder);
+                                        nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(blockStmt, extendedType, stringLiteralExpr, daggerVariableName, isPublisherBuilder));
+                                        defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(blockStmt, extendedType, stringLiteralExpr, daggerVariableName, isPublisherBuilder));
                                         moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(extendedType));
                                     }
                             );
                     componentDeclaration.getImplementedTypes()
                             .forEach(implementedType -> {
-                                        addPutTypeStatement(blockStmt, implementedType, nameStringExpr.orElse(null), daggerVariableName, isPublisherBuilder);
+                                        addPutTypeStatement(blockStmt, implementedType, null, daggerVariableName, isPublisherBuilder);
+                                        nameStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(blockStmt, implementedType, stringLiteralExpr, daggerVariableName, isPublisherBuilder));
+                                        defaultStringExpr.ifPresent(stringLiteralExpr -> addPutTypeStatement(blockStmt, implementedType, stringLiteralExpr, daggerVariableName, isPublisherBuilder));
                                         moduleContextCompilationUnit.addImport(processorManager.getQualifiedNameByType(implementedType));
                                     }
                             );
@@ -1288,18 +1355,19 @@ public class InjectProcessor extends AbstractProcessor {
         } else {
             supplierExpression = new MethodReferenceExpr().setIdentifier("get").setScope(new NameExpr().setName(daggerVariableName));
         }
-        blockStmt.addStatement(
-                new MethodCallExpr()
-                        .setName("put")
-                        .addArgument(new ClassExpr().setType(classOrInterfaceType.getNameAsString()))
-                        .addArgument(supplierExpression)
-        );
         if (nameStringExpr != null) {
             blockStmt.addStatement(
                     new MethodCallExpr()
                             .setName("put")
                             .addArgument(new ClassExpr().setType(classOrInterfaceType.getNameAsString()))
                             .addArgument(nameStringExpr)
+                            .addArgument(supplierExpression)
+            );
+        } else {
+            blockStmt.addStatement(
+                    new MethodCallExpr()
+                            .setName("put")
+                            .addArgument(new ClassExpr().setType(classOrInterfaceType.getNameAsString()))
                             .addArgument(supplierExpression)
             );
         }

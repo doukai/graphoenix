@@ -22,6 +22,7 @@ import io.graphoenix.spi.dao.OperationDAO;
 import io.graphoenix.spi.handler.GeneratorHandler;
 import io.vavr.collection.HashMap;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Default;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
@@ -154,7 +155,9 @@ public class OperationInterfaceImplementer {
                                 .map(this::executableElementToMethodSpec)
                                 .collect(Collectors.toList())
                 );
-
+        if (graphQLConfig.getDefaultOperationHandlerName() != null && graphQLConfig.getDefaultOperationHandlerName().equals(generatorName)) {
+            builder.addAnnotation(Default.class);
+        }
         return JavaFile.builder(graphQLConfig.getOperationPackageName().concat(".").concat(generatorName), builder.build()).build();
     }
 
