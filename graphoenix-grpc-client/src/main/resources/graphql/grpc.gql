@@ -1,7 +1,0 @@
-directive @grpc(
-    packageName: String
-    from: String
-    anchor: Boolean
-    to: String
-    key: String
-) on FIELD_DEFINITION
