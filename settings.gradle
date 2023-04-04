@@ -18,4 +18,5 @@ include 'graphoenix-json'
 include 'graphoenix-protobuf-builder'
 include 'graphoenix-grpc-server'
 include 'graphoenix-grpc-client'
+include 'graphoenix-gossip'
 

@@ -136,4 +136,8 @@ public class PackageManager {
     public URI getURI(String packageName) {
         return URIMap.get(packageName);
     }
+
+    public enum Protocol {
+        GPRC, HTTP, RSOCKET
+    }
 }
