@@ -10,9 +10,10 @@ repositories {
 }
 
 dependencies {
-    implementation project(':graphoenix-spi')
+    implementation project(':graphoenix-core')
+    implementation project(':graphoenix-config')
     implementation 'io.scalecube:scalecube-cluster:2.6.14'
-    implementation 'io.scalecube:scalecube-transport:2.6.14'
+    implementation 'io.scalecube:scalecube-transport-netty:2.6.14'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
