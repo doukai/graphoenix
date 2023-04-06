@@ -5,10 +5,9 @@ import io.graphoenix.spi.handler.PackageRegister;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.net.URI;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,23 +22,22 @@ public class ConfigPackageRegister implements PackageRegister {
     }
 
     @Override
-    public URI getURI(String packageName, String protocol) {
-        return getURIStream(packageName, protocol).findAny().orElse(null);
+    public URL getURL(String packageName, String protocol) {
+        return getURLStream(packageName, protocol).findAny().orElse(null);
     }
 
     @Override
-    public List<URI> getURIList(String packageName, String protocol) {
-        return getURIStream(packageName, protocol).collect(Collectors.toList());
+    public List<URL> getURLList(String packageName, String protocol) {
+        return getURLStream(packageName, protocol).collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Stream<URI> getURIStream(String packageName, String protocol) {
+    public Stream<URL> getURLStream(String packageName, String protocol) {
         return Stream.ofNullable(packageConfig.getMembers())
                 .flatMap(members -> Stream.ofNullable(members.get(packageName)))
-                .map(packageMember -> (Map<String, List<String>>) packageMember)
-                .flatMap(packageMember -> Stream.ofNullable(packageMember.get(protocol)))
-                .flatMap(Collection::stream)
-                .map(URI::create);
+                .map(packageMembers -> (List<String>) packageMembers)
+                .flatMap(packageMembers -> Stream.ofNullable(packageMembers).flatMap(Collection::stream))
+                .map(this::createURL);
     }
 }
