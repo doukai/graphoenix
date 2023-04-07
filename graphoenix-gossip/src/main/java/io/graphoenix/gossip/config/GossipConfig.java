@@ -1,11 +1,13 @@
 package io.graphoenix.gossip.config;
 
 import com.typesafe.config.Optional;
+import org.eclipse.microprofile.config.inject.ConfigProperties;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@ConfigProperties(prefix = "gossip")
 public class GossipConfig {
 
     @Optional

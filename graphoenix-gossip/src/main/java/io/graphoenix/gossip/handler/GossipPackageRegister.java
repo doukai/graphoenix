@@ -25,9 +25,9 @@ public class GossipPackageRegister implements PackageRegister {
 
     private final Map<String, Set<URL>> memberAddressURLs = new ConcurrentHashMap<>();
 
-    private final Map<String, Map<String, Iterator<URL>>> packageProtocolURLIteratorMap = new ConcurrentHashMap<>();
-
     private final Map<String, Map<String, List<URL>>> packageProtocolURLListMap = new ConcurrentHashMap<>();
+
+    private final Map<String, Map<String, Iterator<URL>>> packageProtocolURLIteratorMap = new ConcurrentHashMap<>();
 
     @Inject
     public GossipPackageRegister(GraphQLConfig graphQLConfig) {
@@ -40,13 +40,13 @@ public class GossipPackageRegister implements PackageRegister {
     }
 
     @Override
-    public Iterator<URL> getProtocolURLIterator(String packageName, String protocol) {
-        return packageProtocolURLIteratorMap.get(packageName).get(protocol);
+    public List<URL> getProtocolURLList(String packageName, String protocol) {
+        return packageProtocolURLListMap.get(packageName).get(protocol);
     }
 
     @Override
-    public List<URL> getProtocolURLList(String packageName, String protocol) {
-        return packageProtocolURLListMap.get(packageName).get(protocol);
+    public Iterator<URL> getProtocolURLIterator(String packageName, String protocol) {
+        return packageProtocolURLIteratorMap.get(packageName).get(protocol);
     }
 
     public void mergeMemberURLs(String address, String packageName, String protocol, String host, int port, String fileName) {
@@ -73,7 +73,7 @@ public class GossipPackageRegister implements PackageRegister {
     }
 
     public void mergeMemberProtocolURLList(String packageName) {
-        Map<String, List<URL>> iteratorMap = packageURLs.get(packageName).stream()
+        Map<String, List<URL>> listMap = packageURLs.get(packageName).stream()
                 .map(url -> new AbstractMap.SimpleEntry<>(url.getProtocol(), url))
                 .collect(
                         Collectors.groupingBy(
@@ -81,19 +81,20 @@ public class GossipPackageRegister implements PackageRegister {
                                 Collectors.mapping(Map.Entry<String, URL>::getValue, Collectors.toList())
                         )
                 );
-        packageProtocolURLListMap.put(packageName, iteratorMap);
+        packageProtocolURLListMap.put(packageName, listMap);
     }
 
     public void removeMemberURLs(String address) {
         packageURLs.forEach((key, value) -> {
-            boolean changed = value.removeAll(memberAddressURLs.get(address));
-            if (changed) {
-                mergeMemberProtocolURLList(key);
-                if (graphQLConfig.getPackageLoadBalance().equals(LOAD_BALANCE_ROUND_ROBIN)) {
-                    mergeMemberProtocolURLIterator(key);
+                    boolean changed = value.removeAll(memberAddressURLs.get(address));
+                    if (changed) {
+                        mergeMemberProtocolURLList(key);
+                        if (graphQLConfig.getPackageLoadBalance().equals(LOAD_BALANCE_ROUND_ROBIN)) {
+                            mergeMemberProtocolURLIterator(key);
+                        }
+                    }
                 }
-            }
-        });
+        );
         memberAddressURLs.remove(address);
     }
 }

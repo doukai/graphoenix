@@ -12,7 +12,6 @@ public interface PackageRegister {
     String HOST_NAME = "host";
     String PORT_NAME = "port";
     String FILE_NAME = "file";
-
     String LOAD_BALANCE_ROUND_ROBIN = "roundRobin";
     String LOAD_BALANCE_RANDOM = "random";
 
@@ -33,9 +32,9 @@ public interface PackageRegister {
 
     String getLoadBalance();
 
-    Iterator<URL> getProtocolURLIterator(String packageName, String protocol);
-
     List<URL> getProtocolURLList(String packageName, String protocol);
+
+    Iterator<URL> getProtocolURLIterator(String packageName, String protocol);
 
     default URL createURL(String spec) {
         try {
@@ -54,11 +53,7 @@ public interface PackageRegister {
     }
 
     default URL createURL(String protocol, String host, int port) {
-        try {
-            return new URL(protocol, host, port, "");
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        return createURL(protocol, host, port, "");
     }
 
     default URL createURL(String protocol, String host, int port, String file) {

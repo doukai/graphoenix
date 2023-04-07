@@ -20,17 +20,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.graphoenix.spi.handler.PackageRegister.LOAD_BALANCE_ROUND_ROBIN;
+import static io.graphoenix.spi.handler.PackageRegister.*;
 
 @ApplicationScoped
 public class GossipPackageCluster implements Runnable {
 
     private static final String PACKAGE_NAME = "package";
     private static final String SERVICES_NAME = "services";
-    private static final String PROTOCOL_NAME = "protocol";
-    private static final String HOST_NAME = "host";
-    private static final String PORT_NAME = "port";
-    private static final String FILE_NAME = "file";
 
     private final GraphQLConfig graphQLConfig;
     private final GossipConfig gossipConfig;
