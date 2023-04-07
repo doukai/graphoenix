@@ -39,6 +39,12 @@ public class GraphQLConfig {
     private Set<String> localPackageNames;
 
     @Optional
+    private String packageRegister = "default";
+
+    @Optional
+    private String packageLoadBalance = "random";
+
+    @Optional
     private Boolean fetchToMap = false;
 
     @Optional
@@ -105,10 +111,7 @@ public class GraphQLConfig {
     private String operatorInputName;
 
     @Optional
-    private int inputLayers = 1;
-
-    @Optional
-    private String outputPath;
+    private Integer inputLayers = 1;
 
     public String getGraphQL() {
         return graphQL;
@@ -188,6 +191,22 @@ public class GraphQLConfig {
 
     public void setLocalPackageNames(Set<String> localPackageNames) {
         this.localPackageNames = localPackageNames;
+    }
+
+    public String getPackageRegister() {
+        return packageRegister;
+    }
+
+    public void setPackageRegister(String packageRegister) {
+        this.packageRegister = packageRegister;
+    }
+
+    public String getPackageLoadBalance() {
+        return packageLoadBalance;
+    }
+
+    public void setPackageLoadBalance(String packageLoadBalance) {
+        this.packageLoadBalance = packageLoadBalance;
     }
 
     public Boolean getFetchToMap() {
@@ -367,19 +386,11 @@ public class GraphQLConfig {
         this.operatorInputName = operatorInputName;
     }
 
-    public int getInputLayers() {
+    public Integer getInputLayers() {
         return inputLayers;
     }
 
-    public void setInputLayers(int inputLayers) {
+    public void setInputLayers(Integer inputLayers) {
         this.inputLayers = inputLayers;
-    }
-
-    public String getOutputPath() {
-        return outputPath;
-    }
-
-    public void setOutputPath(String outputPath) {
-        this.outputPath = outputPath;
     }
 }
