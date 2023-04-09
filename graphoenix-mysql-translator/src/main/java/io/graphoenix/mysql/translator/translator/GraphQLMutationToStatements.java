@@ -2,6 +2,7 @@ package io.graphoenix.mysql.translator.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.mysql.translator.expression.JsonTable;
 import io.graphoenix.mysql.translator.utils.DBNameUtil;
 import io.graphoenix.mysql.translator.utils.DBValueUtil;
@@ -65,6 +66,7 @@ import static io.graphoenix.spi.constant.Hammurabi.LIST_INPUT_NAME;
 public class GraphQLMutationToStatements {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final IGraphQLFieldMapManager mapper;
     private final GraphQLQueryToSelect graphQLQueryToSelect;
     private final GraphQLArgumentsToWhere graphQLArgumentsToWhere;
@@ -72,8 +74,9 @@ public class GraphQLMutationToStatements {
     private final DBValueUtil dbValueUtil;
 
     @Inject
-    public GraphQLMutationToStatements(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLQueryToSelect graphQLQueryToSelect, GraphQLArgumentsToWhere graphQLArgumentsToWhere, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
+    public GraphQLMutationToStatements(IGraphQLDocumentManager manager, PackageManager packageManager, IGraphQLFieldMapManager mapper, GraphQLQueryToSelect graphQLQueryToSelect, GraphQLArgumentsToWhere graphQLArgumentsToWhere, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.mapper = mapper;
         this.graphQLQueryToSelect = graphQLQueryToSelect;
         this.graphQLArgumentsToWhere = graphQLArgumentsToWhere;
@@ -101,32 +104,14 @@ public class GraphQLMutationToStatements {
         if (operationDefinitionContext.operationType() != null && operationDefinitionContext.operationType().MUTATION() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> mutationOperationTypeDefinition = manager.getMutationOperationTypeDefinition();
             if (mutationOperationTypeDefinition.isPresent()) {
+                String mutationTypeName = manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST));
                 return Stream.concat(
                         operationDefinitionContext.selectionSet().selection().stream()
-                                .filter(selectionContext ->
-                                        manager.isNotInvokeField(
-                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
-                                                selectionContext.field().name().getText()
-                                        )
-                                )
-                                .filter(selectionContext ->
-                                        manager.isNotFetchField(
-                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
-                                                selectionContext.field().name().getText()
-                                        )
-                                )
-                                .filter(selectionContext ->
-                                        manager.isNotFunctionField(
-                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
-                                                selectionContext.field().name().getText()
-                                        )
-                                )
-                                .filter(selectionContext ->
-                                        manager.isNotConnectionField(
-                                                manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(MUTATION_NOT_EXIST)),
-                                                selectionContext.field().name().getText()
-                                        )
-                                )
+                                .filter(selectionContext -> packageManager.isLocalPackage(mutationTypeName, selectionContext.field().name().getText()))
+                                .filter(selectionContext -> manager.isNotInvokeField(mutationTypeName, selectionContext.field().name().getText()))
+                                .filter(selectionContext -> manager.isNotFetchField(mutationTypeName, selectionContext.field().name().getText()))
+                                .filter(selectionContext -> manager.isNotFunctionField(mutationTypeName, selectionContext.field().name().getText()))
+                                .filter(selectionContext -> manager.isNotConnectionField(mutationTypeName, selectionContext.field().name().getText()))
                                 .flatMap(this::selectionToStatementStream),
                         Stream.of(graphQLQueryToSelect.objectSelectionToSelect(mutationOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection()))
                 );
@@ -223,18 +208,18 @@ public class GraphQLMutationToStatements {
                                                                             }
                                                                         }
                                                                 ).orElseGet(() ->
-                                                                        objectDefaultValueToStatementStream(
-                                                                                fieldDefinitionContext,
-                                                                                idValueExpression,
-                                                                                subFieldDefinitionContext,
-                                                                                inputObjectTypeDefinitionContext,
-                                                                                inputValueDefinitionContext,
-                                                                                mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
-                                                                                        .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
-                                                                                0,
-                                                                                0
-                                                                        )
+                                                                objectDefaultValueToStatementStream(
+                                                                        fieldDefinitionContext,
+                                                                        idValueExpression,
+                                                                        subFieldDefinitionContext,
+                                                                        inputObjectTypeDefinitionContext,
+                                                                        inputValueDefinitionContext,
+                                                                        mapper.getMapFromValueWithVariableFromArguments(fieldDefinitionContext, subFieldDefinitionContext, argumentsContext)
+                                                                                .map(dbValueUtil::scalarValueWithVariableToDBValue).orElse(null),
+                                                                        0,
+                                                                        0
                                                                 )
+                                                        )
                                                 )
                                                 .orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(manager.getFieldTypeName(inputValueDefinitionContext.type()))))
                                 )

@@ -45,25 +45,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static io.graphoenix.core.error.GraphQLErrorType.ARGUMENT_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_AGG_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.CONNECTION_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.FUNC_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.FUNC_NAME_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_FROM_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_TO_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_FROM_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TO_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.MAP_WITH_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.OBJECT_SELECTION_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.OPERATION_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.QUERY_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.QUERY_TYPE_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.SELECTION_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.TYPE_ID_FIELD_NOT_EXIST;
-import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
+import static io.graphoenix.core.error.GraphQLErrorType.*;
 import static io.graphoenix.core.utils.DocumentUtil.DOCUMENT_UTIL;
 import static io.graphoenix.spi.constant.Hammurabi.AFTER_INPUT_NAME;
 import static io.graphoenix.spi.constant.Hammurabi.BEFORE_INPUT_NAME;
@@ -135,7 +117,13 @@ public class GraphQLQueryToSelect {
         if (operationDefinitionContext.operationType() == null || operationDefinitionContext.operationType().QUERY() != null) {
             Optional<GraphqlParser.OperationTypeDefinitionContext> queryOperationTypeDefinition = manager.getQueryOperationTypeDefinition();
             if (queryOperationTypeDefinition.isPresent()) {
-                return objectSelectionToSelect(queryOperationTypeDefinition.get().typeName().name().getText(), operationDefinitionContext.selectionSet().selection());
+                String queryTypeName = manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors().add(QUERY_TYPE_NOT_EXIST));
+                return objectSelectionToSelect(
+                        queryOperationTypeDefinition.get().typeName().name().getText(),
+                        operationDefinitionContext.selectionSet().selection().stream()
+                                .filter(selectionContext -> packageManager.isLocalPackage(queryTypeName, selectionContext.field().name().getText()))
+                                .collect(Collectors.toList())
+                );
             } else {
                 throw new GraphQLErrors().add(OPERATION_NOT_EXIST);
             }
@@ -187,7 +175,6 @@ public class GraphQLQueryToSelect {
                 new ExpressionList(
                         selectionContextList.stream()
                                 .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
-                                .filter(subSelectionContext -> packageManager.isLocalPackage(typeName, subSelectionContext.field().name().getText()))
                                 .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
                                 .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
                                 .filter(subSelectionContext -> manager.isNotFetchField(typeName, subSelectionContext.field().name().getText()))
