@@ -86,11 +86,14 @@ public class GossipPackageRegister implements PackageRegister {
 
     public void removeMemberURLs(String address) {
         packageURLs.forEach((key, value) -> {
-                    boolean changed = value.removeAll(memberAddressURLs.get(address));
-                    if (changed) {
-                        mergeMemberProtocolURLList(key);
-                        if (graphQLConfig.getPackageLoadBalance().equals(LOAD_BALANCE_ROUND_ROBIN)) {
-                            mergeMemberProtocolURLIterator(key);
+                    Set<URL> urls = memberAddressURLs.get(address);
+                    if (urls != null && !urls.isEmpty()) {
+                        boolean changed = value.removeAll(urls);
+                        if (changed) {
+                            mergeMemberProtocolURLList(key);
+                            if (graphQLConfig.getPackageLoadBalance().equals(LOAD_BALANCE_ROUND_ROBIN)) {
+                                mergeMemberProtocolURLIterator(key);
+                            }
                         }
                     }
                 }

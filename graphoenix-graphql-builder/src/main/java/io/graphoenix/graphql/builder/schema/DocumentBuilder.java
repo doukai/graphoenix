@@ -173,7 +173,21 @@ public class DocumentBuilder {
                 .addDefinitions(manager.getScalars().map(ScalarType::new).map(ScalarType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getEnums().filter(packageManager::isOwnPackage).map(this::buildEnum).map(EnumType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 .addDefinitions(manager.getInterfaces().filter(packageManager::isOwnPackage).map(this::buildInterface).map(InterfaceType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
-                .addDefinitions(manager.getObjects().filter(packageManager::isOwnPackage).map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(manager.getObjects().filter(manager::isNotOperationType).filter(packageManager::isOwnPackage).map(this::buildObject).map(ObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
+                .addDefinitions(
+                        manager.getObjects()
+                                .filter(manager::isOperationType)
+                                .map(objectTypeDefinitionContext ->
+                                        buildObject(
+                                                objectTypeDefinitionContext,
+                                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                        .filter(packageManager::isOwnPackage)
+                                                        .collect(Collectors.toList())
+                                        )
+                                )
+                                .map(ObjectType::toString)
+                                .collect(Collectors.toCollection(LinkedHashSet::new))
+                )
                 .addDefinitions(manager.getInputObjects().filter(packageManager::isOwnPackage).map(this::buildInputObjectType).map(InputObjectType::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
                 //TODO union type
                 .addDefinitions(manager.getDirectives().map(DirectiveDefinition::new).map(DirectiveDefinition::toString).collect(Collectors.toCollection(LinkedHashSet::new)))
@@ -192,10 +206,18 @@ public class DocumentBuilder {
     }
 
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
-        return buildObject(objectTypeDefinitionContext, false, false, false);
+        return buildObject(objectTypeDefinitionContext, objectTypeDefinitionContext.fieldsDefinition().fieldDefinition(), false, false, false);
+    }
+
+    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList) {
+        return buildObject(objectTypeDefinitionContext, fieldDefinitionContextList, false, false, false);
     }
 
     public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, boolean buildInterface, boolean buildArgument, boolean buildField) {
+        return buildObject(objectTypeDefinitionContext, objectTypeDefinitionContext.fieldsDefinition().fieldDefinition(), buildInterface, buildArgument, buildField);
+    }
+
+    public ObjectType buildObject(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContextList, boolean buildInterface, boolean buildArgument, boolean buildField) {
         ObjectType objectType = new ObjectType(objectTypeDefinitionContext);
 
         if (manager.getPackageName(objectTypeDefinitionContext).isEmpty()) {
@@ -207,7 +229,7 @@ public class DocumentBuilder {
 
         if (buildArgument) {
             objectType.setFields(
-                    objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                    fieldDefinitionContextList.stream()
                             .map(fieldDefinitionContext ->
                                     manager.isNotInvokeField(fieldDefinitionContext) ?
                                             buildField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext, manager.isMutationOperationType(objectTypeDefinitionContext.name().getText())) :
@@ -225,7 +247,7 @@ public class DocumentBuilder {
             objectType.addField(buildTypeNameField(objectTypeDefinitionContext))
                     .addFields(buildFunctionFieldList(objectTypeDefinitionContext))
                     .addFields(
-                            objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                            fieldDefinitionContextList.stream()
                                     .filter(manager::isNotInvokeField)
                                     .filter(manager::isNotFetchField)
                                     .filter(manager::isNotFunctionField)
@@ -437,7 +459,11 @@ public class DocumentBuilder {
     public Field buildSchemaTypeField(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext))
                 .setTypeName(objectTypeDefinitionContext.name().getText())
-                .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType));
+                .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
+                .addDirective(
+                        new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
+                );
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName("cond").setTypeName("Conditional").setDefaultValue("AND"));
         } else if (inputType.equals(InputType.INPUT)) {
@@ -450,7 +476,11 @@ public class DocumentBuilder {
     public Field buildSchemaTypeFieldList(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext, InputType inputType) {
         Field field = new Field().setName(getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                 .addArguments(buildArgumentsFromObjectType(objectTypeDefinitionContext, inputType))
-                .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"));
+                .setTypeName("[".concat(objectTypeDefinitionContext.name().getText()).concat("]"))
+                .addDirective(
+                        new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
+                );
 
         if (inputType.equals(InputType.EXPRESSION)) {
             field.addArgument(new InputValue().setName(ORDER_BY_INPUT_NAME).setTypeName(objectTypeDefinitionContext.name().getText().concat(InputType.ORDER_BY.toString())))
@@ -485,6 +515,10 @@ public class DocumentBuilder {
                         .setName(CONNECTION_DIRECTIVE_NAME)
                         .addArgument("field", getSchemaFieldName(objectTypeDefinitionContext).concat("List"))
                         .addArgument("agg", getSchemaFieldName(objectTypeDefinitionContext))
+                )
+                .addDirective(
+                        new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
                 );
 
         if (inputType.equals(InputType.EXPRESSION)) {

@@ -912,6 +912,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         return Optional.ofNullable(operationDefinitionContext.directives()).flatMap(this::getPackageName);
     }
 
+    @Override
+    public Optional<String> getPackageName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return Optional.ofNullable(fieldDefinitionContext.directives()).flatMap(this::getPackageName);
+    }
+
     public Optional<String> getPackageName(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals(PACKAGE_INFO_DIRECTIVE_NAME))

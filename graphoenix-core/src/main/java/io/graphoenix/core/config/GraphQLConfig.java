@@ -45,6 +45,9 @@ public class GraphQLConfig {
     private String packageLoadBalance = "random";
 
     @Optional
+    private String operationTypeFetchProtocol = "grpc";
+
+    @Optional
     private Boolean fetchToMap = false;
 
     @Optional
@@ -209,6 +212,14 @@ public class GraphQLConfig {
         this.packageLoadBalance = packageLoadBalance;
     }
 
+    public String getOperationTypeFetchProtocol() {
+        return operationTypeFetchProtocol;
+    }
+
+    public void setOperationTypeFetchProtocol(String operationTypeFetchProtocol) {
+        this.operationTypeFetchProtocol = operationTypeFetchProtocol;
+    }
+
     public Boolean getFetchToMap() {
         return fetchToMap;
     }
@@ -229,9 +240,8 @@ public class GraphQLConfig {
         return grpcPackageName != null ? grpcPackageName : packageName + ".grpc";
     }
 
-    public GraphQLConfig setGrpcPackageName(String grpcPackageName) {
+    public void setGrpcPackageName(String grpcPackageName) {
         this.grpcPackageName = grpcPackageName;
-        return this;
     }
 
     public String getObjectTypePackageName() {

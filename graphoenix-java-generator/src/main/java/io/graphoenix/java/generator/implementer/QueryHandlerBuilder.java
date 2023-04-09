@@ -8,6 +8,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.handler.QueryDataLoader;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -32,19 +33,21 @@ import java.util.stream.Stream;
 public class QueryHandlerBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final TypeManager typeManager;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public QueryHandlerBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
+    public QueryHandlerBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
     }
 
     public void writeToFiler(Filer filer) throws IOException {
         this.buildClass().writeTo(filer);
-        Logger.info("QueryHandler build success");
+        Logger.info("QueryAfterHandler build success");
     }
 
     private JavaFile buildClass() {
@@ -211,14 +214,12 @@ public class QueryHandlerBuilder {
     }
 
     private MethodSpec buildHandleMethod() {
-
         MethodSpec.Builder builder = MethodSpec.methodBuilder("handle")
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(ClassName.get(JsonObject.class), "jsonObject")
                 .addParameter(ClassName.get(GraphqlParser.OperationDefinitionContext.class), "operationDefinition")
                 .addParameter(ClassName.get(QueryDataLoader.class), "loader")
                 .returns(ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(JsonValue.class)));
-
 
         builder.beginControlFlow("for ($T selectionContext : operationDefinition.selectionSet().selection()) ", ClassName.get(GraphqlParser.SelectionContext.class))
                 .addStatement("String selectionName = $T.ofNullable(selectionContext.field().alias()).map(aliasContext -> aliasContext.name().getText()).orElse(selectionContext.field().name().getText())", ClassName.get(Optional.class));
@@ -237,7 +238,14 @@ public class QueryHandlerBuilder {
             } else {
                 builder.nextControlFlow("else if (selectionContext.field().name().getText().equals($S))", typeMethodName);
             }
-            builder.addStatement("$L(jsonObject.get(selectionName), selectionContext.field().selectionSet(), loader, \"/\" + selectionName)", typeMethodName);
+            if (packageManager.isLocalPackage(fieldDefinitionContext)) {
+                builder.addStatement("$L(jsonObject.get(selectionName), selectionContext.field().selectionSet(), loader, \"/\" + selectionName)", typeMethodName);
+            } else {
+                manager.getPackageName(fieldDefinitionContext)
+                        .ifPresent(packageName ->
+                                builder.addStatement("loader.register($S, $S, \"/\" + selectionName, selectionContext)", packageName, graphQLConfig.getOperationTypeFetchProtocol())
+                        );
+            }
             index++;
         }
         builder.endControlFlow()

@@ -30,10 +30,18 @@ public abstract class QueryDataLoader {
     private final JsonProvider jsonProvider;
     private final Map<String, Map<String, Map<String, Map<String, Map<String, Map<JsonValue.ValueType, Set<Tuple2<String, GraphqlParser.SelectionSetContext>>>>>>>> conditionMap = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Map<String, Map<String, Set<Field>>>>> fieldTree = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, Set<Tuple2<String, Field>>>> operationTypeFields = new ConcurrentHashMap<>();
+
     private final Map<String, Map<String, JsonValue>> resultMap = new ConcurrentHashMap<>();
 
     public QueryDataLoader() {
         this.jsonProvider = BeanContext.get(JsonProvider.class);
+    }
+
+    public void register(String packageName, String protocol, String jsonPointer, GraphqlParser.SelectionContext selectionContext) {
+        operationTypeFields.computeIfAbsent(packageName, k -> new ConcurrentHashMap<>());
+        operationTypeFields.get(packageName).computeIfAbsent(protocol, k -> new LinkedHashSet<>());
+        operationTypeFields.get(packageName).get(protocol).add(Tuple.of(jsonPointer, new Field(selectionContext.field())));
     }
 
     public void register(String packageName, String protocol, String typeName, String fieldName, JsonValue key, String jsonPointer, GraphqlParser.SelectionSetContext selectionSetContext) {
@@ -61,7 +69,13 @@ public abstract class QueryDataLoader {
                                         .map(typeMap ->
                                                 new Operation()
                                                         .setOperationType("query")
-                                                        .setFields(
+                                                        .addFields(
+                                                                Stream.ofNullable(operationTypeFields.get(packageName))
+                                                                        .flatMap(packageMap -> Stream.ofNullable(packageMap.get(protocol)))
+                                                                        .flatMap(Collection::stream)
+                                                                        .map(Tuple2::_2).collect(Collectors.toSet())
+                                                        )
+                                                        .addFields(
                                                                 typeMap.entrySet().stream()
                                                                         .flatMap(typeEntry ->
                                                                                 typeEntry.getValue().entrySet().stream()
@@ -102,6 +116,17 @@ public abstract class QueryDataLoader {
 
     protected JsonValue dispatch(JsonObject jsonObject) {
         JsonPatchBuilder patchBuilder = jsonProvider.createPatchBuilder();
+        operationTypeFields.forEach((packageName, protocolMap) ->
+                protocolMap.forEach((protocolName, fieldSet) ->
+                        fieldSet.forEach(
+                                jsonPointer ->
+                                        patchBuilder.add(
+                                                jsonPointer._1(),
+                                                jsonObject.get(Optional.ofNullable(jsonPointer._2().getAlias()).orElse(jsonPointer._2().getName()))
+                                        )
+                        )
+                )
+        );
         Optional.of(conditionMap)
                 .filter(map -> !map.isEmpty()).stream()
                 .flatMap(map -> map.entrySet().stream())

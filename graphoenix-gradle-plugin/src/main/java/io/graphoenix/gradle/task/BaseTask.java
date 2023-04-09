@@ -88,14 +88,11 @@ import static io.graphoenix.config.ConfigUtil.CONFIG_UTIL;
 import static io.graphoenix.core.error.GraphQLErrorType.TYPE_NOT_EXIST;
 import static io.graphoenix.core.error.GraphQLErrorType.UNSUPPORTED_FIELD_TYPE;
 import static io.graphoenix.core.utils.TypeNameUtil.TYPE_NAME_UTIL;
-import static io.graphoenix.spi.constant.Hammurabi.CLASS_INFO_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.CONTAINER_TYPE_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.MUTATION_TYPE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.QUERY_TYPE_NAME;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 public class BaseTask extends DefaultTask {
 
+    private GraphQLConfig graphQLConfig;
     private IGraphQLDocumentManager manager;
     private DocumentBuilder documentBuilder;
 
@@ -109,7 +106,7 @@ public class BaseTask extends DefaultTask {
         ClassLoader classLoader = createClassLoader();
         CONFIG_UTIL.load(resourcePath);
         BeanContext.load(classLoader);
-        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+        graphQLConfig = BeanContext.get(GraphQLConfig.class);
         manager = BeanContext.get(IGraphQLDocumentManager.class);
         GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
         documentBuilder = BeanContext.get(DocumentBuilder.class);
@@ -276,6 +273,10 @@ public class BaseTask extends DefaultTask {
                                                                     .collect(Collectors.toCollection(LinkedHashSet::new))
                                                     )
                                                     .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
+                                                    .addDirective(
+                                                            new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                                                    .addArgument("packageName", graphQLConfig.getPackageName())
+                                                    )
                                     );
                             manager.mergeDocument(objectType.toString());
                         }
@@ -307,6 +308,10 @@ public class BaseTask extends DefaultTask {
                                                                     .collect(Collectors.toCollection(LinkedHashSet::new))
                                                     )
                                                     .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
+                                                    .addDirective(
+                                                            new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                                                    .addArgument("packageName", graphQLConfig.getPackageName())
+                                                    )
                                     );
                             manager.mergeDocument(objectType.toString());
                         }

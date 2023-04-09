@@ -15,11 +15,7 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrorType;
 import io.graphoenix.core.error.GraphQLErrors;
-import io.graphoenix.core.handler.ArgumentBuilder;
-import io.graphoenix.core.handler.BaseOperationHandler;
-import io.graphoenix.core.handler.GraphQLVariablesProcessor;
-import io.graphoenix.core.handler.MutationDataLoader;
-import io.graphoenix.core.handler.QueryDataLoader;
+import io.graphoenix.core.handler.*;
 import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.core.utils.DocumentUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -63,12 +59,14 @@ import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 public class OperationHandlerImplementer {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final TypeManager typeManager;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public OperationHandlerImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
+    public OperationHandlerImplementer(IGraphQLDocumentManager manager, PackageManager packageManager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
     }
@@ -217,21 +215,24 @@ public class OperationHandlerImplementer {
                 builder.addFields(buildQueryFields());
                 break;
             case MUTATION:
-                builder.addField(
+                builder
+                        .addField(
                                 FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "MutationBeforeHandler")),
                                         "mutationBeforeHandler",
                                         Modifier.PRIVATE,
                                         Modifier.FINAL
                                 ).build()
-                        ).addField(
+                        )
+                        .addField(
                                 FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(graphQLConfig.getHandlerPackageName(), "MutationAfterHandler")),
                                         "mutationAfterHandler",
                                         Modifier.PRIVATE,
                                         Modifier.FINAL
                                 ).build()
-                        ).addField(
+                        )
+                        .addField(
                                 FieldSpec.builder(
                                         ParameterizedTypeName.get(ClassName.get(Provider.class), ClassName.get(MutationDataLoader.class)),
                                         "mutationDataLoader",
@@ -406,106 +407,112 @@ public class OperationHandlerImplementer {
         String fieldTypeName = manager.getFieldTypeName(fieldDefinitionContext.type());
         String fieldTypeParameterName = typeManager.typeToLowerCamelName(manager.getFieldTypeName(fieldDefinitionContext.type()));
 
-        if (manager.isInvokeField(fieldDefinitionContext)) {
-            String className = typeManager.getClassName(fieldDefinitionContext);
-            String methodName = typeManager.getMethodName(fieldDefinitionContext);
-            List<AbstractMap.SimpleEntry<String, String>> parameters = typeManager.getParameters(fieldDefinitionContext);
-            String returnClassName = typeManager.getReturnClassName(fieldDefinitionContext);
+        if (packageManager.isLocalPackage(fieldDefinitionContext)) {
+            if (manager.isInvokeField(fieldDefinitionContext)) {
+                String className = typeManager.getClassName(fieldDefinitionContext);
+                String methodName = typeManager.getMethodName(fieldDefinitionContext);
+                List<AbstractMap.SimpleEntry<String, String>> parameters = typeManager.getParameters(fieldDefinitionContext);
+                String returnClassName = typeManager.getReturnClassName(fieldDefinitionContext);
 
-            builder.addStatement("$T $L = $L.get().$L($L)",
-                    TYPE_UTIL.getTypeName(returnClassName),
-                    fieldDefinitionContext.name().getText(),
-                    typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
-                    methodName,
-                    CodeBlock.join(parameters.stream()
-                            .map(parameter ->
-                                    CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
-                                            parameter.getKey(),
-                                            TYPE_UTIL.getClassName(parameter.getValue())
-                                    )
-                            )
-                            .collect(Collectors.toList()), ", ")
-            );
+                builder.addStatement("$T $L = $L.get().$L($L)",
+                        TYPE_UTIL.getTypeName(returnClassName),
+                        fieldDefinitionContext.name().getText(),
+                        typeManager.typeToLowerCamelName(TYPE_NAME_UTIL.toClassName(className).simpleName()),
+                        methodName,
+                        CodeBlock.join(parameters.stream()
+                                .map(parameter ->
+                                        CodeBlock.of("argumentBuilder.get().getArgument(selectionContext, $S, $T.class)",
+                                                parameter.getKey(),
+                                                TYPE_UTIL.getClassName(parameter.getValue())
+                                        )
+                                )
+                                .collect(Collectors.toList()), ", ")
+                );
 
-            CodeBlock invokeCodeBlock;
-            if (manager.isObject(fieldTypeName)) {
-                String filterMethodName;
-                if (fieldTypeIsList) {
-                    filterMethodName = fieldTypeParameterName.concat("List");
+                CodeBlock invokeCodeBlock;
+                if (manager.isObject(fieldTypeName)) {
+                    String filterMethodName;
+                    if (fieldTypeIsList) {
+                        filterMethodName = fieldTypeParameterName.concat("List");
+                    } else {
+                        filterMethodName = fieldTypeParameterName;
+                    }
+                    if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
+                        invokeCodeBlock = CodeBlock.of("return $T.from($L.buildRs()).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                    } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
+                        invokeCodeBlock = CodeBlock.of("return $L.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", fieldDefinitionContext.name().getText(), filterMethodName);
+                    } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
+                        invokeCodeBlock = CodeBlock.of("return $L.collectList().map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", fieldDefinitionContext.name().getText(), filterMethodName);
+                    } else {
+                        invokeCodeBlock = CodeBlock.of("return $T.just($L).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                    }
                 } else {
-                    filterMethodName = fieldTypeParameterName;
-                }
-                if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
-                    invokeCodeBlock = CodeBlock.of("return $T.from($L.buildRs()).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
-                } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                    invokeCodeBlock = CodeBlock.of("return $L.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", fieldDefinitionContext.name().getText(), filterMethodName);
-                } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
-                    invokeCodeBlock = CodeBlock.of("return $L.collectList().map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", fieldDefinitionContext.name().getText(), filterMethodName);
-                } else {
-                    invokeCodeBlock = CodeBlock.of("return $T.just($L).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                    String filterMethodName;
+                    if (fieldTypeIsList) {
+                        filterMethodName = "toJsonValueList";
+                    } else {
+                        filterMethodName = "toJsonValue";
+                    }
+                    if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
+                        invokeCodeBlock = CodeBlock.of("return $T.from($L.buildRs()).map(item-> $L(item))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                    } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
+                        invokeCodeBlock = CodeBlock.of("return $L.map(item-> $L(item))", fieldDefinitionContext.name().getText(), filterMethodName);
+                    } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
+                        invokeCodeBlock = CodeBlock.of("return $L.collectList().map(item-> $L(item))", fieldDefinitionContext.name().getText(), filterMethodName);
+                    } else {
+                        invokeCodeBlock = CodeBlock.of("return $T.just($L).map(item-> $L(item))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                    }
                 }
                 builder.addStatement(invokeCodeBlock);
             } else {
-                String filterMethodName;
-                if (fieldTypeIsList) {
-                    filterMethodName = "toJsonValueList";
+                if (manager.isObject(fieldTypeName)) {
+                    if (fieldTypeIsList) {
+                        builder
+                                .addStatement(
+                                        "$T type = new $T<$T>() {}.getType()",
+                                        ClassName.get(Type.class),
+                                        ClassName.get(TypeToken.class),
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                                )
+                                .addStatement(
+                                        "$T $L = jsonb.get().fromJson(jsonValue.toString(), type)",
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                        fieldTypeParameterName.concat("List")
+                                )
+                                .beginControlFlow("if($L == null)", fieldTypeParameterName.concat("List"))
+                                .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
+                                .endControlFlow()
+                                .addStatement(
+                                        CodeBlock.of("return $T.fromIterable($L).flatMap(item -> invokeHandler.get().$L(item, selectionContext.field().selectionSet())).collectList().map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
+                                                ClassName.get(Flux.class),
+                                                fieldTypeParameterName.concat("List"),
+                                                fieldTypeParameterName,
+                                                fieldTypeParameterName.concat("List")
+                                        )
+
+                                );
+                    } else {
+                        builder
+                                .addStatement(
+                                        "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
+                                        fieldTypeParameterName,
+                                        typeManager.typeContextToTypeName(fieldDefinitionContext.type())
+                                )
+                                .addStatement(
+                                        CodeBlock.of("return invokeHandler.get().$L($L, selectionContext.field().selectionSet()).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
+                                                fieldTypeParameterName,
+                                                fieldTypeParameterName,
+                                                fieldTypeParameterName
+                                        )
+                                );
+                    }
                 } else {
-                    filterMethodName = "toJsonValue";
+                    builder.addStatement("return $T.just(jsonValue)", ClassName.get(Mono.class));
                 }
-                if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
-                    invokeCodeBlock = CodeBlock.of("return $T.from($L.buildRs()).map(item-> $L(item))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
-                } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                    invokeCodeBlock = CodeBlock.of("return $L.map(item-> $L(item))", fieldDefinitionContext.name().getText(), filterMethodName);
-                } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
-                    invokeCodeBlock = CodeBlock.of("return $L.collectList().map(item-> $L(item))", fieldDefinitionContext.name().getText(), filterMethodName);
-                } else {
-                    invokeCodeBlock = CodeBlock.of("return $T.just($L).map(item-> $L(item))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
-                }
-                builder.addStatement(invokeCodeBlock);
             }
         } else {
-            if (manager.isObject(fieldTypeName)) {
-                if (fieldTypeIsList) {
-                    builder.addStatement(
-                                    "$T type = new $T<$T>() {}.getType()",
-                                    ClassName.get(Type.class),
-                                    ClassName.get(TypeToken.class),
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                            )
-                            .addStatement(
-                                    "$T $L = jsonb.get().fromJson(jsonValue.toString(), type)",
-                                    typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                                    fieldTypeParameterName.concat("List")
-                            )
-                            .beginControlFlow("if($L == null)", fieldTypeParameterName.concat("List"))
-                            .addStatement("return $T.just($T.NULL)", ClassName.get(Mono.class), ClassName.get(JsonValue.class))
-                            .endControlFlow()
-                            .addStatement(
-                                    CodeBlock.of("return $T.fromIterable($L).flatMap(item -> invokeHandler.get().$L(item, selectionContext.field().selectionSet())).collectList().map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
-                                            ClassName.get(Flux.class),
-                                            fieldTypeParameterName.concat("List"),
-                                            fieldTypeParameterName,
-                                            fieldTypeParameterName.concat("List")
-                                    )
-
-                            );
-                } else {
-                    builder.addStatement(
-                            "$T $L = jsonb.get().fromJson(jsonValue.toString(), $T.class)",
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type()),
-                            fieldTypeParameterName,
-                            typeManager.typeContextToTypeName(fieldDefinitionContext.type())
-                    ).addStatement(
-                            CodeBlock.of("return invokeHandler.get().$L($L, selectionContext.field().selectionSet()).map(invoked -> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))",
-                                    fieldTypeParameterName,
-                                    fieldTypeParameterName,
-                                    fieldTypeParameterName
-                            )
-                    );
-                }
-            } else {
-                builder.addStatement("return $T.just(jsonValue)", ClassName.get(Mono.class));
-            }
+            builder.addStatement("return $T.just(jsonValue)", ClassName.get(Mono.class));
         }
         return builder.build();
     }

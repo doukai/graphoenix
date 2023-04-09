@@ -1,5 +1,6 @@
 package io.graphoenix.graphql.generator.translator;
 
+import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.document.Directive;
 import io.graphoenix.core.document.Field;
 import io.graphoenix.core.error.ElementProcessException;
@@ -19,18 +20,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.graphoenix.core.error.ElementProcessErrorType.SOURCE_ANNOTATION_NOT_EXIST;
-import static io.graphoenix.spi.constant.Hammurabi.DENY_ALL;
-import static io.graphoenix.spi.constant.Hammurabi.INVOKE_DIRECTIVE_NAME;
-import static io.graphoenix.spi.constant.Hammurabi.PERMIT_ALL;
-import static io.graphoenix.spi.constant.Hammurabi.ROLES_ALLOWED;
+import static io.graphoenix.spi.constant.Hammurabi.*;
 
 @ApplicationScoped
 public class GraphQLApiBuilder {
 
+    private final GraphQLConfig graphQLConfig;
     private final ElementManager elementManager;
 
     @Inject
-    public GraphQLApiBuilder(ElementManager elementManager) {
+    public GraphQLApiBuilder(GraphQLConfig graphQLConfig, ElementManager elementManager) {
+        this.graphQLConfig = graphQLConfig;
         this.elementManager = elementManager;
     }
 
@@ -54,6 +54,10 @@ public class GraphQLApiBuilder {
                                         )
                                 )
                                 .addArgument("returnClassName", executableElement.getReturnType().toString())
+                )
+                .addDirective(
+                        new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                .addArgument("packageName", graphQLConfig.getPackageName())
                 );
         if (executableElement.getAnnotation(PermitAll.class) != null) {
             field.addDirective(new Directive(PERMIT_ALL));

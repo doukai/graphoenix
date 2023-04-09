@@ -191,7 +191,7 @@ directive @containerType on OBJECT
 
 directive @classInfo(className: String!) on OBJECT
 
-directive @packageInfo(packageName: String!) on OBJECT | QUERY | MUTATION | SUBSCRIPTION
+directive @packageInfo(packageName: String!) on OBJECT | FIELD_DEFINITION | QUERY | MUTATION | SUBSCRIPTION
 
 directive @connection(field: String agg: String) on FIELD_DEFINITION
 
