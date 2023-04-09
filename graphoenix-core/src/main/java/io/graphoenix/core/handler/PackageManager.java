@@ -10,10 +10,8 @@ import jakarta.inject.Inject;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 @ApplicationScoped
@@ -112,6 +110,10 @@ public class PackageManager {
         return manager.getPackageName(fieldDefinitionContext).map(this::isLocalPackage).orElse(true);
     }
 
+    public boolean isLocalPackage(String typeName, String fieldName) {
+        return manager.getField(typeName, fieldName).map(this::isLocalPackage).orElse(true);
+    }
+
     public boolean isNotLocalPackage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return !isLocalPackage(objectTypeDefinitionContext);
     }
@@ -132,20 +134,18 @@ public class PackageManager {
         return !isLocalPackage(operationDefinitionContext);
     }
 
+    public boolean isNotLocalPackage(GraphqlParser.FieldDefinitionContext fieldDefinitionContext) {
+        return !isLocalPackage(fieldDefinitionContext);
+    }
+
+    public boolean isNotLocalPackage(String typeName, String fieldName) {
+        return !isLocalPackage(typeName, fieldName);
+    }
+
     public boolean isLocalPackage(String packageName) {
         return Stream.concat(
                 Stream.of(Optional.ofNullable(graphQLConfig.getPackageName()).orElseGet(this::getDefaultPackageName)),
                 Stream.ofNullable(graphQLConfig.getLocalPackageNames()).flatMap(Collection::stream)
         ).anyMatch(localPackageName -> localPackageName.equals(packageName));
-    }
-
-    private final ConcurrentHashMap<String, URI> URIMap = new ConcurrentHashMap<>();
-
-    public URI getURI(String packageName) {
-        return URIMap.get(packageName);
-    }
-
-    public enum Protocol {
-        GPRC, HTTP, RSOCKET
     }
 }

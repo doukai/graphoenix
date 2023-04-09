@@ -2,6 +2,7 @@ package io.graphoenix.mysql.translator.translator;
 
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.operation.*;
 import io.graphoenix.mysql.translator.expression.JsonArrayAggregateFunction;
 import io.graphoenix.mysql.translator.utils.DBNameUtil;
@@ -82,14 +83,16 @@ import static io.graphoenix.spi.constant.Hammurabi.SORT_INPUT_NAME;
 public class GraphQLQueryToSelect {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final IGraphQLFieldMapManager mapper;
     private final GraphQLArgumentsToWhere argumentsToWhere;
     private final DBNameUtil dbNameUtil;
     private final DBValueUtil dbValueUtil;
 
     @Inject
-    public GraphQLQueryToSelect(IGraphQLDocumentManager manager, IGraphQLFieldMapManager mapper, GraphQLArgumentsToWhere argumentsToWhere, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
+    public GraphQLQueryToSelect(IGraphQLDocumentManager manager, PackageManager packageManager, IGraphQLFieldMapManager mapper, GraphQLArgumentsToWhere argumentsToWhere, DBNameUtil dbNameUtil, DBValueUtil dbValueUtil) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.mapper = mapper;
         this.argumentsToWhere = argumentsToWhere;
         this.dbNameUtil = dbNameUtil;
@@ -184,6 +187,7 @@ public class GraphQLQueryToSelect {
                 new ExpressionList(
                         selectionContextList.stream()
                                 .flatMap(subSelectionContext -> manager.fragmentUnzip(typeName, subSelectionContext))
+                                .filter(subSelectionContext -> packageManager.isLocalPackage(typeName, subSelectionContext.field().name().getText()))
                                 .filter(subSelectionContext -> manager.getField(typeName, subSelectionContext.field().name().getText()).isPresent())
                                 .filter(subSelectionContext -> manager.isNotInvokeField(typeName, subSelectionContext.field().name().getText()))
                                 .filter(subSelectionContext -> manager.isNotFetchField(typeName, subSelectionContext.field().name().getText()))
