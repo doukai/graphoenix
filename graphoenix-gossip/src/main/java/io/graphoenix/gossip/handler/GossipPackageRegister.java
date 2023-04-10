@@ -5,6 +5,7 @@ import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.spi.handler.PackageRegister;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.tinylog.Logger;
 
 import java.net.URL;
 import java.util.AbstractMap;
@@ -55,6 +56,7 @@ public class GossipPackageRegister implements PackageRegister {
         packageURLs.get(packageName).add(url);
         memberAddressURLs.computeIfAbsent(address, k -> new LinkedHashSet<>());
         memberAddressURLs.get(address).add(url);
+        Logger.info("package ".concat(packageName).concat(" service: ").concat(url.toString()).concat(" registered from ").concat(address));
     }
 
     public void mergeMemberProtocolURLIterator(String packageName) {
