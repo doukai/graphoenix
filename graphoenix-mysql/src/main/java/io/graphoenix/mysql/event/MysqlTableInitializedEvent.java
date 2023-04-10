@@ -35,8 +35,9 @@ public class MysqlTableInitializedEvent implements ScopeEvent {
         if (mysqlConfig.getCrateTable()) {
             Logger.info("start create type table");
             return tableCreator.selectColumns(graphqlTypeToTable.selectColumnsSQL())
-                    .doOnSuccess(existsColumnNameList -> tableCreator.mergeTable(graphqlTypeToTable.mergeTablesSQL(existsColumnNameList).collect(Collectors.joining(";"))))
+                    .flatMap(existsColumnNameList -> tableCreator.mergeTable(graphqlTypeToTable.mergeTablesSQL(existsColumnNameList).collect(Collectors.joining(";"))))
                     .doOnSuccess((v) -> Logger.info("merge type table success"))
+                    .doOnError(Logger::error)
                     .then();
         }
         return Mono.empty();

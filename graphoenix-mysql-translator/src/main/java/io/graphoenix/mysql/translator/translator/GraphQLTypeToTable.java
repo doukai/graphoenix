@@ -3,6 +3,7 @@ package io.graphoenix.mysql.translator.translator;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.PackageManager;
+import io.graphoenix.mysql.translator.statement.CreateDataBase;
 import io.graphoenix.mysql.translator.utils.DBNameUtil;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.Tuple2;
@@ -15,6 +16,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.alter.Alter;
 import net.sf.jsqlparser.statement.alter.AlterExpression;
 import net.sf.jsqlparser.statement.alter.AlterOperation;
+import net.sf.jsqlparser.statement.create.schema.CreateSchema;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -88,6 +90,14 @@ public class GraphQLTypeToTable {
     public Truncate truncateObjectTable(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         Table table = dbNameUtil.typeToTable(objectTypeDefinitionContext.name().getText());
         return new Truncate().withTable(table);
+    }
+
+    public String mergeSchemaSQL(String schemaName) {
+        return mergeSchema(schemaName).toString();
+    }
+
+    public CreateDataBase mergeSchema(String schemaName) {
+        return new CreateDataBase().withExist(false).withDataBaseName(schemaName);
     }
 
     public Stream<String> mergeTablesSQL(List<Tuple2<String, String>> existsColumnNameList) {

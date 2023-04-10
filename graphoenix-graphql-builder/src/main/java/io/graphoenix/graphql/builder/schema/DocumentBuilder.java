@@ -578,6 +578,7 @@ public class DocumentBuilder {
                     .filter(manager::isNotFetchField)
                     .filter(manager::isNotFunctionField)
                     .filter(manager::isNotConnectionField)
+                    .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
                     .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
                     .map(fieldDefinitionContext -> fieldToArgument(objectTypeDefinitionContext, fieldDefinitionContext, inputType))
                     .collect(Collectors.toCollection(LinkedHashSet::new));
