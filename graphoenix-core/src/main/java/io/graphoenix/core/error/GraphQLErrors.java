@@ -44,6 +44,10 @@ public class GraphQLErrors extends RuntimeException {
         this.errors.add(new GraphQLError(exception.getMessage()));
     }
 
+    public GraphQLErrors(String message) {
+        this.errors.add(new GraphQLError(message));
+    }
+
     public GraphQLErrors add(GraphQLErrorType graphQLErrorType) {
         this.errors.add(new GraphQLError(graphQLErrorType.toString()));
         return this;

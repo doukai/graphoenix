@@ -4,6 +4,7 @@ import io.graphoenix.http.config.HttpServerConfig;
 import io.graphoenix.http.handler.GetRequestHandler;
 import io.graphoenix.http.handler.PostRequestHandler;
 import io.graphoenix.http.handler.SchemaRequestHandler;
+import io.graphoenix.spi.handler.RunningServer;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
@@ -18,7 +19,7 @@ import reactor.netty.http.server.HttpServer;
 import static io.graphoenix.http.handler.SchemaRequestHandler.SCHEMA_PARAM_NAME;
 
 @ApplicationScoped
-public class GraphQLHttpGraphoenixServer implements Runnable {
+public class GraphQLHttpGraphoenixServer implements Runnable, RunningServer {
 
     private final HttpServerConfig httpServerConfig;
     private final SchemaRequestHandler schemaRequestHandler;
@@ -56,5 +57,15 @@ public class GraphQLHttpGraphoenixServer implements Runnable {
                 .bindNow();
 
         server.onDispose().block();
+    }
+
+    @Override
+    public String protocol() {
+        return "http";
+    }
+
+    @Override
+    public int port() {
+        return httpServerConfig.getPort();
     }
 }

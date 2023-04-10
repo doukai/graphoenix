@@ -228,8 +228,7 @@ public class OperationInterfaceImplementer {
                                 .map(entry -> ParameterSpec.builder(TYPE_NAME_UTIL.toTypeName(entry.getValue()), entry.getKey()).build())
                                 .collect(Collectors.toList())
                 )
-                .returns(typeName)
-                .addException(ClassName.get(Exception.class));
+                .returns(typeName);
 
         if (parameters.size() == 0) {
             builder.addStatement(getCodeBlock(operationDefinitionContext, CodeBlock.of("$T.empty().toJavaMap()", ClassName.get(HashMap.class))));

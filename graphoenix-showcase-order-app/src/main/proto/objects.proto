@@ -1,0 +1,935 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.order.dto.objectType.grpc";
+
+package io.graphoenix.showcase.order.grpc;
+
+import "enums.proto";
+
+message PageInfo {
+    bool has_next_page = 1;
+    bool has_previous_page = 2;
+    string start_cursor = 3;
+    string end_cursor = 4;
+}
+message User {
+    optional string id = 1;
+    string login = 2;
+    string password = 3;
+    string name = 4;
+    optional int32 age = 5;
+    optional bool disabled = 6;
+    optional Sex sex = 7;
+    optional UserProfile user_profile = 8;
+    optional int32 organization_id = 9;
+    optional Organization organization = 10;
+    repeated Role roles = 11;
+    repeated string mobile_numbers = 12;
+    optional bool is_deprecated = 13;
+    optional int32 version = 14;
+    optional string realm_id = 15;
+    optional string create_user_id = 16;
+    optional string create_time = 17;
+    optional string update_user_id = 18;
+    optional string update_time = 19;
+    optional string create_group_id = 20;
+    optional string intro_typename = 21;
+    optional int32 id_count = 22;
+    optional string id_max = 23;
+    optional string id_min = 24;
+    optional int32 login_count = 25;
+    optional string login_max = 26;
+    optional string login_min = 27;
+    optional int32 password_count = 28;
+    optional string password_max = 29;
+    optional string password_min = 30;
+    optional int32 name_count = 31;
+    optional string name_max = 32;
+    optional string name_min = 33;
+    optional int32 age_count = 34;
+    optional int32 age_sum = 35;
+    optional int32 age_avg = 36;
+    optional int32 age_max = 37;
+    optional int32 age_min = 38;
+    optional int32 organization_id_count = 39;
+    optional int32 organization_id_sum = 40;
+    optional int32 organization_id_avg = 41;
+    optional int32 organization_id_max = 42;
+    optional int32 organization_id_min = 43;
+    optional Role roles_aggregate = 44;
+    optional RoleConnection roles_connection = 45;
+}
+message UserProfile {
+    optional string id = 1;
+    optional string user_id = 2;
+    optional User user = 3;
+    optional string email = 4;
+    optional string address = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional string create_time = 10;
+    optional string update_user_id = 11;
+    optional string update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 user_id_count = 18;
+    optional string user_id_max = 19;
+    optional string user_id_min = 20;
+    optional int32 email_count = 21;
+    optional string email_max = 22;
+    optional string email_min = 23;
+    optional int32 address_count = 24;
+    optional string address_max = 25;
+    optional string address_min = 26;
+}
+message UserMobileNumbers {
+    optional string id = 1;
+    optional int32 user_id = 2;
+    optional string mobile_number = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 mobile_number_count = 16;
+    optional string mobile_number_max = 17;
+    optional string mobile_number_min = 18;
+    optional int32 user_id_count = 19;
+    optional int32 user_id_sum = 20;
+    optional int32 user_id_avg = 21;
+    optional int32 user_id_max = 22;
+    optional int32 user_id_min = 23;
+}
+message UserRole {
+    optional string id = 1;
+    optional int32 user_id = 2;
+    optional int32 role_id = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 user_id_count = 16;
+    optional int32 user_id_sum = 17;
+    optional int32 user_id_avg = 18;
+    optional int32 user_id_max = 19;
+    optional int32 user_id_min = 20;
+    optional int32 role_id_count = 21;
+    optional int32 role_id_sum = 22;
+    optional int32 role_id_avg = 23;
+    optional int32 role_id_max = 24;
+    optional int32 role_id_min = 25;
+}
+message Role {
+    optional string id = 1;
+    string name = 2;
+    repeated RoleType type = 3;
+    repeated User users = 4;
+    optional bool is_deprecated = 5;
+    optional int32 version = 6;
+    optional string realm_id = 7;
+    optional string create_user_id = 8;
+    optional string create_time = 9;
+    optional string update_user_id = 10;
+    optional string update_time = 11;
+    optional string create_group_id = 12;
+    optional string intro_typename = 13;
+    optional int32 id_count = 14;
+    optional string id_max = 15;
+    optional string id_min = 16;
+    optional int32 name_count = 17;
+    optional string name_max = 18;
+    optional string name_min = 19;
+    optional User users_aggregate = 20;
+    optional UserConnection users_connection = 21;
+}
+message RoleRoleType {
+    optional string id = 1;
+    optional int32 role_id = 2;
+    optional RoleType type = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 role_id_count = 16;
+    optional int32 role_id_sum = 17;
+    optional int32 role_id_avg = 18;
+    optional int32 role_id_max = 19;
+    optional int32 role_id_min = 20;
+}
+message Organization {
+    optional string id = 1;
+    string name = 2;
+    optional int32 above_id = 3;
+    optional Organization above = 4;
+    repeated User users = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional string create_time = 10;
+    optional string update_user_id = 11;
+    optional string update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 name_count = 18;
+    optional string name_max = 19;
+    optional string name_min = 20;
+    optional int32 above_id_count = 21;
+    optional int32 above_id_sum = 22;
+    optional int32 above_id_avg = 23;
+    optional int32 above_id_max = 24;
+    optional int32 above_id_min = 25;
+    optional User users_aggregate = 26;
+    optional UserConnection users_connection = 27;
+}
+message UserConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated UserEdge edges = 3;
+}
+message UserEdge {
+    optional User node = 1;
+    optional string cursor = 2;
+}
+message UserProfileConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated UserProfileEdge edges = 3;
+}
+message UserProfileEdge {
+    optional UserProfile node = 1;
+    optional string cursor = 2;
+}
+message UserMobileNumbersConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated UserMobileNumbersEdge edges = 3;
+}
+message UserMobileNumbersEdge {
+    optional UserMobileNumbers node = 1;
+    optional string cursor = 2;
+}
+message UserRoleConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated UserRoleEdge edges = 3;
+}
+message UserRoleEdge {
+    optional UserRole node = 1;
+    optional string cursor = 2;
+}
+message RoleConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated RoleEdge edges = 3;
+}
+message RoleEdge {
+    optional Role node = 1;
+    optional string cursor = 2;
+}
+message RoleRoleTypeConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated RoleRoleTypeEdge edges = 3;
+}
+message RoleRoleTypeEdge {
+    optional RoleRoleType node = 1;
+    optional string cursor = 2;
+}
+message OrganizationConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated OrganizationEdge edges = 3;
+}
+message OrganizationEdge {
+    optional Organization node = 1;
+    optional string cursor = 2;
+}
+message QueryType {
+    optional string login = 1;
+    optional User user = 2;
+    repeated User user_list = 3;
+    optional UserConnection user_connection = 4;
+    optional UserProfile user_profile = 5;
+    repeated UserProfile user_profile_list = 6;
+    optional UserProfileConnection user_profile_connection = 7;
+    optional UserMobileNumbers user_mobile_numbers = 8;
+    repeated UserMobileNumbers user_mobile_numbers_list = 9;
+    optional UserMobileNumbersConnection user_mobile_numbers_connection = 10;
+    optional UserRole user_role = 11;
+    repeated UserRole user_role_list = 12;
+    optional UserRoleConnection user_role_connection = 13;
+    optional Role role = 14;
+    repeated Role role_list = 15;
+    optional RoleConnection role_connection = 16;
+    optional RoleRoleType role_role_type = 17;
+    repeated RoleRoleType role_role_type_list = 18;
+    optional RoleRoleTypeConnection role_role_type_connection = 19;
+    optional Organization organization = 20;
+    repeated Organization organization_list = 21;
+    optional OrganizationConnection organization_connection = 22;
+    optional bool is_deprecated = 23;
+    optional int32 version = 24;
+    optional string realm_id = 25;
+    optional string create_user_id = 26;
+    optional string create_time = 27;
+    optional string update_user_id = 28;
+    optional string update_time = 29;
+    optional string create_group_id = 30;
+    optional Order order = 31;
+    repeated Order order_list = 32;
+    optional OrderConnection order_connection = 33;
+    optional Good good = 34;
+    repeated Good good_list = 35;
+    optional GoodConnection good_connection = 36;
+    optional Product product = 37;
+    repeated Product product_list = 38;
+    optional ProductConnection product_connection = 39;
+    optional Merchant merchant = 40;
+    repeated Merchant merchant_list = 41;
+    optional MerchantConnection merchant_connection = 42;
+    optional IntroSchema intro_schema = 43;
+    repeated IntroSchema intro_schema_list = 44;
+    optional IntroSchemaConnection intro_schema_connection = 45;
+    optional IntroType intro_type = 46;
+    repeated IntroType intro_type_list = 47;
+    optional IntroTypeConnection intro_type_connection = 48;
+    optional IntroTypeInterfaces intro_type_interfaces = 49;
+    repeated IntroTypeInterfaces intro_type_interfaces_list = 50;
+    optional IntroTypeInterfacesConnection intro_type_interfaces_connection = 51;
+    optional IntroTypePossibleTypes intro_type_possible_types = 52;
+    repeated IntroTypePossibleTypes intro_type_possible_types_list = 53;
+    optional IntroTypePossibleTypesConnection intro_type_possible_types_connection = 54;
+    optional IntroField intro_field = 55;
+    repeated IntroField intro_field_list = 56;
+    optional IntroFieldConnection intro_field_connection = 57;
+    optional IntroInputValue intro_input_value = 58;
+    repeated IntroInputValue intro_input_value_list = 59;
+    optional IntroInputValueConnection intro_input_value_connection = 60;
+    optional IntroEnumValue intro_enum_value = 61;
+    repeated IntroEnumValue intro_enum_value_list = 62;
+    optional IntroEnumValueConnection intro_enum_value_connection = 63;
+    optional IntroDirective intro_directive = 64;
+    repeated IntroDirective intro_directive_list = 65;
+    optional IntroDirectiveConnection intro_directive_connection = 66;
+    optional IntroDirectiveLocations intro_directive_locations = 67;
+    repeated IntroDirectiveLocations intro_directive_locations_list = 68;
+    optional IntroDirectiveLocationsConnection intro_directive_locations_connection = 69;
+}
+message MutationType {
+    optional User user = 1;
+    repeated User user_list = 2;
+    optional UserProfile user_profile = 3;
+    repeated UserProfile user_profile_list = 4;
+    optional UserMobileNumbers user_mobile_numbers = 5;
+    repeated UserMobileNumbers user_mobile_numbers_list = 6;
+    optional UserRole user_role = 7;
+    repeated UserRole user_role_list = 8;
+    optional Role role = 9;
+    repeated Role role_list = 10;
+    optional RoleRoleType role_role_type = 11;
+    repeated RoleRoleType role_role_type_list = 12;
+    optional Organization organization = 13;
+    repeated Organization organization_list = 14;
+    optional bool is_deprecated = 15;
+    optional int32 version = 16;
+    optional string realm_id = 17;
+    optional string create_user_id = 18;
+    optional string create_time = 19;
+    optional string update_user_id = 20;
+    optional string update_time = 21;
+    optional string create_group_id = 22;
+    optional Order order = 23;
+    repeated Order order_list = 24;
+    optional Good good = 25;
+    repeated Good good_list = 26;
+    optional Product product = 27;
+    repeated Product product_list = 28;
+    optional Merchant merchant = 29;
+    repeated Merchant merchant_list = 30;
+    optional IntroSchema intro_schema = 31;
+    repeated IntroSchema intro_schema_list = 32;
+    optional IntroType intro_type = 33;
+    repeated IntroType intro_type_list = 34;
+    optional IntroTypeInterfaces intro_type_interfaces = 35;
+    repeated IntroTypeInterfaces intro_type_interfaces_list = 36;
+    optional IntroTypePossibleTypes intro_type_possible_types = 37;
+    repeated IntroTypePossibleTypes intro_type_possible_types_list = 38;
+    optional IntroField intro_field = 39;
+    repeated IntroField intro_field_list = 40;
+    optional IntroInputValue intro_input_value = 41;
+    repeated IntroInputValue intro_input_value_list = 42;
+    optional IntroEnumValue intro_enum_value = 43;
+    repeated IntroEnumValue intro_enum_value_list = 44;
+    optional IntroDirective intro_directive = 45;
+    repeated IntroDirective intro_directive_list = 46;
+    optional IntroDirectiveLocations intro_directive_locations = 47;
+    repeated IntroDirectiveLocations intro_directive_locations_list = 48;
+}
+message Order {
+    optional string id = 1;
+    string number = 2;
+    string buyer_id = 3;
+    User buyer = 4;
+    repeated Good goods = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional string create_time = 10;
+    optional string update_user_id = 11;
+    optional string update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 number_count = 18;
+    optional string number_max = 19;
+    optional string number_min = 20;
+    optional int32 buyer_id_count = 21;
+    optional string buyer_id_max = 22;
+    optional string buyer_id_min = 23;
+    optional Good goods_aggregate = 24;
+    optional GoodConnection goods_connection = 25;
+}
+message Good {
+    optional string id = 1;
+    int32 quantity = 2;
+    int32 order_id = 3;
+    Order order = 4;
+    int32 product_id = 5;
+    Product product = 6;
+    int32 merchant_id = 7;
+    Merchant merchant = 8;
+    optional bool is_deprecated = 9;
+    optional int32 version = 10;
+    optional string realm_id = 11;
+    optional string create_user_id = 12;
+    optional string create_time = 13;
+    optional string update_user_id = 14;
+    optional string update_time = 15;
+    optional string create_group_id = 16;
+    optional string intro_typename = 17;
+    optional int32 id_count = 18;
+    optional string id_max = 19;
+    optional string id_min = 20;
+    optional int32 quantity_count = 21;
+    optional int32 quantity_sum = 22;
+    optional int32 quantity_avg = 23;
+    optional int32 quantity_max = 24;
+    optional int32 quantity_min = 25;
+    optional int32 order_id_count = 26;
+    optional int32 order_id_sum = 27;
+    optional int32 order_id_avg = 28;
+    optional int32 order_id_max = 29;
+    optional int32 order_id_min = 30;
+    optional int32 product_id_count = 31;
+    optional int32 product_id_sum = 32;
+    optional int32 product_id_avg = 33;
+    optional int32 product_id_max = 34;
+    optional int32 product_id_min = 35;
+    optional int32 merchant_id_count = 36;
+    optional int32 merchant_id_sum = 37;
+    optional int32 merchant_id_avg = 38;
+    optional int32 merchant_id_max = 39;
+    optional int32 merchant_id_min = 40;
+}
+message Product {
+    optional string id = 1;
+    string name = 2;
+    float price = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 name_count = 16;
+    optional string name_max = 17;
+    optional string name_min = 18;
+    optional int32 price_count = 19;
+    optional float price_sum = 20;
+    optional float price_avg = 21;
+    optional float price_max = 22;
+    optional float price_min = 23;
+}
+message Merchant {
+    optional string id = 1;
+    string name = 2;
+    optional int32 organization_id = 3;
+    optional Organization organization = 4;
+    repeated User customer_services = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional string create_time = 10;
+    optional string update_user_id = 11;
+    optional string update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 name_count = 18;
+    optional string name_max = 19;
+    optional string name_min = 20;
+    optional int32 organization_id_count = 21;
+    optional int32 organization_id_sum = 22;
+    optional int32 organization_id_avg = 23;
+    optional int32 organization_id_max = 24;
+    optional int32 organization_id_min = 25;
+}
+message OrderConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated OrderEdge edges = 3;
+}
+message OrderEdge {
+    optional Order node = 1;
+    optional string cursor = 2;
+}
+message GoodConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated GoodEdge edges = 3;
+}
+message GoodEdge {
+    optional Good node = 1;
+    optional string cursor = 2;
+}
+message ProductConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated ProductEdge edges = 3;
+}
+message ProductEdge {
+    optional Product node = 1;
+    optional string cursor = 2;
+}
+message MerchantConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated MerchantEdge edges = 3;
+}
+message MerchantEdge {
+    optional Merchant node = 1;
+    optional string cursor = 2;
+}
+message IntroSchema {
+    optional string id = 1;
+    optional string query_type_name = 2;
+    optional string mutation_type_name = 3;
+    optional string subscription_type_name = 4;
+    repeated IntroType types = 5;
+    IntroType query_type = 6;
+    optional IntroType mutation_type = 7;
+    optional IntroType subscription_type = 8;
+    repeated IntroDirective directives = 9;
+    optional bool is_deprecated = 10;
+    optional int32 version = 11;
+    optional string realm_id = 12;
+    optional string create_user_id = 13;
+    optional string create_time = 14;
+    optional string update_user_id = 15;
+    optional string update_time = 16;
+    optional string create_group_id = 17;
+    optional string intro_typename = 18;
+    optional int32 id_count = 19;
+    optional string id_max = 20;
+    optional string id_min = 21;
+    optional int32 query_type_name_count = 22;
+    optional string query_type_name_max = 23;
+    optional string query_type_name_min = 24;
+    optional int32 mutation_type_name_count = 25;
+    optional string mutation_type_name_max = 26;
+    optional string mutation_type_name_min = 27;
+    optional int32 subscription_type_name_count = 28;
+    optional string subscription_type_name_max = 29;
+    optional string subscription_type_name_min = 30;
+    optional IntroType types_aggregate = 31;
+    optional IntroTypeConnection types_connection = 32;
+    optional IntroDirective directives_aggregate = 33;
+    optional IntroDirectiveConnection directives_connection = 34;
+}
+message IntroType {
+    string name = 1;
+    optional int32 schema_id = 2;
+    IntroTypeKind kind = 3;
+    optional string description = 4;
+    repeated IntroField fields = 5;
+    repeated IntroType interfaces = 6;
+    repeated IntroType possible_types = 7;
+    repeated IntroEnumValue enum_values = 8;
+    repeated IntroInputValue input_fields = 9;
+    optional string of_type_name = 10;
+    optional IntroType of_type = 11;
+    optional bool is_deprecated = 12;
+    optional int32 version = 13;
+    optional string realm_id = 14;
+    optional string create_user_id = 15;
+    optional string create_time = 16;
+    optional string update_user_id = 17;
+    optional string update_time = 18;
+    optional string create_group_id = 19;
+    optional string intro_typename = 20;
+    optional int32 name_count = 21;
+    optional string name_max = 22;
+    optional string name_min = 23;
+    optional int32 description_count = 24;
+    optional string description_max = 25;
+    optional string description_min = 26;
+    optional int32 of_type_name_count = 27;
+    optional string of_type_name_max = 28;
+    optional string of_type_name_min = 29;
+    optional int32 schema_id_count = 30;
+    optional int32 schema_id_sum = 31;
+    optional int32 schema_id_avg = 32;
+    optional int32 schema_id_max = 33;
+    optional int32 schema_id_min = 34;
+    optional IntroField fields_aggregate = 35;
+    optional IntroFieldConnection fields_connection = 36;
+    optional IntroType interfaces_aggregate = 37;
+    optional IntroTypeConnection interfaces_connection = 38;
+    optional IntroType possible_types_aggregate = 39;
+    optional IntroTypeConnection possible_types_connection = 40;
+    optional IntroEnumValue enum_values_aggregate = 41;
+    optional IntroEnumValueConnection enum_values_connection = 42;
+    optional IntroInputValue input_fields_aggregate = 43;
+    optional IntroInputValueConnection input_fields_connection = 44;
+}
+message IntroTypeInterfaces {
+    optional string id = 1;
+    string type_name = 2;
+    string interface_name = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 type_name_count = 16;
+    optional string type_name_max = 17;
+    optional string type_name_min = 18;
+    optional int32 interface_name_count = 19;
+    optional string interface_name_max = 20;
+    optional string interface_name_min = 21;
+}
+message IntroTypePossibleTypes {
+    optional string id = 1;
+    string type_name = 2;
+    string possible_type_name = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 type_name_count = 16;
+    optional string type_name_max = 17;
+    optional string type_name_min = 18;
+    optional int32 possible_type_name_count = 19;
+    optional string possible_type_name_max = 20;
+    optional string possible_type_name_min = 21;
+}
+message IntroField {
+    optional string id = 1;
+    optional string name = 2;
+    optional string type_name = 3;
+    optional string of_type_name = 4;
+    optional IntroType of_type = 5;
+    optional string description = 6;
+    repeated IntroInputValue args = 7;
+    IntroType type = 8;
+    optional string deprecation_reason = 9;
+    optional bool is_deprecated = 10;
+    optional int32 version = 11;
+    optional string realm_id = 12;
+    optional string create_user_id = 13;
+    optional string create_time = 14;
+    optional string update_user_id = 15;
+    optional string update_time = 16;
+    optional string create_group_id = 17;
+    optional string intro_typename = 18;
+    optional int32 id_count = 19;
+    optional string id_max = 20;
+    optional string id_min = 21;
+    optional int32 name_count = 22;
+    optional string name_max = 23;
+    optional string name_min = 24;
+    optional int32 type_name_count = 25;
+    optional string type_name_max = 26;
+    optional string type_name_min = 27;
+    optional int32 of_type_name_count = 28;
+    optional string of_type_name_max = 29;
+    optional string of_type_name_min = 30;
+    optional int32 description_count = 31;
+    optional string description_max = 32;
+    optional string description_min = 33;
+    optional int32 deprecation_reason_count = 34;
+    optional string deprecation_reason_max = 35;
+    optional string deprecation_reason_min = 36;
+    optional IntroInputValue args_aggregate = 37;
+    optional IntroInputValueConnection args_connection = 38;
+}
+message IntroInputValue {
+    optional string id = 1;
+    optional string name = 2;
+    optional string type_name = 3;
+    optional string of_type_name = 4;
+    optional IntroType of_type = 5;
+    optional int32 field_id = 6;
+    optional string directive_name = 7;
+    optional string description = 8;
+    IntroType type = 9;
+    optional string default_value = 10;
+    optional bool is_deprecated = 11;
+    optional int32 version = 12;
+    optional string realm_id = 13;
+    optional string create_user_id = 14;
+    optional string create_time = 15;
+    optional string update_user_id = 16;
+    optional string update_time = 17;
+    optional string create_group_id = 18;
+    optional string intro_typename = 19;
+    optional int32 id_count = 20;
+    optional string id_max = 21;
+    optional string id_min = 22;
+    optional int32 name_count = 23;
+    optional string name_max = 24;
+    optional string name_min = 25;
+    optional int32 type_name_count = 26;
+    optional string type_name_max = 27;
+    optional string type_name_min = 28;
+    optional int32 of_type_name_count = 29;
+    optional string of_type_name_max = 30;
+    optional string of_type_name_min = 31;
+    optional int32 directive_name_count = 32;
+    optional string directive_name_max = 33;
+    optional string directive_name_min = 34;
+    optional int32 description_count = 35;
+    optional string description_max = 36;
+    optional string description_min = 37;
+    optional int32 default_value_count = 38;
+    optional string default_value_max = 39;
+    optional string default_value_min = 40;
+    optional int32 field_id_count = 41;
+    optional int32 field_id_sum = 42;
+    optional int32 field_id_avg = 43;
+    optional int32 field_id_max = 44;
+    optional int32 field_id_min = 45;
+}
+message IntroEnumValue {
+    optional string id = 1;
+    optional string name = 2;
+    optional string of_type_name = 3;
+    optional IntroType of_type = 4;
+    optional string description = 5;
+    optional string deprecation_reason = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional string create_time = 11;
+    optional string update_user_id = 12;
+    optional string update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    optional int32 id_count = 16;
+    optional string id_max = 17;
+    optional string id_min = 18;
+    optional int32 name_count = 19;
+    optional string name_max = 20;
+    optional string name_min = 21;
+    optional int32 of_type_name_count = 22;
+    optional string of_type_name_max = 23;
+    optional string of_type_name_min = 24;
+    optional int32 description_count = 25;
+    optional string description_max = 26;
+    optional string description_min = 27;
+    optional int32 deprecation_reason_count = 28;
+    optional string deprecation_reason_max = 29;
+    optional string deprecation_reason_min = 30;
+}
+message IntroDirective {
+    optional string name = 1;
+    optional int32 schema_id = 2;
+    optional string description = 3;
+    repeated IntroDirectiveLocation locations = 4;
+    repeated IntroInputValue args = 5;
+    bool is_repeatable = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional string create_time = 11;
+    optional string update_user_id = 12;
+    optional string update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    optional int32 name_count = 16;
+    optional string name_max = 17;
+    optional string name_min = 18;
+    optional int32 description_count = 19;
+    optional string description_max = 20;
+    optional string description_min = 21;
+    optional int32 schema_id_count = 22;
+    optional int32 schema_id_sum = 23;
+    optional int32 schema_id_avg = 24;
+    optional int32 schema_id_max = 25;
+    optional int32 schema_id_min = 26;
+    optional IntroInputValue args_aggregate = 27;
+    optional IntroInputValueConnection args_connection = 28;
+}
+message IntroDirectiveLocations {
+    optional string id = 1;
+    string directive_name = 2;
+    IntroDirectiveLocation directive_location = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 directive_name_count = 16;
+    optional string directive_name_max = 17;
+    optional string directive_name_min = 18;
+}
+message IntroSchemaConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroSchemaEdge edges = 3;
+}
+message IntroSchemaEdge {
+    optional IntroSchema node = 1;
+    optional string cursor = 2;
+}
+message IntroTypeConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroTypeEdge edges = 3;
+}
+message IntroTypeEdge {
+    optional IntroType node = 1;
+    optional string cursor = 2;
+}
+message IntroTypeInterfacesConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroTypeInterfacesEdge edges = 3;
+}
+message IntroTypeInterfacesEdge {
+    optional IntroTypeInterfaces node = 1;
+    optional string cursor = 2;
+}
+message IntroTypePossibleTypesConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroTypePossibleTypesEdge edges = 3;
+}
+message IntroTypePossibleTypesEdge {
+    optional IntroTypePossibleTypes node = 1;
+    optional string cursor = 2;
+}
+message IntroFieldConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroFieldEdge edges = 3;
+}
+message IntroFieldEdge {
+    optional IntroField node = 1;
+    optional string cursor = 2;
+}
+message IntroInputValueConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroInputValueEdge edges = 3;
+}
+message IntroInputValueEdge {
+    optional IntroInputValue node = 1;
+    optional string cursor = 2;
+}
+message IntroEnumValueConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroEnumValueEdge edges = 3;
+}
+message IntroEnumValueEdge {
+    optional IntroEnumValue node = 1;
+    optional string cursor = 2;
+}
+message IntroDirectiveConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroDirectiveEdge edges = 3;
+}
+message IntroDirectiveEdge {
+    optional IntroDirective node = 1;
+    optional string cursor = 2;
+}
+message IntroDirectiveLocationsConnection {
+    optional int32 total_count = 1;
+    optional PageInfo page_info = 2;
+    repeated IntroDirectiveLocationsEdge edges = 3;
+}
+message IntroDirectiveLocationsEdge {
+    optional IntroDirectiveLocations node = 1;
+    optional string cursor = 2;
+}

@@ -1,5 +1,7 @@
 package io.graphoenix.grpc.server;
 
+import io.graphoenix.grpc.server.config.GrpcServerConfig;
+import io.graphoenix.spi.handler.RunningServer;
 import io.grpc.Server;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -9,13 +11,17 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
-public class GraphQLGrpcGraphoenixServer implements Runnable {
+public class GraphQLGrpcGraphoenixServer implements Runnable, RunningServer {
 
     private final Server server;
 
+    private final GrpcServerConfig grpcServerConfig;
+
+
     @Inject
-    public GraphQLGrpcGraphoenixServer(Server server) {
+    public GraphQLGrpcGraphoenixServer(Server server, GrpcServerConfig grpcServerConfig) {
         this.server = server;
+        this.grpcServerConfig = grpcServerConfig;
     }
 
     @Override
@@ -33,5 +39,15 @@ public class GraphQLGrpcGraphoenixServer implements Runnable {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public String protocol() {
+        return "grpc";
+    }
+
+    @Override
+    public int port() {
+        return grpcServerConfig.getPort();
     }
 }

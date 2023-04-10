@@ -326,6 +326,8 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             mergeSystemDefinition(definitionContext.typeSystemDefinition());
         } else if (definitionContext.fragmentDefinition() != null) {
             graphQLFragmentManager.register(definitionContext.fragmentDefinition());
+        } else if (definitionContext.operationDefinition() != null) {
+            graphQLOperationManager.register(definitionContext.operationDefinition());
         }
     }
 

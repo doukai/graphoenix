@@ -1,0 +1,44 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'io.graphoenix:graphoenix-gradle-plugin:0.0.1-SNAPSHOT'
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+compileJava.options.sourcepath = files('src/main/resources')
+
+apply plugin: 'io.graphoenix'
+
+group 'io.graphoenix'
+version '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation project(':graphoenix-core')
+    implementation project(':graphoenix-json')
+
+    annotationProcessor project(':graphoenix-annotation-processor')
+    annotationProcessor project(':graphoenix-inject')
+    annotationProcessor project(':graphoenix-interceptor')
+    annotationProcessor project(':graphoenix-config')
+    annotationProcessor project(':graphoenix-json')
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}

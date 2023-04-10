@@ -1,0 +1,66 @@
+type User {
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    login: String!
+    password: String!
+    name: String!
+    age: Int
+    disabled: Boolean
+    sex: Sex
+    userProfile: UserProfile @map(from: "id" to: "userId")
+    organizationId: Int
+    organization: Organization @map(from: "organizationId" to: "id" anchor: true)
+    roles: [Role!] @map(from: "id" with: {type: "UserRole" from: "userId" to: "roleId"} to: "id")
+    mobileNumbers: [String!] @map(from: "id" with: {type: "UserMobileNumbers" from: "userId" to: "mobileNumber"})
+}
+
+type UserProfile {
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    userId: String
+    user: User @map(from: "userId" to: "id" anchor: true)
+    email: String
+    address: String
+}
+
+type UserMobileNumbers {
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    userId: Int
+    mobileNumber: String
+}
+
+enum Sex {
+    MAN
+    FEMALE
+}
+
+type UserRole {
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    userId: Int
+    roleId: Int
+}
+
+type Role {
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    name: String!
+    type: [RoleType]! @map(from: "id" with: {type: "RoleRoleType" from: "roleId" to: "type"})
+    users: [User!] @map(from: "id" with: {type: "UserRole" from: "roleId" to: "userId"} to: "id")
+}
+
+enum RoleType {
+    ADMIN
+    USER
+    ANONYMOUS
+}
+
+type RoleRoleType {
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    roleId: Int
+    type: RoleType
+}
+
+type Organization {
+    id: ID @dataType(type: "int") @column(autoIncrement: true)
+    name: String!
+    aboveId: Int
+    above: Organization @map(from: "aboveId" to: "id" anchor: true)
+    users: [User!] @map(from: "id" to: "organizationId")
+}

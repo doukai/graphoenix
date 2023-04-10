@@ -1,6 +1,5 @@
 package io.graphoenix.showcase.mysql.spi;
 
-import io.graphoenix.r2dbc.connector.dao.R2DBCOperationDAO;
 import io.graphoenix.showcase.mysql.dto.annotation.*;
 import io.graphoenix.showcase.mysql.dto.enumType.Sex;
 import io.graphoenix.showcase.mysql.dto.enumType.Sort;
@@ -15,7 +14,7 @@ import org.eclipse.microprofile.reactive.streams.operators.PublisherBuilder;
 
 import java.util.List;
 
-@GraphQLOperation(operationDAO = R2DBCOperationDAO.class)
+@GraphQLOperation
 public interface OperationTest {
 
     @QueryOperation(value = "user", layers = 1)

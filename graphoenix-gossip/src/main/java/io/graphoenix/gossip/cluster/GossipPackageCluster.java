@@ -1,9 +1,11 @@
 package io.graphoenix.gossip.cluster;
 
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.gossip.config.GossipConfig;
 import io.graphoenix.gossip.handler.GossipPackageRegister;
+import io.graphoenix.spi.handler.RunningServer;
 import io.scalecube.cluster.ClusterImpl;
 import io.scalecube.cluster.ClusterMessageHandler;
 import io.scalecube.cluster.membership.MembershipEvent;
@@ -59,7 +61,7 @@ public class GossipPackageCluster implements Runnable {
                                         Optional.ofNullable(graphQLConfig.getPackageName())
                                                 .orElseGet(packageManager::getDefaultPackageName),
                                         SERVICES_NAME,
-                                        Optional.ofNullable(gossipConfig.getServices()).orElseGet(List::of)
+                                        getServices()
                                 )
                         )
                 )
@@ -105,5 +107,14 @@ public class GossipPackageCluster implements Runnable {
                         }
                 )
                 .startAwait();
+    }
+
+    private List<Map<String, Object>> getServices() {
+        return Optional.ofNullable(gossipConfig.getServices())
+                .orElseGet(() ->
+                        BeanContext.getMap(RunningServer.class).values().stream()
+                                .map(runningServer -> Map.of(PROTOCOL_NAME, (Object) runningServer.protocol(), PORT_NAME, runningServer.port()))
+                                .collect(Collectors.toList())
+                );
     }
 }
