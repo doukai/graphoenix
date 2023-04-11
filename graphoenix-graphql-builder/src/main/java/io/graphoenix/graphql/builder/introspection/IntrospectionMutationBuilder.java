@@ -41,14 +41,50 @@ public class IntrospectionMutationBuilder {
     }
 
     public Operation buildIntrospectionSchemaMutation() {
+        __Schema schema = buildIntrospectionSchema();
+
         Operation operation = new Operation()
                 .setOperationType("mutation")
                 .setName("introspection")
                 .addField(
                         new Field("__schema")
-                                .setArguments(buildIntrospectionSchema().toArguments())
+                                .setArguments(schema.toArguments())
                                 .addField(new Field("id"))
                 );
+
+        List<ObjectValueWithVariable> ofTypes =
+                Stream.ofNullable(schema.getTypes())
+                        .flatMap(Collection::stream)
+                        .flatMap(type -> {
+                                    switch (type.getKind()) {
+                                        case SCALAR:
+                                        case OBJECT:
+                                        case INTERFACE:
+                                        case UNION:
+                                        case ENUM:
+                                        case INPUT_OBJECT:
+                                            return Stream.of(
+                                                    buildNonNullType(type),
+                                                    buildListType(type),
+                                                    buildNonNullListType(type),
+                                                    buildListNonNullType(type),
+                                                    buildNonNullListNonNullType(type)
+                                            );
+                                        default:
+                                            return Stream.empty();
+                                    }
+                                }
+                        )
+                        .map(__Type::toObjectValue)
+                        .collect(Collectors.toList());
+
+        if (ofTypes.size() > 0) {
+            operation.addField(
+                    new Field("__typeList")
+                            .addArgument(LIST_INPUT_NAME, ofTypes)
+                            .addField(new Field("name"))
+            );
+        }
 
         List<ObjectValueWithVariable> interfacesObjectValues = manager.getObjects()
                 .map(this::buildType)
@@ -100,32 +136,6 @@ public class IntrospectionMutationBuilder {
                         manager.getScalars()
                                 .map(this::buildType)
                 ).collect(Collectors.toCollection(LinkedHashSet::new))
-        );
-
-        schema.addTypes(
-                Stream.ofNullable(schema.getTypes())
-                        .flatMap(Collection::stream)
-                        .flatMap(type -> {
-                                    switch (type.getKind()) {
-                                        case SCALAR:
-                                        case OBJECT:
-                                        case INTERFACE:
-                                        case UNION:
-                                        case ENUM:
-                                        case INPUT_OBJECT:
-                                            return Stream.of(
-                                                    buildNonNullType(type),
-                                                    buildListType(type),
-                                                    buildNonNullListType(type),
-                                                    buildListNonNullType(type),
-                                                    buildNonNullListNonNullType(type)
-                                            );
-                                        default:
-                                            return Stream.empty();
-                                    }
-                                }
-                        )
-                        .collect(Collectors.toSet())
         );
 
         manager.getQueryOperationTypeName()

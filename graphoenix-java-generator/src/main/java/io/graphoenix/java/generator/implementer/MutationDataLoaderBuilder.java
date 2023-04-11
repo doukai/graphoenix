@@ -199,7 +199,7 @@ public class MutationDataLoaderBuilder {
             );
             codeBlock = CodeBlock.join(monoList, System.lineSeparator());
         } else {
-            codeBlock = CodeBlock.of("return Mono.empty()");
+            codeBlock = CodeBlock.of("return Mono.just(jsonValue)");
         }
         return MethodSpec.methodBuilder("load")
                 .addModifiers(Modifier.PUBLIC)

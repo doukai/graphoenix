@@ -243,10 +243,11 @@ public class InvokeHandlerBuilder {
                                                                                         .filter(fieldDefinitionContext -> !manager.fieldTypeIsList(fieldDefinitionContext.type()))
                                                                                         .map(fieldDefinitionContext -> {
                                                                                                     CodeBlock caseCodeBlock = CodeBlock.of("case $S:\n", fieldDefinitionContext.name().getText());
-                                                                                                    CodeBlock invokeCodeBlock = CodeBlock.of("return $L($L.$L(), selectionContext.field().selectionSet()).doOnNext($L -> $L.$L($L));",
-                                                                                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
+                                                                                                    CodeBlock invokeCodeBlock = CodeBlock.of("return $T.justOrEmpty($L.$L()).flatMap(field -> $L(field, selectionContext.field().selectionSet())).doOnNext($L -> $L.$L($L));",
+                                                                                                            ClassName.get(Mono.class),
                                                                                                             typeParameterName,
                                                                                                             typeManager.getFieldGetterMethodName(fieldDefinitionContext),
+                                                                                                            getObjectMethodName(manager.getFieldTypeName(fieldDefinitionContext.type())),
                                                                                                             fieldDefinitionContext.name().getText(),
                                                                                                             typeParameterName,
                                                                                                             typeManager.getFieldSetterMethodName(fieldDefinitionContext),
