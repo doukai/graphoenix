@@ -166,8 +166,15 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             registerPath(Path.of(graphqlPathName));
         } else {
             URL resource = classLoader.getResource(graphqlPathName);
+            if (resource == null) {
+                return;
+            }
+            Path resourcePath = Paths.get(resource.toURI());
+            if (Files.notExists(resourcePath)) {
+                return;
+            }
             try {
-                List<Path> pathList = Files.list(Paths.get(Objects.requireNonNull(resource).toURI())).collect(Collectors.toList());
+                List<Path> pathList = Files.list(resourcePath).collect(Collectors.toList());
                 for (Path path : pathList) {
                     registerPath(path);
                 }
@@ -185,6 +192,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public void registerPathByName(String graphqlPathName, String resourcePath) throws IOException {
         Path resource = Paths.get(resourcePath).resolve(graphqlPathName);
+        if (Files.notExists(resource)) {
+            return;
+        }
         try {
             List<Path> pathList = Files.list(resource).collect(Collectors.toList());
             for (Path path : pathList) {
@@ -203,6 +213,9 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     @Override
     public void registerPathByName(String graphqlPathName, Filer filer) throws IOException {
         Path resource = FILER_UTIL.getResourcesPath(filer).resolve(graphqlPathName);
+        if (Files.notExists(resource)) {
+            return;
+        }
         try {
             List<Path> pathList = Files.list(resource).collect(Collectors.toList());
             for (Path path : pathList) {

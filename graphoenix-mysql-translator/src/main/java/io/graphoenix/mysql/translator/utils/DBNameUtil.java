@@ -8,15 +8,23 @@ import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
+import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
+
 @ApplicationScoped
 public class DBNameUtil {
 
     public String graphqlTypeNameToTableName(String graphqlTypeName) {
+        if (graphqlTypeName.startsWith(INTROSPECTION_PREFIX)) {
+            return nameToDBEscape(INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName.replaceFirst(INTROSPECTION_PREFIX, ""))));
+        }
         return nameToDBEscape(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName));
     }
 
     public String graphqlTypeNameToTableAliaName(String graphqlTypeName, int level) {
-        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName) + "_" + level;
+        if (graphqlTypeName.startsWith(INTROSPECTION_PREFIX)) {
+            return INTROSPECTION_PREFIX.concat(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName.replaceFirst(INTROSPECTION_PREFIX, ""))).concat("_").concat(String.valueOf(level));
+        }
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, graphqlTypeName).concat("_").concat(String.valueOf(level));
     }
 
     public String graphqlFieldNameToColumnName(String graphqlFieldName) {

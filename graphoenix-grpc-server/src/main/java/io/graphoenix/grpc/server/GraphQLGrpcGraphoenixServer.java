@@ -37,7 +37,7 @@ public class GraphQLGrpcGraphoenixServer implements Runnable, RunningServer {
             }));
             server.awaitTermination();
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            Logger.error(e);
         }
     }
 
