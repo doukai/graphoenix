@@ -132,41 +132,45 @@ public abstract class MutationDataLoader {
     public Mono<Void> backup() {
         return Mono.justOrEmpty(graphQLConfig.getBackup())
                 .filter(backUp -> backUp)
-                .thenReturn(buildBackupQuery())
+                .flatMap(v -> buildBackupQuery())
                 .flatMap(operation -> operationHandler.query(DOCUMENT_UTIL.graphqlToOperation(operation.toString())))
                 .doOnNext(jsonString -> backUp = jsonString)
                 .then();
     }
 
-    protected Operation buildBackupQuery() {
-        return new Operation()
-                .setOperationType("query")
-                .setFields(
-                        updateMap.entrySet().stream()
-                                .filter(typeEntry -> typeEntry.getValue().size() > 0)
-                                .map(typeEntry ->
-                                        new Field()
-                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
-                                                .addArgument(
-                                                        manager.getObjectTypeIDFieldName(typeEntry.getKey()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST)),
-                                                        Map.of("in", typeEntry.getValue())
+    protected Mono<Operation> buildBackupQuery() {
+        return Mono.justOrEmpty(updateMap)
+                .filter(updateMap -> !updateMap.isEmpty())
+                .map(updateMap ->
+                        new Operation()
+                                .setOperationType("query")
+                                .setFields(
+                                        updateMap.entrySet().stream()
+                                                .filter(typeEntry -> typeEntry.getValue().size() > 0)
+                                                .map(typeEntry ->
+                                                        new Field()
+                                                                .setName(typeToLowerCamelName(typeEntry.getKey()).concat("List"))
+                                                                .addArgument(
+                                                                        manager.getObjectTypeIDFieldName(typeEntry.getKey()).orElseThrow(() -> new GraphQLErrors(TYPE_ID_FIELD_NOT_EXIST)),
+                                                                        Map.of("in", typeEntry.getValue())
+                                                                )
+                                                                .setFields(
+                                                                        manager.getFields(typeEntry.getKey())
+                                                                                .filter(fieldDefinitionContext -> !manager.isObject(typeEntry.getKey()))
+                                                                                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText())
+                                                                                .map(Field::new)
+                                                                                .collect(Collectors.toSet())
+                                                                )
                                                 )
-                                                .setFields(
-                                                        manager.getFields(typeEntry.getKey())
-                                                                .filter(fieldDefinitionContext -> !manager.isObject(typeEntry.getKey()))
-                                                                .map(fieldDefinitionContext -> fieldDefinitionContext.name().getText())
-                                                                .map(Field::new)
-                                                                .collect(Collectors.toSet())
-                                                )
+                                                .collect(Collectors.toSet())
                                 )
-                                .collect(Collectors.toSet())
                 );
     }
 
     public Mono<Void> compensating() {
         return Mono.justOrEmpty(graphQLConfig.getCompensating())
                 .filter(compensating -> compensating)
-                .thenReturn(buildCompensatingMutation())
+                .flatMap(v -> buildCompensatingMutation())
                 .flatMap(operation -> operationHandler.mutation(DOCUMENT_UTIL.graphqlToOperation(operation.toString())))
                 .then();
     }

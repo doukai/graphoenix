@@ -438,13 +438,13 @@ public class OperationHandlerImplementer {
                         filterMethodName = fieldTypeParameterName;
                     }
                     if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
-                        invokeCodeBlock = CodeBlock.of("return $T.from($L.buildRs()).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                        invokeCodeBlock = CodeBlock.of("return $T.from($L.buildRs()).map(invoked-> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
                     } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                        invokeCodeBlock = CodeBlock.of("return $L.map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", fieldDefinitionContext.name().getText(), filterMethodName);
+                        invokeCodeBlock = CodeBlock.of("return $L.map(invoked-> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))", fieldDefinitionContext.name().getText(), filterMethodName);
                     } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
-                        invokeCodeBlock = CodeBlock.of("return $L.collectList().map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", fieldDefinitionContext.name().getText(), filterMethodName);
+                        invokeCodeBlock = CodeBlock.of("return $L.collectList().map(invoked-> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))", fieldDefinitionContext.name().getText(), filterMethodName);
                     } else {
-                        invokeCodeBlock = CodeBlock.of("return $T.just($L).map(item-> selectionFilter.get().$L(item, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                        invokeCodeBlock = CodeBlock.of("return $T.just($L).map(invoked-> selectionFilter.get().$L(invoked, selectionContext.field().selectionSet()))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
                     }
                 } else {
                     String filterMethodName;
@@ -454,13 +454,13 @@ public class OperationHandlerImplementer {
                         filterMethodName = "toJsonValue";
                     }
                     if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(PublisherBuilder.class.getName())) {
-                        invokeCodeBlock = CodeBlock.of("return $T.from($L.buildRs()).map(item-> $L(item))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                        invokeCodeBlock = CodeBlock.of("return $T.from($L.buildRs()).map(this::$L)", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
                     } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Mono.class.getName())) {
-                        invokeCodeBlock = CodeBlock.of("return $L.map(item-> $L(item))", fieldDefinitionContext.name().getText(), filterMethodName);
+                        invokeCodeBlock = CodeBlock.of("return $L.map(this::$L)", fieldDefinitionContext.name().getText(), filterMethodName);
                     } else if (TYPE_UTIL.getClassName(returnClassName).canonicalName().equals(Flux.class.getName())) {
-                        invokeCodeBlock = CodeBlock.of("return $L.collectList().map(item-> $L(item))", fieldDefinitionContext.name().getText(), filterMethodName);
+                        invokeCodeBlock = CodeBlock.of("return $L.collectList().map(this::$L)", fieldDefinitionContext.name().getText(), filterMethodName);
                     } else {
-                        invokeCodeBlock = CodeBlock.of("return $T.just($L).map(item-> $L(item))", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
+                        invokeCodeBlock = CodeBlock.of("return $T.just($L).map(this::$L)", ClassName.get(Mono.class), fieldDefinitionContext.name().getText(), filterMethodName);
                     }
                 }
                 builder.addStatement(invokeCodeBlock);

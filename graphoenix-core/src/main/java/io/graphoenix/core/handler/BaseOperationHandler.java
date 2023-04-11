@@ -15,6 +15,7 @@ import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static jakarta.json.JsonValue.FALSE;
 import static jakarta.json.JsonValue.NULL;
@@ -41,15 +42,14 @@ public abstract class BaseOperationHandler {
     protected Mono<JsonValue> invoke(JsonValue jsonValue, GraphqlParser.OperationDefinitionContext operationDefinitionContext) {
         return Flux.fromIterable(operationDefinitionContext.selectionSet().selection())
                 .flatMap(selectionContext -> {
-                            String selectionName = selectionContext.field().alias() != null ? selectionContext.field().alias().name().getText() : selectionContext.field().name().getText();
+                            String selectionName = Optional.ofNullable(selectionContext.field().alias())
+                                    .map(aliasContext -> aliasContext.name().getText())
+                                    .orElse(selectionContext.field().name().getText());
                             JsonValue fieldValue = jsonValue.asJsonObject().get(selectionName);
-                            if (fieldValue == null || fieldValue.getValueType().equals(JsonValue.ValueType.NULL)) {
-                                return Mono.just(new AbstractMap.SimpleEntry<>(selectionName, fieldValue));
-                            } else {
-                                return getOperationHandler(selectionContext.field().name().getText())
-                                        .apply(fieldValue, selectionContext)
-                                        .map(subJsonValue -> new AbstractMap.SimpleEntry<>(selectionName, subJsonValue));
-                            }
+
+                            return getOperationHandler(selectionContext.field().name().getText())
+                                    .apply(Optional.ofNullable(fieldValue).orElse(NULL), selectionContext)
+                                    .map(invoked -> new AbstractMap.SimpleEntry<>(selectionName, Optional.ofNullable(invoked).orElse(NULL)));
                         }
                 )
                 .collectList()
