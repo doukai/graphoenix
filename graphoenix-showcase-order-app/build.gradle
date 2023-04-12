@@ -75,8 +75,8 @@ dependencies {
 
     compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
 
-    implementation project(":graphoenix-showcase-user")
-    implementation project(":graphoenix-showcase-order")
+    annotationProcessor project(":graphoenix-showcase-user")
+    annotationProcessor project(":graphoenix-showcase-order")
     annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')

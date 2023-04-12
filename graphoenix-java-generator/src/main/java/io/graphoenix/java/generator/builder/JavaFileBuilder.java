@@ -3,6 +3,7 @@ package io.graphoenix.java.generator.builder;
 import com.google.common.collect.Streams;
 import com.squareup.javapoet.JavaFile;
 import io.graphoenix.core.config.GraphQLConfig;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import io.vavr.control.Try;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,12 +18,14 @@ import java.util.stream.Stream;
 public class JavaFileBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final TypeSpecBuilder typeSpecBuilder;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public JavaFileBuilder(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig, TypeSpecBuilder typeSpecBuilder) {
+    public JavaFileBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, GraphQLConfig graphQLConfig, TypeSpecBuilder typeSpecBuilder) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.graphQLConfig = graphQLConfig;
         this.typeSpecBuilder = typeSpecBuilder;
     }
@@ -46,18 +49,22 @@ public class JavaFileBuilder {
                         .map(typeSpecBuilder::buildAnnotation)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getDirectivePackageName(), typeSpec).build()),
                 manager.getEnums()
+                        .filter(packageManager::isOwnPackage)
                         .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildEnum)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getEnumTypePackageName(), typeSpec).build()),
                 manager.getInterfaces()
+                        .filter(packageManager::isOwnPackage)
                         .filter(interfaceTypeDefinitionContext -> manager.getClassName(interfaceTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildInterface)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getInterfaceTypePackageName(), typeSpec).build()),
                 manager.getInputObjects()
+                        .filter(packageManager::isOwnPackage)
                         .filter(inputObjectTypeDefinitionContext -> manager.getClassName(inputObjectTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildClass)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getInputObjectTypePackageName(), typeSpec).build()),
                 manager.getObjects()
+                        .filter(packageManager::isOwnPackage)
                         .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
                         .map(typeSpecBuilder::buildClass)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getObjectTypePackageName(), typeSpec).build()),

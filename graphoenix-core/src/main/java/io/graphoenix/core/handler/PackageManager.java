@@ -70,6 +70,10 @@ public class PackageManager {
         return !isOwnPackage(objectTypeDefinitionContext);
     }
 
+    public boolean isNotOwnPackage(String packageName) {
+        return !isOwnPackage(packageName);
+    }
+
     public boolean isNotOwnPackage(GraphqlParser.EnumTypeDefinitionContext enumTypeDefinitionContext) {
         return !isOwnPackage(enumTypeDefinitionContext);
     }

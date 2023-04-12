@@ -13,6 +13,7 @@ import com.squareup.javapoet.TypeSpec;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.java.generator.implementer.TypeManager;
 import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
@@ -71,12 +72,14 @@ import static io.graphoenix.spi.constant.Hammurabi.PAGE_INFO_NAME;
 public class TypeSpecBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final TypeManager typeManager;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public TypeSpecBuilder(IGraphQLDocumentManager manager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
+    public TypeSpecBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, TypeManager typeManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.typeManager = typeManager;
         this.graphQLConfig = graphQLConfig;
     }
@@ -479,11 +482,19 @@ public class TypeSpecBuilder {
             Optional<GraphqlParser.ObjectTypeDefinitionContext> object = manager.getObject(nameContext.getText());
             if (object.isPresent()) {
                 if (isAnnotation) {
-                    return ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText() + layer);
+                    return manager.getPackageName(object.get())
+                            .filter(packageManager::isNotOwnPackage)
+                            .map(packageName -> ClassName.get(packageName.concat(".dto.annotation"), object.get().name().getText()))
+                            .orElseGet(() -> ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText()));
                 } else {
                     return manager.getClassName(object.get())
                             .map(TYPE_NAME_UTIL::toClassName)
-                            .orElseGet(() -> ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText()));
+                            .orElseGet(() ->
+                                    manager.getPackageName(object.get())
+                                            .filter(packageManager::isNotOwnPackage)
+                                            .map(packageName -> ClassName.get(packageName.concat(".dto.objectType"), object.get().name().getText()))
+                                            .orElseGet(() -> ClassName.get(graphQLConfig.getObjectTypePackageName(), object.get().name().getText()))
+                            );
                 }
             }
         } else if (manager.isEnum(nameContext.getText())) {
@@ -491,24 +502,49 @@ public class TypeSpecBuilder {
             if (enumType.isPresent()) {
                 return manager.getClassName(enumType.get())
                         .map(TYPE_NAME_UTIL::toClassName)
-                        .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()));
+                        .orElseGet(() ->
+                                manager.getPackageName(enumType.get())
+                                        .filter(packageManager::isNotOwnPackage)
+                                        .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), enumType.get().name().getText()))
+                                        .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()))
+                        );
             }
         } else if (manager.isInterface(nameContext.getText())) {
             Optional<GraphqlParser.InterfaceTypeDefinitionContext> interfaceType = manager.getInterface(nameContext.getText());
             if (interfaceType.isPresent()) {
-                return manager.getClassName(interfaceType.get())
-                        .map(TYPE_NAME_UTIL::toClassName)
-                        .orElseGet(() -> ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText()));
+                if (isAnnotation) {
+                    return manager.getPackageName(interfaceType.get())
+                            .filter(packageManager::isNotOwnPackage)
+                            .map(packageName -> ClassName.get(packageName.concat(".dto.annotation"), interfaceType.get().name().getText()))
+                            .orElseGet(() -> ClassName.get(graphQLConfig.getAnnotationPackageName(), interfaceType.get().name().getText()));
+                } else {
+                    return manager.getClassName(interfaceType.get())
+                            .map(TYPE_NAME_UTIL::toClassName)
+                            .orElseGet(() ->
+                                    manager.getPackageName(interfaceType.get())
+                                            .filter(packageManager::isNotOwnPackage)
+                                            .map(packageName -> ClassName.get(packageName.concat(".dto.interfaceType"), interfaceType.get().name().getText()))
+                                            .orElseGet(() -> ClassName.get(graphQLConfig.getInterfaceTypePackageName(), interfaceType.get().name().getText()))
+                            );
+                }
             }
         } else if (manager.isInputObject(nameContext.getText())) {
             Optional<GraphqlParser.InputObjectTypeDefinitionContext> inputObject = manager.getInputObject(nameContext.getText());
             if (inputObject.isPresent()) {
                 if (isAnnotation) {
-                    return ClassName.get(graphQLConfig.getDirectivePackageName(), inputObject.get().name().getText());
+                    return manager.getPackageName(inputObject.get())
+                            .filter(packageManager::isNotOwnPackage)
+                            .map(packageName -> ClassName.get(packageName.concat(".dto.annotation"), inputObject.get().name().getText()))
+                            .orElseGet(() -> ClassName.get(graphQLConfig.getAnnotationPackageName(), inputObject.get().name().getText()));
                 } else {
                     return manager.getClassName(inputObject.get())
                             .map(TYPE_NAME_UTIL::toClassName)
-                            .orElseGet(() -> ClassName.get(graphQLConfig.getInputObjectTypePackageName(), inputObject.get().name().getText()));
+                            .orElseGet(() ->
+                                    manager.getPackageName(inputObject.get())
+                                            .filter(packageManager::isNotOwnPackage)
+                                            .map(packageName -> ClassName.get(packageName.concat(".dto.inputObjectType"), inputObject.get().name().getText()))
+                                            .orElseGet(() -> ClassName.get(graphQLConfig.getInputObjectTypePackageName(), inputObject.get().name().getText()))
+                            );
                 }
             }
         }
@@ -801,6 +837,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildEnumTypeExpressionAnnotations() {
         return manager.getEnums()
+                .filter(packageManager::isOwnPackage)
                 .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).isEmpty())
                 .map(this::enumTypeToInputExpressionAnnotation);
     }
@@ -869,6 +906,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildObjectTypeExpressionAnnotations(int layer) {
         return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
                 .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
                 .filter(manager::isNotContainerType)
@@ -1044,6 +1082,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildObjectTypeInputAnnotations(int layer) {
         return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
                 .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
                 .filter(manager::isNotContainerType)
@@ -1138,6 +1177,7 @@ public class TypeSpecBuilder {
 
     public Stream<TypeSpec> buildObjectTypeOrderByAnnotations(int layer) {
         return manager.getObjects()
+                .filter(packageManager::isOwnPackage)
                 .filter(manager::isNotOperationType)
                 .filter(objectTypeDefinitionContext -> manager.getClassName(objectTypeDefinitionContext).isEmpty())
                 .filter(manager::isNotContainerType)

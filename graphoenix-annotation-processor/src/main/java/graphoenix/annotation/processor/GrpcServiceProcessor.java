@@ -27,9 +27,9 @@ import java.util.Set;
 
 import static javax.lang.model.SourceVersion.RELEASE_11;
 
-@SupportedAnnotationTypes("io.grpc.stub.annotations.GrpcGenerated")
-@SupportedSourceVersion(RELEASE_11)
-@AutoService(Processor.class)
+//@SupportedAnnotationTypes("io.grpc.stub.annotations.GrpcGenerated")
+//@SupportedSourceVersion(RELEASE_11)
+//@AutoService(Processor.class)
 public class GrpcServiceProcessor extends BaseProcessor {
 
     private Filer filer;
@@ -42,33 +42,33 @@ public class GrpcServiceProcessor extends BaseProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        if (annotations.isEmpty()) {
-            return false;
-        }
-        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
-        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
-        DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
-        GrpcInputObjectHandlerBuilder grpcInputObjectHandlerBuilder = BeanContext.get(GrpcInputObjectHandlerBuilder.class);
-        GrpcObjectHandlerBuilder grpcObjectHandlerBuilder = BeanContext.get(GrpcObjectHandlerBuilder.class);
-        GrpcRequestHandlerBuilder grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
-        GrpcServiceImplementer grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
-        GrpcFetchHandlerBuilder grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
-        registerElements(roundEnv);
-        try {
-            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
-            configRegister.registerPackage(GrpcServiceProcessor.class.getClassLoader());
-            if (graphQLConfig.getBuild()) {
-                manager.registerGraphQL(documentBuilder.buildDocument().toString());
-            }
-            grpcInputObjectHandlerBuilder.writeToFiler(filer);
-            grpcObjectHandlerBuilder.writeToFiler(filer);
-            grpcRequestHandlerBuilder.writeToFiler(filer);
-            grpcServiceImplementer.writeToFiler(filer);
-            grpcFetchHandlerBuilder.writeToFiler(filer);
-        } catch (IOException | URISyntaxException e) {
-            Logger.error(e);
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
-        }
+//        if (annotations.isEmpty()) {
+//            return false;
+//        }
+//        GraphQLConfig graphQLConfig = BeanContext.get(GraphQLConfig.class);
+//        IGraphQLDocumentManager manager = BeanContext.get(IGraphQLDocumentManager.class);
+//        DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
+//        GrpcInputObjectHandlerBuilder grpcInputObjectHandlerBuilder = BeanContext.get(GrpcInputObjectHandlerBuilder.class);
+//        GrpcObjectHandlerBuilder grpcObjectHandlerBuilder = BeanContext.get(GrpcObjectHandlerBuilder.class);
+//        GrpcRequestHandlerBuilder grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
+//        GrpcServiceImplementer grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
+//        GrpcFetchHandlerBuilder grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
+//        registerElements(roundEnv);
+//        try {
+//            GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
+//            configRegister.registerPackage(GrpcServiceProcessor.class.getClassLoader());
+//            if (graphQLConfig.getBuild()) {
+//                manager.registerGraphQL(documentBuilder.buildDocument().toString());
+//            }
+//            grpcInputObjectHandlerBuilder.writeToFiler(filer);
+//            grpcObjectHandlerBuilder.writeToFiler(filer);
+//            grpcRequestHandlerBuilder.writeToFiler(filer);
+//            grpcServiceImplementer.writeToFiler(filer);
+//            grpcFetchHandlerBuilder.writeToFiler(filer);
+//        } catch (IOException | URISyntaxException e) {
+//            Logger.error(e);
+//            processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage());
+//        }
         return false;
     }
 }

@@ -8,6 +8,11 @@ import io.graphoenix.core.handler.GraphQLConfigRegister;
 import io.graphoenix.core.schema.JsonSchemaTranslator;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.java.generator.implementer.*;
+import io.graphoenix.java.generator.implementer.grpc.GrpcFetchHandlerBuilder;
+import io.graphoenix.java.generator.implementer.grpc.GrpcInputObjectHandlerBuilder;
+import io.graphoenix.java.generator.implementer.grpc.GrpcObjectHandlerBuilder;
+import io.graphoenix.java.generator.implementer.grpc.GrpcRequestHandlerBuilder;
+import io.graphoenix.java.generator.implementer.grpc.GrpcServiceImplementer;
 import io.graphoenix.spi.antlr.IGraphQLDocumentManager;
 import org.tinylog.Logger;
 
@@ -60,6 +65,13 @@ public class ApplicationProcessor extends BaseProcessor {
         QueryHandlerBuilder queryHandlerBuilder = BeanContext.get(QueryHandlerBuilder.class);
         MutationHandlerBuilder mutationHandlerBuilder = BeanContext.get(MutationHandlerBuilder.class);
         OperationInterfaceImplementer operationInterfaceImplementer = BeanContext.get(OperationInterfaceImplementer.class);
+
+        GrpcInputObjectHandlerBuilder grpcInputObjectHandlerBuilder = BeanContext.get(GrpcInputObjectHandlerBuilder.class);
+        GrpcObjectHandlerBuilder grpcObjectHandlerBuilder = BeanContext.get(GrpcObjectHandlerBuilder.class);
+        GrpcRequestHandlerBuilder grpcRequestHandlerBuilder = BeanContext.get(GrpcRequestHandlerBuilder.class);
+        GrpcServiceImplementer grpcServiceImplementer = BeanContext.get(GrpcServiceImplementer.class);
+        GrpcFetchHandlerBuilder grpcFetchHandlerBuilder = BeanContext.get(GrpcFetchHandlerBuilder.class);
+
         registerElements(roundEnv);
         try {
             GraphQLConfigRegister configRegister = BeanContext.get(GraphQLConfigRegister.class);
@@ -104,6 +116,12 @@ public class ApplicationProcessor extends BaseProcessor {
             queryHandlerBuilder.writeToFiler(filer);
             mutationHandlerBuilder.writeToFiler(filer);
             operationInterfaceImplementer.writeToFiler(filer);
+
+            grpcInputObjectHandlerBuilder.writeToFiler(filer);
+            grpcObjectHandlerBuilder.writeToFiler(filer);
+            grpcRequestHandlerBuilder.writeToFiler(filer);
+            grpcServiceImplementer.writeToFiler(filer);
+            grpcFetchHandlerBuilder.writeToFiler(filer);
 
         } catch (IOException | URISyntaxException e) {
             Logger.error(e);

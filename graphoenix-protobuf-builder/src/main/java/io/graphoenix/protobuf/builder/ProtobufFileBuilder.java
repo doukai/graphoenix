@@ -4,6 +4,7 @@ import com.google.common.base.CaseFormat;
 import graphql.parser.antlr.GraphqlParser;
 import io.graphoenix.core.config.GraphQLConfig;
 import io.graphoenix.core.error.GraphQLErrors;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.protobuf.builder.v3.Enum;
 import io.graphoenix.protobuf.builder.v3.EnumField;
 import io.graphoenix.protobuf.builder.v3.Field;
@@ -29,11 +30,13 @@ import static io.graphoenix.spi.constant.Hammurabi.INTROSPECTION_PREFIX;
 public class ProtobufFileBuilder {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public ProtobufFileBuilder(IGraphQLDocumentManager manager, GraphQLConfig graphQLConfig) {
+    public ProtobufFileBuilder(IGraphQLDocumentManager manager, PackageManager packageManager, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.graphQLConfig = graphQLConfig;
     }
 
@@ -52,7 +55,23 @@ public class ProtobufFileBuilder {
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
-                .setTopLevelDefs(manager.getObjects().map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
+                .setTopLevelDefs(manager.getObjects().filter(packageManager::isOwnPackage).map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
+                .toString()
+        );
+        protoFileMap.put("interfaces", new ProtoFile()
+                .setImports(
+                        List.of(
+                                new Import().setName("enums.proto")
+                        )
+                )
+                .setOptions(
+                        List.of(
+                                new Option().setName("java_multiple_files").setValue(true),
+                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcObjectTypePackageName())
+                        )
+                )
+                .setPkg(graphQLConfig.getGrpcPackageName())
+                .setTopLevelDefs(manager.getInterfaces().filter(packageManager::isOwnPackage).map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
         protoFileMap.put("input_objects", new ProtoFile()
@@ -68,7 +87,7 @@ public class ProtobufFileBuilder {
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
-                .setTopLevelDefs(manager.getInputObjects().map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
+                .setTopLevelDefs(manager.getInputObjects().filter(packageManager::isOwnPackage).map(this::buildMessage).map(Message::toString).collect(Collectors.toList()))
                 .toString()
         );
         protoFileMap.put("enums", new ProtoFile()
@@ -79,7 +98,7 @@ public class ProtobufFileBuilder {
                         )
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
-                .setTopLevelDefs(manager.getEnums().map(this::buildEnum).map(Enum::toString).collect(Collectors.toList()))
+                .setTopLevelDefs(manager.getEnums().filter(packageManager::isOwnPackage).map(this::buildEnum).map(Enum::toString).collect(Collectors.toList()))
                 .toString()
         );
         protoFileMap.put("query_requests", new ProtoFile()
@@ -87,6 +106,7 @@ public class ProtobufFileBuilder {
                         List.of(
                                 new Import().setName("enums.proto"),
                                 new Import().setName("objects.proto"),
+                                new Import().setName("interfaces.proto"),
                                 new Import().setName("input_objects.proto")
                         )
                 )
@@ -105,6 +125,7 @@ public class ProtobufFileBuilder {
                         List.of(
                                 new Import().setName("enums.proto"),
                                 new Import().setName("objects.proto"),
+                                new Import().setName("interfaces.proto"),
                                 new Import().setName("input_objects.proto")
                         )
                 )
@@ -123,6 +144,7 @@ public class ProtobufFileBuilder {
                         List.of(
                                 new Import().setName("enums.proto"),
                                 new Import().setName("objects.proto"),
+                                new Import().setName("interfaces.proto"),
                                 new Import().setName("input_objects.proto")
                         )
                 )
@@ -141,6 +163,7 @@ public class ProtobufFileBuilder {
                         List.of(
                                 new Import().setName("enums.proto"),
                                 new Import().setName("objects.proto"),
+                                new Import().setName("interfaces.proto"),
                                 new Import().setName("input_objects.proto")
                         )
                 )
@@ -159,6 +182,7 @@ public class ProtobufFileBuilder {
                         List.of(
                                 new Import().setName("enums.proto"),
                                 new Import().setName("objects.proto"),
+                                new Import().setName("interfaces.proto"),
                                 new Import().setName("input_objects.proto"),
                                 new Import().setName("query_requests.proto"),
                                 new Import().setName("query_response.proto")
@@ -179,6 +203,7 @@ public class ProtobufFileBuilder {
                         List.of(
                                 new Import().setName("enums.proto"),
                                 new Import().setName("objects.proto"),
+                                new Import().setName("interfaces.proto"),
                                 new Import().setName("input_objects.proto"),
                                 new Import().setName("mutation_requests.proto"),
                                 new Import().setName("mutation_response.proto")
@@ -217,6 +242,7 @@ public class ProtobufFileBuilder {
                         new Service().setName(objectTypeDefinitionContext.name().getText().concat("Service"))
                                 .setRpcs(
                                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .filter(packageManager::isOwnPackage)
                                                 .map(fieldDefinitionContext ->
                                                         new Rpc()
                                                                 .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
@@ -235,6 +261,7 @@ public class ProtobufFileBuilder {
                         new Service().setName(objectTypeDefinitionContext.name().getText().concat("Service"))
                                 .setRpcs(
                                         objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                .filter(packageManager::isOwnPackage)
                                                 .map(fieldDefinitionContext ->
                                                         new Rpc()
                                                                 .setName(getServiceRpcName(fieldDefinitionContext.name().getText()))
@@ -260,6 +287,7 @@ public class ProtobufFileBuilder {
         return manager.getQueryOperationTypeName()
                 .flatMap(manager::getObject).stream()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(packageManager::isOwnPackage)
                 .map(fieldDefinitionContext ->
                         new Message()
                                 .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
@@ -287,6 +315,7 @@ public class ProtobufFileBuilder {
         return manager.getQueryOperationTypeName()
                 .flatMap(manager::getObject).stream()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(packageManager::isOwnPackage)
                 .map(fieldDefinitionContext ->
                         new Message()
                                 .setName("Query".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
@@ -305,6 +334,7 @@ public class ProtobufFileBuilder {
         return manager.getMutationOperationTypeName()
                 .flatMap(manager::getObject).stream()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(packageManager::isOwnPackage)
                 .map(fieldDefinitionContext ->
                         new Message()
                                 .setName("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Request"))
@@ -334,6 +364,7 @@ public class ProtobufFileBuilder {
         return manager.getMutationOperationTypeName()
                 .flatMap(manager::getObject).stream()
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(packageManager::isOwnPackage)
                 .map(fieldDefinitionContext ->
                         new Message()
                                 .setName("Mutation".concat(getServiceRpcName(fieldDefinitionContext.name().getText())).concat("Response"))
@@ -396,6 +427,23 @@ public class ProtobufFileBuilder {
                 );
     }
 
+    public Message buildMessage(GraphqlParser.InterfaceTypeDefinitionContext interfaceTypeDefinitionContext) {
+        return new Message()
+                .setName(getName(interfaceTypeDefinitionContext.name().getText()))
+                .setFields(
+                        IntStream.range(0, interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().size())
+                                .mapToObj(index ->
+                                        new Field()
+                                                .setName(getMessageFiledName(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).name().getText()))
+                                                .setType(buildType(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
+                                                .setOptional(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type().nonNullType() == null)
+                                                .setRepeated(manager.fieldTypeIsList(interfaceTypeDefinitionContext.fieldsDefinition().fieldDefinition().get(index).type()))
+                                                .setNumber(index + 1)
+                                )
+                                .collect(Collectors.toList())
+                );
+    }
+
     public Message buildMessage(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         return new Message()
                 .setName(getName(inputObjectTypeDefinitionContext.name().getText()))
@@ -437,8 +485,32 @@ public class ProtobufFileBuilder {
                 default:
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
             }
+        } else if (manager.isEnum(fieldTypeName)) {
+            return manager.getEnum(fieldTypeName)
+                    .flatMap(manager::getPackageName)
+                    .filter(packageManager::isNotOwnPackage)
+                    .map(packageName -> packageName.concat(".").concat(getName(fieldTypeName)))
+                    .orElseGet(() -> getName(fieldTypeName));
+        } else if (manager.isObject(fieldTypeName)) {
+            return manager.getObject(fieldTypeName)
+                    .flatMap(manager::getPackageName)
+                    .filter(packageManager::isNotOwnPackage)
+                    .map(packageName -> packageName.concat(".").concat(getName(fieldTypeName)))
+                    .orElseGet(() -> getName(fieldTypeName));
+        } else if (manager.isInterface(fieldTypeName)) {
+            return manager.getInterface(fieldTypeName)
+                    .flatMap(manager::getPackageName)
+                    .filter(packageManager::isNotOwnPackage)
+                    .map(packageName -> packageName.concat(".").concat(getName(fieldTypeName)))
+                    .orElseGet(() -> getName(fieldTypeName));
+        } else if (manager.isInputObject(fieldTypeName)) {
+            return manager.getInputObject(fieldTypeName)
+                    .flatMap(manager::getPackageName)
+                    .filter(packageManager::isNotOwnPackage)
+                    .map(packageName -> packageName.concat(".").concat(getName(fieldTypeName)))
+                    .orElseGet(() -> getName(fieldTypeName));
         } else {
-            return getName(fieldTypeName);
+            throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
         }
     }
 

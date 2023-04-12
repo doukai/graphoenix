@@ -1,0 +1,485 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.introspection.dto.inputObjectType.grpc";
+
+package io.graphoenix.introspection.grpc;
+
+import "enums.proto";
+
+message IntroSchemaExpression {
+    optional io.graphoenix.core.StringExpression id = 1;
+    optional io.graphoenix.core.StringExpression query_type_name = 2;
+    optional io.graphoenix.core.StringExpression mutation_type_name = 3;
+    optional io.graphoenix.core.StringExpression subscription_type_name = 4;
+    optional IntroTypeExpression types = 5;
+    optional IntroTypeExpression query_type = 6;
+    optional IntroTypeExpression mutation_type = 7;
+    optional IntroTypeExpression subscription_type = 8;
+    optional IntroDirectiveExpression directives = 9;
+    optional bool include_deprecated = 10;
+    optional io.graphoenix.core.IntExpression version = 11;
+    optional io.graphoenix.core.StringExpression realm_id = 12;
+    optional io.graphoenix.core.StringExpression create_user_id = 13;
+    optional io.graphoenix.core.StringExpression create_time = 14;
+    optional io.graphoenix.core.StringExpression update_user_id = 15;
+    optional io.graphoenix.core.StringExpression update_time = 16;
+    optional io.graphoenix.core.StringExpression create_group_id = 17;
+    optional io.graphoenix.core.StringExpression intro_typename = 18;
+    optional io.graphoenix.core.Conditional cond = 19;
+    repeated IntroSchemaExpression exs = 20;
+}
+message IntroSchemaInput {
+    optional string id = 1;
+    optional string query_type_name = 2;
+    optional string mutation_type_name = 3;
+    optional string subscription_type_name = 4;
+    repeated IntroTypeInput types = 5;
+    optional IntroTypeInput query_type = 6;
+    optional IntroTypeInput mutation_type = 7;
+    optional IntroTypeInput subscription_type = 8;
+    repeated IntroDirectiveInput directives = 9;
+    optional bool is_deprecated = 10;
+    optional int32 version = 11;
+    optional string realm_id = 12;
+    optional string create_user_id = 13;
+    optional string create_time = 14;
+    optional string update_user_id = 15;
+    optional string update_time = 16;
+    optional string create_group_id = 17;
+    optional string intro_typename = 18;
+}
+message IntroSchemaOrderBy {
+    optional io.graphoenix.core.Sort id = 1;
+    optional io.graphoenix.core.Sort query_type_name = 2;
+    optional io.graphoenix.core.Sort mutation_type_name = 3;
+    optional io.graphoenix.core.Sort subscription_type_name = 4;
+    optional io.graphoenix.core.Sort is_deprecated = 5;
+    optional io.graphoenix.core.Sort version = 6;
+    optional io.graphoenix.core.Sort realm_id = 7;
+    optional io.graphoenix.core.Sort create_user_id = 8;
+    optional io.graphoenix.core.Sort create_time = 9;
+    optional io.graphoenix.core.Sort update_user_id = 10;
+    optional io.graphoenix.core.Sort update_time = 11;
+    optional io.graphoenix.core.Sort create_group_id = 12;
+    optional io.graphoenix.core.Sort intro_typename = 13;
+}
+message IntroTypeExpression {
+    optional io.graphoenix.core.StringExpression name = 1;
+    optional io.graphoenix.core.IntExpression schema_id = 2;
+    optional io.graphoenix.core.IntroTypeKindExpression kind = 3;
+    optional io.graphoenix.core.StringExpression description = 4;
+    optional IntroFieldExpression fields = 5;
+    optional IntroTypeExpression interfaces = 6;
+    optional IntroTypeExpression possible_types = 7;
+    optional IntroEnumValueExpression enum_values = 8;
+    optional IntroInputValueExpression input_fields = 9;
+    optional io.graphoenix.core.StringExpression of_type_name = 10;
+    optional IntroTypeExpression of_type = 11;
+    optional bool include_deprecated = 12;
+    optional io.graphoenix.core.IntExpression version = 13;
+    optional io.graphoenix.core.StringExpression realm_id = 14;
+    optional io.graphoenix.core.StringExpression create_user_id = 15;
+    optional io.graphoenix.core.StringExpression create_time = 16;
+    optional io.graphoenix.core.StringExpression update_user_id = 17;
+    optional io.graphoenix.core.StringExpression update_time = 18;
+    optional io.graphoenix.core.StringExpression create_group_id = 19;
+    optional io.graphoenix.core.StringExpression intro_typename = 20;
+    optional io.graphoenix.core.Conditional cond = 21;
+    repeated IntroTypeExpression exs = 22;
+}
+message IntroTypeInput {
+    optional string name = 1;
+    optional int32 schema_id = 2;
+    optional io.graphoenix.core.IntroTypeKind kind = 3;
+    optional string description = 4;
+    repeated IntroFieldInput fields = 5;
+    repeated IntroTypeInput interfaces = 6;
+    repeated IntroTypeInput possible_types = 7;
+    repeated IntroEnumValueInput enum_values = 8;
+    repeated IntroInputValueInput input_fields = 9;
+    optional string of_type_name = 10;
+    optional IntroTypeInput of_type = 11;
+    optional bool is_deprecated = 12;
+    optional int32 version = 13;
+    optional string realm_id = 14;
+    optional string create_user_id = 15;
+    optional string create_time = 16;
+    optional string update_user_id = 17;
+    optional string update_time = 18;
+    optional string create_group_id = 19;
+    optional string intro_typename = 20;
+}
+message IntroTypeOrderBy {
+    optional io.graphoenix.core.Sort name = 1;
+    optional io.graphoenix.core.Sort schema_id = 2;
+    optional io.graphoenix.core.Sort kind = 3;
+    optional io.graphoenix.core.Sort description = 4;
+    optional io.graphoenix.core.Sort of_type_name = 5;
+    optional io.graphoenix.core.Sort is_deprecated = 6;
+    optional io.graphoenix.core.Sort version = 7;
+    optional io.graphoenix.core.Sort realm_id = 8;
+    optional io.graphoenix.core.Sort create_user_id = 9;
+    optional io.graphoenix.core.Sort create_time = 10;
+    optional io.graphoenix.core.Sort update_user_id = 11;
+    optional io.graphoenix.core.Sort update_time = 12;
+    optional io.graphoenix.core.Sort create_group_id = 13;
+    optional io.graphoenix.core.Sort intro_typename = 14;
+}
+message IntroTypeInterfacesExpression {
+    optional io.graphoenix.core.StringExpression id = 1;
+    optional io.graphoenix.core.StringExpression type_name = 2;
+    optional io.graphoenix.core.StringExpression interface_name = 3;
+    optional bool include_deprecated = 4;
+    optional io.graphoenix.core.IntExpression version = 5;
+    optional io.graphoenix.core.StringExpression realm_id = 6;
+    optional io.graphoenix.core.StringExpression create_user_id = 7;
+    optional io.graphoenix.core.StringExpression create_time = 8;
+    optional io.graphoenix.core.StringExpression update_user_id = 9;
+    optional io.graphoenix.core.StringExpression update_time = 10;
+    optional io.graphoenix.core.StringExpression create_group_id = 11;
+    optional io.graphoenix.core.StringExpression intro_typename = 12;
+    optional io.graphoenix.core.Conditional cond = 13;
+    repeated IntroTypeInterfacesExpression exs = 14;
+}
+message IntroTypeInterfacesInput {
+    optional string id = 1;
+    optional string type_name = 2;
+    optional string interface_name = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+}
+message IntroTypeInterfacesOrderBy {
+    optional io.graphoenix.core.Sort id = 1;
+    optional io.graphoenix.core.Sort type_name = 2;
+    optional io.graphoenix.core.Sort interface_name = 3;
+    optional io.graphoenix.core.Sort is_deprecated = 4;
+    optional io.graphoenix.core.Sort version = 5;
+    optional io.graphoenix.core.Sort realm_id = 6;
+    optional io.graphoenix.core.Sort create_user_id = 7;
+    optional io.graphoenix.core.Sort create_time = 8;
+    optional io.graphoenix.core.Sort update_user_id = 9;
+    optional io.graphoenix.core.Sort update_time = 10;
+    optional io.graphoenix.core.Sort create_group_id = 11;
+    optional io.graphoenix.core.Sort intro_typename = 12;
+}
+message IntroTypePossibleTypesExpression {
+    optional io.graphoenix.core.StringExpression id = 1;
+    optional io.graphoenix.core.StringExpression type_name = 2;
+    optional io.graphoenix.core.StringExpression possible_type_name = 3;
+    optional bool include_deprecated = 4;
+    optional io.graphoenix.core.IntExpression version = 5;
+    optional io.graphoenix.core.StringExpression realm_id = 6;
+    optional io.graphoenix.core.StringExpression create_user_id = 7;
+    optional io.graphoenix.core.StringExpression create_time = 8;
+    optional io.graphoenix.core.StringExpression update_user_id = 9;
+    optional io.graphoenix.core.StringExpression update_time = 10;
+    optional io.graphoenix.core.StringExpression create_group_id = 11;
+    optional io.graphoenix.core.StringExpression intro_typename = 12;
+    optional io.graphoenix.core.Conditional cond = 13;
+    repeated IntroTypePossibleTypesExpression exs = 14;
+}
+message IntroTypePossibleTypesInput {
+    optional string id = 1;
+    optional string type_name = 2;
+    optional string possible_type_name = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+}
+message IntroTypePossibleTypesOrderBy {
+    optional io.graphoenix.core.Sort id = 1;
+    optional io.graphoenix.core.Sort type_name = 2;
+    optional io.graphoenix.core.Sort possible_type_name = 3;
+    optional io.graphoenix.core.Sort is_deprecated = 4;
+    optional io.graphoenix.core.Sort version = 5;
+    optional io.graphoenix.core.Sort realm_id = 6;
+    optional io.graphoenix.core.Sort create_user_id = 7;
+    optional io.graphoenix.core.Sort create_time = 8;
+    optional io.graphoenix.core.Sort update_user_id = 9;
+    optional io.graphoenix.core.Sort update_time = 10;
+    optional io.graphoenix.core.Sort create_group_id = 11;
+    optional io.graphoenix.core.Sort intro_typename = 12;
+}
+message IntroFieldExpression {
+    optional io.graphoenix.core.StringExpression id = 1;
+    optional io.graphoenix.core.StringExpression name = 2;
+    optional io.graphoenix.core.StringExpression type_name = 3;
+    optional io.graphoenix.core.StringExpression of_type_name = 4;
+    optional IntroTypeExpression of_type = 5;
+    optional io.graphoenix.core.StringExpression description = 6;
+    optional IntroInputValueExpression args = 7;
+    optional IntroTypeExpression type = 8;
+    optional io.graphoenix.core.StringExpression deprecation_reason = 9;
+    optional bool include_deprecated = 10;
+    optional io.graphoenix.core.IntExpression version = 11;
+    optional io.graphoenix.core.StringExpression realm_id = 12;
+    optional io.graphoenix.core.StringExpression create_user_id = 13;
+    optional io.graphoenix.core.StringExpression create_time = 14;
+    optional io.graphoenix.core.StringExpression update_user_id = 15;
+    optional io.graphoenix.core.StringExpression update_time = 16;
+    optional io.graphoenix.core.StringExpression create_group_id = 17;
+    optional io.graphoenix.core.StringExpression intro_typename = 18;
+    optional io.graphoenix.core.Conditional cond = 19;
+    repeated IntroFieldExpression exs = 20;
+}
+message IntroFieldInput {
+    optional string id = 1;
+    optional string name = 2;
+    optional string type_name = 3;
+    optional string of_type_name = 4;
+    optional IntroTypeInput of_type = 5;
+    optional string description = 6;
+    repeated IntroInputValueInput args = 7;
+    optional IntroTypeInput type = 8;
+    optional string deprecation_reason = 9;
+    optional bool is_deprecated = 10;
+    optional int32 version = 11;
+    optional string realm_id = 12;
+    optional string create_user_id = 13;
+    optional string create_time = 14;
+    optional string update_user_id = 15;
+    optional string update_time = 16;
+    optional string create_group_id = 17;
+    optional string intro_typename = 18;
+}
+message IntroFieldOrderBy {
+    optional io.graphoenix.core.Sort id = 1;
+    optional io.graphoenix.core.Sort name = 2;
+    optional io.graphoenix.core.Sort type_name = 3;
+    optional io.graphoenix.core.Sort of_type_name = 4;
+    optional io.graphoenix.core.Sort description = 5;
+    optional io.graphoenix.core.Sort deprecation_reason = 6;
+    optional io.graphoenix.core.Sort is_deprecated = 7;
+    optional io.graphoenix.core.Sort version = 8;
+    optional io.graphoenix.core.Sort realm_id = 9;
+    optional io.graphoenix.core.Sort create_user_id = 10;
+    optional io.graphoenix.core.Sort create_time = 11;
+    optional io.graphoenix.core.Sort update_user_id = 12;
+    optional io.graphoenix.core.Sort update_time = 13;
+    optional io.graphoenix.core.Sort create_group_id = 14;
+    optional io.graphoenix.core.Sort intro_typename = 15;
+}
+message IntroInputValueExpression {
+    optional io.graphoenix.core.StringExpression id = 1;
+    optional io.graphoenix.core.StringExpression name = 2;
+    optional io.graphoenix.core.StringExpression type_name = 3;
+    optional io.graphoenix.core.StringExpression of_type_name = 4;
+    optional IntroTypeExpression of_type = 5;
+    optional io.graphoenix.core.IntExpression field_id = 6;
+    optional io.graphoenix.core.StringExpression directive_name = 7;
+    optional io.graphoenix.core.StringExpression description = 8;
+    optional IntroTypeExpression type = 9;
+    optional io.graphoenix.core.StringExpression default_value = 10;
+    optional bool include_deprecated = 11;
+    optional io.graphoenix.core.IntExpression version = 12;
+    optional io.graphoenix.core.StringExpression realm_id = 13;
+    optional io.graphoenix.core.StringExpression create_user_id = 14;
+    optional io.graphoenix.core.StringExpression create_time = 15;
+    optional io.graphoenix.core.StringExpression update_user_id = 16;
+    optional io.graphoenix.core.StringExpression update_time = 17;
+    optional io.graphoenix.core.StringExpression create_group_id = 18;
+    optional io.graphoenix.core.StringExpression intro_typename = 19;
+    optional io.graphoenix.core.Conditional cond = 20;
+    repeated IntroInputValueExpression exs = 21;
+}
+message IntroInputValueInput {
+    optional string id = 1;
+    optional string name = 2;
+    optional string type_name = 3;
+    optional string of_type_name = 4;
+    optional IntroTypeInput of_type = 5;
+    optional int32 field_id = 6;
+    optional string directive_name = 7;
+    optional string description = 8;
+    optional IntroTypeInput type = 9;
+    optional string default_value = 10;
+    optional bool is_deprecated = 11;
+    optional int32 version = 12;
+    optional string realm_id = 13;
+    optional string create_user_id = 14;
+    optional string create_time = 15;
+    optional string update_user_id = 16;
+    optional string update_time = 17;
+    optional string create_group_id = 18;
+    optional string intro_typename = 19;
+}
+message IntroInputValueOrderBy {
+    optional io.graphoenix.core.Sort id = 1;
+    optional io.graphoenix.core.Sort name = 2;
+    optional io.graphoenix.core.Sort type_name = 3;
+    optional io.graphoenix.core.Sort of_type_name = 4;
+    optional io.graphoenix.core.Sort field_id = 5;
+    optional io.graphoenix.core.Sort directive_name = 6;
+    optional io.graphoenix.core.Sort description = 7;
+    optional io.graphoenix.core.Sort default_value = 8;
+    optional io.graphoenix.core.Sort is_deprecated = 9;
+    optional io.graphoenix.core.Sort version = 10;
+    optional io.graphoenix.core.Sort realm_id = 11;
+    optional io.graphoenix.core.Sort create_user_id = 12;
+    optional io.graphoenix.core.Sort create_time = 13;
+    optional io.graphoenix.core.Sort update_user_id = 14;
+    optional io.graphoenix.core.Sort update_time = 15;
+    optional io.graphoenix.core.Sort create_group_id = 16;
+    optional io.graphoenix.core.Sort intro_typename = 17;
+}
+message IntroEnumValueExpression {
+    optional io.graphoenix.core.StringExpression id = 1;
+    optional io.graphoenix.core.StringExpression name = 2;
+    optional io.graphoenix.core.StringExpression of_type_name = 3;
+    optional IntroTypeExpression of_type = 4;
+    optional io.graphoenix.core.StringExpression description = 5;
+    optional io.graphoenix.core.StringExpression deprecation_reason = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.IntExpression version = 8;
+    optional io.graphoenix.core.StringExpression realm_id = 9;
+    optional io.graphoenix.core.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.StringExpression create_time = 11;
+    optional io.graphoenix.core.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.StringExpression update_time = 13;
+    optional io.graphoenix.core.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.StringExpression intro_typename = 15;
+    optional io.graphoenix.core.Conditional cond = 16;
+    repeated IntroEnumValueExpression exs = 17;
+}
+message IntroEnumValueInput {
+    optional string id = 1;
+    optional string name = 2;
+    optional string of_type_name = 3;
+    optional IntroTypeInput of_type = 4;
+    optional string description = 5;
+    optional string deprecation_reason = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional string create_time = 11;
+    optional string update_user_id = 12;
+    optional string update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+}
+message IntroEnumValueOrderBy {
+    optional io.graphoenix.core.Sort id = 1;
+    optional io.graphoenix.core.Sort name = 2;
+    optional io.graphoenix.core.Sort of_type_name = 3;
+    optional io.graphoenix.core.Sort description = 4;
+    optional io.graphoenix.core.Sort deprecation_reason = 5;
+    optional io.graphoenix.core.Sort is_deprecated = 6;
+    optional io.graphoenix.core.Sort version = 7;
+    optional io.graphoenix.core.Sort realm_id = 8;
+    optional io.graphoenix.core.Sort create_user_id = 9;
+    optional io.graphoenix.core.Sort create_time = 10;
+    optional io.graphoenix.core.Sort update_user_id = 11;
+    optional io.graphoenix.core.Sort update_time = 12;
+    optional io.graphoenix.core.Sort create_group_id = 13;
+    optional io.graphoenix.core.Sort intro_typename = 14;
+}
+message IntroDirectiveExpression {
+    optional io.graphoenix.core.StringExpression name = 1;
+    optional io.graphoenix.core.IntExpression schema_id = 2;
+    optional io.graphoenix.core.StringExpression description = 3;
+    optional io.graphoenix.core.IntroDirectiveLocationExpression locations = 4;
+    optional IntroInputValueExpression args = 5;
+    optional io.graphoenix.core.BooleanExpression is_repeatable = 6;
+    optional bool include_deprecated = 7;
+    optional io.graphoenix.core.IntExpression version = 8;
+    optional io.graphoenix.core.StringExpression realm_id = 9;
+    optional io.graphoenix.core.StringExpression create_user_id = 10;
+    optional io.graphoenix.core.StringExpression create_time = 11;
+    optional io.graphoenix.core.StringExpression update_user_id = 12;
+    optional io.graphoenix.core.StringExpression update_time = 13;
+    optional io.graphoenix.core.StringExpression create_group_id = 14;
+    optional io.graphoenix.core.StringExpression intro_typename = 15;
+    optional io.graphoenix.core.Conditional cond = 16;
+    repeated IntroDirectiveExpression exs = 17;
+}
+message IntroDirectiveInput {
+    optional string name = 1;
+    optional int32 schema_id = 2;
+    optional string description = 3;
+    repeated io.graphoenix.core.IntroDirectiveLocation locations = 4;
+    repeated IntroInputValueInput args = 5;
+    optional bool is_repeatable = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional string create_time = 11;
+    optional string update_user_id = 12;
+    optional string update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+}
+message IntroDirectiveOrderBy {
+    optional io.graphoenix.core.Sort name = 1;
+    optional io.graphoenix.core.Sort schema_id = 2;
+    optional io.graphoenix.core.Sort description = 3;
+    optional io.graphoenix.core.Sort is_repeatable = 4;
+    optional io.graphoenix.core.Sort is_deprecated = 5;
+    optional io.graphoenix.core.Sort version = 6;
+    optional io.graphoenix.core.Sort realm_id = 7;
+    optional io.graphoenix.core.Sort create_user_id = 8;
+    optional io.graphoenix.core.Sort create_time = 9;
+    optional io.graphoenix.core.Sort update_user_id = 10;
+    optional io.graphoenix.core.Sort update_time = 11;
+    optional io.graphoenix.core.Sort create_group_id = 12;
+    optional io.graphoenix.core.Sort intro_typename = 13;
+}
+message IntroDirectiveLocationsExpression {
+    optional io.graphoenix.core.StringExpression id = 1;
+    optional io.graphoenix.core.StringExpression directive_name = 2;
+    optional io.graphoenix.core.IntroDirectiveLocationExpression directive_location = 3;
+    optional bool include_deprecated = 4;
+    optional io.graphoenix.core.IntExpression version = 5;
+    optional io.graphoenix.core.StringExpression realm_id = 6;
+    optional io.graphoenix.core.StringExpression create_user_id = 7;
+    optional io.graphoenix.core.StringExpression create_time = 8;
+    optional io.graphoenix.core.StringExpression update_user_id = 9;
+    optional io.graphoenix.core.StringExpression update_time = 10;
+    optional io.graphoenix.core.StringExpression create_group_id = 11;
+    optional io.graphoenix.core.StringExpression intro_typename = 12;
+    optional io.graphoenix.core.Conditional cond = 13;
+    repeated IntroDirectiveLocationsExpression exs = 14;
+}
+message IntroDirectiveLocationsInput {
+    optional string id = 1;
+    optional string directive_name = 2;
+    optional io.graphoenix.core.IntroDirectiveLocation directive_location = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional string create_time = 8;
+    optional string update_user_id = 9;
+    optional string update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+}
+message IntroDirectiveLocationsOrderBy {
+    optional io.graphoenix.core.Sort id = 1;
+    optional io.graphoenix.core.Sort directive_name = 2;
+    optional io.graphoenix.core.Sort directive_location = 3;
+    optional io.graphoenix.core.Sort is_deprecated = 4;
+    optional io.graphoenix.core.Sort version = 5;
+    optional io.graphoenix.core.Sort realm_id = 6;
+    optional io.graphoenix.core.Sort create_user_id = 7;
+    optional io.graphoenix.core.Sort create_time = 8;
+    optional io.graphoenix.core.Sort update_user_id = 9;
+    optional io.graphoenix.core.Sort update_time = 10;
+    optional io.graphoenix.core.Sort create_group_id = 11;
+    optional io.graphoenix.core.Sort intro_typename = 12;
+}

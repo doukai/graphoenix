@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.user.grpc";
+
+package io.graphoenix.showcase.user.grpc;
+
+import "enums.proto";
+import "objects.proto";
+import "input_objects.proto";
+
+message MutationUserResponse {
+    optional User user = 1;
+}
+message MutationUserListResponse {
+    repeated User user_list = 1;
+}
+message MutationUserProfileResponse {
+    optional UserProfile user_profile = 1;
+}
+message MutationUserProfileListResponse {
+    repeated UserProfile user_profile_list = 1;
+}
+message MutationUserMobileNumbersResponse {
+    optional UserMobileNumbers user_mobile_numbers = 1;
+}
+message MutationUserMobileNumbersListResponse {
+    repeated UserMobileNumbers user_mobile_numbers_list = 1;
+}
+message MutationUserRoleResponse {
+    optional UserRole user_role = 1;
+}
+message MutationUserRoleListResponse {
+    repeated UserRole user_role_list = 1;
+}
+message MutationRoleResponse {
+    optional Role role = 1;
+}
+message MutationRoleListResponse {
+    repeated Role role_list = 1;
+}
+message MutationRoleRoleTypeResponse {
+    optional RoleRoleType role_role_type = 1;
+}
+message MutationRoleRoleTypeListResponse {
+    repeated RoleRoleType role_role_type_list = 1;
+}
+message MutationOrganizationResponse {
+    optional Organization organization = 1;
+}
+message MutationOrganizationListResponse {
+    repeated Organization organization_list = 1;
+}
+message MutationIsDeprecatedResponse {
+    optional bool is_deprecated = 1;
+}
+message MutationVersionResponse {
+    optional int32 version = 1;
+}
+message MutationRealmIdResponse {
+    optional string realm_id = 1;
+}
+message MutationCreateUserIdResponse {
+    optional string create_user_id = 1;
+}
+message MutationCreateTimeResponse {
+    optional string create_time = 1;
+}
+message MutationUpdateUserIdResponse {
+    optional string update_user_id = 1;
+}
+message MutationUpdateTimeResponse {
+    optional string update_time = 1;
+}
+message MutationCreateGroupIdResponse {
+    optional string create_group_id = 1;
+}
