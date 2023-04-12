@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.core.dto.objectType.grpc";
+
+package io.graphoenix.core.grpc;
+
+import "io/graphoenix/core/enums.proto";
+
+message PageInfo {
+    bool has_next_page = 1;
+    bool has_previous_page = 2;
+    string start_cursor = 3;
+    string end_cursor = 4;
+}

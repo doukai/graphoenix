@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.introspection.grpc";
+
+package io.graphoenix.introspection.grpc;
+
+import "io/graphoenix/introspection/enums.proto";
+import "io/graphoenix/introspection/objects.proto";
+import "io/graphoenix/introspection/interfaces.proto";
+import "io/graphoenix/introspection/input_objects.proto";
+import "io/graphoenix/introspection/mutation_requests.proto";
+import "io/graphoenix/introspection/mutation_responses.proto";
+
+service MutationTypeService {
+    rpc IntroSchema (MutationIntroSchemaRequest) returns (MutationIntroSchemaResponse);
+    rpc IntroSchemaList (MutationIntroSchemaListRequest) returns (MutationIntroSchemaListResponse);
+    rpc IntroType (MutationIntroTypeRequest) returns (MutationIntroTypeResponse);
+    rpc IntroTypeList (MutationIntroTypeListRequest) returns (MutationIntroTypeListResponse);
+    rpc IntroTypeInterfaces (MutationIntroTypeInterfacesRequest) returns (MutationIntroTypeInterfacesResponse);
+    rpc IntroTypeInterfacesList (MutationIntroTypeInterfacesListRequest) returns (MutationIntroTypeInterfacesListResponse);
+    rpc IntroTypePossibleTypes (MutationIntroTypePossibleTypesRequest) returns (MutationIntroTypePossibleTypesResponse);
+    rpc IntroTypePossibleTypesList (MutationIntroTypePossibleTypesListRequest) returns (MutationIntroTypePossibleTypesListResponse);
+    rpc IntroField (MutationIntroFieldRequest) returns (MutationIntroFieldResponse);
+    rpc IntroFieldList (MutationIntroFieldListRequest) returns (MutationIntroFieldListResponse);
+    rpc IntroInputValue (MutationIntroInputValueRequest) returns (MutationIntroInputValueResponse);
+    rpc IntroInputValueList (MutationIntroInputValueListRequest) returns (MutationIntroInputValueListResponse);
+    rpc IntroEnumValue (MutationIntroEnumValueRequest) returns (MutationIntroEnumValueResponse);
+    rpc IntroEnumValueList (MutationIntroEnumValueListRequest) returns (MutationIntroEnumValueListResponse);
+    rpc IntroDirective (MutationIntroDirectiveRequest) returns (MutationIntroDirectiveResponse);
+    rpc IntroDirectiveList (MutationIntroDirectiveListRequest) returns (MutationIntroDirectiveListResponse);
+    rpc IntroDirectiveLocations (MutationIntroDirectiveLocationsRequest) returns (MutationIntroDirectiveLocationsResponse);
+    rpc IntroDirectiveLocationsList (MutationIntroDirectiveLocationsListRequest) returns (MutationIntroDirectiveLocationsListResponse);
+    rpc IsDeprecated (MutationIsDeprecatedRequest) returns (MutationIsDeprecatedResponse);
+    rpc Version (MutationVersionRequest) returns (MutationVersionResponse);
+    rpc RealmId (MutationRealmIdRequest) returns (MutationRealmIdResponse);
+    rpc CreateUserId (MutationCreateUserIdRequest) returns (MutationCreateUserIdResponse);
+    rpc CreateTime (MutationCreateTimeRequest) returns (MutationCreateTimeResponse);
+    rpc UpdateUserId (MutationUpdateUserIdRequest) returns (MutationUpdateUserIdResponse);
+    rpc UpdateTime (MutationUpdateTimeRequest) returns (MutationUpdateTimeResponse);
+    rpc CreateGroupId (MutationCreateGroupIdRequest) returns (MutationCreateGroupIdResponse);
+}

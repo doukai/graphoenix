@@ -226,6 +226,10 @@ public interface IGraphQLDocumentManager {
 
     Optional<String> getPackageName(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
 
+    Optional<String> getPackageName(GraphqlParser.DirectivesContext directivesContext);
+
+    Optional<String> getPackageName(GraphqlParser.TypeContext typeContext);
+
     String getPackageName(String typeName);
 
     String getProtocol(GraphqlParser.FieldDefinitionContext fieldDefinitionContext);
@@ -273,6 +277,10 @@ public interface IGraphQLDocumentManager {
     String getFieldTypeName(GraphqlParser.TypeContext typeContext);
 
     boolean fieldTypeIsList(GraphqlParser.TypeContext typeContext);
+
+    Stream<GraphqlParser.InterfaceTypeDefinitionContext> getInterfaces(GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext);
+
+    Stream<GraphqlParser.DirectiveLocationContext> getDirectiveLocations(GraphqlParser.DirectiveLocationsContext directiveLocationsContext);
 
     void clearAll();
 }

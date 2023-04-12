@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.core.dto.inputObjectType.grpc";
+
+package io.graphoenix.core.grpc;
+
+import "io/graphoenix/core/enums.proto";
+
+message IDExpression {
+    optional Operator opr = 1;
+    optional string val = 2;
+    repeated string in = 3;
+    optional bool skip_null = 4;
+}
+message StringExpression {
+    optional Operator opr = 1;
+    optional string val = 2;
+    repeated string in = 3;
+    optional bool skip_null = 4;
+}
+message BooleanExpression {
+    optional Operator opr = 1;
+    optional bool val = 2;
+    repeated bool in = 3;
+    optional bool skip_null = 4;
+}
+message IntExpression {
+    optional Operator opr = 1;
+    optional int32 val = 2;
+    repeated int32 in = 3;
+    optional bool skip_null = 4;
+}
+message FloatExpression {
+    optional Operator opr = 1;
+    optional float val = 2;
+    repeated float in = 3;
+    optional bool skip_null = 4;
+}
+message MapWith {
+    optional string type = 1;
+    optional string from = 2;
+    optional string to = 3;
+}
+message InvokeParameter {
+    optional string name = 1;
+    optional string class_name = 2;
+}
+message ValidationInput {
+    optional int32 min_length = 1;
+    optional int32 max_length = 2;
+    optional string pattern = 3;
+    optional string format = 4;
+    optional string content_media_type = 5;
+    optional string content_encoding = 6;
+    optional float minimum = 7;
+    optional float exclusive_minimum = 8;
+    optional float maximum = 9;
+    optional float exclusive_maximum = 10;
+    optional float multiple_of = 11;
+    optional string const = 12;
+    repeated string enum = 13;
+    optional ValidationInput items = 14;
+    optional int32 min_items = 15;
+    optional int32 max_items = 16;
+    optional bool unique_items = 17;
+    repeated ValidationInput all_of = 18;
+    repeated ValidationInput any_of = 19;
+    repeated ValidationInput one_of = 20;
+    optional ValidationInput not = 21;
+    repeated Property properties = 22;
+    optional ValidationInput if = 23;
+    optional ValidationInput then = 24;
+    optional ValidationInput else = 25;
+    repeated Property dependent_required = 26;
+}
+message Property {
+    string name = 1;
+    optional ValidationInput validation = 2;
+    repeated string required = 3;
+}
+message OperatorExpression {
+    optional Operator opr = 1;
+    optional Operator val = 2;
+    repeated Operator in = 3;
+}
+message ConditionalExpression {
+    optional Operator opr = 1;
+    optional Conditional val = 2;
+    repeated Conditional in = 3;
+}
+message SortExpression {
+    optional Operator opr = 1;
+    optional Sort val = 2;
+    repeated Sort in = 3;
+}
+message FunctionExpression {
+    optional Operator opr = 1;
+    optional Function val = 2;
+    repeated Function in = 3;
+}
+message ProtocolExpression {
+    optional Operator opr = 1;
+    optional Protocol val = 2;
+    repeated Protocol in = 3;
+}
+message IntroTypeKindExpression {
+    optional Operator opr = 1;
+    optional IntroTypeKind val = 2;
+    repeated IntroTypeKind in = 3;
+}
+message IntroDirectiveLocationExpression {
+    optional Operator opr = 1;
+    optional IntroDirectiveLocation val = 2;
+    repeated IntroDirectiveLocation in = 3;
+}

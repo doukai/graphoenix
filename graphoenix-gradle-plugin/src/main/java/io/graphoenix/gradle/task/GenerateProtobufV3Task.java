@@ -12,12 +12,14 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskExecutionException;
 import org.tinylog.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 public class GenerateProtobufV3Task extends BaseTask {
 
@@ -30,7 +32,10 @@ public class GenerateProtobufV3Task extends BaseTask {
         DocumentBuilder documentBuilder = BeanContext.get(DocumentBuilder.class);
         ProtobufFileBuilder protobufFileBuilder = BeanContext.get(ProtobufFileBuilder.class);
         SourceSet sourceSet = getProject().getConvention().getPlugin(JavaPluginConvention.class).getSourceSets().getByName(SourceSet.MAIN_SOURCE_SET_NAME);
-        Path protoPath = Path.of(sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath()).getParent().resolve("proto");
+        Path protoPath = Path.of(sourceSet.getJava().getSourceDirectories().filter(file -> file.getPath().contains(MAIN_JAVA_PATH)).getAsPath())
+                .getParent()
+                .resolve("proto")
+                .resolve(graphQLConfig.getPackageName().replaceAll("\\.", Matcher.quoteReplacement(File.separator)));
         try {
             registerInvoke();
             configRegister.registerPackage(createClassLoader());

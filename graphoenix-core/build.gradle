@@ -11,9 +11,40 @@ buildscript {
 
 plugins {
     id 'java'
+    id 'com.google.protobuf' version '0.9.1'
 }
 apply plugin: 'maven'
 apply plugin: 'io.graphoenix'
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.21.7"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.52.1'
+        }
+        reactor {
+            artifact = "com.salesforce.servicelibs:reactor-grpc:1.2.3"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+            reactor {}
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/java'
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/reactor'
+        }
+    }
+}
 
 compileJava.options.sourcepath = files('src/main/resources')
 
@@ -44,6 +75,13 @@ dependencies {
     implementation 'org.tinylog:tinylog-impl:2.4.1'
     implementation 'org.tinylog:slf4j-tinylog:2.4.1'
     implementation 'org.tinylog:jcl-tinylog:2.4.1'
+
+    runtimeOnly 'io.grpc:grpc-netty-shaded:1.52.1'
+    implementation 'io.grpc:grpc-protobuf:1.52.1'
+    implementation 'io.grpc:grpc-stub:1.52.1'
+    implementation 'com.salesforce.servicelibs:reactor-grpc-stub:1.2.3'
+
+    compileOnly 'org.apache.tomcat:annotations-api:6.0.53' // necessary for Java 9+
 
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')

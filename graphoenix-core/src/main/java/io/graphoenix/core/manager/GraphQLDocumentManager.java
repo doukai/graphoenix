@@ -24,11 +24,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -932,6 +928,7 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
         return Optional.ofNullable(fieldDefinitionContext.directives()).flatMap(this::getPackageName);
     }
 
+    @Override
     public Optional<String> getPackageName(GraphqlParser.DirectivesContext directivesContext) {
         return directivesContext.directive().stream()
                 .filter(directiveContext -> directiveContext.name().getText().equals(PACKAGE_INFO_DIRECTIVE_NAME))
@@ -941,6 +938,21 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
                 .filter(argumentContext -> argumentContext.valueWithVariable().StringValue() != null)
                 .findFirst()
                 .map(argumentContext -> DOCUMENT_UTIL.getStringValue(argumentContext.valueWithVariable().StringValue()));
+    }
+
+    @Override
+    public Optional<String> getPackageName(GraphqlParser.TypeContext typeContext) {
+        String typeName = getFieldTypeName(typeContext);
+        if (isObject(typeName)) {
+            return getObject(typeName).flatMap(this::getPackageName);
+        } else if (isInterface(typeName)) {
+            return getInterface(typeName).flatMap(this::getPackageName);
+        } else if (isEnum(typeName)) {
+            return getEnum(typeName).flatMap(this::getPackageName);
+        } else if (isInputObject(typeName)) {
+            return getInputObject(typeName).flatMap(this::getPackageName);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -1162,6 +1174,27 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
             return true;
         }
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(typeContext.getText()));
+    }
+
+    @Override
+    public Stream<GraphqlParser.InterfaceTypeDefinitionContext> getInterfaces(GraphqlParser.ImplementsInterfacesContext implementsInterfacesContext) {
+        return Stream.concat(
+                Stream.ofNullable(implementsInterfacesContext.typeName())
+                        .flatMap(Collection::stream)
+                        .map(typeNameContext -> typeNameContext.name().getText())
+                        .flatMap(name -> getInterface(name).stream()),
+                Stream.ofNullable(implementsInterfacesContext.implementsInterfaces())
+                        .flatMap(this::getInterfaces)
+        );
+    }
+
+    @Override
+    public Stream<GraphqlParser.DirectiveLocationContext> getDirectiveLocations(GraphqlParser.DirectiveLocationsContext directiveLocationsContext) {
+        return Stream.concat(
+                Stream.ofNullable(directiveLocationsContext.directiveLocation()),
+                Stream.ofNullable(directiveLocationsContext.directiveLocations())
+                        .flatMap(this::getDirectiveLocations)
+        );
     }
 
     @Override

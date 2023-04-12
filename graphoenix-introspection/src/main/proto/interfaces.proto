@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-option java_multiple_files = true;
-option java_package = "io.graphoenix.introspection.dto.objectType.grpc";
-
-package io.graphoenix.introspection.grpc;
-
-import "enums.proto";
-

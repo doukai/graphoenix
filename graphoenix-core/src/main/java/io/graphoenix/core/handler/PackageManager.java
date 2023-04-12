@@ -66,6 +66,10 @@ public class PackageManager {
         return manager.getPackageName(fieldDefinitionContext).map(this::isOwnPackage).orElse(true);
     }
 
+    public boolean isOwnPackage(GraphqlParser.TypeContext typeContext) {
+        return manager.getPackageName(typeContext).map(this::isOwnPackage).orElse(true);
+    }
+
     public boolean isNotOwnPackage(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         return !isOwnPackage(objectTypeDefinitionContext);
     }
@@ -84,6 +88,10 @@ public class PackageManager {
 
     public boolean isNotOwnPackage(GraphqlParser.InputObjectTypeDefinitionContext inputObjectTypeDefinitionContext) {
         return !isOwnPackage(inputObjectTypeDefinitionContext);
+    }
+
+    public boolean isNotOwnPackage(GraphqlParser.TypeContext typeContext) {
+        return !isOwnPackage(typeContext);
     }
 
     public boolean isOwnPackage(String packageName) {

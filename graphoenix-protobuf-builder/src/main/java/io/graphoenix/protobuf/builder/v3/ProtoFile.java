@@ -34,6 +34,14 @@ public class ProtoFile {
         return this;
     }
 
+    public ProtoFile addImports(List<Import> imports) {
+        if (this.imports == null) {
+            this.imports = new ArrayList<>();
+        }
+        this.imports = imports;
+        return this;
+    }
+
     public List<String> getTopLevelDefs() {
         return topLevelDefs;
     }

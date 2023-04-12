@@ -37,7 +37,7 @@ public class JavaFileBuilder {
 
     public Stream<JavaFile> buildJavaFileList() {
         return Streams.concat(
-                manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(graphQLConfig.getDirectivePackageName(), typeSpec).build()),
+                manager.getDirectives().map(typeSpecBuilder::buildAnnotation).map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),
                 manager.getDirectives()
                         .filter(directiveDefinitionContext -> directiveDefinitionContext.argumentsDefinition() != null)
                         .flatMap(directiveDefinitionContext ->
@@ -47,7 +47,7 @@ public class JavaFileBuilder {
                                         .flatMap(Optional::stream)
                         )
                         .map(typeSpecBuilder::buildAnnotation)
-                        .map(typeSpec -> JavaFile.builder(graphQLConfig.getDirectivePackageName(), typeSpec).build()),
+                        .map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),
                 manager.getEnums()
                         .filter(packageManager::isOwnPackage)
                         .filter(enumTypeDefinitionContext -> manager.getClassName(enumTypeDefinitionContext).isEmpty())

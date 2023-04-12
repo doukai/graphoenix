@@ -1,7 +1,7 @@
 package io.graphoenix.introspection.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.introspection.dto.interfaceType.Meta;
+import io.graphoenix.core.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
