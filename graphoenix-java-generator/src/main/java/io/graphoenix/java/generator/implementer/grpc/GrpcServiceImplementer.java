@@ -60,8 +60,10 @@ public class GrpcServiceImplementer {
     private final TypeManager typeManager;
     private final GrpcNameUtil grpcNameUtil;
     private final GraphQLConfig graphQLConfig;
-    private List<String> queryInvokeClassNames;
-    private List<String> mutationInvokeClassNames;
+//    private List<String> queryInvokeClassNames;
+//    private List<String> mutationInvokeClassNames;
+    private Map<String, String> queryPackageFieldMap;
+    private Map<String, String> mutationPackageFieldMap;
 
     @Inject
     public GrpcServiceImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
@@ -72,26 +74,50 @@ public class GrpcServiceImplementer {
     }
 
     public void writeToFiler(Filer filer) throws IOException {
-        queryInvokeClassNames = manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
-                .filter(manager::isInvokeField)
-                .map(typeManager::getClassName)
-                .distinct()
-                .collect(Collectors.toList());
 
-        mutationInvokeClassNames = manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
-                .filter(manager::isInvokeField)
-                .map(typeManager::getClassName)
-                .distinct()
-                .collect(Collectors.toList());
+        manager.getQueryOperationTypeName()
+                .flatMap(manager::getObject)
+                .orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)).fieldsDefinition().fieldDefinition().stream()
+                .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(manager.getPackageName(fieldDefinitionContext).orElseGet(graphQLConfig::getPackageName), fieldDefinitionContext))
+                .collect(
+                        Collectors.groupingBy(
+                                Map.Entry<String, GraphqlParser.FieldDefinitionContext>::getKey,
+                                Collectors.mapping(
+                                        Map.Entry<String, GraphqlParser.FieldDefinitionContext>::getValue,
+                                        Collectors.toList()
+                                )
+                        )
+                )
+                .forEach((packageName, fieldDefinitionContextList) -> {
+                            try {
+                                this.buildQueryTypeServiceImplClass(packageName).writeTo(filer);
+                                Logger.info("GrpcQueryTypeServiceImpl build success");
+                                this.buildMutationTypeServiceImplClass(packageName).writeTo(filer);
+                                Logger.info("GrpcMutationTypeServiceImpl build success");
+                                this.buildGraphQLServiceImplClass().writeTo(filer);
+                                Logger.info("GrpcGraphQLServiceImpl build success");
+                                this.buildGrpcServerProducerClass().writeTo(filer);
+                                Logger.info("GrpcServerProducer build success");
 
-        this.buildQueryTypeServiceImplClass().writeTo(filer);
-        Logger.info("GrpcQueryTypeServiceImpl build success");
-        this.buildMutationTypeServiceImplClass().writeTo(filer);
-        Logger.info("GrpcMutationTypeServiceImpl build success");
-        this.buildGraphQLServiceImplClass().writeTo(filer);
-        Logger.info("GrpcGraphQLServiceImpl build success");
-        this.buildGrpcServerProducerClass().writeTo(filer);
-        Logger.info("GrpcServerProducer build success");
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                );
+
+
+//        queryInvokeClassNames = manager.getFields(manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST)))
+//                .filter(manager::isInvokeField)
+//                .map(typeManager::getClassName)
+//                .distinct()
+//                .collect(Collectors.toList());
+//
+//        mutationInvokeClassNames = manager.getFields(manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST)))
+//                .filter(manager::isInvokeField)
+//                .map(typeManager::getClassName)
+//                .distinct()
+//                .collect(Collectors.toList());
+
     }
 
     private JavaFile buildGrpcServerProducerClass() {
@@ -99,13 +125,13 @@ public class GrpcServiceImplementer {
         return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
-    private JavaFile buildQueryTypeServiceImplClass() {
-        TypeSpec typeSpec = buildQueryTypeServiceImpl(QUERY);
+    private JavaFile buildQueryTypeServiceImplClass(String packageName) {
+        TypeSpec typeSpec = buildOperationTypeServiceImpl(QUERY, packageName);
         return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
-    private JavaFile buildMutationTypeServiceImplClass() {
-        TypeSpec typeSpec = buildQueryTypeServiceImpl(MUTATION);
+    private JavaFile buildMutationTypeServiceImplClass(String packageName) {
+        TypeSpec typeSpec = buildOperationTypeServiceImpl(MUTATION, packageName);
         return JavaFile.builder(graphQLConfig.getGrpcHandlerPackageName(), typeSpec).build();
     }
 
@@ -150,7 +176,7 @@ public class GrpcServiceImplementer {
                 .build();
     }
 
-    private TypeSpec buildQueryTypeServiceImpl(OperationType operationType) {
+    private TypeSpec buildOperationTypeServiceImpl(OperationType operationType, String packageName) {
         String className;
         String superClassName;
         String serviceName;
@@ -179,7 +205,7 @@ public class GrpcServiceImplementer {
         }
 
         TypeSpec.Builder builder = TypeSpec.classBuilder(className)
-                .superclass(ClassName.get(graphQLConfig.getGrpcPackageName(), superClassName, serviceName))
+                .superclass(ClassName.get(packageName, superClassName, serviceName))
                 .addModifiers(Modifier.PUBLIC)
                 .addField(
                         FieldSpec.builder(
@@ -333,8 +359,10 @@ public class GrpcServiceImplementer {
         String grpcHandlerMethodName = grpcNameUtil.getGrpcFieldName(fieldDefinitionContext);
         String grpcRequestClassName = grpcNameUtil.getGrpcRequestClassName(fieldDefinitionContext, operationType);
         String grpcResponseClassName = grpcNameUtil.getGrpcResponseClassName(fieldDefinitionContext, operationType);
-        ParameterizedTypeName requestClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getGrpcPackageName(), grpcRequestClassName));
-        ParameterizedTypeName responseClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(graphQLConfig.getGrpcPackageName(), grpcResponseClassName));
+        String grpcPackageName = manager.getPackageName(fieldDefinitionContext).map(packageName -> packageName.concat(".grpc")).orElseGet(graphQLConfig::getGrpcPackageName);
+
+        ParameterizedTypeName requestClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(grpcPackageName, grpcRequestClassName));
+        ParameterizedTypeName responseClassName = ParameterizedTypeName.get(ClassName.get(Mono.class), ClassName.get(grpcPackageName, grpcResponseClassName));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(grpcHandlerMethodName)
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
@@ -414,7 +442,7 @@ public class GrpcServiceImplementer {
                             CodeBlock.of(".map($L -> $L.stream().map(item::ordinal).map($T::forNumber).collect($T.toList()))",
                                     fieldDefinitionContext.name().getText(),
                                     fieldDefinitionContext.name().getText(),
-                                    ClassName.get(graphQLConfig.getGrpcPackageName(), grpcObjectName),
+                                    ClassName.get(grpcPackageName, grpcObjectName),
                                     fieldGetterName,
                                     ClassName.get(Collectors.class)
                             )
@@ -443,7 +471,7 @@ public class GrpcServiceImplementer {
                                 Stream.of(
                                         CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
                                                 fieldDefinitionContext.name().getText(),
-                                                ClassName.get(graphQLConfig.getGrpcPackageName(), grpcResponseClassName),
+                                                ClassName.get(grpcPackageName, grpcResponseClassName),
                                                 grpcFieldAddAllName,
                                                 fieldDefinitionContext.name().getText()
                                         )
@@ -462,7 +490,7 @@ public class GrpcServiceImplementer {
                     wrapperCodeBlock = Optional.of(
                             CodeBlock.of(".map($L -> $T.forNumber($L.ordinal()))",
                                     fieldDefinitionContext.name().getText(),
-                                    ClassName.get(graphQLConfig.getGrpcPackageName(), grpcObjectName),
+                                    ClassName.get(grpcPackageName, grpcObjectName),
                                     fieldDefinitionContext.name().getText()
                             )
                     );
@@ -482,7 +510,7 @@ public class GrpcServiceImplementer {
                                 Stream.of(
                                         CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
                                                 fieldDefinitionContext.name().getText(),
-                                                ClassName.get(graphQLConfig.getGrpcPackageName(), grpcResponseClassName),
+                                                ClassName.get(grpcPackageName, grpcResponseClassName),
                                                 grpcFieldSetterName,
                                                 fieldDefinitionContext.name().getText()
                                         )
@@ -542,7 +570,7 @@ public class GrpcServiceImplementer {
                             CodeBlock.of(".flatMap($L -> $L.map(item -> $T.forNumber(item.ordinal())).collectList())",
                                     fieldDefinitionContext.name().getText(),
                                     fieldDefinitionContext.name().getText(),
-                                    ClassName.get(graphQLConfig.getGrpcPackageName(), grpcObjectName))
+                                    ClassName.get(grpcPackageName, grpcObjectName))
                     );
                 } else if (manager.isObject(fieldTypeName)) {
                     wrapperCodeBlock = Optional.of(
@@ -576,7 +604,7 @@ public class GrpcServiceImplementer {
                                     Stream.of(
                                             CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
                                                     fieldDefinitionContext.name().getText(),
-                                                    ClassName.get(graphQLConfig.getGrpcPackageName(), grpcResponseClassName),
+                                                    ClassName.get(grpcPackageName, grpcResponseClassName),
                                                     grpcFieldAddAllName,
                                                     fieldDefinitionContext.name().getText()
                                             )
@@ -604,7 +632,7 @@ public class GrpcServiceImplementer {
                                     Stream.of(
                                             CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
                                                     fieldDefinitionContext.name().getText(),
-                                                    ClassName.get(graphQLConfig.getGrpcPackageName(), grpcResponseClassName),
+                                                    ClassName.get(grpcPackageName, grpcResponseClassName),
                                                     grpcFieldAddAllName,
                                                     fieldDefinitionContext.name().getText()
                                             )
@@ -634,7 +662,7 @@ public class GrpcServiceImplementer {
                             CodeBlock.of(".map($L -> $T.forNumber($L.ordinal()))",
                                     fieldDefinitionContext.name().getText(),
                                     fieldDefinitionContext.name().getText(),
-                                    ClassName.get(graphQLConfig.getGrpcPackageName(), grpcObjectName))
+                                    ClassName.get(grpcPackageName, grpcObjectName))
                     );
                 } else if (manager.isObject(fieldTypeName)) {
                     wrapperCodeBlock = Optional.of(CodeBlock.of(".map(objectHandler.get()::$L)", grpcObjectHandlerMethodName));
@@ -662,7 +690,7 @@ public class GrpcServiceImplementer {
                                     Stream.of(
                                             CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
                                                     fieldDefinitionContext.name().getText(),
-                                                    ClassName.get(graphQLConfig.getGrpcPackageName(), grpcResponseClassName),
+                                                    ClassName.get(grpcPackageName, grpcResponseClassName),
                                                     grpcFieldSetterName,
                                                     fieldDefinitionContext.name().getText()
                                             )
@@ -690,7 +718,7 @@ public class GrpcServiceImplementer {
                                     Stream.of(
                                             CodeBlock.of(".map($L -> $T.newBuilder().$L($L).build())",
                                                     fieldDefinitionContext.name().getText(),
-                                                    ClassName.get(graphQLConfig.getGrpcPackageName(), grpcResponseClassName),
+                                                    ClassName.get(grpcPackageName, grpcResponseClassName),
                                                     grpcFieldSetterName,
                                                     fieldDefinitionContext.name().getText()
                                             )

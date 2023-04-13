@@ -75,15 +75,18 @@ public class GrpcObjectHandlerBuilder {
 
         ClassName className = manager.getClassName(objectTypeDefinitionContext)
                 .map(TYPE_NAME_UTIL::toClassName)
-                .orElseGet(() -> ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()));
+                .orElseGet(() -> ClassName.get(manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), objectTypeDefinitionContext.name().getText()));
+
+        String grpcObjectPackageName = manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType.grpc")).orElseGet(graphQLConfig::getGrpcObjectTypePackageName);
+        ClassName grpcObjectClassName = ClassName.get(grpcObjectPackageName, grpcTypeName);
 
         MethodSpec.Builder builder = MethodSpec.methodBuilder(objectParameterName)
                 .addModifiers(Modifier.PUBLIC)
-                .returns(ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), grpcTypeName))
+                .returns(grpcObjectClassName)
                 .addParameter(className, objectParameterName)
                 .addStatement("$T builder = $T.newBuilder()",
-                        ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), grpcTypeName, "Builder"),
-                        ClassName.get(graphQLConfig.getGrpcObjectTypePackageName(), grpcTypeName)
+                        ClassName.get(grpcObjectPackageName, grpcTypeName, "Builder"),
+                        grpcObjectClassName
                 );
 
         List<GraphqlParser.FieldDefinitionContext> fieldDefinitionContexts = objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()

@@ -131,7 +131,8 @@ public class GrpcRequestHandlerBuilder {
     }
 
     private List<MethodSpec> buildQueryTypeMethods() {
-        return manager.getQueryOperationTypeName().flatMap(manager::getObject)
+        return manager.getQueryOperationTypeName()
+                .flatMap(manager::getObject)
                 .orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
                 .fieldsDefinition().fieldDefinition().stream()
                 .map(fieldDefinitionContext -> buildTypeMethod(fieldDefinitionContext, QUERY))
@@ -139,7 +140,8 @@ public class GrpcRequestHandlerBuilder {
     }
 
     private List<MethodSpec> buildMutationTypeMethods() {
-        return manager.getMutationOperationTypeName().flatMap(manager::getObject)
+        return manager.getMutationOperationTypeName()
+                .flatMap(manager::getObject)
                 .orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST))
                 .fieldsDefinition().fieldDefinition().stream()
                 .map(fieldDefinitionContext -> buildTypeMethod(fieldDefinitionContext, MUTATION))
@@ -159,7 +161,7 @@ public class GrpcRequestHandlerBuilder {
             default:
                 throw new GraphQLErrors(UNSUPPORTED_OPERATION_TYPE);
         }
-        ClassName requestClassName = ClassName.get(graphQLConfig.getGrpcPackageName(), grpcNameUtil.getGrpcRequestClassName(fieldDefinitionContext, operationType));
+        ClassName requestClassName = ClassName.get(manager.getPackageName(fieldDefinitionContext).map(packageName -> packageName.concat(".grpc")).orElseGet(graphQLConfig::getGrpcPackageName), grpcNameUtil.getGrpcRequestClassName(fieldDefinitionContext, operationType));
         MethodSpec.Builder builder = MethodSpec.methodBuilder(grpcNameUtil.getGrpcFieldName(fieldDefinitionContext))
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(requestClassName, requestParameterName)
