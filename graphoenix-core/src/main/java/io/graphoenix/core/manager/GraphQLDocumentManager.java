@@ -661,6 +661,11 @@ public class GraphQLDocumentManager implements IGraphQLDocumentManager {
     }
 
     @Override
+    public Stream<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition() {
+        return graphQLOperationTypeManager.getOperationTypeDefinitions();
+    }
+
+    @Override
     public Optional<GraphqlParser.OperationTypeDefinitionContext> getQueryOperationTypeDefinition() {
         return graphQLOperationTypeManager.getOperationTypeDefinitions()
                 .filter(operationTypeDefinition -> operationTypeDefinition.operationType().QUERY() != null).findFirst();

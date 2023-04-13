@@ -1,8 +1,8 @@
 package io.graphoenix.showcase.user.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
+import io.graphoenix.core.dto.interfaceType.Meta;
 import io.graphoenix.showcase.user.dto.enumType.RoleType;
-import io.graphoenix.showcase.user.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;

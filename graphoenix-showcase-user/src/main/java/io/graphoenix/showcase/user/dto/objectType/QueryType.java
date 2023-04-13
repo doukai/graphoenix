@@ -1,7 +1,7 @@
 package io.graphoenix.showcase.user.dto.objectType;
 
 import com.dslplatform.json.CompiledJson;
-import io.graphoenix.showcase.user.dto.interfaceType.Meta;
+import io.graphoenix.core.dto.interfaceType.Meta;
 import io.graphoenix.spi.annotation.Ignore;
 import jakarta.annotation.Generated;
 import java.lang.Boolean;
@@ -17,6 +17,8 @@ import org.eclipse.microprofile.graphql.Type;
 @Generated("io.graphoenix.java.generator.builder.TypeSpecBuilderProxy")
 @Ignore
 public class QueryType implements Meta {
+  private String login;
+
   private User user;
 
   private Collection<User> userList;
@@ -74,6 +76,14 @@ public class QueryType implements Meta {
   private LocalDateTime updateTime;
 
   private String createGroupId;
+
+  public String getLogin() {
+    return this.login;
+  }
+
+  public void setLogin(String login) {
+    this.login = login;
+  }
 
   public User getUser() {
     return this.user;

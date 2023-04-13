@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.user.dto.enumType.grpc";
+
+package io.graphoenix.showcase.user.grpc;
+
+enum Sex {
+    MAN_SEX = 0;
+    FEMALE_SEX = 1;
+}
+enum RoleType {
+    ADMIN_ROLE_TYPE = 0;
+    USER_ROLE_TYPE = 1;
+    ANONYMOUS_ROLE_TYPE = 2;
+}

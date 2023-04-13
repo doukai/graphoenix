@@ -146,6 +146,8 @@ public interface IGraphQLDocumentManager {
 
     Stream<GraphqlParser.OperationDefinitionContext> getOperationDefinitions();
 
+    Stream<GraphqlParser.OperationTypeDefinitionContext> getOperationTypeDefinition();
+
     Optional<GraphqlParser.OperationTypeDefinitionContext> getQueryOperationTypeDefinition();
 
     Optional<GraphqlParser.OperationTypeDefinitionContext> getMutationOperationTypeDefinition();

@@ -1,6 +1,6 @@
 package io.graphoenix.showcase.user.dto.annotation;
 
-import io.graphoenix.showcase.user.dto.enumType.Operator;
+import io.graphoenix.core.dto.enumType.Operator;
 import java.lang.String;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

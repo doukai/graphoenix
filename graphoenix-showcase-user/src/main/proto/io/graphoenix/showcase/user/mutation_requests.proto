@@ -1,0 +1,318 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.user.grpc";
+
+package io.graphoenix.showcase.user.grpc;
+
+import "io/graphoenix/showcase/user/enums.proto";
+import "io/graphoenix/showcase/user/objects.proto";
+import "io/graphoenix/showcase/user/interfaces.proto";
+import "io/graphoenix/showcase/user/input_objects.proto";
+import "google/protobuf/timestamp.proto";
+
+message MutationUserRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string login = 4;
+    optional string password = 5;
+    optional string name = 6;
+    optional int32 age = 7;
+    optional bool disabled = 8;
+    optional Sex sex = 9;
+    optional UserProfileInput user_profile = 10;
+    optional int32 organization_id = 11;
+    optional OrganizationInput organization = 12;
+    repeated RoleInput roles = 13;
+    repeated string mobile_numbers = 14;
+    optional bool is_deprecated = 15;
+    optional int32 version = 16;
+    optional string realm_id = 17;
+    optional string create_user_id = 18;
+    optional google.protobuf.Timestamp create_time = 19;
+    optional string update_user_id = 20;
+    optional google.protobuf.Timestamp update_time = 21;
+    optional string create_group_id = 22;
+    optional string intro_typename = 23;
+    optional UserExpression where = 24;
+}
+message MutationUserListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string login = 4;
+    optional string password = 5;
+    optional string name = 6;
+    optional int32 age = 7;
+    optional bool disabled = 8;
+    optional Sex sex = 9;
+    optional UserProfileInput user_profile = 10;
+    optional int32 organization_id = 11;
+    optional OrganizationInput organization = 12;
+    repeated RoleInput roles = 13;
+    repeated string mobile_numbers = 14;
+    optional bool is_deprecated = 15;
+    optional int32 version = 16;
+    optional string realm_id = 17;
+    optional string create_user_id = 18;
+    optional google.protobuf.Timestamp create_time = 19;
+    optional string update_user_id = 20;
+    optional google.protobuf.Timestamp update_time = 21;
+    optional string create_group_id = 22;
+    optional string intro_typename = 23;
+    repeated UserInput list = 24;
+    optional UserExpression where = 25;
+}
+message MutationUserProfileRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string user_id = 4;
+    optional UserInput user = 5;
+    optional string email = 6;
+    optional string address = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    optional UserProfileExpression where = 17;
+}
+message MutationUserProfileListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string user_id = 4;
+    optional UserInput user = 5;
+    optional string email = 6;
+    optional string address = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    repeated UserProfileInput list = 17;
+    optional UserProfileExpression where = 18;
+}
+message MutationUserMobileNumbersRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional int32 user_id = 4;
+    optional string mobile_number = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional UserMobileNumbersExpression where = 15;
+}
+message MutationUserMobileNumbersListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional int32 user_id = 4;
+    optional string mobile_number = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    repeated UserMobileNumbersInput list = 15;
+    optional UserMobileNumbersExpression where = 16;
+}
+message MutationUserRoleRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional int32 user_id = 4;
+    optional int32 role_id = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional UserRoleExpression where = 15;
+}
+message MutationUserRoleListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional int32 user_id = 4;
+    optional int32 role_id = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    repeated UserRoleInput list = 15;
+    optional UserRoleExpression where = 16;
+}
+message MutationRoleRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    repeated RoleType type = 5;
+    repeated UserInput users = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional google.protobuf.Timestamp create_time = 11;
+    optional string update_user_id = 12;
+    optional google.protobuf.Timestamp update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    optional RoleExpression where = 16;
+}
+message MutationRoleListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    repeated RoleType type = 5;
+    repeated UserInput users = 6;
+    optional bool is_deprecated = 7;
+    optional int32 version = 8;
+    optional string realm_id = 9;
+    optional string create_user_id = 10;
+    optional google.protobuf.Timestamp create_time = 11;
+    optional string update_user_id = 12;
+    optional google.protobuf.Timestamp update_time = 13;
+    optional string create_group_id = 14;
+    optional string intro_typename = 15;
+    repeated RoleInput list = 16;
+    optional RoleExpression where = 17;
+}
+message MutationRoleRoleTypeRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional int32 role_id = 4;
+    optional RoleType type = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional RoleRoleTypeExpression where = 15;
+}
+message MutationRoleRoleTypeListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional int32 role_id = 4;
+    optional RoleType type = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    repeated RoleRoleTypeInput list = 15;
+    optional RoleRoleTypeExpression where = 16;
+}
+message MutationOrganizationRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    optional int32 above_id = 5;
+    optional OrganizationInput above = 6;
+    repeated UserInput users = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    optional OrganizationExpression where = 17;
+}
+message MutationOrganizationListRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+    optional string id = 3;
+    optional string name = 4;
+    optional int32 above_id = 5;
+    optional OrganizationInput above = 6;
+    repeated UserInput users = 7;
+    optional bool is_deprecated = 8;
+    optional int32 version = 9;
+    optional string realm_id = 10;
+    optional string create_user_id = 11;
+    optional google.protobuf.Timestamp create_time = 12;
+    optional string update_user_id = 13;
+    optional google.protobuf.Timestamp update_time = 14;
+    optional string create_group_id = 15;
+    optional string intro_typename = 16;
+    repeated OrganizationInput list = 17;
+    optional OrganizationExpression where = 18;
+}
+message MutationIsDeprecatedRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message MutationVersionRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message MutationRealmIdRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message MutationCreateUserIdRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message MutationCreateTimeRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message MutationUpdateUserIdRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message MutationUpdateTimeRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}
+message MutationCreateGroupIdRequest {
+    optional string selection_set = 1;
+    optional string arguments = 2;
+}

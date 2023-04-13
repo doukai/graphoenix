@@ -1,0 +1,331 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.graphoenix.showcase.user.dto.objectType.grpc";
+
+package io.graphoenix.showcase.user.grpc;
+
+import "io/graphoenix/showcase/user/enums.proto";
+import "io/graphoenix/core/objects.proto";
+import "google/protobuf/timestamp.proto";
+
+message User {
+    optional string id = 1;
+    string login = 2;
+    string password = 3;
+    string name = 4;
+    optional int32 age = 5;
+    optional bool disabled = 6;
+    optional Sex sex = 7;
+    optional UserProfile user_profile = 8;
+    optional int32 organization_id = 9;
+    optional Organization organization = 10;
+    repeated Role roles = 11;
+    repeated string mobile_numbers = 12;
+    optional bool is_deprecated = 13;
+    optional int32 version = 14;
+    optional string realm_id = 15;
+    optional string create_user_id = 16;
+    optional google.protobuf.Timestamp create_time = 17;
+    optional string update_user_id = 18;
+    optional google.protobuf.Timestamp update_time = 19;
+    optional string create_group_id = 20;
+    optional string intro_typename = 21;
+    optional int32 id_count = 22;
+    optional string id_max = 23;
+    optional string id_min = 24;
+    optional int32 login_count = 25;
+    optional string login_max = 26;
+    optional string login_min = 27;
+    optional int32 password_count = 28;
+    optional string password_max = 29;
+    optional string password_min = 30;
+    optional int32 name_count = 31;
+    optional string name_max = 32;
+    optional string name_min = 33;
+    optional int32 age_count = 34;
+    optional int32 age_sum = 35;
+    optional int32 age_avg = 36;
+    optional int32 age_max = 37;
+    optional int32 age_min = 38;
+    optional int32 organization_id_count = 39;
+    optional int32 organization_id_sum = 40;
+    optional int32 organization_id_avg = 41;
+    optional int32 organization_id_max = 42;
+    optional int32 organization_id_min = 43;
+    optional Role roles_aggregate = 44;
+    optional RoleConnection roles_connection = 45;
+}
+message UserProfile {
+    optional string id = 1;
+    optional string user_id = 2;
+    optional User user = 3;
+    optional string email = 4;
+    optional string address = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 user_id_count = 18;
+    optional string user_id_max = 19;
+    optional string user_id_min = 20;
+    optional int32 email_count = 21;
+    optional string email_max = 22;
+    optional string email_min = 23;
+    optional int32 address_count = 24;
+    optional string address_max = 25;
+    optional string address_min = 26;
+}
+message UserMobileNumbers {
+    optional string id = 1;
+    optional int32 user_id = 2;
+    optional string mobile_number = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional google.protobuf.Timestamp create_time = 8;
+    optional string update_user_id = 9;
+    optional google.protobuf.Timestamp update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 mobile_number_count = 16;
+    optional string mobile_number_max = 17;
+    optional string mobile_number_min = 18;
+    optional int32 user_id_count = 19;
+    optional int32 user_id_sum = 20;
+    optional int32 user_id_avg = 21;
+    optional int32 user_id_max = 22;
+    optional int32 user_id_min = 23;
+}
+message UserRole {
+    optional string id = 1;
+    optional int32 user_id = 2;
+    optional int32 role_id = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional google.protobuf.Timestamp create_time = 8;
+    optional string update_user_id = 9;
+    optional google.protobuf.Timestamp update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 user_id_count = 16;
+    optional int32 user_id_sum = 17;
+    optional int32 user_id_avg = 18;
+    optional int32 user_id_max = 19;
+    optional int32 user_id_min = 20;
+    optional int32 role_id_count = 21;
+    optional int32 role_id_sum = 22;
+    optional int32 role_id_avg = 23;
+    optional int32 role_id_max = 24;
+    optional int32 role_id_min = 25;
+}
+message Role {
+    optional string id = 1;
+    string name = 2;
+    repeated RoleType type = 3;
+    repeated User users = 4;
+    optional bool is_deprecated = 5;
+    optional int32 version = 6;
+    optional string realm_id = 7;
+    optional string create_user_id = 8;
+    optional google.protobuf.Timestamp create_time = 9;
+    optional string update_user_id = 10;
+    optional google.protobuf.Timestamp update_time = 11;
+    optional string create_group_id = 12;
+    optional string intro_typename = 13;
+    optional int32 id_count = 14;
+    optional string id_max = 15;
+    optional string id_min = 16;
+    optional int32 name_count = 17;
+    optional string name_max = 18;
+    optional string name_min = 19;
+    optional User users_aggregate = 20;
+    optional UserConnection users_connection = 21;
+}
+message RoleRoleType {
+    optional string id = 1;
+    optional int32 role_id = 2;
+    optional RoleType type = 3;
+    optional bool is_deprecated = 4;
+    optional int32 version = 5;
+    optional string realm_id = 6;
+    optional string create_user_id = 7;
+    optional google.protobuf.Timestamp create_time = 8;
+    optional string update_user_id = 9;
+    optional google.protobuf.Timestamp update_time = 10;
+    optional string create_group_id = 11;
+    optional string intro_typename = 12;
+    optional int32 id_count = 13;
+    optional string id_max = 14;
+    optional string id_min = 15;
+    optional int32 role_id_count = 16;
+    optional int32 role_id_sum = 17;
+    optional int32 role_id_avg = 18;
+    optional int32 role_id_max = 19;
+    optional int32 role_id_min = 20;
+}
+message Organization {
+    optional string id = 1;
+    string name = 2;
+    optional int32 above_id = 3;
+    optional Organization above = 4;
+    repeated User users = 5;
+    optional bool is_deprecated = 6;
+    optional int32 version = 7;
+    optional string realm_id = 8;
+    optional string create_user_id = 9;
+    optional google.protobuf.Timestamp create_time = 10;
+    optional string update_user_id = 11;
+    optional google.protobuf.Timestamp update_time = 12;
+    optional string create_group_id = 13;
+    optional string intro_typename = 14;
+    optional int32 id_count = 15;
+    optional string id_max = 16;
+    optional string id_min = 17;
+    optional int32 name_count = 18;
+    optional string name_max = 19;
+    optional string name_min = 20;
+    optional int32 above_id_count = 21;
+    optional int32 above_id_sum = 22;
+    optional int32 above_id_avg = 23;
+    optional int32 above_id_max = 24;
+    optional int32 above_id_min = 25;
+    optional User users_aggregate = 26;
+    optional UserConnection users_connection = 27;
+}
+message QueryType {
+    optional string login = 1;
+    optional User user = 2;
+    repeated User user_list = 3;
+    optional UserConnection user_connection = 4;
+    optional UserProfile user_profile = 5;
+    repeated UserProfile user_profile_list = 6;
+    optional UserProfileConnection user_profile_connection = 7;
+    optional UserMobileNumbers user_mobile_numbers = 8;
+    repeated UserMobileNumbers user_mobile_numbers_list = 9;
+    optional UserMobileNumbersConnection user_mobile_numbers_connection = 10;
+    optional UserRole user_role = 11;
+    repeated UserRole user_role_list = 12;
+    optional UserRoleConnection user_role_connection = 13;
+    optional Role role = 14;
+    repeated Role role_list = 15;
+    optional RoleConnection role_connection = 16;
+    optional RoleRoleType role_role_type = 17;
+    repeated RoleRoleType role_role_type_list = 18;
+    optional RoleRoleTypeConnection role_role_type_connection = 19;
+    optional Organization organization = 20;
+    repeated Organization organization_list = 21;
+    optional OrganizationConnection organization_connection = 22;
+    optional bool is_deprecated = 23;
+    optional int32 version = 24;
+    optional string realm_id = 25;
+    optional string create_user_id = 26;
+    optional google.protobuf.Timestamp create_time = 27;
+    optional string update_user_id = 28;
+    optional google.protobuf.Timestamp update_time = 29;
+    optional string create_group_id = 30;
+}
+message MutationType {
+    optional User user = 1;
+    repeated User user_list = 2;
+    optional UserProfile user_profile = 3;
+    repeated UserProfile user_profile_list = 4;
+    optional UserMobileNumbers user_mobile_numbers = 5;
+    repeated UserMobileNumbers user_mobile_numbers_list = 6;
+    optional UserRole user_role = 7;
+    repeated UserRole user_role_list = 8;
+    optional Role role = 9;
+    repeated Role role_list = 10;
+    optional RoleRoleType role_role_type = 11;
+    repeated RoleRoleType role_role_type_list = 12;
+    optional Organization organization = 13;
+    repeated Organization organization_list = 14;
+    optional bool is_deprecated = 15;
+    optional int32 version = 16;
+    optional string realm_id = 17;
+    optional string create_user_id = 18;
+    optional google.protobuf.Timestamp create_time = 19;
+    optional string update_user_id = 20;
+    optional google.protobuf.Timestamp update_time = 21;
+    optional string create_group_id = 22;
+}
+message UserConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated UserEdge edges = 3;
+}
+message UserEdge {
+    optional User node = 1;
+    optional string cursor = 2;
+}
+message UserProfileConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated UserProfileEdge edges = 3;
+}
+message UserProfileEdge {
+    optional UserProfile node = 1;
+    optional string cursor = 2;
+}
+message UserMobileNumbersConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated UserMobileNumbersEdge edges = 3;
+}
+message UserMobileNumbersEdge {
+    optional UserMobileNumbers node = 1;
+    optional string cursor = 2;
+}
+message UserRoleConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated UserRoleEdge edges = 3;
+}
+message UserRoleEdge {
+    optional UserRole node = 1;
+    optional string cursor = 2;
+}
+message RoleConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated RoleEdge edges = 3;
+}
+message RoleEdge {
+    optional Role node = 1;
+    optional string cursor = 2;
+}
+message RoleRoleTypeConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated RoleRoleTypeEdge edges = 3;
+}
+message RoleRoleTypeEdge {
+    optional RoleRoleType node = 1;
+    optional string cursor = 2;
+}
+message OrganizationConnection {
+    optional int32 total_count = 1;
+    optional io.graphoenix.core.grpc.PageInfo page_info = 2;
+    repeated OrganizationEdge edges = 3;
+}
+message OrganizationEdge {
+    optional Organization node = 1;
+    optional string cursor = 2;
+}
