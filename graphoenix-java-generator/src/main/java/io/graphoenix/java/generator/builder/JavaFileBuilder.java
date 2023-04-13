@@ -45,6 +45,7 @@ public class JavaFileBuilder {
                                         .filter(inputValueDefinitionContext -> manager.isInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                                         .map(inputValueDefinitionContext -> manager.getInputObject(manager.getFieldTypeName(inputValueDefinitionContext.type())))
                                         .flatMap(Optional::stream)
+                                        .filter(packageManager::isOwnPackage)
                         )
                         .map(typeSpecBuilder::buildAnnotation)
                         .map(typeSpec -> JavaFile.builder(graphQLConfig.getAnnotationPackageName(), typeSpec).build()),

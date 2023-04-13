@@ -14,7 +14,7 @@ public @interface __TypeInput0 {
 
   int schemaId() default 0;
 
-  __TypeKind kind() default io.graphoenix.introspection.dto.enumType.__TypeKind.SCALAR;
+  __TypeKind kind() default __TypeKind.SCALAR;
 
   String description() default "";
 

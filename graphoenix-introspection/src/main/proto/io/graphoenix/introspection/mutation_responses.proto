@@ -9,6 +9,8 @@ import "io/graphoenix/introspection/enums.proto";
 import "io/graphoenix/introspection/objects.proto";
 import "io/graphoenix/introspection/interfaces.proto";
 import "io/graphoenix/introspection/input_objects.proto";
+import "io/graphoenix/core/enums.proto";
+import "google/protobuf/timestamp.proto";
 
 message MutationIntroSchemaResponse {
     optional IntroSchema intro_schema = 1;
@@ -77,13 +79,13 @@ message MutationCreateUserIdResponse {
     optional string create_user_id = 1;
 }
 message MutationCreateTimeResponse {
-    optional string create_time = 1;
+    optional google.protobuf.Timestamp create_time = 1;
 }
 message MutationUpdateUserIdResponse {
     optional string update_user_id = 1;
 }
 message MutationUpdateTimeResponse {
-    optional string update_time = 1;
+    optional google.protobuf.Timestamp update_time = 1;
 }
 message MutationCreateGroupIdResponse {
     optional string create_group_id = 1;

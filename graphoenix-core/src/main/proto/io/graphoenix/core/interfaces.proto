@@ -6,14 +6,15 @@ option java_package = "io.graphoenix.core.dto.objectType.grpc";
 package io.graphoenix.core.grpc;
 
 import "io/graphoenix/core/enums.proto";
+import "google/protobuf/timestamp.proto";
 
 message Meta {
     optional bool is_deprecated = 1;
     optional int32 version = 2;
     optional string realm_id = 3;
     optional string create_user_id = 4;
-    optional string create_time = 5;
+    optional google.protobuf.Timestamp create_time = 5;
     optional string update_user_id = 6;
-    optional string update_time = 7;
+    optional google.protobuf.Timestamp update_time = 7;
     optional string create_group_id = 8;
 }

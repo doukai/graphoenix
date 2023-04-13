@@ -46,9 +46,7 @@ public class ProtobufFileBuilder {
 
         protoFileMap.put("objects", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto"))
                 )
                 .addImports(
                         io.vavr.collection.List
@@ -56,8 +54,14 @@ public class ProtobufFileBuilder {
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(manager.getObjects().flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())))
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
                 .setOptions(
-                        List.of(
+                        Arrays.asList(
                                 new Option().setName("java_multiple_files").setValue(true),
                                 new Option().setName("java_package").setValue(graphQLConfig.getGrpcObjectTypePackageName())
                         )
@@ -68,9 +72,7 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("interfaces", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto"))
                 )
                 .addImports(
                         io.vavr.collection.List
@@ -78,8 +80,14 @@ public class ProtobufFileBuilder {
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(manager.getInterfaces().flatMap(interfaceTypeDefinitionContext -> getImportScalarTypePath(interfaceTypeDefinitionContext.fieldsDefinition())))
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
                 .setOptions(
-                        List.of(
+                        Arrays.asList(
                                 new Option().setName("java_multiple_files").setValue(true),
                                 new Option().setName("java_package").setValue(graphQLConfig.getGrpcObjectTypePackageName())
                         )
@@ -90,9 +98,7 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("input_objects", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto"))
                 )
                 .addImports(
                         io.vavr.collection.List
@@ -100,8 +106,14 @@ public class ProtobufFileBuilder {
                                 .distinctBy(Import::getName)
                                 .toJavaList()
                 )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(manager.getInputObjects().flatMap(inputObjectTypeDefinitionContext -> getImportScalarTypePath(inputObjectTypeDefinitionContext.inputObjectValueDefinitions())))
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
                 .setOptions(
-                        List.of(
+                        Arrays.asList(
                                 new Option().setName("java_multiple_files").setValue(true),
                                 new Option().setName("java_package").setValue(graphQLConfig.getGrpcInputObjectTypePackageName())
                         )
@@ -112,10 +124,8 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("enums", new ProtoFile()
                 .setOptions(
-                        List.of(
-                                new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcEnumTypePackageName())
-                        )
+                        new Option().setName("java_multiple_files").setValue(true),
+                        new Option().setName("java_package").setValue(graphQLConfig.getGrpcEnumTypePackageName())
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(manager.getEnums().filter(packageManager::isOwnPackage).map(this::buildEnum).map(Enum::toString).collect(Collectors.toList()))
@@ -123,18 +133,61 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("query_requests", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto")),
-                                new Import().setName(getPath("objects.proto")),
-                                new Import().setName(getPath("interfaces.proto")),
-                                new Import().setName(getPath("input_objects.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto")),
+                        new Import().setName(getPath("objects.proto")),
+                        new Import().setName(getPath("interfaces.proto")),
+                        new Import().setName(getPath("input_objects.proto"))
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        manager.getQueryOperationTypeName()
+                                                .flatMap(manager::getObject).stream()
+                                                .flatMap(objectTypeDefinitionContext -> getImportPath(objectTypeDefinitionContext.fieldsDefinition()))
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        manager.getQueryOperationTypeName()
+                                                .flatMap(manager::getObject).stream()
+                                                .flatMap(objectTypeDefinitionContext ->
+                                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                .flatMap(fieldDefinitionContext ->
+                                                                        Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                                                )
+                                                )
+                                                .flatMap(this::getImportPath)
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        Stream.concat(
+                                                manager.getQueryOperationTypeName()
+                                                        .flatMap(manager::getObject).stream()
+                                                        .flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())),
+                                                manager.getQueryOperationTypeName()
+                                                        .flatMap(manager::getObject).stream()
+                                                        .flatMap(objectTypeDefinitionContext ->
+                                                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                        .flatMap(fieldDefinitionContext ->
+                                                                                Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                                                        )
+                                                        )
+                                                        .flatMap(this::getImportScalarTypePath)
+                                        )
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
                 )
                 .setOptions(
-                        List.of(
-                                new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
-                        )
+                        new Option().setName("java_multiple_files").setValue(true),
+                        new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildQueryRpcRequest().map(Message::toString).collect(Collectors.toList()))
@@ -142,18 +195,61 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("query_responses", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto")),
-                                new Import().setName(getPath("objects.proto")),
-                                new Import().setName(getPath("interfaces.proto")),
-                                new Import().setName(getPath("input_objects.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto")),
+                        new Import().setName(getPath("objects.proto")),
+                        new Import().setName(getPath("interfaces.proto")),
+                        new Import().setName(getPath("input_objects.proto"))
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        manager.getQueryOperationTypeName()
+                                                .flatMap(manager::getObject).stream()
+                                                .flatMap(objectTypeDefinitionContext -> getImportPath(objectTypeDefinitionContext.fieldsDefinition()))
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        manager.getQueryOperationTypeName()
+                                                .flatMap(manager::getObject).stream()
+                                                .flatMap(objectTypeDefinitionContext ->
+                                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                .flatMap(fieldDefinitionContext ->
+                                                                        Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                                                )
+                                                )
+                                                .flatMap(this::getImportPath)
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        Stream.concat(
+                                                manager.getQueryOperationTypeName()
+                                                        .flatMap(manager::getObject).stream()
+                                                        .flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())),
+                                                manager.getQueryOperationTypeName()
+                                                        .flatMap(manager::getObject).stream()
+                                                        .flatMap(objectTypeDefinitionContext ->
+                                                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                        .flatMap(fieldDefinitionContext ->
+                                                                                Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                                                        )
+                                                        )
+                                                        .flatMap(this::getImportScalarTypePath)
+                                        )
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
                 )
                 .setOptions(
-                        List.of(
-                                new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
-                        )
+                        new Option().setName("java_multiple_files").setValue(true),
+                        new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildQueryRpcResponse().map(Message::toString).collect(Collectors.toList()))
@@ -161,18 +257,61 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("mutation_requests", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto")),
-                                new Import().setName(getPath("objects.proto")),
-                                new Import().setName(getPath("interfaces.proto")),
-                                new Import().setName(getPath("input_objects.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto")),
+                        new Import().setName(getPath("objects.proto")),
+                        new Import().setName(getPath("interfaces.proto")),
+                        new Import().setName(getPath("input_objects.proto"))
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        manager.getMutationOperationTypeName()
+                                                .flatMap(manager::getObject).stream()
+                                                .flatMap(objectTypeDefinitionContext -> getImportPath(objectTypeDefinitionContext.fieldsDefinition()))
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        manager.getMutationOperationTypeName()
+                                                .flatMap(manager::getObject).stream()
+                                                .flatMap(objectTypeDefinitionContext ->
+                                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                .flatMap(fieldDefinitionContext ->
+                                                                        Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                                                )
+                                                )
+                                                .flatMap(this::getImportPath)
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        Stream.concat(
+                                                manager.getMutationOperationTypeName()
+                                                        .flatMap(manager::getObject).stream()
+                                                        .flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())),
+                                                manager.getMutationOperationTypeName()
+                                                        .flatMap(manager::getObject).stream()
+                                                        .flatMap(objectTypeDefinitionContext ->
+                                                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                        .flatMap(fieldDefinitionContext ->
+                                                                                Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                                                        )
+                                                        )
+                                                        .flatMap(this::getImportScalarTypePath)
+                                        )
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
                 )
                 .setOptions(
-                        List.of(
-                                new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
-                        )
+                        new Option().setName("java_multiple_files").setValue(true),
+                        new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildMutationRpcRequest().map(Message::toString).collect(Collectors.toList()))
@@ -180,18 +319,61 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("mutation_responses", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto")),
-                                new Import().setName(getPath("objects.proto")),
-                                new Import().setName(getPath("interfaces.proto")),
-                                new Import().setName(getPath("input_objects.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto")),
+                        new Import().setName(getPath("objects.proto")),
+                        new Import().setName(getPath("interfaces.proto")),
+                        new Import().setName(getPath("input_objects.proto"))
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        manager.getMutationOperationTypeName()
+                                                .flatMap(manager::getObject).stream()
+                                                .flatMap(objectTypeDefinitionContext -> getImportPath(objectTypeDefinitionContext.fieldsDefinition()))
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        manager.getMutationOperationTypeName()
+                                                .flatMap(manager::getObject).stream()
+                                                .flatMap(objectTypeDefinitionContext ->
+                                                        objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                .flatMap(fieldDefinitionContext ->
+                                                                        Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                                                )
+                                                )
+                                                .flatMap(this::getImportPath)
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
+                )
+                .addImports(
+                        io.vavr.collection.List
+                                .ofAll(
+                                        Stream.concat(
+                                                manager.getMutationOperationTypeName()
+                                                        .flatMap(manager::getObject).stream()
+                                                        .flatMap(objectTypeDefinitionContext -> getImportScalarTypePath(objectTypeDefinitionContext.fieldsDefinition())),
+                                                manager.getMutationOperationTypeName()
+                                                        .flatMap(manager::getObject).stream()
+                                                        .flatMap(objectTypeDefinitionContext ->
+                                                                objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream()
+                                                                        .flatMap(fieldDefinitionContext ->
+                                                                                Stream.ofNullable(fieldDefinitionContext.argumentsDefinition())
+                                                                        )
+                                                        )
+                                                        .flatMap(this::getImportScalarTypePath)
+                                        )
+                                )
+                                .distinctBy(Import::getName)
+                                .toJavaList()
                 )
                 .setOptions(
-                        List.of(
-                                new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
-                        )
+                        new Option().setName("java_multiple_files").setValue(true),
+                        new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildMutationRpcResponse().map(Message::toString).collect(Collectors.toList()))
@@ -199,20 +381,16 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("query", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto")),
-                                new Import().setName(getPath("objects.proto")),
-                                new Import().setName(getPath("interfaces.proto")),
-                                new Import().setName(getPath("input_objects.proto")),
-                                new Import().setName(getPath("query_requests.proto")),
-                                new Import().setName(getPath("query_responses.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto")),
+                        new Import().setName(getPath("objects.proto")),
+                        new Import().setName(getPath("interfaces.proto")),
+                        new Import().setName(getPath("input_objects.proto")),
+                        new Import().setName(getPath("query_requests.proto")),
+                        new Import().setName(getPath("query_responses.proto"))
                 )
                 .setOptions(
-                        List.of(
-                                new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
-                        )
+                        new Option().setName("java_multiple_files").setValue(true),
+                        new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildQueryService().stream().map(Service::toString).collect(Collectors.toList()))
@@ -220,20 +398,16 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("mutation", new ProtoFile()
                 .setImports(
-                        List.of(
-                                new Import().setName(getPath("enums.proto")),
-                                new Import().setName(getPath("objects.proto")),
-                                new Import().setName(getPath("interfaces.proto")),
-                                new Import().setName(getPath("input_objects.proto")),
-                                new Import().setName(getPath("mutation_requests.proto")),
-                                new Import().setName(getPath("mutation_responses.proto"))
-                        )
+                        new Import().setName(getPath("enums.proto")),
+                        new Import().setName(getPath("objects.proto")),
+                        new Import().setName(getPath("interfaces.proto")),
+                        new Import().setName(getPath("input_objects.proto")),
+                        new Import().setName(getPath("mutation_requests.proto")),
+                        new Import().setName(getPath("mutation_responses.proto"))
                 )
                 .setOptions(
-                        List.of(
-                                new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
-                        )
+                        new Option().setName("java_multiple_files").setValue(true),
+                        new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
                 .setTopLevelDefs(buildMutationService().stream().map(Service::toString).collect(Collectors.toList()))
@@ -241,10 +415,8 @@ public class ProtobufFileBuilder {
         );
         protoFileMap.put("graphql", new ProtoFile()
                 .setOptions(
-                        List.of(
-                                new Option().setName("java_multiple_files").setValue(true),
-                                new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
-                        )
+                        new Option().setName("java_multiple_files").setValue(true),
+                        new Option().setName("java_package").setValue(graphQLConfig.getGrpcPackageName())
                 )
                 .setPkg(graphQLConfig.getGrpcPackageName())
                 .addTopLevelDef(buildGraphQLService().toString())
@@ -487,11 +659,15 @@ public class ProtobufFileBuilder {
             switch (fieldTypeName) {
                 case "ID":
                 case "String":
-                case "Date":
-                case "Time":
-                case "DateTime":
-                case "Timestamp":
                     return "string";
+                case "Date":
+                    return "google.type.Date";
+                case "Time":
+                    return "google.type.TimeOfDay";
+                case "DateTime":
+                    return "google.type.DateTime";
+                case "Timestamp":
+                    return "google.protobuf.Timestamp";
                 case "Boolean":
                     return "bool";
                 case "Int":
@@ -501,7 +677,7 @@ public class ProtobufFileBuilder {
                 case "BigInteger":
                     return "int64";
                 case "BigDecimal":
-                    return "double";
+                    return "google.type.Decimal";
                 default:
                     throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(fieldTypeName));
             }
@@ -617,6 +793,117 @@ public class ProtobufFileBuilder {
                         .flatMap(Optional::stream)
                         .map(packageName -> getPath(packageName, "input_objects.proto"))
                         .map(path -> new Import().setName(path))
+        );
+    }
+
+    private Stream<Import> getImportPath(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext) {
+        return Streams.concat(
+                argumentsDefinitionContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(packageManager::isNotOwnPackage)
+                        .filter(typeContext -> manager.isEnum(manager.getFieldTypeName(typeContext)))
+                        .map(manager::getPackageName)
+                        .flatMap(Optional::stream)
+                        .map(packageName -> getPath(packageName, "enums.proto"))
+                        .map(path -> new Import().setName(path)),
+                argumentsDefinitionContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(packageManager::isNotOwnPackage)
+                        .filter(typeContext -> manager.isInputObject(manager.getFieldTypeName(typeContext)))
+                        .map(manager::getPackageName)
+                        .flatMap(Optional::stream)
+                        .map(packageName -> getPath(packageName, "input_objects.proto"))
+                        .map(path -> new Import().setName(path))
+        );
+    }
+
+    private Stream<Import> getImportScalarTypePath(GraphqlParser.FieldsDefinitionContext fieldsDefinitionContext) {
+        return Streams.concat(
+                fieldsDefinitionContext.fieldDefinition().stream()
+                        .map(GraphqlParser.FieldDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Date"))
+                        .map(path -> new Import().setName("google/type/date.proto")),
+                fieldsDefinitionContext.fieldDefinition().stream()
+                        .map(GraphqlParser.FieldDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Time"))
+                        .map(path -> new Import().setName("google/type/timeofday.proto")),
+                fieldsDefinitionContext.fieldDefinition().stream()
+                        .map(GraphqlParser.FieldDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("DateTime"))
+                        .map(path -> new Import().setName("google/type/datetime.proto")),
+                fieldsDefinitionContext.fieldDefinition().stream()
+                        .map(GraphqlParser.FieldDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Timestamp"))
+                        .map(path -> new Import().setName("google/protobuf/timestamp.proto")),
+                fieldsDefinitionContext.fieldDefinition().stream()
+                        .map(GraphqlParser.FieldDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigDecimal"))
+                        .map(path -> new Import().setName("google/type/decimal.proto"))
+        );
+    }
+
+    private Stream<Import> getImportScalarTypePath(GraphqlParser.InputObjectValueDefinitionsContext inputObjectValueDefinitionsContext) {
+        return Streams.concat(
+                inputObjectValueDefinitionsContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Date"))
+                        .map(path -> new Import().setName("google/type/date.proto")),
+                inputObjectValueDefinitionsContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Time"))
+                        .map(path -> new Import().setName("google/type/timeofday.proto")),
+                inputObjectValueDefinitionsContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("DateTime"))
+                        .map(path -> new Import().setName("google/type/datetime.proto")),
+                inputObjectValueDefinitionsContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Timestamp"))
+                        .map(path -> new Import().setName("google/protobuf/timestamp.proto")),
+                inputObjectValueDefinitionsContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigDecimal"))
+                        .map(path -> new Import().setName("google/type/decimal.proto"))
+        );
+    }
+
+    private Stream<Import> getImportScalarTypePath(GraphqlParser.ArgumentsDefinitionContext argumentsDefinitionContext) {
+        return Streams.concat(
+                argumentsDefinitionContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Date"))
+                        .map(path -> new Import().setName("google/type/date.proto")),
+                argumentsDefinitionContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Time"))
+                        .map(path -> new Import().setName("google/type/timeofday.proto")),
+                argumentsDefinitionContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("DateTime"))
+                        .map(path -> new Import().setName("google/type/datetime.proto")),
+                argumentsDefinitionContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("Timestamp"))
+                        .map(path -> new Import().setName("google/protobuf/timestamp.proto")),
+                argumentsDefinitionContext.inputValueDefinition().stream()
+                        .map(GraphqlParser.InputValueDefinitionContext::type)
+                        .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigDecimal"))
+                        .map(path -> new Import().setName("google/type/decimal.proto"))
         );
     }
 }

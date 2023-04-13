@@ -4,6 +4,8 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class ProtoFile {
@@ -34,11 +36,16 @@ public class ProtoFile {
         return this;
     }
 
-    public ProtoFile addImports(List<Import> imports) {
+    public ProtoFile setImports(Import... imports) {
+        this.imports = new ArrayList<>(Arrays.asList(imports));
+        return this;
+    }
+
+    public ProtoFile addImports(Collection<Import> imports) {
         if (this.imports == null) {
             this.imports = new ArrayList<>();
         }
-        this.imports = imports;
+        this.imports.addAll(imports);
         return this;
     }
 
@@ -65,6 +72,11 @@ public class ProtoFile {
 
     public ProtoFile setOptions(List<Option> options) {
         this.options = options;
+        return this;
+    }
+
+    public ProtoFile setOptions(Option... options) {
+        this.options = new ArrayList<>(Arrays.asList(options));
         return this;
     }
 

@@ -14,8 +14,7 @@ public @interface __DirectiveLocationsInput0 {
 
   String directiveName() default "";
 
-  __DirectiveLocation directiveLocation(
-      ) default io.graphoenix.introspection.dto.enumType.__DirectiveLocation.QUERY;
+  __DirectiveLocation directiveLocation() default __DirectiveLocation.QUERY;
 
   boolean isDeprecated() default false;
 

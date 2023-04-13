@@ -5,8 +5,10 @@ option java_package = "io.graphoenix.introspection.dto.inputObjectType.grpc";
 
 package io.graphoenix.introspection.grpc;
 
+import "io/graphoenix/introspection/enums.proto";
 import "io/graphoenix/core/enums.proto";
 import "io/graphoenix/core/input_objects.proto";
+import "google/protobuf/timestamp.proto";
 
 message IntroSchemaExpression {
     optional io.graphoenix.core.grpc.StringExpression id = 1;
@@ -44,9 +46,9 @@ message IntroSchemaInput {
     optional int32 version = 11;
     optional string realm_id = 12;
     optional string create_user_id = 13;
-    optional string create_time = 14;
+    optional google.protobuf.Timestamp create_time = 14;
     optional string update_user_id = 15;
-    optional string update_time = 16;
+    optional google.protobuf.Timestamp update_time = 16;
     optional string create_group_id = 17;
     optional string intro_typename = 18;
 }
@@ -105,9 +107,9 @@ message IntroTypeInput {
     optional int32 version = 13;
     optional string realm_id = 14;
     optional string create_user_id = 15;
-    optional string create_time = 16;
+    optional google.protobuf.Timestamp create_time = 16;
     optional string update_user_id = 17;
-    optional string update_time = 18;
+    optional google.protobuf.Timestamp update_time = 18;
     optional string create_group_id = 19;
     optional string intro_typename = 20;
 }
@@ -151,9 +153,9 @@ message IntroTypeInterfacesInput {
     optional int32 version = 5;
     optional string realm_id = 6;
     optional string create_user_id = 7;
-    optional string create_time = 8;
+    optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
-    optional string update_time = 10;
+    optional google.protobuf.Timestamp update_time = 10;
     optional string create_group_id = 11;
     optional string intro_typename = 12;
 }
@@ -195,9 +197,9 @@ message IntroTypePossibleTypesInput {
     optional int32 version = 5;
     optional string realm_id = 6;
     optional string create_user_id = 7;
-    optional string create_time = 8;
+    optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
-    optional string update_time = 10;
+    optional google.protobuf.Timestamp update_time = 10;
     optional string create_group_id = 11;
     optional string intro_typename = 12;
 }
@@ -251,9 +253,9 @@ message IntroFieldInput {
     optional int32 version = 11;
     optional string realm_id = 12;
     optional string create_user_id = 13;
-    optional string create_time = 14;
+    optional google.protobuf.Timestamp create_time = 14;
     optional string update_user_id = 15;
-    optional string update_time = 16;
+    optional google.protobuf.Timestamp update_time = 16;
     optional string create_group_id = 17;
     optional string intro_typename = 18;
 }
@@ -312,9 +314,9 @@ message IntroInputValueInput {
     optional int32 version = 12;
     optional string realm_id = 13;
     optional string create_user_id = 14;
-    optional string create_time = 15;
+    optional google.protobuf.Timestamp create_time = 15;
     optional string update_user_id = 16;
-    optional string update_time = 17;
+    optional google.protobuf.Timestamp update_time = 17;
     optional string create_group_id = 18;
     optional string intro_typename = 19;
 }
@@ -367,9 +369,9 @@ message IntroEnumValueInput {
     optional int32 version = 8;
     optional string realm_id = 9;
     optional string create_user_id = 10;
-    optional string create_time = 11;
+    optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
-    optional string update_time = 13;
+    optional google.protobuf.Timestamp update_time = 13;
     optional string create_group_id = 14;
     optional string intro_typename = 15;
 }
@@ -419,9 +421,9 @@ message IntroDirectiveInput {
     optional int32 version = 8;
     optional string realm_id = 9;
     optional string create_user_id = 10;
-    optional string create_time = 11;
+    optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
-    optional string update_time = 13;
+    optional google.protobuf.Timestamp update_time = 13;
     optional string create_group_id = 14;
     optional string intro_typename = 15;
 }
@@ -464,9 +466,9 @@ message IntroDirectiveLocationsInput {
     optional int32 version = 5;
     optional string realm_id = 6;
     optional string create_user_id = 7;
-    optional string create_time = 8;
+    optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
-    optional string update_time = 10;
+    optional google.protobuf.Timestamp update_time = 10;
     optional string create_group_id = 11;
     optional string intro_typename = 12;
 }

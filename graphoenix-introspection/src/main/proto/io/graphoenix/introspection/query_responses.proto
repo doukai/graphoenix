@@ -9,6 +9,9 @@ import "io/graphoenix/introspection/enums.proto";
 import "io/graphoenix/introspection/objects.proto";
 import "io/graphoenix/introspection/interfaces.proto";
 import "io/graphoenix/introspection/input_objects.proto";
+import "io/graphoenix/core/enums.proto";
+import "io/graphoenix/core/input_objects.proto";
+import "google/protobuf/timestamp.proto";
 
 message QueryIntroSchemaResponse {
     optional IntroSchema intro_schema = 1;
@@ -104,13 +107,13 @@ message QueryCreateUserIdResponse {
     optional string create_user_id = 1;
 }
 message QueryCreateTimeResponse {
-    optional string create_time = 1;
+    optional google.protobuf.Timestamp create_time = 1;
 }
 message QueryUpdateUserIdResponse {
     optional string update_user_id = 1;
 }
 message QueryUpdateTimeResponse {
-    optional string update_time = 1;
+    optional google.protobuf.Timestamp update_time = 1;
 }
 message QueryCreateGroupIdResponse {
     optional string create_group_id = 1;

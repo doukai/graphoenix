@@ -5,8 +5,10 @@ option java_package = "io.graphoenix.introspection.dto.objectType.grpc";
 
 package io.graphoenix.introspection.grpc;
 
+import "io/graphoenix/introspection/enums.proto";
 import "io/graphoenix/core/enums.proto";
 import "io/graphoenix/core/objects.proto";
+import "google/protobuf/timestamp.proto";
 
 message IntroSchema {
     optional string id = 1;
@@ -22,9 +24,9 @@ message IntroSchema {
     optional int32 version = 11;
     optional string realm_id = 12;
     optional string create_user_id = 13;
-    optional string create_time = 14;
+    optional google.protobuf.Timestamp create_time = 14;
     optional string update_user_id = 15;
-    optional string update_time = 16;
+    optional google.protobuf.Timestamp update_time = 16;
     optional string create_group_id = 17;
     optional string intro_typename = 18;
     optional int32 id_count = 19;
@@ -60,9 +62,9 @@ message IntroType {
     optional int32 version = 13;
     optional string realm_id = 14;
     optional string create_user_id = 15;
-    optional string create_time = 16;
+    optional google.protobuf.Timestamp create_time = 16;
     optional string update_user_id = 17;
-    optional string update_time = 18;
+    optional google.protobuf.Timestamp update_time = 18;
     optional string create_group_id = 19;
     optional string intro_typename = 20;
     optional int32 name_count = 21;
@@ -98,9 +100,9 @@ message IntroTypeInterfaces {
     optional int32 version = 5;
     optional string realm_id = 6;
     optional string create_user_id = 7;
-    optional string create_time = 8;
+    optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
-    optional string update_time = 10;
+    optional google.protobuf.Timestamp update_time = 10;
     optional string create_group_id = 11;
     optional string intro_typename = 12;
     optional int32 id_count = 13;
@@ -121,9 +123,9 @@ message IntroTypePossibleTypes {
     optional int32 version = 5;
     optional string realm_id = 6;
     optional string create_user_id = 7;
-    optional string create_time = 8;
+    optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
-    optional string update_time = 10;
+    optional google.protobuf.Timestamp update_time = 10;
     optional string create_group_id = 11;
     optional string intro_typename = 12;
     optional int32 id_count = 13;
@@ -150,9 +152,9 @@ message IntroField {
     optional int32 version = 11;
     optional string realm_id = 12;
     optional string create_user_id = 13;
-    optional string create_time = 14;
+    optional google.protobuf.Timestamp create_time = 14;
     optional string update_user_id = 15;
-    optional string update_time = 16;
+    optional google.protobuf.Timestamp update_time = 16;
     optional string create_group_id = 17;
     optional string intro_typename = 18;
     optional int32 id_count = 19;
@@ -191,9 +193,9 @@ message IntroInputValue {
     optional int32 version = 12;
     optional string realm_id = 13;
     optional string create_user_id = 14;
-    optional string create_time = 15;
+    optional google.protobuf.Timestamp create_time = 15;
     optional string update_user_id = 16;
-    optional string update_time = 17;
+    optional google.protobuf.Timestamp update_time = 17;
     optional string create_group_id = 18;
     optional string intro_typename = 19;
     optional int32 id_count = 20;
@@ -234,9 +236,9 @@ message IntroEnumValue {
     optional int32 version = 8;
     optional string realm_id = 9;
     optional string create_user_id = 10;
-    optional string create_time = 11;
+    optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
-    optional string update_time = 13;
+    optional google.protobuf.Timestamp update_time = 13;
     optional string create_group_id = 14;
     optional string intro_typename = 15;
     optional int32 id_count = 16;
@@ -266,9 +268,9 @@ message IntroDirective {
     optional int32 version = 8;
     optional string realm_id = 9;
     optional string create_user_id = 10;
-    optional string create_time = 11;
+    optional google.protobuf.Timestamp create_time = 11;
     optional string update_user_id = 12;
-    optional string update_time = 13;
+    optional google.protobuf.Timestamp update_time = 13;
     optional string create_group_id = 14;
     optional string intro_typename = 15;
     optional int32 name_count = 16;
@@ -293,9 +295,9 @@ message IntroDirectiveLocations {
     optional int32 version = 5;
     optional string realm_id = 6;
     optional string create_user_id = 7;
-    optional string create_time = 8;
+    optional google.protobuf.Timestamp create_time = 8;
     optional string update_user_id = 9;
-    optional string update_time = 10;
+    optional google.protobuf.Timestamp update_time = 10;
     optional string create_group_id = 11;
     optional string intro_typename = 12;
     optional int32 id_count = 13;
@@ -337,9 +339,9 @@ message QueryType {
     optional int32 version = 29;
     optional string realm_id = 30;
     optional string create_user_id = 31;
-    optional string create_time = 32;
+    optional google.protobuf.Timestamp create_time = 32;
     optional string update_user_id = 33;
-    optional string update_time = 34;
+    optional google.protobuf.Timestamp update_time = 34;
     optional string create_group_id = 35;
 }
 message MutationType {
@@ -365,9 +367,9 @@ message MutationType {
     optional int32 version = 20;
     optional string realm_id = 21;
     optional string create_user_id = 22;
-    optional string create_time = 23;
+    optional google.protobuf.Timestamp create_time = 23;
     optional string update_user_id = 24;
-    optional string update_time = 25;
+    optional google.protobuf.Timestamp update_time = 25;
     optional string create_group_id = 26;
 }
 message IntroSchemaConnection {

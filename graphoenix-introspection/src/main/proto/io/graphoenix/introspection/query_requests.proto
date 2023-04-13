@@ -9,6 +9,9 @@ import "io/graphoenix/introspection/enums.proto";
 import "io/graphoenix/introspection/objects.proto";
 import "io/graphoenix/introspection/interfaces.proto";
 import "io/graphoenix/introspection/input_objects.proto";
+import "io/graphoenix/core/enums.proto";
+import "io/graphoenix/core/input_objects.proto";
+import "google/protobuf/timestamp.proto";
 
 message QueryIntroSchemaRequest {
     optional string selection_set = 1;

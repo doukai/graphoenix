@@ -1,6 +1,6 @@
 package io.graphoenix.introspection.dto.annotation;
 
-import io.graphoenix.introspection.dto.enumType.Sort;
+import io.graphoenix.core.dto.enumType.Sort;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

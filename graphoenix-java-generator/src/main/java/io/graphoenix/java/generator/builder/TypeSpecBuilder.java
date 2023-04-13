@@ -433,7 +433,14 @@ public class TypeSpecBuilder {
         } else if (valueContext.BooleanValue() != null) {
             return CodeBlock.of("$L", valueContext.BooleanValue().getText());
         } else if (valueContext.enumValue() != null) {
-            return CodeBlock.of("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), manager.getFieldTypeName(inputValueDefinitionContext.type())), valueContext.enumValue().getText());
+            return CodeBlock.of("$T.$L",
+                    manager.getEnum(manager.getFieldTypeName(inputValueDefinitionContext.type()))
+                            .filter(packageManager::isNotOwnPackage)
+                            .flatMap(manager::getPackageName)
+                            .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), manager.getFieldTypeName(inputValueDefinitionContext.type())))
+                            .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), manager.getFieldTypeName(inputValueDefinitionContext.type()))),
+                    valueContext.enumValue().getText()
+            );
         } else if (valueContext.arrayValue() != null) {
             CodeBlock.Builder codeBuilder = CodeBlock.builder();
             codeBuilder.add("{");
@@ -578,7 +585,11 @@ public class TypeSpecBuilder {
         } else if (manager.isEnum(nameContext.getText())) {
             Optional<GraphqlParser.EnumTypeDefinitionContext> enumType = manager.getEnum(nameContext.getText());
             if (enumType.isPresent()) {
-                return ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText());
+                return manager.getEnum(enumType.get().name().getText())
+                        .filter(packageManager::isNotOwnPackage)
+                        .flatMap(manager::getPackageName)
+                        .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), enumType.get().name().getText()))
+                        .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()));
             }
         }
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(nameContext.getText()));
@@ -663,7 +674,11 @@ public class TypeSpecBuilder {
                     return ClassName.get(graphQLConfig.getAnnotationPackageName(), "Float".concat(EXPRESSION_SUFFIX));
             }
         } else if (manager.isEnum(name)) {
-            return ClassName.get(graphQLConfig.getAnnotationPackageName(), name.concat(EXPRESSION_SUFFIX));
+            return manager.getEnum(name)
+                    .filter(packageManager::isNotOwnPackage)
+                    .flatMap(manager::getPackageName)
+                    .map(packageName -> ClassName.get(packageName.concat(".dto.annotation"), name.concat(EXPRESSION_SUFFIX)))
+                    .orElseGet(() -> ClassName.get(graphQLConfig.getAnnotationPackageName(), name.concat(EXPRESSION_SUFFIX)));
         }
         throw new GraphQLErrors(UNSUPPORTED_FIELD_TYPE.bind(name));
     }
@@ -686,7 +701,11 @@ public class TypeSpecBuilder {
             if (enumType.isPresent()) {
                 return CodeBlock.of(
                         "$T.$L",
-                        ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText()),
+                        manager.getEnum(enumType.get().name().getText())
+                                .filter(packageManager::isNotOwnPackage)
+                                .flatMap(manager::getPackageName)
+                                .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), enumType.get().name().getText()))
+                                .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), enumType.get().name().getText())),
                         enumType.get().enumValueDefinitions().enumValueDefinition(0).enumValue().enumValueName().getText()
                 );
             }
@@ -695,7 +714,10 @@ public class TypeSpecBuilder {
             if (object.isPresent()) {
                 return CodeBlock.of(
                         "@$T",
-                        ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText().concat(INPUT_SUFFIX) + layer)
+                        object.filter(packageManager::isNotOwnPackage)
+                                .flatMap(manager::getPackageName)
+                                .map(packageName -> ClassName.get(packageName.concat(".dto.annotation"), object.get().name().getText().concat(INPUT_SUFFIX) + layer))
+                                .orElseGet(() -> ClassName.get(graphQLConfig.getAnnotationPackageName(), object.get().name().getText().concat(INPUT_SUFFIX) + layer))
                 );
             }
         }
@@ -808,8 +830,21 @@ public class TypeSpecBuilder {
                 .addMethod(
                         MethodSpec.methodBuilder("opr")
                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"))
-                                .defaultValue("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"), "EQ")
+                                .returns(
+                                        manager.getEnum("Operator")
+                                                .filter(packageManager::isNotOwnPackage)
+                                                .flatMap(manager::getPackageName)
+                                                .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), "Operator"))
+                                                .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"))
+                                )
+                                .defaultValue("$T.$L",
+                                        manager.getEnum("Operator")
+                                                .filter(packageManager::isNotOwnPackage)
+                                                .flatMap(manager::getPackageName)
+                                                .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), "Operator"))
+                                                .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator")),
+                                        "EQ"
+                                )
                                 .build()
                 )
                 .addMethod(
@@ -875,17 +910,40 @@ public class TypeSpecBuilder {
                 .addMethod(
                         MethodSpec.methodBuilder("opr")
                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"))
-                                .defaultValue("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"), "EQ")
+                                .returns(
+                                        manager.getEnum("Operator")
+                                                .filter(packageManager::isNotOwnPackage)
+                                                .flatMap(manager::getPackageName)
+                                                .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), "Operator"))
+                                                .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator"))
+                                )
+                                .defaultValue("$T.$L",
+                                        manager.getEnum("Operator")
+                                                .filter(packageManager::isNotOwnPackage)
+                                                .flatMap(manager::getPackageName)
+                                                .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), "Operator"))
+                                                .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), "Operator")),
+                                        "EQ"
+                                )
                                 .build()
                 )
                 .addMethod(
                         MethodSpec.methodBuilder("val")
                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), enumTypeDefinitionContext.name().getText()))
+                                .returns(
+                                        manager.getEnum(enumTypeDefinitionContext.name().getText())
+                                                .filter(packageManager::isNotOwnPackage)
+                                                .flatMap(manager::getPackageName)
+                                                .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), enumTypeDefinitionContext.name().getText()))
+                                                .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), enumTypeDefinitionContext.name().getText()))
+                                )
                                 .defaultValue(CodeBlock.of(
                                         "$T.$L",
-                                        ClassName.get(graphQLConfig.getEnumTypePackageName(), enumTypeDefinitionContext.name().getText()),
+                                        manager.getEnum(enumTypeDefinitionContext.name().getText())
+                                                .filter(packageManager::isNotOwnPackage)
+                                                .flatMap(manager::getPackageName)
+                                                .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), enumTypeDefinitionContext.name().getText()))
+                                                .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), enumTypeDefinitionContext.name().getText())),
                                         enumTypeDefinitionContext.enumValueDefinitions().enumValueDefinition(0).enumValue().enumValueName().getText()
                                 ))
                                 .build()
@@ -893,7 +951,15 @@ public class TypeSpecBuilder {
                 .addMethod(
                         MethodSpec.methodBuilder("in")
                                 .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                .returns(ArrayTypeName.of(ClassName.get(graphQLConfig.getEnumTypePackageName(), enumTypeDefinitionContext.name().getText())))
+                                .returns(
+                                        ArrayTypeName.of(
+                                                manager.getEnum(enumTypeDefinitionContext.name().getText())
+                                                        .filter(packageManager::isNotOwnPackage)
+                                                        .flatMap(manager::getPackageName)
+                                                        .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), enumTypeDefinitionContext.name().getText()))
+                                                        .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), enumTypeDefinitionContext.name().getText()))
+                                        )
+                                )
                                 .defaultValue(CodeBlock.of("$L", "{}"))
                                 .build()
                 )
@@ -944,8 +1010,21 @@ public class TypeSpecBuilder {
                                     .addMethod(
                                             MethodSpec.methodBuilder("cond")
                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                    .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Conditional"))
-                                                    .defaultValue("$T.$L", ClassName.get(graphQLConfig.getEnumTypePackageName(), "Conditional"), "AND")
+                                                    .returns(
+                                                            manager.getEnum("Conditional")
+                                                                    .filter(packageManager::isNotOwnPackage)
+                                                                    .flatMap(manager::getPackageName)
+                                                                    .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), "Conditional"))
+                                                                    .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), "Conditional"))
+                                                    )
+                                                    .defaultValue("$T.$L",
+                                                            manager.getEnum("Conditional")
+                                                                    .filter(packageManager::isNotOwnPackage)
+                                                                    .flatMap(manager::getPackageName)
+                                                                    .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), "Conditional"))
+                                                                    .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), "Conditional")),
+                                                            "AND"
+                                                    )
                                                     .build()
                                     )
                                     .addMethods(
@@ -1147,24 +1226,24 @@ public class TypeSpecBuilder {
                                     );
                             if (layer < graphQLConfig.getInputLayers() - 1) {
                                 builder.addMethods(
-                                        manager.getFields(objectTypeDefinitionContext.name().getText())
-                                                .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
-                                                .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
-                                                .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
-                                                .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
-                                                .map(fieldDefinitionContext ->
-                                                        MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
-                                                                .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                .returns(
-                                                                        manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
-                                                                                ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
-                                                                                ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
-                                                                )
-                                                                .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
-                                                                .build()
-                                                )
-                                                .collect(Collectors.toList())
-                                )
+                                                manager.getFields(objectTypeDefinitionContext.name().getText())
+                                                        .filter(fieldDefinitionContext -> manager.isObject(manager.getFieldTypeName(fieldDefinitionContext.type())))
+                                                        .filter(fieldDefinitionContext -> manager.isNotContainerType(fieldDefinitionContext.type()))
+                                                        .filter(fieldDefinitionContext -> manager.isNotConnectionField(objectTypeDefinitionContext.name().getText(), fieldDefinitionContext.name().getText()))
+                                                        .filter(fieldDefinitionContext -> !fieldDefinitionContext.name().getText().endsWith(AGGREGATE_SUFFIX))
+                                                        .map(fieldDefinitionContext ->
+                                                                MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
+                                                                        .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
+                                                                        .returns(
+                                                                                manager.fieldTypeIsList(fieldDefinitionContext.type()) ?
+                                                                                        ArrayTypeName.of(ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))) :
+                                                                                        ClassName.get(graphQLConfig.getAnnotationPackageName(), manager.getFieldTypeName(fieldDefinitionContext.type()).concat(INPUT_SUFFIX) + (layer + 1))
+                                                                        )
+                                                                        .defaultValue(buildAnnotationDefaultValue(fieldDefinitionContext.type(), layer + 1))
+                                                                        .build()
+                                                        )
+                                                        .collect(Collectors.toList())
+                                        )
                                         .addMethod(
                                                 MethodSpec.methodBuilder(LIST_INPUT_NAME)
                                                         .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
@@ -1222,7 +1301,13 @@ public class TypeSpecBuilder {
                                                     .map(fieldDefinitionContext ->
                                                             MethodSpec.methodBuilder(fieldDefinitionContext.name().getText())
                                                                     .addModifiers(Modifier.ABSTRACT, Modifier.PUBLIC)
-                                                                    .returns(ClassName.get(graphQLConfig.getEnumTypePackageName(), "Sort"))
+                                                                    .returns(
+                                                                            manager.getEnum("Sort")
+                                                                                    .filter(packageManager::isNotOwnPackage)
+                                                                                    .flatMap(manager::getPackageName)
+                                                                                    .map(packageName -> ClassName.get(packageName.concat(".dto.enumType"), "Sort"))
+                                                                                    .orElseGet(() -> ClassName.get(graphQLConfig.getEnumTypePackageName(), "Sort"))
+                                                                    )
                                                                     .defaultValue(CodeBlock.of("Sort.ASC"))
                                                                     .build()
                                                     )
