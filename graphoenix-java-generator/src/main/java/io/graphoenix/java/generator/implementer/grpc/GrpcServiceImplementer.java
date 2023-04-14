@@ -532,14 +532,14 @@ public class GrpcServiceImplementer {
             switch (operationType) {
                 case QUERY:
                     operationClass = ClassName.get(
-                            graphQLConfig.getObjectTypePackageName(),
+                            packageName + ".dto.objectType",
                             manager.getQueryOperationTypeName().orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
                     );
                     operationMethodName = "query";
                     break;
                 case MUTATION:
                     operationClass = ClassName.get(
-                            graphQLConfig.getObjectTypePackageName(),
+                            packageName + ".dto.objectType",
                             manager.getMutationOperationTypeName().orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST))
                     );
                     operationMethodName = "mutation";

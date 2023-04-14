@@ -4,6 +4,7 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
@@ -25,6 +26,7 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.SuperExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -396,9 +398,9 @@ public class InjectProcessor extends AbstractProcessor {
 
         moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
 
-        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
+        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
                 .addAnnotation(Provides.class)
-                .setType(componentClassDeclaration.getNameAsString());
+                .setType(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString));
         if (isSingleton) {
             methodDeclaration.addAnnotation(javax.inject.Singleton.class);
         }
@@ -414,9 +416,9 @@ public class InjectProcessor extends AbstractProcessor {
 
         moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
 
-        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
+        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
                 .addAnnotation(Provides.class)
-                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getName())));
+                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString))));
 
         methodDeclaration.createBody().addStatement(buildRequestScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
         processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
@@ -429,9 +431,9 @@ public class InjectProcessor extends AbstractProcessor {
 
         moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
 
-        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
+        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
                 .addAnnotation(Provides.class)
-                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getName())));
+                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString))));
 
         methodDeclaration.createBody().addStatement(buildSessionScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
         processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
@@ -444,9 +446,9 @@ public class InjectProcessor extends AbstractProcessor {
 
         moduleCompilationUnit.addImport(processorManager.getNameByDeclaration(componentProxyClassDeclaration));
 
-        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getNameAsString()), Modifier.Keyword.PUBLIC)
+        MethodDeclaration methodDeclaration = moduleClassDeclaration.addMethod(CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString).replaceAll("\\.", "_")), Modifier.Keyword.PUBLIC)
                 .addAnnotation(Provides.class)
-                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getName())));
+                .setType(new ClassOrInterfaceType().setName(Mono.class.getSimpleName()).setTypeArguments(new ClassOrInterfaceType().setName(componentClassDeclaration.getFullyQualifiedName().orElseGet(componentClassDeclaration::getNameAsString))));
 
         methodDeclaration.createBody().addStatement(buildTransactionScopeProvidesMethodReturnStmt(moduleCompilationUnit, processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit), componentProxyClassDeclaration));
         processorManager.importAllClassOrInterfaceType(moduleClassDeclaration, componentClassDeclaration);
@@ -462,7 +464,7 @@ public class InjectProcessor extends AbstractProcessor {
                         .map(bodyDeclaration -> {
                                     if (bodyDeclaration.isConstructorDeclaration()) {
                                         return new ObjectCreationExpr()
-                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
                                                 .setArguments(
                                                         bodyDeclaration.asConstructorDeclaration().getParameters().stream()
                                                                 .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
@@ -479,13 +481,13 @@ public class InjectProcessor extends AbstractProcessor {
                                                                 .map(methodCallExpr -> (Expression) methodCallExpr)
                                                                 .collect(Collectors.toCollection(NodeList::new))
                                                 )
-                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()));
+                                                .setScope(new NameExpr(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString)));
                                     }
                                 }
                         )
                         .orElseGet(() ->
                                 new ObjectCreationExpr()
-                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                        .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
                                         .setArguments(
                                                 componentProxyClassDeclaration.getConstructors().stream()
                                                         .findFirst()
@@ -522,7 +524,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                         new ExpressionStmt()
                                                                                 .setExpression(
                                                                                         new ObjectCreationExpr()
-                                                                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                                .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
                                                                                                 .setArguments(
                                                                                                         bodyDeclaration.asConstructorDeclaration().getParameters().stream()
                                                                                                                 .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
@@ -552,7 +554,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                                                                 .map(methodCallExpr -> (Expression) methodCallExpr)
                                                                                                                 .collect(Collectors.toCollection(NodeList::new))
                                                                                                 )
-                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
+                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString)))
                                                                                 )
                                                                 )
                                                 )
@@ -571,7 +573,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                 new ExpressionStmt()
                                                                         .setExpression(
                                                                                 new ObjectCreationExpr()
-                                                                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                        .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
                                                                                         .setArguments(
                                                                                                 componentProxyClassDeclaration.getConstructors().stream()
                                                                                                         .findFirst()
@@ -612,7 +614,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                         new ExpressionStmt()
                                                                                 .setExpression(
                                                                                         new ObjectCreationExpr()
-                                                                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                                .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
                                                                                                 .setArguments(
                                                                                                         bodyDeclaration.asConstructorDeclaration().getParameters().stream()
                                                                                                                 .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
@@ -642,7 +644,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                                                                 .map(methodCallExpr -> (Expression) methodCallExpr)
                                                                                                                 .collect(Collectors.toCollection(NodeList::new))
                                                                                                 )
-                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
+                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString)))
                                                                                 )
                                                                 )
                                                 )
@@ -661,7 +663,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                 new ExpressionStmt()
                                                                         .setExpression(
                                                                                 new ObjectCreationExpr()
-                                                                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                        .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
                                                                                         .setArguments(
                                                                                                 componentProxyClassDeclaration.getConstructors().stream()
                                                                                                         .findFirst()
@@ -702,7 +704,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                         new ExpressionStmt()
                                                                                 .setExpression(
                                                                                         new ObjectCreationExpr()
-                                                                                                .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                                .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
                                                                                                 .setArguments(
                                                                                                         bodyDeclaration.asConstructorDeclaration().getParameters().stream()
                                                                                                                 .map(parameter -> getBeanGetMethodCallExpr(parameter, moduleCompilationUnit, parameter.getType().asClassOrInterfaceType()))
@@ -732,7 +734,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                                                                 .map(methodCallExpr -> (Expression) methodCallExpr)
                                                                                                                 .collect(Collectors.toCollection(NodeList::new))
                                                                                                 )
-                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getNameAsString()))
+                                                                                                .setScope(new NameExpr(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString)))
                                                                                 )
                                                                 )
                                                 )
@@ -751,7 +753,7 @@ public class InjectProcessor extends AbstractProcessor {
                                                                 new ExpressionStmt()
                                                                         .setExpression(
                                                                                 new ObjectCreationExpr()
-                                                                                        .setType(componentProxyClassDeclaration.getNameAsString())
+                                                                                        .setType(componentProxyClassDeclaration.getFullyQualifiedName().orElseGet(componentProxyClassDeclaration::getNameAsString))
                                                                                         .setArguments(
                                                                                                 componentProxyClassDeclaration.getConstructors().stream()
                                                                                                         .findFirst()
@@ -827,8 +829,11 @@ public class InjectProcessor extends AbstractProcessor {
     private CompilationUnit getComponentProxyCompilationUnit(CompilationUnit componentCompilationUnit, List<CompilationUnit> componentProxyCompilationUnits) {
         return componentProxyCompilationUnits.stream()
                 .filter(componentProxyCompilationUnit ->
-                        processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit).getExtendedTypes().stream()
-                                .anyMatch(classOrInterfaceType -> classOrInterfaceType.getNameAsString().equals(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString()))
+                        processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getFullyQualifiedName().stream()
+                                .anyMatch(className ->
+                                        processorManager.getPublicClassOrInterfaceDeclaration(componentProxyCompilationUnit).getExtendedTypes().stream()
+                                                .anyMatch(classOrInterfaceType -> processorManager.getQualifiedNameByType(classOrInterfaceType).equals(className))
+                                )
                 )
                 .findFirst()
                 .orElseThrow(() -> new InjectionProcessException(CANNOT_GET_COMPILATION_UNIT.bind(processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit).getNameAsString())));
@@ -1237,8 +1242,13 @@ public class InjectProcessor extends AbstractProcessor {
         componentProxyComponentCompilationUnits.forEach(
                 componentProxyComponentCompilationUnit -> {
                     ClassOrInterfaceDeclaration componentProxyComponentClassDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentProxyComponentCompilationUnit);
-                    String daggerClassName = "Dagger".concat(componentProxyComponentClassDeclaration.getNameAsString());
-                    String daggerVariableName = "dagger".concat(componentProxyComponentClassDeclaration.getNameAsString());
+                    Optional<String> packageNameOptional = componentProxyComponentCompilationUnit.getPackageDeclaration().map(NodeWithName::getNameAsString);
+
+                    String packagePrefix = packageNameOptional.map(name -> name.concat(".")).orElse("");
+                    String variablePrefix = packageNameOptional.map(name -> name.replaceAll("\\.", "_")).map(name -> name.concat("_")).orElse("");
+
+                    String daggerClassName = packagePrefix.concat("Dagger").concat(componentProxyComponentClassDeclaration.getNameAsString());
+                    String daggerVariableName = variablePrefix.concat("dagger").concat(componentProxyComponentClassDeclaration.getNameAsString());
 
                     ClassOrInterfaceType componentType = componentProxyComponentClassDeclaration.getMembers().stream()
                             .filter(BodyDeclaration::isMethodDeclaration)
@@ -1267,7 +1277,7 @@ public class InjectProcessor extends AbstractProcessor {
                     blockStmt.addStatement(new VariableDeclarationExpr()
                             .addVariable(
                                     new VariableDeclarator()
-                                            .setType(componentProxyComponentClassDeclaration.getNameAsString())
+                                            .setType(packagePrefix.concat(componentProxyComponentClassDeclaration.getNameAsString()))
                                             .setName(daggerVariableName)
                                             .setInitializer(
                                                     new MethodCallExpr()
@@ -1293,13 +1303,6 @@ public class InjectProcessor extends AbstractProcessor {
                     if (defaultStringExpr.isPresent()) {
                         addPutTypeStatement(blockStmt, componentType, defaultStringExpr.get(), daggerVariableName, isPublisherBuilder);
                     }
-
-                    componentProxyComponentCompilationUnit.getPackageDeclaration()
-                            .ifPresent(packageDeclaration -> {
-                                        moduleContextCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(componentProxyComponentClassDeclaration.getNameAsString()));
-                                        moduleContextCompilationUnit.addImport(packageDeclaration.getNameAsString().concat(".").concat(daggerClassName));
-                                    }
-                            );
 
                     CompilationUnit componentCompilationUnit = processorManager.getCompilationUnitByClassOrInterfaceType(componentType);
                     ClassOrInterfaceDeclaration componentDeclaration = processorManager.getPublicClassOrInterfaceDeclaration(componentCompilationUnit);
@@ -1359,7 +1362,7 @@ public class InjectProcessor extends AbstractProcessor {
             blockStmt.addStatement(
                     new MethodCallExpr()
                             .setName("put")
-                            .addArgument(new ClassExpr().setType(classOrInterfaceType.getNameAsString()))
+                            .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByType(classOrInterfaceType)))
                             .addArgument(nameStringExpr)
                             .addArgument(supplierExpression)
             );
@@ -1367,7 +1370,7 @@ public class InjectProcessor extends AbstractProcessor {
             blockStmt.addStatement(
                     new MethodCallExpr()
                             .setName("put")
-                            .addArgument(new ClassExpr().setType(classOrInterfaceType.getNameAsString()))
+                            .addArgument(new ClassExpr().setType(processorManager.getQualifiedNameByType(classOrInterfaceType)))
                             .addArgument(supplierExpression)
             );
         }

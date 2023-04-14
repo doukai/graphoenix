@@ -13,8 +13,9 @@ repositories {
 }
 
 dependencies {
-    implementation project(":graphoenix-showcase-user")
     implementation project(':graphoenix-core')
+    implementation project(":graphoenix-showcase-user")
+    implementation project(":graphoenix-introspection")
     implementation project(':graphoenix-interceptor')
     implementation project(':graphoenix-json')
     implementation project(":graphoenix-mysql")
@@ -24,6 +25,7 @@ dependencies {
     implementation project(':graphoenix-gossip')
 
     annotationProcessor project(":graphoenix-showcase-user")
+    annotationProcessor project(":graphoenix-introspection")
     annotationProcessor project(':graphoenix-annotation-processor')
     annotationProcessor project(':graphoenix-inject')
     annotationProcessor project(':graphoenix-interceptor')

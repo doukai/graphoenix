@@ -114,7 +114,7 @@ public class SelectionFilterBuilder {
         if (className.isPresent()) {
             typeClassName = TYPE_NAME_UTIL.toClassName(className.get());
         } else {
-            typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
+            typeClassName = ClassName.get(manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), objectTypeDefinitionContext.name().getText());
         }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(typeParameterName)
                 .addModifiers(Modifier.PUBLIC)
@@ -242,7 +242,7 @@ public class SelectionFilterBuilder {
         if (className.isPresent()) {
             typeClassName = TYPE_NAME_UTIL.toClassName(className.get());
         } else {
-            typeClassName = ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText());
+            typeClassName = ClassName.get(manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), objectTypeDefinitionContext.name().getText());
         }
         MethodSpec.Builder builder = MethodSpec.methodBuilder(listTypeParameterName)
                 .addModifiers(Modifier.PUBLIC)

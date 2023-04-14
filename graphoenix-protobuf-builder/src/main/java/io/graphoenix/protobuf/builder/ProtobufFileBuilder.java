@@ -675,7 +675,6 @@ public class ProtobufFileBuilder {
                 case "Float":
                     return "float";
                 case "BigInteger":
-                    return "int64";
                 case "BigDecimal":
                     return "google.type.Decimal";
                 default:
@@ -842,7 +841,7 @@ public class ProtobufFileBuilder {
                 fieldsDefinitionContext.fieldDefinition().stream()
                         .map(GraphqlParser.FieldDefinitionContext::type)
                         .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
-                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigDecimal"))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigInteger") || manager.getFieldTypeName(typeContext).equals("BigDecimal"))
                         .map(path -> new Import().setName("google/type/decimal.proto"))
         );
     }
@@ -872,7 +871,7 @@ public class ProtobufFileBuilder {
                 inputObjectValueDefinitionsContext.inputValueDefinition().stream()
                         .map(GraphqlParser.InputValueDefinitionContext::type)
                         .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
-                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigDecimal"))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigInteger") || manager.getFieldTypeName(typeContext).equals("BigDecimal"))
                         .map(path -> new Import().setName("google/type/decimal.proto"))
         );
     }
@@ -902,7 +901,7 @@ public class ProtobufFileBuilder {
                 argumentsDefinitionContext.inputValueDefinition().stream()
                         .map(GraphqlParser.InputValueDefinitionContext::type)
                         .filter(typeContext -> manager.isScalar(manager.getFieldTypeName(typeContext)))
-                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigDecimal"))
+                        .filter(typeContext -> manager.getFieldTypeName(typeContext).equals("BigInteger") || manager.getFieldTypeName(typeContext).equals("BigDecimal"))
                         .map(path -> new Import().setName("google/type/decimal.proto"))
         );
     }

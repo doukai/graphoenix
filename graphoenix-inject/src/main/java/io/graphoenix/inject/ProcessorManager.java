@@ -328,7 +328,13 @@ public class ProcessorManager {
 
     public void importAllClassOrInterfaceType(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, ClassOrInterfaceDeclaration sourceClassOrInterfaceDeclaration) {
         classOrInterfaceDeclaration.getMembers().stream()
-                .flatMap(bodyDeclaration -> bodyDeclaration.findAll(ClassOrInterfaceType.class).stream())
+                .flatMap(bodyDeclaration ->
+                        bodyDeclaration.findAll(ClassOrInterfaceType.class).stream()
+                                .filter(classOrInterfaceType ->
+                                        classOrInterfaceType.getParentNode().stream()
+                                                .noneMatch(node -> node instanceof ClassOrInterfaceType)
+                                )
+                )
                 .forEach(classOrInterfaceType -> {
                             if (sourceClassOrInterfaceDeclaration.getNameAsString().equals(classOrInterfaceType.getNameAsString())) {
                                 classOrInterfaceDeclaration.findCompilationUnit().ifPresent(compilationUnit -> compilationUnit.addImport(getQualifiedNameByDeclaration(sourceClassOrInterfaceDeclaration)));

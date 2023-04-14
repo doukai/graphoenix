@@ -120,7 +120,7 @@ public class GrpcObjectHandlerBuilder {
                             grpcAddAllMethodName,
                             objectParameterName,
                             fieldGetterName,
-                            ClassName.get(graphQLConfig.getGrpcEnumTypePackageName(), fieldRpcObjectName),
+                            ClassName.get(manager.getPackageName(fieldDefinitionContext.type()).map(packageName -> packageName.concat(".dto.enumType.grpc")).orElseGet(graphQLConfig::getGrpcEnumTypePackageName), fieldRpcObjectName),
                             ClassName.get(Collectors.class)
                     );
                 } else if (manager.isObject(fieldTypeName)) {
@@ -143,24 +143,32 @@ public class GrpcObjectHandlerBuilder {
             } else {
                 String grpcSetMethodName = grpcNameUtil.getGrpcSetMethodName(fieldDefinitionContext);
                 if (manager.isScalar(manager.getFieldTypeName(fieldDefinitionContext.type()))) {
-                    if (fieldTypeName.equals("DateTime") || fieldTypeName.equals("Timestamp") || fieldTypeName.equals("Date") || fieldTypeName.equals("Time")) {
-                        codeBlock = CodeBlock.of("builder.$L($T.CODEC_UTIL.encode($L.$L()))",
-                                grpcSetMethodName,
-                                ClassName.get(CodecUtil.class),
-                                objectParameterName,
-                                fieldGetterName
-                        );
-                    } else {
-                        codeBlock = CodeBlock.of("builder.$L($L.$L())",
-                                grpcSetMethodName,
-                                objectParameterName,
-                                fieldGetterName
-                        );
+                    switch (fieldTypeName) {
+                        case "DateTime":
+                        case "Timestamp":
+                        case "Date":
+                        case "Time":
+                        case "BigInteger":
+                        case "BigDecimal":
+                            codeBlock = CodeBlock.of("builder.$L($T.CODEC_UTIL.encode($L.$L()))",
+                                    grpcSetMethodName,
+                                    ClassName.get(CodecUtil.class),
+                                    objectParameterName,
+                                    fieldGetterName
+                            );
+                            break;
+                        default:
+                            codeBlock = CodeBlock.of("builder.$L($L.$L())",
+                                    grpcSetMethodName,
+                                    objectParameterName,
+                                    fieldGetterName
+                            );
+                            break;
                     }
                 } else if (manager.isEnum(fieldTypeName)) {
                     codeBlock = CodeBlock.of("builder.$L($T.forNumber($L.$L().ordinal()))",
                             grpcSetMethodName,
-                            ClassName.get(graphQLConfig.getGrpcEnumTypePackageName(), fieldRpcObjectName),
+                            ClassName.get(manager.getPackageName(fieldDefinitionContext.type()).map(packageName -> packageName.concat(".dto.enumType.grpc")).orElseGet(graphQLConfig::getGrpcEnumTypePackageName), fieldRpcObjectName),
                             objectParameterName,
                             fieldGetterName
                     );

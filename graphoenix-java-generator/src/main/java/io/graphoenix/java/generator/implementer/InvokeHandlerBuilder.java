@@ -159,7 +159,7 @@ public class InvokeHandlerBuilder {
     private MethodSpec buildTypeInvokeMethod(GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext) {
         ClassName typeClassName = manager.getClassName(objectTypeDefinitionContext)
                 .map(TYPE_NAME_UTIL::toClassName)
-                .orElseGet(() -> ClassName.get(graphQLConfig.getObjectTypePackageName(), objectTypeDefinitionContext.name().getText()));
+                .orElseGet(() -> ClassName.get(manager.getPackageName(objectTypeDefinitionContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), objectTypeDefinitionContext.name().getText()));
         String typeParameterName = getParameterName(objectTypeDefinitionContext);
 
         return MethodSpec.methodBuilder(typeParameterName)
