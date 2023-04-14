@@ -57,12 +57,15 @@ public class GossipPackageCluster implements Runnable {
                 .transport(opts -> opts.port(Optional.ofNullable(gossipConfig.getPort()).orElse(0)))
                 .config(opts ->
                         opts.metadata(
-                                Map.of(PACKAGE_NAME,
-                                        Optional.ofNullable(graphQLConfig.getPackageName())
-                                                .orElseGet(packageManager::getDefaultPackageName),
-                                        SERVICES_NAME,
-                                        getServices()
-                                )
+                                packageManager.getLocalPackages()
+                                        .map(packageName ->
+                                                Map.of(PACKAGE_NAME,
+                                                        packageName,
+                                                        SERVICES_NAME,
+                                                        getServices()
+                                                )
+                                        )
+                                        .collect(Collectors.toList())
                         )
                 )
                 .transportFactory(TcpTransportFactory::new)
@@ -75,23 +78,26 @@ public class GossipPackageCluster implements Runnable {
                                     case UPDATED:
                                         Optional<Object> metadataOptional = cluster.metadata(event.member());
                                         if (metadataOptional.isPresent()) {
-                                            Map<String, Object> metadata = (Map<String, Object>) metadataOptional.get();
-                                            String packageName = (String) metadata.get(PACKAGE_NAME);
-                                            List<Map<String, Object>> services = (List<Map<String, Object>>) metadata.get(SERVICES_NAME);
-                                            services.forEach(service -> {
-                                                        String protocol = (String) service.get(PROTOCOL_NAME);
-                                                        String host = (String) service.getOrDefault(HOST_NAME, event.member().address().host());
-                                                        int port = (int) service.getOrDefault(PORT_NAME, -1);
-                                                        String file = (String) service.getOrDefault(FILE_NAME, "");
-                                                        gossipPackageRegister.mergeMemberURLs(event.member().address().toString(), packageName, protocol, host, port, file);
+                                            List<Map<String, Object>> metadata = (List<Map<String, Object>>) metadataOptional.get();
+                                            metadata.forEach(packageData -> {
+                                                        String packageName = (String) packageData.get(PACKAGE_NAME);
+                                                        List<Map<String, Object>> services = (List<Map<String, Object>>) packageData.get(SERVICES_NAME);
+                                                        services.forEach(service -> {
+                                                                    String protocol = (String) service.get(PROTOCOL_NAME);
+                                                                    String host = (String) service.getOrDefault(HOST_NAME, event.member().address().host());
+                                                                    int port = (int) service.getOrDefault(PORT_NAME, -1);
+                                                                    String file = (String) service.getOrDefault(FILE_NAME, "");
+                                                                    gossipPackageRegister.mergeMemberURLs(event.member().address().toString(), packageName, protocol, host, port, file);
+                                                                }
+                                                        );
+                                                        if (services.size() > 0) {
+                                                            gossipPackageRegister.mergeMemberProtocolURLList(packageName);
+                                                            if (graphQLConfig.getPackageLoadBalance().equals(LOAD_BALANCE_ROUND_ROBIN)) {
+                                                                gossipPackageRegister.mergeMemberProtocolURLIterator(packageName);
+                                                            }
+                                                        }
                                                     }
                                             );
-                                            if (services.size() > 0) {
-                                                gossipPackageRegister.mergeMemberProtocolURLList(packageName);
-                                                if (graphQLConfig.getPackageLoadBalance().equals(LOAD_BALANCE_ROUND_ROBIN)) {
-                                                    gossipPackageRegister.mergeMemberProtocolURLIterator(packageName);
-                                                }
-                                            }
                                         }
                                         Logger.debug(event.member().toString().concat(" merged"));
                                         break;

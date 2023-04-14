@@ -2,6 +2,7 @@ package io.graphoenix.gradle.task;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MemberValuePair;
@@ -38,6 +39,7 @@ import io.graphoenix.core.document.InterfaceType;
 import io.graphoenix.core.document.ObjectType;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.GraphQLConfigRegister;
+import io.graphoenix.core.operation.ArrayValueWithVariable;
 import io.graphoenix.graphql.builder.schema.DocumentBuilder;
 import io.graphoenix.spi.annotation.Ignore;
 import io.graphoenix.spi.annotation.Package;
@@ -69,12 +71,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.BYTE;
@@ -216,106 +213,166 @@ public class BaseTask extends DefaultTask {
         objectTypeList.forEach(this::registerFields);
         interfaceTypeList.forEach(this::registerFields);
 
-        compilations.stream()
-                .flatMap(compilationUnit ->
-                        compilationUnit.getTypes().stream()
-                                .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
-                )
-                .flatMap(typeDeclaration ->
-                        typeDeclaration.getMethods().stream()
-                                .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Query.class))
-                                .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Mutation.class))
-                                .filter(methodDeclaration -> methodDeclaration.getParameters().stream().anyMatch(parameter -> parameter.isAnnotationPresent(Source.class)))
-                )
-                .forEach(methodDeclaration -> {
-                            String objectName = methodDeclaration.getParameters().stream()
-                                    .filter(parameter -> parameter.isAnnotationPresent(Source.class))
-                                    .findFirst()
-                                    .orElseThrow(() -> new RuntimeException("@Source annotation parameter not exist in " + methodDeclaration.getNameAsString()))
-                                    .getType()
-                                    .asString();
+        compilations.forEach(compilationUnit ->
+                compilationUnit.getTypes().stream()
+                        .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
+                        .forEach(typeDeclaration ->
+                                typeDeclaration.getMethods().stream()
+                                        .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Query.class))
+                                        .filter(methodDeclaration -> !methodDeclaration.isAnnotationPresent(Mutation.class))
+                                        .filter(methodDeclaration -> methodDeclaration.getParameters().stream().anyMatch(parameter -> parameter.isAnnotationPresent(Source.class)))
+                                        .forEach(methodDeclaration -> {
+                                                    String objectName = methodDeclaration.getParameters().stream()
+                                                            .filter(parameter -> parameter.isAnnotationPresent(Source.class))
+                                                            .findFirst()
+                                                            .orElseThrow(() -> new RuntimeException("@Source annotation parameter not exist in " + methodDeclaration.getNameAsString()))
+                                                            .getType()
+                                                            .asString();
 
-                            GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
-                            ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
-                                    .addField(
-                                            new Field()
-                                                    .setName(getSourceNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
-                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
-                                                    .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
-                                    );
-                            manager.mergeDocument(objectType.toString());
-                        }
-                );
+                                                    GraphqlParser.ObjectTypeDefinitionContext objectTypeDefinitionContext = manager.getObject(objectName).orElseThrow(() -> new GraphQLErrors(TYPE_NOT_EXIST.bind(objectName)));
+                                                    ObjectType objectType = documentBuilder.buildObject(objectTypeDefinitionContext)
+                                                            .addField(
+                                                                    new Field()
+                                                                            .setName(getSourceNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
+                                                                            .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                                                            .addDirective(
+                                                                                    new Directive().setName(INVOKE_DIRECTIVE_NAME)
+                                                                                            .addArgument("className",
+                                                                                                    typeDeclaration.getFullyQualifiedName()
+                                                                                                            .orElseGet(() ->
+                                                                                                                    compilationUnit.getPackageDeclaration()
+                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString().concat("."))
+                                                                                                                            .orElse("")
+                                                                                                                            .concat(typeDeclaration.getNameAsString())
+                                                                                                            )
+                                                                                            )
+                                                                                            .addArgument("methodName", methodDeclaration.getNameAsString())
+                                                                                            .addArgument(
+                                                                                                    "parameters",
+                                                                                                    new ArrayValueWithVariable(
+                                                                                                            methodDeclaration.getParameters().stream()
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getTypeAsString()))
+                                                                                                                    .collect(Collectors.toList())
+                                                                                                    )
+                                                                                            )
+                                                                                            .addArgument("returnClassName", methodDeclaration.getTypeAsString())
+                                                                            )
+                                                            );
+                                                    manager.mergeDocument(objectType.toString());
+                                                }
+                                        )
+                        )
+        );
 
-        compilations.stream()
-                .flatMap(compilationUnit ->
-                        compilationUnit.getTypes().stream()
-                                .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
-                )
-                .flatMap(typeDeclaration ->
-                        typeDeclaration.getMethods().stream()
-                                .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
-                )
-                .forEach(methodDeclaration -> {
-                            ObjectType objectType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
-                                    .map(documentBuilder::buildObject)
-                                    .orElseGet(() -> new ObjectType(QUERY_TYPE_NAME))
-                                    .addField(
-                                            new Field()
-                                                    .setName(getQueryNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
-                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
-                                                    .setArguments(
-                                                            methodDeclaration.getParameters().stream()
-                                                                    .map(parameter ->
-                                                                            new InputValue()
-                                                                                    .setName(parameter.getName().getIdentifier())
-                                                                                    .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
-                                                                    .collect(Collectors.toCollection(LinkedHashSet::new))
-                                                    )
-                                                    .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
-                                                    .addDirective(
-                                                            new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
-                                                                    .addArgument("packageName", graphQLConfig.getPackageName())
-                                                    )
-                                    );
-                            manager.mergeDocument(objectType.toString());
-                        }
-                );
+        compilations.forEach(compilationUnit ->
+                compilationUnit.getTypes().stream()
+                        .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
+                        .forEach(typeDeclaration ->
+                                typeDeclaration.getMethods().stream()
+                                        .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Query.class))
+                                        .forEach(methodDeclaration -> {
+                                                    ObjectType objectType = manager.getObject(manager.getQueryOperationTypeName().orElse(QUERY_TYPE_NAME))
+                                                            .map(documentBuilder::buildObject)
+                                                            .orElseGet(() -> new ObjectType(QUERY_TYPE_NAME))
+                                                            .addField(
+                                                                    new Field()
+                                                                            .setName(getQueryNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
+                                                                            .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                                                            .setArguments(
+                                                                                    methodDeclaration.getParameters().stream()
+                                                                                            .map(parameter ->
+                                                                                                    new InputValue()
+                                                                                                            .setName(parameter.getName().getIdentifier())
+                                                                                                            .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
+                                                                                            .collect(Collectors.toCollection(LinkedHashSet::new))
+                                                                            )
+                                                                            .addDirective(
+                                                                                    new Directive().setName(INVOKE_DIRECTIVE_NAME)
+                                                                                            .addArgument("className",
+                                                                                                    typeDeclaration.getFullyQualifiedName()
+                                                                                                            .orElseGet(() ->
+                                                                                                                    compilationUnit.getPackageDeclaration()
+                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString().concat("."))
+                                                                                                                            .orElse("")
+                                                                                                                            .concat(typeDeclaration.getNameAsString())
+                                                                                                            )
+                                                                                            )
+                                                                                            .addArgument("methodName", methodDeclaration.getNameAsString())
+                                                                                            .addArgument(
+                                                                                                    "parameters",
+                                                                                                    new ArrayValueWithVariable(
+                                                                                                            methodDeclaration.getParameters().stream()
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getTypeAsString()))
+                                                                                                                    .collect(Collectors.toList())
+                                                                                                    )
+                                                                                            )
+                                                                                            .addArgument("returnClassName", methodDeclaration.getTypeAsString())
+                                                                            )
+                                                                            .addDirective(
+                                                                                    new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                                                                            .addArgument("packageName", graphQLConfig.getPackageName())
+                                                                            )
+                                                            );
+                                                    manager.mergeDocument(objectType.toString());
+                                                }
+                                        )
+                        )
+        );
 
-        compilations.stream()
-                .flatMap(compilationUnit ->
-                        compilationUnit.getTypes().stream()
-                                .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
-                )
-                .flatMap(typeDeclaration ->
-                        typeDeclaration.getMethods().stream()
-                                .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Mutation.class))
-                )
-                .forEach(methodDeclaration -> {
-                            ObjectType objectType = manager.getObject(manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME))
-                                    .map(documentBuilder::buildObject)
-                                    .orElseGet(() -> new ObjectType(MUTATION_TYPE_NAME))
-                                    .addField(
-                                            new Field()
-                                                    .setName(getMutationNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
-                                                    .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
-                                                    .setArguments(
-                                                            methodDeclaration.getParameters().stream()
-                                                                    .map(parameter ->
-                                                                            new InputValue()
-                                                                                    .setName(parameter.getName().getIdentifier())
-                                                                                    .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
-                                                                    .collect(Collectors.toCollection(LinkedHashSet::new))
-                                                    )
-                                                    .addDirective(new Directive().setName(INVOKE_DIRECTIVE_NAME))
-                                                    .addDirective(
-                                                            new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
-                                                                    .addArgument("packageName", graphQLConfig.getPackageName())
-                                                    )
-                                    );
-                            manager.mergeDocument(objectType.toString());
-                        }
-                );
+        compilations.forEach(compilationUnit ->
+                compilationUnit.getTypes().stream()
+                        .filter(typeDeclaration -> typeDeclaration.isAnnotationPresent(GraphQLApi.class))
+                        .forEach(typeDeclaration ->
+                                typeDeclaration.getMethods().stream()
+                                        .filter(methodDeclaration -> methodDeclaration.isAnnotationPresent(Mutation.class))
+                                        .forEach(methodDeclaration -> {
+                                                    ObjectType objectType = manager.getObject(manager.getMutationOperationTypeName().orElse(MUTATION_TYPE_NAME))
+                                                            .map(documentBuilder::buildObject)
+                                                            .orElseGet(() -> new ObjectType(MUTATION_TYPE_NAME))
+                                                            .addField(
+                                                                    new Field()
+                                                                            .setName(getMutationNameFromMethodDeclaration(methodDeclaration).orElseGet(() -> getInvokeFieldName(methodDeclaration.getName().getIdentifier())))
+                                                                            .setTypeName(getInvokeFieldTypeName(methodDeclaration.getType()))
+                                                                            .setArguments(
+                                                                                    methodDeclaration.getParameters().stream()
+                                                                                            .map(parameter ->
+                                                                                                    new InputValue()
+                                                                                                            .setName(parameter.getName().getIdentifier())
+                                                                                                            .setTypeName(getInvokeFieldArgumentTypeName(parameter.getType())))
+                                                                                            .collect(Collectors.toCollection(LinkedHashSet::new))
+                                                                            )
+                                                                            .addDirective(
+                                                                                    new Directive().setName(INVOKE_DIRECTIVE_NAME)
+                                                                                            .addArgument("className",
+                                                                                                    typeDeclaration.getFullyQualifiedName()
+                                                                                                            .orElseGet(() ->
+                                                                                                                    compilationUnit.getPackageDeclaration()
+                                                                                                                            .map(packageDeclaration -> packageDeclaration.getNameAsString().concat("."))
+                                                                                                                            .orElse("")
+                                                                                                                            .concat(typeDeclaration.getNameAsString())
+                                                                                                            )
+                                                                                            )
+                                                                                            .addArgument("methodName", methodDeclaration.getNameAsString())
+                                                                                            .addArgument(
+                                                                                                    "parameters",
+                                                                                                    new ArrayValueWithVariable(
+                                                                                                            methodDeclaration.getParameters().stream()
+                                                                                                                    .map(parameter -> Map.of("name", parameter.getNameAsString(), "className", parameter.getTypeAsString()))
+                                                                                                                    .collect(Collectors.toList())
+                                                                                                    )
+                                                                                            )
+                                                                                            .addArgument("returnClassName", methodDeclaration.getTypeAsString())
+                                                                            )
+                                                                            .addDirective(
+                                                                                    new Directive(PACKAGE_INFO_DIRECTIVE_NAME)
+                                                                                            .addArgument("packageName", graphQLConfig.getPackageName())
+                                                                            )
+                                                            );
+                                                    manager.mergeDocument(objectType.toString());
+                                                }
+                                        )
+                        )
+        );
     }
 
     protected void registerFields(ResolvedReferenceTypeDeclaration parentResolvedReferenceTypeDeclaration) {

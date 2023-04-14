@@ -123,7 +123,7 @@ public class TypeManager {
                 case "Timestamp":
                     return TypeName.get(LocalDateTime.class);
                 default:
-                    return ClassName.get(graphQLConfig.getObjectTypePackageName(), fieldTypeName);
+                    return ClassName.get(manager.getPackageName(typeContext).map(packageName -> packageName.concat(".dto.objectType")).orElseGet(graphQLConfig::getObjectTypePackageName), fieldTypeName);
             }
         }
     }

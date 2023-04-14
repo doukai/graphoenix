@@ -15,6 +15,7 @@ import io.graphoenix.core.context.BeanContext;
 import io.graphoenix.core.error.GraphQLErrors;
 import io.graphoenix.core.handler.ArgumentBuilder;
 import io.graphoenix.core.handler.GraphQLRequestHandler;
+import io.graphoenix.core.handler.PackageManager;
 import io.graphoenix.core.schema.JsonSchemaValidator;
 import io.graphoenix.core.utils.CodecUtil;
 import io.graphoenix.core.utils.DocumentUtil;
@@ -57,13 +58,15 @@ import static io.graphoenix.spi.dto.type.OperationType.QUERY;
 public class GrpcServiceImplementer {
 
     private final IGraphQLDocumentManager manager;
+    private final PackageManager packageManager;
     private final TypeManager typeManager;
     private final GrpcNameUtil grpcNameUtil;
     private final GraphQLConfig graphQLConfig;
 
     @Inject
-    public GrpcServiceImplementer(IGraphQLDocumentManager manager, TypeManager typeManager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
+    public GrpcServiceImplementer(IGraphQLDocumentManager manager, PackageManager packageManager, TypeManager typeManager, GrpcNameUtil grpcNameUtil, GraphQLConfig graphQLConfig) {
         this.manager = manager;
+        this.packageManager = packageManager;
         this.typeManager = typeManager;
         this.grpcNameUtil = grpcNameUtil;
         this.graphQLConfig = graphQLConfig;
@@ -75,6 +78,7 @@ public class GrpcServiceImplementer {
                 .flatMap(manager::getObject)
                 .orElseThrow(() -> new GraphQLErrors(QUERY_TYPE_NOT_EXIST))
                 .fieldsDefinition().fieldDefinition().stream()
+                .filter(packageManager::isLocalPackage)
                 .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(manager.getPackageName(fieldDefinitionContext).orElseGet(graphQLConfig::getPackageName), fieldDefinitionContext))
                 .collect(
                         Collectors.groupingBy(
@@ -99,6 +103,7 @@ public class GrpcServiceImplementer {
                 .flatMap(manager::getObject)
                 .orElseThrow(() -> new GraphQLErrors(MUTATION_TYPE_NOT_EXIST))
                 .fieldsDefinition().fieldDefinition().stream()
+                .filter(packageManager::isLocalPackage)
                 .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(manager.getPackageName(fieldDefinitionContext).orElseGet(graphQLConfig::getPackageName), fieldDefinitionContext))
                 .collect(
                         Collectors.groupingBy(
@@ -124,6 +129,7 @@ public class GrpcServiceImplementer {
                 .map(manager::getObject)
                 .flatMap(Optional::stream)
                 .flatMap(objectTypeDefinitionContext -> objectTypeDefinitionContext.fieldsDefinition().fieldDefinition().stream())
+                .filter(packageManager::isLocalPackage)
                 .map(fieldDefinitionContext -> new AbstractMap.SimpleEntry<>(manager.getPackageName(fieldDefinitionContext).orElseGet(graphQLConfig::getPackageName), fieldDefinitionContext))
                 .collect(
                         Collectors.groupingBy(

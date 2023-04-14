@@ -155,9 +155,13 @@ public class PackageManager {
     }
 
     public boolean isLocalPackage(String packageName) {
+        return getLocalPackages().anyMatch(localPackageName -> localPackageName.equals(packageName));
+    }
+
+    public Stream<String> getLocalPackages() {
         return Stream.concat(
                 Stream.of(Optional.ofNullable(graphQLConfig.getPackageName()).orElseGet(this::getDefaultPackageName)),
                 Stream.ofNullable(graphQLConfig.getLocalPackageNames()).flatMap(Collection::stream)
-        ).anyMatch(localPackageName -> localPackageName.equals(packageName));
+        );
     }
 }

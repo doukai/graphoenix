@@ -14,10 +14,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-import static java.time.format.DateTimeFormatter.ISO_LOCAL_TIME;
-
 public enum CodecUtil {
 
     CODEC_UTIL;
@@ -72,26 +68,5 @@ public enum CodecUtil {
         return Decimal.newBuilder()
                 .setValueBytes(ByteString.copyFrom(bigInteger.toByteArray()))
                 .build();
-    }
-
-    public LocalDateTime decodeLocalDateTime(String value) throws ClassCastException {
-        if (value == null) {
-            return null;
-        }
-        return LocalDateTime.parse(value, ISO_LOCAL_DATE_TIME);
-    }
-
-    public LocalDate decodeLocalDate(String value) throws ClassCastException {
-        if (value == null) {
-            return null;
-        }
-        return LocalDate.parse(value, ISO_LOCAL_DATE);
-    }
-
-    public LocalTime decodeLocalTime(String value) throws ClassCastException {
-        if (value == null) {
-            return null;
-        }
-        return LocalTime.parse(value, ISO_LOCAL_TIME);
     }
 }
